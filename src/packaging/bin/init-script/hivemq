@@ -1,0 +1,78 @@
+#!/bin/bash
+# Copyright 2019 dc-square GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# chkconfig: 35 90 12
+# description: HiveMQ start script
+#
+# Set HiveMQ Home to correct path, default is /opt/hivemq
+HIVEMQ_HOME=/opt/hivemq
+HIVEMQ_USER=hivemq
+#
+# Get function from functions library
+. /etc/init.d/functions
+# Start the service HiveMQ
+start() {
+        if ps ax | grep -v "grep" | grep -q hivemq.jar ; then
+        echo -n HiveMQ server already running
+        failure $"HiveMQ start"
+        echo; else
+        echo -n Starting HiveMQ server
+        su $HIVEMQ_USER -c "$HIVEMQ_HOME/bin/run.sh >/dev/null 2>&1 &"
+        ### Create the lock file ###
+        touch /var/lock/subsys/hivemq
+        success $"HiveMQ server started"
+        echo; fi
+}
+# Restart the service HiveMQ
+stop() {
+        echo -n Stopping HiveMQ server
+        #killproc hivemq
+        pkill -f hivemq.jar
+        #wait for cleanups
+        while ps ax | grep -v "grep" | grep -q hivemq.jar;
+        do
+        sleep 1
+        done
+        ##
+        if ps ax | grep -v "grep" | grep -q hivemq.jar ; then failure $"HiveMQ shutdown"; else success $"HiveMQ shutdown"; fi
+        ### Now, delete the lock file ###
+        rm -f /var/lock/subsys/hivemq
+        echo
+}
+# Echo the current status of HiveMQ
+status() {
+	if ps ax | grep -v "grep" | grep -q hivemq.jar ; then echo HiveMQ is running; else echo HiveMQ stopped; fi
+}
+### main logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload|condrestart)
+        stop
+        start
+        ;;
+  status)
+        status
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload}"
+        exit 1
+esac
+exit 0

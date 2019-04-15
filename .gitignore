@@ -1,0 +1,15 @@
+build
+.gradle
+.java-version
+.gradletasknamecache
+.DS_Store
+
+# IntelliJ
+out/
+.idea/*
+!.idea/codeStyles
+!.idea/inspectionProfiles
+!.idea/runConfigurations
+
+# JIRA extension
+atlassian-ide-plugin.xml

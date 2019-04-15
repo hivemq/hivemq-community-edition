@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <suppress>
+        <notes><![CDATA[
+   CVE has been fixed with jsoup-1.8.3, false positive.
+   See https://github.com/hibernate/hibernate-validator/pull/424
+   ]]></notes>
+        <gav regex="true">^org\.jsoup:jsoup:.*$</gav>
+        <cve>CVE-2015-6748</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   This CVE only applies to a Drupal module which uses the API
+   ]]></notes>
+        <gav regex="true">^javax\.ws\.rs:javax\.ws\.rs-api:.*$</gav>
+        <cve>CVE-2015-4345</cve>
+    </suppress>
+</suppressions>

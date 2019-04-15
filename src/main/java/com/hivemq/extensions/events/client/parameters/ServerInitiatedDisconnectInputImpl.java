@@ -1,0 +1,91 @@
+/*
+ * Copyright 2019 dc-square GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.hivemq.extensions.events.client.parameters;
+
+import com.google.common.base.Preconditions;
+import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionLostInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ServerInitiatedDisconnectInput;
+import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
+import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.executor.task.PluginTaskInput;
+import io.netty.channel.Channel;
+
+import java.util.Optional;
+import java.util.function.Supplier;
+
+/**
+ * @author Florian Limpöck
+ * @since 4.0.0
+ */
+public class ServerInitiatedDisconnectInputImpl implements ServerInitiatedDisconnectInput, ConnectionLostInput, PluginTaskInput, Supplier<ServerInitiatedDisconnectInputImpl> {
+
+    private final @Nullable DisconnectedReasonCode reasonCode;
+    private final @Nullable String reasonString;
+    private final @Nullable UserProperties userProperties;
+    private final @NotNull ClientInformation clientInformation;
+    private final @NotNull ConnectionInformation connectionInformation;
+
+    public ServerInitiatedDisconnectInputImpl(final @NotNull String clientId,
+                                              final @NotNull Channel channel,
+                                              final @Nullable DisconnectedReasonCode reasonCode,
+                                              final @Nullable String reasonString,
+                                              final @Nullable UserProperties userProperties) {
+        Preconditions.checkNotNull(clientId, "client id must never be null");
+        Preconditions.checkNotNull(channel, "channel must never be null");
+
+        this.reasonCode = reasonCode;
+        this.reasonString = reasonString;
+        this.userProperties = userProperties;
+        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+    }
+
+    @Override
+    public @NotNull ConnectionInformation getConnectionInformation() {
+        return connectionInformation;
+    }
+
+    @Override
+    public @NotNull ClientInformation getClientInformation() {
+        return clientInformation;
+    }
+
+    @Override
+    public @NotNull Optional<DisconnectedReasonCode> getReasonCode() {
+        return Optional.ofNullable(reasonCode);
+    }
+
+    @Override
+    public @NotNull Optional<String> getReasonString() {
+        return Optional.ofNullable(reasonString);
+    }
+
+    @Override
+    public @NotNull Optional<UserProperties> getUserProperties() {
+        return Optional.ofNullable(userProperties);
+    }
+
+    @Override
+    public @NotNull ServerInitiatedDisconnectInputImpl get() {
+        return this;
+    }
+}

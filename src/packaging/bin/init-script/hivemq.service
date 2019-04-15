@@ -1,0 +1,19 @@
+[Unit]
+Description=HiveMQ Community Edition
+After=network.target
+
+[Service]
+Group=hivemq
+User=hivemq
+LimitNOFILE=infinity
+StandardOutput=null
+StandardError=null
+WorkingDirectory=/opt/hivemq
+ExecStart=/opt/hivemq/bin/run.sh
+KillMode=process
+Restart=always
+KillSignal=15
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,102 @@
+= HiveMQ Community Edition
+
+HiveMQ is a MQTT based messaging platform designed for the fast, efficient and reliable movement of data to and from connected IoT devices. It uses the MQTT protocol for instant, bi-directional push of data between your device and your enterprise systems. 
+
+HiveMQ Community Edition (HiveMQ CE) is a MQTT Broker written in Java. 
+
+HiveMQ CE is compatible with MQTT versions 3.1, 3.1.1 and 5.0. 
+
+
+* Web Site: https://www.hivemq.com/
+* Documentation: https://www.hivemq.com/docs/latest/hivemq/
+* Community Forum: https://community.hivemq.com/
+* Contribution Guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
+* License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
+
+
+= Features
+
+* All MQTT 3.1, 3.1.1 and MQTT 5.0 features
+ * MQTT over TCP, TLS, WebSocket and Secure WebSocket transport
+ * Java Extension SDK for:
+ ** Authentication
+ ** Authorization
+ ** Client Initializers
+ ** MQTT Packet Interceptors
+ ** Interacting with Publishes, Retained Messages, Clients and Subscriptions
+ * Seamless integration with the https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client]
+ * Running on Windows, Linux and MacOS (Linux is recommended)
+
+
+= Documentation
+
+The official HiveMQ documentation includes all features and configurations of HiveMQ and HiveMQ CE.
+
+The documentation can be found https://www.hivemq.com/docs/latest/hivemq/[here].
+
+= HiveMQ Community Forum
+
+The ideal place for questions or discussions about the HiveMQ Community Edition is our brand new https://community.hivemq.com/[HiveMQ Community Forum].
+
+= How to use
+
+== Quick start
+
+* Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2019.1/hivemq-ce-2019.1.zip[HiveMQ CE binary package].
+
+* Unzip the package
+* Run the run.sh (Linux/OSX) or run.bat (Windows) in the bin folder of the package.
+
+[source,bash]
+----
+cd hivemq-ce-<version>
+./bin/run.sh
+----
+
+You can now connect MQTT clients to `<ip address>:1883`.
+
+[CAUTION]
+If you want to connect devices on external networks to HiveMQ CE, please make sure your server is reachable from those networks and the required ports (default: 1883) are accessible through your firewall.
+
+== Building from source
+
+=== Prerequisites
+At least Java version 11 is required to build and run HiveMQ CE.
+
+If you are in doubt, you can check the installed Java version by entering `java -version` on your command line.
+
+=== Building the binary package
+
+Check out the git repository and build the binary package.
+[source,bash]
+----
+git clone https://github.com/hivemq/hivemq-community-edition.git
+
+cd hivemq-community-edition
+
+./gradlew clean packaging
+----
+
+The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
+
+
+== Start
+Unzip the created binary package 
+
+[source,bash]
+----
+cd hivemq-ce-<version>
+
+./bin/run.sh
+----
+
+For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
+
+= Contributing
+
+If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.adoc[contribution guidelines].
+
+= License
+
+HiveMQ Community Edition is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
+

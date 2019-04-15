@@ -1,0 +1,168 @@
+/*
+ * Copyright 2019 dc-square GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.hivemq.logging;
+
+import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ChannelUtils;
+import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * The EventLog class is used to log certain events that could be important for customers to separate files.
+ * In a future state of the implementation it may also be used to display those events in the web-interface.
+ *
+ * @author Lukas Brandl
+ */
+@LazySingleton
+public class EventLog {
+
+    public static final String EVENT_CLIENT_CONNECTED = "event.client-connected";
+    public static final String EVENT_CLIENT_DISCONNECTED = "event.client-disconnected";
+    public static final String EVENT_MESSAGE_DROPPED = "event.message-dropped";
+    public static final String EVENT_CLIENT_SESSION_EXPIRED = "event.client-session-expired";
+    /**
+     * Events are logged to DEBUG, in case customers are using a custom logback.xml
+     */
+
+    private static final Logger logClientConnected = LoggerFactory.getLogger(EVENT_CLIENT_CONNECTED);
+    private static final Logger logClientDisconnected = LoggerFactory.getLogger(EVENT_CLIENT_DISCONNECTED);
+    private static final Logger logMessageDropped = LoggerFactory.getLogger(EVENT_MESSAGE_DROPPED);
+    private static final Logger logClientSessionExpired = LoggerFactory.getLogger(EVENT_CLIENT_SESSION_EXPIRED);
+
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Log that a outgoing publish message was dropped.
+     *
+     * @param clientId of the subscriber that would have received the message
+     * @param topic    of the publish message
+     * @param qos      of the publish message
+     * @param reason   why the message was dropped
+     */
+    public void messageDropped(@Nullable final String clientId, @Nullable final String topic, @NotNull final int qos, @NotNull final String reason) {
+        logMessageDropped.debug("Outgoing publish message was dropped. Receiving client: {}, topic: {}, qos: {}, reason: {}.",
+                valueOrUnknown(clientId), valueOrUnknown(topic), qos, reason);
+    }
+
+    /**
+     * Log that a outgoing publish message for a shared subscription was dropped.
+     *
+     * @param group  of the shared subscription
+     * @param topic  of the publish message
+     * @param qos    of the publish message
+     * @param reason why the message was dropped
+     */
+    public void sharedSubscriptionMessageDropped(@Nullable final String group, @Nullable final String topic, @NotNull final int qos, @NotNull final String reason) {
+        logMessageDropped.debug("Outgoing publish message was dropped. Receiving shared subscription group: {}, topic: {}, qos: {}, reason: {}.",
+                valueOrUnknown(group), valueOrUnknown(topic), qos, reason);
+    }
+
+    /**
+     * Log that a outgoing MQTT message for a client was dropped.
+     *
+     * @param client      identifier of the client that would have received the message
+     * @param messageType MQTT message type
+     * @param reason      why the message was dropped
+     */
+    public void mqttMessageDropped(@Nullable final String client, @Nullable final String messageType, @NotNull final String reason) {
+        logMessageDropped.debug("Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
+                valueOrUnknown(client), valueOrUnknown(messageType), reason);
+    }
+
+    /**
+     * Log that a client has successfully connected to the broker.
+     *
+     * @param channel of the client connection
+     */
+    public void clientConnected(@NotNull final Channel channel) {
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String ip = ChannelUtils.getChannelIP(channel).orNull();
+        final Boolean cleanStart = channel.attr(ChannelAttributes.CLEAN_START).get();
+        final Long sessionExpiry = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+
+        logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.", valueOrUnknown(clientId), valueOrUnknown(ip), valueOrUnknown(cleanStart), valueOrUnknown(sessionExpiry));
+    }
+
+    /**
+     * Log that the connection to a client was closed, regardless if the connection was closed by the client or the
+     * server.
+     *
+     * @param channel      of the client connection
+     * @param reasonString reason specified by the client for the DISCONNECT
+     */
+    public void clientDisconnected(@NotNull final Channel channel, @Nullable final String reasonString) {
+        if (!logClientDisconnected.isDebugEnabled()) {
+            return;
+        }
+
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String ip = ChannelUtils.getChannelIP(channel).orNull();
+        final boolean graceful = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
+
+        if (graceful && reasonString != null) {
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reasonString);
+        } else if (graceful) {
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+        } else {
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+        }
+    }
+
+    public void clientDisconnected(final Channel channel) {
+        clientDisconnected(channel, null);
+    }
+
+    /**
+     * Log that the connection to the client was closed by the broker.
+     *
+     * @param channel of the client connection
+     * @param reason  why the connection was closed
+     */
+    public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
+        channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED).set(true);
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String ip = ChannelUtils.getChannelIP(channel).orNull();
+        logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
+    }
+
+    /**
+     * Log that a client session expired and will be deleted.
+     *
+     * @param expiryTimestamp the {@link Long} timestamp of the client-session-expiration
+     * @param clientId          of the expired session
+     */
+    public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
+
+        final LocalDateTime disconnectedSinceDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZoneId.of("UTC"));
+        logClientSessionExpired.debug("Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
+                valueOrUnknown(clientId), disconnectedSinceDateTime.format(dateTimeFormatter));
+    }
+
+    @NotNull
+    private String valueOrUnknown(@Nullable final Object object) {
+        return object != null ? object.toString() : "UNKNOWN";
+    }
+}

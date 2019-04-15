@@ -1,0 +1,132 @@
+/*
+ * Copyright 2019 dc-square GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.hivemq.util;
+
+/**
+ * @author Florian Raschbichler
+ */
+public class ReasonStrings {
+
+    public static final String CONNACK_MALFORMED_PACKET_FIXED_HEADER = "Sent CONNECT with invalid fixed header.";
+    public static final String CONNACK_MALFORMED_PACKET_USER_PROPERTY = "Sent CONNECT with malformed user property.";
+    public static final String CONNACK_MALFORMED_PACKET_USERNAME = "Sent CONNECT with malformed username.";
+    public static final String CONNACK_MALFORMED_PACKET_PASSWORD = "Sent CONNECT with malformed password.";
+    public static final String CONNACK_MALFORMED_BOOLEAN = "Sent CONNECT with a malformed boolean value.";
+    public static final String CONNACK_MALFORMED_AUTH_METHOD = "Sent CONNECT with a malformed auth method.";
+    public static final String CONNACK_MALFORMED_AUTH_DATA = "Sent CONNECT with malformed auth data.";
+    public static final String CONNACK_MALFORMED_WILL_PAYLOAD = "Sent CONNECT with a malformed Will payload.";
+    public static final String CONNACK_MALFORMED_WILL_FLAG = "Sent CONNECT with an invalid will-topic/flag combination.";
+    public static final String CONNACK_MALFORMED_RESPONSE_TOPIC = "Sent CONNECT with a malformed response topic.";
+    public static final String CONNACK_MALFORMED_CONNECT_FLAGS = "Sent CONNECT with invalid connect flags.";
+    public static final String CONNACK_MALFORMED_CORRELATION_DATA = "Sent CONNECT with malformed correlation data.";
+    public static final String CONNACK_MALFORMED_CONTENT_TYPE = "Sent CONNECT with malformed content type.";
+    public static final String CONNACK_MALFORMED_PFI = "Sent CONNECT with an invalid payload format indicator.";
+    public static final String CONNACK_MALFORMED_REMAINING = "Sent CONNECT with not enough remaining read buffer length was sent. Property could not be read.";
+    public static final String CONNACK_MALFORMED_PROPERTIES_LENGTH = "Sent CONNECT with malformed properties length.";
+    public static final String CONNACK_MALFORMED_PROPERTIES_INVALID = "Sent CONNECT with an invalid property identifier.";
+
+    public static final String CONNACK_PROTOCOL_ERROR_NO_AUTH = "Sent CONNECT with auth data and no auth method. This is a protocol violation.";
+    public static final String CONNACK_PROTOCOL_RECEIVE_MAXIMUM = "Sent CONNECT with receive maximum set to '0'. This is a protocol violation.";
+    public static final String CONNACK_PROTOCOL_PACKET_SIZE = "Sent CONNECT with packet size set to '0'. This is a protocol violation.";
+    public static final String CONNACK_PROTOCOL_VARIABLE_HEADER = "Sent CONNECT with invalid variable header. This is a protocol violation.";
+    public static final String CONNACK_PROTOCOL_MULTIPLE_KEY = "Sent CONNECT with %s included more than once. This is a protocol violation.";
+
+    public static final String CONNACK_UNSUPPORTED_PROTOCOL_VERSION = "Sent CONNECT with invalid protocol name.";
+
+    public static final String CONNACK_CLIENT_IDENTIFIER_NOT_VALID = "Sent CONNECT with invalid client identifier.";
+    public static final String CONNACK_CLIENT_IDENTIFIER_EMPTY = "Sent CONNECT with empty client identifier.";
+    public static final String CONNACK_CLIENT_IDENTIFIER_TOO_LONG = "Sent CONNECT with a client identifier that is too long.";
+
+    public static final String CONNACK_NOT_AUTHORIZED_WILL_WILDCARD = "Not authorized to connect. Will topic contained wildcard characters (#/+). The broker does not allow this.";
+    public static final String CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR = "Not authorized to connect. No authenticator registered.";
+    public static final String CONNACK_NOT_AUTHORIZED_FAILED = "Not authorized to connect. Authentication failed.";
+
+    public static final String CONNACK_TOPIC_NAME_INVALID_WILL_LENGTH = "Sent CONNECT with incorrect will topic length.";
+    public static final String CONNACK_TOPIC_NAME_INVALID_WILL_MALFORMED = "Sent CONNECT with malformed will topic.";
+    public static final String CONNACK_TOPIC_NAME_INVALID_WILL_EMPTY = "Sent CONNECT with empty will topic.";
+    public static final String CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD = "Not authorized to connect. Will topic contained wildcard characters (#/+) in the %s. The broker does not allow this.";
+
+    public static final String CONNACK_RETAIN_NOT_SUPPORTED = "Retain flag of Will message was set to true. The broker does not allow this.";
+
+    public static final String CONNACK_QOS_NOT_SUPPORTED_WILL = "Quality of service level of Will message in CONNECT exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
+    public static final String CONNACK_QOS_NOT_SUPPORTED_PUBLISH = "Quality of service level of PUBLISH exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
+
+    public static final String DISCONNECT_MALFORMED_USER_PROPERTY = "%s containing a malformed user property was sent.";
+    public static final String DISCONNECT_MALFORMED_UTF8_LENGTH = "%s with incorrect UTF-8 String length for %s was sent.";
+    public static final String DISCONNECT_MALFORMED_AUTH_METHOD = "%s with malformed authentication method was sent.";
+    public static final String DISCONNECT_MALFORMED_WILDCARD = "%s with wildcard character (#/+) was sent.";
+    public static final String DISCONNECT_MALFORMED_CORRELATION_DATA = "%s with malformed correlation data was sent.";
+    public static final String DISCONNECT_MALFORMED_RESPONSE_TOPIC = "%s with malformed response topic was sent.";
+    public static final String DISCONNECT_MALFORMED_SERVER_REFERENCE = "%s with a malformed UTF-8 String in server reference was sent.";
+    public static final String DISCONNECT_MALFORMED_PFI = "%s with invalid payload format indicator was sent.";
+    public static final String DISCONNECT_MALFORMED_PAYLOAD = "%s containing a payload was sent.";
+    public static final String DISCONNECT_MALFORMED_CONTENT_TYPE = "%s with malformed UTF-8 String for content type was sent.";
+    public static final String DISCONNECT_MALFORMED_REASON_STRING = "%s with malformed UTF-8 String for reason string was sent.";
+    public static final String DISCONNECT_MALFORMED_REMAINING_LENGTH = "%s with not enough remaining read buffer length was sent.";
+    public static final String DISCONNECT_MALFORMED_PROPERTIES_LENGTH = "%s with malformed properties length was sent.";
+    public static final String DISCONNECT_MALFORMED_PROPERTY_IDENTIFIER = "%s with invalid property identifier was sent.";
+    public static final String DISCONNECT_MALFORMED_PUBLISH_QOS_3 = "PUBLISH with quality of service set to '3' was sent.";
+    public static final String DISCONNECT_MALFORMED_AUTH_HEADER = "AUTH with incorrect fixed header was sent.";
+    public static final String DISCONNECT_MALFORMED_SUBSCRIBE_HEADER = "SUBSCRIBE with incorrect fixed header was sent.";
+    public static final String DISCONNECT_MALFORMED_UNSUBSCRIBE_HEADER = "UNSUBSCRIBE with incorrect fixed header was sent.";
+    public static final String DISCONNECT_MALFORMED_AUTH_DATA = "AUTH with malformed authentication data was sent.";
+    public static final String DISCONNECT_MALFORMED_SUBSCRIPTION_OPTIONS = "SUBSCRIBE with malformed subscription options was sent.";
+    public static final String DISCONNECT_MALFORMED_UTF8_STRING = "%s with malformed UTF-8 String for %s was sent.";
+
+    public static final String DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD = "%s with invalid authentication method was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_FIXED_HEADER = "Sent DISCONNECT with invalid fixed header.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SESSION_EXPIRY = "Sent DISCONNECT with invalid session expiry interval. Session expiry was set to zero on CONNECT and DISCONNECT contained a different value. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_REASON_CODE = "%s with invalid reason code was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_ID_ZERO = "%s with a packet identifier of '0' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_ID_ZERO = "SUBSCRIBE with a packet identifier of '0' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBLISH_ID_ZERO = "PUBLISH with quality of service level greater than zero and packet identifier of '0' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_MULTI_KEY = "%s with %s included more than once was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBLISH_QOS_0_DP = "PUBLISH with quality of service set to '0' and DUP flag set to true was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBLISH_SUBSCRIPTION_IDENTIFIER = "PUBLISH containing subscription identifiers was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBACK_HEADER = "PUBACK with incorrect fixed header was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBCOMP_HEADER = "PUBCOMP with incorrect fixed header was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBREL_HEADER = "PUBREL with incorrect fixed header was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTIONS = "SUBSCRIBE with zero subscriptions was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTION_OPTIONS = "SUBSCRIBE with no subscription options was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SHARED_SUBSCRIPTION_NO_LOCAL = "SUBSCRIBE with a shared subscription and the no local flag set to true was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIPTION_IDENTIFIER_ZERO = "SUBSCRIBE with a subscription identifier of '0' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_QOS_3 = "SUBSCRIBE with a quality of service level set to '3' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_RETAIN_HANDLING_3 = "SUBSCRIBE with retain handling set to '3' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_NO_TOPIC_FILTERS = "UNSUBSCRIBE containing no topic filters was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_PACKET_ID_0 = "UNSUBSCRIBE with a packet identifier of '0' was sent. This is a protocol violation.";
+
+    public static final String DISCONNECT_RECEIVE_MAXIMUM_EXCEEDED = "Too many concurrent PUBLISH messages sent.";
+
+    public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ZERO = "PUBLISH containing topic alias of '0' was sent.";
+    public static final String DISCONNECT_TOPIC_ALIAS_INVALID_TOO_LARGE = "Topic alias in PUBLISH sent was too large.";
+    public static final String DISCONNECT_TOPIC_ALIAS_INVALID_UNMAPPED = "Topic alias in PUBLISH could not be mapped.";
+    public static final String DISCONNECT_TOPIC_ALIAS_INVALID_HARD_LIMIT = "Topic alias in PUBLISH exceeds the global memory hard limit.";
+    public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ABSENT = "PUBLISH missing both topic name and topic alias was sent.";
+
+    public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "User properties size of %s sent was too large.";
+
+    public static final String DISCONNECT_PAYLOAD_FORMAT_INVALID_PUBLISH = "PUBLISH with no valid UTF-8 payload was sent.";
+
+    public static final String DISCONNECT_RETAIN_NOT_SUPPORTED = "PUBLISH with retain flag set to true was sent. The broker does not allow this.";
+
+    public static final String DISCONNECT_SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = "Disconnecting client. SUBSCRIBE containing subscription identifiers was sent. The broker does not allow this.";
+
+    private ReasonStrings() {
+        //Don't instantiate
+    }
+
+}
