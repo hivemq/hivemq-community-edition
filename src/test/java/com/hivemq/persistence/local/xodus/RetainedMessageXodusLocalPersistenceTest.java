@@ -30,6 +30,7 @@ import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import com.hivemq.util.ThreadPreConditions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,6 +48,8 @@ import static org.mockito.Mockito.*;
 /**
  * @author Christoph Schäbel
  */
+
+@SuppressWarnings("NullabilityAnnotations")
 public class RetainedMessageXodusLocalPersistenceTest {
 
     private static final int BUCKETSIZE = 4;
@@ -64,6 +67,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        ThreadPreConditions.disable();
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
@@ -92,6 +96,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
         for (int i = 0; i < BUCKETSIZE; i++) {
             persistence.closeDB(i);
         }
+        ThreadPreConditions.enable();
     }
 
     @Test
@@ -116,7 +121,8 @@ public class RetainedMessageXodusLocalPersistenceTest {
 
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 4L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
 
-        assertEquals("message4", new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)).getMessage()));
+        assertEquals("message4", new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE))
+                .getMessage()));
     }
 
     @Test
