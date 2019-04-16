@@ -25,7 +25,7 @@ It is the foundation of the HiveMQ Enterprise Connectivity and Messaging Platfor
  ** Interacting with Publishes, Retained Messages, Clients and Subscriptions
  * Running on Windows, Linux and MacOS (Linux is recommended)
 
-HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client] 
+HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client].
 
 = Documentation
 
