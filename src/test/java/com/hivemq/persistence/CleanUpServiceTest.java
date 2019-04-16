@@ -19,6 +19,7 @@ package com.hivemq.persistence;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Lukas Brandl
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "NullabilityAnnotations"})
 public class CleanUpServiceTest {
 
     @Rule
@@ -73,6 +74,8 @@ public class CleanUpServiceTest {
         MockitoAnnotations.initMocks(this);
         cleanUpService = new CleanUpService(scheduledExecutorService, clientSessionPersistence,
                 subscriptionPersistence, retainedMessagePersistence, clientQueuePersistence);
+
+        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
     }
 
     @Test
