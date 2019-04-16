@@ -2,7 +2,7 @@
 
 == Introduction
 
-Anyone is welcome to participate and contribute to the HiveMQ open source community. We encourage people to use the https://github.com/hivemq/hivemq-ce-dev/issues[Github issue tracker] and create pull requests. The scope of the HiveMQ CE is to provide
+Anyone is welcome to participate and contribute to the HiveMQ open source community. We encourage people to use the https://github.com/hivemq/hivemq-community-edition/issues[Github issue tracker] and create pull requests. The scope of the HiveMQ CE is to provide
 
 . a high-quality implementation of the MQTT broker specification, and
 . the extension framework enabling the integration of HiveMQ CE into other applications.
@@ -97,6 +97,10 @@ com.hivemq.extension.sdk.api.annotations.NotNull
 You can set up IntelliJ to recognise these annotations under `Preferences > Inspections > @NotNull/@Nullable problems > Configure annotations`.
 
 Please watch out for this inspection and check the _Reformat code_, _Optimize imports_ and _Perform code analysis_ checkboxes in the commit dialogue.
+
+=== Testing
+
+The HiveMQ CE project only accepts pull requests that contain unit tests and have sufficient unit test coverage.
 
 === Pull Requests
 
