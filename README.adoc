@@ -1,11 +1,8 @@
 = HiveMQ Community Edition
 
-HiveMQ is a MQTT based messaging platform designed for the fast, efficient and reliable movement of data to and from connected IoT devices. It uses the MQTT protocol for instant, bi-directional push of data between your device and your enterprise systems. 
+HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5. 
 
-HiveMQ Community Edition (HiveMQ CE) is a MQTT Broker written in Java. 
-
-HiveMQ CE is compatible with MQTT versions 3.1, 3.1.1 and 5.0. 
-
+It is the foundation of the HiveMQ Enterprise Connectivity and Messaging Platform and implements all MQTT features. This project is the technical core of many of the largest MQTT deployments and is now available as Open Source Software under the Apache 2 license.
 
 * Web Site: https://www.hivemq.com/
 * Documentation: https://www.hivemq.com/docs/latest/hivemq/
@@ -24,9 +21,9 @@ HiveMQ CE is compatible with MQTT versions 3.1, 3.1.1 and 5.0.
  ** Client Initializers
  ** MQTT Packet Interceptors
  ** Interacting with Publishes, Retained Messages, Clients and Subscriptions
- * Seamless integration with the https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client]
  * Running on Windows, Linux and MacOS (Linux is recommended)
 
+HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client] 
 
 = Documentation
 
