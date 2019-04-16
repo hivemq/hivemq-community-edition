@@ -1,6 +1,6 @@
 = HiveMQ Community Edition
 
-image:https://www.hivemq.com/img/hivemq-ce.png[HiveMQ Community, align="left"]
+image:https://www.hivemq.com/img/hivemq-ce.png[HiveMQ Community ,500, align="left"]
 
 HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5. 
 
