@@ -117,7 +117,7 @@ fsutil dirty query %systemdrive% >nul
 exit /b
 
 :NOJAVA
-  echo You do not have the Java Runtime Environment installed, please install Java JRE from java.com/en/download and try again.
+  echo You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again.
 
 :EXIT
   pause
