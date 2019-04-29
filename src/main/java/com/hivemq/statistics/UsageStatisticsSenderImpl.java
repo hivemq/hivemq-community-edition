@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,11 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
 
     private static final Logger log = LoggerFactory.getLogger(UsageStatisticsSenderImpl.class);
 
-    public void sendStatistics(final String jsonPayload) {
+    public void sendStatistics(final @Nullable String jsonPayload) {
+
+        if (jsonPayload == null) {
+            return;
+        }
 
         final String url = getUrl();
 
@@ -120,9 +125,8 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
         }
     }
 
-    @NotNull
     @VisibleForTesting
-    String getUrl() {
+    @NotNull String getUrl() {
         return "https://analytics.hivemq.com/v1";
     }
 

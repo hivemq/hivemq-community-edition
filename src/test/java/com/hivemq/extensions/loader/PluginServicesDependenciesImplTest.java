@@ -27,7 +27,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
@@ -71,7 +71,7 @@ public class PluginServicesDependenciesImplTest {
     private EventRegistry eventRegistry;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private PublishService publishService;
@@ -86,10 +86,13 @@ public class PluginServicesDependenciesImplTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        final SecurityRegistry securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQPlugins), new AuthorizersImpl(hiveMQPlugins), new HiveMQPlugins());
+        final SecurityRegistry securityRegistry =
+                new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions), new AuthorizersImpl(
+                        hiveMQExtensions), new HiveMQExtensions());
         pluginServicesDependencies =
                 new PluginServicesDependenciesImpl(new MetricRegistry(), initializerRegistry, retainedMessageStore,
-                        clientService, subscriptionStore, managedPluginExecutorService, publishService, hiveMQPlugins,
+                        clientService, subscriptionStore, managedPluginExecutorService, publishService,
+                        hiveMQExtensions,
                         securityRegistry, eventRegistry, clusterService);
     }
 

@@ -25,7 +25,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthOutput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,7 +53,7 @@ public class SecurityRegistryImplTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private HiveMQExtension hiveMQExtension;
@@ -71,12 +71,13 @@ public class SecurityRegistryImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        authenticators = new AuthenticatorsImpl(hiveMQPlugins);
-        authorizers = new AuthorizersImpl(hiveMQPlugins);
-        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQPlugins);
+        authenticators = new AuthenticatorsImpl(hiveMQExtensions);
+        authorizers = new AuthorizersImpl(hiveMQExtensions);
+        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQExtensions);
 
-        when(hiveMQPlugins.getPluginForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(hiveMQExtension);
-        when(hiveMQPlugins.getPlugin(anyString())).thenReturn(hiveMQExtension);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(
+                hiveMQExtension);
+        when(hiveMQExtensions.getExtension(anyString())).thenReturn(hiveMQExtension);
 
         when(hiveMQExtension.getId()).thenReturn("extension1");
         when(hiveMQExtension.getPriority()).thenReturn(1);

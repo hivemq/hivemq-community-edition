@@ -57,7 +57,7 @@ public class PluginLoaderImpl implements PluginLoader {
     @NotNull
     private final ClassServiceLoader serviceLoader;
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
     @NotNull
     private final HiveMQPluginFactory hiveMQPluginFactory;
     @NotNull
@@ -66,11 +66,11 @@ public class PluginLoaderImpl implements PluginLoader {
     @Inject
     @VisibleForTesting
     public PluginLoaderImpl(@NotNull final ClassServiceLoader serviceLoader,
-                            @NotNull final HiveMQPlugins hiveMQPlugins,
+            @NotNull final HiveMQExtensions hiveMQExtensions,
                             @NotNull final HiveMQPluginFactory hiveMQPluginFactory,
                             @NotNull final PluginStaticInitializer staticInitializer) {
         this.serviceLoader = serviceLoader;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.hiveMQPluginFactory = hiveMQPluginFactory;
         this.staticInitializer = staticInitializer;
     }
@@ -202,11 +202,11 @@ public class PluginLoaderImpl implements PluginLoader {
         final boolean folderEnabled = !pluginFolder.resolve("DISABLED").toFile().exists();
 
         //ignore, if this extension with this state is already known to HiveMQ
-        if (hiveMQPlugins.isHiveMQPluginKnown(xmlEntity.getId(), pluginFolder, folderEnabled)) {
+        if (hiveMQExtensions.isHiveMQExtensionKnown(xmlEntity.getId(), pluginFolder, folderEnabled)) {
             return null;
         }
 
-        final boolean pluginEnabled = hiveMQPlugins.isHiveMQPluginEnabled(xmlEntity.getId());
+        final boolean pluginEnabled = hiveMQExtensions.isHiveMQExtensionEnabled(xmlEntity.getId());
 
         //ignore, if folder and plugin disabled.
         if (!folderEnabled && !pluginEnabled) {
@@ -227,7 +227,7 @@ public class PluginLoaderImpl implements PluginLoader {
             return new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), pluginFolder);
         }
 
-        if (hiveMQPlugins.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
+        if (hiveMQExtensions.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
             log.warn("An extension with id \"{}\" is already loaded, ignoring extension at {}", xmlEntity.getId(), pluginFolder);
             return null;
         }
@@ -239,7 +239,7 @@ public class PluginLoaderImpl implements PluginLoader {
             return null;
         }
 
-        hiveMQPlugins.addHiveMQPlugin(hiveMQExtension);
+        hiveMQExtensions.addHiveMQPlugin(hiveMQExtension);
 
         return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), pluginFolder);
     }

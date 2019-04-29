@@ -19,7 +19,7 @@ package com.hivemq.extensions.services.auth;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class AuthenticatorsImplTest {
     private AuthenticatorProviderInput authenticatorProviderInput;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private HiveMQExtension extension1;
@@ -68,11 +68,11 @@ public class AuthenticatorsImplTest {
         final IsolatedPluginClassloader isolatedPluginClassloader1 = new IsolatedPluginClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
         final IsolatedPluginClassloader isolatedPluginClassloader2 = new IsolatedPluginClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
 
-        when(hiveMQPlugins.getPluginForClassloader(isolatedPluginClassloader1)).thenReturn(extension1);
-        when(hiveMQPlugins.getPluginForClassloader(isolatedPluginClassloader2)).thenReturn(extension2);
+        when(hiveMQExtensions.getExtensionForClassloader(isolatedPluginClassloader1)).thenReturn(extension1);
+        when(hiveMQExtensions.getExtensionForClassloader(isolatedPluginClassloader2)).thenReturn(extension2);
 
-        when(hiveMQPlugins.getPlugin("extension1")).thenReturn(extension1);
-        when(hiveMQPlugins.getPlugin("extension2")).thenReturn(extension2);
+        when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
+        when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
 
         when(extension1.getPriority()).thenReturn(11);
         when(extension2.getPriority()).thenReturn(10);
@@ -82,7 +82,7 @@ public class AuthenticatorsImplTest {
 
         simpleProvider1 = new WrappedAuthenticatorProvider((i) -> simpleAuthenticator1, isolatedPluginClassloader1);
         simpleProvider2 = new WrappedAuthenticatorProvider((i) -> simpleAuthenticator2, isolatedPluginClassloader2);
-        authenticators = new AuthenticatorsImpl(hiveMQPlugins);
+        authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authenticators.registerAuthenticatorProvider(simpleProvider1);
         authenticators.registerAuthenticatorProvider(simpleProvider2);
     }

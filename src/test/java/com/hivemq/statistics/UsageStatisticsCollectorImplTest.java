@@ -19,13 +19,16 @@ package com.hivemq.statistics;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtension;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.statistics.entity.Statistic;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
@@ -34,11 +37,22 @@ import static com.hivemq.configuration.service.RestrictionsConfigurationService.
 import static com.hivemq.metrics.HiveMQMetrics.CONNECTIONS_OVERALL_CURRENT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Christoph Schäbel
  */
+@SuppressWarnings("NullabilityAnnotations")
 public class UsageStatisticsCollectorImplTest {
+
+    @Mock
+    HiveMQExtensions hiveMQExtensions;
+
+    @Mock
+    HiveMQExtension customExtension;
+
+    @Mock
+    HiveMQExtension officialExtension;
 
     private UsageStatisticsCollector collector;
     private MetricRegistry metricRegistry;
@@ -47,11 +61,19 @@ public class UsageStatisticsCollectorImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
 
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         metricRegistry = new MetricRegistry();
-        collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService, new MetricsHolder(metricRegistry), new HivemqId(systemInformation), new HiveMQPlugins());
+        collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
+                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), hiveMQExtensions);
+        when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(
+                ImmutableMap.of("1", customExtension, "2", officialExtension));
+
+        when(customExtension.getAuthor()).thenReturn("another company");
+        when(officialExtension.getAuthor()).thenReturn("dc-square Gmbh");
+
     }
 
     @Test
@@ -96,7 +118,6 @@ public class UsageStatisticsCollectorImplTest {
 
     @Test
     public void test_hivemq_statistics() throws Exception {
-
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
@@ -106,8 +127,8 @@ public class UsageStatisticsCollectorImplTest {
         assertEquals(36, statistic.getId().length());
         assertFalse(statistic.getHivemqVersion().isEmpty());
         assertTrue(statistic.getHivemqUptime() >= 0);
-        assertEquals(0, statistic.getOfficialPlugins());
-        assertTrue(statistic.getCustomPlugins() >= 0);
+        assertEquals(1, statistic.getOfficialExtensions());
+        assertEquals(1, statistic.getCustomExtensions());
     }
 
     @Test
@@ -144,5 +165,4 @@ public class UsageStatisticsCollectorImplTest {
         assertEquals(MAX_CONNECTIONS_DEFAULT, statistic.getConnectionThrottling());
         assertEquals(0, statistic.getBandwithIncoming());
     }
-
 }

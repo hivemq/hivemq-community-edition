@@ -22,7 +22,7 @@ import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Comparator;
@@ -43,11 +43,13 @@ public class ClientContextImpl {
     private final ModifiableDefaultPermissions defaultPermissions;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
-    public ClientContextImpl(@NotNull final HiveMQPlugins hiveMQPlugins, @NotNull final ModifiableDefaultPermissions defaultPermissions) {
+    public ClientContextImpl(
+            @NotNull final HiveMQExtensions hiveMQExtensions,
+            @NotNull final ModifiableDefaultPermissions defaultPermissions) {
         this.interceptorList = new CopyOnWriteArrayList<>();
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.defaultPermissions = defaultPermissions;
     }
 
@@ -115,7 +117,8 @@ public class ClientContextImpl {
         if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
             return -1;
         }
-        final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader((IsolatedPluginClassloader) object.getClass().getClassLoader());
+        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+                (IsolatedPluginClassloader) object.getClass().getClassLoader());
         if (plugin != null) {
             return plugin.getPriority();
         } else {
@@ -127,6 +130,7 @@ public class ClientContextImpl {
         if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
             return true;
         }
-        return hiveMQPlugins.getPluginForClassloader((IsolatedPluginClassloader) object.getClass().getClassLoader()) != null;
+        return hiveMQExtensions.getExtensionForClassloader(
+                (IsolatedPluginClassloader) object.getClass().getClassLoader()) != null;
     }
 }

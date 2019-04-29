@@ -25,10 +25,10 @@ import java.util.Comparator;
  */
 public class PluginPriorityComparator implements Comparator<String> {
 
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
 
-    public PluginPriorityComparator(@NotNull final HiveMQPlugins hiveMQPlugins) {
-        this.hiveMQPlugins = hiveMQPlugins;
+    public PluginPriorityComparator(@NotNull final HiveMQExtensions hiveMQExtensions) {
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
@@ -38,8 +38,8 @@ public class PluginPriorityComparator implements Comparator<String> {
             return 0;
         }
 
-        final HiveMQExtension plugin1 = hiveMQPlugins.getPlugin(o1);
-        final HiveMQExtension plugin2 = hiveMQPlugins.getPlugin(o2);
+        final HiveMQExtension plugin1 = hiveMQExtensions.getExtension(o1);
+        final HiveMQExtension plugin2 = hiveMQExtensions.getExtension(o2);
 
         if (plugin1 == null && plugin2 == null) {
             return 0;

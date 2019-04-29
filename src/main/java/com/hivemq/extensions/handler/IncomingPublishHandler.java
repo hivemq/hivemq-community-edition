@@ -26,7 +26,7 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -88,7 +88,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
 
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull PluginOutPutAsyncer asyncer;
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull MessageDroppedService messageDroppedService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
     private final @NotNull Mqtt3ServerDisconnector mqttDisconnector;
@@ -97,14 +97,14 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
     @Inject
     public IncomingPublishHandler(final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
                                   final @NotNull PluginOutPutAsyncer asyncer,
-                                  final @NotNull HiveMQPlugins hiveMQPlugins,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
                                   final @NotNull MessageDroppedService messageDroppedService,
                                   final @NotNull PluginAuthorizerService pluginAuthorizerService,
                                   final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
                                   final @NotNull FullConfigurationService configurationService) {
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.asyncer = asyncer;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.messageDroppedService = messageDroppedService;
         this.pluginAuthorizerService = pluginAuthorizerService;
         this.mqttDisconnector = mqttDisconnector;
@@ -161,7 +161,8 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 break;
             }
 
-            final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader((IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             //disabled extension would be null
             if (plugin == null) {

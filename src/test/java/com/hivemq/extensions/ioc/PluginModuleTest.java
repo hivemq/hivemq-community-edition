@@ -31,7 +31,7 @@ import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
 import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
 import com.hivemq.extensions.loader.*;
@@ -91,8 +91,8 @@ public class PluginModuleTest {
 
     @Test(timeout = 5000)
     public void test_hivemqplugins_is_singleton() {
-        final HiveMQPlugins instance1 = injector.getInstance(HiveMQPlugins.class);
-        final HiveMQPlugins instance2 = injector.getInstance(HiveMQPlugins.class);
+        final HiveMQExtensions instance1 = injector.getInstance(HiveMQExtensions.class);
+        final HiveMQExtensions instance2 = injector.getInstance(HiveMQExtensions.class);
 
         assertNotNull(instance1);
         assertSame(instance1, instance2);

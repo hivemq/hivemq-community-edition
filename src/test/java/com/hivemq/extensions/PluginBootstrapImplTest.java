@@ -65,7 +65,7 @@ public class PluginBootstrapImplTest {
     private PluginLifecycleHandler pluginLifecycleHandler;
 
     @Mock
-    HiveMQPlugins hiveMQPlugins;
+    HiveMQExtensions hiveMQExtensions;
 
     @Mock
     ShutdownHooks shutdownHooks;
@@ -76,7 +76,8 @@ public class PluginBootstrapImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        pluginBootstrap = new PluginBootstrapImpl(pluginLoader, new SystemInformationImpl(), pluginLifecycleHandler, hiveMQPlugins, shutdownHooks);
+        pluginBootstrap = new PluginBootstrapImpl(pluginLoader, new SystemInformationImpl(), pluginLifecycleHandler,
+                hiveMQExtensions, shutdownHooks);
     }
 
     @Test
@@ -95,7 +96,7 @@ public class PluginBootstrapImplTest {
         extensions.put("extension-1", new TestHiveMQExtension("extension-1", temporaryFolder));
         extensions.put("extension-2", new TestHiveMQExtension("extension-2", temporaryFolder));
 
-        when(hiveMQPlugins.getEnabledHiveMQPlugins()).thenReturn(extensions);
+        when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(extensions);
 
         when(pluginLifecycleHandler.pluginStop(anyString())).thenReturn(Futures.immediateFuture(null));
 

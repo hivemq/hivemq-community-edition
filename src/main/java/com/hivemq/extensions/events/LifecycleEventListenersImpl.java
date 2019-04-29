@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
@@ -43,16 +43,16 @@ public class LifecycleEventListenersImpl implements LifecycleEventListeners {
     private final Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> clientLifecycleEventListenerProviderMap;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     @NotNull
     private final ReadWriteLock readWriteLock;
 
     @Inject
-    public LifecycleEventListenersImpl(@NotNull final HiveMQPlugins hiveMQPlugins) {
-        this.hiveMQPlugins = hiveMQPlugins;
+    public LifecycleEventListenersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
+        this.hiveMQExtensions = hiveMQExtensions;
         this.readWriteLock = new ReentrantReadWriteLock();
-        this.clientLifecycleEventListenerProviderMap = new TreeMap<>(new PluginPriorityComparator(hiveMQPlugins));
+        this.clientLifecycleEventListenerProviderMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LifecycleEventListenersImpl implements LifecycleEventListeners {
             final IsolatedPluginClassloader pluginClassloader =
                     (IsolatedPluginClassloader) provider.getClass().getClassLoader();
 
-            final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader(pluginClassloader);
+            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
             if (plugin != null) {
 
