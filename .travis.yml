@@ -1,16 +1,15 @@
 language: java
+
+# workaround as openjdk11 can not be installed https://travis-ci.community/t/install-of-openjdk11-is-failing-again/3061/16
+dist: xenial
+
 jdk:
   - openjdk11
+
 stages:
   - test
   - build
-# Fix SSL errors, snippet from https://github.com/travis-ci/travis-ci/issues/9368
-matrix:
-  include:
-    - jdk: openjdk11
-      before_install:
-        - rm "${JAVA_HOME}/lib/security/cacerts"
-        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+
 jobs:
   include:
     - stage: test
