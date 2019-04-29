@@ -1,6 +1,11 @@
 language: java
+
+# workaround as openjdk11 can not be installed https://travis-ci.community/t/install-of-openjdk11-is-failing-again/3061/16
+dist: xenial
+
 jdk:
   - openjdk11
+
 stages:
   - test
   - build
