@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerPr
 import com.hivemq.extension.sdk.api.events.client.parameters.*;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.events.*;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -81,7 +81,7 @@ public class ClientLifecycleEventHandlerTest {
     private IsolatedPluginClassloader classloader1;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private HiveMQExtension plugin;
@@ -102,7 +102,9 @@ public class ClientLifecycleEventHandlerTest {
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
-        clientLifecycleEventHandler = new ClientLifecycleEventHandler(lifecycleEventListeners, pluginTaskExecutorService, hiveMQPlugins);
+        clientLifecycleEventHandler =
+                new ClientLifecycleEventHandler(lifecycleEventListeners, pluginTaskExecutorService,
+                        hiveMQExtensions);
 
     }
 

@@ -17,8 +17,8 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.HiveMQPluginEvent;
-import com.hivemq.extensions.HiveMQPlugins;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class PluginLifecycleHandlerImplTest {
     ScheduledExecutorService pluginStartStopExecutor;
 
     @Mock
-    HiveMQPlugins hiveMQPlugins;
+    HiveMQExtensions hiveMQExtensions;
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -53,7 +53,7 @@ public class PluginLifecycleHandlerImplTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQPlugins, pluginStartStopExecutor);
+        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class PluginLifecycleHandlerImplTest {
         verify(pluginStartStopExecutor, times(1)).execute(runnableArgumentCaptor.capture());
         runnableArgumentCaptor.getValue().run();
 
-        verify(hiveMQPlugins).pluginStart(eq("test-extension"));
+        verify(hiveMQExtensions).extensionStart(eq("test-extension"));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class PluginLifecycleHandlerImplTest {
         verify(pluginStartStopExecutor, times(1)).execute(runnableArgumentCaptor.capture());
         runnableArgumentCaptor.getValue().run();
 
-        verify(hiveMQPlugins).pluginStop(eq("test-extension"), eq(true));
+        verify(hiveMQExtensions).extensionStop(eq("test-extension"), eq(true));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class PluginLifecycleHandlerImplTest {
         verify(pluginStartStopExecutor, times(1)).execute(runnableArgumentCaptor.capture());
         runnableArgumentCaptor.getValue().run();
 
-        verify(hiveMQPlugins).pluginStop(eq("test-extension"), eq(false));
+        verify(hiveMQExtensions).extensionStop(eq("test-extension"), eq(false));
     }
 
 }

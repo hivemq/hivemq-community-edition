@@ -20,8 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.HiveMQPluginEvent;
-import com.hivemq.extensions.HiveMQPlugins;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +39,15 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PluginLifecycleHandlerImpl.class);
 
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull ExecutorService pluginStartStopExecutor;
 
     @Inject
     PluginLifecycleHandlerImpl(
-            final @NotNull HiveMQPlugins hiveMQPlugins,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor) {
 
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.pluginStartStopExecutor = pluginStartStopExecutor;
     }
 
@@ -79,7 +79,7 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
 
         log.debug("Starting extension with id \"{}\" at {}", pluginId, pluginEvent.getPluginFolder());
 
-        pluginStartStopExecutor.execute(() -> hiveMQPlugins.pluginStart(pluginId));
+        pluginStartStopExecutor.execute(() -> hiveMQExtensions.extensionStart(pluginId));
     }
 
     private @NotNull ListenableFuture<Void> stopPlugin(final @NotNull String pluginId, final boolean disable) {
@@ -87,7 +87,7 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
 
         final SettableFuture<Void> stoppedFuture = SettableFuture.create();
         pluginStartStopExecutor.execute(() -> {
-            hiveMQPlugins.pluginStop(pluginId, disable);
+            hiveMQExtensions.extensionStop(pluginId, disable);
             stoppedFuture.set(null);
         });
         return stoppedFuture;

@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
@@ -42,16 +42,16 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     private final Authorizers authorizers;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     @Inject
     public SecurityRegistryImpl(
             @NotNull final Authenticators authenticators,
             @NotNull final Authorizers authorizers,
-            @NotNull final HiveMQPlugins hiveMQPlugins) {
+            @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.authenticators = authenticators;
         this.authorizers = authorizers;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SecurityRegistryImpl implements SecurityRegistry {
 
         final @NotNull IsolatedPluginClassloader classLoader =
                 (IsolatedPluginClassloader) authenticatorProvider.getClass().getClassLoader();
-        final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader(classLoader);
+        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(classLoader);
 
         checkNotNull(plugin, "Extension classloader must be known, before an extension can add an AuthenticatorProvider.");
 

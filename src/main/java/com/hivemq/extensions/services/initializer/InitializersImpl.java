@@ -21,7 +21,7 @@ import com.hivemq.annotations.ThreadSafe;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
@@ -56,12 +56,12 @@ public class InitializersImpl implements Initializers {
     private final ReadWriteLock readWriteLock;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     @Inject
-    public InitializersImpl(@NotNull final HiveMQPlugins hiveMQPlugins) {
-        this.hiveMQPlugins = hiveMQPlugins;
-        this.clientInitializerMap = new TreeMap<>(new PluginPriorityComparator(hiveMQPlugins));
+    public InitializersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
+        this.hiveMQExtensions = hiveMQExtensions;
+        this.clientInitializerMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -77,7 +77,7 @@ public class InitializersImpl implements Initializers {
             final IsolatedPluginClassloader pluginClassloader =
                     (IsolatedPluginClassloader) initializer.getClass().getClassLoader();
 
-            final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader(pluginClassloader);
+            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
             if (plugin != null) {
 

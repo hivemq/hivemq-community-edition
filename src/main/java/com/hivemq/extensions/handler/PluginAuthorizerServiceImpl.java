@@ -24,7 +24,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.auth.parameter.*;
 import com.hivemq.extensions.client.ClientAuthorizers;
@@ -82,7 +82,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                                        final @NotNull PluginOutPutAsyncer asyncer,
                                        final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
                                        final @NotNull ServerInformation serverInformation,
-                                       final @NotNull HiveMQPlugins hiveMQPlugins,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
                                        final @NotNull Mqtt3ServerDisconnector mqtt3Disconnector,
                                        final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector,
                                        final @NotNull EventLog eventLog,
@@ -95,7 +95,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.mqtt5Disconnector = mqtt5Disconnector;
         this.eventLog = eventLog;
         this.incomingPublishService = incomingPublishService;
-        this.pluginPriorityComparator = new PluginPriorityComparator(hiveMQPlugins);
+        this.pluginPriorityComparator = new PluginPriorityComparator(hiveMQExtensions);
         this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
     }
 

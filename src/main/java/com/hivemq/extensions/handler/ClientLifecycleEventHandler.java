@@ -23,7 +23,7 @@ import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.events.*;
 import com.hivemq.extensions.events.client.parameters.*;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -73,7 +73,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private final @NotNull LifecycleEventListeners lifecycleEventListeners;
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
 
     @VisibleForTesting
     @Nullable ClientLifecycleEventListenerProviderInput providerInput;
@@ -81,10 +81,10 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     @Inject
     public ClientLifecycleEventHandler(@NotNull final LifecycleEventListeners lifecycleEventListeners,
                                        @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
-                                       @NotNull final HiveMQPlugins hiveMQPlugins) {
+            @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.lifecycleEventListeners = lifecycleEventListeners;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
@@ -298,7 +298,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
         ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_EVENT_LISTENERS).get();
         if (eventListeners == null) {
-            eventListeners = new ClientEventListeners(hiveMQPlugins);
+            eventListeners = new ClientEventListeners(hiveMQExtensions);
             ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_EVENT_LISTENERS).set(eventListeners);
         }
         return eventListeners;

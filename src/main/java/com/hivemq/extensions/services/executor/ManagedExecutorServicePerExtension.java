@@ -19,7 +19,7 @@ package com.hivemq.extensions.services.executor;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.CompletableScheduledFuture;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Collection;
@@ -40,14 +40,14 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
     private final IsolatedPluginClassloader classLoader;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     public ManagedExecutorServicePerExtension(
             @NotNull final GlobalManagedPluginExecutorService managedPluginExecutorService,
-            @NotNull final IsolatedPluginClassloader classLoader, @NotNull final HiveMQPlugins hiveMQPlugins) {
+            @NotNull final IsolatedPluginClassloader classLoader, @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.managedPluginExecutorService = managedPluginExecutorService;
         this.classLoader = classLoader;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
             @NotNull final Runnable command, final long initialDelay, final long period, @NotNull final TimeUnit unit) {
         final CompletableScheduledFutureImpl<?> completableScheduledFuture = new CompletableScheduledFutureImpl<>();
         final ScheduledFuture<?> scheduledFuture = managedPluginExecutorService.scheduleAtFixedRate(
-                new WrappedScheduledRunnable(command, classLoader, completableScheduledFuture, hiveMQPlugins),
+                new WrappedScheduledRunnable(command, classLoader, completableScheduledFuture, hiveMQExtensions),
                 initialDelay,
                 period, unit);
         completableScheduledFuture.setScheduledFuture(scheduledFuture);
@@ -99,7 +99,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
 
         final CompletableScheduledFutureImpl<?> completableScheduledFuture = new CompletableScheduledFutureImpl<>();
         final ScheduledFuture<?> scheduledFuture = managedPluginExecutorService.scheduleWithFixedDelay(
-                new WrappedScheduledRunnable(command, classLoader, completableScheduledFuture, hiveMQPlugins),
+                new WrappedScheduledRunnable(command, classLoader, completableScheduledFuture, hiveMQExtensions),
                 initialDelay,
                 delay, unit);
         completableScheduledFuture.setScheduledFuture(scheduledFuture);

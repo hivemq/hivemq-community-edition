@@ -19,7 +19,7 @@ package com.hivemq.extensions.client;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
@@ -53,7 +53,8 @@ public class ClientContextPluginImplTest {
         final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
 
-        final ClientContextImpl clientContext = new ClientContextImpl(new HiveMQPlugins(), new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(new HiveMQExtensions(), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) interceptorList.get(0).getClass().getClassLoader();
         final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
@@ -91,7 +92,8 @@ public class ClientContextPluginImplTest {
         final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
 
-        final ClientContextImpl clientContext = new ClientContextImpl(new HiveMQPlugins(), new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(new HiveMQExtensions(), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) interceptorList.get(0).getClass().getClassLoader();
         final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();

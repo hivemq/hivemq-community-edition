@@ -17,7 +17,7 @@
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +35,8 @@ public class ClientContextImplTest {
 
     @Before
     public void setUp() throws Exception {
-        final HiveMQPlugins hiveMQPlugins = new HiveMQPlugins();
-        clientContext = new ClientContextImpl(hiveMQPlugins, new ModifiableDefaultPermissionsImpl());
+        final HiveMQExtensions hiveMQExtensions = new HiveMQExtensions();
+        clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
     }
 
     @Test

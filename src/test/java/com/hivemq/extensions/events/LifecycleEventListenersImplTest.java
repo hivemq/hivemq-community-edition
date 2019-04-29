@@ -22,7 +22,7 @@ import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.ChannelPersistenceImpl;
@@ -61,7 +61,7 @@ public class LifecycleEventListenersImplTest {
     private LifecycleEventListenersImpl lifecycleEventListeners;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     private ChannelPersistence channelPersistence;
 
@@ -79,10 +79,10 @@ public class LifecycleEventListenersImplTest {
 
         MockitoAnnotations.initMocks(this);
         channelPersistence = new ChannelPersistenceImpl();
-        lifecycleEventListeners = new LifecycleEventListenersImpl(hiveMQPlugins);
+        lifecycleEventListeners = new LifecycleEventListenersImpl(hiveMQExtensions);
 
-        when(hiveMQPlugins.getPlugin("plugin1")).thenReturn(plugin1);
-        when(hiveMQPlugins.getPlugin("plugin2")).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
 
     }
 
@@ -102,7 +102,7 @@ public class LifecycleEventListenersImplTest {
 
         final ClientLifecycleEventListenerProvider clientInitializer = (ClientLifecycleEventListenerProvider) classOne.newInstance();
 
-        when(hiveMQPlugins.getPluginForClassloader(cl)).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
         when(plugin1.getId()).thenReturn("plugin1");
 
         final Channel channelMock = Mockito.mock(Channel.class);
@@ -145,8 +145,8 @@ public class LifecycleEventListenersImplTest {
 
         final ClientLifecycleEventListenerProvider clientInitializerTwo = (ClientLifecycleEventListenerProvider) classTwo.newInstance();
 
-        when(hiveMQPlugins.getPluginForClassloader(cl)).thenReturn(plugin1);
-        when(hiveMQPlugins.getPluginForClassloader(cl2)).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(plugin2);
         when(plugin1.getId()).thenReturn("plugin1");
         when(plugin2.getId()).thenReturn("plugin2");
 
@@ -194,8 +194,8 @@ public class LifecycleEventListenersImplTest {
 
         final ClientLifecycleEventListenerProvider clientInitializerTwo = (ClientLifecycleEventListenerProvider) classTwo.newInstance();
 
-        when(hiveMQPlugins.getPluginForClassloader(cl)).thenReturn(plugin1);
-        when(hiveMQPlugins.getPluginForClassloader(cl2)).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(plugin2);
         when(plugin1.getId()).thenReturn("plugin1");
         when(plugin2.getId()).thenReturn("plugin2");
 
@@ -243,8 +243,8 @@ public class LifecycleEventListenersImplTest {
 
         final ClientLifecycleEventListenerProvider clientInitializerTwo = (ClientLifecycleEventListenerProvider) classTwo.newInstance();
 
-        when(hiveMQPlugins.getPluginForClassloader(cl)).thenReturn(plugin1);
-        when(hiveMQPlugins.getPluginForClassloader(cl2)).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(plugin2);
         when(plugin1.getId()).thenReturn("plugin1");
         when(plugin2.getId()).thenReturn("plugin2");
 

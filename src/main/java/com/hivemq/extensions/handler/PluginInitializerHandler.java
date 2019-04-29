@@ -25,7 +25,7 @@ import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.client.ClientContextPluginImpl;
@@ -69,7 +69,7 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
     private final @NotNull Initializers initializers;
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull ServerInformation serverInformation;
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull MqttConnacker mqttConnacker;
 
@@ -80,13 +80,13 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
     public PluginInitializerHandler(@NotNull final Initializers initializers,
                                     @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
                                     @NotNull final ServerInformation serverInformation,
-                                    @NotNull final HiveMQPlugins hiveMQPlugins,
+            @NotNull final HiveMQExtensions hiveMQExtensions,
                                     @NotNull final ClientSessionPersistence clientSessionPersistence,
                                     @NotNull final MqttConnacker mqttConnacker) {
         this.initializers = initializers;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.serverInformation = serverInformation;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.clientSessionPersistence = clientSessionPersistence;
         this.mqttConnacker = mqttConnacker;
     }
@@ -128,7 +128,7 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
         if (clientContext == null) {
             ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
             defaultPermissions = defaultPermissions == null ? new ModifiableDefaultPermissionsImpl() : defaultPermissions;
-            clientContext = new ClientContextImpl(hiveMQPlugins, defaultPermissions);
+            clientContext = new ClientContextImpl(hiveMQExtensions, defaultPermissions);
         }
 
 

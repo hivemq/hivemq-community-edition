@@ -19,7 +19,7 @@ package com.hivemq.extensions.events.client.parameters;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
@@ -44,8 +44,8 @@ public class ClientEventListeners {
     private final @NotNull Map<String, ClientLifecycleEventListener> pluginEventListenersMap;
     private final @NotNull ReadWriteLock readWriteLock;
 
-    public ClientEventListeners(final @NotNull HiveMQPlugins hiveMQPlugins) {
-        this.pluginEventListenersMap = new TreeMap<>(new PluginPriorityComparator(hiveMQPlugins));
+    public ClientEventListeners(final @NotNull HiveMQExtensions hiveMQExtensions) {
+        this.pluginEventListenersMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 

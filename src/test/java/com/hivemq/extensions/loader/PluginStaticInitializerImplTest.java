@@ -38,7 +38,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.exception.PluginLoadingException;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
@@ -111,7 +111,7 @@ public class PluginStaticInitializerImplTest {
     private ClientService clientService;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private GlobalManagedPluginExecutorService managedPluginExecutorService;
@@ -134,15 +134,17 @@ public class PluginStaticInitializerImplTest {
         metricRegistry = new MetricRegistry();
         fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         initializerRegistry =
-                new InitializerRegistryImpl(new InitializersImpl(hiveMQPlugins));
+                new InitializerRegistryImpl(new InitializersImpl(hiveMQExtensions));
         retainedPublishBuilder = new RetainedPublishBuilderImpl(fullConfigurationService);
         topicSubscriptionBuilder = new TopicSubscriptionBuilderImpl(fullConfigurationService);
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
-        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQPlugins), new AuthorizersImpl(hiveMQPlugins), new HiveMQPlugins());
+        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions), new AuthorizersImpl(
+                hiveMQExtensions), new HiveMQExtensions());
         servicesDependencies = Mockito.spy(
                 new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
-                        clientService, subscriptionStore, managedPluginExecutorService, publishService, hiveMQPlugins,
+                        clientService, subscriptionStore, managedPluginExecutorService, publishService,
+                        hiveMQExtensions,
                         securityRegistry, eventRegistry, clusterService));
         builderDependencies = Mockito.spy(
                 new PluginBuilderDependenciesImpl(() -> retainedPublishBuilder, () -> topicSubscriptionBuilder, () -> topicPermissionBuilder, () -> publishBuilder, () -> willPublishBuilder));
