@@ -2,12 +2,14 @@
 
 image:https://www.hivemq.com/img/svg/hivemq-ce.svg[HiveMQ Community ,500, align="left"]
 
+image:https://travis-ci.com/hivemq/hivemq-community-edition.svg?token=2JEoSXzFpviQH47MBPSm&branch=master["Build Status", link="https://travis-ci.com/hivemq/hivemq-community-edition"]
+
 HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5. 
 
 It is the foundation of the HiveMQ Enterprise Connectivity and Messaging Platform and implements all MQTT features. This project is the technical core of many of the largest MQTT deployments and is now available as Open Source Software under the Apache 2 license.
 
 * Web Site: https://www.hivemq.com/
-* Documentation: https://www.hivemq.com/docs/latest/hivemq/
+* Documentation:https://github.com/hivemq/hivemq-community-edition/wiki
 * Community Forum: https://community.hivemq.com/
 * Contribution Guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
 * License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
@@ -29,9 +31,7 @@ HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Pa
 
 = Documentation
 
-The official HiveMQ documentation includes all features and configurations of HiveMQ and HiveMQ CE.
-
-The documentation can be found https://www.hivemq.com/docs/latest/hivemq/[here].
+The documentation for the HiveMQ CE can be found https://github.com/hivemq/hivemq-community-edition/wiki[here].
 
 = HiveMQ Community Forum
 

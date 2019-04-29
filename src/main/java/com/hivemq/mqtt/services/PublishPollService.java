@@ -72,7 +72,7 @@ public interface PublishPollService {
      * @param sharedSubscription     of the queue for which messages are polled
      * @param qos                    of the clients subscription
      * @param subscriptionIdentifier of the clients subscription
-     * @param channel                to which teh messages are sent
+     * @param channel                to which the messages are sent
      */
     void pollSharedPublishesForClient(@NotNull String client, @NotNull String sharedSubscription, int qos,
                                       @Nullable Integer subscriptionIdentifier, @NotNull Channel channel);
