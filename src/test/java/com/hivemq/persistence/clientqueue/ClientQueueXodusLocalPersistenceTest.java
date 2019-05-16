@@ -109,7 +109,7 @@ public class ClientQueueXodusLocalPersistenceTest {
 
         for (int i = 0; i < 100; i++) {
             final PUBLISH publish = createPublish(i, QoS.AT_LEAST_ONCE, "topic" + i);
-            persistence.add("client" + i, false, publish, 100L, DISCARD, i % bucketCount);
+            persistence.add("client" + i, false, publish, 100L, DISCARD, false, i % bucketCount);
         }
 
         persistence.stop();
@@ -139,9 +139,9 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_readNew_lessAvailable() {
         final PUBLISH publish = createPublish(10, QoS.AT_LEAST_ONCE, "topic1");
         final PUBLISH otherPublish = createPublish(11, QoS.EXACTLY_ONCE, "topic2");
-        persistence.add("client10", false, otherPublish, 100L, DISCARD, 0);
-        persistence.add("client1", false, publish, 100L, DISCARD, 0);
-        persistence.add("client01", false, otherPublish, 100L, DISCARD, 0);
+        persistence.add("client10", false, otherPublish, 100L, DISCARD, false, 0);
+        persistence.add("client1", false, publish, 100L, DISCARD, false, 0);
+        persistence.add("client01", false, otherPublish, 100L, DISCARD, false, 0);
         final ImmutableList<PUBLISH> publishes =
                 persistence.readNew("client1", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
         assertEquals(1, publishes.size());
@@ -158,11 +158,11 @@ public class ClientQueueXodusLocalPersistenceTest {
         }
         final PUBLISH otherPublish = createPublish(14, QoS.EXACTLY_ONCE, "topic5");
 
-        persistence.add("client10", false, otherPublish, 100L, DISCARD, 0);
+        persistence.add("client10", false, otherPublish, 100L, DISCARD, false, 0);
         for (final PUBLISH publish : publishes) {
-            persistence.add("client1", false, publish, 100L, DISCARD, 0);
+            persistence.add("client1", false, publish, 100L, DISCARD, false, 0);
         }
-        persistence.add("client01", false, otherPublish, 100L, DISCARD, 0);
+        persistence.add("client01", false, otherPublish, 100L, DISCARD, false, 0);
 
         final ImmutableIntArray packetIds = ImmutableIntArray.of(2, 3, 5);
         final ImmutableList<PUBLISH> readPublishes = persistence.readNew("client1", false, packetIds, 256000, 0);
@@ -183,11 +183,11 @@ public class ClientQueueXodusLocalPersistenceTest {
         }
         final PUBLISH otherPublish = createPublish(14, QoS.EXACTLY_ONCE, "topic5");
 
-        persistence.add("client10", false, otherPublish, 100L, DISCARD, 0);
+        persistence.add("client10", false, otherPublish, 100L, DISCARD, false, 0);
         for (final PUBLISH publish : publishes) {
-            persistence.add("client1", false, publish, 100L, DISCARD, 0);
+            persistence.add("client1", false, publish, 100L, DISCARD, false, 0);
         }
-        persistence.add("client01", false, otherPublish, 100L, DISCARD, 0);
+        persistence.add("client01", false, otherPublish, 100L, DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(5), 256000, 0);
@@ -212,7 +212,7 @@ public class ClientQueueXodusLocalPersistenceTest {
         for (int i = 0; i < publishes.length; i++) {
             final PUBLISH publish = createPublish(0, QoS.AT_MOST_ONCE, "topic" + i);
             publishes[i] = publish;
-            persistence.add("client", false, publish, 100L, DISCARD, 0);
+            persistence.add("client", false, publish, 100L, DISCARD, false, 0);
         }
 
         final ImmutableList<PUBLISH> messages =
@@ -231,14 +231,14 @@ public class ClientQueueXodusLocalPersistenceTest {
         for (int i = 0; i < qos0Publishes.length; i++) {
             final PUBLISH publish = createPublish(0, QoS.AT_MOST_ONCE, "topic" + i);
             qos0Publishes[i] = publish;
-            persistence.add("client", false, publish, 100L, DISCARD, 0);
+            persistence.add("client", false, publish, 100L, DISCARD, false, 0);
         }
 
         final PUBLISH[] qos1Publishes = new PUBLISH[3];
         for (int i = 0; i < qos1Publishes.length; i++) {
             final PUBLISH publish = createPublish(1 + i, QoS.AT_LEAST_ONCE, "topic" + i);
             qos1Publishes[i] = publish;
-            persistence.add("client", false, publish, 100L, DISCARD, 0);
+            persistence.add("client", false, publish, 100L, DISCARD, false, 0);
         }
 
         final ImmutableList<PUBLISH> messages =
@@ -269,7 +269,7 @@ public class ClientQueueXodusLocalPersistenceTest {
             publishes[i] = createPublish(10 + i, (i % 2 == 0) ? QoS.EXACTLY_ONCE : QoS.AT_LEAST_ONCE, "topic" + i);
         }
         for (final PUBLISH publish : publishes) {
-            persistence.add("client1", false, publish, 100L, DISCARD, 0);
+            persistence.add("client1", false, publish, 100L, DISCARD, false, 0);
         }
 
         final ImmutableList<PUBLISH> messages1 =
@@ -309,7 +309,7 @@ public class ClientQueueXodusLocalPersistenceTest {
             publishes[i] = createPublish(10 + i, (i % 2 == 0) ? QoS.EXACTLY_ONCE : QoS.AT_LEAST_ONCE, "topic" + i);
         }
         for (final PUBLISH publish : publishes) {
-            persistence.add("client1", false, publish, 100L, DISCARD, 0);
+            persistence.add("client1", false, publish, 100L, DISCARD, false, 0);
         }
 
         // Assign packet ID's
@@ -330,7 +330,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_add_discard() {
         for (int i = 1; i <= 6; i++) {
-            persistence.add("client", false, createPublish(i, QoS.AT_LEAST_ONCE, "topic" + i), 3L, DISCARD, 0);
+            persistence.add("client", false, createPublish(i, QoS.AT_LEAST_ONCE, "topic" + i), 3L, DISCARD, false, 0);
         }
         assertEquals(3, persistence.size("client", false, 0));
 
@@ -348,7 +348,8 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_add_discard_oldest() {
         for (int i = 1; i <= 6; i++) {
-            persistence.add("client", false, createPublish(i, QoS.AT_LEAST_ONCE, "topic" + i), 3L, DISCARD_OLDEST, 0);
+            persistence.add(
+                    "client", false, createPublish(i, QoS.AT_LEAST_ONCE, "topic" + i), 3L, DISCARD_OLDEST, false, 0);
         }
         assertEquals(3, persistence.size("client", false, 0));
         final ImmutableList<PUBLISH> publishes =
@@ -363,11 +364,11 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_clear() {
         for (int i = 0; i < 5; i++) {
-            persistence.add("client1", false, createPublish(1, QoS.AT_LEAST_ONCE), 100L, DISCARD, 0);
+            persistence.add("client1", false, createPublish(1, QoS.AT_LEAST_ONCE), 100L, DISCARD, false, 0);
         }
 
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE), 100L, DISCARD, 0);
-        persistence.add("client2", false, createPublish(1, QoS.AT_LEAST_ONCE), 100L, DISCARD, 0);
+        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE), 100L, DISCARD, false, 0);
+        persistence.add("client2", false, createPublish(1, QoS.AT_LEAST_ONCE), 100L, DISCARD, false, 0);
         persistence.clear("client1", false, 0);
 
         final ImmutableList<PUBLISH> publishes1 =
@@ -382,7 +383,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_replace() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         persistence.readNew("client", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
         final String uniqueId = persistence.replace("client", new PUBREL(4), 0);
@@ -393,7 +394,7 @@ public class ClientQueueXodusLocalPersistenceTest {
 
     @Test
     public void test_replca_false_id() {
-        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", 1), 100L, DISCARD, 0);
+        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", 1), 100L, DISCARD, false, 0);
         persistence.readNew("client", false, ImmutableIntArray.of(1), 256000, 0);
         final String uniqueId = persistence.remove("client", 1, "hivemqId_pub_2", 0);
         assertNull(uniqueId);
@@ -405,7 +406,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_replace_not_found() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         final String uniqueId = persistence.replace("client", new PUBREL(4), 0);
         assertEquals(4, persistence.size("client", false, 0));
@@ -415,7 +416,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_remove() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         persistence.readNew("client", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
         final String uniqueId = persistence.remove("client", 4, 0);
@@ -433,7 +434,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_remove_not_found() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         final String uniqueId = persistence.remove("client", 1, 0);
         assertNull(uniqueId);
@@ -441,7 +442,7 @@ public class ClientQueueXodusLocalPersistenceTest {
 
     @Test
     public void test_remove_false_id() {
-        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", 1), 100L, DISCARD, 0);
+        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", 1), 100L, DISCARD, false, 0);
         persistence.readNew("client", false, ImmutableIntArray.of(1), 256000, 0);
         final String uniqueId = persistence.remove("client", 1, "hivemqId_pub_2", 0);
         assertNull(uniqueId);
@@ -456,9 +457,11 @@ public class ClientQueueXodusLocalPersistenceTest {
         final int queueLimit = (int) (Runtime.getRuntime().maxMemory() / 10000);
 
         persistence.add(
-                "client", false, createBigPublish(0, QoS.AT_MOST_ONCE, "topic1", 1, queueLimit), 100L, DISCARD, 0);
+                "client", false, createBigPublish(0, QoS.AT_MOST_ONCE, "topic1", 1, queueLimit), 100L, DISCARD, false,
+                0);
         persistence.add(
-                "client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, 0);
+                "client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, false,
+                0);
 
         verify(payloadPersistence).decrementReferenceCounter(1);
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic5"), eq(0), anyLong(), anyLong());
@@ -470,9 +473,10 @@ public class ClientQueueXodusLocalPersistenceTest {
         final int queueLimit = (int) (Runtime.getRuntime().maxMemory() / 10000);
 
         persistence.add(
-                "client", false, createBigPublish(0, QoS.AT_MOST_ONCE, "topic1", 1, queueLimit), 100L, DISCARD, 0);
+                "client", false, createBigPublish(0, QoS.AT_MOST_ONCE, "topic1", 1, queueLimit), 100L, DISCARD, false,
+                0);
         persistence.add(
-                "group", true, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, 0);
+                "group", true, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, false, 0);
 
         verify(payloadPersistence).decrementReferenceCounter(1);
         verify(messageDroppedService).qos0MemoryExceededShared(eq("group"), eq("topic5"), eq(0), anyLong(), anyLong());
@@ -482,14 +486,14 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_read_new_expired_mixed_qos() {
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2), 10000L, 0);
@@ -504,20 +508,20 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_read_new_part_expired_qos0() {
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_MOST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_MOST_ONCE, 110, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2), 10000L, 0);
@@ -532,20 +536,20 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_read_new_part_expired_qos1() {
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_LEAST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_LEAST_ONCE, 110, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2), 10000L, 0);
@@ -560,20 +564,20 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_read_new_part_expired_qos2() {
         persistence.add(
                 "client1", false, createPublish(0, QoS.EXACTLY_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.EXACTLY_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         persistence.add(
                 "client2", false, createPublish(0, QoS.EXACTLY_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.EXACTLY_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.EXACTLY_ONCE, 110, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2, 3), 10000L, 0);
@@ -588,34 +592,34 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_read_new_part_expired_mixed_qos() {
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_MOST_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client2", false, createPublish(0, QoS.AT_LEAST_ONCE, 110, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
 
         persistence.add(
                 "client3", false, createPublish(0, QoS.EXACTLY_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client3", false, createPublish(0, QoS.EXACTLY_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client3", false, createPublish(0, QoS.EXACTLY_ONCE, 100, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client3", false, createPublish(0, QoS.EXACTLY_ONCE, 110, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> messages1 =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2, 3), 10000L, 0);
@@ -631,22 +635,22 @@ public class ClientQueueXodusLocalPersistenceTest {
 
     @Test
     public void test_clean_up() {
-        persistence.add("removed", false, createPublish(0, QoS.AT_LEAST_ONCE), 10, DISCARD, 0);
+        persistence.add("removed", false, createPublish(0, QoS.AT_LEAST_ONCE), 10, DISCARD, false, 0);
         persistence.clear("removed", false, 0);
 
         persistence.readNew("empty", false, ImmutableIntArray.of(1), 100000L, 0);
 
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
+                DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_LEAST_ONCE, "topic2"), 10, DISCARD, 0);
+                DISCARD, false, 0);
+        persistence.add("client1", false, createPublish(0, QoS.AT_LEAST_ONCE, "topic2"), 10, DISCARD, false, 0);
         persistence.add(
                 "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
-                DISCARD, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic2"), 10, DISCARD, 0);
+                DISCARD, false, 0);
+        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic2"), 10, DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> newMessages =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1), 10000L, 0);
@@ -665,9 +669,11 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_clean_up_shared() {
         persistence.add(
                 "name/topic1", true, createPublish(0, QoS.AT_LEAST_ONCE, 1000, System.currentTimeMillis()), 10, DISCARD,
+                false,
                 0);
         persistence.add(
                 "name/topic2", true, createPublish(1, QoS.AT_LEAST_ONCE, 1000, System.currentTimeMillis()), 10, DISCARD,
+                false,
                 0);
 
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
@@ -677,11 +683,11 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_overlapping_ids() {
 
-        persistence.add("id", false, createPublish(1, QoS.AT_LEAST_ONCE, "not_shared"), 10, DISCARD, 0);
-        persistence.add("id", false, createPublish(0, QoS.AT_MOST_ONCE, "not_shared"), 10, DISCARD, 0);
+        persistence.add("id", false, createPublish(1, QoS.AT_LEAST_ONCE, "not_shared"), 10, DISCARD, false, 0);
+        persistence.add("id", false, createPublish(0, QoS.AT_MOST_ONCE, "not_shared"), 10, DISCARD, false, 0);
 
-        persistence.add("id", true, createPublish(1, QoS.AT_LEAST_ONCE, "shared"), 10, DISCARD, 0);
-        persistence.add("id", true, createPublish(0, QoS.AT_MOST_ONCE, "shared"), 10, DISCARD, 0);
+        persistence.add("id", true, createPublish(1, QoS.AT_LEAST_ONCE, "shared"), 10, DISCARD, false, 0);
+        persistence.add("id", true, createPublish(0, QoS.AT_MOST_ONCE, "shared"), 10, DISCARD, false, 0);
 
         final ImmutableList<PUBLISH> notSharedMessages =
                 persistence.readNew("id", false, ImmutableIntArray.of(1, 2, 3), 10000L, 0);
@@ -704,7 +710,8 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_remove_shared() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("group/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add(
+                    "group/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         persistence.removeShared("group/topic", "hivemqId_pub_2", 0);
         final ImmutableList<PUBLISH> messages =
@@ -720,7 +727,8 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_remove_in_flight_marker() {
         for (int i = 0; i < 3; i++) {
-            persistence.add("group/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, 0);
+            persistence.add(
+                    "group/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
         }
         persistence.readNew("group/topic", true,
                 ImmutableIntArray.of(SHARED_IN_FLIGHT_MARKER, SHARED_IN_FLIGHT_MARKER, SHARED_IN_FLIGHT_MARKER),
@@ -740,9 +748,9 @@ public class ClientQueueXodusLocalPersistenceTest {
 
     @Test
     public void test_remove_all_qos_0_messages() {
-        persistence.add("client1", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic1", 1), 100L, DISCARD, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic2", 1), 100L, DISCARD, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic3", 1), 100L, DISCARD, 0);
+        persistence.add("client1", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic1", 1), 100L, DISCARD, false, 0);
+        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic2", 1), 100L, DISCARD, false, 0);
+        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic3", 1), 100L, DISCARD, false, 0);
 
         persistence.removeAllQos0Messages("client1", false, 0);
 
@@ -751,6 +759,118 @@ public class ClientQueueXodusLocalPersistenceTest {
         assertEquals(1, messages.size());
 
         verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong());
+    }
+
+    @Test
+    public void test_batched_add() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        for (int i = 0; i < 10; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 100, DISCARD, false, 0);
+
+        assertEquals(10, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+
+        assertEquals(10, all.size());
+        assertEquals("topic0", all.get(0).getTopic());
+        assertEquals("topic1", all.get(1).getTopic());
+    }
+
+    @Test
+    public void test_batched_add_discard() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        for (int i = 0; i < 10; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 5, DISCARD, false, 0);
+
+        assertEquals(5, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(5, all.size());
+        assertEquals("topic0", all.get(0).getTopic());
+        assertEquals("topic1", all.get(1).getTopic());
+    }
+
+    @Test
+    public void test_batched_add_discard_oldest() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+
+        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topicA"), 3, DISCARD_OLDEST, false, 0);
+        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topicB"), 3, DISCARD_OLDEST, false, 0);
+        persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topicC"), 3, DISCARD_OLDEST, false, 0);
+
+        for (int i = 0; i < 3; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 3, DISCARD_OLDEST, false, 0);
+
+        assertEquals(3, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(3, all.size());
+        assertEquals("topic0", all.get(0).getTopic());
+        assertEquals("topic1", all.get(1).getTopic());
+        assertEquals("topic2", all.get(2).getTopic());
+    }
+
+    @Test
+    public void test_batched_add_larger_than_queue_discard_oldest() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+
+        for (int i = 0; i < 6; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 3, DISCARD_OLDEST, false, 0);
+
+        assertEquals(3, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(3, all.size());
+        assertEquals("topic3", all.get(0).getTopic());
+        assertEquals("topic4", all.get(1).getTopic());
+        assertEquals("topic5", all.get(2).getTopic());
+    }
+
+    @Test
+    public void test_batched_drop_qos_0_memory_exceeded() {
+
+        final int queueLimit = (int) (Runtime.getRuntime().maxMemory() / 10000);
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        publishes.add(createBigPublish(0, QoS.AT_MOST_ONCE, "topic1", 1, queueLimit));
+        publishes.add(createBigPublish(1, QoS.AT_MOST_ONCE, "topic2", 2, queueLimit));
+        persistence.add("client", false, publishes.build(), 100L, DISCARD, false, 0);
+
+        verify(payloadPersistence).decrementReferenceCounter(1);
+        verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic2"), eq(0), anyLong(), anyLong());
+
+        assertEquals(1, persistence.size("client", false, 0));
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(1, all.size());
+    }
+
+    @Test
+    public void test_batched_add_retained_dont_discard() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        for (int i = 0; i < 10; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 5, DISCARD, true, 0);
+
+        assertEquals(10, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(10, all.size());
+        assertEquals("topic0", all.get(0).getTopic());
+        assertEquals("topic1", all.get(1).getTopic());
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos) {

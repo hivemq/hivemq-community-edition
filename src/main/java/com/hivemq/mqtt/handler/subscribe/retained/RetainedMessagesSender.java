@@ -35,6 +35,7 @@ import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.RetainedMessage;
+import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.channels.ClosedChannelException;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -69,20 +71,23 @@ public class RetainedMessagesSender {
     private final @NotNull HivemqId hiveMQId;
     private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence;
-    private final @NotNull MessageIDPools messageIDPools;
+    private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull PublishPollService publishPollService;
+    private final @NotNull MessageIDPools messageIDPools;
 
     @Inject
     public RetainedMessagesSender(
             final @NotNull HivemqId hiveMQId,
             final @NotNull PublishPayloadPersistence publishPayloadPersistence,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
+            final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull MessageIDPools messageIDPools,
             final @NotNull PublishPollService publishPollService) {
 
         this.hiveMQId = hiveMQId;
         this.publishPayloadPersistence = publishPayloadPersistence;
         this.retainedMessagePersistence = retainedMessagePersistence;
+        this.clientQueuePersistence = clientQueuePersistence;
         this.messageIDPools = messageIDPools;
         this.publishPollService = publishPollService;
     }
@@ -91,59 +96,77 @@ public class RetainedMessagesSender {
      * Writes out the retained message for a given topic to the given {@link io.netty.channel.Channel}
      * <p>
      *
-     * @param subscribedTopic the topic to get the retained message for. Must not include wildcards.
-     * @param channel         the channel to write the retained message to.
+     * @param subscribedTopics the topic to get the retained message for. Must not include wildcards.
+     * @param channel          the channel to write the retained message to.
      */
-    public @NotNull ListenableFuture<Void> writeRetainedMessage(
-            final @Nullable Topic subscribedTopic, final @NotNull Channel channel) {
+    public @NotNull ListenableFuture<Void> writeRetainedMessages(
+            final @NotNull Channel channel, final @Nullable Topic... subscribedTopics) {
 
-        if (subscribedTopic == null) {
+        if (subscribedTopics == null) {
             return Futures.immediateFuture(null);
         }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
-        final ListenableFuture<RetainedMessage> future = retainedMessagePersistence.get(subscribedTopic.getTopic());
+        final ImmutableList.Builder<ListenableFuture<RetainedMessage>> retainedMessageFutures = ImmutableList.builder();
+        for (final Topic topic : subscribedTopics) {
+            retainedMessageFutures.add(retainedMessagePersistence.get(topic.getTopic()));
+        }
+        // Futures.allAsList preserves the original order
+        final ListenableFuture<List<RetainedMessage>> retainedMessagesFuture =
+                Futures.allAsList(retainedMessageFutures.build());
+
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        Futures.addCallback(future, new SendRetainedMessageCallback(subscribedTopic, hiveMQId,
-                publishPayloadPersistence, messageIDPools, clientId, resultFuture, channel, publishPollService), channel.eventLoop());
+        Futures.addCallback(retainedMessagesFuture, new SendRetainedMessageCallback(subscribedTopics, hiveMQId,
+                publishPayloadPersistence, messageIDPools, clientId, resultFuture, channel, clientQueuePersistence,
+                publishPollService), channel.eventLoop());
 
         return resultFuture;
 
     }
 
-    private static class SendRetainedMessageCallback implements FutureCallback<RetainedMessage> {
-        private final @NotNull Topic subscribedTopic;
+    private static class SendRetainedMessageCallback implements FutureCallback<List<RetainedMessage>> {
+
+        private final @NotNull Topic[] subscribedTopics;
         private final @NotNull HivemqId hivemqId;
         private final @NotNull PublishPayloadPersistence payloadPersistence;
         private final @NotNull MessageIDPools messageIDPools;
         private final @NotNull String clientId;
         private final @NotNull SettableFuture<Void> resultFuture;
         private final @NotNull Channel channel;
+        private final @NotNull ClientQueuePersistence clientQueuePersistence;
         private final @NotNull PublishPollService publishPollService;
 
         SendRetainedMessageCallback(
-                final @NotNull Topic subscribedTopic,
+                final @NotNull Topic[] subscribedTopics,
                 final @NotNull HivemqId hivemqId,
                 final @NotNull PublishPayloadPersistence payloadPersistence,
                 final @NotNull MessageIDPools messageIDPools,
                 final @NotNull String clientId,
                 final @NotNull SettableFuture<Void> resultFuture,
                 final @NotNull Channel channel,
+                final @NotNull ClientQueuePersistence clientQueuePersistence,
                 final @NotNull PublishPollService publishPollService) {
 
-            this.subscribedTopic = subscribedTopic;
+            this.subscribedTopics = subscribedTopics;
             this.hivemqId = hivemqId;
             this.payloadPersistence = payloadPersistence;
             this.messageIDPools = messageIDPools;
             this.clientId = clientId;
             this.resultFuture = resultFuture;
             this.channel = channel;
+            this.clientQueuePersistence = clientQueuePersistence;
             this.publishPollService = publishPollService;
         }
 
         @Override
-        public void onSuccess(final @Nullable RetainedMessage retainedMessage) {
-            if (retainedMessage != null) {
+        public void onSuccess(final List<RetainedMessage> retainedMessages) {
+
+            final ImmutableList.Builder<PUBLISH> builder = ImmutableList.builder();
+            for (int i = 0; i < retainedMessages.size(); i++) {
+                // Topics and retained messages have the same order
+                final Topic subscribedTopic = subscribedTopics[i];
+                final RetainedMessage retainedMessage = retainedMessages.get(i);
+
                 final QoS qos = PublishUtil.getMinQoS(subscribedTopic.getQoS(), retainedMessage.getQos());
                 final ImmutableList<Integer> subscriptionIdentifier;
                 if (subscribedTopic.getSubscriptionIdentifier() != null) {
@@ -169,31 +192,50 @@ public class RetainedMessagesSender {
                         .withCorrelationData(retainedMessage.getCorrelationData())
                         .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
                         .withSubscriptionIdentifiers(subscriptionIdentifier);
-
-                //Message ID must not be zero for QoS 1 and 2
-                if (qos.getQosNumber() > 0) {
-                    try {
-                        final int messageId = messageIDPools.forClient(clientId).takeNextId();
-                        publishBuilder.withPacketIdentifier(messageId);
-                        sendOutMessage(publishBuilder.build());
-                    } catch (final NoMessageIdAvailableException e) {
-                        resultFuture.setException(e);
-                    }
-                } else {
-                    sendOutMessage(publishBuilder.build());
-                }
+                builder.add(publishBuilder.build());
 
             }
+            sendOutMessages(builder.build());
         }
 
-        private void sendOutMessage(final @NotNull PUBLISH publish) {
+        private void sendOutMessages(final @NotNull List<PUBLISH> publishs) {
             if (!channel.isActive()) {
-                payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                for (final PUBLISH publish : publishs) {
+                    payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                }
                 resultFuture.setException(CLOSED_CHANNEL_EXCEPTION);
                 return;
             }
-            log.trace("Sending retained message with topic [{}] for client [{}]", subscribedTopic, clientId);
+            if (log.isTraceEnabled()) {
+                for (final Topic topic : subscribedTopics) {
+                    log.trace("Sending retained message with topic [{}] for client [{}]", topic.getQoS(), clientId);
+                }
+            }
+            final ImmutableList.Builder<PUBLISH> builder = ImmutableList.builder();
+            final ImmutableList.Builder<ListenableFuture<Void>> futures = ImmutableList.builder();
+            for (final PUBLISH publish : publishs) {
+                if (publish.getQoS() == QoS.AT_MOST_ONCE) {
+                    futures.add(sendPublishDirectly(publish));
+                    continue;
+                }
+                builder.add(publish);
+            }
+            final ImmutableList<PUBLISH> qos1and2Messages = builder.build();
+            if (qos1and2Messages.isEmpty()) {
+                resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
+                return;
+            }
 
+            futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true));
+            resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
+            for (final PUBLISH publish : qos1and2Messages) {
+                // If the message was queued the reference count can be decremented directly
+                payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+            }
+        }
+
+        private ListenableFuture<Void> sendPublishDirectly(final @NotNull PUBLISH publish) {
+            final SettableFuture<Void> resultFuture = SettableFuture.create();
             final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
 
             Futures.addCallback(publishFuture, new FutureCallback<>() {
@@ -201,7 +243,8 @@ public class RetainedMessagesSender {
                 public void onSuccess(final @Nullable PublishStatus status) {
                     // remove PubRel from client queue
                     if (publish.getQoS() == QoS.EXACTLY_ONCE) {
-                        final ListenableFuture<Void> future = publishPollService.removeMessageFromQueue(clientId, publish.getPacketIdentifier());
+                        final ListenableFuture<Void> future =
+                                publishPollService.removeMessageFromQueue(clientId, publish.getPacketIdentifier());
                         FutureUtils.addExceptionLogger(future);
                         // check for new messages as the queue was not empty because of the PubRel
                         if (status != PublishStatus.NOT_CONNECTED) {
@@ -243,19 +286,31 @@ public class RetainedMessagesSender {
                 }
             }, MoreExecutors.directExecutor());
 
+            if (publish.getQoS() != QoS.AT_MOST_ONCE) {
+                try {
+                    publish.setPacketIdentifier(messageIDPools.forClient(clientId).takeNextId());
+                } catch (NoMessageIdAvailableException e) {
+                    resultFuture.setException(e);
+                }
+            }
             final ChannelInactiveHandler channelInactiveHandler = channel.pipeline().get(ChannelInactiveHandler.class);
-            final ChannelInactiveHandler.ChannelInactiveCallback channelInactiveCallback = new PublishChannelInactiveCallback(publishFuture);
+            final ChannelInactiveHandler.ChannelInactiveCallback channelInactiveCallback =
+                    new PublishChannelInactiveCallback(publishFuture);
             if (channelInactiveHandler != null) {
-                Futures.addCallback(publishFuture, new PublishStoredInPersistenceCallback(channelInactiveHandler, publish), MoreExecutors.directExecutor());
+                Futures.addCallback(
+                        publishFuture, new PublishStoredInPersistenceCallback(channelInactiveHandler, publish),
+                        MoreExecutors.directExecutor());
                 channelInactiveHandler.addCallback(publish.getUniqueId(), channelInactiveCallback);
             }
             if (!channel.isActive()) {
                 channelInactiveCallback.channelInactive();
-                return;
+                return resultFuture;
             }
 
-            final PublishWithFuture event = new PublishWithFuture(publish, publishFuture, publish.getPayloadId(), false, payloadPersistence);
+            final PublishWithFuture event =
+                    new PublishWithFuture(publish, publishFuture, publish.getPayloadId(), false, payloadPersistence);
             channel.pipeline().fireUserEventTriggered(event);
+            return resultFuture;
         }
 
         @Override

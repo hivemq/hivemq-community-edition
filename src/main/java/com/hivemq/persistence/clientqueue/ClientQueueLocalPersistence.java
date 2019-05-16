@@ -26,6 +26,8 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.LocalPersistence;
 
+import java.util.List;
+
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy;
 
 /**
@@ -35,22 +37,43 @@ import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMe
 public interface ClientQueueLocalPersistence extends LocalPersistence {
 
     /**
-     * Adds a PUBLISH to a client or shared subscription queue.
-     * If the size exceeds the queue limit, the given PUBLISH or the oldest PUBLISH in the queue will be dropped
-     * dependent on the queued messages strategy.
+     * Adds a PUBLISH to a client or shared subscription queue. If the size exceeds the queue limit, the given PUBLISH
+     * or the oldest PUBLISH in the queue will be dropped dependent on the queued messages strategy.
      *
      * @param queueId     for which the PUBLISH will be queued
      * @param shared      is true if the queueId is actually a shared subscription false if it is a client ID
      * @param publish     to be queued
      * @param max         maximum amount of messages queued for the client
      * @param strategy    how to discard messages in case the queue is full
+     * @param retained    true if this message was sent in response to a subscribe. Retained messages are not dropped
+     *                    when the queue reached the maximum queue size.
      * @param bucketIndex provided by the single writer
      */
-    void add(@NotNull String queueId, boolean shared, @NotNull PUBLISH publish, long max, @NotNull QueuedMessagesStrategy strategy, int bucketIndex);
+    void add(
+            @NotNull String queueId, boolean shared, @NotNull PUBLISH publish, long max,
+            @NotNull QueuedMessagesStrategy strategy, boolean retained, int bucketIndex);
 
     /**
-     * Returns a batch of PUBLISHes and marks them by setting packet identifiers.
-     * The size of the batch is limited by 2 factors:
+     * Adds a PUBLISH to a client or shared subscription queue. If the size exceeds the queue limit, the given PUBLISH
+     * or the oldest PUBLISH in the queue will be dropped dependent on the queued messages strategy.
+     *
+     * @param queueId     for which the PUBLISH will be queued
+     * @param shared      is true if the queueId is actually a shared subscription false if it is a client ID
+     * @param publishes   to be queued
+     * @param max         maximum amount of messages queued for the client
+     * @param strategy    how to discard messages in case the queue is full
+     * @param retained    true if this messages are sent in response to a subscribe. Retained messages are not dropped
+     *                    when the queue reached the maximum queue size. It is not necessarily the same as the retain
+     *                    flag of the publish.
+     * @param bucketIndex provided by the single writer
+     */
+    void add(
+            @NotNull String queueId, boolean shared, @NotNull List<PUBLISH> publishes, long max,
+            @NotNull QueuedMessagesStrategy strategy, boolean retained, int bucketIndex);
+
+    /**
+     * Returns a batch of PUBLISHes and marks them by setting packet identifiers. The size of the batch is limited by 2
+     * factors:
      * <li>
      * <ul>The count of PUBLISHes will be less than or equal to the size of the given packet id list</ul>
      * <ul>The estimated memory usage will be approximately less than or equal to the given bytes limit but never less
@@ -67,11 +90,13 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
      * @return a list of queued messages with the provided ID's
      */
     @NotNull
-    ImmutableList<PUBLISH> readNew(@NotNull String queueId, boolean shared, @NotNull ImmutableIntArray packetIds, long bytesLimit, int bucketIndex);
+    ImmutableList<PUBLISH> readNew(
+            @NotNull String queueId, boolean shared, @NotNull ImmutableIntArray packetIds, long bytesLimit,
+            int bucketIndex);
 
     /**
-     * Returns a batch of PUBLISHes that already have a packet identifier
-     * The size of the batch is limited by 2 factors:
+     * Returns a batch of PUBLISHes that already have a packet identifier The size of the batch is limited by 2
+     * factors:
      * <li>
      * <ul>The count of PUBLISHes will be less then or equal to the size of the given packet id list</ul>
      * <ul>The estimated memory usage will be approximately less than or equal to the given bytes limit</ul>
@@ -85,13 +110,13 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
      * @return a list of queued messages with the provided ID's
      */
     @NotNull
-    ImmutableList<MessageWithID> readInflight(@NotNull String client, boolean shared, int batchSize, long bytesLimit, int bucketIndex);
+    ImmutableList<MessageWithID> readInflight(
+            @NotNull String client, boolean shared, int batchSize, long bytesLimit, int bucketIndex);
 
     /**
      * Replaces the PUBLISH with the PUBREL with the same packet id.
      * <p>
-     * This method is not used for shared subscriptions.
-     * Because PUBRELs are not stored for shared subscriptions.
+     * This method is not used for shared subscriptions. Because PUBRELs are not stored for shared subscriptions.
      *
      * @param client      for which the PUBREL will replace a PUBLISH
      * @param pubrel      to be put
@@ -104,8 +129,7 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
     /**
      * Removes the PUBLISH or PUBREL with the given packet id.
      * <p>
-     * This method is not used for shared subscriptions.
-     * Because the shared subscription queue doesn't have packet IDs.
+     * This method is not used for shared subscriptions. Because the shared subscription queue doesn't have packet IDs.
      *
      * @param client      for which the message will be removed
      * @param packetId    for which the message will be removed
@@ -175,8 +199,7 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
     ImmutableSet<String> cleanUp(int bucketIndex);
 
     /**
-     * Remove a PUBLISH with a given unique ID.
-     * Messages with QoS 0 are not checked.
+     * Remove a PUBLISH with a given unique ID. Messages with QoS 0 are not checked.
      *
      * @param sharedSubscription for which the message is removed
      * @param uniqueId           of the message to remove
