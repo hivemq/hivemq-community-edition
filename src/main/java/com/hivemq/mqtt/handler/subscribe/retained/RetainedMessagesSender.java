@@ -228,10 +228,6 @@ public class RetainedMessagesSender {
 
             futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
-            for (final PUBLISH publish : qos1and2Messages) {
-                // If the message was queued the reference count can be decremented directly
-                payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
-            }
         }
 
         private ListenableFuture<Void> sendPublishDirectly(final @NotNull PUBLISH publish) {
