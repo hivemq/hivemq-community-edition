@@ -17,11 +17,14 @@
 package com.hivemq.mqtt.topic.tree;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableSet;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
+import com.hivemq.mqtt.topic.SubscriptionFlags;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -310,14 +313,14 @@ public class TestAddToTopicTreeImpl {
          */
         final Node testRootNode = topicTree.segments.get("test");
         assertEquals("test", testRootNode.getTopicPart());
-        assertEquals(1, testRootNode.getChildren().length);
+        assertEquals(1, testRootNode.getChildrenMap().size());
         assertNull(testRootNode.exactSubscriberMap);
         assertNull(testRootNode.wildcardSubscriberMap);
 
         /*
             test/+/test node
          */
-        final Node testWildcard = testRootNode.children[0];
+        final Node testWildcard = testRootNode.getChildrenMap().values().iterator().next();
         assertEquals("+", testWildcard.getTopicPart());
         assertEquals(1, testWildcard.getChildren().length);
         assertNull(testWildcard.exactSubscriberMap);
@@ -334,5 +337,16 @@ public class TestAddToTopicTreeImpl {
         assertEquals(true, testWildcardTestNode.exactSubscriberMap.values().contains(new SubscriberWithQoS("sub3", 0, (byte) 0, null, null, null)));
         assertNull(testWildcardTestNode.wildcardSubscriberMap);
 
+    }
+
+    @Test
+    public void test_topic_key_length() throws Exception {
+        final TopicTreeImpl topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree.addTopic("subscriber1", new Topic("topic1/1", QoS.AT_LEAST_ONCE), SubscriptionFlags.getDefaultFlags(false, false, false), null);
+        topicTree.addTopic("subscriber2", new Topic("topic1/+", QoS.AT_LEAST_ONCE), SubscriptionFlags.getDefaultFlags(false, true, true), null);
+        topicTree.addTopic("subscriber3", new Topic("+/1", QoS.AT_LEAST_ONCE), SubscriptionFlags.getDefaultFlags(false, false, false), null);
+
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("topic1/1");
+        assertEquals(3, subscribers.size());
     }
 }

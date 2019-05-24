@@ -280,13 +280,13 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         topicTree.addTopic("subscriber3", new Topic("topic/topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber4", new Topic("topic/topic3", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        assertEquals(3, topicTree.segments.get("topic").childrenIndex.size());
+        assertEquals(3, topicTree.segments.get("topic").getChildrenMap().size());
         topicTree.removeSubscriber("subscriber1", "topic/topic1", null);
-        assertEquals(3, topicTree.segments.get("topic").childrenIndex.size());
+        assertEquals(3, topicTree.segments.get("topic").getChildrenMap().size());
         topicTree.removeSubscriber("subscriber2", "topic/topic1", null);
-        assertEquals(2, topicTree.segments.get("topic").childrenIndex.size());
+        assertEquals(2, topicTree.segments.get("topic").getChildrenMap().size());
         topicTree.removeSubscriber("subscriber3", "topic/topic2", null);
-        assertEquals(1, topicTree.segments.get("topic").childrenIndex.size());
+        assertEquals(1, topicTree.segments.get("topic").getChildrenMap().size());
         topicTree.removeSubscriber("subscriber4", "topic/topic3", null);
         assertEquals(0, topicTree.segments.size());
     }
@@ -298,13 +298,13 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         topicTree.addTopic("subscriber3", new Topic("topic/topic1/part2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber4", new Topic("topic/topic1/part3", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        assertEquals(3, topicTree.segments.get("topic").children[0].childrenIndex.size());
+        assertEquals(3, topicTree.segments.get("topic").children[0].getChildrenMap().size());
         topicTree.removeSubscriber("subscriber1", "topic/topic1/part1", null);
-        assertEquals(3, topicTree.segments.get("topic").children[0].childrenIndex.size());
+        assertEquals(3, topicTree.segments.get("topic").children[0].getChildrenMap().size());
         topicTree.removeSubscriber("subscriber2", "topic/topic1/part1", null);
-        assertEquals(2, topicTree.segments.get("topic").children[0].childrenIndex.size());
+        assertEquals(2, topicTree.segments.get("topic").children[0].getChildrenMap().size());
         topicTree.removeSubscriber("subscriber3", "topic/topic1/part2", null);
-        assertEquals(1, topicTree.segments.get("topic").children[0].childrenIndex.size());
+        assertEquals(1, topicTree.segments.get("topic").children[0].getChildrenMap().size());
         topicTree.removeSubscriber("subscriber4", "topic/topic1/part3", null);
         assertEquals(0, topicTree.segments.size());
     }
