@@ -21,25 +21,30 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
-import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
+import com.hivemq.extension.sdk.api.services.general.IterationCallback;
+import com.hivemq.extension.sdk.api.services.subscription.*;
 import com.hivemq.extensions.ListenableFutureConverter;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.general.IterationContextImpl;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import com.hivemq.mqtt.topic.tree.SubscriptionTypeItemFilter;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.util.Topics;
-import com.hivemq.annotations.Nullable;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,12 +57,19 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
 
     private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence;
     private final @NotNull PluginServiceRateLimitService rateLimitService;
+    private final @NotNull LocalTopicTree topicTree;
+    private final @NotNull GlobalManagedPluginExecutorService managedExtensionExecutorService;
 
     @Inject
-    public SubscriptionStoreImpl(final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
-                                 final @NotNull PluginServiceRateLimitService rateLimitService) {
+    public SubscriptionStoreImpl(
+            final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
+            final @NotNull PluginServiceRateLimitService rateLimitService,
+            final @NotNull LocalTopicTree topicTree,
+            final @NotNull GlobalManagedPluginExecutorService managedExtensionExecutorService) {
         this.subscriptionPersistence = subscriptionPersistence;
         this.rateLimitService = rateLimitService;
+        this.topicTree = topicTree;
+        this.managedExtensionExecutorService = managedExtensionExecutorService;
     }
 
     @Override
@@ -199,6 +211,139 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
         return CompletableFuture.completedFuture(ClientSubscriptionsToTopicSubscriptions.INSTANCE.apply(subscriptionPersistence.getSubscriptions(clientID)));
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(final @NotNull String topic,
+                                                                          final @NotNull IterationCallback<SubscriberForTopicResult> callback) {
+        return iterateAllSubscribersForTopic(topic, SubscriptionType.ALL, callback, managedExtensionExecutorService);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(final @NotNull String topic,
+                                                                          final @NotNull SubscriptionType subscriptionType,
+                                                                          final @NotNull IterationCallback<SubscriberForTopicResult> callback) {
+        return iterateAllSubscribersForTopic(topic, subscriptionType, callback, managedExtensionExecutorService);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(final @NotNull String topic,
+                                                                          final @NotNull IterationCallback<SubscriberForTopicResult> callback,
+                                                                          final @NotNull Executor callbackExecutor) {
+        return iterateAllSubscribersForTopic(topic, SubscriptionType.ALL, callback, callbackExecutor);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(final @NotNull String topic,
+                                                                          final @NotNull SubscriptionType subscriptionType,
+                                                                          final @NotNull IterationCallback<SubscriberForTopicResult> callback,
+                                                                          final @NotNull Executor callbackExecutor) {
+
+        Preconditions.checkNotNull(topic, "Topic cannot be null");
+        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Preconditions.checkNotNull(callbackExecutor, "Executor cannot be null");
+        Preconditions.checkArgument(
+                Topics.isValidTopicToPublish(topic),
+                "Topic must be a valid topic and cannot contain wildcard characters, got '" + topic + "'");
+
+        final ImmutableSet<String> subscribers = topicTree.getSubscribersForTopic(topic, new SubscriptionTypeItemFilter(subscriptionType), false);
+
+        final CompletableFuture<Void> iterationFinishedFuture = new CompletableFuture<>();
+
+        callbackExecutor.execute(() -> {
+
+            final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+            final IterationContextImpl iterationContext = new IterationContextImpl();
+            try {
+                Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
+
+                for (final String subscriber : subscribers) {
+                    try {
+                        callback.iterate(iterationContext, new SubscriberForTopicResultImpl(subscriber));
+                        if (iterationContext.isAborted()) {
+                            iterationFinishedFuture.complete(null);
+                            return;
+                        }
+
+                    } catch (final Exception e) {
+                        iterationFinishedFuture.completeExceptionally(e);
+                        return;
+                    }
+                }
+                iterationFinishedFuture.complete(null);
+            } finally {
+                Thread.currentThread().setContextClassLoader(previousClassLoader);
+            }
+        });
+
+        return iterationFinishedFuture;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(final @NotNull String topicFilter,
+                                                                                 final @NotNull IterationCallback<SubscriberWithFilterResult> callback) {
+        return iterateAllSubscribersWithTopicFilter(
+                topicFilter, SubscriptionType.ALL, callback, managedExtensionExecutorService);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(final @NotNull String topicFilter,
+                                                                                 final @NotNull SubscriptionType subscriptionType,
+                                                                                 final @NotNull IterationCallback<SubscriberWithFilterResult> callback) {
+        return iterateAllSubscribersWithTopicFilter(
+                topicFilter, subscriptionType, callback, managedExtensionExecutorService);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(final @NotNull String topicFilter,
+                                                                                 final @NotNull IterationCallback<SubscriberWithFilterResult> callback,
+                                                                                 final @NotNull Executor callbackExecutor) {
+        return iterateAllSubscribersWithTopicFilter(topicFilter, SubscriptionType.ALL, callback, callbackExecutor);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(final @NotNull String topicFilter,
+                                                                                 final @NotNull SubscriptionType subscriptionType,
+                                                                                 final @NotNull IterationCallback<SubscriberWithFilterResult> callback,
+                                                                                 final @NotNull Executor callbackExecutor) {
+        Preconditions.checkNotNull(topicFilter, "Topic filter cannot be null");
+        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Preconditions.checkNotNull(callbackExecutor, "Executor cannot be null");
+        Preconditions.checkNotNull(subscriptionType, "SubscriptionType cannot be null");
+        Preconditions.checkArgument(Topics.isValidToSubscribe(topicFilter), "Topic filter must be a valid MQTT topic filter, got '" + topicFilter + "'");
+
+
+        final ImmutableSet<String> subscribers =
+                topicTree.getSubscribersWithFilter(topicFilter, new SubscriptionTypeItemFilter(subscriptionType));
+
+        final CompletableFuture<Void> iterationFinishedFuture = new CompletableFuture<>();
+        callbackExecutor.execute(() -> {
+
+            final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+            final IterationContextImpl iterationContext = new IterationContextImpl();
+            try {
+                Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
+
+                for (final String subscriber : subscribers) {
+                    try {
+                        callback.iterate(iterationContext, new SubscriberWithFilterResultImpl(subscriber));
+                        if (iterationContext.isAborted()) {
+                            iterationFinishedFuture.complete(null);
+                            return;
+                        }
+
+                    } catch (final Exception e) {
+                        iterationFinishedFuture.completeExceptionally(e);
+                        return;
+                    }
+                }
+                iterationFinishedFuture.complete(null);
+            } finally {
+                Thread.currentThread().setContextClassLoader(previousClassLoader);
+            }
+        });
+
+        return iterationFinishedFuture;
     }
 
     private static class ClientSubscriptionsToTopicSubscriptions implements Function<ImmutableSet<Topic>, Set<TopicSubscription>> {

@@ -711,6 +711,169 @@ public class TopicTreeImpl implements LocalTopicTree {
     @Override
     @NotNull
     public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(@NotNull final String group, @NotNull final String topicFilter) {
+        return getSubscriptionsByTopicFilter(topicFilter, subscriber -> {
+            return subscriber.isSharedSubscription()
+                    && subscriber.getSharedName() != null
+                    && subscriber.getSharedName().equals(group);
+        });
+    }
+
+    @Override
+    @NotNull
+    public ImmutableSet<String> getSubscribersWithFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
+        return createDistinctSubscriberIds(getSubscriptionsByTopicFilter(topicFilter, itemFilter));
+    }
+
+    @Override
+    public @NotNull ImmutableSet<String> getSubscribersForTopic(@NotNull final String topic, @NotNull final ItemFilter itemFilter, final boolean excludeRootLevelWildcard) {
+        checkNotNull(topic, "Topic must not be null");
+
+        final ImmutableSet.Builder<String> subscribers = ImmutableSet.builder();
+
+        //Root wildcard subscribers always match
+        if (!excludeRootLevelWildcard) {
+            for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
+                addAfterItemCallback(itemFilter, subscribers, rootWildcardSubscriber);
+            }
+        }
+
+        //This is a shortcut in case there are no nodes beside the root node
+        if (segments.isEmpty() || topic.isEmpty()) {
+            return subscribers.build();
+        }
+
+        final String[] topicPart = StringUtils.splitPreserveAllTokens(topic, '/');
+        final String segmentKey = topicPart[0];
+
+        final Lock lock = segmentLocks.get(segmentKey).readLock();
+        lock.lock();
+
+        try {
+            final Node firstSegmentNode = segments.get(segmentKey);
+            if (firstSegmentNode != null) {
+                traverseTreeWithFilter(firstSegmentNode, subscribers, topicPart, 0, itemFilter);
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        //We now have to traverse the wildcard node if something matches here
+        if (!excludeRootLevelWildcard) {
+
+            final Lock wildcardLock = segmentLocks.get("+").readLock();
+            wildcardLock.lock();
+
+            try {
+                final Node firstSegmentNode = segments.get("+");
+                if (firstSegmentNode != null) {
+                    traverseTreeWithFilter(firstSegmentNode, subscribers, topicPart, 0, itemFilter);
+                }
+            } finally {
+                wildcardLock.unlock();
+            }
+        }
+
+        return subscribers.build();
+    }
+
+
+    private void traverseTreeWithFilter(@NotNull final Node node, @NotNull final ImmutableSet.Builder<String> subscribers,
+                                        final String[] topicPart, final int depth, @NotNull final ItemFilter itemFilter) {
+
+        if (!topicPart[depth].equals(node.getTopicPart()) && !"+".equals(node.getTopicPart())) {
+            return;
+        }
+
+        if (node.wildcardSubscriberMap != null) {
+
+            for (final SubscriberWithQoS value : node.wildcardSubscriberMap.values()) {
+                addAfterItemCallback(itemFilter, subscribers, value);
+            }
+
+        } else {
+
+            final SubscriberWithQoS[] wcSubs = node.getWildcardSubscribers();
+            if (wcSubs != null) {
+                for (final SubscriberWithQoS wildcardSubscriber : wcSubs) {
+                    if (wildcardSubscriber != null) {
+                        addAfterItemCallback(itemFilter, subscribers, wildcardSubscriber);
+                    }
+                }
+            }
+        }
+
+        final boolean end = topicPart.length - 1 == depth;
+        if (end) {
+            if (NodeUtils.getExactSubscriberCount(node) > 0) {
+
+                if (node.exactSubscriberMap != null) {
+
+                    for (final SubscriberWithQoS value : node.exactSubscriberMap.values()) {
+                        addAfterItemCallback(itemFilter, subscribers, value);
+                    }
+
+                } else {
+
+                    if (node.getExactSubscribers() != null) {
+                        for (final SubscriberWithQoS subscriberWithQoS : node.getExactSubscribers()) {
+                            if (subscriberWithQoS != null) {
+                                addAfterItemCallback(itemFilter, subscribers, subscriberWithQoS);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (NodeUtils.getChildrenCount(node) == 0) {
+                return;
+            }
+
+
+            //if the node has an index, we can just use the index instead of traversing the whole node set
+            if (node.getChildrenMap() != null) {
+
+                //Get the exact node by the index
+                final Node matchingChildNode = getIndexForChildNode(topicPart[depth + 1], node);
+                //We also need to check if there is a wildcard node
+                final Node matchingWildcardNode = getIndexForChildNode("+", node);
+
+                if (matchingChildNode != null) {
+                    traverseTreeWithFilter(matchingChildNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+
+                if (matchingWildcardNode != null) {
+                    traverseTreeWithFilter(matchingWildcardNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+                //We can return without any further recursion because we found all matching nodes
+                return;
+            }
+
+            //The children are stored as array
+            final Node[] children = node.getChildren();
+            if (children == null) {
+                return;
+            }
+
+            for (final Node childNode : children) {
+                if (childNode != null) {
+                    traverseTreeWithFilter(childNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+            }
+        }
+    }
+
+    @NotNull
+    private ImmutableSet<String> createDistinctSubscriberIds(final ImmutableSet<SubscriberWithQoS> subscriptionsByFilters) {
+
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for (final SubscriberWithQoS subscription : subscriptionsByFilters) {
+            builder.add(subscription.getSubscriber());
+        }
+        return builder.build();
+    }
+
+    @NotNull
+    private ImmutableSet<SubscriberWithQoS> getSubscriptionsByTopicFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
         final ImmutableSet.Builder<SubscriberWithQoS> subscribers = ImmutableSet.builder();
         if (topicFilter.equals("#")) {
             for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
@@ -765,33 +928,53 @@ public class TopicTreeImpl implements LocalTopicTree {
             if (contents[contents.length - 1].equals("#")) {
                 if (node.wildcardSubscriberMap != null) {
                     for (final SubscriberWithQoS value : node.wildcardSubscriberMap.values()) {
-                        addSharedSubscription(subscribers, value, group);
+                        addAfterCallback(itemFilter, subscribers, value);
                     }
                 } else {
                     if (node.getWildcardSubscribers() == null) {
                         return subscribers.build();
                     }
                     for (final SubscriberWithQoS wildcardSubscriber : node.getWildcardSubscribers()) {
-                        addSharedSubscription(subscribers, wildcardSubscriber, group);
+                        addAfterCallback(itemFilter, subscribers, wildcardSubscriber);
                     }
                 }
             } else {
                 if (node.exactSubscriberMap != null) {
                     for (final SubscriberWithQoS value : node.exactSubscriberMap.values()) {
-                        addSharedSubscription(subscribers, value, group);
+                        addAfterCallback(itemFilter, subscribers, value);
                     }
                 } else {
                     if (node.getExactSubscribers() == null) {
                         return subscribers.build();
                     }
                     for (final SubscriberWithQoS exactSubscriber : node.getExactSubscribers()) {
-                        addSharedSubscription(subscribers, exactSubscriber, group);
+                        addAfterCallback(itemFilter, subscribers, exactSubscriber);
                     }
                 }
             }
             return subscribers.build();
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void addAfterCallback(@NotNull final ItemFilter itemFilter,
+                                  @NotNull final ImmutableSet.Builder<SubscriberWithQoS> subscribers,
+                                  @Nullable final SubscriberWithQoS subscriber) {
+        if (subscriber != null) {
+            if (itemFilter.checkItem(subscriber)) {
+                subscribers.add(subscriber);
+            }
+        }
+    }
+
+    private void addAfterItemCallback(@NotNull final ItemFilter itemFilter,
+                                      @NotNull final ImmutableSet.Builder<String> subscribers,
+                                      @Nullable final SubscriberWithQoS subscriber) {
+        if (subscriber != null) {
+            if (itemFilter.checkItem(subscriber)) {
+                subscribers.add(subscriber.getSubscriber());
+            }
         }
     }
 
@@ -816,20 +999,6 @@ public class TopicTreeImpl implements LocalTopicTree {
             }
         }
         return matchingSharedSubscription;
-    }
-
-    /**
-     * Add the subscriber to the set if the shared group matches.
-     */
-    private void addSharedSubscription(@NotNull final ImmutableSet.Builder<SubscriberWithQoS> subscribers, @Nullable final SubscriberWithQoS subscriber, @NotNull final String group) {
-        if (subscriber == null) {
-            return;
-        }
-        if (subscriber.isSharedSubscription()
-                && subscriber.getSharedName() != null
-                && subscriber.getSharedName().equals(group)) {
-            subscribers.add(subscriber);
-        }
     }
 
     /* *************
@@ -899,6 +1068,15 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
         return true;
     }
+
+    private interface IterateCallback {
+        /**
+         * @param subscriber the current subscriber
+         * @return true to continue the iteration, false to stop
+         */
+        boolean call(@NotNull final SubscriberWithQoS subscriber, @NotNull final String topic);
+    }
+
 
     public interface Condition {
 

@@ -18,13 +18,13 @@ package com.hivemq.extension.sdk.api.services.subscription;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
-import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
-import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
-import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
+import com.hivemq.extension.sdk.api.services.exception.*;
+import com.hivemq.extension.sdk.api.services.general.IterationCallback;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * This service allows extensions to manage the Subscriptions for client session programmatically.
@@ -49,7 +49,7 @@ public interface SubscriptionStore {
      *
      * @param clientID     The client for which the new subscription should be added.
      * @param subscription The subscription to which the client should be subscribed.
-     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscription was added
+     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscription was added by all cluster nodes.
      * @throws NullPointerException     If clientID or subscription is null.
      * @throws IllegalArgumentException If clientID is empty.
      * @since 4.0.0
@@ -132,5 +132,195 @@ public interface SubscriptionStore {
      */
     @NotNull CompletableFuture<Set<TopicSubscription>> getSubscriptions(@NotNull String clientID);
 
+    /**
+     * Iterate over all subscribers that have a subscription that matches the the passed topic.
+     * <p>
+     * This will iterate all subscribers including individual and shared subscriptions.
+     * To filter the result use the overloaded methods and pass a {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the {@link ManagedExtensionExecutorService} per default.
+     * Use the overloaded methods to pass a custom executor for the callback.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
+     * this method.
+     * <p>
+     *
+     * @param topic    the topic to check for (no wildcards allowed). Same topic that is used in a MQTT PUBLISH message
+     * @param callback a {@link IterationCallback} that is called for every returned result.
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException     if the passed topic or callback are null
+     * @throws IllegalArgumentException if the passed topic is not a valid topic or contains wildcards
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull IterationCallback<SubscriberForTopicResult> callback);
+
+    /**
+     * Iterate over all subscribers that have a subscription that matches the the passed topic.
+     * <p>
+     * This method will iterate all subscribers according to the passed {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the {@link ManagedExtensionExecutorService} per default.
+     * Use the overloaded methods to pass a custom executor for the callback.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
+     * this method.
+     * <p>
+     *
+     * @param topic            the topic to check for (no wildcards allowed). Same topic that is used in a MQTT PUBLISH
+     *                         message
+     * @param subscriptionType a {@link SubscriptionType} to filter only individual or shared subscriptions, or both.
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException     if the passed topic, subscriptionType or callback are null
+     * @throws IllegalArgumentException if the passed topic is not a valid topic or contains wildcards
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberForTopicResult> callback);
+
+
+    /**
+     * Iterate over all subscribers that have a subscription that matches the the passed topic.
+     * <p>
+     * This method will iterate all subscribers including individual and shared subscriptions.
+     * To filter the result use the overloaded methods and pass a {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the passed {@link Executor}
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
+     * this method.
+     * <p>
+     * @param topic            the topic to check for (no wildcards allowed). Same topic that is used in a MQTT PUBLISH
+     *                         message
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @param callbackExecutor a {@link Executor} in which the callback for each iteration is executed
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException     if the passed topic, subscriptionType or callback are null
+     * @throws IllegalArgumentException if the passed topic is not a valid topic or contains wildcards
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull IterationCallback<SubscriberForTopicResult> callback, @NotNull Executor callbackExecutor);
+
+    /**
+     * Iterate over all subscribers that have a subscription that matches the the passed topic.
+     * <p>
+     * This method will iterate all subscribers according to the passed {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the passed {@link Executor}
+     * If you want to collect the results of each execution of the callback in a collectio please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
+     * this method.
+     * <p>
+     *
+     * @param topic            the topic to check for (no wildcards allowed). Same topic that is used in a MQTT PUBLISH
+     *                         message
+     * @param subscriptionType a {@link SubscriptionType} to filter only individual or shared subscriptions, or both.
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @param callbackExecutor a {@link Executor} in which the callback for each iteration is executed
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException     if the passed topic, subscriptionType, callback or callbackExecutor are null
+     * @throws IllegalArgumentException if the passed topic is not a valid topic or contains wildcards
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberForTopicResult> callback, @NotNull Executor callbackExecutor);
+
+    /**
+     * Iterate over all subscribers that have a subscription that equals the passed topic filter.
+     * <p>
+     * This method will iterate all subscribers including individual and shared subscriptions.
+     * To filter the result use the overloaded methods and pass a {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the {@link ManagedExtensionExecutorService} per default.
+     * Use the overloaded methods to pass a custom executor for the callback.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
+     * this method.
+     * <p>
+     *
+     * @param topicFilter the topic filter to search for (wildcards allowed). Same topic that is used in a MQTT
+     *                    SUBSCRIBE
+     *                    message. Wildcards in the topic filter are not expanded, only exact matches are contained in
+     *                    the result.
+     * @param callback    a {@link IterationCallback} that is called for every returned result.
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException if the passed topicFilter or callback are null
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull IterationCallback<SubscriberWithFilterResult> callback);
+
+    /**
+     * Iterate over all subscribers that have a subscription that equals the passed topic filter.
+     * <p>
+     * This method will iterate all subscribers according to the passed {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the {@link ManagedExtensionExecutorService} per default.
+     * Use the overloaded methods to pass a custom executor for the callback.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe),  as the callback might be executed in another thread as the calling thread
+     * of this method.
+     * <p>
+     *
+     * @param topicFilter      the topic filter to search for (wildcards allowed). Same topic that is used in a MQTT
+     *                         SUBSCRIBE
+     *                         message. Wildcards in the topic filter are not expanded, only exact matches are contained
+     *                         in
+     *                         the result.
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @param subscriptionType a {@link SubscriptionType} to filter only individual or shared subscriptions, or both.
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException if the passed topicFilter, subscriptionType or callback are null
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberWithFilterResult> callback);
+
+    /**
+     * Iterate over all subscribers that have a subscription that equals the passed topic filter.
+     * <p>
+     * This method will iterate all subscribers including individual and shared subscriptions.
+     * To filter the result use the overloaded methods and pass a {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the passed {@link Executor}
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection,
+     * as the callback might be executed in another thread as the calling thread of this method.
+     * <p>
+     *
+     * @param topicFilter      the topic filter to search for (wildcards allowed). Same topic that is used in a MQTT
+     *                         SUBSCRIBE
+     *                         message. Wildcards in the topic filter are not expanded, only exact matches are contained
+     *                         in
+     *                         the result.
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @param callbackExecutor a {@link Executor} in which the callback for each iteration is executed
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException if the passed topicFilter, callback or callbackExecutor are null
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull IterationCallback<SubscriberWithFilterResult> callback, @NotNull Executor callbackExecutor);
+
+    /**
+     * Iterate over all subscribers that have a subscription that equals the passed topic filter.
+     * <p>
+     * This method will iterate all subscribers according to the passed {@link SubscriptionType}.
+     * <p>
+     * The callback is executed in the passed {@link Executor}
+     * If you want to collect the results of each execution of the callback in a collectio please make sure to use a
+     * concurrent collection,
+     * as the callback might be executed in another thread as the calling thread of this method.
+     * <p>
+     * nodes in the cluster have at least version 4.2.0
+     *
+     * @param topicFilter      the topic filter to search for (wildcards allowed). Same topic that is used in a MQTT
+     *                         SUBSCRIBE
+     *                         message. Wildcards in the topic filter are not expanded, only exact matches are contained
+     *                         in
+     *                         the result.
+     * @param subscriptionType a {@link SubscriptionType} to filter only individual or shared subscriptions, or both.
+     * @param callback         a {@link IterationCallback} that is called for every returned result.
+     * @param callbackExecutor a {@link Executor} in which the callback for each iteration is executed
+     * @return a {@link CompletableFuture} that is completed after all iterations are executed
+     * @throws NullPointerException if the passed topicFilter, subscriptionType, callback or callbackExecutor are null
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberWithFilterResult> callback, @NotNull Executor callbackExecutor);
+
 }
- 
