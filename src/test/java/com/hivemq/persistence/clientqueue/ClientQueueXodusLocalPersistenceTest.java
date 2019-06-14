@@ -41,8 +41,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy.DISCARD;
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy.DISCARD_OLDEST;
@@ -88,6 +90,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 .thenReturn(temporaryFolder.newFolder());
 
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
+        InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
 
         persistence = new ClientQueueXodusLocalPersistence(
                 payloadPersistence,
@@ -859,18 +862,57 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_batched_add_retained_dont_discard() {
         final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
         }
-        persistence.add("client", false, publishes.build(), 5, DISCARD, true, 0);
+        persistence.add("client", false, publishes.build(), 2, DISCARD, true, 0);
 
-        assertEquals(10, persistence.size("client", false, 0));
+        assertEquals(5, persistence.size("client", false, 0));
 
         final ImmutableList<PUBLISH> all =
                 persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
-        assertEquals(10, all.size());
+        assertEquals(5, all.size());
         assertEquals("topic0", all.get(0).getTopic());
         assertEquals("topic1", all.get(1).getTopic());
+    }
+
+    @Test
+    public void test_batched_add_retained_discard_over_retained_limit() {
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        for (int i = 0; i < 10; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 2, DISCARD, true, 0);
+
+        assertEquals(5, persistence.size("client", false, 0));
+
+        final ImmutableList<PUBLISH> all =
+                persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
+        assertEquals(5, all.size());
+        assertEquals("topic0", all.get(0).getTopic());
+        assertEquals("topic1", all.get(1).getTopic());
+    }
+
+    @Test
+    public void add_and_poll_mixture_retained() {
+        for (int i = 0; i < 12; i++) {
+            if (i % 2 == 0) {
+                persistence.add(
+                        "client", false, createPublish(1, QoS.EXACTLY_ONCE, "topic" + i), 5, DISCARD_OLDEST, false, 0);
+            } else {
+                persistence.add(
+                        "client", false, createPublish(1, QoS.EXACTLY_ONCE, "topic" + i), 5, DISCARD_OLDEST, true, 0);
+            }
+        }
+        final ImmutableList<PUBLISH> all = persistence.readNew(
+                "client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 10000L, 0);
+        assertEquals(10, persistence.size("client", false, 0));
+        assertEquals(10, all.size());
+
+        final Set<PUBLISH> notExpectedMessages = all.stream()
+                .filter(publish -> publish.getTopic().equals("10") || publish.getTopic().equals("11"))
+                .collect(Collectors.toSet());
+        assertTrue(notExpectedMessages.isEmpty());
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos) {
