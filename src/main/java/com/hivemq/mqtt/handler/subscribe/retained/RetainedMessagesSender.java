@@ -163,9 +163,15 @@ public class RetainedMessagesSender {
 
             final ImmutableList.Builder<PUBLISH> builder = ImmutableList.builder();
             for (int i = 0; i < retainedMessages.size(); i++) {
+                final RetainedMessage retainedMessage = retainedMessages.get(i);
+
+                //list can contain null entries
+                if (retainedMessage == null) {
+                    continue;
+                }
+
                 // Topics and retained messages have the same order
                 final Topic subscribedTopic = subscribedTopics[i];
-                final RetainedMessage retainedMessage = retainedMessages.get(i);
 
                 final QoS qos = PublishUtil.getMinQoS(subscribedTopic.getQoS(), retainedMessage.getQos());
                 final ImmutableList<Integer> subscriptionIdentifier;
