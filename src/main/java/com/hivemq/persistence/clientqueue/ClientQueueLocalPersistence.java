@@ -54,7 +54,7 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
             @NotNull QueuedMessagesStrategy strategy, boolean retained, int bucketIndex);
 
     /**
-     * Adds a PUBLISH to a client or shared subscription queue. If the size exceeds the queue limit, the given PUBLISH
+     * Adds a list of PUBLISHes to a client or shared subscription queue. If the size exceeds the queue limit, the given PUBLISH
      * or the oldest PUBLISH in the queue will be dropped dependent on the queued messages strategy.
      *
      * @param queueId     for which the PUBLISH will be queued

@@ -55,7 +55,7 @@ public interface ClientQueuePersistence {
     ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull PUBLISH publish, boolean retained);
 
     /**
-     * Add a publishes to the queue.
+     * Add a list of publishes to the queue.
      * The publishes will be queued without packet IDs
      *
      * @param queueId   of the queue
