@@ -16,7 +16,9 @@
 
 package com.hivemq.util;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.persistence.util.BatchedException;
 import org.junit.Test;
 
 import javax.net.ssl.SSLException;
@@ -72,6 +74,16 @@ public class ExceptionsTest {
         assertTrue(Exceptions.isConnectionClosedException(new IOException()));
 
         assertFalse(Exceptions.isConnectionClosedException(new RuntimeException()));
+    }
+
+    @Test
+    public void test_is_connection_closed_exception_batched() throws Exception {
+        final BatchedException batchedException1 = new BatchedException(
+                ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
+        assertTrue(Exceptions.isConnectionClosedException(batchedException1));
+        final BatchedException batchedException2 = new BatchedException(ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
+        assertFalse(Exceptions.isConnectionClosedException(batchedException2));
+
     }
 
     private static RuntimeException getNestedThrowable(final int nest, final Throwable nested) {

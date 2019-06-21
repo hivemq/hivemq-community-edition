@@ -17,12 +17,13 @@
 package com.hivemq.util;
 
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.persistence.util.BatchedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
+import java.util.Collection;
 
 /**
  * Various utilities for dealing with Exceptions
@@ -33,10 +34,8 @@ public class Exceptions {
 
     private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
 
-
     /**
-     * Throwables are rethrown if they are an error.
-     * Otherwise they will just be logged.
+     * Throwables are rethrown if they are an error. Otherwise they will just be logged.
      *
      * @param throwable the throwable to guard HiveMQ from
      */
@@ -78,12 +77,24 @@ public class Exceptions {
     }
 
     /**
-     * Checks if a throwable is an IOException.
+     * Checks if a throwable is an IOException or a BatchedException that contains ClosedChannelException only.
      *
      * @param throwable to check
      * @return true if the exception is an IOException
      */
     public static boolean isConnectionClosedException(final Throwable throwable) {
-        return throwable instanceof IOException;
+        if (throwable instanceof IOException) {
+            return true;
+        }
+        if (throwable instanceof BatchedException) {
+            final Collection<Throwable> throwables = ((BatchedException) throwable).getThrowables();
+            for (final Throwable inner : throwables) {
+                if (!(inner instanceof ClosedChannelException)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

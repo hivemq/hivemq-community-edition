@@ -73,7 +73,8 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
                     log.trace("Retrying retained message for client '{}' on topic '{}'.",
                             channel.attr(ChannelAttributes.CLIENT_ID).get(), subscription.getTopic());
                 }
-                final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessage(subscription, channel);
+                final ListenableFuture<Void> sentFuture =
+                        retainedMessagesSender.writeRetainedMessages(channel, subscription);
                 Futures.addCallback(sentFuture, this, channel.eventLoop());
             }, 1, TimeUnit.SECONDS);
 

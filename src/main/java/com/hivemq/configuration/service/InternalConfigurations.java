@@ -94,6 +94,9 @@ public class InternalConfigurations {
     // The amount of bytes that are polled per batch
     public static final int PUBLISH_POLL_BATCH_MEMORY = 1024 * 1024 * 5; // 5Mb
 
+    // The amount of qos > 0 retained messages that are queued
+    public static final AtomicInteger RETAINED_MESSAGE_QUEUE_SIZE = new AtomicInteger(100_000);
+
     /* ************************
      *   Payload Persistence  *
      **************************/
