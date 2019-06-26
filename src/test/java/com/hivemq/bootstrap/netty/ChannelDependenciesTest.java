@@ -25,6 +25,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.extensions.handler.PluginInitializerHandler;
+import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -159,6 +160,8 @@ public class ChannelDependenciesTest {
     @Mock
     private IncomingSubscribeHandler incomingSubscribeHandler;
 
+    @Mock
+    private PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -197,7 +200,8 @@ public class ChannelDependenciesTest {
                 () -> clientLifecycleEventHandler,
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
-                () -> publishMessageExpiryHandler);
+                () -> publishMessageExpiryHandler,
+                publishOutboundInterceptorHandler);
 
     }
 

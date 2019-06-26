@@ -16,12 +16,13 @@
 
 package com.hivemq.extension.sdk.api.client;
 
-import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
-import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 
 import java.util.List;
 
@@ -55,6 +56,25 @@ public interface ClientContext {
      */
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
 
+
+    /**
+     * Adds an {@link PublishOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
+     * @since 4.2.0
+     */
+    void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
+
+    /**
+     * Removes an {@link PublishOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
+     * @since 4.2.0
+     */
+    void removePublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
+
     /**
      * Returns all {@link Interceptor} which are registered for this client.
      *
@@ -72,6 +92,15 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptors();
+
+    /**
+     * Returns all {@link PublishOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of PublishOutboundInterceptors for this client.
+     * @since 4.2.0
+     */
+    @Immutable
+    @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every

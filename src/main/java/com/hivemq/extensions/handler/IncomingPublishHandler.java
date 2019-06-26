@@ -166,6 +166,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
 
             //disabled extension would be null
             if (plugin == null) {
+                interceptorContext.increment();
                 continue;
             }
 
@@ -352,7 +353,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 }
             }
 
-            messageDroppedService.inboundPublishIntercepted(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
+            messageDroppedService.extensionPrevented(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
         }
 
         @Override

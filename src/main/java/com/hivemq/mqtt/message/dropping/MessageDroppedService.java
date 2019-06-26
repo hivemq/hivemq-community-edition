@@ -45,9 +45,9 @@ public interface MessageDroppedService {
     void notWritable(final String clientId, final String topic, final int qos);
 
     /**
-     * Update the metrics if a PUBLISH was dropped because a inbound publish interceptor prevented onward delivery.
+     * Update the metrics if a PUBLISH was dropped because an extension prevented onward delivery.
      */
-    void inboundPublishIntercepted(final String clientId, final String topic, final int qos);
+    void extensionPrevented(final String clientId, final String topic, final int qos);
 
     /**
      * Update the metrics if a message was dropped because of an internal error
