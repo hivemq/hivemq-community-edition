@@ -28,6 +28,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
+import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
@@ -689,6 +690,31 @@ public class SubscriptionStoreImplTest {
         //test checks if the future does return with an exception if an exception is thrown in the iterate callback
         future.get();
     }
+
+    @Test(timeout = 10000, expected = RateLimitExceededException.class)
+    public void test_iterate_topic_filter_rate_limit_exceeded() throws Throwable {
+        when(rateLimitService.rateLimitExceeded()).thenReturn(true);
+
+        try {
+            subscriptionStore.iterateAllSubscribersWithTopicFilter("topic/#", (context, value) -> {
+            }).get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test(timeout = 10000, expected = RateLimitExceededException.class)
+    public void test_iterate_topic_rate_limit_exceeded() throws Throwable {
+        when(rateLimitService.rateLimitExceeded()).thenReturn(true);
+
+        try {
+            subscriptionStore.iterateAllSubscribersForTopic("topic", (context, value) -> {
+            }).get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
 
     private static class TestSubscriptionImpl implements TopicSubscription {
 
