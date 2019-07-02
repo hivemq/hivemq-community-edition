@@ -349,12 +349,6 @@ public class ModifiableOutboundPublishImplTest {
         assertTrue(modifiableOutboundPublish.isModified());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_Retain_not_available() {
-
-        modifiableOutboundPublish.setRetain(true);
-    }
-
     @Test
     public void test_change_UserProperties_modifies_packet() {
 
