@@ -23,13 +23,12 @@ import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiableOutboundPublish;
-import com.hivemq.extension.sdk.api.packets.publish.ModifiablePublishPacket;
 
 import java.time.Duration;
 
 /**
- * This is the output parameter of any {@link PublishOutboundInterceptor}
- * providing methods to define the outcome of PUBLISH interception.
+ * This is the output parameter of any {@link PublishOutboundInterceptor} providing methods to define the outcome of
+ * PUBLISH interception.
  * <p>
  * It can be used to
  * <ul>
@@ -60,16 +59,16 @@ public interface PublishOutboundOutput extends AsyncOutput<PublishOutboundOutput
     void preventPublishDelivery();
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled either as failed or
+     * successful, depending on the specified fallback.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
-     * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then the publish will be delivered.
-     *                        If the fallback is FAILURE then the publish will be dropped.
+     * @param timeoutFallback Fallback behaviour if a timeout occurs. If the fallback is SUCCESS then the publish will
+     *                        be delivered. If the fallback is FAILURE then the publish will be dropped.
      * @throws UnsupportedOperationException If async is called more than once.
+     * @throws NullPointerException          If timeout or timeoutFallback is null.
      * @since 4.2.0
      */
     @NotNull Async<PublishOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback);

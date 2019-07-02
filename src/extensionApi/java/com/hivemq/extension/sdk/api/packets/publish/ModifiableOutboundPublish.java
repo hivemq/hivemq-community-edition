@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * A copy of an {@link PublishPacket} that can be modified for onward delivery. Most changes to the parameters will only
+ * A {@link PublishPacket} that can be modified for onward delivery. Most changes to the parameters will only
  * alter the message that is sent to the subscriber but not the way HiveMQ is handling the original publish message. For
  * example a message will not be stored as a retained message if it wasn't sent as such. For behavioral changes to the
  * message handling use the {@link com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor}
@@ -41,7 +41,6 @@ public interface ModifiableOutboundPublish extends PublishPacket {
      * merely alters the retained flag sent to the subscriber.
      *
      * @param retain The new retain flag for the publish.
-     * @throws IllegalArgumentException If set to true and retained messages are disabled by HiveMQ.
      * @since 4.2.0
      */
     void setRetain(boolean retain);

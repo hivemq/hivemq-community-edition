@@ -23,6 +23,7 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiableOutboundPublish;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -43,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Lukas Brandl
  * @since 4.2.0
  */
+@ThreadSafe
 public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish {
 
     private final @NotNull PUBLISH publish;
@@ -93,12 +95,9 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setRetain(final boolean retain) {
-        if (!mqttConfigurationService.retainedMessagesEnabled() && retain) {
-            throw new IllegalArgumentException("Retained messages are disabled");
-        }
+    public synchronized void setRetain(final boolean retain) {
         if (retain == this.retain) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.retain = retain;
@@ -106,7 +105,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setTopic(final @NotNull String topic) {
+    public synchronized void setTopic(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
         checkArgument(topic.length() <= restrictionsConfigurationService.maxTopicLength(), "Topic filter length must not exceed '" + restrictionsConfigurationService.maxTopicLength() + "' characters, but has '" + topic.length() + "' characters");
 
@@ -119,7 +118,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         }
 
         if (topic.equals(this.topic)) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.topic = topic;
@@ -127,9 +126,9 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setPayloadFormatIndicator(final @Nullable PayloadFormatIndicator payloadFormatIndicator) {
+    public synchronized void setPayloadFormatIndicator(final @Nullable PayloadFormatIndicator payloadFormatIndicator) {
         if (payloadFormatIndicator == this.payloadFormatIndicator) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.payloadFormatIndicator = payloadFormatIndicator;
@@ -137,10 +136,10 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setMessageExpiryInterval(final long messageExpiryInterval) {
+    public synchronized void setMessageExpiryInterval(final long messageExpiryInterval) {
         PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
         if (messageExpiryInterval == this.messageExpiryInterval) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.messageExpiryInterval = messageExpiryInterval;
@@ -148,10 +147,10 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setResponseTopic(final @Nullable String responseTopic) {
+    public synchronized void setResponseTopic(final @Nullable String responseTopic) {
         PluginBuilderUtil.checkResponseTopic(responseTopic, securityConfigurationService.validateUTF8());
 
-        //deny unnecessary change
+        //ignore unnecessary change
         if (responseTopic != null && responseTopic.equals(this.responseTopic)) {
             return;
         }
@@ -163,8 +162,8 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setCorrelationData(final @Nullable ByteBuffer correlationData) {
-        //deny unnecessary change
+    public synchronized void setCorrelationData(final @Nullable ByteBuffer correlationData) {
+        //ignore unnecessary change
         if (correlationData != null && correlationData.equals(this.correlationData)) {
             return;
         }
@@ -176,10 +175,10 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setContentType(final @Nullable String contentType) {
+    public synchronized void setContentType(final @Nullable String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
 
-        //deny unnecessary change
+        //ignore unnecessary change
         if (contentType != null && contentType.equals(this.contentType)) {
             return;
         }
@@ -191,10 +190,10 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setPayload(final @NotNull ByteBuffer payload) {
+    public synchronized void setPayload(final @NotNull ByteBuffer payload) {
         Preconditions.checkNotNull(payload, "payload must never be null");
         if (payload.equals(this.payload)) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.payload = payload;
@@ -202,7 +201,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public void setSubscriptionIdentifiers(final @NotNull List<@NotNull Integer> subscriptionIdentifiers) {
+    public synchronized void setSubscriptionIdentifiers(final @NotNull List<@NotNull Integer> subscriptionIdentifiers) {
         checkNotNull(subscriptionIdentifiers, "Subscription identifiers must not be null null");
         for (final Integer subscriptionIdentifier : subscriptionIdentifiers) {
             checkNotNull(subscriptionIdentifier, "At least one element of the subscription identifiers was null");
