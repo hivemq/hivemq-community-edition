@@ -191,7 +191,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
 
     @Override
     public synchronized void setPayload(final @NotNull ByteBuffer payload) {
-        Preconditions.checkNotNull(payload, "payload must never be null");
+        Preconditions.checkNotNull(payload, "Payload must never be null");
         if (payload.equals(this.payload)) {
             //ignore unnecessary change
             return;

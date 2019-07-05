@@ -43,7 +43,7 @@ import java.time.Duration;
 public interface PublishOutboundOutput extends AsyncOutput<PublishOutboundOutput> {
 
     /**
-     * Use this object to make any changes to the inbound PUBLISH.
+     * Use this object to make any changes to the outbound PUBLISH.
      *
      * @return A modifiable publish packet.
      * @since 4.2.0

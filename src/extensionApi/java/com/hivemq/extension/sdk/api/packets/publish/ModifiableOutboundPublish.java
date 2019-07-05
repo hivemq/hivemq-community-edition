@@ -60,6 +60,7 @@ public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
      * Sets the payload format indicator.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param payloadFormatIndicator The new payload format indicator for the publish.
      * @since 4.2.0
@@ -69,6 +70,7 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     /**
      * Sets the message expiry interval. The original expire interval for this message will still be used, only the
      * value sent to the client is changed.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param messageExpiryInterval The new message expiry interval for the publish.
      * @throws IllegalArgumentException If the message expiry interval is less than zero or more than the configured
@@ -79,6 +81,7 @@ public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
      * Sets the response topic.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param responseTopic The new response topic for the publish.
      * @throws IllegalArgumentException If the response topic is not a valid UTF-8 string.
@@ -89,6 +92,7 @@ public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
      * Sets the correlation data.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param correlationData The new correlation data for the publish.
      * @since 4.2.0
@@ -97,6 +101,7 @@ public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
      * Sets the content type.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param contentType The new content type for the publish.
      * @throws IllegalArgumentException If the content type is not a valid UTF-8 string.
@@ -117,8 +122,9 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     /**
      * Set the subscription identifier. This will not affect the identifiers of the original subscription, it merely
      * alters the outgoing publish.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @param subscriptionIdentifiers The new subscription identifiers for the publish
+     * @param subscriptionIdentifiers The new subscription identifiers for the publish.
      * @throws NullPointerException If the subscription identifiers list is null.
      * @throws NullPointerException If one ore more of the entries are null.
      * @since 4.2.0
