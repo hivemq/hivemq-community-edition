@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
+import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
@@ -55,19 +56,22 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
     private final @NotNull EventRegistry eventRegistry;
 
     private final @NotNull ClusterService clusterService;
+    private final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry;
 
     @Inject
-    public PluginServicesDependenciesImpl(final @NotNull MetricRegistry metricRegistry,
-                                          final @NotNull InitializerRegistry initializerRegistry,
-                                          final @NotNull RetainedMessageStore retainedMessageStore,
-                                          final @NotNull ClientService clientService,
-                                          final @NotNull SubscriptionStore subscriptionStore,
-                                          final @NotNull GlobalManagedPluginExecutorService globalManagedPluginExecutorService,
-                                          final @NotNull PublishService publishService,
+    public PluginServicesDependenciesImpl(
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull InitializerRegistry initializerRegistry,
+            final @NotNull RetainedMessageStore retainedMessageStore,
+            final @NotNull ClientService clientService,
+            final @NotNull SubscriptionStore subscriptionStore,
+            final @NotNull GlobalManagedPluginExecutorService globalManagedPluginExecutorService,
+            final @NotNull PublishService publishService,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-                                          final @NotNull SecurityRegistry securityRegistry,
-                                          final @NotNull EventRegistry eventRegistry,
-                                          final @NotNull ClusterService clusterService) {
+            final @NotNull SecurityRegistry securityRegistry,
+            final @NotNull EventRegistry eventRegistry,
+            final @NotNull ClusterService clusterService,
+            final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry) {
         this.metricRegistry = metricRegistry;
         this.publishService = publishService;
         this.securityRegistry = securityRegistry;
@@ -79,6 +83,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
         this.hiveMQExtensions = hiveMQExtensions;
         this.eventRegistry = eventRegistry;
         this.clusterService = clusterService;
+        this.globalInterceptorRegistry = globalInterceptorRegistry;
     }
 
     @NotNull
@@ -97,6 +102,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
         builder.put(ManagedExtensionExecutorService.class.getCanonicalName(), getManagedExecutorService(classLoader));
         builder.put(EventRegistry.class.getCanonicalName(), eventRegistry);
         builder.put(ClusterService.class.getCanonicalName(), clusterService);
+        builder.put(GlobalInterceptorRegistry.class.getCanonicalName(), globalInterceptorRegistry);
 
         return builder.build();
     }

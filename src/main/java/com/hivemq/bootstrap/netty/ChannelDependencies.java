@@ -25,6 +25,7 @@ import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
+import com.hivemq.extensions.handler.ConnectInterceptorHandler;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
@@ -159,6 +160,9 @@ public class ChannelDependencies {
     @NotNull
     private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
 
+    @NotNull
+    private final ConnectInterceptorHandler connectInterceptorHandler;
+
     @Inject
     public ChannelDependencies(
             @NotNull final Provider<MetricsInitializer> statisticsInitializer,
@@ -193,7 +197,8 @@ public class ChannelDependencies {
             @NotNull final Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
-            @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler) {
+            @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
+            @NotNull final ConnectInterceptorHandler connectInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -229,6 +234,7 @@ public class ChannelDependencies {
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
+        this.connectInterceptorHandler = connectInterceptorHandler;
     }
 
     @NotNull
@@ -394,5 +400,10 @@ public class ChannelDependencies {
     @NotNull
     public PublishOutboundInterceptorHandler getPublishOutboundInterceptorHandler() {
         return publishOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public ConnectInterceptorHandler getConnectInterceptorHandler() {
+        return connectInterceptorHandler;
     }
 }

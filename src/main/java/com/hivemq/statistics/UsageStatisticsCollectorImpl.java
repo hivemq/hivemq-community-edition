@@ -67,7 +67,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
                                         final @NotNull FullConfigurationService fullConfigurationService,
                                         final @NotNull MetricsHolder metricsHolder,
                                         final @NotNull HivemqId hivemqId,
-            final @NotNull HiveMQExtensions hiveMQExtensions) {
+                                        final @NotNull HiveMQExtensions hiveMQExtensions) {
 
         this.systemInformation = systemInformation;
         this.fullConfigurationService = fullConfigurationService;

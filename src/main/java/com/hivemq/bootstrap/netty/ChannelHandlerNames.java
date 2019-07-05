@@ -105,12 +105,13 @@ public class ChannelHandlerNames {
     public static final String STOP_READING_AFTER_CONNECT_HANDLER = "stop_reading_after_connect_handler";
 
     /* *************
-     *   Plugins   *
+     *   Extensions   *
      ***************/
 
     public static final String PLUGIN_INITIALIZER_HANDLER = "plugin_initializer_handler";
     public static final String CLIENT_LIFECYCLE_EVENT_HANDLER = "client_lifecycle_event_handler";
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
+    public static final String CONNECT_INTERCEPTOR_HANDLER = "connect_interceptor_handler";
 
     /* *************
      *     Misc    *

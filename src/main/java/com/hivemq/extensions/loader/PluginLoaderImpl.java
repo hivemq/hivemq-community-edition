@@ -65,10 +65,11 @@ public class PluginLoaderImpl implements PluginLoader {
 
     @Inject
     @VisibleForTesting
-    public PluginLoaderImpl(@NotNull final ClassServiceLoader serviceLoader,
+    public PluginLoaderImpl(
+            @NotNull final ClassServiceLoader serviceLoader,
             @NotNull final HiveMQExtensions hiveMQExtensions,
-                            @NotNull final HiveMQPluginFactory hiveMQPluginFactory,
-                            @NotNull final PluginStaticInitializer staticInitializer) {
+            @NotNull final HiveMQPluginFactory hiveMQPluginFactory,
+            @NotNull final PluginStaticInitializer staticInitializer) {
         this.serviceLoader = serviceLoader;
         this.hiveMQExtensions = hiveMQExtensions;
         this.hiveMQPluginFactory = hiveMQPluginFactory;
@@ -137,7 +138,8 @@ public class PluginLoaderImpl implements PluginLoader {
                 //We are creating an isolated extension classloader for each extension.
                 final URL[] classpath = {pluginFileUrl};
 
-                final IsolatedPluginClassloader pluginClassloader = new IsolatedPluginClassloader(classpath, getClass().getClassLoader());
+                final IsolatedPluginClassloader pluginClassloader =
+                        new IsolatedPluginClassloader(classpath, getClass().getClassLoader());
 
                 pluginClassloader.loadClassesWithStaticContext();
 
@@ -145,9 +147,12 @@ public class PluginLoaderImpl implements PluginLoader {
                     return Optional.empty();
                 }
 
-                final Iterable<Class<? extends T>> allPluginModuleStartingPoints = serviceLoader.load(desiredPluginClass, pluginClassloader);
+                final Iterable<Class<? extends T>> allPluginModuleStartingPoints =
+                        serviceLoader.load(desiredPluginClass, pluginClassloader);
                 if (Iterables.size(allPluginModuleStartingPoints) > 1) {
-                    log.warn("Extension {} contains more than one implementation of ExtensionMain. The extension will be disabled.", pluginFileUrl.toString());
+                    log.warn(
+                            "Extension {} contains more than one implementation of ExtensionMain. The extension will be disabled.",
+                            pluginFileUrl.toString());
                     return Optional.empty();
                 }
                 for (final Class<? extends ExtensionMain> startingPoint : allPluginModuleStartingPoints) {
@@ -157,14 +162,19 @@ public class PluginLoaderImpl implements PluginLoader {
 
             for (final Class<? extends ExtensionMain> implementation : allImplementations.build()) {
                 if (type.getRawType().isAssignableFrom(implementation)) {
-                    @SuppressWarnings("unchecked") final Class<? extends T> pluginClass = (Class<? extends T>) implementation;
+                    @SuppressWarnings("unchecked") final Class<? extends T> pluginClass =
+                            (Class<? extends T>) implementation;
                     desiredPlugins.add(pluginClass);
                 } else {
-                    log.debug("Extension {} is not a {} Extension and will be ignored", implementation.getName(), type.getRawType().getName());
+                    log.debug(
+                            "Extension {} is not a {} Extension and will be ignored", implementation.getName(),
+                            type.getRawType().getName());
                 }
             }
         } catch (final IOException | ClassNotFoundException | SecurityException e) {
-            log.error("An error occurred while searching the implementations for the extension {}. The extension will be disabled. {} : {}", pluginId, e.getClass().getSimpleName(), e.getMessage());
+            log.error(
+                    "An error occurred while searching the implementations for the extension {}. The extension will be disabled. {} : {}",
+                    pluginId, e.getClass().getSimpleName(), e.getMessage());
             return Optional.empty();
         }
 
@@ -175,19 +185,24 @@ public class PluginLoaderImpl implements PluginLoader {
         }
 
         if (desired.size() == 0) {
-            log.warn("No implementation of the interface ExtensionMain found in the extension with id \"{}\". The extension will be disabled.", pluginId);
+            log.warn(
+                    "No implementation of the interface ExtensionMain found in the extension with id \"{}\". The extension will be disabled.",
+                    pluginId);
             return Optional.empty();
         }
-        log.error("More than one implementation of the interface ExtensionMain found in extension with id {}, this interface can only be implemented once. The extension will be disabled.", pluginId);
+        log.error(
+                "More than one implementation of the interface ExtensionMain found in extension with id {}, this interface can only be implemented once. The extension will be disabled.",
+                pluginId);
         return Optional.empty();
     }
 
-
     @VisibleForTesting
     @Nullable
-    public <T extends ExtensionMain> HiveMQPluginEvent processSinglePluginFolder(@NotNull final Path pluginFolder, @NotNull final Class<T> desiredClass) {
+    public <T extends ExtensionMain> HiveMQPluginEvent processSinglePluginFolder(
+            @NotNull final Path pluginFolder, @NotNull final Class<T> desiredClass) {
 
-        final Optional<HiveMQPluginEntity> xmlEntityOptional = HiveMQPluginXMLReader.getPluginEntityFromXML(pluginFolder, true);
+        final Optional<HiveMQPluginEntity> xmlEntityOptional =
+                HiveMQPluginXMLReader.getPluginEntityFromXML(pluginFolder, true);
         if (!xmlEntityOptional.isPresent()) {
             return null;
         }
@@ -217,7 +232,9 @@ public class PluginLoaderImpl implements PluginLoader {
 
         //check for matching directory name and pluginId
         if (!fileName.equals(xmlEntity.getId())) {
-            log.warn("Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}", xmlEntity.getId(), pluginFolder);
+            log.warn(
+                    "Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}",
+                    xmlEntity.getId(), pluginFolder);
             return null;
         }
 
@@ -228,7 +245,9 @@ public class PluginLoaderImpl implements PluginLoader {
         }
 
         if (hiveMQExtensions.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
-            log.warn("An extension with id \"{}\" is already loaded, ignoring extension at {}", xmlEntity.getId(), pluginFolder);
+            log.warn(
+                    "An extension with id \"{}\" is already loaded, ignoring extension at {}", xmlEntity.getId(),
+                    pluginFolder);
             return null;
         }
 
@@ -244,7 +263,9 @@ public class PluginLoaderImpl implements PluginLoader {
         return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), pluginFolder);
     }
 
-    @Nullable <T extends ExtensionMain> HiveMQExtension loadSinglePlugin(@NotNull final Path pluginFolder, @NotNull final HiveMQPluginEntity xmlEntity, @NotNull final Class<T> desiredClass) {
+    @Nullable <T extends ExtensionMain> HiveMQExtension loadSinglePlugin(
+            @NotNull final Path pluginFolder, @NotNull final HiveMQPluginEntity xmlEntity,
+            @NotNull final Class<T> desiredClass) {
         final ImmutableList.Builder<Path> jarPaths = ImmutableList.builder();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(pluginFolder)) {
             for (final Path path : stream) {
@@ -263,7 +284,8 @@ public class PluginLoaderImpl implements PluginLoader {
             try {
                 urls.add(path.toUri().toURL());
             } catch (final MalformedURLException e) {
-                log.warn("Could not add " + path.toAbsolutePath().toString() + " to the list of files considered for extension discovery");
+                log.warn("Could not add " + path.toAbsolutePath().toString() +
+                        " to the list of files considered for extension discovery");
                 log.debug("Original exception:", e);
             }
         }
@@ -300,11 +322,14 @@ public class PluginLoaderImpl implements PluginLoader {
         return hiveMQPluginFactory.createHiveMQPlugin(instance, pluginFolder, xmlEntity, true);
     }
 
-    private boolean initializeStaticContext(@NotNull final String hiveMQPluginID, @NotNull final IsolatedPluginClassloader classloader) {
+    private boolean initializeStaticContext(
+            @NotNull final String hiveMQPluginID, @NotNull final IsolatedPluginClassloader classloader) {
         try {
             staticInitializer.initialize(hiveMQPluginID, classloader);
         } catch (final Throwable e) {
-            log.warn("Extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}", hiveMQPluginID, e.getMessage());
+            log.warn(
+                    "Extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
+                    hiveMQPluginID, e.getMessage());
             log.debug("Original exception", e);
             Exceptions.rethrowError(e);
             return false;

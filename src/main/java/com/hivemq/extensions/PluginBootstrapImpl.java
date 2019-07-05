@@ -56,7 +56,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
     public PluginBootstrapImpl(@NotNull final PluginLoader pluginLoader,
                                @NotNull final SystemInformation systemInformation,
                                @NotNull final PluginLifecycleHandler lifecycleHandler,
-            @NotNull final HiveMQExtensions hiveMQExtensions,
+                               @NotNull final HiveMQExtensions hiveMQExtensions,
                                @NotNull final ShutdownHooks shutdownHooks) {
         this.pluginLoader = pluginLoader;
         this.systemInformation = systemInformation;
