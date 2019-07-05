@@ -18,11 +18,11 @@ package com.hivemq.extension.sdk.api.interceptor.connect;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorInput;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorOutput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundOutput;
 
 /**
- * Interface for the connect interception.
+ * Interface for the connect inbound interception.
  * <p>
  * Interceptors are always called by the same Thread for all messages from the same client.
  * <p>
@@ -34,15 +34,15 @@ import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterce
  * @since 4.2.0
  */
 @FunctionalInterface
-public interface ConnectInterceptor extends Interceptor {
+public interface ConnectInboundInterceptor extends Interceptor {
 
     /**
-     * When a {@link ConnectInterceptor} is set through any extension,
+     * When a {@link ConnectInboundInterceptor} is set through any extension,
      * this method gets called for every inbound CONNECT packet from any MQTT client.
      *
-     * @param connectInterceptorInput  The {@link ConnectInterceptorInput} parameter.
-     * @param connectInterceptorOutput The {@link ConnectInterceptorOutput} parameter.
+     * @param connectInboundInput  The {@link ConnectInboundInput} parameter.
+     * @param connectInboundOutput The {@link ConnectInboundOutput} parameter.
      * @since 4.2.0
      */
-    void onConnect(@NotNull ConnectInterceptorInput connectInterceptorInput, @NotNull ConnectInterceptorOutput connectInterceptorOutput);
+    void onConnect(@NotNull ConnectInboundInput connectInboundInput, @NotNull ConnectInboundOutput connectInboundOutput);
 }

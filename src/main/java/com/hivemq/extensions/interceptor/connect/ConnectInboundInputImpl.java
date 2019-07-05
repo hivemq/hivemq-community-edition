@@ -4,7 +4,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
@@ -16,13 +16,13 @@ import java.util.function.Supplier;
  * @author Lukas Brandl
  * @since 4.2.0
  */
-public class ConnectInterceptorInputImpl implements Supplier<ConnectInterceptorInputImpl>, ConnectInterceptorInput, PluginTaskInput {
+public class ConnectInboundInputImpl implements Supplier<ConnectInboundInputImpl>, ConnectInboundInput, PluginTaskInput {
 
     private @NotNull ConnectPacket connectPacket;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
 
-    public ConnectInterceptorInputImpl(
+    public ConnectInboundInputImpl(
             final @NotNull ConnectPacket connectPacket,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
@@ -49,7 +49,7 @@ public class ConnectInterceptorInputImpl implements Supplier<ConnectInterceptorI
     }
 
     @Override
-    public @NotNull ConnectInterceptorInputImpl get() {
+    public @NotNull ConnectInboundInputImpl get() {
         return this;
     }
 

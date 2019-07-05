@@ -5,14 +5,14 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorProviderInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 import com.hivemq.extensions.PluginInformationUtil;
 import io.netty.channel.Channel;
 
 /**
  * @author Lukas Brandl
  */
-public class ConnectInterceptorProviderInputImpl implements ConnectInterceptorProviderInput {
+public class ConnectInboundProviderInputImpl implements ConnectInboundProviderInput {
 
     @NotNull
     private final ConnectionInformation connectionInformation;
@@ -23,9 +23,9 @@ public class ConnectInterceptorProviderInputImpl implements ConnectInterceptorPr
     @NotNull
     private final ServerInformation serverInformation;
 
-    public ConnectInterceptorProviderInputImpl(final @NotNull ServerInformation serverInformation,
-                                               final @NotNull Channel channel,
-                                               final @NotNull String clientId) {
+    public ConnectInboundProviderInputImpl(final @NotNull ServerInformation serverInformation,
+                                           final @NotNull Channel channel,
+                                           final @NotNull String clientId) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "client id must never be null");

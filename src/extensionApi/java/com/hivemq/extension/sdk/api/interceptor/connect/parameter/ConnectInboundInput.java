@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 dc-square GmbH
+ * Copyright 2018 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,28 @@
 package com.hivemq.extension.sdk.api.interceptor.connect.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.async.AsyncOutput;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.packets.publish.ModifiableConnectPacket;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * This is the output parameter of any {@link ConnectInterceptor}
- * providing methods to define the outcome of a CONNECT interception.
- * <p>
- * It can be used to
- * <ul>
- * <li>Modify a CONNECT packet</li>
- * <li>Disconnect the sender of the CONNECT packet</li>
- * </ul>
+ * This is the input parameter of any {@link ConnectInboundInterceptor}
+ * providing CONNECT, connection and client based information.
  *
  * @author Lukas Brandl
  * @since 4.2.0
  */
 @DoNotImplement
-public interface ConnectInterceptorOutput extends AsyncOutput<ConnectInterceptorOutput> {
+public interface ConnectInboundInput extends ClientBasedInput {
 
     /**
-     * Use this object to make any changes to the CONNECT message.
+     * The unmodifiable CONNECT packet that was intercepted.
      *
-     * @return A modifiable connect packet.
+     * @return An unmodifiable {@link ConnectPacket}.
      * @since 4.2.0
      */
-    @NotNull ModifiableConnectPacket getConnectPacket();
-
+    @Immutable
+    @NotNull ConnectPacket getConnectPacket();
 }

@@ -18,26 +18,26 @@ package com.hivemq.extension.sdk.api.interceptor.connect;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorProviderInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 
 /**
  * The interceptor provider allows to implement custom logic to and modify incoming CONNECT messages.
- * For each incoming CONNECT message an {@link ConnectInterceptor} can be provided that contains the modification logic.
+ * For each incoming CONNECT message an {@link ConnectInboundInterceptor} can be provided that contains the modification logic.
  *
  * @author Lukas Brandl
  * @since 4.2.0
  */
-public interface ConnectInterceptorProvider {
+public interface ConnectInboundInterceptorProvider {
     /**
      * This method is called for each incoming CONNECT message by HiveMQ.
      * <p>
-     * Either the same {@link ConnectInterceptor} (stateless or must be thread-safe)<br/>
+     * Either the same {@link ConnectInboundInterceptor} (stateless or must be thread-safe)<br/>
      * or a new one (stateful, must not be thread-safe) can be supplied on each call.
      * <p>
      * <code>null</code> can be returned if a CONNECT message should not be intercepted.
      *
-     * @return an implementation of the {@link ConnectInterceptor} or null if the CONNECT should not be intercepted.
+     * @return an implementation of the {@link ConnectInboundInterceptor} or null if the CONNECT should not be intercepted.
      * @since 4.2.0
      */
-    @Nullable ConnectInterceptor getConnectInterceptor(@NotNull ConnectInterceptorProviderInput input);
+    @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull ConnectInboundProviderInput input);
 }

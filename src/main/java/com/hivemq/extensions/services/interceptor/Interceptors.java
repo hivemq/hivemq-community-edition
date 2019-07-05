@@ -2,8 +2,7 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 
 /**
  * @author Lukas Brandl
@@ -16,7 +15,7 @@ public interface Interceptors {
      *
      * @param provider to be added
      */
-    void addConnectInterceptorProvider(@NotNull ConnectInterceptorProvider provider);
+    void addConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider provider);
 
     /**
      * Get a map of connect interceptor providers (value) mapped by the id of the plugin which added the interceptor provider (key)
@@ -24,5 +23,5 @@ public interface Interceptors {
      * @return An immutable copy of the connect interceptor providers
      */
     @NotNull
-    ImmutableMap<String, ConnectInterceptorProvider> connectInterceptorProviders();
+    ImmutableMap<String, ConnectInboundInterceptorProvider> connectInterceptorProviders();
 }

@@ -10,17 +10,17 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.connect.ConnectInterceptorInputImpl;
-import com.hivemq.extensions.interceptor.connect.ConnectInterceptorOutputImpl;
-import com.hivemq.extensions.interceptor.connect.ConnectInterceptorProviderInputImpl;
+import com.hivemq.extensions.interceptor.connect.ConnectInboundInputImpl;
+import com.hivemq.extensions.interceptor.connect.ConnectInboundOutputImpl;
+import com.hivemq.extensions.interceptor.connect.ConnectInboundProviderInputImpl;
 import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -44,9 +44,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Lukas Brandl
  */
 @ChannelHandler.Sharable
-public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNECT> {
+public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandler<CONNECT> {
 
-    private static final Logger log = LoggerFactory.getLogger(ConnectInterceptorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectInboundInterceptorHandler.class);
 
     @NotNull
     private final FullConfigurationService configurationService;
@@ -73,7 +73,7 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
     private final MqttConnacker connacker;
 
     @Inject
-    public ConnectInterceptorHandler(
+    public ConnectInboundInterceptorHandler(
             @NotNull final FullConfigurationService configurationService,
             @NotNull final PluginOutPutAsyncer asyncer,
             @NotNull final HiveMQExtensions hiveMQExtensions,
@@ -106,36 +106,37 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
             return;
         }
 
-        final ImmutableMap<String, ConnectInterceptorProvider> connectInterceptorProviders =
+        final ImmutableMap<String, ConnectInboundInterceptorProvider> connectInterceptorProviders =
                 interceptors.connectInterceptorProviders();
+
         if (connectInterceptorProviders.isEmpty()) {
             super.channelRead(ctx, connect);
         }
-        final ConnectInterceptorProviderInputImpl providerInput =
-                new ConnectInterceptorProviderInputImpl(serverInformation, channel, clientId);
-        final ImmutableMap.Builder<String, ConnectInterceptor> builder = ImmutableMap.builder();
-        for (final Map.Entry<String, ConnectInterceptorProvider> providerEntry : connectInterceptorProviders.entrySet()) {
-            final ConnectInterceptor interceptor = providerEntry.getValue().getConnectInterceptor(providerInput);
+        final ConnectInboundProviderInputImpl providerInput =
+                new ConnectInboundProviderInputImpl(serverInformation, channel, clientId);
+        final ImmutableMap.Builder<String, ConnectInboundInterceptor> builder = ImmutableMap.builder();
+        for (final Map.Entry<String, ConnectInboundInterceptorProvider> providerEntry : connectInterceptorProviders.entrySet()) {
+            final ConnectInboundInterceptor interceptor = providerEntry.getValue().getConnectInterceptor(providerInput);
             if (interceptor != null) {
                 builder.put(providerEntry.getKey(), interceptor);
             }
         }
-        final ImmutableMap<String, ConnectInterceptor> connectInterceptors = builder.build();
+        final ImmutableMap<String, ConnectInboundInterceptor> connectInterceptors = builder.build();
 
-        final ConnectInterceptorOutputImpl output =
-                new ConnectInterceptorOutputImpl(configurationService, asyncer, connect);
-        final ConnectInterceptorInputImpl input =
-                new ConnectInterceptorInputImpl(new ConnectPacketImpl(connect), clientId, channel);
+        final ConnectInboundOutputImpl output =
+                new ConnectInboundOutputImpl(configurationService, asyncer, connect);
+        final ConnectInboundInputImpl input =
+                new ConnectInboundInputImpl(new ConnectPacketImpl(connect), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final ConnectInterceptorContext interceptorContext = new ConnectInterceptorContext(ConnectInterceptorTask.class,
                 clientId, channel, input, interceptorFuture, connectInterceptors.size());
 
-        for (final Map.Entry<String, ConnectInterceptor> entry : connectInterceptors.entrySet()) {
+        for (final Map.Entry<String, ConnectInboundInterceptor> entry : connectInterceptors.entrySet()) {
             if (interceptorFuture.isDone()) {
                 // The future is set in case an async interceptor timeout failed
                 break;
             }
-            final ConnectInterceptor interceptor = entry.getValue();
+            final ConnectInboundInterceptor interceptor = entry.getValue();
             final HiveMQExtension plugin = hiveMQExtensions.getExtension(entry.getKey());
 
             //disabled extension would be null
@@ -169,10 +170,10 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
 
     }
 
-    private class ConnectInterceptorContext extends PluginInOutTaskContext<ConnectInterceptorOutputImpl> {
+    private class ConnectInterceptorContext extends PluginInOutTaskContext<ConnectInboundOutputImpl> {
 
         private final @NotNull Channel channel;
-        private final @NotNull ConnectInterceptorInputImpl input;
+        private final @NotNull ConnectInboundInputImpl input;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
@@ -181,7 +182,7 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
                 final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull Channel channel,
-                final @NotNull ConnectInterceptorInputImpl input,
+                final @NotNull ConnectInboundInputImpl input,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, clientId);
@@ -193,7 +194,7 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
         }
 
         @Override
-        public void pluginPost(@NotNull final ConnectInterceptorOutputImpl pluginOutput) {
+        public void pluginPost(@NotNull final ConnectInboundOutputImpl pluginOutput) {
 
             if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
                     pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
@@ -223,21 +224,21 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
     }
 
     private class ConnectInterceptorTask
-            implements PluginInOutTask<ConnectInterceptorInputImpl, ConnectInterceptorOutputImpl> {
+            implements PluginInOutTask<ConnectInboundInputImpl, ConnectInboundOutputImpl> {
 
-        private final @NotNull ConnectInterceptor interceptor;
+        private final @NotNull ConnectInboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
         private ConnectInterceptorTask(
-                final @NotNull ConnectInterceptor interceptor,
+                final @NotNull ConnectInboundInterceptor interceptor,
                 final @NotNull String pluginId) {
             this.interceptor = interceptor;
             this.pluginId = pluginId;
         }
 
         @Override
-        public @NotNull ConnectInterceptorOutputImpl apply(
-                final @NotNull ConnectInterceptorInputImpl input, final @NotNull ConnectInterceptorOutputImpl output) {
+        public @NotNull ConnectInboundOutputImpl apply(
+                final @NotNull ConnectInboundInputImpl input, final @NotNull ConnectInboundOutputImpl output) {
             try {
                 interceptor.onConnect(input, output);
             } catch (final Throwable e) {
@@ -253,13 +254,13 @@ public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNE
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final @NotNull ConnectInterceptorOutputImpl output;
+        private final @NotNull ConnectInboundOutputImpl output;
         private final @NotNull CONNECT connect;
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull String clusterId;
 
         InterceptorFutureCallback(
-                final @NotNull ConnectInterceptorOutputImpl output,
+                final @NotNull ConnectInboundOutputImpl output,
                 final @NotNull CONNECT connect,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull String clusterId) {

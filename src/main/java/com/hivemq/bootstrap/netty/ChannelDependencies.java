@@ -25,7 +25,7 @@ import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.ConnectInterceptorHandler;
+import com.hivemq.extensions.handler.ConnectInboundInterceptorHandler;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
@@ -161,7 +161,7 @@ public class ChannelDependencies {
     private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
 
     @NotNull
-    private final ConnectInterceptorHandler connectInterceptorHandler;
+    private final ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -198,7 +198,7 @@ public class ChannelDependencies {
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
-            @NotNull final ConnectInterceptorHandler connectInterceptorHandler) {
+            @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -234,7 +234,7 @@ public class ChannelDependencies {
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
-        this.connectInterceptorHandler = connectInterceptorHandler;
+        this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
     }
 
     @NotNull
@@ -403,7 +403,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public ConnectInterceptorHandler getConnectInterceptorHandler() {
-        return connectInterceptorHandler;
+    public ConnectInboundInterceptorHandler getConnectInboundInterceptorHandler() {
+        return connectInboundInterceptorHandler;
     }
 }

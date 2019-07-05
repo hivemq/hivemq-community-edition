@@ -2,9 +2,9 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorProviderInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -62,7 +62,7 @@ public class InterceptorsImplTest {
     public void test_add_and_remove() throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInterceptorProvider");
+                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -70,9 +70,9 @@ public class InterceptorsImplTest {
         //This classloader contains the classes from the jar file
         final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInterceptorProvider");
+        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
 
-        final ConnectInterceptorProvider connectInterceptorProvider = (ConnectInterceptorProvider) classOne.newInstance();
+        final ConnectInboundInterceptorProvider connectInterceptorProvider = (ConnectInboundInterceptorProvider) classOne.newInstance();
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin1);
         when(plugin1.getId()).thenReturn("plugin1");
@@ -99,7 +99,7 @@ public class InterceptorsImplTest {
     public void test_plugin_null() throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInterceptorProvider");
+                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -107,9 +107,9 @@ public class InterceptorsImplTest {
         //This classloader contains the classes from the jar file
         final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInterceptorProvider");
+        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
 
-        final ConnectInterceptorProvider connectInterceptorProvider = (ConnectInterceptorProvider) classOne.newInstance();
+        final ConnectInboundInterceptorProvider connectInterceptorProvider = (ConnectInboundInterceptorProvider) classOne.newInstance();
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(null);
         when(plugin1.getId()).thenReturn("plugin1");
@@ -125,9 +125,9 @@ public class InterceptorsImplTest {
 
     }
 
-    public static class TestConnectInterceptorProvider implements ConnectInterceptorProvider {
+    public static class TestConnectInboundInterceptorProvider implements ConnectInboundInterceptorProvider {
         @Override
-        public @Nullable ConnectInterceptor getConnectInterceptor(@NotNull ConnectInterceptorProviderInput input) {
+        public @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull ConnectInboundProviderInput input) {
             return (connectInterceptorInput, connectInterceptorOutput) -> {
 
             };

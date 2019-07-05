@@ -2,7 +2,7 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ public class GlobalInterceptorRegistryImpl implements GlobalInterceptorRegistry 
     }
 
     @Override
-    public void setConnectInterceptorProvider(@NotNull final ConnectInterceptorProvider provider) {
+    public void setConnectInterceptorProvider(@NotNull final ConnectInboundInterceptorProvider provider) {
         Preconditions.checkNotNull(provider, "Connect interceptor provider must never be null");
         interceptors.addConnectInterceptorProvider(provider);
     }

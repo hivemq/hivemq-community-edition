@@ -2,8 +2,7 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
@@ -22,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class InterceptorsImpl implements Interceptors {
 
     @NotNull
-    private final Map<@NotNull String, @NotNull ConnectInterceptorProvider> connectInterceptorMap;
+    private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInterceptorMap;
 
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
@@ -45,7 +44,7 @@ public class InterceptorsImpl implements Interceptors {
     }
 
     @Override
-    public void addConnectInterceptorProvider(@NotNull final ConnectInterceptorProvider provider) {
+    public void addConnectInterceptorProvider(@NotNull final ConnectInboundInterceptorProvider provider) {
         final Lock writeLock = readWriteLock.writeLock();
 
         writeLock.lock();
@@ -68,7 +67,7 @@ public class InterceptorsImpl implements Interceptors {
 
     @Override
     @NotNull
-    public ImmutableMap<String, ConnectInterceptorProvider> connectInterceptorProviders() {
+    public ImmutableMap<String, ConnectInboundInterceptorProvider> connectInterceptorProviders() {
         final Lock readLock = readWriteLock.readLock();
 
         readLock.lock();

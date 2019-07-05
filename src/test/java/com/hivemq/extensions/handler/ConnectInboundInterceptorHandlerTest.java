@@ -9,10 +9,10 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorOutput;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInterceptorProviderInput;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundOutput;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -26,7 +26,6 @@ import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
@@ -48,14 +47,15 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
  * @author Lukas Brandl
  */
-public class ConnectInterceptorHandlerTest {
+public class ConnectInboundInterceptorHandlerTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -85,7 +85,7 @@ public class ConnectInterceptorHandlerTest {
 
     private PluginTaskExecutorService pluginTaskExecutorService;
 
-    private ConnectInterceptorHandler handler;
+    private ConnectInboundInterceptorHandler handler;
 
     private HivemqId hivemqId = new HivemqId();
 
@@ -104,7 +104,7 @@ public class ConnectInterceptorHandlerTest {
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        handler = new ConnectInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService,
                 hivemqId, interceptors, serverInformation, connacker);
         channel.pipeline().addFirst(handler);
@@ -123,7 +123,7 @@ public class ConnectInterceptorHandlerTest {
     @Test
     public void test_modify() throws Exception {
 
-        final ConnectInterceptorProvider interceptorProvider = getInterceptor("TestModifyInterceptor");
+        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestModifyInboundInterceptor");
         when(interceptors.connectInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -143,7 +143,8 @@ public class ConnectInterceptorHandlerTest {
     @Test
     public void test_timeout_failed() throws Exception {
 
-        final ConnectInterceptorProvider interceptorProvider = getInterceptor("TestTimeoutFailedInterceptor");
+        final ConnectInboundInterceptorProvider interceptorProvider =
+                getInterceptor("TestTimeoutFailedInboundInterceptor");
         when(interceptors.connectInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -158,7 +159,7 @@ public class ConnectInterceptorHandlerTest {
     @Test
     public void test_timeout_exception() throws Exception {
 
-        final ConnectInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInterceptor");
+        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
         when(interceptors.connectInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -182,11 +183,11 @@ public class ConnectInterceptorHandlerTest {
     }
 
     @NotNull
-    private ConnectInterceptorProvider getInterceptor(@NotNull final String name) throws Exception {
+    private ConnectInboundInterceptorProvider getInterceptor(@NotNull final String name) throws Exception {
 
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.ConnectInterceptorHandlerTest$" + name);
+                .addClass("com.hivemq.extensions.handler.ConnectInboundInterceptorHandlerTest$" + name);
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -196,29 +197,29 @@ public class ConnectInterceptorHandlerTest {
                 new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> providerClass =
-                cl.loadClass("com.hivemq.extensions.handler.ConnectInterceptorHandlerTest$" + name);
+                cl.loadClass("com.hivemq.extensions.handler.ConnectInboundInterceptorHandlerTest$" + name);
 
-        return (ConnectInterceptorProvider) providerClass.newInstance();
+        return (ConnectInboundInterceptorProvider) providerClass.newInstance();
     }
 
-    public static class TestModifyInterceptor implements ConnectInterceptorProvider {
+    public static class TestModifyInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInterceptor getConnectInterceptor(
-                @NotNull final ConnectInterceptorProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+                @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> output.getConnectPacket().setClientId("modified");
         }
     }
 
-    public static class TestTimeoutFailedInterceptor implements ConnectInterceptorProvider {
+    public static class TestTimeoutFailedInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInterceptor getConnectInterceptor(
-                @NotNull final ConnectInterceptorProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+                @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
-                final Async<ConnectInterceptorOutput> async =
+                final Async<ConnectInboundOutput> async =
                         output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
                 try {
                     Thread.sleep(100);
@@ -229,11 +230,11 @@ public class ConnectInterceptorHandlerTest {
         }
     }
 
-    public static class TestExceptionInterceptor implements ConnectInterceptorProvider {
+    public static class TestExceptionInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInterceptor getConnectInterceptor(
-                @NotNull final ConnectInterceptorProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+                @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
                 throw new RuntimeException("test");

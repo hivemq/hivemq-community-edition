@@ -17,8 +17,8 @@
 package com.hivemq.extension.sdk.api.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 
 /**
  * @author Lukas Brandl
@@ -31,12 +31,12 @@ public interface GlobalInterceptorRegistry {
      * <p>
      * The provider is called once for each incoming connect message.
      * <p>
-     * The {@link ConnectInterceptorProvider} must be implemented by the extension developer.
-     * It will return an {@link ConnectInterceptor} that can be used to modify incoming CONNECT messages.
+     * The {@link ConnectInboundInterceptorProvider} must be implemented by the extension developer.
+     * It will return an {@link ConnectInboundInterceptor} that can be used to modify incoming CONNECT messages.
      *
      * @param provider The provider to be registered.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
-    void setConnectInterceptorProvider(@NotNull ConnectInterceptorProvider provider);
+    void setConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider provider);
 }
