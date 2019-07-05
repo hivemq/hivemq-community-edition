@@ -110,12 +110,6 @@ public class ConnectInterceptorHandlerTest {
         channel.pipeline().addFirst(handler);
     }
 
-    @Test
-    public void test_other_message() {
-        channel.writeInbound(new PUBACK(1));
-        assertNotNull(channel.readInbound());
-    }
-
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
 

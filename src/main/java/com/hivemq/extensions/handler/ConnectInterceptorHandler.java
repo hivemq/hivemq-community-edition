@@ -32,7 +32,7 @@ import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Lukas Brandl
  */
 @ChannelHandler.Sharable
-public class ConnectInterceptorHandler extends ChannelInboundHandlerAdapter {
+public class ConnectInterceptorHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private static final Logger log = LoggerFactory.getLogger(ConnectInterceptorHandler.class);
 
@@ -93,12 +93,8 @@ public class ConnectInterceptorHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(@NotNull final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
-
-        if (!(msg instanceof CONNECT)) {
-            super.channelRead(ctx, msg);
-            return;
-        }
+    public void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT connect)
+            throws Exception {
 
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
@@ -110,12 +106,10 @@ public class ConnectInterceptorHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        final CONNECT connect = (CONNECT) msg;
-
         final ImmutableMap<String, ConnectInterceptorProvider> connectInterceptorProviders =
                 interceptors.connectInterceptorProviders();
         if (connectInterceptorProviders.isEmpty()) {
-            super.channelRead(ctx, msg);
+            super.channelRead(ctx, connect);
         }
         final ConnectInterceptorProviderInputImpl providerInput =
                 new ConnectInterceptorProviderInputImpl(serverInformation, channel, clientId);
