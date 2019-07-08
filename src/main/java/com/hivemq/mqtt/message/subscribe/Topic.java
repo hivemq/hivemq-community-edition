@@ -18,10 +18,12 @@ package com.hivemq.mqtt.message.subscribe;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -85,6 +87,16 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
 
     public static Topic topicFromString(@NotNull final String string) {
         return new Topic(string, DEFAULT_QOS);
+    }
+
+    @NotNull
+    public static Topic topicFromSubscription(@NotNull final Subscription subscription, final @Nullable Integer subscriptionIdentifier) {
+        return new Topic(subscription.getTopicFilter(),
+                Objects.requireNonNull(QoS.valueOf(subscription.getQos().getQosNumber())),
+                subscription.getNoLocal(),
+                subscription.getRetainAsPublished(),
+                Objects.requireNonNull(Mqtt5RetainHandling.fromCode(subscription.getRetainHandling().getCode())),
+                subscriptionIdentifier);
     }
 
     /**
