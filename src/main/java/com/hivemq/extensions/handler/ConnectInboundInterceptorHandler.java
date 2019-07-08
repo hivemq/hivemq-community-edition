@@ -110,7 +110,8 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 interceptors.connectInterceptorProviders();
 
         if (connectInterceptorProviders.isEmpty()) {
-            super.channelRead(ctx, connect);
+            ctx.fireChannelRead(connect);
+            return;
         }
         final ConnectInboundProviderInputImpl providerInput =
                 new ConnectInboundProviderInputImpl(serverInformation, channel, clientId);
