@@ -57,8 +57,9 @@ public interface ModifiableConnectPacket extends ConnectPacket {
     /**
      * Set the will publish
      * Use {@link Builders#willPublish()} to get the {@link WillPublishBuilder} to create a will publish
+     * To remove a will publish set this to null
      *
-     * @param willPublish the new will publish for the CONNET
+     * @param willPublish the new will publish for the CONNECT
      * @since 4.2.0
      */
     void setWillPublish(@Nullable WillPublishPacket willPublish);
@@ -126,7 +127,7 @@ public interface ModifiableConnectPacket extends ConnectPacket {
     void setRequestProblemInformation(boolean requestProblemInformation);
 
     /**
-     * Set the authenticaiton method
+     * Set the authentication method
      *
      * @param authenticationMethod The new authentication method of the CONNECT
      * @throws IllegalArgumentException if the authentication method is not a valid UTF-8 string

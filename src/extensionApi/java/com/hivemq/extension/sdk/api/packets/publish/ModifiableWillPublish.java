@@ -10,7 +10,7 @@ public interface ModifiableWillPublish extends WillPublishPacket, ModifiablePubl
     /**
      * Sets the will delay
      *
-     * @param willDelay The new will delay for the will publish
+     * @param willDelay The new will delay for the will publish in seconds
      * @throws IllegalArgumentException If the delay is less than zero or more than '4294967295'.
      * @since 4.2.0
      */

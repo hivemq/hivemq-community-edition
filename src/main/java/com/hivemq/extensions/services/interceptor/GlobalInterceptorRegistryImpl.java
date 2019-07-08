@@ -22,8 +22,8 @@ public class GlobalInterceptorRegistryImpl implements GlobalInterceptorRegistry 
     }
 
     @Override
-    public void setConnectInterceptorProvider(@NotNull final ConnectInboundInterceptorProvider provider) {
-        Preconditions.checkNotNull(provider, "Connect interceptor provider must never be null");
-        interceptors.addConnectInterceptorProvider(provider);
+    public void setConnectInterceptorProvider(@NotNull final ConnectInboundInterceptorProvider connectInboundInterceptorProvider) {
+        Preconditions.checkNotNull(connectInboundInterceptorProvider, "Connect interceptor provider must never be null");
+        interceptors.addConnectInterceptorProvider(connectInboundInterceptorProvider);
     }
 }

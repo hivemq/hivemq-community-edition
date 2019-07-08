@@ -157,7 +157,7 @@ public class ConnectInboundInterceptorHandlerTest {
     }
 
     @Test
-    public void test_timeout_exception() throws Exception {
+    public void test_exception() throws Exception {
 
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
         when(interceptors.connectInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
@@ -175,6 +175,8 @@ public class ConnectInboundInterceptorHandlerTest {
         }
 
         assertEquals("client", connect.getClientIdentifier());
+        verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
+                any(Mqtt3ConnAckReturnCode.class), anyString());
     }
 
     @NotNull

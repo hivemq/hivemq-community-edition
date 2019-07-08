@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 
 /**
- * The interceptor provider allows to implement custom logic to and modify incoming CONNECT messages.
+ * The interceptor provider allows to implement custom logic to modify incoming CONNECT messages.
  * For each incoming CONNECT message an {@link ConnectInboundInterceptor} can be provided that contains the modification logic.
  *
  * @author Lukas Brandl

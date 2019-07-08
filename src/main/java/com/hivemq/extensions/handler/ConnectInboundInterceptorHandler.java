@@ -133,7 +133,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
 
         for (final Map.Entry<String, ConnectInboundInterceptor> entry : connectInterceptors.entrySet()) {
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
+                // The future is set in case an async interceptor timeout failed or if an interceptor throws an exception
                 break;
             }
             final ConnectInboundInterceptor interceptor = entry.getValue();
@@ -144,7 +144,8 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 interceptorContext.increment();
                 continue;
             }
-            final ConnectInterceptorTask interceptorTask = new ConnectInterceptorTask(interceptor, plugin.getId());
+            final ConnectInterceptorTask interceptorTask = new ConnectInterceptorTask(interceptor, plugin.getId(), channel,
+                    interceptorFuture, clientId);
 
             final boolean executionSuccessful =
                     pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output,
@@ -157,7 +158,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
 
                 //may happen if interface not implemented.
                 if (className.isEmpty()) {
-                    className = "ConnectInterceptor";
+                    className = "ConnectInboundInterceptor";
                 }
 
                 log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", className, plugin.getId());
@@ -177,6 +178,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull String clientId;
 
         ConnectInterceptorContext(
                 final @NotNull Class<?> taskClazz,
@@ -186,6 +188,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, clientId);
+            this.clientId = clientId;
             this.channel = channel;
             this.input = input;
             this.interceptorFuture = interceptorFuture;
@@ -199,7 +202,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
                     pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
                 final String logMessage =
-                        "Connect with client ID " + hivemqId + " failed because of an interceptor timeout";
+                        "Connect with client ID " + clientId + " failed because of an interceptor timeout";
                 connacker.connackError(channel, logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
                         Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, "Extension interceptor timeout");
                 interceptorFuture.set(null);
@@ -228,12 +231,21 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
 
         private final @NotNull ConnectInboundInterceptor interceptor;
         private final @NotNull String pluginId;
+        private final @NotNull Channel channel;
+        private final @NotNull SettableFuture<Void> interceptorFuture;
+        private final @NotNull String clientId;
 
         private ConnectInterceptorTask(
                 final @NotNull ConnectInboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String pluginId,
+                final @NotNull Channel channel,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @NotNull String clientId) {
             this.interceptor = interceptor;
             this.pluginId = pluginId;
+            this.channel = channel;
+            this.interceptorFuture = interceptorFuture;
+            this.clientId = clientId;
         }
 
         @Override
@@ -246,6 +258,10 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                         "Uncaught exception was thrown from extension with id \"{}\" on connect interception. The exception should be handled by the extension.",
                         pluginId);
                 log.debug("Original exception:", e);
+                final String logMessage = "Connect with client ID " + clientId + " failed because of an exception was thrown by an interceptor";
+                connacker.connackError(channel, logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
+                        Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, "Exception in interceptor");
+                interceptorFuture.set(null);
                 Exceptions.rethrowError(e);
             }
             return output;

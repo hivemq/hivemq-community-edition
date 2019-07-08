@@ -33,10 +33,11 @@ public interface GlobalInterceptorRegistry {
      * <p>
      * The {@link ConnectInboundInterceptorProvider} must be implemented by the extension developer.
      * It will return an {@link ConnectInboundInterceptor} that can be used to modify incoming CONNECT messages.
+     * If there is already a provider present, it will be overwritten.
      *
-     * @param provider The provider to be registered.
+     * @param connectInboundInterceptorProvider The provider to be registered.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
-    void setConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider provider);
+    void setConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider connectInboundInterceptorProvider);
 }

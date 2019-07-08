@@ -529,6 +529,9 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
                 .withMqtt5UserProperties(Mqtt5UserProperties.of(userProperties.build()))
                 .withUsername(connectPacket.getUserName().orElse(null))
                 .withPassword(Bytes.getBytesFromReadOnlyBuffer(connectPacket.getPassword()))
+                .withWill(connectPacket.getWillPublish().isPresent())
+                .withUsernameRequired(connectPacket.getUserName().isPresent())
+                .withPasswordRequired(connectPacket.getPassword().isPresent())
                 .build();
     }
 

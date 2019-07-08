@@ -29,7 +29,6 @@ import com.hivemq.extension.sdk.api.packets.publish.ModifiableConnectPacket;
  * It can be used to
  * <ul>
  * <li>Modify a CONNECT packet</li>
- * <li>Disconnect the sender of the CONNECT packet</li>
  * </ul>
  *
  * @author Lukas Brandl
