@@ -27,8 +27,6 @@ import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundIntercepto
 public interface GlobalInterceptorRegistry {
 
     /**
-     * Every extension can call this method once. Each subsequent calls will be ignored.
-     * <p>
      * The provider is called once for each incoming connect message.
      * <p>
      * The {@link ConnectInboundInterceptorProvider} must be implemented by the extension developer.

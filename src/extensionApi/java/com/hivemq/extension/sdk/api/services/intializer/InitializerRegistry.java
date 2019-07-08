@@ -30,8 +30,6 @@ import com.hivemq.extension.sdk.api.client.parameter.InitializerInput;
 public interface InitializerRegistry {
 
     /**
-     * Every extension can call this method once. Each subsequent calls will be ignored.
-     * <p>
      * Each connecting and connected MQTT client will be initialized by this initializer, as soon as the extension is
      * enabled and running.
      * <p>
@@ -39,6 +37,7 @@ public interface InitializerRegistry {
      * <p>
      * The {@link ClientInitializer} and its {@link ClientInitializer#initialize(InitializerInput, ClientContext)}
      * method must be implemented by the extension developer.
+     * If there is already an initializer present, it will be overwritten.
      *
      * @param initializer The initializer to set.
      * @throws NullPointerException If the initializer is null.
