@@ -37,64 +37,73 @@ import java.util.Optional;
 public interface ModifiableConnectPacket extends ConnectPacket {
 
     /**
-     * Set the client ID
+     * Set the client ID.
      *
-     * @param clientId The new client ID of the CONNECT
-     * @throws IllegalArgumentException if the client ID is not a valid UTF-8 string
-     * @throws IllegalArgumentException if the client ID exceeds the maximum client ID length
+     * @param clientId The new client ID of the CONNECT.
+     * @throws IllegalArgumentException If the client ID is not a valid UTF-8 string.
+     * @throws IllegalArgumentException If the client ID exceeds the maximum client ID length.
      * @since 4.2.0
      */
     void setClientId(@NotNull String clientId);
 
     /**
-     * Set the clean start flag
+     * Set the clean start flag.
+     * <p>
+     * For an MQTT 3 client clean start has the same value as clean session by default.
+     * However this MQTT 5 property can be used in the same way as for MQTT 5 client via this method.
      *
-     * @param cleanStart The new clean start flag of the CONNECT
+     * @param cleanStart The new clean start flag of the CONNECT.
      * @since 4.2.0
      */
     void setCleanStart(boolean cleanStart);
 
     /**
-     * Set the will publish
-     * Use {@link Builders#willPublish()} to get the {@link WillPublishBuilder} to create a will publish
-     * To remove a will publish set this to null
+     * Set the will publish.
+     * <p>
+     * Use {@link Builders#willPublish()} to get the {@link WillPublishBuilder} to create a will publish.
+     * To remove a will publish set this to null.
+     * <p>
+     * To modify the existing {@link WillPublishPacket} use {@link #getModifiableWillPublish()}.
      *
-     * @param willPublish the new will publish for the CONNECT
+     * @param willPublish The new will publish for the CONNECT.
      * @since 4.2.0
      */
     void setWillPublish(@Nullable WillPublishPacket willPublish);
 
     /**
-     * Set the expiry interval
+     * Set the expiry interval.
+     * <p>
+     * For an MQTT 3 client the expiry will be 0 by default if clean session is false.
+     * This method may be used to set a custom session expiry for MQTT 3 clients.
      *
-     * @param expiryInterval The new expiry interval for the CONNECT
+     * @param expiryInterval The new expiry interval for the CONNECT.
      * @throws IllegalArgumentException If the expiry interval is more than the configured maximum.
      * @since 4.2.0
      */
     void setExpiryInterval(long expiryInterval);
 
     /**
-     * Set the keep alive
+     * Set the keep alive.
      *
-     * @param keepAlive The new keep alive for the CONNECT
+     * @param keepAlive The new keep alive for the CONNECT.
      * @throws IllegalArgumentException If the keep alive is more than the configured maximum.
      * @since 4.2.0
      */
     void setKeepAlive(int keepAlive);
 
     /**
-     * Set the receive maximum
+     * Set the receive maximum.
      *
-     * @param receiveMaximum The new receive maximum for the CONNECT
+     * @param receiveMaximum The new receive maximum for the CONNECT.
      * @throws IllegalArgumentException If the receive maximum is less than zero or more than '65535'.
      * @since 4.2.0
      */
     void setReceiveMaximum(int receiveMaximum);
 
     /**
-     * Set the maximum packet size
+     * Set the maximum packet size.
      *
-     * @param maximumPacketSize The new maximum packet size for the CONNECT
+     * @param maximumPacketSize The new maximum packet size for the CONNECT.
      * @throws IllegalArgumentException If the maximum packet size is less than zero or more than the configured
      *                                  maximum.
      * @since 4.2.0
@@ -102,59 +111,62 @@ public interface ModifiableConnectPacket extends ConnectPacket {
     void setMaximumPacketSize(int maximumPacketSize);
 
     /**
-     * Set the topic alias maximum
+     * Set the topic alias maximum.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @param topicAliasMaximum The new topic alias maximum for the CONNECT
+     * @param topicAliasMaximum The new topic alias maximum for the CONNECT.
      * @throws IllegalArgumentException If the topic alias maximum is more than '65535'.
      * @since 4.2.0
      */
     void setTopicAliasMaximum(int topicAliasMaximum);
 
     /**
-     * Set the request response information
+     * Set the request response information.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @param requestResponseInformation The new request response information flag for the CONNECT
+     * @param requestResponseInformation The new request response information flag for the CONNECT.
      * @since 4.2.0
      */
     void setRequestResponseInformation(boolean requestResponseInformation);
 
     /**
-     * Set the request problem information
+     * Set the request problem information.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @param requestProblemInformation The new request problem information flag for the CONNECT
+     * @param requestProblemInformation The new request problem information flag for the CONNECT.
      * @since 4.2.0
      */
     void setRequestProblemInformation(boolean requestProblemInformation);
 
     /**
-     * Set the authentication method
+     * Set the authentication method.
      *
-     * @param authenticationMethod The new authentication method of the CONNECT
-     * @throws IllegalArgumentException if the authentication method is not a valid UTF-8 string
+     * @param authenticationMethod The new authentication method of the CONNECT.
+     * @throws IllegalArgumentException If the authentication method is not a valid UTF-8 string.
      * @since 4.2.0
      */
     void setAuthenticationMethod(@Nullable String authenticationMethod);
 
     /**
-     * Set the authentication data
+     * Set the authentication data.
      *
-     * @param authenticationData The new authentication data of the CONNECT
+     * @param authenticationData The new authentication data of the CONNECT.
      * @since 4.2.0
      */
     void setAuthenticationData(@Nullable ByteBuffer authenticationData);
 
     /**
-     * Set the username
+     * Set the username.
      *
-     * @param userName The new username for the CONNECT
+     * @param userName The new username for the CONNECT.
      * @since 4.2.0
      */
     void setUserName(@Nullable String userName);
 
     /**
-     * Set the password
+     * Set the password.
      *
-     * @param password The new password for the CONNECT
+     * @param password The new password for the CONNECT.
      * @since 4.2.0
      */
     void setPassword(@Nullable ByteBuffer password);
@@ -177,6 +189,4 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      */
     @NotNull
     Optional<ModifiableWillPublish> getModifiableWillPublish();
-
-    boolean isModified();
 }

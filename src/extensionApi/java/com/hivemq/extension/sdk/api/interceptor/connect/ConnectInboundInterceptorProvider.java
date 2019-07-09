@@ -22,12 +22,13 @@ import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInbound
 
 /**
  * The interceptor provider allows to implement custom logic to modify incoming CONNECT messages.
- * For each incoming CONNECT message an {@link ConnectInboundInterceptor} can be provided that contains the modification logic.
+ * For each incoming CONNECT message a {@link ConnectInboundInterceptor} can be provided that contains the modification logic.
  *
  * @author Lukas Brandl
  * @since 4.2.0
  */
 public interface ConnectInboundInterceptorProvider {
+
     /**
      * This method is called for each incoming CONNECT message by HiveMQ.
      * <p>
@@ -36,7 +37,7 @@ public interface ConnectInboundInterceptorProvider {
      * <p>
      * <code>null</code> can be returned if a CONNECT message should not be intercepted.
      *
-     * @return an implementation of the {@link ConnectInboundInterceptor} or null if the CONNECT should not be intercepted.
+     * @return An implementation of the {@link ConnectInboundInterceptor} or null if the CONNECT should not be intercepted.
      * @since 4.2.0
      */
     @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull ConnectInboundProviderInput input);

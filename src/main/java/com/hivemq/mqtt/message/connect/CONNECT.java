@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.publish.ModifiableConnectPacket;
+import com.hivemq.extensions.packets.connect.ModifiableConnectPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -500,7 +500,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         }
     }
 
-    public static @NotNull CONNECT mergeConnectPacket(final @NotNull ModifiableConnectPacket connectPacket, final @NotNull CONNECT origin,
+    public static @NotNull CONNECT mergeConnectPacket(final @NotNull ModifiableConnectPacketImpl connectPacket, final @NotNull CONNECT origin,
                                                       @NotNull final String clusterId) {
 
         if (!connectPacket.isModified()) {

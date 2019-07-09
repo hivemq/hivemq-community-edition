@@ -141,6 +141,26 @@ public class ConnectInboundInterceptorHandlerTest {
     }
 
     @Test
+    public void test_null_interceptor() throws Exception {
+
+        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestNullInterceptor");
+        when(interceptors.connectInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
+        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.writeInbound(testConnect());
+        channel.runPendingTasks();
+        CONNECT connect = channel.readInbound();
+        while (connect == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            connect = channel.readInbound();
+        }
+
+        assertEquals("client", connect.getClientIdentifier());
+    }
+
+    @Test
     public void test_timeout_failed() throws Exception {
 
         final ConnectInboundInterceptorProvider interceptorProvider =
@@ -241,6 +261,15 @@ public class ConnectInboundInterceptorHandlerTest {
             return (input, output) -> {
                 throw new RuntimeException("test");
             };
+        }
+    }
+
+    public static class TestNullInterceptor implements ConnectInboundInterceptorProvider {
+
+        @Override
+        public @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+            System.out.println("Provider called");
+            return null;
         }
     }
 }

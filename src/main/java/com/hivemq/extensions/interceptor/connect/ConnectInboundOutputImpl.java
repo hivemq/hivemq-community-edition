@@ -26,7 +26,7 @@ public class ConnectInboundOutputImpl extends AbstractAsyncOutput<ConnectInbound
     }
 
     @Override
-    public @NotNull ModifiableConnectPacket getConnectPacket() {
+    public @NotNull ModifiableConnectPacketImpl getConnectPacket() {
         return connectPacket;
     }
 

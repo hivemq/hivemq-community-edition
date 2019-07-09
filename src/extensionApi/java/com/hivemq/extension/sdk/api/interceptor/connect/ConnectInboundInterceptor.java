@@ -28,7 +28,6 @@ import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInbound
  * <p>
  * If the same instance is shared between multiple clients it can be called in different Threads and must therefore be
  * thread-safe.
- * <p>
  *
  * @author Lukas Brandl
  * @since 4.2.0

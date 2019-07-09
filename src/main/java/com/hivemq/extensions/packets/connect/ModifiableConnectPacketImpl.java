@@ -157,6 +157,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public synchronized void setTopicAliasMaximum(final int topicAliasMaximum) {
         checkArgument(topicAliasMaximum >= 0, "Topic alias must NOT be less than 0");
         checkArgument(topicAliasMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "Maximum packet must be less than 65535");
+        if (getMqttVersion() != MqttVersion.V_5) {
+            return;
+        }
         if (this.topicAliasMaximum == topicAliasMaximum) {
             return;
         }
@@ -166,6 +169,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
     @Override
     public synchronized void setRequestResponseInformation(final boolean requestResponseInformation) {
+        if (getMqttVersion() != MqttVersion.V_5) {
+            return;
+        }
         if (this.requestResponseInformation == requestResponseInformation) {
             return;
         }
@@ -175,6 +181,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
     @Override
     public synchronized void setRequestProblemInformation(final boolean requestProblemInformation) {
+        if (getMqttVersion() != MqttVersion.V_5) {
+            return;
+        }
         if (this.requestProblemInformation == requestProblemInformation) {
             return;
         }
@@ -232,8 +241,6 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         modified = true;
     }
 
-
-    @Override
     public boolean isModified() {
         final boolean willModified;
         if (modifiableWillPublish == null) {

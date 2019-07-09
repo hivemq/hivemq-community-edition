@@ -124,6 +124,11 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
         }
         final ImmutableMap<String, ConnectInboundInterceptor> connectInterceptors = builder.build();
 
+        if (connectInterceptors.isEmpty()) {
+            ctx.fireChannelRead(connect);
+            return;
+        }
+
         final ConnectInboundOutputImpl output =
                 new ConnectInboundOutputImpl(configurationService, asyncer, connect);
         final ConnectInboundInputImpl input =
