@@ -173,7 +173,7 @@ public interface ConnectPacket {
      * If this property is present, the {@link ByteBuffer} contains the data used for the extended authentication.
      * The contents of this data are defined by the authentication method.
      * <p>
-     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication data if present.
      * @since 4.0.0
@@ -183,7 +183,7 @@ public interface ConnectPacket {
     /**
      * The user properties from the CONNECT packet.
      * <p>
-     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return The user properties.
      * @since 4.0.0

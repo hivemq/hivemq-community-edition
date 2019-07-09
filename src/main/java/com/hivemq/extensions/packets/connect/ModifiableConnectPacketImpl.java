@@ -106,15 +106,15 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
-    public synchronized void setExpiryInterval(final long expiryInterval) {
+    public synchronized void setSessionExpiryInterval(final long sessionExpiryInterval) {
         final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
 
-        checkArgument(expiryInterval >= 0, "Session expiry interval must NOT be less than 0");
-        checkArgument(expiryInterval < configuredMaximum, "Expiry interval must be less than the configured maximum of" + configuredMaximum);
-        if (this.sessionExpiryInterval == expiryInterval) {
+        checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must NOT be less than 0");
+        checkArgument(sessionExpiryInterval < configuredMaximum, "Expiry interval must be less than the configured maximum of" + configuredMaximum);
+        if (this.sessionExpiryInterval == sessionExpiryInterval) {
             return;
         }
-        this.sessionExpiryInterval = expiryInterval;
+        this.sessionExpiryInterval = sessionExpiryInterval;
         modified = true;
     }
 

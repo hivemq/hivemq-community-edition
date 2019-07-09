@@ -38,7 +38,7 @@ public class ModifiableConnectPacketImplTest {
     public void test_change_all_valid_values() {
         modifiablePacket.setClientId("id modified");
         modifiablePacket.setKeepAlive(1);
-        modifiablePacket.setExpiryInterval(2);
+        modifiablePacket.setSessionExpiryInterval(2);
         modifiablePacket.setAuthenticationData(ByteBuffer.wrap(new byte[]{3}));
         modifiablePacket.setAuthenticationMethod("auth modified");
         modifiablePacket.setMaximumPacketSize(4);
@@ -85,7 +85,7 @@ public class ModifiableConnectPacketImplTest {
 
         modifiablePacket.setClientId("id modified");
         modifiablePacket.setKeepAlive(1);
-        modifiablePacket.setExpiryInterval(2);
+        modifiablePacket.setSessionExpiryInterval(2);
         modifiablePacket.setAuthenticationData(ByteBuffer.wrap(new byte[]{3}));
         modifiablePacket.setAuthenticationMethod("auth modified");
         modifiablePacket.setMaximumPacketSize(4);
@@ -110,7 +110,7 @@ public class ModifiableConnectPacketImplTest {
         assertTrue(modifiablePacket.isModified());
 
         modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setExpiryInterval(2);
+        modifiablePacket.setSessionExpiryInterval(2);
         assertTrue(modifiablePacket.isModified());
 
         modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
@@ -171,7 +171,7 @@ public class ModifiableConnectPacketImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_expiry_interval_maximum() {
         configurationService.mqttConfiguration().setMaxSessionExpiryInterval(60);
-        modifiablePacket.setExpiryInterval(61);
+        modifiablePacket.setSessionExpiryInterval(61);
     }
 
     @Test(expected = IllegalArgumentException.class)

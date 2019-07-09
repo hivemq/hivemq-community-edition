@@ -249,7 +249,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 final @NotNull ConnectInboundInputImpl input, final @NotNull ConnectInboundOutputImpl output) {
             try {
                 final ConnectInboundInterceptor interceptor = provider.getConnectInterceptor(providerInput);
-                if (interceptor != null) {
+                if (interceptor != null && !interceptorFuture.isDone()) {
                     interceptor.onConnect(input, output);
                 }
             } catch (final Throwable e) {

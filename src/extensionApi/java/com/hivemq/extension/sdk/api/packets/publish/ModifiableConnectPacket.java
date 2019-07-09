@@ -80,7 +80,7 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * @throws IllegalArgumentException If the expiry interval is more than the configured maximum.
      * @since 4.2.0
      */
-    void setExpiryInterval(long expiryInterval);
+    void setSessionExpiryInterval(long expiryInterval);
 
     /**
      * Set the keep alive.
