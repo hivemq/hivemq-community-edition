@@ -115,19 +115,6 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
         }
         final ConnectInboundProviderInputImpl providerInput =
                 new ConnectInboundProviderInputImpl(serverInformation, channel, clientId);
-        final ImmutableMap.Builder<String, ConnectInboundInterceptor> builder = ImmutableMap.builder();
-        for (final Map.Entry<String, ConnectInboundInterceptorProvider> providerEntry : connectInterceptorProviders.entrySet()) {
-            final ConnectInboundInterceptor interceptor = providerEntry.getValue().getConnectInterceptor(providerInput);
-            if (interceptor != null) {
-                builder.put(providerEntry.getKey(), interceptor);
-            }
-        }
-        final ImmutableMap<String, ConnectInboundInterceptor> connectInterceptors = builder.build();
-
-        if (connectInterceptors.isEmpty()) {
-            ctx.fireChannelRead(connect);
-            return;
-        }
 
         final ConnectInboundOutputImpl output =
                 new ConnectInboundOutputImpl(configurationService, asyncer, connect);
@@ -135,14 +122,14 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 new ConnectInboundInputImpl(new ConnectPacketImpl(connect), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final ConnectInterceptorContext interceptorContext = new ConnectInterceptorContext(ConnectInterceptorTask.class,
-                clientId, channel, input, interceptorFuture, connectInterceptors.size());
+                clientId, channel, input, interceptorFuture, connectInterceptorProviders.size());
 
-        for (final Map.Entry<String, ConnectInboundInterceptor> entry : connectInterceptors.entrySet()) {
+        for (final Map.Entry<String, ConnectInboundInterceptorProvider> entry : connectInterceptorProviders.entrySet()) {
             if (interceptorFuture.isDone()) {
                 // The future is set in case an async interceptor timeout failed or if an interceptor throws an exception
                 break;
             }
-            final ConnectInboundInterceptor interceptor = entry.getValue();
+            final ConnectInboundInterceptorProvider provider = entry.getValue();
             final HiveMQExtension plugin = hiveMQExtensions.getExtension(entry.getKey());
 
             //disabled extension would be null
@@ -150,7 +137,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
                 interceptorContext.increment();
                 continue;
             }
-            final ConnectInterceptorTask interceptorTask = new ConnectInterceptorTask(interceptor, plugin.getId(), channel,
+            final ConnectInterceptorTask interceptorTask = new ConnectInterceptorTask(provider, providerInput, plugin.getId(), channel,
                     interceptorFuture, clientId);
 
             final boolean executionSuccessful =
@@ -160,7 +147,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             //we need to increment since extension post method would not be called.
             if (!executionSuccessful) {
 
-                String className = interceptor.getClass().getSimpleName();
+                String className = provider.getClass().getSimpleName();
 
                 //may happen if interface not implemented.
                 if (className.isEmpty()) {
@@ -235,19 +222,22 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
     private class ConnectInterceptorTask
             implements PluginInOutTask<ConnectInboundInputImpl, ConnectInboundOutputImpl> {
 
-        private final @NotNull ConnectInboundInterceptor interceptor;
+        private final @NotNull ConnectInboundInterceptorProvider provider;
+        private final @NotNull ConnectInboundProviderInputImpl providerInput;
         private final @NotNull String pluginId;
         private final @NotNull Channel channel;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String clientId;
 
         private ConnectInterceptorTask(
-                final @NotNull ConnectInboundInterceptor interceptor,
+                final @NotNull ConnectInboundInterceptorProvider provider,
+                final @NotNull ConnectInboundProviderInputImpl providerInput,
                 final @NotNull String pluginId,
                 final @NotNull Channel channel,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final @NotNull String clientId) {
-            this.interceptor = interceptor;
+            this.provider = provider;
+            this.providerInput = providerInput;
             this.pluginId = pluginId;
             this.channel = channel;
             this.interceptorFuture = interceptorFuture;
@@ -258,7 +248,10 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
         public @NotNull ConnectInboundOutputImpl apply(
                 final @NotNull ConnectInboundInputImpl input, final @NotNull ConnectInboundOutputImpl output) {
             try {
-                interceptor.onConnect(input, output);
+                final ConnectInboundInterceptor interceptor = provider.getConnectInterceptor(providerInput);
+                if (interceptor != null) {
+                    interceptor.onConnect(input, output);
+                }
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on connect interception. The exception should be handled by the extension.",
