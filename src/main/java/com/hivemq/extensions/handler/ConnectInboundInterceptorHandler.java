@@ -14,6 +14,7 @@ import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundIntercepto
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.client.parameter.ClientInformationImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
@@ -290,6 +291,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             try {
                 final CONNECT finalConnect = CONNECT.mergeConnectPacket(output.getConnectPacket(), connect, clusterId);
                 ctx.channel().attr(ChannelAttributes.CLIENT_ID).set(finalConnect.getClientIdentifier());
+                ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_INFORMATION).set(new ClientInformationImpl(finalConnect.getClientIdentifier()));
                 ctx.channel().attr(ChannelAttributes.CLEAN_START).set(finalConnect.isCleanStart());
                 ctx.channel().attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(finalConnect.getKeepAlive());
                 ctx.channel().attr(ChannelAttributes.AUTH_USERNAME).set(finalConnect.getUsername());

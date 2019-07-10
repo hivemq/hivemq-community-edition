@@ -85,6 +85,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(PLUGIN_INITIALIZER_HANDLER, channelDependencies.getPluginInitializerHandler());
 
         //Must be after decoder
+        ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
         ch.pipeline().addLast(PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPublishOutboundInterceptorHandler());
@@ -105,7 +106,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(PUBLISH_MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
-        ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
         ch.pipeline().addLast(MQTT_CONNECT_HANDLER, channelDependencies.getConnectHandler());
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 

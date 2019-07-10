@@ -162,7 +162,7 @@ public interface ConnectPacket {
      * If this property is present, the string contains the authentication method that should be used for the extended
      * authentication.
      * <p>
-     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication method if present.
      * @since 4.0.0

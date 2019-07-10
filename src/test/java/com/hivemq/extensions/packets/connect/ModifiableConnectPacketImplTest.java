@@ -184,4 +184,9 @@ public class ModifiableConnectPacketImplTest {
     public void test_auth_method_null_char() {
         modifiablePacket.setAuthenticationMethod("\0");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_client_id_empty() {
+        modifiablePacket.setClientId("");
+    }
 }

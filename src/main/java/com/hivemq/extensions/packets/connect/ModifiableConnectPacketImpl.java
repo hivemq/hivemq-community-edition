@@ -79,6 +79,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         checkArgument(!Utf8Utils.containsMustNotCharacters(clientId), clientId + " is not a valid client id");
         checkArgument(!Utf8Utils.hasControlOrNonCharacter(clientId), clientId + " is not a valid client id");
         checkArgument(clientId.length() < clientIdLength, "client ID exceeds the maximum client ID length");
+        checkArgument(!clientId.isEmpty(),"client ID must not be empty");
         if (this.clientId.equals(clientId)) {
             return;
         }

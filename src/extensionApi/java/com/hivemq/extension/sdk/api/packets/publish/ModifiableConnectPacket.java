@@ -18,12 +18,15 @@ package com.hivemq.extension.sdk.api.packets.publish;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.builder.WillPublishBuilder;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -38,10 +41,18 @@ public interface ModifiableConnectPacket extends ConnectPacket {
 
     /**
      * Set the client ID.
+     * <p>
+     * In case the client ID is changed, future interceptors may be called by a different thread for the same client.
+     * Extensions need to ensure thread-safety for shared objects in this case.
+     * Interceptors are still called in the same order for the client.
+     * <p>
+     * The client ID provided by the {@link ClientInformation} in the {@link ConnectInboundInput} is not updated until
+     * all inter {@link ConnectInboundInterceptor} for this CONNECT are finished.
      *
      * @param clientId The new client ID of the CONNECT.
      * @throws IllegalArgumentException If the client ID is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the client ID exceeds the maximum client ID length.
+     * @throws IllegalArgumentException If the client ID is empty.
      * @since 4.2.0
      */
     void setClientId(@NotNull String clientId);
@@ -95,7 +106,7 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * Set the receive maximum.
      *
      * @param receiveMaximum The new receive maximum for the CONNECT.
-     * @throws IllegalArgumentException If the receive maximum is less than zero or more than '65535'.
+     * @throws IllegalArgumentException If the receive maximum is less than one or more than '65535'.
      * @since 4.2.0
      */
     void setReceiveMaximum(int receiveMaximum);
@@ -104,7 +115,7 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * Set the maximum packet size.
      *
      * @param maximumPacketSize The new maximum packet size for the CONNECT.
-     * @throws IllegalArgumentException If the maximum packet size is less than zero or more than the configured
+     * @throws IllegalArgumentException If the maximum packet size is less than one or more than the configured
      *                                  maximum.
      * @since 4.2.0
      */
