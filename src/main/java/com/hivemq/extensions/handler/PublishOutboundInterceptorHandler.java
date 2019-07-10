@@ -238,6 +238,8 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             } catch (final Throwable e) {
                 log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound publish interception. " +
                         "Extensions are responsible on their own to handle exceptions.", pluginId);
+
+                publishOutboundOutput.forciblyPreventPublishDelivery();
                 Exceptions.rethrowError(e);
             }
             return publishOutboundOutput;
