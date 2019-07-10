@@ -216,7 +216,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
 
-        removeNoConnectIdleHandler(ctx);
         addOrderedTopicHandler(ctx, connect);
 
         if (authenticators.areAuthenticatorsAvailable() || AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
@@ -728,16 +727,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return Futures.immediateFuture(null);
         } finally {
             lock.unlock();
-        }
-    }
-
-    private void removeNoConnectIdleHandler(final @NotNull ChannelHandlerContext ctx) {
-        try {
-            ctx.pipeline().remove(NEW_CONNECTION_IDLE_HANDLER);
-            ctx.pipeline().remove(NO_CONNECT_IDLE_EVENT_HANDLER);
-        } catch (final NoSuchElementException ex) {
-            //no problem, because if these handlers are not in the pipeline anyway, we still get the expected result here
-            log.trace("Not able to remove no connect idle handler");
         }
     }
 

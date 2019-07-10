@@ -25,6 +25,7 @@ import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
+import com.hivemq.mqtt.handler.connect.RemoveConnectIdleHandler;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.security.exception.SslException;
@@ -80,6 +81,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(MQTT_MESSAGE_DECODER, new MQTTMessageDecoder(channelDependencies));
 
         ch.pipeline().addLast(MQTT_MESSAGE_ENCODER, channelDependencies.getMqttMessageEncoder());
+
+        ch.pipeline().addLast(REMOVE_CONNECT_IDLE_HANDLER, new RemoveConnectIdleHandler());
 
         //Must be before encoder
         ch.pipeline().addLast(PLUGIN_INITIALIZER_HANDLER, channelDependencies.getPluginInitializerHandler());
