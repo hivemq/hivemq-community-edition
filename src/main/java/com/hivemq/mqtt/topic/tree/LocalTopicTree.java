@@ -25,13 +25,40 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 /**
  * @author Lukas Brandl
+ * @author Christoph Schäbel
  */
 public interface LocalTopicTree {
 
     boolean addTopic(@NotNull String subscriber, @NotNull Topic topic, byte flags, @Nullable String sharedGroup);
 
+    /**
+     * All subscribers for a topic (PUBLISH)
+     *
+     * @param topic the topic to publish to (no wildcards)
+     * @return the subscribers interested in this topic with all their identifiers
+     */
     @NotNull
     ImmutableSet<SubscriberWithIdentifiers> getSubscribers(@NotNull String topic);
+
+    /**
+     * All subscribers that have subscribed to this exact topic filter
+     *
+     * @param topicFilter the topic filter (including wildcards)
+     * @return the subscribers with a subscription with this topic filter
+     */
+    @NotNull
+    ImmutableSet<String> getSubscribersWithFilter(@NotNull String topicFilter, @NotNull ItemFilter itemFilter);
+
+    /**
+     * All subscribers that have a subscription matching this topic
+     *
+     * @param topic the topic to match (no wildcards)
+     * @param itemFilter
+     * @param excludeRootLevelWildcard
+     * @return the subscribers with a subscription for this topic
+     */
+    @NotNull
+    ImmutableSet<String> getSubscribersForTopic(@NotNull String topic, @NotNull ItemFilter itemFilter, boolean excludeRootLevelWildcard);
 
     @NotNull
     ImmutableSet<SubscriberWithIdentifiers> getSubscribers(@NotNull String topic, boolean excludeRootLevelWildcard);
@@ -66,4 +93,15 @@ public interface LocalTopicTree {
      */
     @Nullable
     SubscriberWithIdentifiers getSubscriber(@NotNull String client, @NotNull String topic);
+
+
+    interface ItemFilter {
+        /**
+         * is called for each subscriber that matches the specified topic / topic filter
+         *
+         * @param subscriber the current subscriber
+         * @return true if the current subscriber should be added to the result set, false if not
+         */
+        boolean checkItem(@NotNull final SubscriberWithQoS subscriber);
+    }
 }
