@@ -148,15 +148,12 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             //we need to increment since extension post method would not be called.
             if (!executionSuccessful) {
 
-                String className = provider.getClass().getSimpleName();
-
-                //may happen if interface not implemented.
-                if (className.isEmpty()) {
-                    className = "ConnectInboundInterceptor";
-                }
-
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", className, plugin.getId());
-                interceptorContext.increment();
+                log.warn("Extension task queue full on connect interceptor call. Connect failed for client {}.", clientId);
+                final String logMessage = "Connect with client ID " + clientId + " failed the extension task queue was full.";
+                connacker.connackError(channel, logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
+                        Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, "Extension interceptor timeout");
+                interceptorFuture.set(null);
+                return;
             }
         }
 
