@@ -322,7 +322,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         if (authData == null) {
             return Optional.empty();
         }
-        return Optional.of(authData);
+        return Optional.of(authData.asReadOnlyBuffer());
     }
 
     @Override
@@ -340,6 +340,6 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         if (password == null) {
             return Optional.empty();
         }
-        return Optional.of(password);
+        return Optional.of(password.asReadOnlyBuffer());
     }
 }

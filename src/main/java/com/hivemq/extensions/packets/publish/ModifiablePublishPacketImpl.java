@@ -294,7 +294,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public @NotNull Optional<ByteBuffer> getCorrelationData() {
-        return Optional.ofNullable(correlationData);
+        if(correlationData == null){
+            return Optional.empty();
+        }
+        return Optional.of(correlationData.asReadOnlyBuffer());
     }
 
     @Override
@@ -309,7 +312,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public @NotNull Optional<ByteBuffer> getPayload() {
-        return Optional.ofNullable(payload);
+        if(payload == null){
+            return Optional.empty();
+        }
+        return Optional.of(payload.asReadOnlyBuffer());
     }
 
     @Override
