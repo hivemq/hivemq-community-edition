@@ -130,7 +130,7 @@ public class ModifiableConnectPacketImplTest {
         assertTrue(modifiablePacket.isModified());
 
         modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setRequestProblemInformation(true);
+        modifiablePacket.setRequestProblemInformation(false);
         assertTrue(modifiablePacket.isModified());
 
         modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);

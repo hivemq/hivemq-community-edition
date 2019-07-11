@@ -318,12 +318,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         if (connect.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_NOT_SET) {
             connect.setMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
         }
-        if (connect.isResponseInformationRequested() == null) {
-            connect.setResponseInformationRequested(DEFAULT_RESPONSE_INFORMATION_REQUESTED);
-        }
-        if (connect.isProblemInformationRequested() == null) {
-            connect.setProblemInformationRequested(DEFAULT_PROBLEM_INFORMATION_REQUESTED);
-        }
         if (connect.isWill()) {
             final MqttWillPublish willPublish = connect.getWillPublish();
             if (willPublish.getMessageExpiryInterval() > maxMessageExpiryInterval) {

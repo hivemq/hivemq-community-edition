@@ -209,8 +209,8 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(SESSION_EXPIRY_NOT_SET, connect.getSessionExpiryInterval());
         assertEquals(RECEIVE_MAXIMUM_NOT_SET, connect.getReceiveMaximum());
         assertEquals(TOPIC_ALIAS_MAXIMUM_NOT_SET, connect.getTopicAliasMaximum());
-        assertEquals(null, connect.isResponseInformationRequested());
-        assertEquals(null, connect.isProblemInformationRequested());
+        assertEquals(DEFAULT_RESPONSE_INFORMATION_REQUESTED, connect.isResponseInformationRequested());
+        assertEquals(DEFAULT_PROBLEM_INFORMATION_REQUESTED, connect.isProblemInformationRequested());
 
         assertNull(channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get());
     }

@@ -40,8 +40,8 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     private final int keepAlive;
     private final boolean isCleanStart;
     private long sessionExpiryInterval;
-    private Boolean isResponseInformationRequested;
-    private Boolean isProblemInformationRequested;
+    private boolean isResponseInformationRequested;
+    private boolean isProblemInformationRequested;
 
     //Restrictions
     private int receiveMaximum;
@@ -69,7 +69,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     //MQTT 5 CONNECT
     private CONNECT(
             final int keepAlive, final boolean isCleanStart, final long sessionExpiryInterval,
-            final Boolean isResponseInformationRequested, final Boolean isProblemInformationRequested,
+            final boolean isResponseInformationRequested, final boolean isProblemInformationRequested,
             final int receiveMaximum, final int topicAliasMaximum, final long maximumPacketSize,
             final boolean usernameRequired, final boolean passwordRequired,
             @Nullable final String username, @Nullable final byte[] password,
@@ -203,12 +203,12 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     }
 
     @Override
-    public Boolean isResponseInformationRequested() {
+    public boolean isResponseInformationRequested() {
         return isResponseInformationRequested;
     }
 
     @Override
-    public Boolean isProblemInformationRequested() {
+    public boolean isProblemInformationRequested() {
         return isProblemInformationRequested;
     }
 
@@ -364,8 +364,8 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         private int keepAlive;
         private boolean isCleanStart;
         private long sessionExpiryInterval;
-        private Boolean isResponseInformationRequested;
-        private Boolean isProblemInformationRequested;
+        private boolean isResponseInformationRequested = DEFAULT_RESPONSE_INFORMATION_REQUESTED;
+        private boolean isProblemInformationRequested = DEFAULT_PROBLEM_INFORMATION_REQUESTED;
 
         //Restrictions
         private int receiveMaximum;
@@ -434,12 +434,12 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
             return this;
         }
 
-        public Mqtt5Builder withResponseInformationRequested(final Boolean responseInformationRequested) {
+        public Mqtt5Builder withResponseInformationRequested(final boolean responseInformationRequested) {
             isResponseInformationRequested = responseInformationRequested;
             return this;
         }
 
-        public Mqtt5Builder withProblemInformationRequested(final Boolean problemInformationRequested) {
+        public Mqtt5Builder withProblemInformationRequested(final boolean problemInformationRequested) {
             isProblemInformationRequested = problemInformationRequested;
             return this;
         }

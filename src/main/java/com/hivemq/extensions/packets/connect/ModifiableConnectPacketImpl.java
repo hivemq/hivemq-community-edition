@@ -58,8 +58,8 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         this.receiveMaximum = originalConnect.getReceiveMaximum();
         this.maximumPacketSize = originalConnect.getMaximumPacketSize();
         this.topicAliasMaximum = originalConnect.getTopicAliasMaximum();
-        this.requestResponseInformation = originalConnect.isResponseInformationRequested() == null ? false : originalConnect.isResponseInformationRequested();
-        this.requestProblemInformation = originalConnect.isProblemInformationRequested() == null ? false : originalConnect.isProblemInformationRequested();
+        this.requestResponseInformation = originalConnect.isResponseInformationRequested();
+        this.requestProblemInformation = originalConnect.isProblemInformationRequested();
         this.authMethod = originalConnect.getAuthMethod();
         this.authData = originalConnect.getAuthData() == null ? null : ByteBuffer.wrap(originalConnect.getAuthData());
         this.userProperties = new ModifiableUserPropertiesImpl(originalConnect.getUserProperties().getPluginUserProperties(),

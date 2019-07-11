@@ -47,7 +47,7 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * Interceptors are still called in the same order for the client.
      * <p>
      * The client ID provided by the {@link ClientInformation} in the {@link ConnectInboundInput} is not updated until
-     * all inter {@link ConnectInboundInterceptor} for this CONNECT are finished.
+     * all {@link ConnectInboundInterceptor} for this CONNECT are finished.
      *
      * @param clientId The new client ID of the CONNECT.
      * @throws IllegalArgumentException If the client ID is not a valid UTF-8 string.
