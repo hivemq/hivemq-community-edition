@@ -16,6 +16,7 @@
 
 package com.hivemq.extensions.packets.general;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
@@ -50,7 +51,8 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
     };
 
     @NotNull
-    private InternalUserProperties legacy;
+    @VisibleForTesting
+    InternalUserProperties legacy;
 
     private final boolean validateUTF8;
 
@@ -70,7 +72,7 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
         if (legacy == null) {
             this.legacy = EmptyUserPropertiesImpl.INSTANCE;
         } else {
-            // This is necessary because the legacy user properties can be modifiable
+            // It is necessary to copy here, because the legacy user properties can be modifiable
             this.legacy = new UserPropertiesImpl(Mqtt5UserProperties.of(legacy.asImmutableList()));
         }
         this.validateUTF8 = validateUTF8;
