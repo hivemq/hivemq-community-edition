@@ -58,6 +58,9 @@ public class InternalConfigurations {
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRIES = new AtomicInteger(500);
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRY_INTERVAL = new AtomicInteger(100);
 
+    //max amount of subscriptions to pull from the peristence for extension iterate chunk
+    public static final int PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE = 2000;
+
     //The threshold at which the topic tree starts to map entries instead of storing them in an array
     public static final AtomicInteger TOPIC_TREE_MAP_CREATION_THRESHOLD = new AtomicInteger(16);
     // The configuration for qos 0 memory hard limit divisor, must be greater than 0.

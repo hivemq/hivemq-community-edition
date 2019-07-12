@@ -94,4 +94,15 @@ public class TopicSubscriptionImpl implements TopicSubscription {
                 Objects.requireNonNull(Mqtt5RetainHandling.DO_NOT_SEND),
                 topicSubscription.getSubscriptionIdentifier().orElse(null));
     }
+
+    @Override
+    public String toString() {
+        return "TopicSubscriptionImpl{" +
+                "topicFilter='" + topicFilter + '\'' +
+                ", qos=" + qos +
+                ", retainAsPublished=" + retainAsPublished +
+                ", noLocal=" + noLocal +
+                ", subscriptionIdentifier=" + subscriptionIdentifier +
+                '}';
+    }
 }
