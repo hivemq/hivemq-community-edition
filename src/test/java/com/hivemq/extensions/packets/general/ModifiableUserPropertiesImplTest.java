@@ -92,7 +92,7 @@ public class ModifiableUserPropertiesImplTest {
     @Test(timeout = 5000)
     public void test_delegate_is_returned() {
 
-        assertSame(intermediateProps, filledProps.consolidate());
+        assertEquals(filledProps.legacy, filledProps.consolidate());
     }
 
     @Test(expected = NullPointerException.class)

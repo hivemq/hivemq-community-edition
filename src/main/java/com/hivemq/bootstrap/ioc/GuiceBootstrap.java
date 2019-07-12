@@ -32,7 +32,7 @@ import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.ioc.ConfigurationModule;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.diagnostic.DiagnosticModule;
-import com.hivemq.extensions.ioc.PluginModule;
+import com.hivemq.extensions.ioc.ExtensionModule;
 import com.hivemq.lifecycle.LifecycleModule;
 import com.hivemq.metrics.ioc.MetricsModule;
 import com.hivemq.mqtt.ioc.MQTTHandlerModule;
@@ -112,7 +112,7 @@ public class GuiceBootstrap {
                 /* Bind Statistics specific classes */
                 new UsageStatisticsModule(),
                 /* Binds the Extension System */
-                new PluginModule());
+                new ExtensionModule());
 
         try {
             return Guice.createInjector(Stage.PRODUCTION, modules.build());

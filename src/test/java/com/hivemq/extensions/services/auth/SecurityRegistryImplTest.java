@@ -75,8 +75,8 @@ public class SecurityRegistryImplTest {
         authorizers = new AuthorizersImpl(hiveMQExtensions);
         securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQExtensions);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(
-                hiveMQExtension);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class)))
+                .thenReturn(hiveMQExtension);
         when(hiveMQExtensions.getExtension(anyString())).thenReturn(hiveMQExtension);
 
         when(hiveMQExtension.getId()).thenReturn("extension1");

@@ -25,6 +25,7 @@ import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
+import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
@@ -69,6 +70,13 @@ public class Services {
      */
     public static @NotNull InitializerRegistry initializerRegistry() {
         return getClassObject(InitializerRegistry.class);
+    }
+
+    /**
+     * @return A service to set a {@link GlobalInterceptorRegistry}
+     */
+    public static @NotNull GlobalInterceptorRegistry interceptorRegistry() {
+        return getClassObject(GlobalInterceptorRegistry.class);
     }
 
     /**

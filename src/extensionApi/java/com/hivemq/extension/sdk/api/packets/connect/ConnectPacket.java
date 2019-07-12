@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -161,7 +162,7 @@ public interface ConnectPacket {
      * If this property is present, the string contains the authentication method that should be used for the extended
      * authentication.
      * <p>
-     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication method if present.
      * @since 4.0.0
@@ -172,7 +173,7 @@ public interface ConnectPacket {
      * If this property is present, the {@link ByteBuffer} contains the data used for the extended authentication.
      * The contents of this data are defined by the authentication method.
      * <p>
-     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication data if present.
      * @since 4.0.0
@@ -182,7 +183,7 @@ public interface ConnectPacket {
     /**
      * The user properties from the CONNECT packet.
      * <p>
-     * For an MQTT 3 client this MQTT 5 property will always be empty.
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return The user properties.
      * @since 4.0.0

@@ -97,7 +97,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
     @Inject
     public IncomingPublishHandler(final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
                                   final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
+                                  final @NotNull HiveMQExtensions hiveMQExtensions,
                                   final @NotNull MessageDroppedService messageDroppedService,
                                   final @NotNull PluginAuthorizerService pluginAuthorizerService,
                                   final @NotNull Mqtt3ServerDisconnector mqttDisconnector,

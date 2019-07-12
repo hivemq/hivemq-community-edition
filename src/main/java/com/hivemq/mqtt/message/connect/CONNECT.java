@@ -17,12 +17,17 @@
 package com.hivemq.mqtt.message.connect;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extensions.packets.connect.ModifiableConnectPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.util.Bytes;
 
 import java.nio.charset.StandardCharsets;
 
@@ -35,8 +40,8 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     private final int keepAlive;
     private final boolean isCleanStart;
     private long sessionExpiryInterval;
-    private Boolean isResponseInformationRequested;
-    private Boolean isProblemInformationRequested;
+    private boolean isResponseInformationRequested;
+    private boolean isProblemInformationRequested;
 
     //Restrictions
     private int receiveMaximum;
@@ -64,7 +69,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     //MQTT 5 CONNECT
     private CONNECT(
             final int keepAlive, final boolean isCleanStart, final long sessionExpiryInterval,
-            final Boolean isResponseInformationRequested, final Boolean isProblemInformationRequested,
+            final boolean isResponseInformationRequested, final boolean isProblemInformationRequested,
             final int receiveMaximum, final int topicAliasMaximum, final long maximumPacketSize,
             final boolean usernameRequired, final boolean passwordRequired,
             @Nullable final String username, @Nullable final byte[] password,
@@ -132,11 +137,13 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     }
 
     @Override
+    @Nullable
     public String getAuthMethod() {
         return authMethod;
     }
 
     @Override
+    @Nullable
     public byte[] getAuthData() {
         return data;
     }
@@ -196,12 +203,12 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     }
 
     @Override
-    public Boolean isResponseInformationRequested() {
+    public boolean isResponseInformationRequested() {
         return isResponseInformationRequested;
     }
 
     @Override
-    public Boolean isProblemInformationRequested() {
+    public boolean isProblemInformationRequested() {
         return isProblemInformationRequested;
     }
 
@@ -357,8 +364,8 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         private int keepAlive;
         private boolean isCleanStart;
         private long sessionExpiryInterval;
-        private Boolean isResponseInformationRequested;
-        private Boolean isProblemInformationRequested;
+        private boolean isResponseInformationRequested = DEFAULT_RESPONSE_INFORMATION_REQUESTED;
+        private boolean isProblemInformationRequested = DEFAULT_PROBLEM_INFORMATION_REQUESTED;
 
         //Restrictions
         private int receiveMaximum;
@@ -427,12 +434,12 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
             return this;
         }
 
-        public Mqtt5Builder withResponseInformationRequested(final Boolean responseInformationRequested) {
+        public Mqtt5Builder withResponseInformationRequested(final boolean responseInformationRequested) {
             isResponseInformationRequested = responseInformationRequested;
             return this;
         }
 
-        public Mqtt5Builder withProblemInformationRequested(final Boolean problemInformationRequested) {
+        public Mqtt5Builder withProblemInformationRequested(final boolean problemInformationRequested) {
             isProblemInformationRequested = problemInformationRequested;
             return this;
         }
@@ -491,6 +498,41 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
             this.usernameRequired = usernameRequired;
             return this;
         }
+    }
+
+    public static @NotNull CONNECT mergeConnectPacket(final @NotNull ModifiableConnectPacketImpl connectPacket, final @NotNull CONNECT origin,
+                                                      @NotNull final String clusterId) {
+
+        if (!connectPacket.isModified()) {
+            return origin;
+        }
+
+        final CONNECT.Mqtt5Builder builder = new CONNECT.Mqtt5Builder();
+
+        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
+        for (final UserProperty userProperty : connectPacket.getUserProperties().asList()) {
+            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+
+        return builder.withClientIdentifier(connectPacket.getClientId())
+                .withCleanStart(connectPacket.getCleanStart())
+                .withWillPublish(MqttWillPublish.fromWillPacket(clusterId, connectPacket.getWillPublish().orElse(null)))
+                .withSessionExpiryInterval(connectPacket.getSessionExpiryInterval())
+                .withKeepAlive(connectPacket.getKeepAlive())
+                .withReceiveMaximum(connectPacket.getReceiveMaximum())
+                .withMaximumPacketSize(connectPacket.getMaximumPacketSize())
+                .withTopicAliasMaximum(connectPacket.getTopicAliasMaximum())
+                .withResponseInformationRequested(connectPacket.getRequestResponseInformation())
+                .withProblemInformationRequested(connectPacket.getRequestProblemInformation())
+                .withAuthMethod(connectPacket.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connectPacket.getAuthenticationData()))
+                .withMqtt5UserProperties(Mqtt5UserProperties.of(userProperties.build()))
+                .withUsername(connectPacket.getUserName().orElse(null))
+                .withPassword(Bytes.getBytesFromReadOnlyBuffer(connectPacket.getPassword()))
+                .withWill(connectPacket.getWillPublish().isPresent())
+                .withUsernameRequired(connectPacket.getUserName().isPresent())
+                .withPasswordRequired(connectPacket.getPassword().isPresent())
+                .build();
     }
 
 }

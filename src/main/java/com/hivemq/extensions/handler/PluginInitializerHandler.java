@@ -65,7 +65,6 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PluginInitializerHandler.class);
 
-
     private final @NotNull Initializers initializers;
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull ServerInformation serverInformation;
@@ -77,12 +76,13 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
     private @Nullable InitializerInputImpl initializerInput;
 
     @Inject
-    public PluginInitializerHandler(@NotNull final Initializers initializers,
-                                    @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
-                                    @NotNull final ServerInformation serverInformation,
+    public PluginInitializerHandler(
+            @NotNull final Initializers initializers,
+            @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
+            @NotNull final ServerInformation serverInformation,
             @NotNull final HiveMQExtensions hiveMQExtensions,
-                                    @NotNull final ClientSessionPersistence clientSessionPersistence,
-                                    @NotNull final MqttConnacker mqttConnacker) {
+            @NotNull final ClientSessionPersistence clientSessionPersistence,
+            @NotNull final MqttConnacker mqttConnacker) {
         this.initializers = initializers;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.serverInformation = serverInformation;
@@ -92,7 +92,9 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void write(@NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise) throws Exception {
+    public void write(
+            @NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise)
+            throws Exception {
         if (msg instanceof CONNACK) {
 
             final CONNACK connack = (CONNACK) msg;
@@ -107,7 +109,9 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void fireInitialize(@NotNull final ChannelHandlerContext ctx, @Nullable final CONNACK msg, @NotNull final ChannelPromise promise) {
+    private void fireInitialize(
+            @NotNull final ChannelHandlerContext ctx, @Nullable final CONNACK msg,
+            @NotNull final ChannelPromise promise) {
 
         final Map<String, ClientInitializer> pluginInitializerMap = initializers.getClientInitializerMap();
 
@@ -126,8 +130,10 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
 
         if (clientContext == null) {
-            ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
-            defaultPermissions = defaultPermissions == null ? new ModifiableDefaultPermissionsImpl() : defaultPermissions;
+            ModifiableDefaultPermissions defaultPermissions =
+                    ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+            defaultPermissions =
+                    defaultPermissions == null ? new ModifiableDefaultPermissionsImpl() : defaultPermissions;
             clientContext = new ClientContextImpl(hiveMQExtensions, defaultPermissions);
         }
 
@@ -137,14 +143,18 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
         }
 
         final SettableFuture<Void> initializeFuture = SettableFuture.create();
-        final MultiInitializerTaskContext taskContext = new MultiInitializerTaskContext(InitializeTask.class, clientId, ctx, initializeFuture, clientContext, pluginInitializerMap.size());
+        final MultiInitializerTaskContext taskContext =
+                new MultiInitializerTaskContext(InitializeTask.class, clientId, ctx, initializeFuture, clientContext,
+                        pluginInitializerMap.size());
 
         for (final Map.Entry<String, ClientInitializer> initializerEntry : pluginInitializerMap.entrySet()) {
 
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     taskContext,
                     () -> initializerInput,
-                    () -> new ClientContextPluginImpl((IsolatedPluginClassloader) initializerEntry.getValue().getClass().getClassLoader(), clientContext),
+                    () -> new ClientContextPluginImpl(
+                            (IsolatedPluginClassloader) initializerEntry.getValue().getClass().getClassLoader(),
+                            clientContext),
                     new InitializeTask(initializerEntry.getValue(), initializerEntry.getKey())
             );
 
@@ -168,7 +178,9 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
     }
 
-    private void authenticateWill(@NotNull final ChannelHandlerContext ctx, @Nullable final CONNACK msg, @NotNull final ChannelPromise promise) {
+    private void authenticateWill(
+            @NotNull final ChannelHandlerContext ctx, @Nullable final CONNACK msg,
+            @NotNull final ChannelPromise promise) {
 
         final CONNECT connect = ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).get();
         if (connect == null || connect.getWillPublish() == null) {
@@ -187,7 +199,8 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
         //Will is not authorized
         ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(true);
         //We have already added the will to the session, so we need to remove it again
-        final ListenableFuture<Void> removeWillFuture = clientSessionPersistence.removeWill(connect.getClientIdentifier());
+        final ListenableFuture<Void> removeWillFuture =
+                clientSessionPersistence.removeWill(connect.getClientIdentifier());
         Futures.addCallback(removeWillFuture, new FutureCallback<Void>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
@@ -234,12 +247,13 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         private int counter = 0;
 
-        MultiInitializerTaskContext(@NotNull final Class<?> taskClazz,
-                                    @NotNull final String clientId,
-                                    @NotNull final ChannelHandlerContext channelHandlerContext,
-                                    @NotNull final SettableFuture<Void> initializeFuture,
-                                    @NotNull final ClientContextImpl clientContext,
-                                    final int clientInitializerCount) {
+        MultiInitializerTaskContext(
+                @NotNull final Class<?> taskClazz,
+                @NotNull final String clientId,
+                @NotNull final ChannelHandlerContext channelHandlerContext,
+                @NotNull final SettableFuture<Void> initializeFuture,
+                @NotNull final ClientContextImpl clientContext,
+                final int clientInitializerCount) {
             super(taskClazz, clientId);
             this.channelHandlerContext = channelHandlerContext;
             this.initializeFuture = initializeFuture;
@@ -253,7 +267,9 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
                 if (++counter == initializerSize) {
                     //update the clients context when all initializers are initialized.
                     channelHandlerContext.channel().attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-                    channelHandlerContext.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(clientContext.getDefaultPermissions());
+                    channelHandlerContext.channel()
+                            .attr(ChannelAttributes.AUTH_PERMISSIONS)
+                            .set(clientContext.getDefaultPermissions());
                     initializeFuture.set(null);
                 }
             } catch (final Exception e) {
@@ -277,11 +293,14 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         @NotNull
         @Override
-        public ClientContextPluginImpl apply(@NotNull final InitializerInputImpl initializerInput, @NotNull final ClientContextPluginImpl clientContext) {
+        public ClientContextPluginImpl apply(
+                @NotNull final InitializerInputImpl initializerInput,
+                @NotNull final ClientContextPluginImpl clientContext) {
             try {
                 clientInitializer.initialize(initializerInput, clientContext);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on initialize. Extensions are responsible on their own to handle exceptions.",
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on initialize. Extensions are responsible on their own to handle exceptions.",
                         pluginId);
                 log.debug("Original exception:", e);
                 Exceptions.rethrowError(e);

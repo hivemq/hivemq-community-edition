@@ -33,6 +33,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.builder.*;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
+import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
@@ -126,7 +127,7 @@ public class PluginStaticInitializerImplTest {
     private ClusterService clusterService;
 
     @Mock
-    private PluginAuthorizerService pluginAuthorizerService;
+    private GlobalInterceptorRegistry interceptorRegistry;
 
     @Before
     public void before() {
@@ -144,8 +145,7 @@ public class PluginStaticInitializerImplTest {
         servicesDependencies = Mockito.spy(
                 new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
                         clientService, subscriptionStore, managedPluginExecutorService, publishService,
-                        hiveMQExtensions,
-                        securityRegistry, eventRegistry, clusterService));
+                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry));
         builderDependencies = Mockito.spy(
                 new PluginBuilderDependenciesImpl(() -> retainedPublishBuilder, () -> topicSubscriptionBuilder, () -> topicPermissionBuilder, () -> publishBuilder, () -> willPublishBuilder));
         staticInitializer = new PluginStaticInitializerImpl(servicesDependencies, builderDependencies);

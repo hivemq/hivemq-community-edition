@@ -60,7 +60,7 @@ import static org.mockito.Mockito.mock;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginModuleTest {
+public class ExtensionModuleTest {
 
     private Injector injector;
 
@@ -72,7 +72,7 @@ public class PluginModuleTest {
             @Override
             protected void configure() {
 
-                install(new PluginModule());
+                install(new ExtensionModule());
                 bind(SystemInformation.class).toInstance(new SystemInformationImpl());
                 bind(ChannelPersistence.class).toInstance(mock(ChannelPersistence.class));
                 bind(FullConfigurationService.class).toInstance(new TestConfigurationBootstrap().getFullConfigurationService());

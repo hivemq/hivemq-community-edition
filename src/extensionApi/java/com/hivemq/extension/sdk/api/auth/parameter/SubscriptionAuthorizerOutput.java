@@ -16,11 +16,11 @@
 
 package com.hivemq.extension.sdk.api.auth.parameter;
 
-import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 
@@ -62,9 +62,9 @@ public interface SubscriptionAuthorizerOutput extends AsyncOutput<SubscriptionAu
      * Fails the authorization of the subscription.
      * The outcome depends on the MQTT version specified by the subscribing client.
      * <ul>
-     *    <li>For an MQTT 3.1 client the connection is closed.</li>
-     *    <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
-     *    <li>For an MQTT 5 client the reason code for the subscription in the SUBACK packet is NOT_AUTHORIZED.</li>
+     * <li>For an MQTT 3.1 client the connection is closed.</li>
+     * <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
+     * <li>For an MQTT 5 client the reason code for the subscription in the SUBACK packet is NOT_AUTHORIZED.</li>
      * </ul>
      * <p>
      * This is a final decision, other extensions or default permissions are ignored.
@@ -79,9 +79,9 @@ public interface SubscriptionAuthorizerOutput extends AsyncOutput<SubscriptionAu
      * Fails the authorization of the subscription.
      * The outcome depends on the MQTT version specified by the subscribing client.
      * <ul>
-     *    <li>For an MQTT 3.1 client the connection is closed.</li>
-     *    <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
-     *    <li>For an MQTT 5 client <code>reasonCode</code> is used as the reason code for the subscription in the SUBACK
+     * <li>For an MQTT 3.1 client the connection is closed.</li>
+     * <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
+     * <li>For an MQTT 5 client <code>reasonCode</code> is used as the reason code for the subscription in the SUBACK
      * packet.</li>
      * </ul>
      * <p>
@@ -99,11 +99,11 @@ public interface SubscriptionAuthorizerOutput extends AsyncOutput<SubscriptionAu
      * Fails the authorization of the subscription.
      * The outcome depends on the MQTT version specified by the subscribing client.
      * <ul>
-     *    <li>For an MQTT 3.1 client the connection is closed.</li>
-     *    <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
-     *    <li>For an MQTT 5 client <code>reasonCode</code> is Used as the reason code for the subscription and
-     *    <code>reasonString</code> is Used as the reason string for the SUBACK packet. If this method is called for
-     *    more than one subscription, the <code>reasonString</code>'s are combined.</li>
+     * <li>For an MQTT 3.1 client the connection is closed.</li>
+     * <li>For an MQTT 3.1.1 client the return code for the subscription in the SUBACK packet is <b>'Failure'</b>.</li>
+     * <li>For an MQTT 5 client <code>reasonCode</code> is Used as the reason code for the subscription and
+     * <code>reasonString</code> is Used as the reason string for the SUBACK packet. If this method is called for
+     * more than one subscription, the <code>reasonString</code>'s are combined.</li>
      * </ul>
      * <p>
      * This is a final decision, other extensions or default permissions are ignored.
@@ -180,7 +180,7 @@ public interface SubscriptionAuthorizerOutput extends AsyncOutput<SubscriptionAu
      * The outcome of the authorization is determined by the next extension with a {@link SubscriptionAuthorizer}.
      * <p>
      * If no extension with a SubscriptionAuthorizer is left the default permissions (see {@link
-     * ModifiableDefaultPermissions})are used.
+     * ModifiableDefaultPermissions})are used. If no default permissions are set, then the authorization is denied.
      *
      * @throws UnsupportedOperationException When authorizeSuccessfully, failAuthorization, disconnectClient or
      *                                       nextExtensionOrDefault has already been called.
