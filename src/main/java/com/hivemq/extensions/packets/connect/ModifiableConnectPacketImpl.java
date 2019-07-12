@@ -5,12 +5,15 @@ import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiableConnectPacket;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiableWillPublish;
+import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.packets.general.MqttVersionUtil;
+import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.Utf8Utils;
 
@@ -26,8 +29,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 @ThreadSafe
 public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
-    final @NotNull FullConfigurationService configurationService;
-    private final CONNECT originalConnect;
+    private final @NotNull FullConfigurationService configurationService;
+    private final ProtocolVersion protocolVersion;
     private boolean modified = false;
 
     private @NotNull String clientId;
@@ -49,7 +52,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
     public ModifiableConnectPacketImpl(@NotNull final FullConfigurationService configurationService, @NotNull final CONNECT originalConnect) {
         this.configurationService = configurationService;
-        this.originalConnect = originalConnect;
+        this.protocolVersion = originalConnect.getProtocolVersion();
 
         this.clientId = originalConnect.getClientIdentifier();
         this.cleanStart = originalConnect.isCleanStart();
@@ -72,6 +75,29 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         }
     }
 
+    public ModifiableConnectPacketImpl(@NotNull final FullConfigurationService configurationService, @NotNull final ConnectPacket originalConnect) {
+        this.configurationService = configurationService;
+        this.protocolVersion = MqttVersionUtil.toProtocolVersion(originalConnect.getMqttVersion());
+
+        this.clientId = originalConnect.getClientId();
+        this.cleanStart = originalConnect.getCleanStart();
+        this.sessionExpiryInterval = originalConnect.getSessionExpiryInterval();
+        this.keepAlive = originalConnect.getKeepAlive();
+        this.receiveMaximum = originalConnect.getReceiveMaximum();
+        this.maximumPacketSize = originalConnect.getMaximumPacketSize();
+        this.topicAliasMaximum = originalConnect.getTopicAliasMaximum();
+        this.requestResponseInformation = originalConnect.getRequestResponseInformation();
+        this.requestProblemInformation = originalConnect.getRequestProblemInformation();
+        this.authMethod = originalConnect.getAuthenticationMethod().orElse(null);
+        this.authData = originalConnect.getAuthenticationData().orElse(null);
+        this.userProperties = new ModifiableUserPropertiesImpl((InternalUserProperties) originalConnect.getUserProperties(),
+                configurationService.securityConfiguration().validateUTF8());
+        this.userName = originalConnect.getUserName().orElse(null);
+        this.password = originalConnect.getPassword().orElse(null);
+        if (originalConnect.getWillPublish().isPresent()) {
+            this.modifiableWillPublish = new ModifiableWillPublishImpl(configurationService, originalConnect.getWillPublish().get());
+        }
+    }
 
     @Override
     public synchronized void setClientId(@NotNull final String clientId) {
@@ -79,7 +105,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         checkArgument(!Utf8Utils.containsMustNotCharacters(clientId), clientId + " is not a valid client id");
         checkArgument(!Utf8Utils.hasControlOrNonCharacter(clientId), clientId + " is not a valid client id");
         checkArgument(clientId.length() < clientIdLength, "client ID exceeds the maximum client ID length");
-        checkArgument(!clientId.isEmpty(),"client ID must not be empty");
+        checkArgument(!clientId.isEmpty(), "client ID must not be empty");
         if (this.clientId.equals(clientId)) {
             return;
         }
@@ -254,7 +280,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
     @Override
     public @NotNull MqttVersion getMqttVersion() {
-        return MqttVersionUtil.toMqttVersion(originalConnect.getProtocolVersion());
+        return MqttVersionUtil.toMqttVersion(protocolVersion);
     }
 
     @Override

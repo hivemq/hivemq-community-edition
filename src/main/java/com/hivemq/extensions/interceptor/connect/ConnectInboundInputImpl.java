@@ -1,6 +1,7 @@
 package com.hivemq.extensions.interceptor.connect;
 
 import com.hivemq.annotations.NotNull;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
@@ -8,6 +9,7 @@ import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInbound
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.extensions.packets.connect.ModifiableConnectPacketImpl;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
@@ -53,7 +55,7 @@ public class ConnectInboundInputImpl implements Supplier<ConnectInboundInputImpl
         return this;
     }
 
-    public void updateConnect(final @NotNull ConnectPacket connectPacket) {
-        this.connectPacket = connectPacket;
+    public void updateConnect(final @NotNull ModifiableConnectPacketImpl connectPacket, @NotNull final FullConfigurationService configurationService) {
+        this.connectPacket = new ModifiableConnectPacketImpl(configurationService, connectPacket);
     }
 }

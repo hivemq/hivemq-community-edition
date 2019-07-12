@@ -201,7 +201,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             }
 
             if (pluginOutput.getConnectPacket().isModified()) {
-                input.updateConnect(pluginOutput.getConnectPacket());
+                input.updateConnect(pluginOutput.getConnectPacket(), configurationService);
             }
 
             if (counter.incrementAndGet() == interceptorCount) {
