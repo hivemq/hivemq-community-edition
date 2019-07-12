@@ -22,6 +22,8 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
 import com.hivemq.extensions.packets.publish.ModifiablePublishPacketImpl;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -344,6 +346,20 @@ public class PUBLISHFactory {
             return origin;
         }
 
+        return mergePublishPacket((PublishPacket) publishPacket, origin);
+
+    }
+
+    public static @NotNull PUBLISH mergePublishPacket(final @NotNull ModifiableOutboundPublishImpl publishPacket, final @NotNull PUBLISH origin) {
+
+        if (!publishPacket.isModified()) {
+            return origin;
+        }
+        return mergePublishPacket((PublishPacket) publishPacket, origin);
+    }
+
+    private static @NotNull PUBLISH mergePublishPacket(final @NotNull PublishPacket publishPacket, final @NotNull PUBLISH origin) {
+
         final Mqtt5Builder builder = new Mqtt5Builder();
 
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publishPacket.getPayloadFormatIndicator().isPresent() ? Mqtt5PayloadFormatIndicator.valueOf(publishPacket.getPayloadFormatIndicator().get().name()) : null;
@@ -371,7 +387,7 @@ public class PUBLISHFactory {
                 .withResponseTopic(publishPacket.getResponseTopic().orElse(null))
                 .withCorrelationData(Bytes.getBytesFromReadOnlyBuffer(publishPacket.getCorrelationData()))
                 .withNewTopicAlias(origin.isNewTopicAlias())
-                .withSubscriptionIdentifiers(origin.getSubscriptionIdentifiers())
+                .withSubscriptionIdentifiers(ImmutableList.copyOf(publishPacket.getSubscriptionIdentifiers()))
                 .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
                 .build();
 

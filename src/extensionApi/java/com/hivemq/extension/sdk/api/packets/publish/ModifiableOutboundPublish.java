@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,96 +20,93 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
- * A {@link PublishPacket} that can be modified for onward delivery.
+ * A {@link PublishPacket} that can be modified for onward delivery. Most changes to the parameters will only
+ * alter the message that is sent to the subscriber but not the way HiveMQ is handling the original publish message. For
+ * example a message will not be stored as a retained message if it wasn't sent as such. For behavioral changes to the
+ * message handling use the {@link com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor}
  *
- * @author Christoph Schäbel
- * @author Florian Limpöck
- * @since 4.0.0
+ * @author Lukas Brandl
+ * @since 4.2.0
  */
 @DoNotImplement
-public interface ModifiablePublishPacket extends PublishPacket {
+public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
-     * This does not change the QoS to the publisher.
-     * Only for onward delivery.
-     *
-     * @param qos The QoS for the onward publish to subscribers.
-     * @throws NullPointerException     If qos is null.
-     * @throws IllegalArgumentException If qos is greater than the configured maximum.
-     * @since 4.0.0
-     */
-    void setQos(@NotNull Qos qos);
-
-    /**
-     * Sets the retain flag.
+     * Sets the retain flag. This will not affect whether or not the message is stored as a retained message, it
+     * merely alters the retained flag sent to the subscriber.
      *
      * @param retain The new retain flag for the publish.
-     * @throws IllegalArgumentException If set to true and retained messages are disabled by HiveMQ.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setRetain(boolean retain);
 
     /**
-     * Sets the topic.
+     * Sets the topic. This will not change whether the publish topic matches the subscription for which it is sent or
+     * not, it merely alters the publish topic that is sent to the subscriber.
      *
      * @param topic The new topic for the publish.
      * @throws NullPointerException     If the topic is null.
      * @throws IllegalArgumentException If the topic is an empty string.
      * @throws IllegalArgumentException If the topic is invalid for publish messages.
      * @throws IllegalArgumentException If the topic length exceeds the configured length for topics. Default is 65535.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setTopic(@NotNull String topic);
 
     /**
      * Sets the payload format indicator.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param payloadFormatIndicator The new payload format indicator for the publish.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setPayloadFormatIndicator(@Nullable PayloadFormatIndicator payloadFormatIndicator);
 
     /**
-     * Sets the message expiry interval.
+     * Sets the message expiry interval. The original expire interval for this message will still be used, only the
+     * value sent to the client is changed.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param messageExpiryInterval The new message expiry interval for the publish.
      * @throws IllegalArgumentException If the message expiry interval is less than zero or more than the configured
      *                                  maximum by HiveMQ.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setMessageExpiryInterval(long messageExpiryInterval);
 
     /**
      * Sets the response topic.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param responseTopic The new response topic for the publish.
      * @throws IllegalArgumentException If the response topic is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the response topic exceeds the UTF-8 string length limit.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setResponseTopic(@Nullable String responseTopic);
 
     /**
      * Sets the correlation data.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param correlationData The new correlation data for the publish.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setCorrelationData(@Nullable ByteBuffer correlationData);
 
     /**
      * Sets the content type.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param contentType The new content type for the publish.
      * @throws IllegalArgumentException If the content type is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the content type exceeds the UTF-8 string length limit.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setContentType(@Nullable String contentType);
 
@@ -118,15 +115,23 @@ public interface ModifiablePublishPacket extends PublishPacket {
      *
      * @param payload The new payload for the publish.
      * @throws NullPointerException If payload is null.
-     * @since 4.0.0
+     * @since 4.2.0
      */
     void setPayload(@NotNull ByteBuffer payload);
 
     /**
-     * Get the modifiable {@link UserProperties} of the PUBLISH packet.
+     * Set the subscription identifier. This will not affect the identifiers of the original subscription, it merely
+     * alters the outgoing publish.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @return Modifiable user properties.
-     * @since 4.0.0
+     * @param subscriptionIdentifiers The new subscription identifiers for the publish.
+     * @throws NullPointerException If the subscription identifiers list is null.
+     * @throws NullPointerException If one ore more of the entries are null.
+     * @since 4.2.0
      */
-    @NotNull ModifiableUserProperties getUserProperties();
+    void setSubscriptionIdentifiers(@NotNull List<@NotNull Integer> subscriptionIdentifiers);
+
+    @NotNull
+    ModifiableUserProperties getUserProperties();
+
 }

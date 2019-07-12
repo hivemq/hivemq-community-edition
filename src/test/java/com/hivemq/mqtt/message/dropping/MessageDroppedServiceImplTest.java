@@ -58,8 +58,8 @@ public class MessageDroppedServiceImplTest {
 
     @Test
     public void test_publish_inbound_intercepted() {
-        messageDroppedService.inboundPublishIntercepted(clientId, topic, qos);
-        verify(eventLog, times(1)).messageDropped(clientId, topic, qos, "Inbound publish interceptor prevented onward delivery");
+        messageDroppedService.extensionPrevented(clientId, topic, qos);
+        verify(eventLog, times(1)).messageDropped(clientId, topic, qos, "Extension prevented onward delivery");
 
     }
 

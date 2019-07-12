@@ -25,7 +25,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
-import com.hivemq.extension.sdk.api.packets.publish.ModifiablePublishPacket;
+import com.hivemq.extension.sdk.api.packets.publish.ModifiableOutboundPublish;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
@@ -41,11 +41,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Florian Limpöck
- * @since 4.0.0
+ * @author Lukas Brandl
+ * @since 4.2.0
  */
 @ThreadSafe
-public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
+public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish {
 
     private final @NotNull PUBLISH publish;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
@@ -53,20 +53,20 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
 
     private @NotNull String topic;
-    private @NotNull Qos qos;
+    private final @NotNull Qos qos;
     private boolean retain;
     private @Nullable PayloadFormatIndicator payloadFormatIndicator;
     private long messageExpiryInterval;
     private @Nullable String responseTopic;
     private @Nullable ByteBuffer correlationData;
-    private final @Nullable List<Integer> subscriptionIdentifiers;
+    private @Nullable List<Integer> subscriptionIdentifiers;
     private @Nullable String contentType;
     private @Nullable ByteBuffer payload;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
     private boolean modified;
 
-    public ModifiablePublishPacketImpl(final @NotNull FullConfigurationService configurationService, final @NotNull PUBLISH publish) {
+    public ModifiableOutboundPublishImpl(final @NotNull FullConfigurationService configurationService, final @NotNull PUBLISH publish) {
 
         Preconditions.checkNotNull(publish, "publish must never be null");
         Preconditions.checkNotNull(configurationService, "config must never be null");
@@ -95,21 +95,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public synchronized void setQos(final @NotNull Qos qos) {
-        PluginBuilderUtil.checkQos(qos, mqttConfigurationService.maximumQos().getQosNumber());
-        if (qos.getQosNumber() == this.qos.getQosNumber()) {
-            //ignore unnecessary change
-            return;
-        }
-        this.qos = qos;
-        this.modified = true;
-    }
-
-    @Override
     public synchronized void setRetain(final boolean retain) {
-        if (!mqttConfigurationService.retainedMessagesEnabled() && retain) {
-            throw new IllegalArgumentException("Retained messages are disabled");
-        }
         if (retain == this.retain) {
             //ignore unnecessary change
             return;
@@ -205,12 +191,25 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public synchronized void setPayload(final @NotNull ByteBuffer payload) {
-        Preconditions.checkNotNull(payload, "payload must never be null");
+        Preconditions.checkNotNull(payload, "Payload must never be null");
         if (payload.equals(this.payload)) {
             //ignore unnecessary change
             return;
         }
         this.payload = payload;
+        this.modified = true;
+    }
+
+    @Override
+    public synchronized void setSubscriptionIdentifiers(final @NotNull List<@NotNull Integer> subscriptionIdentifiers) {
+        checkNotNull(subscriptionIdentifiers, "Subscription identifiers must not be null null");
+        for (final Integer subscriptionIdentifier : subscriptionIdentifiers) {
+            checkNotNull(subscriptionIdentifier, "At least one element of the subscription identifiers was null");
+        }
+        if (this.subscriptionIdentifiers != null && this.subscriptionIdentifiers.equals(subscriptionIdentifiers)) {
+            return;
+        }
+        this.subscriptionIdentifiers = subscriptionIdentifiers;
         this.modified = true;
     }
 

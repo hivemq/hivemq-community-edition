@@ -61,7 +61,7 @@ project.ext {
 
     projectString = "hivemq-ce-$version"
     packagingDir = "$project.buildDir/package"
-    extensionApiVersion = "4.1.0"
+    extensionApiVersion = "4.2.0-SNAPSHOT"
 }
 
 configurations {

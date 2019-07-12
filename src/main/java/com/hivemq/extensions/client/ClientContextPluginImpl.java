@@ -17,9 +17,11 @@
 package com.hivemq.extensions.client;
 
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.executor.task.AbstractOutput;
@@ -54,6 +56,16 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
         clientContext.removeInterceptor(interceptor);
     }
 
+    @Override
+    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        clientContext.addInterceptor(interceptor);
+    }
+
+    @Override
+    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        clientContext.removeInterceptor(interceptor);
+    }
+
     @NotNull
     @Override
     public List<Interceptor> getAllInterceptors() {
@@ -66,6 +78,10 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
         return clientContext.getPublishInboundInterceptorsForPlugin(pluginClassloader);
     }
 
+    @Override
+    public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+        return clientContext.getPublishOutboundInterceptorsForPlugin(pluginClassloader);
+    }
 
     @NotNull
     @Override

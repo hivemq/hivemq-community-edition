@@ -794,7 +794,7 @@ public class IncomingPublishHandlerTest {
         }
 
         @Override
-        public void inboundPublishIntercepted(final String clientId, final String topic, final int qos) {
+        public void extensionPrevented(final String clientId, final String topic, final int qos) {
             latch.countDown();
         }
 

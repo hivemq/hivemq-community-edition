@@ -20,6 +20,7 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -67,6 +68,14 @@ public class ClientContextImpl {
         removeInterceptor(interceptor);
     }
 
+    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
     public void removeInterceptor(@NotNull final Interceptor interceptor) {
         interceptorList.remove(interceptor);
     }
@@ -105,6 +114,27 @@ public class ClientContextImpl {
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (PublishInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
