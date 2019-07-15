@@ -16,6 +16,7 @@
 
 package com.hivemq.extensions;
 
+import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
@@ -23,6 +24,7 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,7 +83,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         when(plugin2.getPluginClassloader()).thenReturn(loader2);
 
 
-        hiveMQExtensions = new HiveMQExtensions();
+        hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl()));
 
         hiveMQExtensions.addHiveMQPlugin(plugin1);
     }

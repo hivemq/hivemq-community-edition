@@ -108,7 +108,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
         }
 
         final ImmutableMap<String, ConnectInboundInterceptorProvider> connectInterceptorProviders =
-                interceptors.connectInterceptorProviders();
+                interceptors.connectInboundInterceptorProviders();
 
         if (connectInterceptorProviders.isEmpty()) {
             ctx.fireChannelRead(connect);

@@ -18,14 +18,17 @@ package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -122,6 +125,11 @@ abstract public class PluginAbstractTest {
             @SuppressWarnings("unchecked")
             public Map<String, ExtensionInformation> getEnabledExtensions() {
                 return Collections.EMPTY_MAP;
+            }
+
+            @Override
+            public @NotNull ServerInformation getServerInformation() {
+                return Mockito.mock(ServerInformation.class);
             }
 
             @Override

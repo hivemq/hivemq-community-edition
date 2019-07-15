@@ -16,12 +16,16 @@
 
 package com.hivemq.extensions.client;
 
+import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,9 +38,12 @@ public class ClientContextImplTest {
 
     private ClientContextImpl clientContext;
 
+    @Mock
+    private ServerInformation serverInformation;
+
     @Before
     public void setUp() throws Exception {
-        final HiveMQExtensions hiveMQExtensions = new HiveMQExtensions();
+        final HiveMQExtensions hiveMQExtensions = new HiveMQExtensions(serverInformation);
         clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
     }
 

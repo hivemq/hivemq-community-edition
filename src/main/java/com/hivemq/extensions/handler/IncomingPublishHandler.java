@@ -264,6 +264,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound publish interception. Extensions are responsible on their own to handle exceptions.",
                         pluginId);
+                publishInboundOutput.forciblyPreventPublishDelivery(publishInboundOutput.getReasonCode(), publishInboundOutput.getReasonString());
                 Exceptions.rethrowError(e);
             }
             return publishInboundOutput;

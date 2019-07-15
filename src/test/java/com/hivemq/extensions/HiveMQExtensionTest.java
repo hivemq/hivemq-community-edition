@@ -16,12 +16,15 @@
 
 package com.hivemq.extensions;
 
+import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.config.HiveMQPluginXMLReader;
 import com.hivemq.extensions.parameters.start.ExtensionStartOutputImpl;
 import com.hivemq.extensions.parameters.start.ExtensionStartStopInputImpl;
@@ -30,6 +33,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mock;
 
 import java.io.File;
 import java.util.Collections;
@@ -56,6 +60,9 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
     private HiveMQExtension enabledStopPlugin;
     private HiveMQExtension enabledReasonPlugin;
 
+    @Mock
+    private ServerInformation serverInformation;
+
     @Before
     public void setUp() throws Exception {
 
@@ -73,7 +80,8 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
         enabledPlugins = Collections.singletonMap(enabledStartPlugin.getId(), enabledStartPlugin);
         pluginStartOutput = new ExtensionStartOutputImpl();
         pluginStopOutput = new ExtensionStopOutputImpl();
-        enabledPluginStartInput = new ExtensionStartStopInputImpl(enabledStartPlugin, enabledPlugins);
+        enabledPluginStartInput =
+                new ExtensionStartStopInputImpl(enabledStartPlugin, enabledPlugins, serverInformation);
     }
 
     @Test(timeout = 5000)

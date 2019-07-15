@@ -17,10 +17,13 @@
 package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.Collections;
@@ -78,6 +81,11 @@ abstract public class AbstractPluginTest {
                         return null;
                     }
                 };
+            }
+
+            @Override
+            public @NotNull ServerInformation getServerInformation() {
+                return Mockito.mock(ServerInformation.class);
             }
 
             @NotNull

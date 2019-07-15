@@ -16,16 +16,23 @@
 
 package com.hivemq.mqtt.message.connack;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.packets.connack.ModifiableConnackPacket;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties.MqttMessageWithReasonCode;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.Bytes;
 
 import java.nio.charset.StandardCharsets;
 
@@ -49,24 +56,24 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     //Mqtt 5
     private final long sessionExpiryInterval;
     private final int serverKeepAlive;
-    private final String assignedClientIdentifier;
+    private final @Nullable String assignedClientIdentifier;
 
     //Auth
-    private final String authMethod;
-    private final byte[] authData;
+    private final @Nullable String authMethod;
+    private final @Nullable byte[] authData;
 
     //Restrictions from Server
     private final int receiveMaximum;
     private final int topicAliasMaximum;
     private final int maximumPacketSize;
-    private final QoS maximumQoS;
+    private final @Nullable QoS maximumQoS;
     private final boolean isRetainAvailable;
     private final boolean isWildcardSubscriptionAvailable;
     private final boolean isSubscriptionIdentifierAvailable;
     private final boolean isSharedSubscriptionAvailable;
 
-    private final String responseInformation;
-    private final String serverReference;
+    private final @Nullable String responseInformation;
+    private final @Nullable String serverReference;
 
     // MQTT 5 CONNACK for FAILED CONNECT
     public CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode, @Nullable final String reasonString) {
@@ -368,8 +375,47 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         }
     }
 
-    public Mqtt3ConnAckReturnCode getReturnCode() {
-        return Mqtt3ConnAckReturnCode.fromReasonCode(getReasonCode());
+    public static @NotNull CONNACK mergeConnackPacket(final @NotNull ModifiableConnackPacket connackPacket, final @NotNull CONNACK origin) {
+
+        if (!connackPacket.isModified()) {
+            return origin;
+        }
+
+        final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder();
+
+        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
+        for (final UserProperty userProperty : connackPacket.getUserProperties().asList()) {
+            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+
+        final QoS qoS;
+        final Qos extensionMaxQos = connackPacket.getMaximumQoS().orElse(null);
+        if (extensionMaxQos != null) {
+            qoS = QoS.valueOf(extensionMaxQos.getQosNumber());
+        } else {
+            qoS = null;
+        }
+
+        return builder.withAssignedClientIdentifier(connackPacket.getAssignedClientIdentifier().orElse(null))
+                .withSessionExpiryInterval(connackPacket.getSessionExpiryInterval())
+                .withSessionPresent(connackPacket.getSessionPresent())
+                .withServerKeepAlive(connackPacket.getServerKeepAlive())
+                .withServerReference(connackPacket.getServerReference().orElse(null))
+                .withReceiveMaximum(connackPacket.getReceiveMaximum())
+                .withMaximumPacketSize(connackPacket.getMaximumPacketSize())
+                .withTopicAliasMaximum(connackPacket.getTopicAliasMaximum())
+                .withResponseInformation(connackPacket.getResponseInformation().orElse(null))
+                .withAuthMethod(connackPacket.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connackPacket.getAuthenticationData()))
+                .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
+                .withReasonCode(ReasonCodeUtil.toMqtt5(connackPacket.getReasonCode()))
+                .withReasonString(connackPacket.getReasonString().orElse(null))
+                .withMaximumQoS(qoS)
+                .withSharedSubscriptionAvailable(connackPacket.getSharedSubscriptionsAvailable())
+                .withSubscriptionIdentifierAvailable(connackPacket.getSubscriptionIdentifiersAvailable())
+                .withWildcardSubscriptionAvailable(connackPacket.getWildCardSubscriptionAvailable())
+                .withRetainAvailable(connackPacket.getRetainAvailable())
+                .build();
     }
 
     @Override
@@ -387,9 +433,9 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return maximumPacketSize;
     }
 
-    @Override
-    public QoS getMaximumQoS() {
-        return maximumQoS;
+    @NotNull
+    public Mqtt3ConnAckReturnCode getReturnCode() {
+        return Mqtt3ConnAckReturnCode.fromReasonCode(getReasonCode());
     }
 
     @Override
@@ -426,35 +472,46 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return serverKeepAlive;
     }
 
+    @Nullable
+    @Override
+    public QoS getMaximumQoS() {
+        return maximumQoS;
+    }
+
+    @Nullable
     @Override
     public String getAssignedClientIdentifier() {
         return assignedClientIdentifier;
     }
 
+    @Nullable
     @Override
     public String getAuthMethod() {
         return authMethod;
     }
 
+    @Nullable
     @Override
     public byte[] getAuthData() {
         return authData;
     }
 
+    @Nullable
     @Override
     public String getResponseInformation() {
         return responseInformation;
-    }
-
-    @Override
-    public String getServerReference() {
-        return serverReference;
     }
 
     @NotNull
     @Override
     public MessageType getType() {
         return MessageType.CONNACK;
+    }
+
+    @Nullable
+    @Override
+    public String getServerReference() {
+        return serverReference;
     }
 
 }

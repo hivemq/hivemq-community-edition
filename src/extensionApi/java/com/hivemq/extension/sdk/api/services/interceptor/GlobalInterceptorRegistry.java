@@ -17,17 +17,20 @@
 package com.hivemq.extension.sdk.api.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 
 /**
  * @author Lukas Brandl
+ * @author Florian Limpöck
  * @since 4.2.0
  */
 public interface GlobalInterceptorRegistry {
 
     /**
-     * The provider is called once for each incoming connect message.
+     * The provider is called once for each incoming CONNECT message.
      * <p>
      * The {@link ConnectInboundInterceptorProvider} must be implemented by the extension developer.
      * It will return an {@link ConnectInboundInterceptor} that can be used to modify incoming CONNECT messages.
@@ -37,5 +40,18 @@ public interface GlobalInterceptorRegistry {
      * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
-    void setConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider connectInboundInterceptorProvider);
+    void setConnectInboundInterceptorProvider(@NotNull ConnectInboundInterceptorProvider connectInboundInterceptorProvider);
+
+    /**
+     * The provider is called once for each outbound CONNACK message.
+     * <p>
+     * The {@link ConnackOutboundInterceptorProvider} must be implemented by the extension developer.
+     * It will return an {@link ConnackOutboundInterceptor} that can be used to modify outbound CONNACK messages.
+     * If there is already a provider present, it will be overwritten.
+     *
+     * @param connackOutboundInterceptorProvider The provider to be registered.
+     * @throws NullPointerException If the interceptor is null.
+     * @since 4.2.0
+     */
+    void setConnackOutboundInterceptorProvider(@NotNull ConnackOutboundInterceptorProvider connackOutboundInterceptorProvider);
 }

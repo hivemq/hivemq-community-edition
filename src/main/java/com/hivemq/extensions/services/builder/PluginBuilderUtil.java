@@ -60,6 +60,46 @@ public class PluginBuilderUtil {
         }
     }
 
+    public static void checkReasonString(final @Nullable String reasonString, final boolean validateUTF8) {
+        if (reasonString == null) {
+            return;
+        }
+
+        checkUtf8StringLength(reasonString, "Reason string");
+
+        if (!isValidUtf8String(reasonString, validateUTF8)) {
+            throw new IllegalArgumentException("The reason string (" + reasonString + ") is UTF-8 malformed");
+        }
+    }
+
+    public static void checkResponseInformation(final @Nullable String responseInformation, final boolean requestResponseInformation, final boolean validateUTF8) {
+        if (responseInformation == null) {
+            return;
+        }
+
+        if (!requestResponseInformation) {
+            throw new IllegalStateException("Response information must not be set if it was not requested in the CONNECT message");
+        }
+
+        checkUtf8StringLength(responseInformation, "Response information");
+
+        if (!isValidUtf8String(responseInformation, validateUTF8)) {
+            throw new IllegalArgumentException("The response information (" + responseInformation + ") is UTF-8 malformed");
+        }
+    }
+
+    public static void checkServerReference(final @Nullable String serverReference, final boolean validateUTF8) {
+        if (serverReference == null) {
+            return;
+        }
+
+        checkUtf8StringLength(serverReference, "Server reference");
+
+        if (!isValidUtf8String(serverReference, validateUTF8)) {
+            throw new IllegalArgumentException("The server reference (" + serverReference + ") is UTF-8 malformed");
+        }
+    }
+
     public static void checkContentType(final @Nullable String contentType, final boolean validateUTF8) {
         if (contentType == null) {
             return;
