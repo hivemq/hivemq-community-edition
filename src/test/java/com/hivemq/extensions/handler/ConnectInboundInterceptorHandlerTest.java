@@ -207,8 +207,19 @@ public class ConnectInboundInterceptorHandlerTest {
     public void test_queue_full() throws Exception {
 
         pluginTaskExecutorService = mock(PluginTaskExecutorService.class);
+
+        channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        when(plugin.getId()).thenReturn("plugin");
+
+        handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+                pluginTaskExecutorService,
+                hivemqId, interceptors, serverInformation, connacker);
+
+        channel.pipeline().addFirst(handler);
+
         when(pluginTaskExecutorService.handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class),
-                any(Supplier.class), any(PluginInOutTask.class))).thenThrow(new RuntimeException("test"));
+                any(Supplier.class), any(PluginInOutTask.class))).thenReturn(false);
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
         when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
