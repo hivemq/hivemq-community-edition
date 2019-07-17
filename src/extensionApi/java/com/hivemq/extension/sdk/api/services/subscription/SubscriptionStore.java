@@ -193,7 +193,6 @@ public interface SubscriptionStore {
      */
     @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberForTopicResult> callback);
 
-
     /**
      * Iterate over all subscribers that have a subscription that matches the passed topic.
      * Includes subscribers with direct matches of the topic or a match via a wildcard topic.
@@ -393,7 +392,6 @@ public interface SubscriptionStore {
      */
     @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberWithFilterResult> callback, @NotNull Executor callbackExecutor);
 
-
     /**
      * Iterate over all subscribers and their subscriptions.
      * <p>
@@ -409,18 +407,14 @@ public interface SubscriptionStore {
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
-     * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
-     * during the iteration (e.g. a network-split, node leave or node join)
      *
      * @param callback An {@link IterationCallback} that is called for every returned result.
-     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no match is found
-     * for the topic filter or the iteration is aborted manually with the {@link IterationContext}.
-     * @throws NullPointerException If the passed subscriptionType, callback or callbackExecutor are
-     *                              null.
+     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no subscriptions exist
+     * or the iteration is aborted manually with the {@link IterationContext}.
+     * @throws NullPointerException If the passed callback is null.
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<AllSubscriptionsResult> callback);
-
 
     /**
      * Iterate over all subscribers and their subscriptions.
@@ -431,19 +425,16 @@ public interface SubscriptionStore {
      * <p>
      * The callback is executed in the passed {@link Executor}.
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
-     * concurrent collection, as the callback might be executed in another thread as the calling thread of this method.
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of this method.
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
-     * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
-     * during the iteration (e.g. a network-split, node leave or node join)
      *
      * @param callback         An {@link IterationCallback} that is called for every returned result.
      * @param callbackExecutor An {@link Executor} in which the callback for each iteration is executed.
-     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no match is found
-     * for the topic filter or the iteration is aborted manually with the {@link IterationContext}.
-     * @throws NullPointerException If the passed subscriptionType, callback or callbackExecutor are
-     *                              null.
+     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no subscriptions exist
+     * or the iteration is aborted manually with the {@link IterationContext}.
+     * @throws NullPointerException If the passed callback or callbackExecutor are null.
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<AllSubscriptionsResult> callback, @NotNull Executor callbackExecutor);

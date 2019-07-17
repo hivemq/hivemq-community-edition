@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * Parameter object passed to each iteration from {@link SubscriptionStore#iterateAllSubscriptions(IterationCallback)}.
- * This object represents a client identifier and all its subscriptions
+ * This object represents a client identifier and all its subscriptions.
  *
  * @author Christoph Schäbel
  * @since 4.2.0
@@ -31,9 +31,9 @@ import java.util.Set;
 public interface AllSubscriptionsResult {
 
     /**
-     * Get the client identifier for this client
+     * Get the client identifier for this client.
      *
-     * @return the client identifier of this client
+     * @return The client identifier of this client.
      * @since 4.2.0
      */
     @NotNull
@@ -43,7 +43,7 @@ public interface AllSubscriptionsResult {
      * Get a {@link Set} of {@link TopicSubscription} containing all subscriptions including the subscription options
      * and identifier for this client.
      *
-     * @return a {@link Set} of all the subscriptions for this client
+     * @return A {@link Set} of all the subscriptions for this client.
      * @since 4.2.0
      */
     @NotNull
