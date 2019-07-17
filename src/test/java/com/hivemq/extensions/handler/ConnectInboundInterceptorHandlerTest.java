@@ -205,7 +205,6 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test
     public void test_queue_full() throws Exception {
-
         pluginTaskExecutorService = mock(PluginTaskExecutorService.class);
 
         channel = new EmbeddedChannel();
