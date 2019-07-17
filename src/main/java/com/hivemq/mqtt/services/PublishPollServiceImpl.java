@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
 import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
@@ -161,7 +162,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         final MessageIDPool messageIDPool = messageIDPools.forClient(client);
         final ImmutableIntArray messageIds;
         try {
-            messageIds = createMessageIds(messageIDPool);
+            messageIds = createMessageIds(messageIDPool, pollMessageLimit(channel));
         } catch (final NoMessageIdAvailableException e) {
             // This should never happen if the limit for the poll message limit is set correctly
             log.error("No message id available for client " + client, e);
@@ -214,7 +215,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      */
     @Override
     public void pollInflightMessages(@NotNull final String client, @NotNull final Channel channel) {
-        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, PUBLISH_POLL_BATCH_MEMORY, PUBLISH_POLL_BATCH_SIZE);
+        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, pollMessageLimit(channel), PUBLISH_POLL_BATCH_SIZE);
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
@@ -312,7 +313,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             return;
         }
 
-        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readShared(sharedSubscription, PUBLISH_POLL_BATCH_SIZE, PUBLISH_POLL_BATCH_MEMORY);
+        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readShared(sharedSubscription, pollMessageLimit(channel), PUBLISH_POLL_BATCH_MEMORY);
 
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
@@ -408,6 +409,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      * {@inheritDoc}
      */
     @NotNull
+    @Override
     public ListenableFuture<Void> removeMessageFromQueue(@NotNull final String client, final int packetId) {
         return clientQueuePersistence.remove(client, packetId);
     }
@@ -416,6 +418,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      * {@inheritDoc}
      */
     @NotNull
+    @Override
     public ListenableFuture<Void> removeMessageFromSharedQueue(@NotNull final String sharedSubscription, @NotNull final String uniqueId) {
         return clientQueuePersistence.removeShared(sharedSubscription, uniqueId);
     }
@@ -424,6 +427,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      * {@inheritDoc}
      */
     @NotNull
+    @Override
     public ListenableFuture<Void> putPubrelInQueue(@NotNull final String client, final int packetId) {
         return clientQueuePersistence.putPubrel(client, packetId);
     }
@@ -432,6 +436,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      * {@inheritDoc}
      */
     @NotNull
+    @Override
     public ListenableFuture<Void> removeInflightMarker(@NotNull final String sharedSubscription, @NotNull final String uniqueId) {
         return clientQueuePersistence.removeInFlightMarker(sharedSubscription, uniqueId);
     }
@@ -440,13 +445,19 @@ public class PublishPollServiceImpl implements PublishPollService {
      * {@inheritDoc}
      */
     @NotNull
-    private ImmutableIntArray createMessageIds(@NotNull final MessageIDPool messageIDPool) throws NoMessageIdAvailableException {
+    private ImmutableIntArray createMessageIds(@NotNull final MessageIDPool messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(PUBLISH_POLL_BATCH_SIZE);
-        for (int i = 0; i < PUBLISH_POLL_BATCH_SIZE; i++) {
+        for (int i = 0; i < pollMessageLimit; i++) {
             final int nextId = messageIDPool.takeNextId();
             builder.add(nextId);
         }
         return builder.build();
+    }
+
+    private int pollMessageLimit(@NotNull final Channel channel) {
+        final int min = InternalConfigurations.PUBLISH_POLL_BATCH_SIZE;
+        final int inflightWindow = ChannelUtils.maxInflightWindow(channel);
+        return Math.max(min, inflightWindow);
     }
 
     private class PubrelResendCallback implements FutureCallback<PublishStatus> {

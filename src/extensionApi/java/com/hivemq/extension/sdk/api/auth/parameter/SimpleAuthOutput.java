@@ -187,4 +187,12 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
      * @since 4.0.0
      */
     @NotNull ModifiableDefaultPermissions getDefaultPermissions();
+
+    /**
+     * Provides a modifiable {@link ModifiableClientSettings} object, that used to configure client specific restrictions and parameters.
+     *
+     * @return a modifiable {@link ModifiableClientSettings} object.
+     * @since 4.2.0
+     */
+    @NotNull ModifiableClientSettings getClientSettings();
 }

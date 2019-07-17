@@ -18,13 +18,17 @@ package com.hivemq.mqtt.handler.ordering;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.codec.encoder.mqtt5.PublishDroppedEvent;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
+import com.hivemq.mqtt.message.pubrec.PUBREC;
+import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPromise;
@@ -55,6 +59,7 @@ public class OrderedTopicHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         final DefaultEventLoopGroup eventExecutors = new DefaultEventLoopGroup(1);
+        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 3;
 
         channel = new EmbeddedChannel();
 
@@ -86,10 +91,15 @@ public class OrderedTopicHandlerTest {
         promise1.await();
         promise2.await();
         promise3.await();
+
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(1, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
     @Test(timeout = 5000)
     public void test_qos1_release_next_message_on_dropped() throws Exception {
+
+        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -111,34 +121,14 @@ public class OrderedTopicHandlerTest {
         promise3.await();
     }
 
-    @Test(timeout = 5000)
-    public void test_qos1_release_use_different_buckets_no_queuing() throws Exception {
-
-        final PUBLISH publish = createPublish("bucket_zero", 1, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish2 = createPublish("bucket=1", 2, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish3 = createPublish("bucket-2", 3, QoS.AT_LEAST_ONCE);
-
-        final ChannelPromise promise1 = channel.newPromise();
-        final ChannelPromise promise2 = channel.newPromise();
-        final ChannelPromise promise3 = channel.newPromise();
-
-        channel.writeAndFlush(publish, promise1);
-        channel.writeAndFlush(publish2, promise2);
-        channel.writeAndFlush(publish3, promise3);
-
-        promise1.await();
-        promise2.await();
-        promise3.await();
-
-    }
 
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages() throws Exception {
 
 
-        final PUBLISH publish = createPublish("bucket_zero", 1, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish2 = createPublish("bucket=1", 2, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish3 = createPublish("bucket-2", 3, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
 
         final ChannelPromise promise1 = channel.newPromise();
         final ChannelPromise promise2 = channel.newPromise();
@@ -148,27 +138,31 @@ public class OrderedTopicHandlerTest {
         channel.writeAndFlush(publish2, promise2);
         channel.writeAndFlush(publish3, promise3);
 
-        channel.pipeline().fireChannelRead(new PUBACK(1));
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(3, orderedTopicHandler.unacknowledgedMessages().size());
+
         channel.pipeline().fireChannelRead(new PUBACK(1));
         channel.pipeline().fireChannelRead(new PUBACK(1));
         channel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
 
         promise1.await();
         promise2.await();
         promise3.await();
 
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(0, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages_multiple_pubacks() throws Exception {
 
-
-        final PUBLISH publish = createPublish("bucket_zero", 1, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish2 = createPublish("bucket=1", 2, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish3 = createPublish("bucket-2", 3, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish4 = createPublish("bucket_zero", 4, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish5 = createPublish("bucket=1", 5, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish6 = createPublish("bucket-2", 6, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish4 = createPublish("topic", 4, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish5 = createPublish("topic", 5, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish6 = createPublish("topic", 6, QoS.AT_LEAST_ONCE);
 
         final ChannelPromise promise1 = channel.newPromise();
         final ChannelPromise promise2 = channel.newPromise();
@@ -184,10 +178,13 @@ public class OrderedTopicHandlerTest {
         channel.writeAndFlush(publish5, promise5);
         channel.writeAndFlush(publish6, promise6);
 
-        channel.pipeline().fireChannelRead(new PUBACK(1));
+        assertEquals(3, orderedTopicHandler.queue.size());
+        assertEquals(3, orderedTopicHandler.unacknowledgedMessages().size());
+
         channel.pipeline().fireChannelRead(new PUBACK(1));
         channel.pipeline().fireChannelRead(new PUBACK(1));
         channel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
 
         channel.pipeline().fireChannelRead(new PUBACK(4));
         channel.pipeline().fireChannelRead(new PUBACK(4));
@@ -203,77 +200,51 @@ public class OrderedTopicHandlerTest {
         promise5.await();
         promise6.await();
 
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(0, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
-    @Test(timeout = 5000)
-    public void test_qos1_queue_different_topics_on_same_bucket() throws Exception {
-
-
-        final PUBLISH publish = createPublish("bucket_zero", 1, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish2 = createPublish("bucket-0", 2, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish3 = createPublish("bucket%-zero", 3, QoS.AT_LEAST_ONCE);
-
-        final ChannelPromise promise1 = channel.newPromise();
-        final ChannelPromise promise2 = channel.newPromise();
-        final ChannelPromise promise3 = channel.newPromise();
-
-        channel.writeAndFlush(publish, promise1);
-        channel.writeAndFlush(publish2, promise2);
-        channel.writeAndFlush(publish3, promise3);
-
-
-        channel.pipeline().fireChannelRead(new PUBACK(1));
-        channel.pipeline().fireChannelRead(new PUBACK(2));
-
-        promise1.await();
-        promise2.await();
-        promise3.await();
-
-        assertEquals(true, orderedTopicHandler.getQueues()[0].isEmpty());
-        assertEquals(null, orderedTopicHandler.getQueues()[1]);
-        assertEquals(null, orderedTopicHandler.getQueues()[2]);
-
-    }
-
-    @Test(timeout = 4000)
+    @Test(timeout = 4_000)
     public void test_remove_messages() throws Exception {
-        final PUBLISH publish1 = createPublish("bucket_zero", 1, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish2 = createPublish("bucket_zero", 2, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish3 = createPublish("bucket_zero", 3, QoS.AT_LEAST_ONCE);
-        final PUBLISH publish4 = createPublish("bucket_zero", 4, QoS.AT_LEAST_ONCE);
+        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+
+        final PUBLISH publish1 = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
+        final PUBLISH publish4 = createPublish("topic", 4, QoS.AT_LEAST_ONCE);
 
         final ChannelPromise promise1 = channel.newPromise();
         final ChannelPromise promise2 = channel.newPromise();
         final ChannelPromise promise3 = channel.newPromise();
         final ChannelPromise promise4 = channel.newPromise();
 
-
         channel.writeAndFlush(publish1, promise1);
         channel.writeAndFlush(publish2, promise2);
         channel.writeAndFlush(publish3, promise3);
         channel.writeAndFlush(publish4, promise4);
 
-
         promise1.await();
 
-        assertEquals(3, orderedTopicHandler.getQueues()[0].size());
+        assertEquals(3, orderedTopicHandler.queue.size());
         channel.pipeline().fireChannelRead(new PUBACK(1));
 
         promise2.await();
-        assertEquals(2, orderedTopicHandler.getQueues()[0].size());
+        assertEquals(2, orderedTopicHandler.queue.size());
 
         channel.pipeline().fireChannelRead(new PUBACK(2));
         promise3.await();
 
-        channel.pipeline().fireChannelRead(new PUBACK(4));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
         promise4.await();
 
 
-        assertTrue(orderedTopicHandler.getQueues()[0].isEmpty());
+        assertTrue(orderedTopicHandler.queue.isEmpty());
     }
 
     @Test(timeout = 5000)
     public void test_qos2_release_next_message_on_next_pubcomp() throws Exception {
+
+        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish = createPublish("topic", 1, QoS.EXACTLY_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
@@ -293,25 +264,39 @@ public class OrderedTopicHandlerTest {
         promise1.await();
         promise2.await();
         promise3.await();
+
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(1, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
     @Test(timeout = 5000)
-    public void test_do_not_queue_resended_messages() throws Exception {
+    public void test_qos2_release_next_message_on_failed_pubrec() throws Exception {
 
-        final PUBLISH publish = createPublish("bucket_zero", 1, QoS.EXACTLY_ONCE);
+        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+
+        final PUBLISH publish = createPublish("topic", 1, QoS.EXACTLY_ONCE);
+        final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
+        final PUBLISH publish3 = createPublish("topic", 3, QoS.EXACTLY_ONCE);
 
         final ChannelPromise promise1 = channel.newPromise();
         final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
         channel.writeAndFlush(publish, promise1);
-
-
-        //resend message with same message id
-        final PUBLISH publish2 = createPublish("bucket_zero", 1, QoS.EXACTLY_ONCE, true);
         channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
+
+        channel.pipeline().fireChannelRead(new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
+                null, Mqtt5UserProperties.NO_USER_PROPERTIES));
+        channel.pipeline().fireChannelRead(new PUBREC(2, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
+                null, Mqtt5UserProperties.NO_USER_PROPERTIES));
 
         promise1.await();
         promise2.await();
+        promise3.await();
+
+        assertEquals(0, orderedTopicHandler.queue.size());
+        assertEquals(1, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
     @Test(timeout = 5000)
@@ -350,6 +335,32 @@ public class OrderedTopicHandlerTest {
         promise1.await();
 
         assertEquals(PublishStatus.DELIVERED, future.get());
+    }
+
+    @Test(timeout = 5000)
+    public void test_max_inflight_window() throws Exception {
+
+        channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(50);
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 3;
+
+
+        final PUBLISH publish = createPublish("topic", 1, QoS.EXACTLY_ONCE);
+        final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
+        final PUBLISH publish3 = createPublish("topic", 3, QoS.EXACTLY_ONCE);
+        final PUBLISH publish4 = createPublish("topic", 4, QoS.EXACTLY_ONCE);
+
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
+        final ChannelPromise promise4 = channel.newPromise();
+
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish4, promise4);
+
+        assertEquals(1, orderedTopicHandler.queue.size());
+        assertEquals(3, orderedTopicHandler.unacknowledgedMessages().size());
     }
 
     private PUBLISH createPublish(final String topic, final int messageId, final QoS qoS) {

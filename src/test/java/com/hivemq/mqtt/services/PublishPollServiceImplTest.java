@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
@@ -52,6 +53,7 @@ import util.TestChannelAttribute;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -107,6 +109,9 @@ public class PublishPollServiceImplTest {
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
         when(pipeline.get(ChannelInactiveHandler.class)).thenReturn(channelInactiveHandler);
+        when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
+        InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
+
         publishPollService = new PublishPollServiceImpl(messageIDPools, clientQueuePersistence, channelPersistence,
                 publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, TestSingleWriterFactory.defaultSingleWriter());
     }
@@ -124,6 +129,24 @@ public class PublishPollServiceImplTest {
         verify(messageIDPool, times(48)).returnId(anyInt());
         verify(pipeline, times(2)).fireUserEventTriggered(any(PUBLISH.class));
         verify(channelInactiveHandler, times(2)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+    }
+
+
+    @Test
+    public void test_new_messages_inflight_batch_size() throws NoMessageIdAvailableException {
+
+        InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 10;
+        when(messageIDPool.takeNextId()).thenReturn(1);
+        when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
+        when(channel.isActive()).thenReturn(true);
+        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+
+        publishPollService.pollNewMessages("client");
+
+        verify(messageIDPool, times(9)).returnId(anyInt()); // 10 messages are polled because the client receive max is 10
+        verify(pipeline, times(1)).fireUserEventTriggered(any(PUBLISH.class));
+        verify(channelInactiveHandler, times(1)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
     }
 
     @Test
@@ -211,7 +234,7 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.inFlightSize()).thenReturn(0);
+        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
 
 
         publishPollService.pollSharedPublishes("group/topic");
@@ -260,7 +283,7 @@ public class PublishPollServiceImplTest {
         when(channel.isActive()).thenReturn(true);
 
         when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.inFlightSize()).thenReturn(0);
+        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(1)));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
@@ -277,7 +300,7 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
         when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.inFlightSize()).thenReturn(0);
+        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish(QoS.AT_LEAST_ONCE);
         when(clientQueuePersistence.readShared(eq("group/topic"), anyInt(), anyLong())).thenReturn(Futures.immediateFuture(
