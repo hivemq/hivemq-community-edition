@@ -40,6 +40,7 @@ public interface ModifiableClientSettings {
      * Configure the way the client is affected by the overload protection.
      *
      * @param level used for handling the overload protection for this client.
+     * @since 4.2.0
      */
     void setOverloadProtectionThrottlingLevel(@NotNull OverloadProtectionThrottlingLevel level);
 
@@ -51,6 +52,7 @@ public interface ModifiableClientSettings {
 
     /**
      * @return the overload protection level that will be used for this client.
+     * @since 4.2.0
      */
     @NotNull OverloadProtectionThrottlingLevel getOverloadProtectionThrottlingLevel();
 }
