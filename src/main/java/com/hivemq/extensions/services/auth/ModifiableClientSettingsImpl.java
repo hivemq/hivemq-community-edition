@@ -16,7 +16,9 @@
 package com.hivemq.extensions.services.auth;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
+import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 
 /**
  * @author Lukas Brandl
@@ -24,6 +26,8 @@ import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     private int receiveMaximum;
+    @NotNull
+    private OverloadProtectionThrottlingLevel overloadProtectionThrottlingLevel = OverloadProtectionThrottlingLevel.DEFAULT;
     private boolean modified = false;
 
     public ModifiableClientSettingsImpl(final int receiveMaximum) {
@@ -39,6 +43,20 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
         }
         this.receiveMaximum = receiveMaximum;
         modified = true;
+    }
+
+    @Override
+    public void setOverloadProtectionThrottlingLevel(@NotNull final OverloadProtectionThrottlingLevel level) {
+        if (this.overloadProtectionThrottlingLevel == level) {
+            return;
+        }
+        this.overloadProtectionThrottlingLevel = level;
+        modified = true;
+    }
+
+    @Override
+    public @NotNull OverloadProtectionThrottlingLevel getOverloadProtectionThrottlingLevel() {
+        return overloadProtectionThrottlingLevel;
     }
 
     @Override
