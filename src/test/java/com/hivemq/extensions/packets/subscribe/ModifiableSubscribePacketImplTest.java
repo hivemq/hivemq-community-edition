@@ -19,6 +19,7 @@ package com.hivemq.extensions.packets.subscribe;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscription;
+import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE;
@@ -45,6 +46,17 @@ public class ModifiableSubscribePacketImplTest {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         modifiableSubscribePacket = new ModifiableSubscribePacketImpl(configurationService, new SUBSCRIBE(TestMessageUtil.TEST_USER_PROPERTIES,
                 ImmutableList.of(new Topic("topic", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1)), 1, 1));
+    }
+
+    @Test
+    public void test_clear_user_properties() {
+        final ModifiableUserPropertiesImpl userProperties = modifiableSubscribePacket.getUserProperties();
+
+        assertFalse(userProperties.asList().isEmpty());
+
+        userProperties.clear();
+
+        assertTrue(userProperties.asList().isEmpty());
     }
 
     @Test

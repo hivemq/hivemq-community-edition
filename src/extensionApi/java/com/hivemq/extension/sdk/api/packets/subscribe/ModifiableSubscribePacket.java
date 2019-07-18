@@ -58,12 +58,12 @@ public interface ModifiableSubscribePacket {
     ModifiableUserProperties getUserProperties();
 
     /**
-     * get the modifiable subscriptions of the SUBSCRIBE packet.
+     * Get the modifiable subscriptions of the SUBSCRIBE packet.
      * <p>
      * The list itself is immutable, so you cannot add or remove subscriptions from the SUBSCRIBE.
      * To do this please use the {@link SubscriptionStore}.
      *
-     * @return a unmodifiable list of all {@link ModifiableSubscription}s of the SUBSCRIBE.
+     * @return An unmodifiable list of all {@link ModifiableSubscription}s of the SUBSCRIBE.
      * @since 4.2.0
      */
     @NotNull

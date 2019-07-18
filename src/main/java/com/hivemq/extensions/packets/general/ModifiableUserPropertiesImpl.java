@@ -169,6 +169,7 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
         try {
             modified = true;
             current = null;
+            legacy = EmptyUserPropertiesImpl.INSTANCE;
         } finally {
             lock.unlock();
         }
