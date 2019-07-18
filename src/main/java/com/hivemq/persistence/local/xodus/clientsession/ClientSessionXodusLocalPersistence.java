@@ -17,6 +17,7 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.annotations.ThreadSafe;
@@ -26,12 +27,14 @@ import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
+import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
@@ -155,7 +158,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         checkNotNull(clientId, "Client id must not be null");
         checkBucketIndex(bucketIndex);
 
-        return getSession(clientId, buckets[bucketIndex], checkExpired);
+        return getSession(clientId, buckets[bucketIndex], checkExpired, true);
     }
 
     /**
@@ -166,7 +169,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         checkNotNull(clientId, "Client id must not be null");
         checkBucketIndex(bucketIndex);
 
-        return getSession(clientId, buckets[bucketIndex], true);
+        return getSession(clientId, buckets[bucketIndex], true, true);
     }
 
     /**
@@ -177,7 +180,18 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     public ClientSession getSession(@NotNull final String clientId, final boolean checkExpired) {
         checkNotNull(clientId, "Client id must not be null");
 
-        return getSession(clientId, getBucket(clientId), checkExpired);
+        return getSession(clientId, getBucket(clientId), checkExpired, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Nullable
+    @Override
+    public ClientSession getSession(@NotNull final String clientId, final boolean checkExpired, final boolean includeWill) {
+        checkNotNull(clientId, "Client id must not be null");
+
+        return getSession(clientId, getBucket(clientId), checkExpired, includeWill);
     }
 
     /**
@@ -188,25 +202,33 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     public ClientSession getSession(@NotNull final String clientId) {
         checkNotNull(clientId, "Client id must not be null");
 
-        return getSession(clientId, getBucket(clientId), true);
+        return getSession(clientId, getBucket(clientId), true, true);
     }
 
     @Nullable
-    private ClientSession getSession(@NotNull final String clientId, final Bucket bucket, final boolean checkExpired) {
+    private ClientSession getSession(@NotNull final String clientId, final Bucket bucket, final boolean checkExpired, final boolean includeWill) {
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
             final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
             if (byteIterable == null) {
                 return null;
             }
+            final ClientSession clientSession;
+            final @NotNull byte[] bytes = byteIterableToBytes(byteIterable);
 
-            final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
+            if (includeWill) {
+                clientSession = serializer.deserializeValue(bytes);
+            } else {
+                clientSession = serializer.deserializeValueWithoutWill(bytes);
+            }
 
-            if (checkExpired && ClientSessions.isExpired(clientSession, System.currentTimeMillis() - serializer.deserializeTimestamp(byteIterableToBytes(byteIterable)))) {
+            if (checkExpired && ClientSessions.isExpired(clientSession, System.currentTimeMillis() - serializer.deserializeTimestamp(bytes))) {
                 return null;
             }
 
-            dereferenceWillPayload(clientSession);
+            if (includeWill) {
+                dereferenceWillPayload(clientSession);
+            }
             return clientSession;
         });
     }
@@ -345,6 +367,78 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             clientSession.setWillPublish(null);
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
             return new PersistenceEntry<>(clientSession, timestamp);
+        });
+    }
+
+    @Override
+    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(@NotNull final PersistenceFilter filter,
+                                                                                     final int bucketIndex,
+                                                                                     @Nullable final String lastClientId,
+                                                                                     final int maxResults) {
+
+        checkNotNull(filter, "Filter must not be null");
+        checkBucketIndex(bucketIndex);
+
+        final Bucket bucket = buckets[bucketIndex];
+        return bucket.getEnvironment().computeInTransaction(txn -> {
+            final Map<String, ClientSession> resultMap = Maps.newHashMap();
+
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                int counter = 0;
+
+                //determine starting point
+                if (lastClientId != null) {
+                    final ByteIterable lastClientKey = bytesToByteIterable(serializer.serializeKey(lastClientId));
+                    final ByteIterable foundKey = cursor.getSearchKeyRange(lastClientKey);
+                    if (foundKey == null) {
+                        //this key is not in the persistence and no key larger than this key is there anymore
+                        return new BucketChunkResult<>(resultMap, true, lastClientId, bucketIndex);
+                    } else {
+                        if (cursor.getKey().equals(lastClientKey)) {
+                            //jump to the next key
+                            cursor.getNext();
+                        }
+                    }
+                } else {
+                    cursor.getNext();
+                }
+
+                String lastKey = lastClientId;
+
+                do {
+
+                    if (cursor.getKey() == ByteIterable.EMPTY) {
+                        continue;
+                    }
+
+                    final String key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    lastKey = key;
+
+                    if (!filter.match(key)) {
+                        continue;
+                    }
+
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+
+                    final ClientSession clientSession = serializer.deserializeValueWithoutWill(valueBytes);
+                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
+
+                    final boolean expired = ClientSessions.isExpired(clientSession, System.currentTimeMillis() - timestamp);
+                    if (expired) {
+                        continue;
+                    }
+
+                    resultMap.put(key, clientSession);
+                    counter++;
+
+                    if (counter >= maxResults) {
+                        return new BucketChunkResult<>(resultMap, !cursor.getNext(), lastKey, bucketIndex);
+                    }
+
+                } while (cursor.getNext());
+
+                return new BucketChunkResult<>(resultMap, true, lastKey, bucketIndex);
+            }
         });
     }
 

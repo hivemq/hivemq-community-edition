@@ -20,9 +20,11 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceEntry;
+import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +45,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * session stored for the given id
      */
     @Nullable
-    ClientSession getSession(@NotNull String clientId, int bucketIndex, final boolean checkExpired);
+    ClientSession getSession(@NotNull String clientId, int bucketIndex, boolean checkExpired);
 
     /**
      * Get a {@link ClientSession} for a specific client id and a bucket index with an expired check.
@@ -65,7 +67,19 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * session stored for the given id
      */
     @Nullable
-    ClientSession getSession(@NotNull String clientId, final boolean checkExpired);
+    ClientSession getSession(@NotNull String clientId, boolean checkExpired);
+
+    /**
+     * Get a {@link ClientSession} for a specific client id with an optional expired check.
+     *
+     * @param clientId     The id associated with the session
+     * @param checkExpired true => return null for expired session, false return tombstones and expired sessions
+     * @param includeWill  if the will message should be included, the will is set to <code>null</code>
+     *                     if this parameter is <code>false</code>.
+     * @return A {@link ClientSession} object or {@code null} if there is no session stored for the given id
+     */
+    @Nullable
+    ClientSession getSession(@NotNull String clientId, boolean checkExpired, boolean includeWill);
 
     /**
      * Get a {@link ClientSession} for a specific client id with an expired check.
@@ -185,4 +199,18 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      */
     @Nullable
     PersistenceEntry<ClientSession> removeWill(@NotNull String clientId, int bucketIndex);
+
+    /**
+     * Gets a chunk of client sessions from the persistence.
+     * <p>
+     * The session do not include the will message. It is always set to <code>null</code> in the returned sessions.
+     *
+     * @param filter       the persistence filter to match. Usually a master filter.
+     * @param bucketIndex  the bucket index
+     * @param lastClientId the last client identifier for this chunk. Pass <code>null</code> to start at the beginning.
+     * @param maxResults   the max amount of results contained in the chunk.
+     * @return a {@link BucketChunkResult} with the entries and the information if more chunks are available
+     */
+    @NotNull
+    BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(@NotNull PersistenceFilter filter, int bucketIndex, @Nullable String lastClientId, int maxResults);
 }

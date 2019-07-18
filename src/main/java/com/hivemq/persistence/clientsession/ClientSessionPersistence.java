@@ -21,6 +21,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
 import java.util.Map;
 import java.util.Set;
@@ -59,11 +60,12 @@ public interface ClientSessionPersistence {
     /**
      * Get a client session for a specific identifier.
      *
-     * @param clientId the client id.
+     * @param clientId    the client id.
+     * @param includeWill if the will message should be included, the will is set to <code>null</code> if this parameter is <code>false</code>.
      * @return the client session for this identifier or <null>.
      */
     @Nullable
-    ClientSession getSession(@NotNull String clientId);
+    ClientSession getSession(@NotNull String clientId, boolean includeWill);
 
     /**
      * Trigger a cleanup for a specific bucket
@@ -156,4 +158,15 @@ public interface ClientSessionPersistence {
      */
     @NotNull
     ListenableFuture<Void> removeWill(@NotNull String clientId);
+
+
+    /**
+     * Process a request for a chunk of all the client sessions from this node
+     *
+     * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
+     * @return a result containing the new cursor and a map of clientIds to their session
+     */
+    @NotNull
+    ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(@NotNull ChunkCursor cursor);
+
 }

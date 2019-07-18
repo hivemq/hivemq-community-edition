@@ -16,28 +16,43 @@
 
 package com.hivemq.extensions.services.session;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.session.SessionInformation;
+import com.hivemq.extensions.iteration.AsyncIterator;
+import com.hivemq.extensions.iteration.AsyncIteratorFactory;
+import com.hivemq.extensions.iteration.ChunkResult;
+import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.TestException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -55,13 +70,17 @@ public class ClientServiceImplTest {
     @Mock
     private PluginServiceRateLimitService pluginServiceRateLimitService;
 
+    @Mock
+    AsyncIteratorFactory asyncIteratorFactory;
+
     private final String clientId = "clientID";
     private final long sessionExpiry = 123546L;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientService = new ClientServiceImpl(pluginServiceRateLimitService, clientSessionPersistence);
+        clientService = new ClientServiceImpl(pluginServiceRateLimitService, clientSessionPersistence,
+                getManagedExtensionExecutorService(), asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 
@@ -168,14 +187,14 @@ public class ClientServiceImplTest {
     @Test(timeout = 20000)
     public void test_client_connected_null_success() throws Throwable {
 
-        when(clientSessionPersistence.getSession(clientId)).thenReturn(null);
+        when(clientSessionPersistence.getSession(clientId, false)).thenReturn(null);
         assertFalse(clientService.isClientConnected(clientId).get());
 
     }
 
     @Test(timeout = 20000)
     public void test_get_session_null_success() throws Throwable {
-        when(clientSessionPersistence.getSession(clientId)).thenReturn(null);
+        when(clientSessionPersistence.getSession(clientId, false)).thenReturn(null);
         assertEquals(Optional.empty(), clientService.getSession(clientId).get());
     }
 
@@ -184,7 +203,7 @@ public class ClientServiceImplTest {
 
         final ClientSession session = getSession(true);
 
-        when(clientSessionPersistence.getSession(clientId)).thenReturn(session);
+        when(clientSessionPersistence.getSession(clientId, false)).thenReturn(session);
         final Optional<SessionInformation> sessionInformation = clientService.getSession(clientId).get();
 
         assertTrue(sessionInformation.isPresent());
@@ -250,7 +269,7 @@ public class ClientServiceImplTest {
     @Test(timeout = 20000)
     public void test_client_connected_true_success() throws Throwable {
 
-        when(clientSessionPersistence.getSession(clientId)).thenReturn(getSession(true));
+        when(clientSessionPersistence.getSession(clientId, false)).thenReturn(getSession(true));
         assertEquals(true, clientService.isClientConnected(clientId).get());
 
     }
@@ -258,13 +277,159 @@ public class ClientServiceImplTest {
     @Test(timeout = 20000)
     public void test_client_connected_false_success() throws Throwable {
 
-        when(clientSessionPersistence.getSession(clientId)).thenReturn(getSession(false));
+        when(clientSessionPersistence.getSession(clientId, false)).thenReturn(getSession(false));
         assertEquals(false, clientService.isClientConnected(clientId).get());
 
     }
 
     @NotNull
     private ClientSession getSession(final boolean connected) {
-        return new ClientSession(connected, sessionExpiry, new ClientSessionWill(Mockito.mock(MqttWillPublish.class), 12345L));
+        return new ClientSession(connected, sessionExpiry, new ClientSessionWill(mock(MqttWillPublish.class), 12345L));
+    }
+
+    @Test(timeout = 10000, expected = RateLimitExceededException.class)
+    public void test_iterate_all_rate_limit_exceeded() throws Throwable {
+        when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(true);
+
+        try {
+            clientService.iterateAllClients((context, value) -> {
+            }).get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test(timeout = 10000, expected = NullPointerException.class)
+    public void test_iterate_all_callback_null() throws Throwable {
+        clientService.iterateAllClients(null).get();
+    }
+
+    @Test(timeout = 10000, expected = NullPointerException.class)
+    public void test_iterate_all_callback_executor_null() throws Throwable {
+        clientService.iterateAllClients((context, value) -> {
+        }, null).get();
+    }
+
+    @Test(timeout = 10000)
+    public void test_item_callback() throws Exception {
+        final ArrayList<SessionInformation> items = Lists.newArrayList();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ClientServiceImpl.AllClientsItemCallback itemCallback = new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+            items.add(value);
+            latch.countDown();
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SessionInformationImpl("client", 1, true),
+                new SessionInformationImpl("client2", 2, true),
+                new SessionInformationImpl("client3", 3, false)
+        ));
+
+        assertEquals(true, onItems.get());
+
+        assertEquals(3, items.size());
+
+        executor.shutdownNow();
+    }
+
+    @Test(timeout = 10000)
+    public void test_item_callback_abort() throws Exception {
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ClientServiceImpl.AllClientsItemCallback itemCallback = new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+            context.abortIteration();
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SessionInformationImpl("client", 1, true),
+                new SessionInformationImpl("client2", 2, true),
+                new SessionInformationImpl("client3", 3, false)
+        ));
+
+        assertEquals(false, onItems.get());
+
+        executor.shutdownNow();
+    }
+
+    @Test(timeout = 10000, expected = RuntimeException.class)
+    public void test_item_callback_exception() throws Throwable {
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ClientServiceImpl.AllClientsItemCallback itemCallback = new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+            throw new RuntimeException("test-exception");
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SessionInformationImpl("client", 1, true),
+                new SessionInformationImpl("client2", 2, true),
+                new SessionInformationImpl("client3", 3, false)
+        ));
+
+        try {
+            onItems.get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+
+        executor.shutdownNow();
+    }
+
+
+    @Test(timeout = 10000)
+    public void test_iteration_started() throws Exception {
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
+
+        //noinspection unchecked
+        when(asyncIteratorFactory.createIterator(any(FetchCallback.class), any(AsyncIterator.ItemCallback.class)))
+                .thenReturn(new AsyncIterator() {
+                    @Override
+                    public void fetchAndIterate() {
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public @NotNull CompletableFuture<Void> getFinishedFuture() {
+                        return resultFuture;
+                    }
+
+                });
+
+        clientService.iterateAllClients((context, value) -> {
+        });
+
+        resultFuture.complete(null);
+
+        latch.await();
+    }
+
+    @Test
+    public void test_test_fetch_callback_conversion() {
+
+        final ClientServiceImpl.AllClientsFetchCallback fetchCallback = new ClientServiceImpl.AllClientsFetchCallback(null);
+
+        final ChunkResult<ChunkCursor, SessionInformation> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ClientSession>>(
+                Map.of(
+                        1, new BucketChunkResult<>(Map.of(
+                                "client1", new ClientSession(true, 10)), true, "client1", 1),
+                        2, new BucketChunkResult<>(Map.of(
+                                "client2", new ClientSession(true, 10),
+                                "client3", new ClientSession(true, 10))
+                                , false, "client3", 2)
+                )));
+
+        assertTrue(chunkResult.getCursor().getFinishedBuckets().contains(1));
+        assertFalse(chunkResult.getCursor().getFinishedBuckets().contains(2));
+        assertEquals(3, chunkResult.getResults().size());
+    }
+
+
+    @NotNull
+    public GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
+        return new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
     }
 }

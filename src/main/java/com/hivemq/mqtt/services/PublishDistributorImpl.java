@@ -128,7 +128,7 @@ public class PublishDistributorImpl implements PublishDistributor {
         }
 
         final boolean qos0Message = Math.min(subscriptionQos, publish.getQoS().getQosNumber()) == 0;
-        final ClientSession clientSession = clientSessionPersistence.getSession(client);
+        final ClientSession clientSession = clientSessionPersistence.getSession(client, false);
         final boolean clientConnected = clientSession != null && clientSession.isConnected();
 
         if ((qos0Message && !clientConnected)) {

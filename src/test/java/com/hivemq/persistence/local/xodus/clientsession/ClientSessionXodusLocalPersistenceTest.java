@@ -16,31 +16,32 @@
 
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.google.common.collect.Lists;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.persistence.NoSessionException;
-import com.hivemq.persistence.PersistenceEntry;
-import com.hivemq.persistence.PersistenceStartup;
+import com.hivemq.persistence.*;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestBucketUtil;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
@@ -452,8 +453,202 @@ public class ClientSessionXodusLocalPersistenceTest {
     }
 
 
+    @Test(timeout = 10_000)
+    public void test_get_chunk_match_some() {
+        persistence.put("clientid", new ClientSession(true, 1000), 123L, 1);
+        persistence.put("clientid2", new ClientSession(true, 1000), 123L, 1);
+
+
+        final Map<String, ClientSession> client1Entries = persistence.getAllClientsChunk(new ClientIdPersistenceFilter("clientid"), 1, null, 10).getValue();
+        final Map<String, ClientSession> client2Entries = persistence.getAllClientsChunk(new ClientIdPersistenceFilter("clientid2"), 1, null, 10).getValue();
+
+        assertNotNull(client1Entries.get("clientid"));
+        assertNull(client1Entries.get("clientid2"));
+
+        assertNull(client2Entries.get("clientid"));
+        assertNotNull(client2Entries.get("clientid2"));
+    }
+
+    @Test(timeout = 10_000)
+    public void test_get_chunk_many_clients() {
+
+        for (int i = 0; i < 100; i++) {
+            persistence.put("client-" + i, new ClientSession(true, 1000), 123L, 1);
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+    }
+
+    @Test(timeout = 10_000)
+    public void test_get_chunk_remove_last_key_between_iterations() {
+
+        for (int i = 0; i < 100; i++) {
+            persistence.put("client-" + i, new ClientSession(true, 1000), 123L, 1);
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            if (chunk != null && chunk.getLastKey() != null) {
+                persistence.removeWithTimestamp(chunk.getLastKey(), 1);
+            }
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+    }
+
+    @Test(timeout = 10_000)
+    public void test_get_chunk_empty_between_iterations() {
+
+        persistence.put("client1", new ClientSession(true, 1000), 123L, 1);
+        persistence.put("client2", new ClientSession(true, 1000), 123L, 1);
+        persistence.put("client3", new ClientSession(true, 1000), 123L, 1);
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            if (chunk != null && chunk.getLastKey() != null) {
+                for (int i = 0; i < 100; i++) {
+                    persistence.removeWithTimestamp("client1", 1);
+                    persistence.removeWithTimestamp("client2", 1);
+                    persistence.removeWithTimestamp("client3", 1);
+                }
+            }
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+
+        assertEquals(1, clientIds.size());
+    }
+
+    @Test(timeout = 10_000)
+    public void test_get_chunk_skip_expired_clients() {
+
+        persistence.put("client1", new ClientSession(true, 1000), System.currentTimeMillis(), 1);
+        persistence.put("client2", new ClientSession(false, 1000), System.currentTimeMillis(), 1);
+        persistence.put("client3", new ClientSession(false, 1000), 123L, 1);
+        persistence.put("client4", new ClientSession(true, 1000), 123L, 1);
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+
+        assertEquals(3, clientIds.size());
+
+        assertFalse(clientIds.contains("client3"));
+    }
+
+    @Test(timeout = 10_000)
+    public void test_get_chunk_only_expired_clients() {
+
+        persistence.put("client1", new ClientSession(false, 1000), 123L, 1);
+        persistence.put("client2", new ClientSession(false, 1000), 123L, 1);
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+
+        assertEquals(0, clientIds.size());
+    }
+
+    @Test(timeout = 30_000)
+    public void test_get_chunk_many_clients_random_ids() {
+
+        final ArrayList<String> clientIdList = getRandomUniqueIds();
+
+        for (int i = 0; i < 100; i++) {
+            persistence.put(clientIdList.get(i), new ClientSession(true, 1000), System.currentTimeMillis(), 1);
+
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, ClientSession>> chunk = null;
+
+        do {
+            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+    }
+
+    @NotNull
+    public ArrayList<String> getRandomUniqueIds() {
+        final Set<String> clientIdSet = new HashSet<>();
+
+        final Random random = new Random();
+        while (clientIdSet.size() < 100) {
+            clientIdSet.add(RandomStringUtils.randomAlphanumeric(random.nextInt(100)));
+        }
+        return new ArrayList<>(clientIdSet);
+    }
+
     private ClientSession getSessionWithInterval(final long interval) {
         return new ClientSession(true, interval);
+    }
+
+    private static class ClientIdPersistenceFilter implements PersistenceFilter {
+        private final String clientid;
+
+        public ClientIdPersistenceFilter(final String clientid) {
+
+            this.clientid = clientid;
+        }
+
+        @Override
+        public boolean match(@NotNull final String key) {
+            return key.equals(clientid);
+        }
     }
 
 }
