@@ -18,9 +18,13 @@ package com.hivemq.extension.sdk.api.interceptor.connack.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
+import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.connack.ModifiableConnackPacket;
+
+import java.time.Duration;
 
 /**
  * This is the output parameter of any {@link ConnackOutboundInterceptor}
@@ -43,4 +47,34 @@ public interface ConnackOutboundOutput extends AsyncOutput<ConnackOutboundOutput
     @NotNull
     ModifiableConnackPacket getConnackPacket();
 
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
+     * handled either as failed or successful, depending on the specified fallback.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     * <p>
+     * {@link TimeoutFallback#FAILURE} results in closed connection without a CONNACK sent to the client.
+     * <p>
+     * {@link TimeoutFallback#SUCCESS} will proceed the CONNACK.
+     *
+     * @param timeout  Timeout that HiveMQ waits for the result of the async operation.
+     * @param fallback Fallback behaviour if a timeout occurs.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.2.0
+     */
+    @Override
+    @NotNull Async<ConnackOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
+
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
+     * This means that the outcome results in closed connection without a CONNACK sent to the client.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     *
+     * @param timeout Timeout that HiveMQ waits for the result of the async operation.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.2.0
+     */
+    @Override
+    @NotNull Async<ConnackOutboundOutput> async(@NotNull Duration timeout);
 }
