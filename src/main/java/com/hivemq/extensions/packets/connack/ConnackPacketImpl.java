@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -85,8 +86,8 @@ public class ConnackPacketImpl implements ConnackPacket {
     }
 
     public ConnackPacketImpl(@NotNull final ConnackPacket connackPacket) {
-        this.sessionExpiryInterval = connackPacket.getSessionExpiryInterval();
-        this.serverKeepAlive = connackPacket.getServerKeepAlive();
+        this.sessionExpiryInterval = connackPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
+        this.serverKeepAlive = connackPacket.getServerKeepAlive().orElse(Mqtt5CONNECT.KEEP_ALIVE_NOT_SET);
         this.receiveMaximum = connackPacket.getReceiveMaximum();
         this.maximumPacketSize = connackPacket.getMaximumPacketSize();
         this.topicAliasMaximum = connackPacket.getTopicAliasMaximum();
@@ -106,14 +107,22 @@ public class ConnackPacketImpl implements ConnackPacket {
         this.serverReference = connackPacket.getServerReference().orElse(null);
     }
 
+    @NotNull
     @Override
-    public long getSessionExpiryInterval() {
-        return sessionExpiryInterval;
+    public Optional<Long> getSessionExpiryInterval() {
+        if (sessionExpiryInterval == Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) {
+            return Optional.empty();
+        }
+        return Optional.of(sessionExpiryInterval);
     }
 
+    @NotNull
     @Override
-    public int getServerKeepAlive() {
-        return serverKeepAlive;
+    public Optional<Integer> getServerKeepAlive() {
+        if (serverKeepAlive == Mqtt5CONNECT.KEEP_ALIVE_NOT_SET) {
+            return Optional.empty();
+        }
+        return Optional.of(serverKeepAlive);
     }
 
     @Override

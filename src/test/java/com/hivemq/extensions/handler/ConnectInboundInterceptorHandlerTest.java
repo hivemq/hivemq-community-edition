@@ -263,7 +263,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestModifyInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(
                 @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> output.getConnectPacket().setClientId("modified");
@@ -273,7 +273,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestTimeoutFailedInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(
                 @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
@@ -291,7 +291,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestExceptionInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(
                 @NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
@@ -303,7 +303,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestNullInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return null;
         }

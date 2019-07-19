@@ -70,6 +70,7 @@ public interface ModifiableConnackPacket extends ConnackPacket {
      * @param responseInformation The new response information for the CONNACK.
      * @throws IllegalArgumentException If the response information is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the response information exceeds the UTF-8 string length limit.
+     * @throws IllegalStateException    If the response information was not requested in connect packet.
      * @since 4.2.0
      */
     void setResponseInformation(@Nullable String responseInformation);
@@ -84,8 +85,4 @@ public interface ModifiableConnackPacket extends ConnackPacket {
      */
     void setServerReference(@Nullable String serverReference);
 
-    /**
-     * @return True if the packet was modified, else false.
-     */
-    boolean isModified();
 }

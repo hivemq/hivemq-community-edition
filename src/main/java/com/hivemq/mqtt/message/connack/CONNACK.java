@@ -21,9 +21,9 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
-import com.hivemq.extension.sdk.api.packets.connack.ModifiableConnackPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extensions.packets.connack.ModifiableConnackPacketImpl;
 import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
@@ -141,55 +141,47 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.serverReference = serverReference;
     }
 
-    private void checkPreconditions(final long sessionExpiryInterval,
-                                    final int serverKeepAlive,
-                                    @Nullable final String assignedClientIdentifier,
-                                    @Nullable final String authMethod,
-                                    @Nullable final byte[] authData,
-                                    final int receiveMaximum,
-                                    final int topicAliasMaximum,
-                                    final int maximumPacketSize,
-                                    @Nullable final String responseInformation,
-                                    @Nullable final String serverReference) {
+    public static @NotNull CONNACK mergeConnackPacket(final @NotNull ModifiableConnackPacketImpl connackPacket, final @NotNull CONNACK origin) {
 
-        checkArgument(receiveMaximum != 0, "Receive maximum must never be zero");
-
-        if (assignedClientIdentifier != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(assignedClientIdentifier.getBytes(StandardCharsets.UTF_8).length),
-                    "A client Id must never exceed 65.535 bytes");
-        }
-        if (authMethod != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(authMethod.getBytes(StandardCharsets.UTF_8).length),
-                    "An auth method must never exceed 65.535 bytes");
-        }
-        if (authData != null) {
-            checkNotNull(authMethod, "Auth method must be set if auth data is set");
-            checkArgument(UnsignedDataTypes.isUnsignedShort(authData.length),
-                    "An auth data must never exceed 65.535 bytes");
-        }
-        if (responseInformation != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(responseInformation.getBytes(StandardCharsets.UTF_8).length),
-                    "A response information must never exceed 65.535 bytes");
-        }
-        if (serverReference != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(serverReference.getBytes(StandardCharsets.UTF_8).length),
-                    "A server reference must never exceed 65.535 bytes");
-        }
-        if(sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
-            checkArgument(UnsignedDataTypes.isUnsignedInt(sessionExpiryInterval),
-                    "A session expiry interval must never be larger than 4.294.967.296");
+        if (!connackPacket.isModified()) {
+            return origin;
         }
 
-        checkArgument(maximumPacketSize <= CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
-                "A maximum packet size must never be larger than 268.435.460");
+        final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder();
 
-        checkArgument(UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
-                "A topic alias maximum must never be larger than 65.535");
-
-        if (serverKeepAlive != CONNECT.KEEP_ALIVE_NOT_SET) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
-                    "A server keep alive must never be larger than 65.535");
+        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
+        for (final UserProperty userProperty : connackPacket.getUserProperties().asList()) {
+            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
         }
+
+        final QoS qoS;
+        final Qos extensionMaxQos = connackPacket.getMaximumQoS().orElse(null);
+        if (extensionMaxQos != null) {
+            qoS = QoS.valueOf(extensionMaxQos.getQosNumber());
+        } else {
+            qoS = null;
+        }
+
+        return builder.withAssignedClientIdentifier(connackPacket.getAssignedClientIdentifier().orElse(null))
+                .withSessionExpiryInterval(origin.getSessionExpiryInterval())
+                .withSessionPresent(connackPacket.getSessionPresent())
+                .withServerKeepAlive(origin.getServerKeepAlive())
+                .withServerReference(connackPacket.getServerReference().orElse(null))
+                .withReceiveMaximum(connackPacket.getReceiveMaximum())
+                .withMaximumPacketSize(connackPacket.getMaximumPacketSize())
+                .withTopicAliasMaximum(connackPacket.getTopicAliasMaximum())
+                .withResponseInformation(connackPacket.getResponseInformation().orElse(null))
+                .withAuthMethod(connackPacket.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connackPacket.getAuthenticationData()))
+                .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
+                .withReasonCode(ReasonCodeUtil.toMqtt5(connackPacket.getReasonCode()))
+                .withReasonString(connackPacket.getReasonString().orElse(null))
+                .withMaximumQoS(qoS)
+                .withSharedSubscriptionAvailable(connackPacket.getSharedSubscriptionsAvailable())
+                .withSubscriptionIdentifierAvailable(connackPacket.getSubscriptionIdentifiersAvailable())
+                .withWildcardSubscriptionAvailable(connackPacket.getWildCardSubscriptionAvailable())
+                .withRetainAvailable(connackPacket.getRetainAvailable())
+                .build();
     }
 
     //MQTT 3.1
@@ -227,6 +219,57 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.serverReference = null;
     }
 
+    private void checkPreconditions(final long sessionExpiryInterval,
+                                    final int serverKeepAlive,
+                                    @Nullable final String assignedClientIdentifier,
+                                    @Nullable final String authMethod,
+                                    @Nullable final byte[] authData,
+                                    final int receiveMaximum,
+                                    final int topicAliasMaximum,
+                                    final int maximumPacketSize,
+                                    @Nullable final String responseInformation,
+                                    @Nullable final String serverReference) {
+
+        checkArgument(receiveMaximum != 0, "Receive maximum must never be zero");
+
+        if (assignedClientIdentifier != null) {
+            checkArgument(UnsignedDataTypes.isUnsignedShort(assignedClientIdentifier.getBytes(StandardCharsets.UTF_8).length),
+                    "A client Id must never exceed 65.535 bytes");
+        }
+        if (authMethod != null) {
+            checkArgument(UnsignedDataTypes.isUnsignedShort(authMethod.getBytes(StandardCharsets.UTF_8).length),
+                    "An auth method must never exceed 65.535 bytes");
+        }
+        if (authData != null) {
+            checkNotNull(authMethod, "Auth method must be set if auth data is set");
+            checkArgument(UnsignedDataTypes.isUnsignedShort(authData.length),
+                    "An auth data must never exceed 65.535 bytes");
+        }
+        if (responseInformation != null) {
+            checkArgument(UnsignedDataTypes.isUnsignedShort(responseInformation.getBytes(StandardCharsets.UTF_8).length),
+                    "A response information must never exceed 65.535 bytes");
+        }
+        if (serverReference != null) {
+            checkArgument(UnsignedDataTypes.isUnsignedShort(serverReference.getBytes(StandardCharsets.UTF_8).length),
+                    "A server reference must never exceed 65.535 bytes");
+        }
+        if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
+            checkArgument(UnsignedDataTypes.isUnsignedInt(sessionExpiryInterval),
+                    "A session expiry interval must never be larger than 4.294.967.296");
+        }
+
+        checkArgument(maximumPacketSize <= CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
+                "A maximum packet size must never be larger than 268.435.460");
+
+        checkArgument(UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
+                "A topic alias maximum must never be larger than 65.535");
+
+        if (serverKeepAlive != CONNECT.KEEP_ALIVE_NOT_SET) {
+            checkArgument(UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
+                    "A server keep alive must never be larger than 65.535");
+        }
+    }
+
     public static class Mqtt5Builder {
 
         private Mqtt5ConnAckReasonCode reasonCode;
@@ -257,7 +300,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         private String responseInformation;
         private String serverReference;
 
-        public CONNACK build(){
+        public CONNACK build() {
             return new CONNACK(reasonCode,
                     reasonString,
                     userProperties,
@@ -373,49 +416,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
             this.serverReference = serverReference;
             return this;
         }
-    }
-
-    public static @NotNull CONNACK mergeConnackPacket(final @NotNull ModifiableConnackPacket connackPacket, final @NotNull CONNACK origin) {
-
-        if (!connackPacket.isModified()) {
-            return origin;
-        }
-
-        final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder();
-
-        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
-        for (final UserProperty userProperty : connackPacket.getUserProperties().asList()) {
-            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-
-        final QoS qoS;
-        final Qos extensionMaxQos = connackPacket.getMaximumQoS().orElse(null);
-        if (extensionMaxQos != null) {
-            qoS = QoS.valueOf(extensionMaxQos.getQosNumber());
-        } else {
-            qoS = null;
-        }
-
-        return builder.withAssignedClientIdentifier(connackPacket.getAssignedClientIdentifier().orElse(null))
-                .withSessionExpiryInterval(connackPacket.getSessionExpiryInterval())
-                .withSessionPresent(connackPacket.getSessionPresent())
-                .withServerKeepAlive(connackPacket.getServerKeepAlive())
-                .withServerReference(connackPacket.getServerReference().orElse(null))
-                .withReceiveMaximum(connackPacket.getReceiveMaximum())
-                .withMaximumPacketSize(connackPacket.getMaximumPacketSize())
-                .withTopicAliasMaximum(connackPacket.getTopicAliasMaximum())
-                .withResponseInformation(connackPacket.getResponseInformation().orElse(null))
-                .withAuthMethod(connackPacket.getAuthenticationMethod().orElse(null))
-                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connackPacket.getAuthenticationData()))
-                .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
-                .withReasonCode(ReasonCodeUtil.toMqtt5(connackPacket.getReasonCode()))
-                .withReasonString(connackPacket.getReasonString().orElse(null))
-                .withMaximumQoS(qoS)
-                .withSharedSubscriptionAvailable(connackPacket.getSharedSubscriptionsAvailable())
-                .withSubscriptionIdentifierAvailable(connackPacket.getSubscriptionIdentifiersAvailable())
-                .withWildcardSubscriptionAvailable(connackPacket.getWildCardSubscriptionAvailable())
-                .withRetainAvailable(connackPacket.getRetainAvailable())
-                .build();
     }
 
     @Override

@@ -130,7 +130,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         final ConnackOutboundProviderInputImpl providerInput = new ConnackOutboundProviderInputImpl(serverInformation, channel, clientId);
 
         final Boolean requestResponseInformation = channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).get();
-        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(configurationService, asyncer, connack, Objects.requireNonNull(requestResponseInformation));
+        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(configurationService, asyncer, connack, Objects.requireNonNullElse(requestResponseInformation, false));
         final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(new ConnackPacketImpl(connack), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final ConnackInterceptorContext interceptorContext = new ConnackInterceptorContext(ConnackInterceptorTask.class,
@@ -169,7 +169,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             }
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, connack, ctx, eventLog);
+        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, connack, ctx, promise, eventLog);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
 
     }
@@ -179,15 +179,18 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         private final @NotNull ConnackOutboundOutputImpl output;
         private final @NotNull CONNACK connack;
         private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ChannelPromise promise;
         private final @NotNull EventLog eventLog;
 
         InterceptorFutureCallback(final @NotNull ConnackOutboundOutputImpl output,
                                   final @NotNull CONNACK connack,
                                   final @NotNull ChannelHandlerContext ctx,
+                                  final @NotNull ChannelPromise promise,
                                   final @NotNull EventLog eventLog) {
             this.output = output;
             this.connack = connack;
             this.ctx = ctx;
+            this.promise = promise;
             this.eventLog = eventLog;
         }
 
@@ -200,10 +203,10 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
                     return;
                 }
                 final CONNACK finalConnack = CONNACK.mergeConnackPacket(output.getConnackPacket(), connack);
-                ctx.writeAndFlush(finalConnack);
+                ctx.writeAndFlush(finalConnack, promise);
             } catch (final Exception e) {
                 log.error("Exception while modifying an intercepted CONNACK message.", e);
-                ctx.writeAndFlush(connack);
+                ctx.writeAndFlush(connack, promise);
             }
         }
 

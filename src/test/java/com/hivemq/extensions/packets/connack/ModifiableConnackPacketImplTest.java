@@ -20,6 +20,7 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import org.junit.Before;
 import org.junit.Test;
@@ -157,8 +158,8 @@ public class ModifiableConnackPacketImplTest {
 
         final ConnackPacketImpl connackPacket = new ConnackPacketImpl(fullMqtt5Connack);
 
-        assertEquals(fullMqtt5Connack.getSessionExpiryInterval(), connackPacket.getSessionExpiryInterval());
-        assertEquals(fullMqtt5Connack.getServerKeepAlive(), connackPacket.getServerKeepAlive());
+        assertEquals(fullMqtt5Connack.getSessionExpiryInterval(), connackPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET).longValue());
+        assertEquals(fullMqtt5Connack.getServerKeepAlive(), connackPacket.getServerKeepAlive().orElse(Mqtt5CONNECT.KEEP_ALIVE_NOT_SET).intValue());
         assertEquals(fullMqtt5Connack.getReceiveMaximum(), connackPacket.getReceiveMaximum());
         assertEquals(fullMqtt5Connack.getMaximumPacketSize(), connackPacket.getMaximumPacketSize());
         assertEquals(fullMqtt5Connack.getTopicAliasMaximum(), connackPacket.getTopicAliasMaximum());

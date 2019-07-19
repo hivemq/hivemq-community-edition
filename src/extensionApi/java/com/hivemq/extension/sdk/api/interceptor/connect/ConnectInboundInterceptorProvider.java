@@ -40,5 +40,5 @@ public interface ConnectInboundInterceptorProvider {
      * @return An implementation of the {@link ConnectInboundInterceptor} or null if the CONNECT should not be intercepted.
      * @since 4.2.0
      */
-    @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull ConnectInboundProviderInput input);
+    @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull ConnectInboundProviderInput input);
 }

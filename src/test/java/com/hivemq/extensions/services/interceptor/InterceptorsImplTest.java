@@ -167,7 +167,7 @@ public class InterceptorsImplTest {
 
     public static class TestConnectInboundInterceptorProvider implements ConnectInboundInterceptorProvider {
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull final ConnectInboundProviderInput input) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput input) {
             return (connectInterceptorInput, connectInterceptorOutput) -> {
 
             };

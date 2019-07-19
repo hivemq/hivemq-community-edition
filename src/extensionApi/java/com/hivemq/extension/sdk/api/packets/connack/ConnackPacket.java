@@ -44,7 +44,8 @@ public interface ConnackPacket {
      * @return The session expiry interval.
      * @since 4.2.0
      */
-    long getSessionExpiryInterval();
+    @NotNull
+    Optional<Long> getSessionExpiryInterval();
 
     /**
      * An interval in seconds in which the client has to send any MQTT control packet, so that HiveMQ doesn't end the
@@ -55,7 +56,8 @@ public interface ConnackPacket {
      * @return The server keep alive.
      * @since 4.2.0
      */
-    int getServerKeepAlive();
+    @NotNull
+    Optional<Integer> getServerKeepAlive();
 
     /**
      * The limit of QoS 1 and QoS 2 {@link Publish}es that the server is willing

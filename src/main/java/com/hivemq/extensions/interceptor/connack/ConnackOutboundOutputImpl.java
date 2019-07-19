@@ -19,7 +19,6 @@ package com.hivemq.extensions.interceptor.connack;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.connack.parameter.ConnackOutboundOutput;
-import com.hivemq.extension.sdk.api.packets.connack.ModifiableConnackPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
@@ -44,7 +43,7 @@ public class ConnackOutboundOutputImpl extends AbstractAsyncOutput<ConnackOutbou
     }
 
     @Override
-    public @NotNull ModifiableConnackPacket getConnackPacket() {
+    public @NotNull ModifiableConnackPacketImpl getConnackPacket() {
         return connackPacket;
     }
 
