@@ -16,17 +16,20 @@
 
 package com.hivemq.extensions.client;
 
+import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.executor.task.AbstractOutput;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Florian Limpöck
@@ -40,47 +43,68 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @NotNull
     private final ClientContextImpl clientContext;
 
-    public ClientContextPluginImpl(@NotNull final IsolatedPluginClassloader pluginClassloader,
-                                   @NotNull final ClientContextImpl clientContext) {
+    public ClientContextPluginImpl(final @NotNull IsolatedPluginClassloader pluginClassloader,
+                                   final @NotNull ClientContextImpl clientContext) {
         this.pluginClassloader = pluginClassloader;
         this.clientContext = clientContext;
     }
 
     @Override
-    public void addPublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
+    public void addPublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
+        clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void addPublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
         clientContext.addInterceptor(interceptor);
     }
 
     @Override
-    public void removePublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
+    public void addSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
+        clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removePublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
+        clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removePublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
         clientContext.removeInterceptor(interceptor);
     }
 
     @Override
-    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        clientContext.addInterceptor(interceptor);
-    }
-
-    @Override
-    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        clientContext.removeInterceptor(interceptor);
+    public void removeSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
+        clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @NotNull
     @Override
+    @Immutable
     public List<Interceptor> getAllInterceptors() {
         return clientContext.getAllInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
     @Override
+    @Immutable
     public List<PublishInboundInterceptor> getPublishInboundInterceptors() {
         return clientContext.getPublishInboundInterceptorsForPlugin(pluginClassloader);
     }
 
+    @NotNull
     @Override
-    public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+    @Immutable
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
         return clientContext.getPublishOutboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
+    @Immutable
+    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
+        return clientContext.getSubscribeInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull

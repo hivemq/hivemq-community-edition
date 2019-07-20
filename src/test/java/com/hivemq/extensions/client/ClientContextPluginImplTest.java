@@ -20,6 +20,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
@@ -76,11 +77,13 @@ public class ClientContextPluginImplTest {
 
         addInterceptors(anotherInterceptorList, contextPlugin2);
 
-        assertEquals(1, contextPlugin1.getAllInterceptors().size());
+        assertEquals(2, contextPlugin1.getAllInterceptors().size());
         assertEquals(1, contextPlugin1.getPublishInboundInterceptors().size());
+        assertEquals(1, contextPlugin1.getSubscribeInboundInterceptors().size());
 
-        assertEquals(1, contextPlugin2.getAllInterceptors().size());
+        assertEquals(2, contextPlugin2.getAllInterceptors().size());
         assertEquals(1, contextPlugin2.getPublishInboundInterceptors().size());
+        assertEquals(1, contextPlugin2.getSubscribeInboundInterceptors().size());
 
 
         for (final Interceptor interceptor : contextPlugin1.getAllInterceptors()) {
@@ -89,6 +92,10 @@ public class ClientContextPluginImplTest {
 
         for (final PublishInboundInterceptor interceptor : contextPlugin1.getPublishInboundInterceptors()) {
             assertFalse(contextPlugin2.getPublishInboundInterceptors().contains(interceptor));
+        }
+
+        for (final SubscribeInboundInterceptor interceptor : contextPlugin1.getSubscribeInboundInterceptors()) {
+            assertFalse(contextPlugin2.getSubscribeInboundInterceptors().contains(interceptor));
         }
 
     }
@@ -120,9 +127,11 @@ public class ClientContextPluginImplTest {
 
         assertEquals(0, contextPlugin1.getAllInterceptors().size());
         assertEquals(0, contextPlugin1.getPublishInboundInterceptors().size());
+        assertEquals(0, contextPlugin1.getSubscribeInboundInterceptors().size());
 
-        assertEquals(1, contextPlugin2.getAllInterceptors().size());
+        assertEquals(2, contextPlugin2.getAllInterceptors().size());
         assertEquals(1, contextPlugin2.getPublishInboundInterceptors().size());
+        assertEquals(1, contextPlugin2.getSubscribeInboundInterceptors().size());
 
     }
 
@@ -131,6 +140,9 @@ public class ClientContextPluginImplTest {
             if (interceptor instanceof PublishInboundInterceptor) {
                 contextPlugin.addPublishInboundInterceptor((PublishInboundInterceptor) interceptor);
             }
+            if (interceptor instanceof SubscribeInboundInterceptor) {
+                contextPlugin.addSubscribeInboundInterceptor((SubscribeInboundInterceptor) interceptor);
+            }
         }
     }
 
@@ -138,6 +150,9 @@ public class ClientContextPluginImplTest {
         for (final Interceptor interceptor : interceptorList) {
             if (interceptor instanceof PublishInboundInterceptor) {
                 contextPlugin.removePublishInboundInterceptor((PublishInboundInterceptor) interceptor);
+            }
+            if (interceptor instanceof SubscribeInboundInterceptor) {
+                contextPlugin.removeSubscribeInboundInterceptor((SubscribeInboundInterceptor) interceptor);
             }
         }
     }

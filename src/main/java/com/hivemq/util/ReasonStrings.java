@@ -125,6 +125,8 @@ public class ReasonStrings {
 
     public static final String DISCONNECT_SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = "Disconnecting client. SUBSCRIBE containing subscription identifiers was sent. The broker does not allow this.";
 
+    public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
+
     private ReasonStrings() {
         //Don't instantiate
     }

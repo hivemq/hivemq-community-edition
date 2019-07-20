@@ -21,9 +21,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.SubscriptionAuthorizerInput;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
@@ -31,7 +29,6 @@ import com.hivemq.extensions.packets.subscribe.SubscriptionImpl;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import io.netty.channel.Channel;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -64,11 +61,7 @@ public class SubscriptionAuthorizerInputImpl implements SubscriptionAuthorizerIn
         this.subscriptionIdentifier = topic.getSubscriptionIdentifier() != null && topic.getSubscriptionIdentifier() > 0 ?
                 Optional.of(topic.getSubscriptionIdentifier()) : Optional.empty();
 
-        this.subscription = new SubscriptionImpl(topic.getTopic(),
-                Qos.valueOf(topic.getQoS().getQosNumber()),
-                Objects.requireNonNull(RetainHandling.fromCode(topic.getRetainHandling().getCode())),
-                topic.isRetainAsPublished(),
-                topic.isNoLocal());
+        this.subscription = new SubscriptionImpl(topic);
 
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);

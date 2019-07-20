@@ -49,6 +49,11 @@ public interface PluginTaskOutput {
     void markAsTimedOut();
 
     /**
+     * resets the async and timeout status
+     */
+    void resetAsyncStatus();
+
+    /**
      * @return a {@link SettableFuture} which is set to true if resume has been called on the
      * {@link AsyncOutput} and false if a timeout occurred
      */

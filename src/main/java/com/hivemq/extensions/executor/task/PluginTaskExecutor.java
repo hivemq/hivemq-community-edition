@@ -248,6 +248,9 @@ public class PluginTaskExecutor {
                     //noinspection unchecked: generics extends a PluginTaskOutput
                     pluginPost.pluginPost(outputObject);
                 }
+                if (outputObject.isAsync()) {
+                    outputObject.resetAsyncStatus();
+                }
             } catch (final Throwable t) {
                 Exceptions.rethrowError("Exception at extension post", t);
             }

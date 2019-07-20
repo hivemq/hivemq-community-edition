@@ -20,6 +20,7 @@ import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
@@ -54,10 +55,13 @@ public class ClientContextImplTest {
         });
         clientContext.addPublishOutboundInterceptor((input, output) -> {
         });
-        
-        assertEquals(2, clientContext.getAllInterceptors().size());
+        clientContext.addSubscribeInboundInterceptor((input, output) -> {
+        });
+
+        assertEquals(3, clientContext.getAllInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
         assertEquals(1, clientContext.getPublishOutboundInterceptors().size());
+        assertEquals(1, clientContext.getSubscribeInboundInterceptors().size());
     }
 
     @Test
@@ -82,5 +86,24 @@ public class ClientContextImplTest {
         assertEquals(0, clientContext.getAllInterceptors().size());
         assertEquals(0, clientContext.getPublishInboundInterceptors().size());
         assertEquals(0, clientContext.getPublishOutboundInterceptors().size());
+
+    }
+
+    @Test
+    public void test_add_remove_specific_subscribe() {
+
+
+        final SubscribeInboundInterceptor subscribeInboundInterceptor = (input, output) -> {
+        };
+
+        clientContext.addPublishInboundInterceptor((input, output) -> {
+        });
+        clientContext.addSubscribeInboundInterceptor(subscribeInboundInterceptor);
+        clientContext.removeSubscribeInboundInterceptor(subscribeInboundInterceptor);
+
+        assertEquals(1, clientContext.getAllInterceptors().size());
+        assertEquals(0, clientContext.getSubscribeInboundInterceptors().size());
+        assertEquals(1, clientContext.getPublishInboundInterceptors().size());
+
     }
 }

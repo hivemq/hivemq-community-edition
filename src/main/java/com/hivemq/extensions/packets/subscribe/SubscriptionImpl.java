@@ -20,6 +20,9 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import com.hivemq.mqtt.message.subscribe.Topic;
+
+import java.util.Objects;
 
 /**
  * @author Florian Limpöck
@@ -33,8 +36,10 @@ public class SubscriptionImpl implements Subscription {
     private final boolean retainAsPublished;
     private final boolean noLocal;
 
-    public SubscriptionImpl(final @NotNull String topicFilter, final @NotNull Qos qos,
-                            final @NotNull RetainHandling retainHandling, final boolean retainAsPublished,
+    public SubscriptionImpl(final @NotNull String topicFilter,
+                            final @NotNull Qos qos,
+                            final @NotNull RetainHandling retainHandling,
+                            final boolean retainAsPublished,
                             final boolean noLocal) {
         this.topicFilter = topicFilter;
         this.qos = qos;
@@ -42,6 +47,15 @@ public class SubscriptionImpl implements Subscription {
         this.retainAsPublished = retainAsPublished;
         this.noLocal = noLocal;
     }
+
+    public SubscriptionImpl(final @NotNull Topic topic) {
+        this.topicFilter = topic.getTopic();
+        this.qos = Qos.valueOf(topic.getQoS().getQosNumber());
+        this.retainHandling = Objects.requireNonNull(RetainHandling.fromCode(topic.getRetainHandling().getCode()));
+        this.retainAsPublished = topic.isRetainAsPublished();
+        this.noLocal = topic.isNoLocal();
+    }
+
 
     @Override
     public @NotNull String getTopicFilter() {
