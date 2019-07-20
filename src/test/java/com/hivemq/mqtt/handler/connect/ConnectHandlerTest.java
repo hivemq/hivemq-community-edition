@@ -88,6 +88,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -1251,12 +1252,14 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
 
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535);
-        clientSettings.setClientReceiveMaximum(123); // Set modified
+        clientSettings.setClientReceiveMaximum(123);
+        clientSettings.setOverloadProtectionThrottlingLevel(NONE);
         handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
 
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
         assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get().intValue());
         assertEquals(123, connect.getReceiveMaximum());
+        assertEquals(NONE, embeddedChannel.attr(ChannelAttributes.OVERLOAD_PROTECTION_THROTTLING_LEVEL).get());
     }
 
     private void createHandler() {

@@ -16,6 +16,7 @@
 package com.hivemq.extensions.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,5 +57,17 @@ public class ModifiableClientSettingsImplTest {
         clientSettings.setClientReceiveMaximum(123);
         assertTrue(clientSettings.isModified());
         assertEquals(123, clientSettings.getClientReceiveMaximum());
+    }
+
+    @Test
+    public void test_overload_protection_not_modified() {
+        clientSettings.setOverloadProtectionThrottlingLevel(OverloadProtectionThrottlingLevel.DEFAULT);
+        assertFalse(clientSettings.isModified());
+    }
+
+    @Test
+    public void test_overload_protection_modified() {
+        clientSettings.setOverloadProtectionThrottlingLevel(OverloadProtectionThrottlingLevel.NONE);
+        assertTrue(clientSettings.isModified());
     }
 }

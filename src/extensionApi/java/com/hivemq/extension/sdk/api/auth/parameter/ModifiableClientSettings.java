@@ -15,6 +15,8 @@
  */
 package com.hivemq.extension.sdk.api.auth.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 /**
  * An instance of this interface is provided by the {@link SimpleAuthOutput} and can be used to configure client
  * specific parameters and restrictions.
@@ -35,8 +37,23 @@ public interface ModifiableClientSettings {
     void setClientReceiveMaximum(int receiveMaximum);
 
     /**
+     * Configure the way the client is affected by the overload protection.
+     *
+     * @param level used for handling the overload protection for this client.
+     * @throws NullPointerException if the level is null
+     * @since 4.2.0
+     */
+    void setOverloadProtectionThrottlingLevel(@NotNull OverloadProtectionThrottlingLevel level);
+
+    /**
      * @return The value that will be used as receive maximum for this client.
      * @since 4.2.0
      */
     int getClientReceiveMaximum();
+
+    /**
+     * @return the overload protection level that will be used for this client.
+     * @since 4.2.0
+     */
+    @NotNull OverloadProtectionThrottlingLevel getOverloadProtectionThrottlingLevel();
 }
