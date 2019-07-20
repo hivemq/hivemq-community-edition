@@ -46,6 +46,11 @@ public class AbstractOutput implements PluginTaskOutput {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void resetAsyncStatus() {
+        throw new UnsupportedOperationException();
+    }
+
     @Nullable
     @Override
     public SettableFuture<Boolean> getAsyncFuture() {

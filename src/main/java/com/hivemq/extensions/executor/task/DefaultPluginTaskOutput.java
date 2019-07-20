@@ -54,7 +54,12 @@ public class DefaultPluginTaskOutput implements PluginTaskOutput {
 
     @Override
     public void markAsTimedOut() {
+        //noop
+    }
 
+    @Override
+    public void resetAsyncStatus() {
+        //noop
     }
 
     @Nullable

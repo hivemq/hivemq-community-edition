@@ -18,7 +18,6 @@ package com.hivemq.extensions.client;
 
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
@@ -56,6 +55,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addPublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
+        clientContext.addInterceptor(interceptor);
+    }
+
+    @Override
     public void addSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
@@ -66,28 +70,25 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void removePublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
+        clientContext.removeInterceptor(interceptor);
+    }
+
+    @Override
     public void removeSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
-    @Override
-    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        clientContext.addInterceptor(interceptor);
-    }
-
-    @Override
-    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        clientContext.removeInterceptor(interceptor);
-    }
-
     @NotNull
     @Override
+    @Immutable
     public List<Interceptor> getAllInterceptors() {
         return clientContext.getAllInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
     @Override
+    @Immutable
     public List<PublishInboundInterceptor> getPublishInboundInterceptors() {
         return clientContext.getPublishInboundInterceptorsForPlugin(pluginClassloader);
     }
@@ -95,13 +96,15 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @NotNull
     @Override
     @Immutable
-    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
-        return clientContext.getSubscribeInboundInterceptorsForPlugin(pluginClassloader);
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+        return clientContext.getPublishOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
+    @NotNull
     @Override
-    public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors() {
-        return clientContext.getPublishOutboundInterceptorsForPlugin(pluginClassloader);
+    @Immutable
+    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
+        return clientContext.getSubscribeInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull

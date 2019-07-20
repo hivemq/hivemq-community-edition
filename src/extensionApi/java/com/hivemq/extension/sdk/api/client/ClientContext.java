@@ -52,6 +52,15 @@ public interface ClientContext {
     void addPublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
 
     /**
+     * Adds an {@link PublishOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
+     * @since 4.2.0
+     */
+    void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
+
+    /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
@@ -71,15 +80,6 @@ public interface ClientContext {
      */
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
 
-
-    /**
-     * Adds an {@link PublishOutboundInterceptor} for this client. <br>
-     * Subsequent adding of the same interceptor will be ignored.
-     *
-     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
-     * @since 4.2.0
-     */
-    void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
 
     /**
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
@@ -119,15 +119,6 @@ public interface ClientContext {
     @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptors();
 
     /**
-     * Returns all {@link SubscribeInboundInterceptor} which are registered for this client by this extension.
-     *
-     * @return List of SubscribeInboundInterceptors for this client.
-     * @since 4.2.0
-     */
-    @Immutable
-    @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
-
-    /**
      * Returns all {@link PublishOutboundInterceptor} which are registered for this client by this extension.
      *
      * @return List of PublishOutboundInterceptors for this client.
@@ -135,6 +126,15 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors();
+
+    /**
+     * Returns all {@link SubscribeInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of SubscribeInboundInterceptors for this client.
+     * @since 4.2.0
+     */
+    @Immutable
+    @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every

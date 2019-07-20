@@ -55,17 +55,13 @@ public class ClientContextImplTest {
         });
         clientContext.addPublishOutboundInterceptor((input, output) -> {
         });
-
-        assertEquals(2, clientContext.getAllInterceptors().size());
         clientContext.addSubscribeInboundInterceptor((input, output) -> {
         });
 
-        assertEquals(2, clientContext.getAllInterceptors().size());
+        assertEquals(3, clientContext.getAllInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
-        assertEquals(1, clientContext.getSubscribeInboundInterceptors().size());
-
-
         assertEquals(1, clientContext.getPublishOutboundInterceptors().size());
+        assertEquals(1, clientContext.getSubscribeInboundInterceptors().size());
     }
 
     @Test

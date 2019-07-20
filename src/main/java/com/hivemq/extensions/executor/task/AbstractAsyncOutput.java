@@ -89,6 +89,12 @@ public class AbstractAsyncOutput<T> implements PluginTaskOutput, AsyncOutput<T> 
         timedOut.set(true);
     }
 
+    public void resetAsyncStatus() {
+        timedOut.set(false);
+        async.set(false);
+        called.set(false);
+    }
+
     @Nullable
     @Override
     public SettableFuture<Boolean> getAsyncFuture() {
