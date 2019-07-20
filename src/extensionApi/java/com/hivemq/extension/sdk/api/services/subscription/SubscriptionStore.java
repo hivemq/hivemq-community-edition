@@ -19,10 +19,7 @@ package com.hivemq.extension.sdk.api.services.subscription;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
-import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
-import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
-import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
-import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
+import com.hivemq.extension.sdk.api.services.exception.*;
 import com.hivemq.extension.sdk.api.services.general.IterationCallback;
 import com.hivemq.extension.sdk.api.services.general.IterationContext;
 
@@ -195,7 +192,6 @@ public interface SubscriptionStore {
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllSubscribersForTopic(@NotNull String topic, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberForTopicResult> callback);
-
 
     /**
      * Iterate over all subscribers that have a subscription that matches the passed topic.
@@ -395,5 +391,53 @@ public interface SubscriptionStore {
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(@NotNull String topicFilter, @NotNull SubscriptionType subscriptionType, @NotNull IterationCallback<SubscriberWithFilterResult> callback, @NotNull Executor callbackExecutor);
+
+    /**
+     * Iterate over all subscribers and their subscriptions.
+     * <p>
+     * The callback is called once for each client.
+     * Passed to each execution of the callback are the client identifier and a set of all its subscriptions.
+     * Clients without subscriptions are not included.
+     * <p>
+     * The callback is executed in the {@link ManagedExtensionExecutorService} per default.
+     * Use the overloaded methods to pass a custom executor for the callback.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
+     * of this method.
+     * <p>
+     * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
+     * exceeded.
+     *
+     * @param callback An {@link IterationCallback} that is called for every returned result.
+     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no subscriptions exist
+     * or the iteration is aborted manually with the {@link IterationContext}.
+     * @throws NullPointerException If the passed callback is null.
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<SubscriptionsForClientResult> callback);
+
+    /**
+     * Iterate over all subscribers and their subscriptions.
+     * <p>
+     * The callback is called once for each client.
+     * Passed to each execution of the callback are the client identifier and a set of all its subscriptions.
+     * Clients without subscriptions are not included.
+     * <p>
+     * The callback is executed in the passed {@link Executor}.
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of this method.
+     * <p>
+     * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
+     * exceeded.
+     *
+     * @param callback         An {@link IterationCallback} that is called for every returned result.
+     * @param callbackExecutor An {@link Executor} in which the callback for each iteration is executed.
+     * @return A {@link CompletableFuture} that is completed after all iterations are executed, no subscriptions exist
+     * or the iteration is aborted manually with the {@link IterationContext}.
+     * @throws NullPointerException If the passed callback or callbackExecutor are null.
+     * @since 4.2.0
+     */
+    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<SubscriptionsForClientResult> callback, @NotNull Executor callbackExecutor);
+
 
 }

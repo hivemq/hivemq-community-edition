@@ -17,14 +17,17 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import com.hivemq.persistence.MatchAllPersistenceFilter;
 import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -33,6 +36,7 @@ import jetbrains.exodus.env.Cursor;
 import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalExecutable;
 import net.jodah.concurrentunit.Waiter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,6 +45,7 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -421,6 +426,212 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
                 assertEquals(subscription.getSubscriptionIdentifier().intValue(), 3);
             }
         }
+    }
+
+    @Test
+    public void test_get_chunk_match_all() {
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2", new Topic("topic3", QoS.AT_MOST_ONCE), 1234567890L, BucketUtils.getBucket("clientid2", bucketCount));
+
+
+        final Map<String, Set<Topic>> client1Entries = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, BucketUtils.getBucket("clientid", bucketCount), null, 10).getValue();
+        final Map<String, Set<Topic>> client2Entries = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, BucketUtils.getBucket("clientid2", bucketCount), null, 10).getValue();
+
+        assertEquals(2, client1Entries.get("clientid").size());
+        assertEquals(1, client2Entries.get("clientid2").size());
+    }
+
+    @Test
+    public void test_get_chunk_match_some() {
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2", new Topic("topic3", QoS.AT_MOST_ONCE), 1234567890L, BucketUtils.getBucket("clientid2", bucketCount));
+
+
+        final Map<String, Set<Topic>> client1Entries = persistence.getAllSubscribersChunk(getMatchClientidFilter(), BucketUtils.getBucket("clientid", bucketCount), null, 100).getValue();
+        final Map<String, Set<Topic>> client2Entries = persistence.getAllSubscribersChunk(getMatchClientidFilter(), BucketUtils.getBucket("clientid2", bucketCount), null, 100).getValue();
+
+        assertEquals(2, client1Entries.get("clientid").size());
+        assertEquals(0, client2Entries.size());
+    }
+
+    @Test
+    public void test_get_chunk_multiple_subscriptions() throws InterruptedException {
+        for (int i = 0; i < 60; i++) {
+            persistence.addSubscription("client" + i, new Topic("A" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));
+            persistence.addSubscription("client" + i, new Topic("B" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));
+        }
+
+        final Map<String, Set<Topic>> all = new HashMap<>();
+        for (int i = 0; i < bucketCount; i++) {
+            all.putAll(persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, i, null, 10).getValue());
+        }
+
+        for (final Map.Entry<String, Set<Topic>> entry : all.entrySet()) {
+            assertEquals(2, entry.getValue().size());
+        }
+    }
+
+    @Test
+    public void test_get_chunk_single_client_multiple_subscriptions() {
+
+        persistence.addSubscription("1", new Topic("A1", QoS.AT_LEAST_ONCE), 123L, 1);
+        persistence.addSubscription("1", new Topic("B1", QoS.AT_LEAST_ONCE), 123L, 1);
+
+        persistence.addSubscription("2", new Topic("A2", QoS.AT_LEAST_ONCE), 123L, 1);
+        persistence.addSubscription("2", new Topic("B2", QoS.AT_LEAST_ONCE), 123L, 1);
+
+        persistence.addSubscription("3", new Topic("A3", QoS.AT_LEAST_ONCE), 123L, 1);
+        persistence.addSubscription("3", new Topic("B3", QoS.AT_LEAST_ONCE), 123L, 1);
+
+        final BucketChunkResult<Map<String, Set<Topic>>> chunk =
+                persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, null, 3);
+
+        final Map<String, Set<Topic>> all = chunk.getValue();
+
+        assertEquals(2, all.size());
+        for (final Map.Entry<String, Set<Topic>> entry : all.entrySet()) {
+            assertEquals(2, entry.getValue().size());
+
+            for (final Topic topic : entry.getValue()) {
+                assertTrue(topic.getTopic().endsWith(entry.getKey()));
+            }
+        }
+
+        final BucketChunkResult<Map<String, Set<Topic>>> chunk2 =
+                persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk.getLastKey(), 1);
+
+        final Map<String, Set<Topic>> all2 = chunk2.getValue();
+
+        assertEquals(1, all2.size());
+        for (final Map.Entry<String, Set<Topic>> entry2 : all2.entrySet()) {
+            assertEquals(2, entry2.getValue().size());
+
+            for (final Topic topic : entry2.getValue()) {
+                assertTrue(topic.getTopic().endsWith(entry2.getKey()));
+            }
+        }
+    }
+
+    @Test
+    public void test_get_chunk_duplicate_topics() {
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, 1);
+        persistence.addSubscription("clientid", new Topic("topic", QoS.EXACTLY_ONCE), 431L, 1);
+
+        final Map<String, Set<Topic>> client1Entries = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, null, 100).getValue();
+
+        final Set<Topic> topics = client1Entries.get("clientid");
+        assertEquals(1, topics.size());
+        final Topic topic = topics.iterator().next();
+        assertEquals("topic", topic.getTopic());
+        assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());
+    }
+
+    @Test
+    public void test_get_chunk_many_clients_no_duplicates() {
+
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 10; j++) {
+                persistence.addSubscription("sub-" + i, new Topic(i + "/" + j, QoS.AT_LEAST_ONCE), 123L, 1);
+            }
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, Set<Topic>>> chunk = null;
+
+        do {
+            chunk = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+
+    }
+
+    @Test
+    public void test_get_chunk_remove_last_key_between_iterations() {
+
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 10; j++) {
+                persistence.addSubscription("sub-" + i, new Topic(i + "/" + j, QoS.AT_LEAST_ONCE), 123L, 1);
+            }
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, Set<Topic>>> chunk = null;
+
+        do {
+            if (chunk != null && chunk.getLastKey() != null) {
+                persistence.removeAll(chunk.getLastKey(), System.currentTimeMillis(), 1);
+            }
+            chunk = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+    }
+
+
+    @Test(timeout = 30_000)
+    public void test_get_chunk_many_clients_no_duplicates_random_ids() {
+
+        final ArrayList<String> clientIdList = getRandomUniqueIds();
+
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 10; j++) {
+                persistence.addSubscription(clientIdList.get(i), new Topic(i + "/" + j, QoS.AT_LEAST_ONCE), 123L, 1);
+            }
+        }
+
+        final ArrayList<String> clientIds = Lists.newArrayList();
+        BucketChunkResult<Map<String, Set<Topic>>> chunk = null;
+
+        do {
+            chunk = persistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            clientIds.addAll(chunk.getValue().keySet());
+        } while (!chunk.isFinished());
+
+        final Set<String> seenIds = new HashSet<>();
+        for (final String clientId : clientIds) {
+            if (seenIds.contains(clientId)) {
+                System.out.println(clientIds);
+                fail("clientid " + clientId + " is duplicated. Total result count:" + clientIds.size());
+            }
+            seenIds.add(clientId);
+        }
+
+        assertEquals(100, clientIds.size());
+
+    }
+
+    @NotNull
+    public ArrayList<String> getRandomUniqueIds() {
+        final Set<String> clientIdSet = new HashSet<>();
+
+        final Random random = new Random();
+        while (clientIdSet.size() < 100) {
+            clientIdSet.add(RandomStringUtils.randomAlphanumeric(random.nextInt(100)));
+        }
+        return new ArrayList<>(clientIdSet);
     }
 
     private void countBucketEntries(final AtomicInteger count, final String client) {

@@ -18,8 +18,10 @@ package com.hivemq.extensions.services.subscription;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -29,16 +31,24 @@ import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
+import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
+import com.hivemq.extensions.iteration.AsyncIterator;
+import com.hivemq.extensions.iteration.AsyncIteratorFactory;
+import com.hivemq.extensions.iteration.ChunkResult;
+import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -46,14 +56,11 @@ import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 import util.TestException;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -76,12 +83,15 @@ public class SubscriptionStoreImplTest {
     @Mock
     private LocalTopicTree topicTree;
 
+    @Mock
+    private AsyncIteratorFactory asyncIteratorFactory;
+
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
         subscriptionStore = new SubscriptionStoreImpl(clientSessionSubscriptionPersistence, rateLimitService, topicTree,
-                getManagedExtensionExecutorService());
+                getManagedExtensionExecutorService(), asyncIteratorFactory);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 
@@ -713,6 +723,152 @@ public class SubscriptionStoreImplTest {
         } catch (final ExecutionException e) {
             throw e.getCause();
         }
+    }
+
+    @Test(timeout = 10000, expected = RateLimitExceededException.class)
+    public void test_iterate_all_rate_limit_exceeded() throws Throwable {
+        when(rateLimitService.rateLimitExceeded()).thenReturn(true);
+
+        try {
+            subscriptionStore.iterateAllSubscriptions((context, value) -> {
+            }).get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test(timeout = 10000, expected = NullPointerException.class)
+    public void test_iterate_all_callback_null() throws Throwable {
+        subscriptionStore.iterateAllSubscriptions(null).get();
+    }
+
+    @Test(timeout = 10000, expected = NullPointerException.class)
+    public void test_iterate_all_callback_executor_null() throws Throwable {
+        subscriptionStore.iterateAllSubscriptions((context, value) -> {
+        }, null).get();
+    }
+
+    @Test(timeout = 10000)
+    public void test_item_callback() throws Exception {
+        final ArrayList<SubscriptionsForClientResult> items = Lists.newArrayList();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+            items.add(value);
+            latch.countDown();
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+        ));
+
+        assertEquals(true, onItems.get());
+
+        assertEquals(3, items.size());
+
+        executor.shutdownNow();
+    }
+
+    @Test(timeout = 10000)
+    public void test_item_callback_abort() throws Exception {
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+            context.abortIteration();
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+        ));
+
+        assertEquals(false, onItems.get());
+
+        executor.shutdownNow();
+    }
+
+    @Test(timeout = 10000, expected = RuntimeException.class)
+    public void test_item_callback_exception() throws Throwable {
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+            throw new RuntimeException("test-exception");
+        });
+
+        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+        ));
+
+        try {
+            onItems.get();
+        } catch (final ExecutionException e) {
+            throw e.getCause();
+        }
+
+        executor.shutdownNow();
+    }
+
+
+    @Test(timeout = 10000)
+    public void test_iteration_started() throws Exception {
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
+
+        //noinspection unchecked
+        when(asyncIteratorFactory.createIterator(any(FetchCallback.class), any(AsyncIterator.ItemCallback.class)))
+                .thenReturn(new AsyncIterator() {
+                    @Override
+                    public void fetchAndIterate() {
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public @NotNull CompletableFuture<Void> getFinishedFuture() {
+                        return resultFuture;
+                    }
+                });
+
+        final CompletableFuture<Void> finishFuture = subscriptionStore.iterateAllSubscriptions((context, value) -> {
+        });
+
+        resultFuture.complete(null);
+
+        latch.await();
+    }
+
+    @Test
+    public void test_test_fetch_callback_conversion() {
+
+        final SubscriptionStoreImpl.AllSubscribersFetchCallback fetchCallback = new SubscriptionStoreImpl.AllSubscribersFetchCallback(null);
+
+        final ChunkResult<ChunkCursor, SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, Set<Topic>>>(
+                Map.of(
+                        1, new BucketChunkResult<>(Map.of(
+                                "client1", Set.of(
+                                        new Topic("topic1", QoS.AT_LEAST_ONCE)
+                                )), true, "client1", 1),
+                        2, new BucketChunkResult<>(Map.of(
+                                "client2", Set.of(
+                                        new Topic("topic2", QoS.AT_LEAST_ONCE), new Topic("topic3", QoS.AT_LEAST_ONCE)
+                                ),
+                                "client3", Set.of(
+                                        new Topic("topic4", QoS.AT_LEAST_ONCE)
+                                )
+                        ), false, "client3", 2)
+                )
+        ));
+
+        assertTrue(chunkResult.getCursor().getFinishedBuckets().contains(1));
+        assertFalse(chunkResult.getCursor().getFinishedBuckets().contains(2));
+        assertEquals(3, chunkResult.getResults().size());
     }
 
 
