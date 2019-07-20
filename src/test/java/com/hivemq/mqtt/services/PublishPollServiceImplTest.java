@@ -135,7 +135,9 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_new_messages_inflight_batch_size() throws NoMessageIdAvailableException {
 
-        InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 10;
+        InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 1;
+        when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(10));
+
         when(messageIDPool.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
         when(channel.isActive()).thenReturn(true);
