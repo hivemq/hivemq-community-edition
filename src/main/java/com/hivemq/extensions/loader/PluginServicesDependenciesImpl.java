@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
 import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
@@ -57,6 +58,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
 
     private final @NotNull ClusterService clusterService;
     private final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry;
+    private final @NotNull AdminService adminService;
 
     @Inject
     public PluginServicesDependenciesImpl(
@@ -71,7 +73,8 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
             final @NotNull SecurityRegistry securityRegistry,
             final @NotNull EventRegistry eventRegistry,
             final @NotNull ClusterService clusterService,
-            final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry) {
+            final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry,
+            final @NotNull AdminService adminService) {
         this.metricRegistry = metricRegistry;
         this.publishService = publishService;
         this.securityRegistry = securityRegistry;
@@ -84,6 +87,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
         this.eventRegistry = eventRegistry;
         this.clusterService = clusterService;
         this.globalInterceptorRegistry = globalInterceptorRegistry;
+        this.adminService = adminService;
     }
 
     @NotNull
@@ -103,6 +107,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
         builder.put(EventRegistry.class.getCanonicalName(), eventRegistry);
         builder.put(ClusterService.class.getCanonicalName(), clusterService);
         builder.put(GlobalInterceptorRegistry.class.getCanonicalName(), globalInterceptorRegistry);
+        builder.put(AdminService.class.getCanonicalName(), adminService);
 
         return builder.build();
     }

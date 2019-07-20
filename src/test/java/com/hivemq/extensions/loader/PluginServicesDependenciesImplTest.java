@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
 import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
@@ -86,6 +87,9 @@ public class PluginServicesDependenciesImplTest {
     @Mock
     private ServerInformation serverInformation;
 
+    @Mock
+    private AdminService adminService;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
@@ -95,7 +99,8 @@ public class PluginServicesDependenciesImplTest {
         pluginServicesDependencies =
                 new PluginServicesDependenciesImpl(new MetricRegistry(), initializerRegistry, retainedMessageStore,
                         clientService, subscriptionStore, managedPluginExecutorService, publishService,
-                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry);
+                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry,
+                        adminService);
     }
 
     @Test

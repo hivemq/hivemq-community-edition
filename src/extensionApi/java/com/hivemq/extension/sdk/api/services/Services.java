@@ -21,6 +21,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
@@ -141,6 +142,13 @@ public class Services {
      */
     public static @NotNull ClientService clientService() {
         return getClassObject(ClientService.class);
+    }
+
+    /**
+     * @return A service to get general information about the state of this HiveMQ instance.
+     */
+    public static @NotNull AdminService adminService() {
+        return getClassObject(AdminService.class);
     }
 
     private static <T> @NotNull T getClassObject(@NotNull final Class<T> clazz) {
