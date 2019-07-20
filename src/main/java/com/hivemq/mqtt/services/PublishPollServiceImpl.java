@@ -215,7 +215,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      */
     @Override
     public void pollInflightMessages(@NotNull final String client, @NotNull final Channel channel) {
-        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, pollMessageLimit(channel), PUBLISH_POLL_BATCH_SIZE);
+        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, PUBLISH_POLL_BATCH_MEMORY, pollMessageLimit(channel));
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
