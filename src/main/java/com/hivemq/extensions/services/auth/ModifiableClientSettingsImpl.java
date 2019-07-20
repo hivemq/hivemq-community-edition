@@ -47,6 +47,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     @Override
     public void setOverloadProtectionThrottlingLevel(@NotNull final OverloadProtectionThrottlingLevel level) {
+        Preconditions.checkNotNull(level,"Overload protection throttling level must not be null");
         if (this.overloadProtectionThrottlingLevel == level) {
             return;
         }

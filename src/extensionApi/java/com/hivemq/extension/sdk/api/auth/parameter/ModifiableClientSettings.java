@@ -40,6 +40,7 @@ public interface ModifiableClientSettings {
      * Configure the way the client is affected by the overload protection.
      *
      * @param level used for handling the overload protection for this client.
+     * @throws NullPointerException if the level is null
      * @since 4.2.0
      */
     void setOverloadProtectionThrottlingLevel(@NotNull OverloadProtectionThrottlingLevel level);
