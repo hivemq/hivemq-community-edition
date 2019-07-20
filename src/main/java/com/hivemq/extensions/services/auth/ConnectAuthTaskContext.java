@@ -70,10 +70,15 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
     private final AtomicBoolean authTimedOut = new AtomicBoolean(false);
 
     public ConnectAuthTaskContext(
-            @NotNull final String identifier, @NotNull final ConnectHandler connectHandler,
-            @NotNull final MqttConnacker mqttConnacker, @NotNull final ChannelHandlerContext ctx,
-            @NotNull final CONNECT connect, @NotNull final PluginOutPutAsyncer asyncer,
-            final int authenticatorsCount, final boolean validateUTF8) {
+            @NotNull final String identifier,
+            @NotNull final ConnectHandler connectHandler,
+            @NotNull final MqttConnacker mqttConnacker,
+            @NotNull final ChannelHandlerContext ctx,
+            @NotNull final CONNECT connect,
+            @NotNull final PluginOutPutAsyncer asyncer,
+            final int authenticatorsCount,
+            final boolean validateUTF8,
+            @NotNull final ModifiableClientSettingsImpl clientSettings) {
 
         super(SimpleAuthTask.class, identifier);
         this.connectHandler = connectHandler;
@@ -82,7 +87,7 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
         this.connect = connect;
         this.authenticatorsCount = authenticatorsCount;
         this.position = new AtomicInteger(0);
-        this.connectAuthTaskOutput = new ConnectAuthTaskOutput(asyncer, validateUTF8);
+        this.connectAuthTaskOutput = new ConnectAuthTaskOutput(asyncer, validateUTF8, clientSettings);
     }
 
     @Override
@@ -113,7 +118,7 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
         switch (pluginOutput.getAuthenticationState()) {
 
             case SUCCESS:
-                succeed();
+                succeed(pluginOutput);
                 break;
 
             case FAILED:
@@ -125,7 +130,7 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
                 break;
             case UNDECIDED:
                 if (!connectAuthTaskOutput.isAuthenticatorPresent()) {
-                    ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect));
+                    ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect, pluginOutput.getClientSettings()));
                 } else {
                     //should never happen
                     throw new IllegalStateException("Unsupported authentication state");
@@ -139,7 +144,7 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
             // on to enhanced auth
             try {
                 ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectAuthTaskOutput.getDefaultPermissions());
-                ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect));
+                ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect, pluginOutput.getClientSettings()));
             } catch (final RejectedExecutionException ex) {
                 if (!ctx.executor().isShutdown()) {
                     log.error("Execution of successful unauthenticated connect was rejected for client with IP {}.",
@@ -161,10 +166,10 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
                 ReasonCodeUtil.toMqtt3(pluginOutput.getConnackReasonCode()), pluginOutput.getReasonString(), event);
     }
 
-    private void succeed() {
+    private void succeed(@NotNull final ConnectAuthTaskOutput pluginOutput) {
         try {
             ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectAuthTaskOutput.getDefaultPermissions());
-            ctx.executor().execute(() -> connectHandler.connectSuccessfulAuthenticated(ctx, connect));
+            ctx.executor().execute(() -> connectHandler.connectSuccessfulAuthenticated(ctx, connect, pluginOutput.getClientSettings()));
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
                 log.error("Execution of successful authenticated connect was rejected for client with IP {}.",

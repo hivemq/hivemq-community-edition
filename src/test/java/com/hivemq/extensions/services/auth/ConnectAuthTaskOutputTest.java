@@ -50,7 +50,7 @@ public class ConnectAuthTaskOutputTest {
                 .withMqtt5UserProperties(
                         Mqtt5UserProperties.of(new MqttUserProperty("one", "one"), new MqttUserProperty("two", "two")))
                 .build();
-        connectAuthTaskOutput = new ConnectAuthTaskOutput(asyncer, true);
+        connectAuthTaskOutput = new ConnectAuthTaskOutput(asyncer, true, new ModifiableClientSettingsImpl(65535));
     }
 
     @Test(timeout = 5000)

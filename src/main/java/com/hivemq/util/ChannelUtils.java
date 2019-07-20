@@ -19,6 +19,7 @@ package com.hivemq.util;
 import com.google.common.base.Optional;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.security.auth.ClientToken;
 import com.hivemq.security.auth.SslClientCertificate;
@@ -97,6 +98,15 @@ public class ChannelUtils {
             return false;
         }
         return inFlightMessages.get() > 0;
+    }
+
+    public static int maxInflightWindow(@NotNull final Channel channel) {
+        final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
+        final int max = InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE;
+        if (clientReceiveMaximum == null) {
+            return max;
+        }
+        return Math.min(clientReceiveMaximum, max);
     }
 
     private static ClientToken getClientToken(@NotNull final Channel channel, @Nullable final Long disconnectTimestamp) {

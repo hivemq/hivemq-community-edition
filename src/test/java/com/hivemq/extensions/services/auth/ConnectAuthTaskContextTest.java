@@ -82,6 +82,8 @@ public class ConnectAuthTaskContextTest {
 
     private CONNECT connect;
 
+    private ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535);
+
     private final ImmediateEventExecutor eventExecutors = ImmediateEventExecutor.INSTANCE;
 
     @Before
@@ -102,7 +104,8 @@ public class ConnectAuthTaskContextTest {
 
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -110,14 +113,15 @@ public class ConnectAuthTaskContextTest {
 
         context.pluginPost(output);
 
-        Mockito.verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect));
+        Mockito.verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect), same(clientSettings));
     }
 
     @Test(timeout = 5000)
     public void test_failed_auth() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -132,7 +136,8 @@ public class ConnectAuthTaskContextTest {
     public void test_undecided_auth_present() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
         final ConnectAuthTaskOutput output = context.get();
         output.authenticatorPresent();
@@ -146,21 +151,23 @@ public class ConnectAuthTaskContextTest {
     public void test_undecided_auth_not_present() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
 
         context.pluginPost(output);
 
-        verify(connectHandler, times(1)).connectSuccessfulUnauthenticated(same(ctx), same(connect));
+        verify(connectHandler, times(1)).connectSuccessfulUnauthenticated(same(ctx), same(connect), same(clientSettings));
     }
 
     @Test(timeout = 5000)
     public void test_async_timed_out_auth() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -179,7 +186,8 @@ public class ConnectAuthTaskContextTest {
     public void test_async_timed_out_auth_multiple_auth() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth(), new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -199,7 +207,8 @@ public class ConnectAuthTaskContextTest {
     public void test_inconclusive_auth_no_enhanced_available() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -216,7 +225,8 @@ public class ConnectAuthTaskContextTest {
         when(channel.hasAttr(eq(ChannelAttributes.AUTH_METHOD))).thenReturn(true);
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -225,7 +235,7 @@ public class ConnectAuthTaskContextTest {
         output.nextExtensionOrDefault();
         context.pluginPost(output);
 
-        verify(connectHandler, times(1)).connectSuccessfulUnauthenticated(same(ctx), same(connect));
+        verify(connectHandler, times(1)).connectSuccessfulUnauthenticated(same(ctx), same(connect), same(clientSettings));
     }
 
     @Test(timeout = 5000)
@@ -236,7 +246,8 @@ public class ConnectAuthTaskContextTest {
 
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth(), new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
         final ConnectAuthTaskOutput output = context.get();
         final ModifiableUserProperties outboundUserProperties = output.getOutboundUserProperties();
@@ -261,7 +272,7 @@ public class ConnectAuthTaskContextTest {
 
         assertEquals(0, outboundUserProperties3.asList().size());
 
-        verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect));
+        verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect), same(clientSettings));
 
         assertEquals(2, connect.getUserProperties().size());
     }
@@ -271,7 +282,8 @@ public class ConnectAuthTaskContextTest {
     public void test_wait_for_last_task_done() {
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth(), new TestAuth(), new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
         final ConnectAuthTaskOutput output = context.get();
 
@@ -280,10 +292,10 @@ public class ConnectAuthTaskContextTest {
 
         context.pluginPost(output);
         context.pluginPost(output);
-        Mockito.verify(connectHandler, never()).connectSuccessfulAuthenticated(any(ChannelHandlerContext.class), any(CONNECT.class));
+        Mockito.verify(connectHandler, never()).connectSuccessfulAuthenticated(any(ChannelHandlerContext.class), any(CONNECT.class), any(ModifiableClientSettingsImpl.class));
         context.pluginPost(output);
 
-        Mockito.verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect));
+        Mockito.verify(connectHandler, times(1)).connectSuccessfulAuthenticated(same(ctx), same(connect), same(clientSettings));
     }
 
     @Test(timeout = 5000)
@@ -295,7 +307,8 @@ public class ConnectAuthTaskContextTest {
 
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
@@ -318,7 +331,8 @@ public class ConnectAuthTaskContextTest {
 
         final ImmutableList<Authenticator> authenticators = ImmutableList.of(new TestAuth());
         final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer, authenticators.size(), true);
+                new ConnectAuthTaskContext("client", connectHandler, connacker, ctx, connect, asyncer,
+                        authenticators.size(), true, clientSettings);
 
 
         final ConnectAuthTaskOutput output = context.get();
