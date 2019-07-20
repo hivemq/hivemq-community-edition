@@ -42,7 +42,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     }
 
     @Override
-    public int getReceiveMaximum() {
+    public int getClientReceiveMaximum() {
         return receiveMaximum;
     }
 

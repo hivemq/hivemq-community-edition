@@ -37,6 +37,7 @@ import java.time.Duration;
  * <li>Authenticate the client successfully OR fail authentication OR delegate the decision to the next extension</li>
  * <li>Alter the user properties sent to the client as part of the CONNACK packet</li>
  * <li>Alter the default topic permissions which apply only if the client is authenticated successfully</li>
+ * <li>Configure client specific parameters and restrictions</li>
  * </ul>
  * <p>
  * Only one of the methods {@link #authenticateSuccessfully()}, {@link #failAuthentication()}, {@link
@@ -189,9 +190,9 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
     @NotNull ModifiableDefaultPermissions getDefaultPermissions();
 
     /**
-     * Provides a modifiable {@link ModifiableClientSettings} object, that used to configure client specific restrictions and parameters.
+     * Provides a {@link ModifiableClientSettings} object, that is used to configure client specific parameters and restrictions.
      *
-     * @return a modifiable {@link ModifiableClientSettings} object.
+     * @return A {@link ModifiableClientSettings} object.
      * @since 4.2.0
      */
     @NotNull ModifiableClientSettings getClientSettings();

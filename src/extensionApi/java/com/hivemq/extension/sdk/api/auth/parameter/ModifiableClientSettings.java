@@ -16,7 +16,8 @@
 package com.hivemq.extension.sdk.api.auth.parameter;
 
 /**
- * An instance of this interface is provided by the {@link SimpleAuthOutput} and can be used to configure client specific parameters an restrictions.
+ * An instance of this interface is provided by the {@link SimpleAuthOutput} and can be used to configure client
+ * specific parameters and restrictions.
  *
  * @author Lukas Brandl
  * @since 4.2.0
@@ -27,15 +28,15 @@ public interface ModifiableClientSettings {
      * Set the receive maximum of the client to the given value.
      * The new value overwrites the receive maximum that the client provided via the CONNECT message.
      *
-     * @throws IllegalArgumentException if the value less than 1 or more than 65535
-     * @param receiveMaximum to be used for the client.
+     * @param receiveMaximum To be used for this client.
+     * @throws IllegalArgumentException If the value is less than 1 or more than 65535.
      * @since 4.2.0
      */
     void setClientReceiveMaximum(int receiveMaximum);
 
     /**
-     * @return the value that will be used as receive maximum for the client.
+     * @return The value that will be used as receive maximum for this client.
      * @since 4.2.0
      */
-    int getReceiveMaximum();
+    int getClientReceiveMaximum();
 }

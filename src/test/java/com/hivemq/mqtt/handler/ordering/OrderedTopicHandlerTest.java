@@ -59,7 +59,7 @@ public class OrderedTopicHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         final DefaultEventLoopGroup eventExecutors = new DefaultEventLoopGroup(1);
-        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 3;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 5;
 
         channel = new EmbeddedChannel();
 
@@ -99,7 +99,7 @@ public class OrderedTopicHandlerTest {
     @Test(timeout = 5000)
     public void test_qos1_release_next_message_on_dropped() throws Exception {
 
-        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -157,6 +157,8 @@ public class OrderedTopicHandlerTest {
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages_multiple_pubacks() throws Exception {
 
+        channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(3);
+
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
@@ -206,7 +208,7 @@ public class OrderedTopicHandlerTest {
 
     @Test(timeout = 4_000)
     public void test_remove_messages() throws Exception {
-        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish1 = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -244,7 +246,7 @@ public class OrderedTopicHandlerTest {
     @Test(timeout = 5000)
     public void test_qos2_release_next_message_on_next_pubcomp() throws Exception {
 
-        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish = createPublish("topic", 1, QoS.EXACTLY_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
@@ -272,7 +274,7 @@ public class OrderedTopicHandlerTest {
     @Test(timeout = 5000)
     public void test_qos2_release_next_message_on_failed_pubrec() throws Exception {
 
-        InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE = 1;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 1;
 
         final PUBLISH publish = createPublish("topic", 1, QoS.EXACTLY_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);

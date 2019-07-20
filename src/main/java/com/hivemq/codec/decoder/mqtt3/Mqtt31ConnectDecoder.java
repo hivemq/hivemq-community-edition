@@ -202,7 +202,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(keepAlive);
         channel.attr(ChannelAttributes.CLEAN_START).set(isCleanSessionFlag);
 
-        final CONNECT connect = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
+        return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
                 .withClientIdentifier(clientId)
                 .withUsername(userName)
                 .withPassword(password)
@@ -213,9 +213,6 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withUsernameRequired(isUsernameFlag)
                 .withWill(isWillFlag)
                 .withWillPublish(willPublish).build();
-
-        connect.setReceiveMaximum(InternalConfigurations.DEFAULT_INFLIGHT_WINDOW_SIZE);
-        return connect;
     }
 
     private boolean validateUsernamePassword(final boolean isUsernameFlag, final boolean isPasswordFlag) {

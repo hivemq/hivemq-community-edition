@@ -69,8 +69,6 @@ public class InternalConfigurations {
     // The amount of qos 0 messages that are queued if the channel is not writable
     public static final AtomicInteger NOT_WRITABLE_QUEUE_SIZE = new AtomicInteger(1000);
 
-    // The default inflight window size is used if a client has no receive maximum
-    public static int DEFAULT_INFLIGHT_WINDOW_SIZE = 10;
     // The limit of unacknowledged messages that hivemq will handle, regardless of the client receive maximum
     public static int MAX_INFLIGHT_WINDOW_SIZE = 50;
 

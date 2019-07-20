@@ -52,9 +52,9 @@ public class ModifiableClientSettingsImplTest {
 
     @Test
     public void test_client_receive_modified() {
-        assertEquals(65535, clientSettings.getReceiveMaximum());
+        assertEquals(65535, clientSettings.getClientReceiveMaximum());
         clientSettings.setClientReceiveMaximum(123);
         assertTrue(clientSettings.isModified());
-        assertEquals(123, clientSettings.getReceiveMaximum());
+        assertEquals(123, clientSettings.getClientReceiveMaximum());
     }
 }
