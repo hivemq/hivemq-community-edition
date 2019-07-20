@@ -97,7 +97,7 @@ public class TopicSubscriptionImpl implements TopicSubscription {
 
     @Override
     public String toString() {
-        return "TopicSubscriptionImpl{" +
+        return "TopicSubscription{" +
                 "topicFilter='" + topicFilter + '\'' +
                 ", qos=" + qos +
                 ", retainAsPublished=" + retainAsPublished +

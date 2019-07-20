@@ -47,7 +47,7 @@ public class SubscriptionsForClientResultImpl implements SubscriptionsForClientR
 
     @Override
     public String toString() {
-        return "AllSubscribersResultImpl{" +
+        return "SubscriptionsForClientResult{" +
                 "clientId='" + clientId + '\'' +
                 ", topicSubscriptions=" + topicSubscriptions +
                 "}\n";
