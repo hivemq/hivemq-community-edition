@@ -563,14 +563,19 @@ public class IncomingPublishHandlerTest {
 
         channel.writeInbound(TestMessageUtil.createMqtt3Publish("topic", "payload".getBytes(), QoS.AT_LEAST_ONCE));
 
-        while (messageAtomicReference.get() == null) {
+        PUBACK puback = channel.readOutbound();
+        while (puback == null) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
+            puback = channel.readOutbound();
         }
 
-        final PUBLISH message = (PUBLISH) messageAtomicReference.get();
+        assertEquals(Mqtt5PubAckReasonCode.SUCCESS, puback.getReasonCode());
+        assertEquals(null, puback.getReasonString());
 
-        assertEquals("topic", message.getTopic());
+        assertNull(channel.readInbound());
+
+        assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
 
     }
 

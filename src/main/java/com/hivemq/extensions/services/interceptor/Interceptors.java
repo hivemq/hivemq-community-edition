@@ -2,6 +2,7 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 
 /**
@@ -16,7 +17,7 @@ public interface Interceptors {
      *
      * @param provider to be added
      */
-    void addConnectInterceptorProvider(@NotNull ConnectInboundInterceptorProvider provider);
+    void addConnectInboundInterceptorProvider(@NotNull ConnectInboundInterceptorProvider provider);
 
     /**
      * Get a map of connect interceptor providers (value) mapped by the id of the plugin which added the interceptor
@@ -25,5 +26,21 @@ public interface Interceptors {
      * @return An immutable copy of the connect interceptor providers
      */
     @NotNull
-    ImmutableMap<String, ConnectInboundInterceptorProvider> connectInterceptorProviders();
+    ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders();
+
+    /**
+     * Add an connack outbound interceptor provider to the connack outbound interceptor provider map
+     *
+     * @param provider to be added
+     */
+    void addConnackOutboundInterceptorProvider(@NotNull ConnackOutboundInterceptorProvider provider);
+
+    /**
+     * Get a map of connack outbound interceptor providers (value) mapped by the id of the plugin which added the
+     * interceptor provider (key)
+     *
+     * @return An immutable copy of the connack outbound interceptor providers
+     */
+    @NotNull
+    ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders();
 }

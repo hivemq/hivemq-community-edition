@@ -2,6 +2,9 @@ package com.hivemq.extensions.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
+import com.hivemq.extension.sdk.api.interceptor.connack.parameter.ConnackOutboundProviderInput;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
@@ -82,16 +85,53 @@ public class InterceptorsImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        interceptors.addConnectInterceptorProvider(connectInterceptorProvider);
+        interceptors.addConnectInboundInterceptorProvider(connectInterceptorProvider);
 
         final ArgumentCaptor<Consumer> captor = ArgumentCaptor.forClass(Consumer.class);
         verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
 
-        assertSame(connectInterceptorProvider, interceptors.connectInterceptorProviders().get("plugin1"));
+        assertSame(connectInterceptorProvider, interceptors.connectInboundInterceptorProviders().get("plugin1"));
 
         when(plugin1.getPluginClassloader()).thenReturn(cl);
         captor.getValue().accept(plugin1);
-        assertEquals(0, interceptors.connectInterceptorProviders().size());
+        assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
+
+    }
+
+    @Test
+    public void test_add_and_remove_connack() throws Exception {
+
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
+                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnackOutboundInterceptorProvider");
+
+        final File jarFile = temporaryFolder.newFile();
+        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+
+        //This classloader contains the classes from the jar file
+        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+
+        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnackOutboundInterceptorProvider");
+
+        final ConnackOutboundInterceptorProvider connackInterceptorProvider = (ConnackOutboundInterceptorProvider) classOne.newInstance();
+
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin1);
+        when(plugin1.getId()).thenReturn("plugin1");
+
+        final Channel channelMock = Mockito.mock(Channel.class);
+        final ChannelPipeline pipelineMock = Mockito.mock(ChannelPipeline.class);
+
+        when(channelMock.pipeline()).thenReturn(pipelineMock);
+
+        interceptors.addConnackOutboundInterceptorProvider(connackInterceptorProvider);
+
+        final ArgumentCaptor<Consumer> captor = ArgumentCaptor.forClass(Consumer.class);
+        verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
+
+        assertSame(connackInterceptorProvider, interceptors.connackOutboundInterceptorProviders().get("plugin1"));
+
+        when(plugin1.getPluginClassloader()).thenReturn(cl);
+        captor.getValue().accept(plugin1);
+        assertEquals(0, interceptors.connackOutboundInterceptorProviders().size());
 
     }
 
@@ -119,15 +159,24 @@ public class InterceptorsImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        interceptors.addConnectInterceptorProvider(connectInterceptorProvider);
+        interceptors.addConnectInboundInterceptorProvider(connectInterceptorProvider);
 
-        assertEquals(0, interceptors.connectInterceptorProviders().size());
+        assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
 
     }
 
     public static class TestConnectInboundInterceptorProvider implements ConnectInboundInterceptorProvider {
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInterceptor(@NotNull ConnectInboundProviderInput input) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput input) {
+            return (connectInterceptorInput, connectInterceptorOutput) -> {
+
+            };
+        }
+    }
+
+    public static class TestConnackOutboundInterceptorProvider implements ConnackOutboundInterceptorProvider {
+        @Override
+        public @Nullable ConnackOutboundInterceptor getConnackOutboundInterceptor(@NotNull final ConnackOutboundProviderInput input) {
             return (connectInterceptorInput, connectInterceptorOutput) -> {
 
             };

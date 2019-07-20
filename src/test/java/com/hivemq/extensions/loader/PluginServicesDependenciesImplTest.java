@@ -18,6 +18,7 @@ package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
@@ -82,12 +83,15 @@ public class PluginServicesDependenciesImplTest {
     @Mock
     private GlobalInterceptorRegistry interceptorRegistry;
 
+    @Mock
+    private ServerInformation serverInformation;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         final SecurityRegistry securityRegistry =
                 new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions), new AuthorizersImpl(
-                        hiveMQExtensions), new HiveMQExtensions());
+                        hiveMQExtensions), new HiveMQExtensions(serverInformation));
         pluginServicesDependencies =
                 new PluginServicesDependenciesImpl(new MetricRegistry(), initializerRegistry, retainedMessageStore,
                         clientService, subscriptionStore, managedPluginExecutorService, publishService,

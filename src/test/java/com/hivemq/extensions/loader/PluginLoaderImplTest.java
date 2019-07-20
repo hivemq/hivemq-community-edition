@@ -18,12 +18,14 @@ package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extensions.*;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.config.HiveMQPluginXMLReader;
 import net.bytebuddy.ByteBuddy;
 import org.apache.commons.io.FileUtils;
@@ -84,6 +86,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
     @Mock
     private ClassServiceLoader classServiceLoader;
 
+    @Mock
+    private ServerInformation serverInformation;
 
     @Mock
     private PluginStaticInitializer staticInitializer;
@@ -98,7 +102,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        hiveMQExtensions = new HiveMQExtensions();
+        hiveMQExtensions = new HiveMQExtensions(serverInformation);
         pluginLoader = new PluginLoaderImpl(classServiceLoader, hiveMQExtensions, new HiveMQPluginFactoryImpl(),
                 staticInitializer);
         realPluginLoader =

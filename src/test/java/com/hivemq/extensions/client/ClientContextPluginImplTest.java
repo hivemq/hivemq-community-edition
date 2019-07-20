@@ -17,15 +17,18 @@
 package com.hivemq.extensions.client;
 
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestInterceptorUtil;
 
@@ -42,6 +45,10 @@ public class ClientContextPluginImplTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+
+    @Mock
+    private ServerInformation serverInformation;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
@@ -54,7 +61,7 @@ public class ClientContextPluginImplTest {
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
 
         final ClientContextImpl clientContext =
-                new ClientContextImpl(new HiveMQExtensions(), new ModifiableDefaultPermissionsImpl());
+                new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) interceptorList.get(0).getClass().getClassLoader();
         final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
@@ -93,7 +100,7 @@ public class ClientContextPluginImplTest {
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
 
         final ClientContextImpl clientContext =
-                new ClientContextImpl(new HiveMQExtensions(), new ModifiableDefaultPermissionsImpl());
+                new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) interceptorList.get(0).getClass().getClassLoader();
         final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();

@@ -283,7 +283,7 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
                 }
             } else {
                 final PUBLISH mergedPublish = PUBLISHFactory.mergePublishPacket(outboundOutput.getPublishPacket(), publish);
-                ctx.writeAndFlush(mergedPublish);
+                ctx.writeAndFlush(mergedPublish, promise);
             }
         }
 

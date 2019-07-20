@@ -24,11 +24,7 @@ import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
-import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.ConnectInboundInterceptorHandler;
-import com.hivemq.extensions.handler.IncomingPublishHandler;
-import com.hivemq.extensions.handler.PluginInitializerHandler;
-import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -163,6 +159,9 @@ public class ChannelDependencies {
     @NotNull
     private final ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
 
+    @NotNull
+    private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
+
     @Inject
     public ChannelDependencies(
             @NotNull final Provider<MetricsInitializer> statisticsInitializer,
@@ -198,7 +197,8 @@ public class ChannelDependencies {
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
-            @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler) {
+            @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
+            @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -235,6 +235,7 @@ public class ChannelDependencies {
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
+        this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
     }
 
     @NotNull
@@ -405,5 +406,10 @@ public class ChannelDependencies {
     @NotNull
     public ConnectInboundInterceptorHandler getConnectInboundInterceptorHandler() {
         return connectInboundInterceptorHandler;
+    }
+
+    @NotNull
+    public ConnackOutboundInterceptorHandler getConnackOutboundInterceptorHandler() {
+        return connackOutboundInterceptorHandler;
     }
 }

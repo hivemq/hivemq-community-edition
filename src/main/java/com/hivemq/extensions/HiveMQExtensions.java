@@ -22,6 +22,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.annotations.ThreadSafe;
 import com.hivemq.common.annotations.GuardedBy;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.parameters.start.ExtensionStartOutputImpl;
 import com.hivemq.extensions.parameters.start.ExtensionStartStopInputImpl;
@@ -30,6 +31,7 @@ import com.hivemq.util.Checkpoints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.*;
@@ -64,6 +66,12 @@ public class HiveMQExtensions {
     private final @NotNull ReadWriteLock classloaderLock = new ReentrantReadWriteLock();
     private final @NotNull ReadWriteLock beforePluginStopCallbacksLock = new ReentrantReadWriteLock();
     private final @NotNull ReadWriteLock afterPluginStopCallbacksLock = new ReentrantReadWriteLock();
+    private final @NotNull ServerInformation serverInformation;
+
+    @Inject
+    public HiveMQExtensions(final @NotNull ServerInformation serverInformation){
+        this.serverInformation = serverInformation;
+    }
 
     public @NotNull Map<String, HiveMQExtension> getEnabledHiveMQExtensions() {
         final Lock lock = pluginsLock.readLock();
@@ -202,7 +210,7 @@ public class HiveMQExtensions {
             addClassLoaderMapping(pluginClassloader, plugin);
 
             final ExtensionStartStopInputImpl input =
-                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions());
+                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStartOutputImpl output = new ExtensionStartOutputImpl();
 
             Thread.currentThread().setContextClassLoader(pluginClassloader);
@@ -267,7 +275,7 @@ public class HiveMQExtensions {
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             final ExtensionStartStopInputImpl input =
-                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions());
+                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStopOutputImpl output = new ExtensionStopOutputImpl();
 
             Thread.currentThread().setContextClassLoader(pluginClassloader);
