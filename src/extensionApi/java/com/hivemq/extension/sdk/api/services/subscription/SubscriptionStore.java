@@ -414,7 +414,7 @@ public interface SubscriptionStore {
      * @throws NullPointerException If the passed callback is null.
      * @since 4.2.0
      */
-    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<AllSubscriptionsResult> callback);
+    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<SubscriptionsForClientResult> callback);
 
     /**
      * Iterate over all subscribers and their subscriptions.
@@ -437,7 +437,7 @@ public interface SubscriptionStore {
      * @throws NullPointerException If the passed callback or callbackExecutor are null.
      * @since 4.2.0
      */
-    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<AllSubscriptionsResult> callback, @NotNull Executor callbackExecutor);
+    @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull IterationCallback<SubscriptionsForClientResult> callback, @NotNull Executor callbackExecutor);
 
 
 }

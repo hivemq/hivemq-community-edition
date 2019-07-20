@@ -363,12 +363,12 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull final IterationCallback<AllSubscriptionsResult> callback) {
+    public @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull final IterationCallback<SubscriptionsForClientResult> callback) {
         return iterateAllSubscriptions(callback, managedExtensionExecutorService);
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull final IterationCallback<AllSubscriptionsResult> callback,
+    public @NotNull CompletableFuture<Void> iterateAllSubscriptions(@NotNull final IterationCallback<SubscriptionsForClientResult> callback,
                                                                     @NotNull final Executor callbackExecutor) {
 
         Preconditions.checkNotNull(callback, "Callback cannot be null");
@@ -378,8 +378,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
 
-        final FetchCallback<ChunkCursor, AllSubscriptionsResult> fetchCallback = new AllSubscribersFetchCallback(subscriptionPersistence);
-        final AsyncIterator<ChunkCursor, AllSubscriptionsResult> asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllSubscribersResultItemCallback(callbackExecutor, callback));
+        final FetchCallback<ChunkCursor, SubscriptionsForClientResult> fetchCallback = new AllSubscribersFetchCallback(subscriptionPersistence);
+        final AsyncIterator<ChunkCursor, SubscriptionsForClientResult> asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllSubscribersResultItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 
@@ -398,19 +398,19 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
     }
 
-    static class AllSubscribersResultItemCallback implements AsyncIterator.ItemCallback<AllSubscriptionsResult> {
+    static class AllSubscribersResultItemCallback implements AsyncIterator.ItemCallback<SubscriptionsForClientResult> {
         private @NotNull
         final Executor callbackExecutor;
         private @NotNull
-        final IterationCallback<AllSubscriptionsResult> callback;
+        final IterationCallback<SubscriptionsForClientResult> callback;
 
-        AllSubscribersResultItemCallback(@NotNull final Executor callbackExecutor, @NotNull final IterationCallback<AllSubscriptionsResult> callback) {
+        AllSubscribersResultItemCallback(@NotNull final Executor callbackExecutor, @NotNull final IterationCallback<SubscriptionsForClientResult> callback) {
             this.callbackExecutor = callbackExecutor;
             this.callback = callback;
         }
 
         @Override
-        public @NotNull ListenableFuture<Boolean> onItems(@NotNull final Collection<AllSubscriptionsResult> items) {
+        public @NotNull ListenableFuture<Boolean> onItems(@NotNull final Collection<SubscriptionsForClientResult> items) {
 
             final IterationContextImpl iterationContext = new IterationContextImpl();
             final SettableFuture<Boolean> resultFuture = SettableFuture.create();
@@ -422,8 +422,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
                     final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                     try {
                         Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
-                        for (final AllSubscriptionsResult allSubscriptionsResult : items) {
-                            callback.iterate(iterationContext, allSubscriptionsResult);
+                        for (final SubscriptionsForClientResult subscriptionsForClientResult : items) {
+                            callback.iterate(iterationContext, subscriptionsForClientResult);
 
                             if (iterationContext.isAborted()) {
                                 resultFuture.set(false);
@@ -443,7 +443,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
     }
 
-    static class AllSubscribersFetchCallback implements FetchCallback<ChunkCursor, AllSubscriptionsResult> {
+    static class AllSubscribersFetchCallback implements FetchCallback<ChunkCursor, SubscriptionsForClientResult> {
 
         @NotNull
         private final ClientSessionSubscriptionPersistence subscriptionPersistence;
@@ -453,7 +453,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
 
         @Override
-        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, AllSubscriptionsResult>> fetchNextResults(@Nullable final ChunkCursor cursor) {
+        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SubscriptionsForClientResult>> fetchNextResults(@Nullable final ChunkCursor cursor) {
 
             final ListenableFuture<MultipleChunkResult<Map<String, Set<Topic>>>> persistenceFuture =
                     subscriptionPersistence.getAllLocalSubscribersChunk(cursor != null ? cursor : new ChunkCursor());
@@ -465,8 +465,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
 
         @NotNull
-        ChunkResult<ChunkCursor, AllSubscriptionsResult> convertToChunkResult(@NotNull final MultipleChunkResult<Map<String, Set<Topic>>> input) {
-            final ImmutableList.Builder<AllSubscriptionsResult> results = ImmutableList.builder();
+        ChunkResult<ChunkCursor, SubscriptionsForClientResult> convertToChunkResult(@NotNull final MultipleChunkResult<Map<String, Set<Topic>>> input) {
+            final ImmutableList.Builder<SubscriptionsForClientResult> results = ImmutableList.builder();
             final ImmutableMap.Builder<Integer, String> lastKeys = ImmutableMap.builder();
             final ImmutableSet.Builder<Integer> finishedBuckets = ImmutableSet.builder();
 
@@ -485,7 +485,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
                 }
 
                 for (final Map.Entry<String, Set<Topic>> entry : bucketChunkResult.getValue().entrySet()) {
-                    results.add(new AllSubscribersResultImpl(entry.getKey(),
+                    results.add(new SubscriptionsForClientResultImpl(entry.getKey(),
                             entry.getValue().stream().map(topic -> new TopicSubscriptionImpl(topic)).collect(Collectors.toSet())));
                 }
             }

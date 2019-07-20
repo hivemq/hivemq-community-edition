@@ -16,7 +16,7 @@
 package com.hivemq.extensions.services.subscription;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.services.subscription.AllSubscriptionsResult;
+import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
 
 import java.util.Set;
@@ -24,12 +24,12 @@ import java.util.Set;
 /**
  * @author Christoph Schäbel
  */
-public class AllSubscribersResultImpl implements AllSubscriptionsResult {
+public class SubscriptionsForClientResultImpl implements SubscriptionsForClientResult {
 
     private final @NotNull String clientId;
     private final @NotNull Set<TopicSubscription> topicSubscriptions;
 
-    public AllSubscribersResultImpl(
+    public SubscriptionsForClientResultImpl(
             @NotNull final String clientId, @NotNull final Set<TopicSubscription> topicSubscriptions) {
         this.clientId = clientId;
         this.topicSubscriptions = topicSubscriptions;

@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Christoph Schäbel
  * @since 4.2.0
  */
-public interface AllSubscriptionsResult {
+public interface SubscriptionsForClientResult {
 
     /**
      * Get the client identifier for this client.

@@ -31,7 +31,7 @@ import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
-import com.hivemq.extension.sdk.api.services.subscription.AllSubscriptionsResult;
+import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
 import com.hivemq.extensions.iteration.AsyncIterator;
@@ -750,7 +750,7 @@ public class SubscriptionStoreImplTest {
 
     @Test(timeout = 10000)
     public void test_item_callback() throws Exception {
-        final ArrayList<AllSubscriptionsResult> items = Lists.newArrayList();
+        final ArrayList<SubscriptionsForClientResult> items = Lists.newArrayList();
 
         final CountDownLatch latch = new CountDownLatch(1);
         final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -760,9 +760,9 @@ public class SubscriptionStoreImplTest {
         });
 
         final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new AllSubscribersResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
         ));
 
         assertEquals(true, onItems.get());
@@ -781,9 +781,9 @@ public class SubscriptionStoreImplTest {
         });
 
         final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new AllSubscribersResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
         ));
 
         assertEquals(false, onItems.get());
@@ -800,9 +800,9 @@ public class SubscriptionStoreImplTest {
         });
 
         final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new AllSubscribersResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
-                new AllSubscribersResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
+                new SubscriptionsForClientResultImpl("client", Set.of(new TopicSubscriptionImpl("topic1", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client2", Set.of(new TopicSubscriptionImpl("topic2", Qos.AT_LEAST_ONCE, false, false, 1))),
+                new SubscriptionsForClientResultImpl("client3", Set.of(new TopicSubscriptionImpl("topic3", Qos.AT_LEAST_ONCE, false, false, 1)))
         ));
 
         try {
@@ -849,7 +849,7 @@ public class SubscriptionStoreImplTest {
 
         final SubscriptionStoreImpl.AllSubscribersFetchCallback fetchCallback = new SubscriptionStoreImpl.AllSubscribersFetchCallback(null);
 
-        final ChunkResult<ChunkCursor, AllSubscriptionsResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, Set<Topic>>>(
+        final ChunkResult<ChunkCursor, SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, Set<Topic>>>(
                 Map.of(
                         1, new BucketChunkResult<>(Map.of(
                                 "client1", Set.of(
