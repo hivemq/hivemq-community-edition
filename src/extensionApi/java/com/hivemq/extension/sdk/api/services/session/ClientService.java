@@ -131,6 +131,14 @@ public interface ClientService {
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
      * of this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
@@ -156,6 +164,14 @@ public interface ClientService {
      * The callback is executed in the passed {@link Executor}.
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection, as the callback might be executed in another thread as the calling thread of this method.
+     * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.

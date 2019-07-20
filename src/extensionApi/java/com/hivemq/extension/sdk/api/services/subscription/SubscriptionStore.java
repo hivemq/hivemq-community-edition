@@ -149,6 +149,14 @@ public interface SubscriptionStore {
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
      * this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -177,6 +185,14 @@ public interface SubscriptionStore {
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
      * this method.
+     * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -208,6 +224,14 @@ public interface SubscriptionStore {
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
      * this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -236,6 +260,14 @@ public interface SubscriptionStore {
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of
      * this method.
+     * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -273,6 +305,14 @@ public interface SubscriptionStore {
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
      * of this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -306,6 +346,14 @@ public interface SubscriptionStore {
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
      * of this method.
+     * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -341,6 +389,14 @@ public interface SubscriptionStore {
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection, as the callback might be executed in another thread as the calling thread of this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -371,8 +427,16 @@ public interface SubscriptionStore {
      * This method will iterate all subscribers according to the passed {@link SubscriptionType}.
      * <p>
      * The callback is executed in the passed {@link Executor}.
-     * If you want to collect the results of each execution of the callback in a collectio please make sure to use a
+     * If you want to collect the results of each execution of the callback in a collection please make sure to use a
      * concurrent collection, as the callback might be executed in another thread as the calling thread of this method.
+     * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -405,6 +469,14 @@ public interface SubscriptionStore {
      * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
      * of this method.
      * <p>
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -425,9 +497,19 @@ public interface SubscriptionStore {
      * <p>
      * The callback is executed in the passed {@link Executor}.
      * If you want to collect the results of each execution of the callback in a collection please make sure to use a
-     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread of this method.
+     * concurrent collection (thread-safe), as the callback might be executed in another thread as the calling thread
+     * of this method.
      * <p>
-     * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
+     * The results are not sorted in any way, no ordering of any kind is guaranteed.
+     * <p>
+     * CAUTION: This method can be used in large scale deployments, but it is a very expensive operation.
+     * Do not call this method in short time intervals.
+     * <p>
+     * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
+     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * <p>
+     * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit
+     * was
      * exceeded.
      *
      * @param callback         An {@link IterationCallback} that is called for every returned result.
