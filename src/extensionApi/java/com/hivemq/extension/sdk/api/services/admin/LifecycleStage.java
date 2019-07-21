@@ -29,8 +29,8 @@ public enum LifecycleStage {
     STARTING,
 
     /**
-     * The HiveMQ startup process is complete.
-     * In this stage clients can connect to HiveMQ and the HiveMQ instance has joined the cluster if there is a cluster.
+     * The HiveMQ startup process is complete. In this stage clients can connect to HiveMQ and the HiveMQ instance has
+     * joined the cluster if there is a cluster.
      *
      * @since 4.2.0
      */

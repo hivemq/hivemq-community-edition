@@ -27,21 +27,21 @@ import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 public interface AdminService {
 
     /**
-     * @return information about the HiveMQ instance the extension is running in.
+     * @return Information about the HiveMQ instance the extension is running in.
      * @since 4.2.0
      */
     @NotNull
     ServerInformation getServerInformation();
 
     /**
-     * @return information about the current stage of this HiveMQ instance.
+     * @return Information about the current stage of this HiveMQ instance.
      * @since 4.2.0
      */
     @NotNull
     LifecycleStage getCurrentStage();
 
     /**
-     * @return information about the license that is used by HiveMQ.
+     * @return Information about the license that is used by HiveMQ.
      * @since 4.2.0
      */
     @NotNull

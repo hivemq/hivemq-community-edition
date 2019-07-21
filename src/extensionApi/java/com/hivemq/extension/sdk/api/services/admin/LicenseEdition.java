@@ -16,32 +16,37 @@
 package com.hivemq.extension.sdk.api.services.admin;
 
 /**
- * The enum represents the edition for which HiveMQ is licensed
+ * The enum represents the edition for which HiveMQ is licensed.
  *
  * @author Lukas Brandl
  * @since 4.2.0
  */
 public enum LicenseEdition {
+
     /**
      * The open source edition of HiveMQ.
+     *
      * @since 4.2.0
      */
     COMMUNITY,
 
     /**
      * An otherwise commercial instance of HiveMQ that is running without a license file.
+     *
      * @since 4.2.0
      */
     TRIAL,
 
     /**
      * Professional edition of HiveMQ.
+     *
      * @since 4.2.0
      */
     PROFESSIONAL,
 
     /**
      * Enterprise edition of HiveMQ.
+     *
      * @since 4.2.0
      */
     ENTERPRISE

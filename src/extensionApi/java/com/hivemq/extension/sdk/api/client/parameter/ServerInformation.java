@@ -72,7 +72,7 @@ public interface ServerInformation {
     /**
      * All configured listeners.
      *
-     * @return a set which contains a {@link Listener} instance for each configured listener.
+     * @return A set which contains a {@link Listener} instance for each configured listener.
      * @since 4.2.0
      */
     @NotNull

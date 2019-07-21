@@ -9,7 +9,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public interface SubscriberWithFilterResult {
 
     /**
-     * @return the subscribers MQTT client identifier
+     * @return The subscribers MQTT client identifier.
      */
     @NotNull
     String getClientId();

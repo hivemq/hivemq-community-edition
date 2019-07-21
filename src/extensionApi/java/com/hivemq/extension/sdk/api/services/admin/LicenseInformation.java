@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public interface LicenseInformation {
 
     /**
-     * @return an enum that represents the edition for which HiveMQ is licensed.
+     * @return An enum that represents the edition for which HiveMQ is licensed.
      * @since 4.2.0
      */
     @NotNull
