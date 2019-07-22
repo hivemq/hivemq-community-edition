@@ -17,6 +17,7 @@
 package com.hivemq.extensions;
 
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
@@ -62,6 +63,9 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
     @Mock
     private IsolatedPluginClassloader loader2;
 
+    @Mock
+    private ListenerConfigurationService listenerConfigurationService;
+
     private String id1;
     private String id2;
     private HiveMQExtensions hiveMQExtensions;
@@ -83,7 +87,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         when(plugin2.getPluginClassloader()).thenReturn(loader2);
 
 
-        hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl()));
+        hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService));
 
         hiveMQExtensions.addHiveMQPlugin(plugin1);
     }

@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -102,6 +103,9 @@ public class PluginInitializerHandlerTest {
     @Mock
     private MqttConnacker mqttConnacker;
 
+    @Mock
+    private ListenerConfigurationService listenerConfigurationService;
+
     private EmbeddedChannel embeddedChannel;
 
     @Before
@@ -120,7 +124,7 @@ public class PluginInitializerHandlerTest {
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
         pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,
-                new ServerInformationImpl(new SystemInformationImpl()),
+                new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService),
                 hiveMQExtensions, clientSessionPersistence, mqttConnacker);
     }
 

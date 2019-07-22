@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.io.File;
+import java.util.Set;
 
 /**
  * The server information contains specific data about HiveMQ instance the extensions runs in.
@@ -67,4 +68,13 @@ public interface ServerInformation {
      * @since 4.0.0
      */
     @NotNull File getExtensionsFolder();
+
+    /**
+     * All configured listeners.
+     *
+     * @return A set which contains a {@link Listener} instance for each configured listener.
+     * @since 4.2.0
+     */
+    @NotNull
+    Set<Listener> getListener();
 }

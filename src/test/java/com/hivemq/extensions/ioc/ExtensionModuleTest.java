@@ -26,6 +26,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
 import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
@@ -84,6 +85,7 @@ public class ExtensionModuleTest {
                 bind(ListeningExecutorService.class).annotatedWith(Persistence.class).toInstance(mock(ListeningExecutorService.class));
                 bind(InternalPublishService.class).toInstance(mock(InternalPublishService.class));
                 bind(ClientSessionSubscriptionPersistence.class).toInstance(mock(ClientSessionSubscriptionPersistence.class));
+                bind(ListenerConfigurationService.class).toInstance(mock(ListenerConfigurationService.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
             }
         });
