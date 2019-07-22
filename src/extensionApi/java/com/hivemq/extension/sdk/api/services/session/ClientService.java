@@ -137,7 +137,7 @@ public interface ClientService {
      * Do not call this method in short time intervals.
      * <p>
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
-     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -147,8 +147,7 @@ public interface ClientService {
      * @param callback An {@link IterationCallback} that is called for every returned result.
      * @return A {@link CompletableFuture} that is completed after all iterations are executed, no match is found
      * or the iteration is aborted manually with the {@link IterationContext}.
-     * @throws NullPointerException If the passed callback or callbackExecutor are
-     *                              null.
+     * @throws NullPointerException If the passed callback or callbackExecutor are null.
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllClients(@NotNull IterationCallback<SessionInformation> callback);
@@ -171,7 +170,7 @@ public interface ClientService {
      * Do not call this method in short time intervals.
      * <p>
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
-     * further iteration and save ressources by calling {@link IterationContext#abortIteration()}
+     * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -182,8 +181,7 @@ public interface ClientService {
      * @param callbackExecutor An {@link Executor} in which the callback for each iteration is executed.
      * @return A {@link CompletableFuture} that is completed after all iterations are executed, no match is found
      * or the iteration is aborted manually with the {@link IterationContext}.
-     * @throws NullPointerException If the passed callback or callbackExecutor are
-     *                              null.
+     * @throws NullPointerException If the passed callback or callbackExecutor are null.
      * @since 4.2.0
      */
     @NotNull CompletableFuture<Void> iterateAllClients(@NotNull IterationCallback<SessionInformation> callback, @NotNull Executor callbackExecutor);

@@ -16,7 +16,7 @@ public interface IterationCallback<T> {
     /**
      * This method is called for every result that is part of the iteration.
      *
-     * @param context an {@link} IterationContext that allows for interaction with the overlaying iteration mechanism.
+     * @param context an {@link IterationContext} that allows for interaction with the overlaying iteration mechanism.
      * @param value   the value for this single iteration.
      */
     void iterate(@NotNull IterationContext context, @NotNull T value);
