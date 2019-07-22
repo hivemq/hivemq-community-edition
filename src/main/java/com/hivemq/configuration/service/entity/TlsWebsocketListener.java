@@ -17,6 +17,8 @@
 package com.hivemq.configuration.service.entity;
 
 import com.hivemq.annotations.Immutable;
+import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.List;
 
@@ -36,17 +38,22 @@ public class TlsWebsocketListener extends WebsocketListener {
 
     private final Tls tls;
 
-    TlsWebsocketListener(final int port,
-                         final String bindAddress, final String path,
-                         final Boolean allowExtensions, final List<String> subprotocols,
-                         final Tls tls) {
-        super(port, bindAddress, path, allowExtensions, subprotocols);
+    TlsWebsocketListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull String path,
+            final @NotNull Boolean allowExtensions,
+            final @NotNull List<String> subprotocols,
+            final @NotNull Tls tls,
+            final @NotNull String name) {
+        super(port, bindAddress, path, allowExtensions, subprotocols, name);
         this.tls = tls;
     }
 
     /**
      * @return the TLS configuration
      */
+    @NotNull
     public Tls getTls() {
         return tls;
     }
@@ -54,6 +61,7 @@ public class TlsWebsocketListener extends WebsocketListener {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public String readableName() {
         return "Websocket Listener with TLS";
@@ -64,7 +72,7 @@ public class TlsWebsocketListener extends WebsocketListener {
      */
     public static class Builder extends WebsocketListener.Builder {
 
-        private Tls tls;
+        private @Nullable Tls tls;
 
         /**
          * Sets the TLS configuration of the TLS Websocket listener
@@ -72,7 +80,8 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @param tls the TLS configuration
          * @return the Builder
          */
-        public Builder tls(final Tls tls) {
+        @NotNull
+        public Builder tls(final @NotNull Tls tls) {
             checkNotNull(tls);
             this.tls = tls;
             return this;
@@ -84,6 +93,7 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @param port the port
          * @return the Builder
          */
+        @NotNull
         @Override
         public Builder port(final int port) {
             super.port(port);
@@ -96,8 +106,9 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @param bindAddress the bind address
          * @return the Builder
          */
+        @NotNull
         @Override
-        public Builder bindAddress(final String bindAddress) {
+        public Builder bindAddress(final @NotNull String bindAddress) {
             super.bindAddress(bindAddress);
             return this;
         }
@@ -108,9 +119,24 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @param path the path
          * @return the Builder
          */
+        @NotNull
         @Override
-        public Builder path(final String path) {
+        public Builder path(final @NotNull String path) {
             super.path(path);
+            return this;
+        }
+
+        /**
+         * Sets the name of the websocket listener
+         *
+         * @param name the name
+         * @return the Builder
+         */
+        @NotNull
+        @Override
+        public Builder name(final @NotNull String name) {
+            checkNotNull(name);
+            this.name = name;
             return this;
         }
 
@@ -121,6 +147,7 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @return the Builder
          */
         @Override
+        @NotNull
         public Builder allowExtensions(final boolean allowExtensions) {
             super.allowExtensions(allowExtensions);
             return this;
@@ -135,7 +162,8 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @return the Builder
          */
         @Override
-        public Builder setSubprotocols(final List<String> subprotocols) {
+        @NotNull
+        public Builder setSubprotocols(final @NotNull List<String> subprotocols) {
             super.setSubprotocols(subprotocols);
             return this;
         }
@@ -146,13 +174,19 @@ public class TlsWebsocketListener extends WebsocketListener {
          * @return the TLS Websocket Listener
          */
         @Override
+        @NotNull
         public TlsWebsocketListener build() {
             //For validation purposes
             super.build();
             if (tls == null) {
                 throw new IllegalStateException("The TLS settings for a TLS Websocket listener was not set.");
             }
-            return new TlsWebsocketListener(port, bindAddress, path, allowExtensions, subprotocols, tls);
+
+            if (name == null) {
+                name = "tls-websocket-listener-" + port;
+            }
+
+            return new TlsWebsocketListener(port, bindAddress, path, allowExtensions, subprotocols, tls, name);
         }
 
     }

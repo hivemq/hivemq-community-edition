@@ -18,6 +18,7 @@ package com.hivemq.configuration.service.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.Immutable;
+import com.hivemq.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,26 +37,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class WebsocketListener implements Listener {
 
-    private final Integer port;
+    private final @NotNull Integer port;
 
-    private final String bindAddress;
+    private final @NotNull String bindAddress;
 
-    private final String path;
+    private final @NotNull String path;
 
-    private final Boolean allowExtensions;
+    private final @NotNull Boolean allowExtensions;
 
-    private final List<String> subprotocols;
+    private final @NotNull List<String> subprotocols;
 
-    protected WebsocketListener(final int port,
-                                final String bindAddress,
-                                final String path,
-                                final boolean allowExtensions,
-                                final List<String> subprotocols) {
+    private final @NotNull String name;
+
+    protected WebsocketListener(
+            final int port,
+            final String bindAddress,
+            final String path,
+            final boolean allowExtensions,
+            final List<String> subprotocols,
+            final String name) {
         this.port = port;
         this.bindAddress = bindAddress;
         this.path = path;
         this.allowExtensions = allowExtensions;
         this.subprotocols = subprotocols;
+        this.name = name;
     }
 
     /**
@@ -83,6 +89,14 @@ public class WebsocketListener implements Listener {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull String getName() {
+        return name;
+    }
+
+    /**
      * @return the path of the websocket
      */
     public String getPath() {
@@ -107,9 +121,11 @@ public class WebsocketListener implements Listener {
      * A builder which allows to conveniently build a listener object with a fluent API
      */
     public static class Builder {
+
         protected Integer port;
         protected String bindAddress;
         protected String path = "";
+        protected String name;
         protected boolean allowExtensions = false;
         protected List<String> subprotocols = new ArrayList<>();
 
@@ -124,6 +140,7 @@ public class WebsocketListener implements Listener {
          * @param port the port
          * @return the Builder
          */
+        @NotNull
         public Builder port(final int port) {
             this.port = port;
             return this;
@@ -135,7 +152,8 @@ public class WebsocketListener implements Listener {
          * @param bindAddress the bind address
          * @return the Builder
          */
-        public Builder bindAddress(final String bindAddress) {
+        @NotNull
+        public Builder bindAddress(final @NotNull String bindAddress) {
             checkNotNull(bindAddress);
             this.bindAddress = bindAddress;
             return this;
@@ -147,9 +165,23 @@ public class WebsocketListener implements Listener {
          * @param path the path
          * @return the Builder
          */
-        public Builder path(final String path) {
+        @NotNull
+        public Builder path(final @NotNull String path) {
             checkNotNull(path);
             this.path = path;
+            return this;
+        }
+
+        /**
+         * Sets the name of the websocket listener
+         *
+         * @param name the name
+         * @return the Builder
+         */
+        @NotNull
+        public Builder name(final @NotNull String name) {
+            checkNotNull(name);
+            this.name = name;
             return this;
         }
 
@@ -159,6 +191,7 @@ public class WebsocketListener implements Listener {
          * @param allowExtensions if websocket extensions should be allowed or not
          * @return the Builder
          */
+        @NotNull
         public Builder allowExtensions(final boolean allowExtensions) {
             this.allowExtensions = allowExtensions;
             return this;
@@ -172,7 +205,8 @@ public class WebsocketListener implements Listener {
          * @param subprotocols a list of websocket subprotocols
          * @return the Builder
          */
-        public Builder setSubprotocols(final List<String> subprotocols) {
+        @NotNull
+        public Builder setSubprotocols(final @NotNull List<String> subprotocols) {
             checkNotNull(subprotocols);
             this.subprotocols = ImmutableList.copyOf(subprotocols);
             return this;
@@ -183,6 +217,7 @@ public class WebsocketListener implements Listener {
          *
          * @return the Websocket Listener
          */
+        @NotNull
         public WebsocketListener build() throws IllegalStateException {
             if (port == null) {
                 throw new IllegalStateException("The port for a Websocket listener was not set.");
@@ -192,7 +227,11 @@ public class WebsocketListener implements Listener {
                 throw new IllegalStateException("The bind address for a Websocket listener was not set.");
             }
 
-            return new WebsocketListener(port, bindAddress, path, allowExtensions, subprotocols);
+            if (name == null) {
+                name = "websocket-listener-" + port;
+            }
+
+            return new WebsocketListener(port, bindAddress, path, allowExtensions, subprotocols, name);
         }
     }
 }

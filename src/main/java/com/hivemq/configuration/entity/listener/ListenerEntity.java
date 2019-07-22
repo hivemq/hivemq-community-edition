@@ -17,6 +17,7 @@
 package com.hivemq.configuration.entity.listener;
 
 import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -32,6 +33,9 @@ public abstract class ListenerEntity {
     @XmlElement(name = "bind-address", required = true)
     private @NotNull String bindAddress = "0.0.0.0";
 
+    @XmlElement(name = "name")
+    private @Nullable String name;
+
     public int getPort() {
         return port;
     }
@@ -40,4 +44,7 @@ public abstract class ListenerEntity {
         return bindAddress;
     }
 
+    public @Nullable String getName() {
+        return name;
+    }
 }
