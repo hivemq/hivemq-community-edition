@@ -230,5 +230,10 @@ public class ChannelInitializerFactoryImplTest {
         public String readableName() {
             return null;
         }
+
+        @Override
+        public @NotNull String getName() {
+            return "listener";
+        }
     }
 }

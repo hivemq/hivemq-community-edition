@@ -37,6 +37,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                 "        <tls-tcp-listener>" +
                 "            <port>8883</port>" +
                 "            <bind-address>0.0.0.0</bind-address>" +
+                "            <name>my-tls-tcp-listener</name>" +
                 "            <tls>" +
                 "               <cipher-suites>" +
                 "                   <cipher-suite>TLS_RSA_WITH_AES_128_CBC_SHA</cipher-suite>" +
@@ -79,7 +80,70 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
         //Check if the relative path was made absolute
         assertEquals(true, new File(tlsTcpListener.getTls().getTruststorePath()).isAbsolute());
         assertEquals("password-truststore", tlsTcpListener.getTls().getTruststorePassword());
+        assertEquals("my-tls-tcp-listener", tlsTcpListener.getName());
 
+    }
+
+    @Test
+    public void test_read_multiple_tcp_listeners() throws Exception {
+
+        final String contents = "" +
+                "<hivemq>" +
+                "    <listeners>" +
+                "       <tcp-listener>" +
+                "           <port>1883</port>" +
+                "           <bind-address>0.0.0.0</bind-address>" +
+                "            <name>my-tcp-listener</name>" +
+                "       </tcp-listener>" +
+                "       <tcp-listener>" +
+                "           <port>1884</port>" +
+                "           <bind-address>0.0.0.0</bind-address>" +
+                "            <name>my-tcp-listener</name>" +
+                "       </tcp-listener>" +
+                "       <tcp-listener>" +
+                "           <port>1885</port>" +
+                "           <bind-address>0.0.0.0</bind-address>" +
+                "            <name>my-tcp-listener</name>" +
+                "       </tcp-listener>" +
+                "    </listeners>" +
+                "</hivemq>";
+
+        Files.write(contents.getBytes(UTF_8), xmlFile);
+
+        reader.applyConfig();
+
+        final TcpListener tcpListener1 = listenerConfigurationService.getTcpListeners().get(0);
+        final TcpListener tcpListener2 = listenerConfigurationService.getTcpListeners().get(1);
+        final TcpListener tcpListener3 = listenerConfigurationService.getTcpListeners().get(2);
+
+        assertEquals("my-tcp-listener", tcpListener1.getName());
+        assertEquals("my-tcp-listener-1", tcpListener2.getName());
+        assertEquals("my-tcp-listener-2", tcpListener3.getName());
+    }
+
+    @Test
+    public void test_read_tcp_listener_white_space_name() throws Exception {
+
+        final String contents = "" +
+                "<hivemq>" +
+                "    <listeners>" +
+                "       <tcp-listener>" +
+                "           <port>1883</port>" +
+                "           <bind-address>0.0.0.0</bind-address>" +
+                "           <name>     </name>" +
+                "       </tcp-listener>" +
+                "    </listeners>" +
+                "</hivemq>";
+
+        Files.write(contents.getBytes(UTF_8), xmlFile);
+
+        reader.applyConfig();
+
+        final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().get(0);
+
+        assertEquals(1883, tcpListener.getPort());
+        assertEquals("0.0.0.0", tcpListener.getBindAddress());
+        assertEquals("tcp-listener-1883", tcpListener.getName());
     }
 
     @Test

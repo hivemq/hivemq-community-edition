@@ -16,6 +16,8 @@
 
 package com.hivemq.configuration.service.entity;
 
+import com.hivemq.annotations.NotNull;
+
 /**
  * A marker interface for a listener. Any listener implementation must
  * implement this interface.
@@ -44,5 +46,12 @@ public interface Listener {
      * @return the human readable, name of the listener
      */
     String readableName();
+
+    /**
+     * @return the name of the listener
+     * @since 4.1
+     */
+    @NotNull
+    String getName();
 
 }

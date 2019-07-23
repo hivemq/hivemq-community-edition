@@ -191,6 +191,11 @@ public class AbstractChannelInitializerTest {
                     return null;
                 }
 
+                @Override
+                public @NotNull String getName() {
+                    return "listener";
+                }
+
             }, eventLog);
         }
 
@@ -219,6 +224,10 @@ public class AbstractChannelInitializerTest {
                     return null;
                 }
 
+                @Override
+                public @NotNull String getName() {
+                    return "listener";
+                }
             }, eventLog);
         }
 
