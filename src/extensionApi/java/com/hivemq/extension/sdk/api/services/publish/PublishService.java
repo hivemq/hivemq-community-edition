@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Lukas Brandl
  * @author Christoph Schäbel
- * @since 4.0
+ * @since 4.0.0
  */
 @DoNotImplement
 public interface PublishService {

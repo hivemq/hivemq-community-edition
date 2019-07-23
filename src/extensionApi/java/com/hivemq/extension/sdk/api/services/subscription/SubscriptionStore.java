@@ -70,7 +70,8 @@ public interface SubscriptionStore {
      *
      * @param clientID      The client for which the new subscriptions should be added.
      * @param subscriptions The subscriptions to which the client should be subscribed.
-     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscriptions were added.
+     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscriptions were added by all
+     * Cluster Nodes.
      * @throws NullPointerException     If clientID, subscriptions or one of the subscription in the set is null.
      * @throws IllegalArgumentException If clientID or subscriptions is empty.
      * @since 4.0.0
@@ -89,7 +90,8 @@ public interface SubscriptionStore {
      *
      * @param clientID    The client for which the subscription should be removed.
      * @param topicFilter The topic from which the client should get unsubscribed.
-     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscription was removed.
+     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscription was removed by all
+     * cluster nodes.
      * @throws NullPointerException     If clientID or topicFilter is null.
      * @throws IllegalArgumentException If clientID is empty.
      * @since 4.0.0
@@ -109,7 +111,8 @@ public interface SubscriptionStore {
      *
      * @param clientID     The client for which the subscriptions should be removed.
      * @param topicFilters The topics from which the client should get unsubscribed.
-     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscriptions were removed.
+     * @return A {@link CompletableFuture} object that will succeed, as soon as the subscriptions were removed by all
+     * Cluster Nodes.
      * @throws NullPointerException     If clientID, topics or one of the topics in the set is null.
      * @throws IllegalArgumentException If clientID or topics is empty.
      * @since 4.0.0
@@ -157,6 +160,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -194,6 +199,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -232,6 +239,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -269,6 +278,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -313,6 +324,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -355,6 +368,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -397,6 +412,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -438,6 +455,8 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      *
@@ -477,8 +496,12 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
+     * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
+     * during the iteration (e.g. a network-split, node leave or node join).
      *
      * @param callback An {@link IterationCallback} that is called for every returned result.
      * @return A {@link CompletableFuture} that is completed after all iterations are executed, no subscriptions exist
@@ -508,9 +531,13 @@ public interface SubscriptionStore {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit
      * was
      * exceeded.
+     * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
+     * during the iteration (e.g. a network-split, node leave or node join).
      *
      * @param callback         An {@link IterationCallback} that is called for every returned result.
      * @param callbackExecutor An {@link Executor} in which the callback for each iteration is executed.

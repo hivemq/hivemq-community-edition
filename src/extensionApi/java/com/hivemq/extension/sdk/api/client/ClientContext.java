@@ -22,8 +22,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
-import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
-import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 
@@ -56,6 +54,7 @@ public interface ClientContext {
      * Subsequent adding of the same interceptor will be ignored.
      *
      * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
     void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
@@ -86,6 +85,7 @@ public interface ClientContext {
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
      * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
     void removePublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);

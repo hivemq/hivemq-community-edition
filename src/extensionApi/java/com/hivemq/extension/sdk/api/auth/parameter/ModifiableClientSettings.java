@@ -52,7 +52,7 @@ public interface ModifiableClientSettings {
     int getClientReceiveMaximum();
 
     /**
-     * @return the overload protection level that will be used for this client.
+     * @return The overload protection level that will be used for this client.
      * @since 4.2.0
      */
     @NotNull OverloadProtectionThrottlingLevel getOverloadProtectionThrottlingLevel();

@@ -72,6 +72,7 @@ public class Services {
 
     /**
      * @return A service to set a {@link ClientInitializer}.
+     * @since 4.0.0
      */
     public static @NotNull InitializerRegistry initializerRegistry() {
         return getClassObject(InitializerRegistry.class);
@@ -79,13 +80,16 @@ public class Services {
 
     /**
      * @return A service to set a {@link GlobalInterceptorRegistry}.
+     * @since 4.2.0
      */
     public static @NotNull GlobalInterceptorRegistry interceptorRegistry() {
         return getClassObject(GlobalInterceptorRegistry.class);
     }
 
     /**
-     * @return A service to register {@link AuthenticatorProvider} and {@link AuthorizerProvider}.
+     * @return A service to register {@link AuthenticatorProvider}
+     * and {@link AuthorizerProvider}.
+     * @since 4.0.0
      */
     public static @NotNull SecurityRegistry securityRegistry() {
         return getClassObject(SecurityRegistry.class);
