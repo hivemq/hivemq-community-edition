@@ -528,7 +528,7 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
         assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());
     }
 
-    @Test
+    @Test(timeout = 10_000)
     public void test_get_chunk_many_clients_no_duplicates() {
 
         for (int i = 0; i < 100; i++) {
@@ -558,7 +558,7 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     }
 
-    @Test
+    @Test(timeout = 10_000)
     public void test_get_chunk_remove_last_key_between_iterations() {
 
         for (int i = 0; i < 100; i++) {

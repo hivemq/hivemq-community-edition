@@ -91,11 +91,11 @@ public class ClientSessionPersistenceImplTest {
 
     @Test
     public void test_is_existent() {
-        when(localPersistence.getSession("client1")).thenReturn(new ClientSession(true, 0));
+        when(localPersistence.getSession(eq("client1"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         assertTrue(clientSessionPersistence.isExistent("client1"));
-        when(localPersistence.getSession("client2")).thenReturn(new ClientSession(false, 1));
+        when(localPersistence.getSession(eq("client2"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false, 1));
         assertTrue(clientSessionPersistence.isExistent("client2"));
-        when(localPersistence.getSession("client3")).thenReturn(new ClientSession(false, 0));
+        when(localPersistence.getSession(eq("client3"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false, 0));
         assertFalse(clientSessionPersistence.isExistent("client3"));
         assertFalse(clientSessionPersistence.isExistent("client4"));
 
@@ -134,14 +134,14 @@ public class ClientSessionPersistenceImplTest {
 
     @Test
     public void force_client_disconnect_session_null() throws ExecutionException, InterruptedException {
-        when(localPersistence.getSession("client")).thenReturn(null);
+        when(localPersistence.getSession("client", true)).thenReturn(null);
         final Boolean result = clientSessionPersistence.forceDisconnectClient("client", false, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
     }
 
     @Test
     public void force_client_disconnect_not_connected() throws ExecutionException, InterruptedException {
-        when(localPersistence.getSession("client")).thenReturn(new ClientSession(true, 0));
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         when(channelPersistence.get("client")).thenReturn(null);
         final Boolean result = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
@@ -153,7 +153,7 @@ public class ClientSessionPersistenceImplTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         when(channelPersistence.get("client")).thenReturn(channel);
-        when(localPersistence.getSession("client")).thenReturn(new ClientSession(true, 0));
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
         channel.disconnect();
         final Boolean result = future.get();
@@ -190,7 +190,7 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void test_set_expiry_interval_no_session() throws ExecutionException, InterruptedException {
         when(subscriptionPersistence.removeAll("client")).thenReturn(Futures.immediateFuture(null));
-        when(localPersistence.getSession("client")).thenReturn(null);
+        when(localPersistence.getSession("client", true)).thenReturn(null);
         final Boolean result = clientSessionPersistence.setSessionExpiryInterval("client", 0).get();
         assertFalse(result);
         verify(subscriptionPersistence).removeAll("client");

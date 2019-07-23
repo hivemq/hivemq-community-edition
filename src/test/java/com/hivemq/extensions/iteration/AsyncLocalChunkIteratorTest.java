@@ -139,7 +139,7 @@ public class AsyncLocalChunkIteratorTest {
 
     private static class TestItemCallback implements AsyncIterator.ItemCallback<String> {
 
-        final List<String> items = new ArrayList<>();
+        final List<String> items = Collections.synchronizedList(new ArrayList<>());
 
         private boolean abort = false;
 
