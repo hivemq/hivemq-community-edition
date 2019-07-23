@@ -25,10 +25,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * A {@link PublishPacket} that can be modified for onward delivery. Most changes to the parameters will only
- * alter the message that is sent to the subscriber but not the way HiveMQ is handling the original publish message. For
- * example a message will not be stored as a retained message if it wasn't sent as such. For behavioral changes to the
- * message handling use the {@link com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor}
+ * A {@link PublishPacket} that can be modified for onward delivery.
+ * Most changes to the parameters will only alter the message that is sent to the subscriber but not the way HiveMQ is
+ * handling the original publish message.
+ * For example a message will not be stored as a retained message if it wasn't sent as such.
+ * For behavioral changes to the message handling use the {@link com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor}
  *
  * @author Lukas Brandl
  * @since 4.2.0
@@ -37,8 +38,9 @@ import java.util.List;
 public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
-     * Sets the retain flag. This will not affect whether or not the message is stored as a retained message, it
-     * merely alters the retained flag sent to the subscriber.
+     * Sets the retain flag.
+     * This will not affect whether or not the message is stored as a retained message, it merely alters the retained
+     * flag sent to the subscriber.
      *
      * @param retain The new retain flag for the publish.
      * @since 4.2.0
@@ -46,8 +48,10 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setRetain(boolean retain);
 
     /**
-     * Sets the topic. This will not change whether the publish topic matches the subscription for which it is sent or
-     * not, it merely alters the publish topic that is sent to the subscriber.
+     * Sets the topic.
+     * This will not change whether the publish topic matches the subscription for which it is sent or not, it merely
+     * alters
+     * the publish topic that is sent to the subscriber.
      *
      * @param topic The new topic for the publish.
      * @throws NullPointerException     If the topic is null.
@@ -68,8 +72,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setPayloadFormatIndicator(@Nullable PayloadFormatIndicator payloadFormatIndicator);
 
     /**
-     * Sets the message expiry interval. The original expire interval for this message will still be used, only the
-     * value sent to the client is changed.
+     * Sets the message expiry interval.
+     * The original expire interval for this message will still be used, only the value sent to the client is changed.
      * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param messageExpiryInterval The new message expiry interval for the publish.
@@ -120,8 +124,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setPayload(@NotNull ByteBuffer payload);
 
     /**
-     * Set the subscription identifier. This will not affect the identifiers of the original subscription, it merely
-     * alters the outgoing publish.
+     * Set the subscription identifier.
+     * This will not affect the identifiers of the original subscription, it merely alters the outgoing publish.
      * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param subscriptionIdentifiers The new subscription identifiers for the publish.

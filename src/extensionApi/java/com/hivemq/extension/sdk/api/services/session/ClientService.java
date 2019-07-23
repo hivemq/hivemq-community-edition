@@ -19,6 +19,7 @@ package com.hivemq.extension.sdk.api.services.session;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
+import com.hivemq.extension.sdk.api.services.exception.IncompatibleHiveMQVersionException;
 import com.hivemq.extension.sdk.api.services.exception.IterationFailedException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
@@ -42,7 +43,8 @@ import java.util.concurrent.Executor;
 public interface ClientService {
 
     /**
-     * Check if a client with a given identifier is currently connected
+     * Check if a client with a given identifier is currently connected to this HiveMQ broker instance or any other
+     * instance in the cluster.
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -56,6 +58,8 @@ public interface ClientService {
 
     /**
      * Returns additional client information about a given client with a given client identifier.
+     * <p>
+     * This method will also get client information from other cluster nodes if needed.
      * <p>
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
@@ -139,6 +143,8 @@ public interface ClientService {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed
@@ -172,6 +178,8 @@ public interface ClientService {
      * If you are searching for a specific entry in the results and have found what you are looking for, you can abort
      * further iteration and save resources by calling {@link IterationContext#abortIteration()}.
      * <p>
+     * {@link CompletableFuture} fails with an {@link IncompatibleHiveMQVersionException} if not all
+     * HiveMQ nodes in the cluster have at least version 4.2.0.
      * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
      * exceeded.
      * {@link CompletableFuture} fails with a {@link IterationFailedException} if the cluster topology changed

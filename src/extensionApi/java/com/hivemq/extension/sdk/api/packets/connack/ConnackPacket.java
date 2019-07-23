@@ -26,6 +26,10 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 
 /**
+ * Represents a CONNACK packet.
+ * <p>
+ * Contains all values of an MQTT 5 CONNACK, but will also used to represent MQTT 3 connack packets.
+ *
  * @author Florian Limpöck
  * @since 4.2.0
  */
@@ -34,14 +38,9 @@ public interface ConnackPacket {
     /**
      * Duration in seconds how long session for the client is stored.
      * <p>
-     * For an MQTT 3 client, this MQTT 5 property can be interpreted as followed:
-     * <ul>
-     * <li>cleanSession = true -&gt; sessionExpiryInterval = 0</li>
-     * <li>cleanSession = false -&gt; sessionExpiryInterval = The configured {@code <session-expiry>} in the {@code
-     * <mqtt>} config in the config.xml. Default: 4294967295</li>
-     * </ul>
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
      *
-     * @return The session expiry interval.
+     * @return An {@link Optional} that contains the session expiry interval.
      * @since 4.2.0
      */
     @NotNull
@@ -51,9 +50,9 @@ public interface ConnackPacket {
      * An interval in seconds in which the client has to send any MQTT control packet, so that HiveMQ doesn't end the
      * connection.
      * <p>
-     * For an MQTT 3 client this MQTT 5 property will always be -1.
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
      *
-     * @return The server keep alive.
+     * @return An {@link Optional} that contains the server keep alive.
      * @since 4.2.0
      */
     @NotNull
@@ -73,7 +72,8 @@ public interface ConnackPacket {
     /**
      * The maximum packet size in bytes for an MQTT Control Packet, the server is willing to accept.
      * <p>
-     * For an MQTT 3 client this MQTT 5 property will always be the configured value from HiveMQ config.xml. (default 268435460 bytes)
+     * For an MQTT 3 client this MQTT 5 property will always be the configured {@code <max-packet-size>} in the {@code
+     * <mqtt>} config in the config.xml Default: 268435460 bytes.
      *
      * @return The maximum packet size.
      * @since 4.2.0
@@ -117,7 +117,7 @@ public interface ConnackPacket {
      * <p>
      *
      * @return The connack reason code.
-     * @see ConnackReasonCode to check how reason codes are translated from MQTT 5 to MQTT 3.
+     * @see ConnackReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      * @since 4.2.0
      */
     @NotNull

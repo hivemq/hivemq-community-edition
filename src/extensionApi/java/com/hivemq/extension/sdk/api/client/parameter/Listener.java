@@ -53,7 +53,7 @@ public interface Listener {
     @NotNull ListenerType getListenerType();
 
     /**
-     * @return the configured or default name of the listener.
+     * @return The configured or default name of the listener.
      * @since 4.1.0
      */
     @NotNull

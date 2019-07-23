@@ -14,34 +14,25 @@
  * limitations under the License.
  */
 
-package com.hivemq.extension.sdk.api.services.subscription;
+package com.hivemq.extension.sdk.api.services.exception;
+
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * Enum to filter the subscriptions by type.
+ * This exception is used to signal that a cluster node has an incompatible HiveMQ version for a specific request.
  *
- * @author Christoph Schäbel
- * @since 4.2.0
+ * @author Florian Limpöck
+ * @since 4.1.0
  */
-public enum SubscriptionType {
+public class IncompatibleHiveMQVersionException extends Exception {
 
-    /**
-     * Include individual and shared subscriptions.
-     *
-     * @since 4.2.0
-     */
-    ALL,
+    public static final @NotNull IncompatibleHiveMQVersionException INSTANCE = new IncompatibleHiveMQVersionException();
 
-    /**
-     * Only include individual subscriptions.
-     *
-     * @since 4.2.0
-     */
-    INDIVIDUAL,
+    static {
+        INSTANCE.setStackTrace(new StackTraceElement[0]);
+    }
 
-    /**
-     * Only include shared subscriptions.
-     *
-     * @since 4.2.0
-     */
-    SHARED
+    private IncompatibleHiveMQVersionException() {
+    }
+
 }
