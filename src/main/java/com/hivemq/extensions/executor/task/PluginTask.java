@@ -16,10 +16,14 @@
 
 package com.hivemq.extensions.executor.task;
 
+import com.hivemq.annotations.NotNull;
+
 /**
  * A marker interface for extension tasks.
  *
  * @author Georg Held
  */
 public interface PluginTask {
+
+    @NotNull ClassLoader getPluginClassLoader();
 }

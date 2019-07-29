@@ -111,6 +111,7 @@ public class PublishPollServiceImplTest {
         when(pipeline.get(ChannelInactiveHandler.class)).thenReturn(channelInactiveHandler);
         when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
 
         publishPollService = new PublishPollServiceImpl(messageIDPools, clientQueuePersistence, channelPersistence,
                 publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, TestSingleWriterFactory.defaultSingleWriter());

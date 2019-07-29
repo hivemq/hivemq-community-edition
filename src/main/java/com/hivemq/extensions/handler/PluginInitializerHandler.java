@@ -307,5 +307,10 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
             }
             return clientContext;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return clientInitializer.getClass().getClassLoader();
+        }
     }
 }

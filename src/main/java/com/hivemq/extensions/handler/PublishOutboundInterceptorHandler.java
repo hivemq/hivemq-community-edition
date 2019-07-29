@@ -244,6 +244,11 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             }
             return publishOutboundOutput;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return interceptor.getClass().getClassLoader();
+        }
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
@@ -291,7 +296,6 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         public void onFailure(final @NotNull Throwable t) {
             //should never happen, since the settable future never sets an exception
             Exceptions.rethrowError("Exception in publish outbound interceptor handling. ", t);
-            ctx.writeAndFlush(publish);
         }
     }
 }

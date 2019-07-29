@@ -294,5 +294,10 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             }
             return output;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return interceptorProvider.getClass().getClassLoader();
+        }
     }
 }

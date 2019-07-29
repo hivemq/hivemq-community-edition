@@ -39,6 +39,9 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.exporter.ZipExporter;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,6 +50,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestMessageUtil;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
@@ -60,8 +65,7 @@ import static org.mockito.Mockito.when;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-
-@SuppressWarnings("NullabilityAnnotations")
+@SuppressWarnings("ALL")
 public class ClientLifecycleEventHandlerTest {
 
     @Rule
@@ -103,13 +107,12 @@ public class ClientLifecycleEventHandlerTest {
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
         clientLifecycleEventHandler =
-                new ClientLifecycleEventHandler(lifecycleEventListeners, pluginTaskExecutorService,
-                        hiveMQExtensions);
+                new ClientLifecycleEventHandler(lifecycleEventListeners, pluginTaskExecutorService, hiveMQExtensions);
 
     }
 
     @Test
-    public void test_on_mqtt_connect() throws InterruptedException {
+    public void test_on_mqtt_connect() throws Exception {
 
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
 
@@ -349,11 +352,11 @@ public class ClientLifecycleEventHandlerTest {
 
     }
 
-    private Map<String, ClientLifecycleEventListenerProvider> createMap(final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) {
+    private Map<String, ClientLifecycleEventListenerProvider> createMap(final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) throws Exception {
 
         final Map<String, ClientLifecycleEventListenerProvider> map = new TreeMap<>();
-        map.put("plugin1", new TestProvider(countDownLatch1));
-        map.put("plugin2", new TestProvider(countDownLatch2));
+        map.put("plugin1", getTestProvider(countDownLatch1));
+        map.put("plugin2", getTestProvider(countDownLatch2));
         return map;
     }
 
@@ -388,7 +391,25 @@ public class ClientLifecycleEventHandlerTest {
         }
     }
 
-    private class TestProvider implements ClientLifecycleEventListenerProvider {
+    private ClientLifecycleEventListenerProvider getTestProvider(CountDownLatch countDownLatch) throws Exception {
+
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
+                .addClass("com.hivemq.extensions.handler.ClientLifecycleEventHandlerTest$TestProvider")
+                .addClass("com.hivemq.extensions.handler.ClientLifecycleEventHandlerTest$TestProvider$1");
+
+        final File jarFile = temporaryFolder.newFile();
+        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+
+        //This classloader contains the classes from the jar file
+        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+
+        final Class<?> providerClass = cl.loadClass("com.hivemq.extensions.handler.ClientLifecycleEventHandlerTest$TestProvider");
+
+        ClientLifecycleEventListenerProvider testProvider = (ClientLifecycleEventListenerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class).newInstance(countDownLatch);
+        return testProvider;
+    }
+
+    public static class TestProvider implements ClientLifecycleEventListenerProvider {
 
         private final CountDownLatch onMqttConnectionStartLatch;
         private final CountDownLatch onAuthenticationFailedDisconnectLatch;
@@ -398,7 +419,7 @@ public class ClientLifecycleEventHandlerTest {
         private final CountDownLatch onAuthenticationSuccessfulLatch;
         private final CountDownLatch onDisconnectLatch;
 
-        private TestProvider(final CountDownLatch countDownLatch) {
+        public TestProvider(final CountDownLatch countDownLatch) {
             this.onMqttConnectionStartLatch = countDownLatch;
             this.onAuthenticationFailedDisconnectLatch = countDownLatch;
             this.onConnectionLostLatch = countDownLatch;

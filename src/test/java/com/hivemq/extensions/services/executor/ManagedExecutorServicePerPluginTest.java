@@ -632,7 +632,7 @@ public class ManagedExecutorServicePerPluginTest {
             });
         }
 
-        assertFalse(invokeAllLatch.await(500, TimeUnit.MILLISECONDS));
+        assertFalse(invokeAllLatch.await(400, TimeUnit.MILLISECONDS));
         //every task times out
         assertEquals(5, invokeAllLatch.getCount());
 

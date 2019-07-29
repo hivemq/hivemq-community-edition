@@ -304,9 +304,9 @@ public class PluginTaskExecutor {
             final Thread thread = Thread.currentThread();
             final ClassLoader contextClassLoader = thread.getContextClassLoader();
             try {
-                thread.setContextClassLoader(task.getPluginContext().getPluginClassLoader());
 
                 final PluginTask pluginTask = task.getPluginTask();
+                thread.setContextClassLoader(pluginTask.getPluginClassLoader());
                 final PluginTaskOutput output;
                 if (pluginTask instanceof PluginInOutTask) {
                     output = runInOutTask(task, (PluginInOutTask) pluginTask);
