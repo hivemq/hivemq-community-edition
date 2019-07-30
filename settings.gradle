@@ -1,2 +1,4 @@
 rootProject.name = 'hivemq-community-edition'
 
+include 'hivemq-extension-sdk'
+include 'hivemq-core'
