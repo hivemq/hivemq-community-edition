@@ -2,25 +2,36 @@
 
 == Introduction
 
-Anyone is welcome to participate and contribute to the HiveMQ open source community. We encourage people to use the https://github.com/hivemq/hivemq-community-edition/issues[Github issue tracker] and create pull requests. The scope of the HiveMQ CE is to provide
+Anyone is welcome to participate and contribute to the HiveMQ open source community.
+We encourage people to use the https://github.com/hivemq/hivemq-community-edition/issues[Github issue tracker] and create pull requests.
+The scope of the HiveMQ CE is to provide
 
 . a high-quality implementation of the MQTT broker specification, and
 . the extension framework enabling the integration of HiveMQ CE into other applications.
 
 Therefore, we ask that contributions are focused on improving the current implementation and project scope.
 
-We will not accept contributions that would add features that expand the scope of the project. It is HiveMQ’s intention to offer commercial products that will add features suited for enterprise deployments of HiveMQ, such as clustering, monitoring tools, enterprise security, technical support, and more. We also expect that other companies and open source projects will create extensions of HiveMQ CE to suit their specific customer requirements. If you would like to suggest a new feature, please contact the project team (support@hivemq.com) to discuss if it fits within the project scope. If you wish to contribute, we will preferibly accept Bug Fixes, Typos, Documentation, JavaDoc and Logging.
+We will not accept contributions that would add features that expand the scope of the project.
+It is HiveMQ’s intention to offer commercial products that will add features suited for enterprise deployments of HiveMQ, such as clustering, monitoring tools, enterprise security, technical support, and more.
+We also expect that other companies and open source projects will create extensions of HiveMQ CE to suit their specific customer requirements.
+If you would like to suggest a new feature, please contact the project team (support@hivemq.com) to discuss if it fits within the project scope.
+If you wish to contribute, we will preferibly accept Bug Fixes, Typos, Documentation, JavaDoc and Logging.
 
 == Licensing
 
-HiveMQ CE is released under the Apache 2.0 license to allow you the use of the software as you please. By contributing your code, you agree to license your contribution under the terms of the Apache License, Version 2.0.
+HiveMQ CE is released under the Apache 2.0 license to allow you the use of the software as you please.
+By contributing your code, you agree to license your contribution under the terms of the Apache License, Version 2.0.
 
 Please fill out our Contributor License Agreement (CLA), otherwise we cannot accept your contribution.
 
 All files must contain the license header from the link:HEADER[header file].
 
 == Contributor License Agreement
-If you wish to contribute to the HiveMQ CE, please download, fill out and sign the https://www.hivemq.com/downloads/Contributor_License_Agreement.pdf[Contributor License Agreement]. Send the signed agreement  to (contributing@hivemq.com) with the subject `CLA for Project: HiveMQ Community Edition`. Please read this document carefully before signing it and keep a copy for your own records. Once we've received your signed CLA, you will be added to the list of contributors and our HiveMQ Development Team will review your contributions.
+
+If you wish to contribute to the HiveMQ CE, please download, fill out and sign the https://www.hivemq.com/downloads/Contributor_License_Agreement.pdf[Contributor License Agreement].
+Send the signed agreement to (contributing@hivemq.com) with the subject `CLA for Project: HiveMQ Community Edition`.
+Please read this document carefully before signing it and keep a copy for your own records.
+Once we've received your signed CLA, you will be added to the list of contributors and our HiveMQ Development Team will review your contributions.
 
 In case the rights to all intellectual property created by you are maintained by your employer, including your work on HiveMQ CE, you must ensure you have retained all rights to grant the license, or that your employer has agreed to a separate https://www.hivemq.com/downloads/Corporate_Contributor_License_Agreement.pdf[Corporate CLA].
 
@@ -29,11 +40,15 @@ In case the rights to all intellectual property created by you are maintained by
 === Issues
 ==== Bug Fixes and Minor Features
 
-Please always open an issue in the issue tracker before sending a pull request and wait until someone from the HiveMQ Development Team approves it, before you start working on it. This prevents you from working on issues that we will ultimately not accept. When you start working on an approved issue, please make it known in the comments that you are going to work on it, so a simulteaneous contribution by someone else can be avoided.
+Please always open an issue in the issue tracker before sending a pull request and wait until someone from the HiveMQ Development Team approves it, before you start working on it.
+This prevents you from working on issues that we will ultimately not accept.
+When you start working on an approved issue, please make it known in the comments that you are going to work on it, so a simulteaneous contribution by someone else can be avoided.
 
-After you committed, your contribution will be reviewed by the HiveMQ Development Team. We reserve the right to release only reviewed and approved implementations.
+After you committed, your contribution will be reviewed by the HiveMQ Development Team.
+We reserve the right to release only reviewed and approved implementations.
 
 ==== Security Issues
+
 Please do not report any security issue to the public issue tracker. Please send security issues to security@hivemq.com.
 
 ==== Questions
@@ -43,7 +58,11 @@ Please refer all your questions about the HiveMQ CE to the https://community.hiv
 Issues consisting of questions or suggestions will be closed immediately.
 
 === Checking out the Project
-We recommend that you use the https://www.jetbrains.com/idea/download/[IntelliJ] IDE for all development on HiveMQ CE. It will automate your process as much as possible. Java version 11 is required to build and run HiveMQ CE (we recommend OpenJDK 11). You can check your installed Java version by entering `java -version` on the command line.
+
+We recommend that you use the https://www.jetbrains.com/idea/download/[IntelliJ] IDE for all development on HiveMQ CE.
+It will automate your process as much as possible.
+Java version 11 is required to build and run HiveMQ CE (we recommend OpenJDK 11).
+You can check your installed Java version by entering `java -version` on the command line.
 
 First you need to https://help.github.com/en/articles/fork-a-repo[fork] the HiveMQ Community Edition https://github.com/hivemq/hivemq-community-edition[repository].
 
@@ -54,14 +73,19 @@ Then you can clone the repository:
 git clone https://github.com/<your user name>/hivemq-community-edition.git
 ----
 
-*Open* the HiveMQ CE project folder in IntelliJ. Choose to sync the gradle project, if so prompted by the IDE. After setting the gradle and project SDK (Java 11), you are good to go.
+*Open* the HiveMQ CE project folder in IntelliJ.
+Choose to sync the gradle project, if so prompted by the IDE.
+After setting the gradle and project SDK (Java 11), you are good to go.
 
 === Branching Model
+
 A modified version of https://nvie.com/posts/a-successful-git-branching-model/[git-flow] is used for the structuring of the HiveMQ CE repository.
 
-All branches must start with an issue type tag, usually `bugfix` or `improvement`, followed by a slash `/` and a __speaking name__ describing the code change e.g. `bugfix/locking-for-concurrent-access-in-some-class` or `improvement/better-javadoc-in-some-interface`. The `master` branch is always on the latest release version and all pull requests must be opened against the `develop` branch.
+All branches must start with an issue type tag, usually `bugfix` or `improvement`, followed by a slash `/` and a __speaking name__ describing the code change e.g. `bugfix/locking-for-concurrent-access-in-some-class` or `improvement/better-javadoc-in-some-interface`.
+The pull requests must be opened against the `master` branch.
 
 === Code Style Guidelines
+
 Only code following _good_ Java practices, like using the appropriate keywords and visibility, will be accepted.
 
 HiveMQ CE uses nullability annotations, these should be used to annotate the declared types of variables and fields, whose initialization status can be in question.
@@ -106,7 +130,8 @@ The HiveMQ CE project only accepts pull requests that contain unit tests and hav
 
 === Pull Requests
 
-As soon as your code is ready for a https://help.github.com/en/articles/creating-a-pull-request[pull request], please link the specific issue that you want to resolve. Once the continuous integration is successful and at least one member of the HiveMQ Development Team has approved the changes, you will be asked to rebase and squash before the pull request can be merged.
+As soon as your code is ready for a https://help.github.com/en/articles/creating-a-pull-request[pull request], please link the specific issue that you want to resolve.
+Once the continuous integration is successful and at least one member of the HiveMQ Development Team has approved the changes, you will be asked to rebase and squash before the pull request can be merged.
 
 We greatly appreciate your involvement and contribution.
 
