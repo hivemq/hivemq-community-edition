@@ -1,3 +1,5 @@
+apply plugin: 'com.jfrog.bintray'
+
 version = '4.2.0-SNAPSHOT'
 
 dependencies {
@@ -40,7 +42,6 @@ javadoc {
 }
 
 task javadocJar(type: Jar) {
-
     description = "Builds the EXTENSION-SDK Javadoc jar File"
     manifest {
         attributes "Implementation-Title": "hivemq-extension-sdk"
@@ -110,9 +111,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
-                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
-                    url = 'http://github.com/hivemq/hivemq-community-edition/tree/master'
+                    connection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
+                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
+                    url = 'https://github.com/hivemq/hivemq-extension-sdk/tree/master'
                 }
             }
         }
@@ -126,7 +127,7 @@ publishing {
 bintray {
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['extensionApi'] //When uploading Maven-based publication files
+    publications = ['extensionSdk'] //When uploading Maven-based publication files
     dryRun = true //[Default: false] Whether to run this as dry-run, without deploying
     publish = false //[Default: false] Whether version should be auto published after an upload
     override = false //[Default: false] Whether to override version artifacts already published
@@ -164,4 +165,3 @@ bintray {
         }
     }
 }
-

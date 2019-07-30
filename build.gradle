@@ -1,24 +1,573 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.3' apply false
+    id 'com.github.hierynomus.license' version '0.15.0' apply false
+    id 'com.jfrog.bintray' version '1.8.4' apply false
+    id 'org.owasp.dependencycheck' version '3.1.2' apply false
+    id 'com.github.spotbugs' version '1.6.5' apply false
+    id 'de.thetaphi.forbiddenapis' version '2.6' apply false
+}
+
 allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
         jcenter()
         maven { url 'https://repo.eclipse.org/content/repositories/paho-releases/' }
-        maven {         // for snapshot artifacts
-            url 'https://oss.sonatype.org/content/groups/public'
-        }
-        maven { // for bee
-            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
-        }
+        maven { url 'https://oss.sonatype.org/content/groups/public' } // for snapshot artifacts
     }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.github.hierynomus.license'
+}
+
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'idea'
+apply plugin: 'org.owasp.dependencycheck'
+
+/************************
+ * Code Quality Plugins *
+ ***********************/
+apply plugin: 'jacoco'
+apply plugin: 'pmd'
+apply plugin: 'com.github.spotbugs'
+apply plugin: 'de.thetaphi.forbiddenapis'
+
+allprojects {
+    sourceCompatibility = 10
+    targetCompatibility = 10
 
     group 'com.hivemq'
 }
 
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
+version = '2019.2-SNAPSHOT'
 
-    sourceCompatibility = 10
-    targetCompatibility = 10
+mainClassName = 'com.hivemq.HiveMQServer'
+
+// Project Variables
+project.ext {
+    // Project Dependency Versions
+    bouncycastlesVersion = '1.60'
+    jacksonVersion = '2.9.6'
+    nettyVersion = '4.1.32.Final'
+    xodusVersion = '1.2.3'
+    guiceVersion = '4.2.2'
+    metricsVersion = '4.0.3'
+
+    // Additional Versions
+    jacocoVersion = '0.8.2'
+    pmdVersion = '6.8.0'
+    spotbugsVersion = '3.1.8'
+    shrinkwrapVersion = '1.2.6'
+
+    projectString = "hivemq-ce-$version"
+    packagingDir = "$project.buildDir/package"
+    packagingProjectDir = "$packagingDir/$projectString"
+    zipDir = "$project.buildDir/zip"
+}
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+    test {
+        compileClasspath += configurations.provided
+        runtimeClasspath += configurations.provided
+    }
+}
+
+/****************
+ * Dependencies *
+ ***************/
+
+dependencies {
+
+    compile(
+            /* Netty */
+            [group: 'io.netty', name: 'netty-handler', version: nettyVersion],
+            [group: 'io.netty', name: 'netty-codec-http', version: nettyVersion],
+
+            /* Javassist is needed for better netty performance */
+            [group: 'org.javassist', name: 'javassist', version: '3.24.0-GA'],
+            /* Logging */
+            [group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'],
+
+            /* bouncycastles */
+            [group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: bouncycastlesVersion],
+            [group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: bouncycastlesVersion],
+
+            /* jackson */
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion],
+
+            /* apache commons */
+            [group: 'commons-io', name: 'commons-io', version: '2.6'],
+            [group: 'commons-codec', name: 'commons-codec', version: '1.11'],
+            [group: 'commons-collections', name: 'commons-collections', version: '3.2.2'],
+            [group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'],
+
+            /* xml */
+            [group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0'],
+            [group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.0'],
+            [group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.12'],
+
+            /* javax */
+            [group: 'javax.activation', name: 'activation', version: '1.1.1'],
+            [group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'],
+            [group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'],
+
+            /* Hashing */
+            [group: 'net.openhft', name: 'zero-allocation-hashing', version: '0.8'],
+
+    )
+
+    /* Guava */
+    compile([group: 'com.google.guava', name: 'guava', version: '27.0-jre']) {
+        //We don't need the HTTP Client since we are only interested in the server version
+        exclude group: 'org.checkerframework', module: 'checker-qual'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
+    }
+
+    /* Oshi */
+    compile([group: 'com.github.oshi', name: 'oshi-core', version: '3.6.2']) {
+        //We don't need the HTTP Client since we are only interested in the server version
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+
+    compile([group: 'io.dropwizard.metrics', name: 'metrics-logback', version: metricsVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+    compile([group: 'io.dropwizard.metrics', name: 'metrics-core', version: metricsVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+    compile([group: 'io.dropwizard.metrics', name: 'metrics-jmx', version: metricsVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+
+    /* Xodus */
+    compile([group: 'org.jetbrains.xodus', name: 'xodus-environment', version: xodusVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.jetbrains', module: 'annotations'
+    }
+    compile([group: 'org.jetbrains.xodus', name: 'xodus-openAPI', version: xodusVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.jetbrains', module: 'annotations'
+    }
+    compile([group: 'org.jetbrains.xodus', name: 'xodus-entity-store', version: xodusVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.jetbrains', module: 'annotations'
+    }
+    compile([group: 'org.jetbrains.xodus', name: 'xodus-utils', version: xodusVersion]) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.jetbrains', module: 'annotations'
+    }
+
+    /* Jackson */
+    compile([group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: jacksonVersion]) {
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
+    }
+    compile([group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: jacksonVersion]) {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
+    }
+
+    /* Dependency injection */
+    compile([group: 'com.google.inject', name: 'guice', version: guiceVersion]) {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+
+    /* Logging */
+    compile([group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3']) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+
+    compile project(':hivemq-extension-sdk')
+
+
+    testCompile(
+            [group: 'junit', name: 'junit', version: '4.12'],
+            [group: 'org.mockito', name: 'mockito-core', version: '1.+'],
+            [group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.9.0'],
+            [group: 'net.jodah', name: 'concurrentunit', version: '0.4.2'],
+
+            /*
+             * Shrinkwrap API for creating JAR Archives on the fly
+             */
+            [group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-api', version: shrinkwrapVersion],
+            [group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.4'],
+            [group: 'org.assertj', name: 'assertj-core', version: '2.0.0'],
+
+            /* Hamcrest Matcher */
+            [group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0'],
+
+            //additional reflection possibilities
+            [group: 'org.reflections', name: 'reflections', version: '0.9.11'],
+
+            // wiremock
+            [group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0'],
+    )
+
+    /* We need some HotSpot methods to generate heapdumps from code */
+    testCompile files(
+            "${System.getProperty('java.home')}/../lib/sa-jdi.jar"
+    )
+
+    testRuntime(
+            /*
+             * Shrinkwrap Implementation for creating JAR Archives on the fly
+             */
+            [group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-impl-base', version: shrinkwrapVersion],
+    )
+
+    provided(
+            [group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.0'],
+    )
+
+    //plugins for spotbugs
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0'
+}
+
+/******************************
+ * Change metadata of jar file *
+ ******************************/
+// Create the executable jar and exclude some certificates
+jar {
+
+    manifest {
+        attributes "Implementation-Title": "HiveMQ"
+        attributes "Implementation-Vendor": 'dc-square GmbH'
+        attributes "Implementation-Version": version
+        attributes "HiveMQ-Version": version
+        attributes "Main-Class": mainClassName
+    }
+
+    // remove the security files (from mail.jar / activation.jar) so that the jar will be executable.
+    from(configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
+}
+
+test {
+    jvmArgs += ["-noverify", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.nio=ALL-UNNAMED", "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "jdk.management/com.sun.management.internal=ALL-UNNAMED", "--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"]
+    minHeapSize = "128m"
+    maxHeapSize = "2048m"
+
+    /* Use inclusions, exclusions from file so we can run in parallel */
+    File exclusions = new File("exclusions.txt")
+    if (exclusions.exists()) {
+        def lines = exclusions.readLines()
+        exclude lines
+        logger.lifecycle("Excluded " + lines.size() + " tests for this execution")
+    }
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+
+    testLogging {
+        events "failed"
+        exceptionFormat "short"
+    }
+
+    /* use tmpdir from gradle property or the same tmpdir as the runner */
+    if (project.hasProperty("test_temp_dir")) {
+        jvmArgs "-Djava.io.tmpdir=" + test_temp_dir
+    } else {
+        def tempDir = System.properties['java.io.tmpdir']
+        if (tempDir) {
+            jvmArgs "-Djava.io.tmpdir=" + tempDir
+        }
+    }
+}
+
+/***********************
+ * Code Coverage Tasks *
+ ***********************/
+
+pmd {
+    toolVersion = pmdVersion
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+    rulePriority = 3
+}
+
+jacoco {
+    toolVersion = jacocoVersion
+}
+
+spotbugs {
+    toolVersion = spotbugsVersion
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+    reportsDir = file("$project.buildDir/reports/findbugs")
+    reportLevel = "medium"
+}
+
+/****************************
+ * Build Preconditions *
+ ***************************/
+
+compileJava {
+    if (!System.properties['java.version'].startsWith("11")) {
+        throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
+    }
+}
+
+/****************************
+ * Packaging & XSD Creation *
+ ***************************/
+
+shadowJar {
+    mergeServiceFiles()
+
+    baseName = 'hivemq-ce'
+    classifier = ''
+}
+
+task cleanPackaging {
+    group 'packaging'
+
+    doFirst {
+        delete project.packagingDir
+        new File(project.packagingProjectDir).mkdirs()
+
+        new File(project.zipDir).mkdirs()
+    }
+}
+
+task copyXml(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter cleanPackaging
+
+    from "$projectDir/src/main/resources/config.xml"
+    into "$project.packagingProjectDir/conf"
+}
+
+task copyPackaging(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter cleanPackaging
+
+    from "$projectDir/src/packaging"
+    into "$project.packagingProjectDir"
+
+    doLast {
+        new File("$packagingProjectDir/data").mkdirs()
+        new File("$packagingProjectDir/log").mkdirs()
+        new File("$packagingProjectDir/extensions").mkdirs()
+    }
+}
+
+task copyJar(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter cleanPackaging
+    dependsOn shadowJar
+
+    from "$project.buildDir/libs/$projectString" + ".jar"
+    into "$project.packagingProjectDir/bin"
+
+    rename { String fileName ->
+        fileName.replace("$projectString" + ".jar", "hivemq.jar")
+    }
+}
+
+task packaging(type: Zip) {
+    group 'packaging'
+
+    dependsOn cleanPackaging
+    dependsOn copyXml
+    dependsOn copyPackaging
+    dependsOn copyJar
+
+    from project.packagingDir
+    destinationDir new File(project.zipDir)
+    archiveName = projectString + ".zip"
+    include '**'
+}
+
+/************
+ * JavaDoc  *
+ ************/
+
+task javadocAll(type: Javadoc) {
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
+    source = sourceSets.main.allJava
+
+    failOnError = true
+
+    classpath = sourceSets.main.allSource
+    classpath += sourceSets.main.compileClasspath
+    classpath += sourceSets.main.runtimeClasspath
+
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('-html5')
+    options.addBooleanOption "-no-module-directories", true
+
+    doLast {
+        javaexec {
+            main = "-jar"
+            args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
+        }
+    }
+}
+
+/*******************
+ * OWASP CVE CHECK *
+ *******************/
+
+dependencyCheck {
+    analyzers {
+        centralEnabled = false
+    }
+    format = 'ALL'
+    scanConfigurations = ['compile']
+    suppressionFile = "gradle/dependency-check/suppress.xml"
+    failOnError = false
+}
+check.dependsOn dependencyCheckAnalyze
+
+/*************
+ * MiscStuff *
+ *************/
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+defaultTasks 'packaging'
+
+/**************
+ * Compliance *
+ **************/
+
+downloadLicenses {
+    ext.apacheTwo = license('Apache License, Version 2.0', 'http://opensource.org/licenses/Apache-2.0')
+    ext.cddlOnePointZero = license('CDDL, Version 1.0', 'http://glassfish.java.net/public/CDDLv1.0.html')
+    ext.cddlOnePointOne = license('CDDL, Version 1.1', 'http://glassfish.java.net/public/CDDL+GPL_1_1.html')
+    ext.lgplTwoPointOne = license('LGPL, Version 2.1', 'http://www.gnu.org/licenses/lgpl-2.1.html')
+    ext.eplOnePointZero = license('EPL, Version 1.0', 'http://www.eclipse.org/legal/epl-v10.html')
+
+    aliases = [
+            (apacheTwo)       : ['Apache License 2', 'Apache Software License - Version 2.0', 'The Apache Software License, Version 2.0', 'Apache 2', 'Apache License Version 2.0', 'Apache License, Version 2.0', 'Apache License 2.0', 'Apache 2.0', 'The Apache License, Version 2.0', license('Apache License', 'http://www.apache.org/licenses/LICENSE-2.0')],
+            (cddlOnePointZero): ['Common Development and Distribution License (CDDL) v1.0', 'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0'],
+            (cddlOnePointOne) : ['CDDL 1.1'],
+            (lgplTwoPointOne) : ['LGPL 2.1', 'GNU Lesser General Public License'],
+            (eplOnePointZero) : ['Eclipse Public License - Version 1.0', 'Eclipse Public License', 'Eclipse Public License - v 1.0']
+    ]
+}
+
+allprojects {
+    license {
+        header file("$rootDir/HEADER")
+        exclude "*"
+    }
+}
+
+task updateThirdPartyLicenses {
+    dependsOn ':downloadLicenses'
+    doLast {
+        javaexec {
+            main = "-jar"
+            args = ["gradle/tools/license-third-party-tool-1.0.jar",
+                    "build/reports/license/dependency-license.xml",
+                    "src/packaging/third-party-licenses/licenses",
+                    "src/packaging/third-party-licenses/licenses.html"
+            ]
+        }
+    }
+}
+
+forbiddenApisMain {
+    exclude '**/BatchedException.class'
+    exclude '**/LoggingBootstrap.class'
+}
+
+forbiddenApis {
+    bundledSignatures = ['jdk-system-out']
+    ignoreFailures = false
+}
+
+// dependency check fails at the moment, see https://github.com/jeremylong/dependency-check-gradle/issues/104
+dependencyCheckAnalyze.enabled = false
+
+//disable
+forbiddenApisTest.enabled = false
+
+/*****************
+ * Maven Publish *
+ *****************/
+
+publishing {
+    publications {
+        distribution(MavenPublication) {
+
+            artifact packaging
+
+            pom {
+                name = 'HiveMQ Community Edition'
+                description = 'HiveMQ Community Edition Distribution'
+                url = 'http://www.hivemq.com/'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'cschaebe'
+                        name = 'Christoph Schaebel'
+                        email = 'christoph.schaebel@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                    developer {
+                        id = 'lbrandl'
+                        name = 'Lukas Brandl'
+                        email = 'lukas.brandl@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                    developer {
+                        id = 'flimpoeck'
+                        name = 'Florian Limpoeck'
+                        email = 'florian.limpoeck@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    url = 'https://github.com/hivemq/hivemq-community-edition/tree/master'
+                }
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
 }
