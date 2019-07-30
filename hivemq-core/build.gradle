@@ -335,7 +335,7 @@ task copyXml(type: Copy) {
 
 task copyPackaging(type: Copy) {
     dependsOn copyXml
-    
+
     from "$projectDir/src/packaging"
     into "$project.packagingDir"
 
@@ -348,10 +348,10 @@ task copyPackaging(type: Copy) {
 
 task copyJar(type: Copy) {
     dependsOn shadowJar
-    
+
     from "$project.buildDir/libs/$projectString" + ".jar"
     into "$project.packagingDir/bin"
-    
+
     rename { String fileName ->
         fileName.replace("$projectString" + ".jar", "hivemq.jar")
     }
@@ -372,7 +372,7 @@ task zipJar(type: Zip) {
 task packaging {
     delete "$project.buildDir/package"
     new File(project.packagingDir).mkdirs()
-    
+
     dependsOn zipJar
 }
 
@@ -381,6 +381,8 @@ task packaging {
  ************/
 
 task javadocAll(type: Javadoc) {
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
     source = sourceSets.main.allJava
 
     failOnError = true
@@ -396,7 +398,7 @@ task javadocAll(type: Javadoc) {
     doLast {
         javaexec {
             main = "-jar"
-            args = ["gradle/tools/javadoc-cleaner-1.0.jar"]
+            args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }

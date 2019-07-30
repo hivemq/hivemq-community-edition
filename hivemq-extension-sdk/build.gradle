@@ -14,14 +14,15 @@ jar {
     description = "Builds the EXTENSION-SDK jar File"
     manifest {
         attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH' // FIXME HiveMQ
+        attributes "Implementation-Vendor": 'dc-square GmbH'
         attributes "Implementation-Version": version
     }
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 javadoc {
-    //options.encoding = 'UTF-8' FIXME utf-8
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
     source = sourceSets.main.allJava
 
     failOnError = true
@@ -38,7 +39,7 @@ javadoc {
     doLast {
         javaexec {
             main = "-jar"
-            args = ["gradle/tools/javadoc-cleaner-1.0.jar"]
+            args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }
