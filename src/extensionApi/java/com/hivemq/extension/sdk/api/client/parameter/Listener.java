@@ -51,4 +51,11 @@ public interface Listener {
      * @since 4.0.0
      */
     @NotNull ListenerType getListenerType();
+
+    /**
+     * @return The configured or default name of the listener.
+     * @since 4.1.0
+     */
+    @NotNull
+    String getName();
 }

@@ -16,13 +16,18 @@
 
 package com.hivemq.extensions.client.parameter;
 
+import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.client.parameter.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Florian Limpöck
@@ -34,9 +39,13 @@ public class ServerInformationImpl implements ServerInformation {
     @NotNull
     private final SystemInformation systemInformation;
 
+    @NotNull
+    private final ListenerConfigurationService listenerConfigurationService;
+
     @Inject
-    public ServerInformationImpl(@NotNull final SystemInformation systemInformation) {
+    public ServerInformationImpl(@NotNull final SystemInformation systemInformation, @NotNull final ListenerConfigurationService listenerConfigurationService) {
         this.systemInformation = systemInformation;
+        this.listenerConfigurationService = listenerConfigurationService;
     }
 
     @NotNull
@@ -68,4 +77,16 @@ public class ServerInformationImpl implements ServerInformation {
     public File getExtensionsFolder() {
         return systemInformation.getExtensionsFolder();
     }
+
+    @NotNull
+    @Override
+    public Set<Listener> getListener() {
+        final List<com.hivemq.configuration.service.entity.Listener> listeners = listenerConfigurationService.getListeners();
+        final ImmutableSet.Builder<Listener> builder = ImmutableSet.builder();
+        for (final com.hivemq.configuration.service.entity.Listener listener : listeners) {
+            builder.add(new ListenerImpl(listener));
+        }
+        return builder.build();
+    }
+
 }

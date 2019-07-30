@@ -47,18 +47,18 @@ public class ListenerConfigurationServiceImplTest {
     public void test_add_listeners() {
 
         final TcpListener tcpListener = new TcpListener(1883, "localhost");
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().
-                port(1884).
-                bindAddress("localhost").
-                build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder()
+                .port(1884)
+                .bindAddress("localhost")
+                .build();
 
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(1885, "localhost", createDefaultTLS());
 
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().
-                port(1886).
-                bindAddress("localhost").
-                tls(createDefaultTLS()).
-                build();
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
+                .port(1886)
+                .bindAddress("localhost")
+                .tls(createDefaultTLS())
+                .build();
 
 
         listenerConfigurationService.addListener(tcpListener);
@@ -101,6 +101,11 @@ public class ListenerConfigurationServiceImplTest {
                 return null;
             }
 
+            @Override
+            public @NotNull String getName() {
+                return "name";
+            }
+
         });
     }
 
@@ -121,7 +126,8 @@ public class ListenerConfigurationServiceImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_add_invalid_listener_type_subclass_of_websocketlistener() {
 
-        final WebsocketListener subclass = new WebsocketListener(123, null, null, false, null) {
+        final WebsocketListener subclass = new WebsocketListener(123, null, null, false,
+                null, null) {
         };
 
         listenerConfigurationService.addListener(subclass);

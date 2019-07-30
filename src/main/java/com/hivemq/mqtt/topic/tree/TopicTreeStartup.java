@@ -77,7 +77,7 @@ public class TopicTreeStartup {
             final Set<String> clients = clientsFuture.get();
             for (final String client : clients) {
                 final Set<Topic> clientSubscriptions = clientSessionSubscriptionPersistence.getSubscriptions(client);
-                final ClientSession session = clientSessionPersistence.getSession(client);
+                final ClientSession session = clientSessionPersistence.getSession(client, false);
                 if (session == null || session.getSessionExpiryInterval() == SESSION_EXPIRE_ON_DISCONNECT) {
                     // We don't have to remove the subscription from the topic tree, since it is not added to the topic tree yet.
                     clientSessionSubscriptionPersistence.removeAllLocally(client);

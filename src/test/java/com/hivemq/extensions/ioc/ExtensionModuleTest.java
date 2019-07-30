@@ -26,12 +26,13 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
 import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
 import com.hivemq.extensions.loader.*;
@@ -60,7 +61,7 @@ import static org.mockito.Mockito.mock;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginModuleTest {
+public class ExtensionModuleTest {
 
     private Injector injector;
 
@@ -72,7 +73,7 @@ public class PluginModuleTest {
             @Override
             protected void configure() {
 
-                install(new PluginModule());
+                install(new ExtensionModule());
                 bind(SystemInformation.class).toInstance(new SystemInformationImpl());
                 bind(ChannelPersistence.class).toInstance(mock(ChannelPersistence.class));
                 bind(FullConfigurationService.class).toInstance(new TestConfigurationBootstrap().getFullConfigurationService());
@@ -84,6 +85,7 @@ public class PluginModuleTest {
                 bind(ListeningExecutorService.class).annotatedWith(Persistence.class).toInstance(mock(ListeningExecutorService.class));
                 bind(InternalPublishService.class).toInstance(mock(InternalPublishService.class));
                 bind(ClientSessionSubscriptionPersistence.class).toInstance(mock(ClientSessionSubscriptionPersistence.class));
+                bind(ListenerConfigurationService.class).toInstance(mock(ListenerConfigurationService.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
             }
         });
@@ -91,8 +93,8 @@ public class PluginModuleTest {
 
     @Test(timeout = 5000)
     public void test_hivemqplugins_is_singleton() {
-        final HiveMQPlugins instance1 = injector.getInstance(HiveMQPlugins.class);
-        final HiveMQPlugins instance2 = injector.getInstance(HiveMQPlugins.class);
+        final HiveMQExtensions instance1 = injector.getInstance(HiveMQExtensions.class);
+        final HiveMQExtensions instance2 = injector.getInstance(HiveMQExtensions.class);
 
         assertNotNull(instance1);
         assertSame(instance1, instance2);

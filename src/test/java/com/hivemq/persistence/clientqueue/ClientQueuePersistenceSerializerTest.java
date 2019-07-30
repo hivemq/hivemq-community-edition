@@ -92,8 +92,9 @@ public class ClientQueuePersistenceSerializerTest {
     @Test
     public void test_serialize_pubrel() {
         final PUBREL pubrel = new PUBREL(10);
-        final ByteIterable bytes = serializer.serializePubRel(pubrel);
+        final ByteIterable bytes = serializer.serializePubRel(pubrel, true);
         assertEquals(10, serializer.deserializeValue(bytes).getPacketIdentifier());
+        assertTrue(serializer.deserializeRetained(bytes));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class ClientQueuePersistenceSerializerTest {
                 .withDuplicateDelivery(false)
                 .build();
 
-        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish);
+        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, false);
 
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);
@@ -153,7 +154,7 @@ public class ClientQueuePersistenceSerializerTest {
                 .withSubscriptionIdentifiers(ImmutableList.of(1, 2, 3))
                 .build();
 
-        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish);
+        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, true);
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);
 
@@ -199,7 +200,7 @@ public class ClientQueuePersistenceSerializerTest {
                 .withDuplicateDelivery(false)
                 .build();
 
-        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish);
+        ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, false);
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);
 

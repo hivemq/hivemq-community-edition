@@ -384,10 +384,10 @@ public class TopicTreeImpl implements LocalTopicTree {
             if (NodeUtils.getChildrenCount(node) == 0) {
                 return;
             }
-            final Node[] children = node.getChildren();
+
 
             //if the node has an index, we can just use the index instead of traversing the whole node set
-            if (node.childrenIndex != null) {
+            if (node.getChildrenMap() != null) {
 
                 //Get the exact node by the index
                 final Node matchingChildNode = getIndexForChildNode(topicPart[depth + 1], node);
@@ -403,10 +403,14 @@ public class TopicTreeImpl implements LocalTopicTree {
                 }
                 //We can return without any further recursion because we found all matching nodes
                 return;
-
             }
 
-            //We don't have an index, so let's iterate
+            //The children are stored as array
+            final Node[] children = node.getChildren();
+            if (children == null) {
+                return;
+            }
+
             for (final Node childNode : children) {
                 if (childNode != null) {
                     traverseTree(childNode, subscribers, topicPart, depth + 1, topic + "/");
@@ -415,14 +419,13 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
     }
 
+    @Nullable
     private Node getIndexForChildNode(final @NotNull String key, final @NotNull Node node) {
-        final Integer index = node.childrenIndex.get(key);
-
-        //No index found, so we can just abort since there is no matching node
-        if (index == null) {
+        final Map<String, Node> childrenMap = node.getChildrenMap();
+        if (childrenMap == null) {
             return null;
         }
-        return node.getChildren()[index];
+        return childrenMap.get(key);
     }
 
     /* ***************************************
@@ -511,10 +514,14 @@ public class TopicTreeImpl implements LocalTopicTree {
             }
         }
 
+        final Map<String, Node> childrenMap = node.getChildrenMap();
+        if (childrenMap != null) {
+            childrenMap.entrySet().removeIf(entry -> entry == null ||
+                    removeSubscriberFromAllSubnodes(entry.getValue(), condition, topic + node.getTopicPart() + "/"));
+        }
+
         final Node[] children = node.getChildren();
         if (children != null) {
-
-
             //Since we don't have any topics
             for (int i = 0; i < children.length; i++) {
                 final Node child = children[i];
@@ -522,9 +529,6 @@ public class TopicTreeImpl implements LocalTopicTree {
 
                     final boolean canGetRemoved = removeSubscriberFromAllSubnodes(child, condition, topic + node.getTopicPart() + "/");
                     if (canGetRemoved) {
-                        if (node.childrenIndex != null) {
-                            node.childrenIndex.remove(children[i].getTopicPart());
-                        }
                         children[i] = null;
                     }
                 }
@@ -549,7 +553,6 @@ public class TopicTreeImpl implements LocalTopicTree {
         checkNotNull(subscriber);
         checkNotNull(topic);
 
-
         if ("#".equals(topic)) {
             removeRootWildcardSubscriber(subscriber, sharedName);
             return;
@@ -563,7 +566,6 @@ public class TopicTreeImpl implements LocalTopicTree {
             log.debug("Tried to remove an empty topic from the topic tree.");
             return;
         }
-
 
         final String[] topicPart = StringUtils.splitPreserveAllTokens(topic, "/");
 
@@ -611,13 +613,16 @@ public class TopicTreeImpl implements LocalTopicTree {
                             parent = segmentNode;
                         }
                         final Node[] childrenOfParent = parent.getChildren();
-                        for (int j = 0; j < childrenOfParent.length; j++) {
-                            if (childrenOfParent[j] == node) {
-                                //Also delete the index if available
-                                if (parent.childrenIndex != null) {
-                                    parent.childrenIndex.remove(childrenOfParent[j].getTopicPart());
+                        if (childrenOfParent != null) {
+                            for (int j = 0; j < childrenOfParent.length; j++) {
+                                if (childrenOfParent[j] == node) {
+                                    childrenOfParent[j] = null;
                                 }
-                                childrenOfParent[j] = null;
+                            }
+                        } else if (parent.getChildrenMap() != null) {
+                            final Node childOfParent = parent.getChildrenMap().get(node.getTopicPart());
+                            if (childOfParent == node) {
+                                parent.getChildrenMap().remove(childOfParent.getTopicPart());
                             }
                         }
                     }
@@ -664,40 +669,38 @@ public class TopicTreeImpl implements LocalTopicTree {
         //Note dobermai: We don't need to check for "+" subscribers explicitly, because unsubscribes are always absolute
 
         Node foundNode = null;
-        if (node.getChildren() != null) {
 
-            if (node.childrenIndex != null) {
-                if (topicParts.length > depth + 1) {
-                    //We have an index available, so we can use it
-                    final Integer index = node.childrenIndex.get(topicParts[depth + 1]);
-                    if (index == null) {
-                        //No child topic found, we can abort
-                        return;
-                    } else {
-                        foundNode = node.getChildren()[index];
-                    }
+        if (node.getChildrenMap() != null) {
+            if (topicParts.length > depth + 1) {
+                //We have an index available, so we can use it
+                final Node indexNode = node.getChildrenMap().get(topicParts[depth + 1]);
+                if (indexNode == null) {
+                    //No child topic found, we can abort
+                    return;
+                } else {
+                    foundNode = indexNode;
                 }
-            } else {
+            }
+        } else if (node.getChildren() != null) {
 
-                //No index available, we must iterate all child nodes
+            //No index available, we must iterate all child nodes
 
-                for (int i = 0; i < node.getChildren().length; i++) {
-                    final Node child = node.getChildren()[i];
-                    if (child != null && depth + 2 <= topicParts.length) {
+            for (int i = 0; i < node.getChildren().length; i++) {
+                final Node child = node.getChildren()[i];
+                if (child != null && depth + 2 <= topicParts.length) {
 
-                        if (child.getTopicPart().equals(topicParts[depth + 1])) {
-                            foundNode = child;
-                            break;
-                        }
+                    if (child.getTopicPart().equals(topicParts[depth + 1])) {
+                        foundNode = child;
+                        break;
                     }
                 }
             }
+        }
 
-            if (foundNode != null) {
-                //Child node found, traverse the tree one level deeper
-                results[depth + 1] = foundNode;
-                iterateChildNodesForSubscriberRemoval(foundNode, topicParts, results, depth + 1);
-            }
+        if (foundNode != null) {
+            //Child node found, traverse the tree one level deeper
+            results[depth + 1] = foundNode;
+            iterateChildNodesForSubscriberRemoval(foundNode, topicParts, results, depth + 1);
         }
 
     }
@@ -708,6 +711,169 @@ public class TopicTreeImpl implements LocalTopicTree {
     @Override
     @NotNull
     public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(@NotNull final String group, @NotNull final String topicFilter) {
+        return getSubscriptionsByTopicFilter(topicFilter, subscriber -> {
+            return subscriber.isSharedSubscription()
+                    && subscriber.getSharedName() != null
+                    && subscriber.getSharedName().equals(group);
+        });
+    }
+
+    @Override
+    @NotNull
+    public ImmutableSet<String> getSubscribersWithFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
+        return createDistinctSubscriberIds(getSubscriptionsByTopicFilter(topicFilter, itemFilter));
+    }
+
+    @Override
+    public @NotNull ImmutableSet<String> getSubscribersForTopic(@NotNull final String topic, @NotNull final ItemFilter itemFilter, final boolean excludeRootLevelWildcard) {
+        checkNotNull(topic, "Topic must not be null");
+
+        final ImmutableSet.Builder<String> subscribers = ImmutableSet.builder();
+
+        //Root wildcard subscribers always match
+        if (!excludeRootLevelWildcard) {
+            for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
+                addAfterItemCallback(itemFilter, subscribers, rootWildcardSubscriber);
+            }
+        }
+
+        //This is a shortcut in case there are no nodes beside the root node
+        if (segments.isEmpty() || topic.isEmpty()) {
+            return subscribers.build();
+        }
+
+        final String[] topicPart = StringUtils.splitPreserveAllTokens(topic, '/');
+        final String segmentKey = topicPart[0];
+
+        final Lock lock = segmentLocks.get(segmentKey).readLock();
+        lock.lock();
+
+        try {
+            final Node firstSegmentNode = segments.get(segmentKey);
+            if (firstSegmentNode != null) {
+                traverseTreeWithFilter(firstSegmentNode, subscribers, topicPart, 0, itemFilter);
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        //We now have to traverse the wildcard node if something matches here
+        if (!excludeRootLevelWildcard) {
+
+            final Lock wildcardLock = segmentLocks.get("+").readLock();
+            wildcardLock.lock();
+
+            try {
+                final Node firstSegmentNode = segments.get("+");
+                if (firstSegmentNode != null) {
+                    traverseTreeWithFilter(firstSegmentNode, subscribers, topicPart, 0, itemFilter);
+                }
+            } finally {
+                wildcardLock.unlock();
+            }
+        }
+
+        return subscribers.build();
+    }
+
+
+    private void traverseTreeWithFilter(@NotNull final Node node, @NotNull final ImmutableSet.Builder<String> subscribers,
+                                        final String[] topicPart, final int depth, @NotNull final ItemFilter itemFilter) {
+
+        if (!topicPart[depth].equals(node.getTopicPart()) && !"+".equals(node.getTopicPart())) {
+            return;
+        }
+
+        if (node.wildcardSubscriberMap != null) {
+
+            for (final SubscriberWithQoS value : node.wildcardSubscriberMap.values()) {
+                addAfterItemCallback(itemFilter, subscribers, value);
+            }
+
+        } else {
+
+            final SubscriberWithQoS[] wcSubs = node.getWildcardSubscribers();
+            if (wcSubs != null) {
+                for (final SubscriberWithQoS wildcardSubscriber : wcSubs) {
+                    if (wildcardSubscriber != null) {
+                        addAfterItemCallback(itemFilter, subscribers, wildcardSubscriber);
+                    }
+                }
+            }
+        }
+
+        final boolean end = topicPart.length - 1 == depth;
+        if (end) {
+            if (NodeUtils.getExactSubscriberCount(node) > 0) {
+
+                if (node.exactSubscriberMap != null) {
+
+                    for (final SubscriberWithQoS value : node.exactSubscriberMap.values()) {
+                        addAfterItemCallback(itemFilter, subscribers, value);
+                    }
+
+                } else {
+
+                    if (node.getExactSubscribers() != null) {
+                        for (final SubscriberWithQoS subscriberWithQoS : node.getExactSubscribers()) {
+                            if (subscriberWithQoS != null) {
+                                addAfterItemCallback(itemFilter, subscribers, subscriberWithQoS);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (NodeUtils.getChildrenCount(node) == 0) {
+                return;
+            }
+
+
+            //if the node has an index, we can just use the index instead of traversing the whole node set
+            if (node.getChildrenMap() != null) {
+
+                //Get the exact node by the index
+                final Node matchingChildNode = getIndexForChildNode(topicPart[depth + 1], node);
+                //We also need to check if there is a wildcard node
+                final Node matchingWildcardNode = getIndexForChildNode("+", node);
+
+                if (matchingChildNode != null) {
+                    traverseTreeWithFilter(matchingChildNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+
+                if (matchingWildcardNode != null) {
+                    traverseTreeWithFilter(matchingWildcardNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+                //We can return without any further recursion because we found all matching nodes
+                return;
+            }
+
+            //The children are stored as array
+            final Node[] children = node.getChildren();
+            if (children == null) {
+                return;
+            }
+
+            for (final Node childNode : children) {
+                if (childNode != null) {
+                    traverseTreeWithFilter(childNode, subscribers, topicPart, depth + 1, itemFilter);
+                }
+            }
+        }
+    }
+
+    @NotNull
+    private ImmutableSet<String> createDistinctSubscriberIds(final ImmutableSet<SubscriberWithQoS> subscriptionsByFilters) {
+
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for (final SubscriberWithQoS subscription : subscriptionsByFilters) {
+            builder.add(subscription.getSubscriber());
+        }
+        return builder.build();
+    }
+
+    @NotNull
+    private ImmutableSet<SubscriberWithQoS> getSubscriptionsByTopicFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
         final ImmutableSet.Builder<SubscriberWithQoS> subscribers = ImmutableSet.builder();
         if (topicFilter.equals("#")) {
             for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
@@ -731,17 +897,30 @@ public class TopicTreeImpl implements LocalTopicTree {
                 if (contents[i].equals("#")) {
                     break;
                 }
-                final Node[] children = node.getChildren();
-                if (children == null) {
+
+                if (node.getChildren() == null && node.getChildrenMap() == null) {
                     // No matching node in the topic tree
                     return subscribers.build();
                 }
-                for (final Node child : children) {
-                    if (child != null && child.getTopicPart().equals(contents[i])) {
-                        node = child;
-                        continue contentLoop;
+
+                final Node[] children = node.getChildren();
+                if (children != null) {
+                    for (final Node child : children) {
+                        if (child != null && child.getTopicPart().equals(contents[i])) {
+                            node = child;
+                            continue contentLoop;
+                        }
+                        // No matching node in the topic tree
                     }
-                    // No matching node in the topic tree
+                } else if (node.getChildrenMap() != null) {
+
+                    for (final Node child : node.getChildrenMap().values()) {
+                        if (child != null && child.getTopicPart().equals(contents[i])) {
+                            node = child;
+                            continue contentLoop;
+                        }
+                        // No matching node in the topic tree
+                    }
                 }
                 return subscribers.build();
             }
@@ -749,33 +928,53 @@ public class TopicTreeImpl implements LocalTopicTree {
             if (contents[contents.length - 1].equals("#")) {
                 if (node.wildcardSubscriberMap != null) {
                     for (final SubscriberWithQoS value : node.wildcardSubscriberMap.values()) {
-                        addSharedSubscription(subscribers, value, group);
+                        addAfterCallback(itemFilter, subscribers, value);
                     }
                 } else {
                     if (node.getWildcardSubscribers() == null) {
                         return subscribers.build();
                     }
                     for (final SubscriberWithQoS wildcardSubscriber : node.getWildcardSubscribers()) {
-                        addSharedSubscription(subscribers, wildcardSubscriber, group);
+                        addAfterCallback(itemFilter, subscribers, wildcardSubscriber);
                     }
                 }
             } else {
                 if (node.exactSubscriberMap != null) {
                     for (final SubscriberWithQoS value : node.exactSubscriberMap.values()) {
-                        addSharedSubscription(subscribers, value, group);
+                        addAfterCallback(itemFilter, subscribers, value);
                     }
                 } else {
                     if (node.getExactSubscribers() == null) {
                         return subscribers.build();
                     }
                     for (final SubscriberWithQoS exactSubscriber : node.getExactSubscribers()) {
-                        addSharedSubscription(subscribers, exactSubscriber, group);
+                        addAfterCallback(itemFilter, subscribers, exactSubscriber);
                     }
                 }
             }
             return subscribers.build();
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void addAfterCallback(@NotNull final ItemFilter itemFilter,
+                                  @NotNull final ImmutableSet.Builder<SubscriberWithQoS> subscribers,
+                                  @Nullable final SubscriberWithQoS subscriber) {
+        if (subscriber != null) {
+            if (itemFilter.checkItem(subscriber)) {
+                subscribers.add(subscriber);
+            }
+        }
+    }
+
+    private void addAfterItemCallback(@NotNull final ItemFilter itemFilter,
+                                      @NotNull final ImmutableSet.Builder<String> subscribers,
+                                      @Nullable final SubscriberWithQoS subscriber) {
+        if (subscriber != null) {
+            if (itemFilter.checkItem(subscriber)) {
+                subscribers.add(subscriber.getSubscriber());
+            }
         }
     }
 
@@ -800,20 +999,6 @@ public class TopicTreeImpl implements LocalTopicTree {
             }
         }
         return matchingSharedSubscription;
-    }
-
-    /**
-     * Add the subscriber to the set if the shared group matches.
-     */
-    private void addSharedSubscription(@NotNull final ImmutableSet.Builder<SubscriberWithQoS> subscribers, @Nullable final SubscriberWithQoS subscriber, @NotNull final String group) {
-        if (subscriber == null) {
-            return;
-        }
-        if (subscriber.isSharedSubscription()
-                && subscriber.getSharedName() != null
-                && subscriber.getSharedName().equals(group)) {
-            subscribers.add(subscriber);
-        }
     }
 
     /* *************
@@ -853,7 +1038,11 @@ public class TopicTreeImpl implements LocalTopicTree {
             noWildcardSubscribers = true;
         }
 
-        return isEmptyArray(node.getChildren()) &&
+        final boolean noChildrenPresent = (node.getChildren() == null && node.getChildrenMap() == null) ||
+                node.getChildren() != null && isEmptyArray(node.getChildren()) ||
+                node.getChildrenMap() != null && node.getChildrenMap().isEmpty();
+
+        return noChildrenPresent &&
                 noWildcardSubscribers && noExactSubscribers;
     }
 
@@ -879,6 +1068,15 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
         return true;
     }
+
+    private interface IterateCallback {
+        /**
+         * @param subscriber the current subscriber
+         * @return true to continue the iteration, false to stop
+         */
+        boolean call(@NotNull final SubscriberWithQoS subscriber, @NotNull final String topic);
+    }
+
 
     public interface Condition {
 

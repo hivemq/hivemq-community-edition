@@ -58,6 +58,12 @@ public class InternalConfigurations {
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRIES = new AtomicInteger(500);
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRY_INTERVAL = new AtomicInteger(100);
 
+    //max amount of subscriptions to pull from the peristence for extension iterate chunk
+    public static final int PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE = 2000;
+
+    //max amount of clients to pull from the peristence for extension iterate chunk
+    public static final int PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE = 2000;
+
     //The threshold at which the topic tree starts to map entries instead of storing them in an array
     public static final AtomicInteger TOPIC_TREE_MAP_CREATION_THRESHOLD = new AtomicInteger(16);
     // The configuration for qos 0 memory hard limit divisor, must be greater than 0.
@@ -66,7 +72,11 @@ public class InternalConfigurations {
     // The amount of qos 0 messages that are queued if the channel is not writable
     public static final AtomicInteger NOT_WRITABLE_QUEUE_SIZE = new AtomicInteger(1000);
 
-    public static final int INFLIGHT_QUEUE_BUCKET_COUNT = 3;
+    // The limit of unacknowledged messages that hivemq will handle, regardless of the client receive maximum
+    public static int MAX_INFLIGHT_WINDOW_SIZE = 50;
+
+
+
     //The maximum allowed size of the passed value for the ConnectionAttributeStore in bytes
     public static final int CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE = 10240; //10Kb
 
@@ -89,10 +99,13 @@ public class InternalConfigurations {
 
 
     // The amount of publishes that are polled per batch
-    public static final int PUBLISH_POLL_BATCH_SIZE = 50;
+    public static int PUBLISH_POLL_BATCH_SIZE = 50;
 
     // The amount of bytes that are polled per batch
     public static final int PUBLISH_POLL_BATCH_MEMORY = 1024 * 1024 * 5; // 5Mb
+
+    // The amount of qos > 0 retained messages that are queued
+    public static final AtomicInteger RETAINED_MESSAGE_QUEUE_SIZE = new AtomicInteger(100_000);
 
     /* ************************
      *   Payload Persistence  *
@@ -138,12 +151,6 @@ public class InternalConfigurations {
 
     public static final AtomicInteger MESSAGE_ID_PRODUCER_LOCK_SIZE = new AtomicInteger(8);
 
-    /**
-     * the time in seconds at which a qos > 0 publish or pubrel will be resend if not acknowledged.
-     * <p>
-     * 0 means no retry (default 0)
-     */
-    public static final AtomicInteger PUBLISH_RETRY_INTERVAL = new AtomicInteger(0);
     /**
      * The amount of clean up job tasks that are processed at the same time, in each schedule interval
      */

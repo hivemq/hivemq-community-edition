@@ -16,6 +16,8 @@
 
 package com.hivemq.extensions;
 
+import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
@@ -23,6 +25,7 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,7 +46,7 @@ import static org.mockito.Mockito.*;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class HiveMQPluginsTest extends PluginAbstractTest {
+public class HiveMQExtensionsTest extends PluginAbstractTest {
 
     @Rule
     public TemporaryFolder tmpFolder = new TemporaryFolder();
@@ -60,9 +63,12 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
     @Mock
     private IsolatedPluginClassloader loader2;
 
+    @Mock
+    private ListenerConfigurationService listenerConfigurationService;
+
     private String id1;
     private String id2;
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Before
     public void setUp() throws Exception {
@@ -81,67 +87,67 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin2.getPluginClassloader()).thenReturn(loader2);
 
 
-        hiveMQPlugins = new HiveMQPlugins();
+        hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService));
 
-        hiveMQPlugins.addHiveMQPlugin(plugin1);
+        hiveMQExtensions.addHiveMQPlugin(plugin1);
     }
 
     @Test(timeout = 5000)
     public void test_disabled_plugin_is_not_started() {
-        assertFalse(hiveMQPlugins.pluginStart(id1));
+        assertFalse(hiveMQExtensions.extensionStart(id1));
     }
 
     @Test(timeout = 5000)
     public void test_enabled_plugin_is_started() throws Throwable {
         when(plugin1.isEnabled()).thenReturn(true);
-        assertTrue(hiveMQPlugins.pluginStart(id1));
+        assertTrue(hiveMQExtensions.extensionStart(id1));
 
         verify(plugin1, times(1)).start(any(ExtensionStartInput.class), any(ExtensionStartOutput.class));
         verify(plugin1, times(1)).getPluginClassloader();
 
-        assertEquals(plugin1, hiveMQPlugins.getPluginForClassloader(loader1));
+        assertEquals(plugin1, hiveMQExtensions.getExtensionForClassloader(loader1));
     }
 
     @Test(timeout = 5000)
     public void test_disabled_plugin_is_not_disabled() {
-        assertFalse(hiveMQPlugins.pluginStop(id1, false));
+        assertFalse(hiveMQExtensions.extensionStop(id1, false));
     }
 
     @Test(timeout = 5000)
     public void test_enabled_plugin_is_not_disabled() throws Throwable {
         when(plugin1.isEnabled()).thenReturn(true);
-        assertTrue(hiveMQPlugins.pluginStart(id1));
-        assertNotNull(hiveMQPlugins.getPluginForClassloader(loader1));
+        assertTrue(hiveMQExtensions.extensionStart(id1));
+        assertNotNull(hiveMQExtensions.getExtensionForClassloader(loader1));
 
-        hiveMQPlugins.pluginStop(id1, false);
+        hiveMQExtensions.extensionStop(id1, false);
         verify(plugin1, times(1)).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
         verify(plugin1, times(1)).clean(false);
-        assertNull(hiveMQPlugins.getPluginForClassloader(loader1));
+        assertNull(hiveMQExtensions.getExtensionForClassloader(loader1));
     }
 
     @Test(timeout = 5000)
     public void test_plugin_stop_throws_exception() throws Throwable {
 
         when(plugin1.isEnabled()).thenReturn(true);
-        hiveMQPlugins.pluginStart(id1);
-        assertNotNull(hiveMQPlugins.getPluginForClassloader(loader1));
+        hiveMQExtensions.extensionStart(id1);
+        assertNotNull(hiveMQExtensions.getExtensionForClassloader(loader1));
 
         doThrow(new RuntimeException()).when(plugin1).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
 
-        hiveMQPlugins.pluginStop(id1, true);
+        hiveMQExtensions.extensionStop(id1, true);
 
         verify(plugin1, times(1)).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
-        assertNull(hiveMQPlugins.getPluginForClassloader(loader1));
-        assertTrue(hiveMQPlugins.getClassloaderToPluginMap().isEmpty());
+        assertNull(hiveMQExtensions.getExtensionForClassloader(loader1));
+        assertTrue(hiveMQExtensions.getClassloaderToExtensionMap().isEmpty());
     }
 
     @Test(timeout = 5000)
     public void test_enabled_plugin_is_returned() {
-        hiveMQPlugins.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQPlugin(plugin2);
         when(plugin1.isEnabled()).thenReturn(true);
 
 
-        final Map<String, HiveMQExtension> enabledHiveMQPlugins = hiveMQPlugins.getEnabledHiveMQPlugins();
+        final Map<String, HiveMQExtension> enabledHiveMQPlugins = hiveMQExtensions.getEnabledHiveMQExtensions();
         assertEquals(1, enabledHiveMQPlugins.size());
         assertTrue(enabledHiveMQPlugins.containsKey(id1));
         assertFalse(enabledHiveMQPlugins.containsKey(id2));
@@ -149,7 +155,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
 
     @Test(timeout = 5000)
     public void test_enabled_plugins_is_empty() {
-        final Map<String, HiveMQExtension> enabledHiveMQPlugins = hiveMQPlugins.getEnabledHiveMQPlugins();
+        final Map<String, HiveMQExtension> enabledHiveMQPlugins = hiveMQExtensions.getEnabledHiveMQExtensions();
         assertEquals(0, enabledHiveMQPlugins.size());
     }
 
@@ -159,7 +165,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.getVersion()).thenReturn(version);
         when(plugin2.getId()).thenReturn(id1);
 
-        hiveMQPlugins.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQPlugin(plugin2);
 
         verify(plugin2, times(1)).setPreviousVersion(same(version));
     }
@@ -170,7 +176,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.getVersion()).thenReturn(version);
         when(plugin2.getId()).thenReturn(id2);
 
-        hiveMQPlugins.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQPlugin(plugin2);
 
         verify(plugin2, never()).setPreviousVersion(anyString());
     }
@@ -180,9 +186,9 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.isEnabled()).thenReturn(true);
 
         final PluginStopCallback pluginStopCallback = new PluginStopCallback();
-        hiveMQPlugins.addBeforePluginStopCallback(pluginStopCallback);
+        hiveMQExtensions.addBeforeExtensionStopCallback(pluginStopCallback);
 
-        hiveMQPlugins.pluginStart(id1);
+        hiveMQExtensions.extensionStart(id1);
 
         final AtomicBoolean before = new AtomicBoolean(false);
 
@@ -191,7 +197,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
             return null;
         }).when(plugin1).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
 
-        hiveMQPlugins.pluginStop(id1, false);
+        hiveMQExtensions.extensionStop(id1, false);
 
         assertTrue(before.get());
         assertEquals(1, pluginStopCallback.count);
@@ -202,9 +208,9 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.isEnabled()).thenReturn(true);
 
         final PluginStopCallback pluginStopCallback = new PluginStopCallback();
-        hiveMQPlugins.addBeforePluginStopCallback(pluginStopCallback);
+        hiveMQExtensions.addBeforeExtensionStopCallback(pluginStopCallback);
 
-        hiveMQPlugins.pluginStart(id1);
+        hiveMQExtensions.extensionStart(id1);
 
         final AtomicBoolean before = new AtomicBoolean(false);
 
@@ -213,7 +219,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
             throw new IllegalStateException("test");
         }).when(plugin1).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
 
-        hiveMQPlugins.pluginStop(id1, false);
+        hiveMQExtensions.extensionStop(id1, false);
 
         assertTrue(before.get());
         assertEquals(1, pluginStopCallback.count);
@@ -224,9 +230,9 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.isEnabled()).thenReturn(true);
 
         final PluginStopCallback pluginStopCallback = new PluginStopCallback();
-        hiveMQPlugins.addAfterPluginStopCallback(pluginStopCallback);
+        hiveMQExtensions.addAfterExtensionStopCallback(pluginStopCallback);
 
-        hiveMQPlugins.pluginStart(id1);
+        hiveMQExtensions.extensionStart(id1);
 
         final AtomicBoolean notBefore = new AtomicBoolean(false);
 
@@ -235,7 +241,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
             return null;
         }).when(plugin1).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
 
-        hiveMQPlugins.pluginStop(id1, false);
+        hiveMQExtensions.extensionStop(id1, false);
 
         assertTrue(notBefore.get());
         assertSame(plugin1, pluginStopCallback.plugin);
@@ -247,9 +253,9 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
         when(plugin1.isEnabled()).thenReturn(true);
 
         final PluginStopCallback pluginStopCallback = new PluginStopCallback();
-        hiveMQPlugins.addAfterPluginStopCallback(pluginStopCallback);
+        hiveMQExtensions.addAfterExtensionStopCallback(pluginStopCallback);
 
-        hiveMQPlugins.pluginStart(id1);
+        hiveMQExtensions.extensionStart(id1);
 
         final AtomicBoolean notBefore = new AtomicBoolean(false);
 
@@ -258,7 +264,7 @@ public class HiveMQPluginsTest extends PluginAbstractTest {
             throw new IllegalStateException("test");
         }).when(plugin1).stop(any(ExtensionStopInput.class), any(ExtensionStopOutput.class));
 
-        hiveMQPlugins.pluginStop(id1, false);
+        hiveMQExtensions.extensionStop(id1, false);
 
         assertTrue(notBefore.get());
         assertSame(plugin1, pluginStopCallback.plugin);

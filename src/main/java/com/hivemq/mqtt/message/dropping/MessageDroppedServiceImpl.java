@@ -81,9 +81,9 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
      * @inheritDoc
      */
     @Override
-    public void inboundPublishIntercepted(final @NotNull String clientId, final @NotNull String topic, final int qos) {
+    public void extensionPrevented(final @NotNull String clientId, final @NotNull String topic, final int qos) {
         metricsHolder.getDroppedMessageCounter().inc();
-        eventLog.messageDropped(clientId, topic, qos, "Inbound publish interceptor prevented onward delivery");
+        eventLog.messageDropped(clientId, topic, qos, "Extension prevented onward delivery");
     }
 
     /**

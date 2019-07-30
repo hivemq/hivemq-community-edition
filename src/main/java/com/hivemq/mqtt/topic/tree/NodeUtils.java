@@ -143,9 +143,9 @@ public class NodeUtils {
     public static int getChildrenCount(final @NotNull Node node) {
         checkNotNull(node, "Node must not be null");
 
-        //If the node has a children index, we don't need to count
-        if (node.childrenIndex != null) {
-            return node.childrenIndex.size();
+        //If the node has a children map instead of the array, we don't need to count
+        if (node.childrenMap != null) {
+            return node.childrenMap.size();
         }
 
         final Node[] children = node.getChildren();

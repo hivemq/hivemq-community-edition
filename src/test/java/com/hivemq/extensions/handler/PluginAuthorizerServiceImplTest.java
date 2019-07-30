@@ -29,7 +29,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.*;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
@@ -43,7 +43,6 @@ import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
-import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -93,7 +92,7 @@ public class PluginAuthorizerServiceImplTest {
     @Mock
     private ServerInformation serverInformation;
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
     @Mock
     private Mqtt3ServerDisconnector mqtt3Disconnector;
     @Mock
@@ -128,9 +127,9 @@ public class PluginAuthorizerServiceImplTest {
         pluginMap.put("plugin1", plugin1);
         pluginMap.put("plugin2", plugin2);
 
-        when(hiveMQPlugins.getEnabledHiveMQPlugins()).thenReturn(pluginMap);
-        when(hiveMQPlugins.getPlugin("plugin1")).thenReturn(plugin1);
-        when(hiveMQPlugins.getPlugin("plugin2")).thenReturn(plugin2);
+        when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(pluginMap);
+        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
 
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
 
@@ -141,7 +140,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
         pluginAuthorizerService = new PluginAuthorizerServiceImpl(authorizers, asyncer, pluginTaskExecutorService, serverInformation,
-                hiveMQPlugins, mqtt3Disconnector, mqtt5Disconnector, eventLog, incomingPublishService);
+                hiveMQExtensions, mqtt3Disconnector, mqtt5Disconnector, eventLog, incomingPublishService);
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);

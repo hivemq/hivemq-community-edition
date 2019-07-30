@@ -21,6 +21,9 @@ import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundOutput;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundInput;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundOutput;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -44,7 +47,8 @@ public class TestInterceptorUtil {
     public static List<Interceptor> getIsolatedInterceptors(final TemporaryFolder temporaryFolder, @NotNull final ClassLoader classLoader) throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("util.TestInterceptorUtil$TestPublishInboundInterceptor");
+                .addClass("util.TestInterceptorUtil$TestPublishInboundInterceptor")
+                .addClass("util.TestInterceptorUtil$TestSubscriberInboundInterceptor");
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -55,9 +59,12 @@ public class TestInterceptorUtil {
         final List<Interceptor> interceptors = new ArrayList<>();
 
         final Class<?> publishInboundInterceptorClass = cl.loadClass("util.TestInterceptorUtil$TestPublishInboundInterceptor");
+        final Class<?> subscribeInboundInteceptorClass = cl.loadClass("util.TestInterceptorUtil$TestSubscriberInboundInterceptor");
 
         final PublishInboundInterceptor publishInboundInterceptor = (PublishInboundInterceptor) publishInboundInterceptorClass.newInstance();
+        final SubscribeInboundInterceptor subscribeInboundInterceptor = (SubscribeInboundInterceptor) subscribeInboundInteceptorClass.newInstance();
         interceptors.add(publishInboundInterceptor);
+        interceptors.add(subscribeInboundInterceptor);
 
         return interceptors;
 
@@ -68,6 +75,14 @@ public class TestInterceptorUtil {
 
         @Override
         public void onInboundPublish(@NotNull final PublishInboundInput input, @NotNull final PublishInboundOutput output) {
+
+        }
+    }
+
+    public static class TestSubscriberInboundInterceptor implements SubscribeInboundInterceptor {
+
+        @Override
+        public void onInboundSubscribe(final @NotNull SubscribeInboundInput subscribeInboundInput, final @NotNull SubscribeInboundOutput subscribeInboundOutput) {
 
         }
     }

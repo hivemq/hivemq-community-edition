@@ -369,8 +369,10 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withReceiveMaximum(receiveMaximum)
                 .withMaximumPacketSize(maximumPacketSize)
                 .withTopicAliasMaximum(topicAliasMaximum)
-                .withResponseInformationRequested(requestResponseInformation)
-                .withProblemInformationRequested(requestProblemInformation)
+                .withResponseInformationRequested(requestResponseInformation == null ?
+                        DEFAULT_RESPONSE_INFORMATION_REQUESTED : requestResponseInformation)
+                .withProblemInformationRequested(requestProblemInformation == null ?
+                        DEFAULT_PROBLEM_INFORMATION_REQUESTED : requestProblemInformation)
                 .withMqtt5UserProperties(userProperties);
 
         return true;
@@ -1029,7 +1031,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     "Sent CONNECT with wildcard character (#/+) in the " + location,
                     Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
                     null,
-                    String.format(ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD,location));
+                    String.format(ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD, location));
 
             return true;
         }
@@ -1119,7 +1121,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 "A client (IP: {}) sent a CONNECT with '" + key + "' included more than once. This is not allowed.",
                 "Sent a CONNECT with '" + key + "' included more than once",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
-                String.format(ReasonStrings.CONNACK_PROTOCOL_MULTIPLE_KEY,key));
+                String.format(ReasonStrings.CONNACK_PROTOCOL_MULTIPLE_KEY, key));
 
     }
 

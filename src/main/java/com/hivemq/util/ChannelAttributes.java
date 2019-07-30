@@ -18,6 +18,7 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -47,6 +48,12 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> CONNACK_SENT = AttributeKey.valueOf("MQTT.ConnackSent");
     public static final AttributeKey<Boolean> TAKEN_OVER = AttributeKey.valueOf("MQTT.TakenOver");
     public static final AttributeKey<Boolean> PREVENT_LWT = AttributeKey.valueOf("MQTT.PreventLWT");
+
+    /**
+     * The define the way the client should be affected by the overload protection.
+     * <code>null</code> is interpreted as {@link OverloadProtectionThrottlingLevel#DEFAULT}.
+     */
+    public static final AttributeKey<OverloadProtectionThrottlingLevel> OVERLOAD_PROTECTION_THROTTLING_LEVEL = AttributeKey.valueOf("Restriction.OverloadProtectionThrottlingLevel");
 
     /**
      * This reveres to the in-flight messages in the client queue, not the ones in the ordered topic queue

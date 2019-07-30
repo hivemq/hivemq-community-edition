@@ -26,7 +26,7 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import java.nio.ByteBuffer;
 
 /**
- * A copy of an {@link PublishPacket} that can be modified for onward delivery.
+ * A {@link PublishPacket} that can be modified for onward delivery.
  *
  * @author Christoph Schäbel
  * @author Florian Limpöck

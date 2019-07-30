@@ -58,16 +58,20 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
     private @Nullable ConnackReasonCode connackReasonCode;
     private @Nullable String reasonString;
     private @NotNull ModifiableDefaultPermissions defaultPermissions;
+    private @NotNull
+    final ModifiableClientSettingsImpl clientSettings;
 
-    ConnectAuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8) {
+    ConnectAuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8,
+                          @NotNull final ModifiableClientSettingsImpl clientSettings) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
+        this.clientSettings = clientSettings;
         authenticationState = AuthenticationState.UNDECIDED;
         defaultPermissions = new ModifiableDefaultPermissionsImpl();
     }
 
     ConnectAuthTaskOutput(final @NotNull ConnectAuthTaskOutput connectAuthTaskOutput) {
-        this(connectAuthTaskOutput.asyncer, connectAuthTaskOutput.validateUTF8);
+        this(connectAuthTaskOutput.asyncer, connectAuthTaskOutput.validateUTF8, connectAuthTaskOutput.clientSettings);
         if (connectAuthTaskOutput.getChangedUserProperties() != null) {
             legacyUserProperties = connectAuthTaskOutput.getChangedUserProperties().consolidate();
             modifiableUserProperties = new ModifiableUserPropertiesImpl(legacyUserProperties, validateUTF8);
@@ -178,6 +182,11 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
     @Override
     public @NotNull ModifiableDefaultPermissions getDefaultPermissions() {
         return defaultPermissions;
+    }
+
+    @Override
+    public @NotNull ModifiableClientSettingsImpl getClientSettings() {
+        return clientSettings;
     }
 
     @NotNull AuthenticationState getAuthenticationState() {

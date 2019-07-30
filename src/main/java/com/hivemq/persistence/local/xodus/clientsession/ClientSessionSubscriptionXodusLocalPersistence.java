@@ -17,14 +17,18 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
@@ -45,8 +49,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 
@@ -280,6 +283,88 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
                         return;
                     }
                 }
+            }
+        });
+    }
+
+    @Override
+    @NotNull
+    public BucketChunkResult<Map<String, Set<Topic>>> getAllSubscribersChunk(@NotNull final PersistenceFilter filter, final int bucketIndex, @Nullable final String lastClientId, final int maxResults) {
+        checkNotNull(filter, "Filter must not be null");
+        checkArgument(maxResults > 0, "max results must be greater than 0");
+
+        final ImmutableMap.Builder<String, Set<Topic>> resultBuilder = ImmutableMap.builder();
+
+        final Bucket bucket = buckets[bucketIndex];
+        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
+
+            String lastKey = null;
+
+            int containedItemCount = 0;
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+
+                final ByteIterable lastClientIdKey = lastClientId != null ? bytesToByteIterable(serializer.serializeKey(lastClientId)) : null;
+
+                if (lastClientIdKey != null) {
+                    //jump to last known key or to next entry after key
+                    cursor.getSearchKeyRange(lastClientIdKey);
+                    if (cursor.getKey().equals(lastClientIdKey)) {
+                        //advance to next clientid if key matches
+                        cursor.getNextNoDup();
+                    }
+                } else {
+                    //start at the beginning
+                    cursor.getNext();
+                }
+
+                do {
+                    //if the key is empty the iteration is finished
+                    final ByteIterable key = cursor.getKey();
+                    if (key.getLength() < 1) {
+                        break;
+                    }
+
+
+                    //compare the serialized ByteIterable not the clientId String, because the key is prefixed with the clientId length
+                    if (lastClientIdKey != null && lastClientIdKey.compareTo(key) >= 0) {
+                        continue;
+                    }
+
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(key));
+                    if (!filter.match(clientId)) {
+                        continue;
+                    }
+
+                    final Map<Topic, Long> topicMap = new HashMap<>();
+                    //read all subscriptions for this clientId
+                    do {
+
+                        final long id = serializer.deserializeId(byteIterableToBytes(cursor.getValue()));
+                        final Topic topic = serializer.deserializeValue(cursor.getValue());
+
+                        final Long valueFromMap = topicMap.get(topic);
+                        if (valueFromMap == null) {
+                            topicMap.put(topic, id);
+                        } else if (valueFromMap < id) {
+                            topicMap.remove(topic); // We have to remove the entry here, otherwise the key will not be replaced since it is considered equal.
+                            topicMap.put(topic, id);
+                        }
+
+                    } while (cursor.getNextDup());
+
+                    lastKey = clientId;
+                    if (topicMap.size() > 0) {
+                        final Set<Topic> topicSet = topicMap.keySet();
+                        containedItemCount += topicSet.size();
+                        resultBuilder.put(clientId, topicSet);
+
+                        if (containedItemCount >= maxResults) {
+                            return new BucketChunkResult<>(resultBuilder.build(), !cursor.getNext(), lastKey, bucketIndex);
+                        }
+                    }
+                } while (cursor.getNextNoDup());
+
+                return new BucketChunkResult<>(resultBuilder.build(), true, lastKey, bucketIndex);
             }
         });
     }

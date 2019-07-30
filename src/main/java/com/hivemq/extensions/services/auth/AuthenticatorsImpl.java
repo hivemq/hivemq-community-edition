@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
@@ -48,12 +48,12 @@ public class AuthenticatorsImpl implements Authenticators {
     private final TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     @Inject
-    public AuthenticatorsImpl(final @NotNull HiveMQPlugins hiveMQPlugins) {
-        this.hiveMQPlugins = hiveMQPlugins;
-        this.authenticatorPluginMap = new TreeMap<>(new PluginPriorityComparator(hiveMQPlugins));
+    public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions) {
+        this.hiveMQExtensions = hiveMQExtensions;
+        this.authenticatorPluginMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class AuthenticatorsImpl implements Authenticators {
         try {
 
             final IsolatedPluginClassloader pluginClassloader = provider.getClassLoader();
-            final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader(pluginClassloader);
+            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
             if (plugin != null) {
                 authenticatorPluginMap.put(plugin.getId(), provider);

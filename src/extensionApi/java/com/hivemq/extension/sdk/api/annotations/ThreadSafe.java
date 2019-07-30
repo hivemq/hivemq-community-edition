@@ -18,6 +18,7 @@ package com.hivemq.extension.sdk.api.annotations;
 
 import java.lang.annotation.*;
 
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
@@ -29,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  */
 @Documented
 @Retention(CLASS)
-@Target({TYPE})
+@Target({TYPE, METHOD})
 public @interface ThreadSafe {
     String value() default "";
 }

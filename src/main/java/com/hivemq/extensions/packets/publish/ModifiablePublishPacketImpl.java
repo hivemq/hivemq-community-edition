@@ -23,11 +23,15 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiablePublishPacket;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
+import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
 
@@ -43,9 +47,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Florian Limpöck
  * @since 4.0.0
  */
+@ThreadSafe
 public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
-    private final @NotNull PUBLISH publish;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
     private final @NotNull SecurityConfigurationService securityConfigurationService;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
@@ -61,8 +65,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     private @Nullable String contentType;
     private @Nullable ByteBuffer payload;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
+    private final int packetId;
+    private final boolean duplicateDelivery;
 
-    private boolean modified;
+    protected boolean modified;
 
     public ModifiablePublishPacketImpl(final @NotNull FullConfigurationService configurationService, final @NotNull PUBLISH publish) {
 
@@ -72,7 +78,6 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.mqttConfigurationService = configurationService.mqttConfiguration();
         this.securityConfigurationService = configurationService.securityConfiguration();
         this.restrictionsConfigurationService = configurationService.restrictionsConfiguration();
-        this.publish = publish;
         this.qos = Qos.valueOf(publish.getQoS().getQosNumber());
         this.retain = publish.isRetain();
         this.topic = publish.getTopic();
@@ -89,14 +94,49 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.contentType = publish.getContentType();
         this.payload = publish.getPayload() != null ? ByteBuffer.wrap(publish.getPayload()).asReadOnlyBuffer() : null;
         this.userProperties = new ModifiableUserPropertiesImpl(publish.getUserProperties().getPluginUserProperties(), configurationService.securityConfiguration().validateUTF8());
+        this.packetId = publish.getPacketIdentifier();
+        this.duplicateDelivery = publish.isDuplicateDelivery();
         this.modified = false;
     }
 
+    public ModifiablePublishPacketImpl(final @NotNull FullConfigurationService configurationService,
+                                       @NotNull final String topic,
+                                       final int qos,
+                                       final boolean retain,
+                                       @Nullable final PayloadFormatIndicator payloadFormatIndicator,
+                                       final long messageExpiryInterval,
+                                       @Nullable final String responseTopic,
+                                       @Nullable final ByteBuffer correlationData,
+                                       @Nullable final List<Integer> subscriptionIdentifiers,
+                                       @Nullable final String contentType,
+                                       @Nullable final ByteBuffer payload,
+                                       @NotNull final InternalUserProperties userProperties,
+                                       final int packetId,
+                                       final boolean duplicateDelivery) {
+        this.mqttConfigurationService = configurationService.mqttConfiguration();
+        this.securityConfigurationService = configurationService.securityConfiguration();
+        this.restrictionsConfigurationService = configurationService.restrictionsConfiguration();
+
+        this.topic = topic;
+        this.qos = Qos.valueOf(qos);
+        this.retain = retain;
+        this.payloadFormatIndicator = payloadFormatIndicator;
+        this.messageExpiryInterval = messageExpiryInterval;
+        this.responseTopic = responseTopic;
+        this.correlationData = correlationData;
+        this.subscriptionIdentifiers = subscriptionIdentifiers;
+        this.contentType = contentType;
+        this.payload = payload;
+        this.userProperties = new ModifiableUserPropertiesImpl(userProperties, configurationService.securityConfiguration().validateUTF8());
+        this.packetId = packetId;
+        this.duplicateDelivery = duplicateDelivery;
+    }
+
     @Override
-    public void setQos(final @NotNull Qos qos) {
+    public synchronized void setQos(final @NotNull Qos qos) {
         PluginBuilderUtil.checkQos(qos, mqttConfigurationService.maximumQos().getQosNumber());
         if (qos.getQosNumber() == this.qos.getQosNumber()) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.qos = qos;
@@ -104,12 +144,12 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setRetain(final boolean retain) {
+    public synchronized void setRetain(final boolean retain) {
         if (!mqttConfigurationService.retainedMessagesEnabled() && retain) {
             throw new IllegalArgumentException("Retained messages are disabled");
         }
         if (retain == this.retain) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.retain = retain;
@@ -117,7 +157,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setTopic(final @NotNull String topic) {
+    public synchronized void setTopic(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
         checkArgument(topic.length() <= restrictionsConfigurationService.maxTopicLength(), "Topic filter length must not exceed '" + restrictionsConfigurationService.maxTopicLength() + "' characters, but has '" + topic.length() + "' characters");
 
@@ -130,7 +170,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         }
 
         if (topic.equals(this.topic)) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.topic = topic;
@@ -138,9 +178,9 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setPayloadFormatIndicator(final @Nullable PayloadFormatIndicator payloadFormatIndicator) {
+    public synchronized void setPayloadFormatIndicator(final @Nullable PayloadFormatIndicator payloadFormatIndicator) {
         if (payloadFormatIndicator == this.payloadFormatIndicator) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.payloadFormatIndicator = payloadFormatIndicator;
@@ -148,10 +188,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setMessageExpiryInterval(final long messageExpiryInterval) {
+    public synchronized void setMessageExpiryInterval(final long messageExpiryInterval) {
         PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
         if (messageExpiryInterval == this.messageExpiryInterval) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.messageExpiryInterval = messageExpiryInterval;
@@ -159,10 +199,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setResponseTopic(final @Nullable String responseTopic) {
+    public synchronized void setResponseTopic(final @Nullable String responseTopic) {
         PluginBuilderUtil.checkResponseTopic(responseTopic, securityConfigurationService.validateUTF8());
 
-        //deny unnecessary change
+        //ignore unnecessary change
         if (responseTopic != null && responseTopic.equals(this.responseTopic)) {
             return;
         }
@@ -174,8 +214,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setCorrelationData(final @Nullable ByteBuffer correlationData) {
-        //deny unnecessary change
+    public synchronized void setCorrelationData(final @Nullable ByteBuffer correlationData) {
+        //ignore unnecessary change
         if (correlationData != null && correlationData.equals(this.correlationData)) {
             return;
         }
@@ -187,10 +227,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setContentType(final @Nullable String contentType) {
+    public synchronized void setContentType(final @Nullable String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
 
-        //deny unnecessary change
+        //ignore unnecessary change
         if (contentType != null && contentType.equals(this.contentType)) {
             return;
         }
@@ -202,10 +242,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setPayload(final @NotNull ByteBuffer payload) {
+    public synchronized void setPayload(final @NotNull ByteBuffer payload) {
         Preconditions.checkNotNull(payload, "payload must never be null");
         if (payload.equals(this.payload)) {
-            //deny unnecessary change
+            //ignore unnecessary change
             return;
         }
         this.payload = payload;
@@ -214,7 +254,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public boolean getDupFlag() {
-        return publish.isDuplicateDelivery();
+        return duplicateDelivery;
     }
 
     @Override
@@ -234,7 +274,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public int getPacketId() {
-        return publish.getPacketIdentifier();
+        return packetId;
     }
 
     @Override
@@ -254,7 +294,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public @NotNull Optional<ByteBuffer> getCorrelationData() {
-        return Optional.ofNullable(correlationData);
+        if(correlationData == null){
+            return Optional.empty();
+        }
+        return Optional.of(correlationData.asReadOnlyBuffer());
     }
 
     @Override
@@ -269,7 +312,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public @NotNull Optional<ByteBuffer> getPayload() {
-        return Optional.ofNullable(payload);
+        if(payload == null){
+            return Optional.empty();
+        }
+        return Optional.of(payload.asReadOnlyBuffer());
     }
 
     @Override

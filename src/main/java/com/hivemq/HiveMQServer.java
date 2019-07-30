@@ -28,7 +28,9 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.PluginBootstrap;
+import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.metrics.MetricRegistryLogger;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -52,15 +54,18 @@ public class HiveMQServer {
     private final @NotNull HiveMQNettyBootstrap nettyBootstrap;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull PluginBootstrap pluginBootstrap;
+    private final @NotNull AdminService adminService;
 
     @Inject
     HiveMQServer(final @NotNull HiveMQNettyBootstrap nettyBootstrap,
                  final @NotNull PublishPayloadPersistence payloadPersistence,
-                 final @NotNull PluginBootstrap pluginBootstrap) {
+                 final @NotNull PluginBootstrap pluginBootstrap,
+                 final @NotNull AdminService adminService) {
 
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
         this.pluginBootstrap = pluginBootstrap;
+        this.adminService = adminService;
     }
 
     public void start() throws Exception {
@@ -74,6 +79,8 @@ public class HiveMQServer {
         final List<ListenerStartupInformation> startupInformation = startFuture.get();
 
         new StartupListenerVerifier(startupInformation).verifyAndPrint();
+
+        ((AdminServiceImpl) adminService).hivemqStarted();
     }
 
     public static void main(final @NotNull String[] args) throws Exception {

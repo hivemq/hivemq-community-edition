@@ -22,8 +22,10 @@ import com.hivemq.codec.decoder.MqttDecoders;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.extensions.handler.*;
 import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
+import com.hivemq.extensions.handler.IncomingSubscribeHandler;
 import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -41,7 +43,6 @@ import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
 import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
 import com.hivemq.mqtt.handler.publish.qos.QoSSenderHandler;
-import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -159,6 +160,14 @@ public class ChannelDependenciesTest {
     @Mock
     private IncomingSubscribeHandler incomingSubscribeHandler;
 
+    @Mock
+    private PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
+
+    @Mock
+    private ConnectInboundInterceptorHandler connectInterceptorHandler;
+
+    @Mock
+    private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -197,7 +206,10 @@ public class ChannelDependenciesTest {
                 () -> clientLifecycleEventHandler,
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
-                () -> publishMessageExpiryHandler);
+                () -> publishMessageExpiryHandler,
+                publishOutboundInterceptorHandler,
+                connectInterceptorHandler,
+                connackOutboundInterceptorHandler);
 
     }
 
@@ -236,5 +248,7 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getClientLifecycleEventHandler());
         assertNotNull(channelDependencies.getIncomingPublishHandler());
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
+        assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
+        assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
     }
 }

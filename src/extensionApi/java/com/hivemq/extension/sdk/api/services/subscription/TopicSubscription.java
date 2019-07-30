@@ -28,7 +28,7 @@ import java.util.Optional;
 /**
  * Represents a Subscription.
  * <p>
- * Contains all values (except {@link RetainHandling}) of an MQTT 5 Subscription, but will also used to represent MQTT 3
+ * Contains all values (except {@link RetainHandling}) of an MQTT 5 Subscription, but is also used to represent MQTT 3
  * Subscriptions.
  * <p>
  *

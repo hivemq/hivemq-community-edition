@@ -17,12 +17,17 @@
 package com.hivemq.mqtt.message.connect;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.Bytes;
 
 /**
  * @author Silvio Giebl
@@ -95,6 +100,32 @@ public class MqttWillPublish {
         this.userProperties = Mqtt5UserProperties.NO_USER_PROPERTIES;
         this.messageExpiryInterval = PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX;
         this.delayInterval = WILL_DELAY_INTERVAL_DEFAULT;
+    }
+
+    @Nullable
+    public static MqttWillPublish fromWillPacket(@NotNull final String hivemqId, @Nullable final WillPublishPacket packet) {
+        if (packet == null) {
+            return null;
+        }
+
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = packet.getPayloadFormatIndicator().isPresent() ?
+                Mqtt5PayloadFormatIndicator.valueOf(packet.getPayloadFormatIndicator().get().name()) : null;
+
+        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        return new MqttWillPublish(hivemqId, packet.getTopic(),
+                Bytes.getBytesFromReadOnlyBuffer(packet.getPayload()),
+                QoS.valueOf(packet.getQos().getQosNumber()),
+                packet.getRetain(),
+                packet.getMessageExpiryInterval().orElse(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET),
+                payloadFormatIndicator,
+                packet.getContentType().orElse(null),
+                packet.getResponseTopic().orElse(null),
+                Bytes.getBytesFromReadOnlyBuffer(packet.getCorrelationData()),
+                Mqtt5UserProperties.of(userProperties.build()),
+                packet.getWillDelay());
     }
 
     public long getDelayInterval() {

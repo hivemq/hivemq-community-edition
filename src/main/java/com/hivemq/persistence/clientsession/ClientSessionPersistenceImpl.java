@@ -20,26 +20,23 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ProducerQueues;
-import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.*;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
@@ -110,7 +107,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     public boolean isExistent(@NotNull final String client) {
         checkNotNull(client, "Client id must not be null");
 
-        return isExistent(getSession(client));
+        return isExistent(getSession(client, false));
     }
 
     private boolean isExistent(@Nullable final ClientSession clientSession) {
@@ -217,7 +214,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         Preconditions.checkNotNull(clientId, "Parameter clientId cannot be null");
         Preconditions.checkNotNull(source, "Disconnect source cannot be null");
 
-        final ClientSession session = getSession(clientId);
+        final ClientSession session = getSession(clientId, false);
 
         if (session == null) {
             log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.");
@@ -291,10 +288,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @Nullable
     @Override
-    public ClientSession getSession(@NotNull final String clientId) {
+    public ClientSession getSession(@NotNull final String clientId, final boolean includeWill) {
         checkNotNull(clientId, "Client id must not be null");
 
-        return localPersistence.getSession(clientId);
+        return localPersistence.getSession(clientId, true, includeWill);
     }
 
     /**
@@ -362,7 +359,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     @Override
     public Long getSessionExpiryInterval(@NotNull final String clientId) {
 
-        final ClientSession session = getSession(clientId);
+        final ClientSession session = getSession(clientId, false);
         if (session == null) {
             return null;
         }
@@ -467,6 +464,46 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 return null;
             }
         });
+    }
+
+    @Override
+    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(@NotNull final ChunkCursor cursor) {
+        try {
+            checkNotNull(cursor, "Cursor must not be null");
+
+            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, ClientSession>>>> builder = ImmutableList.builder();
+
+            final int bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
+            final int maxResults = InternalConfigurations.PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE / (bucketCount - cursor.getFinishedBuckets().size());
+            for (int i = 0; i < bucketCount; i++) {
+                //skip already finished buckets
+                if (!cursor.getFinishedBuckets().contains(i)) {
+                    final String lastKey = cursor.getLastKeys().get(i);
+                    builder.add(singleWriter.submit(i, (bucketIndex1, queueBuckets, queueIndex) -> {
+                        return localPersistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, bucketIndex1, lastKey, maxResults);
+                    }));
+                }
+            }
+
+            return Futures.transform(Futures.allAsList(builder.build()), allBucketsResult -> {
+                Preconditions.checkNotNull(allBucketsResult, "Iteration result from all buckets cannot be null");
+
+                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, ClientSession>>> resultBuilder = ImmutableMap.builder();
+                for (final BucketChunkResult<Map<String, ClientSession>> bucketResult : allBucketsResult) {
+                    resultBuilder.put(bucketResult.getBucketIndex(), bucketResult);
+                }
+
+                for (final Integer finishedBucketId : cursor.getFinishedBuckets()) {
+                    resultBuilder.put(finishedBucketId, new BucketChunkResult<>(Map.of(), true, cursor.getLastKeys().get(finishedBucketId), finishedBucketId));
+                }
+
+                return new MultipleChunkResult<>(resultBuilder.build());
+
+            }, MoreExecutors.directExecutor());
+
+        } catch (final Throwable throwable) {
+            return Futures.immediateFailedFuture(throwable);
+        }
     }
 
     public enum DisconnectSource {

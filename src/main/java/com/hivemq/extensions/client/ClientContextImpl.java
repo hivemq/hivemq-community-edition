@@ -20,9 +20,11 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Comparator;
@@ -43,11 +45,13 @@ public class ClientContextImpl {
     private final ModifiableDefaultPermissions defaultPermissions;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
-    public ClientContextImpl(@NotNull final HiveMQPlugins hiveMQPlugins, @NotNull final ModifiableDefaultPermissions defaultPermissions) {
+    public ClientContextImpl(
+            @NotNull final HiveMQExtensions hiveMQExtensions,
+            @NotNull final ModifiableDefaultPermissions defaultPermissions) {
         this.interceptorList = new CopyOnWriteArrayList<>();
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.defaultPermissions = defaultPermissions;
     }
 
@@ -61,7 +65,23 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void removePublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
+    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
+    public void removeSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
 
@@ -97,12 +117,54 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
+    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof SubscribeInboundInterceptor)
+                .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
     public List<PublishInboundInterceptor> getPublishInboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof PublishInboundInterceptor)
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (PublishInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof SubscribeInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -115,7 +177,8 @@ public class ClientContextImpl {
         if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
             return -1;
         }
-        final HiveMQExtension plugin = hiveMQPlugins.getPluginForClassloader((IsolatedPluginClassloader) object.getClass().getClassLoader());
+        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+                (IsolatedPluginClassloader) object.getClass().getClassLoader());
         if (plugin != null) {
             return plugin.getPriority();
         } else {
@@ -127,6 +190,7 @@ public class ClientContextImpl {
         if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
             return true;
         }
-        return hiveMQPlugins.getPluginForClassloader((IsolatedPluginClassloader) object.getClass().getClassLoader()) != null;
+        return hiveMQExtensions.getExtensionForClassloader(
+                (IsolatedPluginClassloader) object.getClass().getClassLoader()) != null;
     }
 }

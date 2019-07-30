@@ -21,9 +21,11 @@ import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.builder.*;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
+import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
@@ -44,12 +46,16 @@ import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
 import com.hivemq.extensions.ioc.annotation.PluginTaskQueue;
 import com.hivemq.extensions.loader.*;
+import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.extensions.services.auth.*;
 import com.hivemq.extensions.services.builder.*;
 import com.hivemq.extensions.services.cluster.ClusterServiceNoopImpl;
 import com.hivemq.extensions.services.initializer.InitializerRegistryImpl;
 import com.hivemq.extensions.services.initializer.Initializers;
 import com.hivemq.extensions.services.initializer.InitializersImpl;
+import com.hivemq.extensions.services.interceptor.GlobalInterceptorRegistryImpl;
+import com.hivemq.extensions.services.interceptor.Interceptors;
+import com.hivemq.extensions.services.interceptor.InterceptorsImpl;
 import com.hivemq.extensions.services.publish.PublishServiceImpl;
 import com.hivemq.extensions.services.publish.RetainedMessageStoreImpl;
 import com.hivemq.extensions.services.session.ClientServiceImpl;
@@ -65,10 +71,10 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Georg Held
  */
-public class PluginModule extends SingletonModule<Class<PluginModule>> {
+public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
 
-    public PluginModule() {
-        super(PluginModule.class);
+    public ExtensionModule() {
+        super(ExtensionModule.class);
     }
 
     @Override
@@ -116,6 +122,10 @@ public class PluginModule extends SingletonModule<Class<PluginModule>> {
         bind(ClusterService.class).to(ClusterServiceNoopImpl.class).in(LazySingleton.class);
 
         bind(PluginAuthorizerService.class).to(PluginAuthorizerServiceImpl.class);
+
+        bind(GlobalInterceptorRegistry.class).to(GlobalInterceptorRegistryImpl.class).in(LazySingleton.class);
+        bind(Interceptors.class).to(InterceptorsImpl.class).in(LazySingleton.class);
+        bind(AdminService.class).to(AdminServiceImpl.class).in(LazySingleton.class);
     }
 
     private @NotNull ExecutorService getPluginStartStopExecutor() {

@@ -45,8 +45,7 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,7 +87,7 @@ public class TopicTreeStartupTest {
         final ListenableFuture<Set<String>> future = Futures.immediateFuture(Sets.newHashSet("client1", "client2", "client3"));
         when(clientSessionPersistence.getAllClients()).thenReturn(future);
 
-        when(clientSessionPersistence.getSession(anyString())).thenReturn(new ClientSession(false, SESSION_EXPIRY_MAX));
+        when(clientSessionPersistence.getSession(anyString(), anyBoolean())).thenReturn(new ClientSession(false, SESSION_EXPIRY_MAX));
 
         when(clientSessionSubscriptionPersistence.getSubscriptions(eq("client1"))).thenReturn(ImmutableSet.of(new Topic("topic1", QoS.AT_LEAST_ONCE)));
         when(clientSessionSubscriptionPersistence.getSubscriptions(eq("client2"))).thenReturn(ImmutableSet.of(new Topic("topic1", QoS.AT_LEAST_ONCE), new Topic("topic2", QoS.EXACTLY_ONCE)));
@@ -112,7 +111,7 @@ public class TopicTreeStartupTest {
         final ListenableFuture<Set<String>> future = Futures.immediateFuture(Sets.newHashSet("client1", "client2"));
         when(clientSessionPersistence.getAllClients()).thenReturn(future);
 
-        when(clientSessionPersistence.getSession(anyString())).thenReturn(new ClientSession(false, 0));
+        when(clientSessionPersistence.getSession(anyString(), anyBoolean())).thenReturn(new ClientSession(false, 0));
 
         topicTreeStartup.postConstruct();
 

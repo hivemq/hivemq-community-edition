@@ -19,11 +19,13 @@ package com.hivemq.statistics;
 import com.codahale.metrics.Gauge;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtension;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.statistics.collectors.CloudPlatform;
 import com.hivemq.statistics.collectors.ContainerEnvironment;
@@ -39,6 +41,7 @@ import oshi.software.os.OperatingSystemVersion;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.SortedMap;
 
 import static com.hivemq.configuration.service.InternalConfigurations.SYSTEM_METRICS_ENABLED;
@@ -57,23 +60,23 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     private final @NotNull FullConfigurationService fullConfigurationService;
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull HivemqId hivemqId;
-    private final @NotNull HiveMQPlugins hiveMQPlugins;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
 
     @Inject
     public UsageStatisticsCollectorImpl(final @NotNull SystemInformation systemInformation,
                                         final @NotNull FullConfigurationService fullConfigurationService,
                                         final @NotNull MetricsHolder metricsHolder,
                                         final @NotNull HivemqId hivemqId,
-                                        final @NotNull HiveMQPlugins hiveMQPlugins) {
+                                        final @NotNull HiveMQExtensions hiveMQExtensions) {
 
         this.systemInformation = systemInformation;
         this.fullConfigurationService = fullConfigurationService;
         this.metricsHolder = metricsHolder;
         this.hivemqId = hivemqId;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
-    public String getJson(final String statisticsType) throws Exception {
+    public @NotNull String getJson(final @NotNull String statisticsType) throws Exception {
 
         final Statistic statistic = collectStatistics();
         statistic.setStatisticType(statisticsType);
@@ -82,7 +85,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         return objectMapper.writer().writeValueAsString(statistic);
     }
 
-    private Statistic collectStatistics() {
+    private @NotNull Statistic collectStatistics() {
 
         final Statistic statistic = new Statistic();
 
@@ -91,7 +94,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         try {
             collectSystemStatistics(statistic);
         } catch (final Throwable t) {
-            log.debug("Not able to fetch system information for anonymous statistics, reason: ", t.getMessage());
+            log.debug("Not able to fetch system information for anonymous statistics, reason: {}", t.getMessage());
             log.trace("original exception", t);
         }
         collectConfigStatistics(statistic);
@@ -102,22 +105,35 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         return statistic;
     }
 
-    private void collectEnvironmentStatistics(final Statistic statistic) {
+    private void collectEnvironmentStatistics(final @NotNull Statistic statistic) {
         statistic.setCloudPlatform(new CloudPlatform().getCloudPlatform());
         statistic.setContainer(new ContainerEnvironment().getContainerEnvironment());
     }
 
-    private void collectHiveMQInformation(final Statistic statistic) {
+    private void collectHiveMQInformation(final @NotNull Statistic statistic) {
 
         statistic.setId(hivemqId.getHivemqId());
         statistic.setHivemqVersion(systemInformation.getHiveMQVersion());
         statistic.setHivemqUptime((System.currentTimeMillis() - systemInformation.getRunningSince()) / 1000);
 
-        statistic.setOfficialPlugins(0);
-        statistic.setCustomPlugins(hiveMQPlugins.getEnabledHiveMQPlugins().size());
+        int official = 0;
+        int custom = 0;
+
+        final Collection<HiveMQExtension> extensions = hiveMQExtensions.getEnabledHiveMQExtensions().values();
+
+        for (final HiveMQExtension extension : extensions) {
+            if (extension.getAuthor() != null && extension.getAuthor().contains("dc-square")) {
+                official++;
+            } else {
+                custom++;
+            }
+        }
+
+        statistic.setOfficialExtensions(official);
+        statistic.setCustomExtensions(custom);
     }
 
-    private void collectJvmStatistics(final Statistic statistic) {
+    private void collectJvmStatistics(final @NotNull Statistic statistic) {
 
         statistic.setJavaVendor(System.getProperty("java.vm.vendor"));
         statistic.setJavaVendorVersion(System.getProperty("java.vendor.version"));
@@ -128,14 +144,14 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         statistic.setSystemArchitecture(System.getProperty("os.arch"));
     }
 
-    private void collectMetricStatistics(final Statistic statistic) {
+    private void collectMetricStatistics(final @NotNull Statistic statistic) {
 
         final Number connectedClients = getGaugeValue(CONNECTIONS_OVERALL_CURRENT.name());
 
         statistic.setConnectedClients(connectedClients == null ? 0 : connectedClients.longValue());
     }
 
-    private void collectConfigStatistics(final Statistic statistic) {
+    private void collectConfigStatistics(final @NotNull Statistic statistic) {
 
         final ListenerConfigurationService listenerConfiguration = fullConfigurationService.listenerConfiguration();
 
@@ -154,7 +170,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         statistic.setBandwithIncoming(fullConfigurationService.restrictionsConfiguration().incomingLimit());
     }
 
-    private <T> T getGaugeValue(final String metricName) {
+    private @Nullable <T> T getGaugeValue(final String metricName) {
         try {
             final SortedMap<String, Gauge> gauges = metricsHolder.getMetricRegistry().getGauges((name, metric) -> metricName.equals(name));
             if (gauges.isEmpty()) {
@@ -171,7 +187,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         }
     }
 
-    private void collectSystemStatistics(final Statistic statistic) {
+    private void collectSystemStatistics(final @NotNull Statistic statistic) {
 
         if (!SYSTEM_METRICS_ENABLED) {
             return;

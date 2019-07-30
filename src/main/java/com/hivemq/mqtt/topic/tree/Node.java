@@ -33,11 +33,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class Node {
 
-    private final String topicPart;
+    private final @NotNull String topicPart;
     private final int indexMapCreationThreshold;
     private final int subscriberMapCreationThreshold;
-    private final Counter subscriptionCounter;
-    private final AtomicInteger segmentSubscriptionCounter;
+    private final @NotNull Counter subscriptionCounter;
+    private final @NotNull AtomicInteger segmentSubscriptionCounter;
 
 
     public Node(final String topicPart, final int indexMapCreationThreshold, final int subscriberMapCreationThreshold,
@@ -64,16 +64,17 @@ class Node {
     private SubscriberWithQoS[] exactSubscribers;
 
     /**
-     * The child nodes of this node. The childs get initialized lazily for memory saving purposes
+     * The child nodes of this node. The children get initialized lazily for memory saving purposes. If a threshold is exceeded this is null and
+     * the childrenMap contains all the children.
      */
     @Nullable
     Node[] children;
 
     /**
-     * An optional index map for quick access to children.
+     * An optional map for quick access to children (only exists if a threshold is exceeded)
      */
     @Nullable
-    Map<String, Integer> childrenIndex;
+    Map<String, Node> childrenMap;
 
     /**
      * An optional index map for quick access to exact subscribers.
@@ -88,33 +89,33 @@ class Node {
     Map<Key, SubscriberWithQoS> wildcardSubscriberMap;
 
 
-    public Node addIfAbsent(final Node node) {
+    @NotNull
+    public Node addIfAbsent(@NotNull final Node node) {
 
         if (children != null) {
 
             //Check if we need to create an index for large nodes
-            if (children.length > indexMapCreationThreshold && childrenIndex == null) {
-                childrenIndex = new HashMap<>();
+            if (children.length > indexMapCreationThreshold && childrenMap == null) {
+                childrenMap = new HashMap<>(children.length);
 
+                Node existingNode = null;
                 //Add all entries to the map
-                for (int i = 0; i < children.length; i++) {
-                    if (children[i] != null) {
-                        childrenIndex.put(children[i].getTopicPart(), i);
+                for (final Node child : children) {
+                    if (child != null) {
+                        childrenMap.put(child.getTopicPart(), child);
+                        if (child.getTopicPart().equals(node.getTopicPart())) {
+                            existingNode = child;
+                        }
                     }
                 }
-            }
-
-            //Let's check if we already have an index
-            if (childrenIndex != null) {
-                @Nullable final Integer index = childrenIndex.get(node.getTopicPart());
-                if (index != null) {
-                    return children[index];
+                children = null;
+                if (existingNode != null) {
+                    return existingNode;
                 }
-            }
+                childrenMap.put(node.getTopicPart(), node);
+            } else {
 
-            //We don't have an index map for this node, so iterate to find the root node
-            else {
-
+                //check if the node already exists
                 for (final Node child : children) {
                     if (child != null) {
                         if (child.getTopicPart().equals(node.getTopicPart())) {
@@ -122,33 +123,27 @@ class Node {
                         }
                     }
                 }
+
+                final Integer emptySlotIndex = findEmptyArrayIndex(children);
+                if (emptySlotIndex != null) {
+                    children[emptySlotIndex] = node;
+                } else {
+                    final Node[] newChildren = new Node[children.length + 1];
+                    System.arraycopy(children, 0, newChildren, 0, children.length);
+                    newChildren[newChildren.length - 1] = node;
+                    children = newChildren;
+                }
+            }
+        } else if (childrenMap != null) {
+
+            final Node previousValue = childrenMap.putIfAbsent(node.getTopicPart(), node);
+            if (previousValue != null) {
+                return previousValue;
             }
         } else {
-            children = new Node[0];
+            children = new Node[]{node};
         }
 
-        final Integer emptySlotIndex = findEmptyArrayIndex(children);
-
-        if (emptySlotIndex != null) {
-
-            children[emptySlotIndex] = node;
-
-            if (childrenIndex != null) {
-                childrenIndex.put(node.getTopicPart(), emptySlotIndex);
-            }
-
-        } else {
-
-            final Node[] newChildren = new Node[children.length + 1];
-            System.arraycopy(children, 0, newChildren, 0, children.length);
-            newChildren[newChildren.length - 1] = node;
-            children = newChildren;
-
-            //Add to index, if index is available
-            if (childrenIndex != null) {
-                childrenIndex.put(node.getTopicPart(), newChildren.length - 1);
-            }
-        }
         return node;
     }
 
@@ -169,7 +164,7 @@ class Node {
      * @param exactSubscriber the subscription
      * @return if the subscriber already had an existing subscription for this topic
      */
-    public boolean addExactSubscriber(final SubscriberWithQoS exactSubscriber) {
+    public boolean addExactSubscriber(@NotNull final SubscriberWithQoS exactSubscriber) {
 
         if (exactSubscriberMap == null && NodeUtils.getExactSubscriberCount(this) > subscriberMapCreationThreshold) {
             exactSubscriberMap = new HashMap<>(subscriberMapCreationThreshold + 1);
@@ -348,7 +343,7 @@ class Node {
      * @return <code>true</code> if the entry is already present in the array or if a
      * empty slot could be found for the entry
      */
-    private boolean fillEmptyArraySlot(@NotNull final SubscriberWithQoS[] array, final SubscriberWithQoS entry) {
+    private boolean fillEmptyArraySlot(final @NotNull SubscriberWithQoS[] array, final @NotNull SubscriberWithQoS entry) {
         for (int i = 0; i < array.length; i++) {
             //If there's an empty slot in the array, reuse it instead of creating a new copy
             if (array[i] == null) {
@@ -386,6 +381,11 @@ class Node {
     }
 
     @Nullable
+    public Map<String, Node> getChildrenMap() {
+        return childrenMap;
+    }
+
+    @Nullable
     public SubscriberWithQoS[] getExactSubscribers() {
         return exactSubscribers;
     }
@@ -395,11 +395,12 @@ class Node {
         return wildcardSubscribers;
     }
 
+    @NotNull
     public String getTopicPart() {
         return topicPart;
     }
 
-    AtomicInteger getSegmentSubscriptionCounter() {
+    @NotNull AtomicInteger getSegmentSubscriptionCounter() {
         return segmentSubscriptionCounter;
     }
 

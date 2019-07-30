@@ -18,10 +18,14 @@ package com.hivemq.persistence.local;
 
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.annotations.Nullable;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.LocalPersistence;
+import com.hivemq.persistence.PersistenceFilter;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -95,5 +99,20 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
     @ReadOnly
     @NotNull
     ImmutableSet<Topic> getSubscriptions(@NotNull final String client);
+
+    /**
+     * Get a chunk of subscriptions.
+     *
+     * @param filter       the persistence filter to match. Usually a master filter.
+     * @param bucketIndex  the bucket index
+     * @param lastClientId the last client identifier for this chunk. Pass <code>null</code> to start at the beginning.
+     * @param maxResults   the max amount of results contained in the chunk (can be exceeded). Subscriptions (not
+     *                     clientids) are counted here. When the subscription count for one client
+     *                     exceeds the limit, it will contain all subscriptions for this client anyway.
+     * @return a {@link BucketChunkResult} with the entries and the information if more chunks are available
+     */
+    @NotNull
+    BucketChunkResult<Map<String, Set<Topic>>> getAllSubscribersChunk(@NotNull PersistenceFilter filter, int bucketIndex, @Nullable String lastClientId, int maxResults);
+
 
 }

@@ -18,9 +18,10 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -94,13 +95,16 @@ public class PluginInitializerHandlerTest {
     private InitializersImpl initializers;
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;
 
     @Mock
     private MqttConnacker mqttConnacker;
+
+    @Mock
+    private ListenerConfigurationService listenerConfigurationService;
 
     private EmbeddedChannel embeddedChannel;
 
@@ -119,7 +123,9 @@ public class PluginInitializerHandlerTest {
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
-        pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService, new ServerInformationImpl(new SystemInformationImpl()), hiveMQPlugins, clientSessionPersistence, mqttConnacker);
+        pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,
+                new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService),
+                hiveMQExtensions, clientSessionPersistence, mqttConnacker);
     }
 
     @Test(timeout = 10000)

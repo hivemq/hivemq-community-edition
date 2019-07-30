@@ -48,7 +48,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
     @NotNull
     private final PluginLifecycleHandler lifecycleHandler;
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
     @NotNull
     private final ShutdownHooks shutdownHooks;
 
@@ -56,12 +56,12 @@ public class PluginBootstrapImpl implements PluginBootstrap {
     public PluginBootstrapImpl(@NotNull final PluginLoader pluginLoader,
                                @NotNull final SystemInformation systemInformation,
                                @NotNull final PluginLifecycleHandler lifecycleHandler,
-                               @NotNull final HiveMQPlugins hiveMQPlugins,
+                               @NotNull final HiveMQExtensions hiveMQExtensions,
                                @NotNull final ShutdownHooks shutdownHooks) {
         this.pluginLoader = pluginLoader;
         this.systemInformation = systemInformation;
         this.lifecycleHandler = lifecycleHandler;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
         this.shutdownHooks = shutdownHooks;
     }
 
@@ -85,7 +85,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
 
         final ImmutableList.Builder<ListenableFuture<Void>> futures = ImmutableList.builder();
 
-        for (final String pluginId : hiveMQPlugins.getEnabledHiveMQPlugins().keySet()) {
+        for (final String pluginId : hiveMQExtensions.getEnabledHiveMQExtensions().keySet()) {
             futures.add(lifecycleHandler.pluginStop(pluginId));
         }
 

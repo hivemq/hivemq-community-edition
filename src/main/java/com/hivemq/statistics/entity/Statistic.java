@@ -26,8 +26,9 @@ public class Statistic {
     private String hivemqVersion;
     private long hivemqUptime;
     private Number connectedClients;
-    private long officialPlugins;
-    private long customPlugins;
+    private long officialExtensions;
+    private long enterpriseExtensions;
+    private long customExtensions;
     private long tcpListeners;
     private long tlsListeners;
     private long wsListeners;
@@ -100,20 +101,20 @@ public class Statistic {
         this.connectedClients = connectedClients;
     }
 
-    public long getOfficialPlugins() {
-        return officialPlugins;
+    public long getOfficialExtensions() {
+        return officialExtensions;
     }
 
-    public void setOfficialPlugins(final long officialPlugins) {
-        this.officialPlugins = officialPlugins;
+    public void setOfficialExtensions(final long officialExtensions) {
+        this.officialExtensions = officialExtensions;
     }
 
-    public long getCustomPlugins() {
-        return customPlugins;
+    public long getCustomExtensions() {
+        return customExtensions;
     }
 
-    public void setCustomPlugins(final long customPlugins) {
-        this.customPlugins = customPlugins;
+    public void setCustomExtensions(final long customExtensions) {
+        this.customExtensions = customExtensions;
     }
 
     public long getTcpListeners() {

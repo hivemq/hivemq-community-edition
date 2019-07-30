@@ -92,7 +92,7 @@ public class ModifiableUserPropertiesImplTest {
     @Test(timeout = 5000)
     public void test_delegate_is_returned() {
 
-        assertSame(intermediateProps, filledProps.consolidate());
+        assertEquals(filledProps.legacy, filledProps.consolidate());
     }
 
     @Test(expected = NullPointerException.class)
@@ -205,6 +205,19 @@ public class ModifiableUserPropertiesImplTest {
         assertEquals(0, filledProps.getAllForName("one").size());
         assertEquals(0, filledProps.getAllForName("two").size());
         assertTrue(filledProps.isEmpty());
+    }
+
+    @Test
+    public void test_clear_add() {
+        assertEquals(3, filledProps.asList().size());
+        filledProps.clear();
+        assertEquals(0, filledProps.getAllForName("one").size());
+        assertEquals(0, filledProps.getAllForName("two").size());
+        assertTrue(filledProps.isEmpty());
+
+        filledProps.addUserProperty("some", "new");
+        assertFalse(filledProps.isEmpty());
+        assertEquals(1, filledProps.asList().size());
     }
 
 

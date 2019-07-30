@@ -65,6 +65,11 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals(session.isConnected(), result.isConnected());
         assertEquals(UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE, result.getSessionExpiryInterval());
         assertEquals(1234567890L, timestamp);
+
+        final ClientSession result2 = serializer.deserializeValueWithoutWill(bytes);
+        assertEquals(session.isConnected(), result2.isConnected());
+        assertEquals(UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE, result2.getSessionExpiryInterval());
+        assertNull(result2.getWillPublish());
     }
 
     @Test
@@ -79,6 +84,11 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals(session.isConnected(), result.isConnected());
         assertEquals(10000L, result.getSessionExpiryInterval());
         assertEquals(1234567890L, timestamp);
+
+        final ClientSession result2 = serializer.deserializeValueWithoutWill(bytes);
+        assertEquals(session.isConnected(), result2.isConnected());
+        assertEquals(10000L, result2.getSessionExpiryInterval());
+        assertNull(result2.getWillPublish());
     }
 
     @Test
@@ -142,6 +152,12 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals("responseTopic", resultWill.getResponseTopic());
         assertEquals("contentType", resultWill.getContentType());
         assertArrayEquals(new byte[]{1, 2, 3}, resultWill.getCorrelationData());
+
+
+        final ClientSession result2 = serializer.deserializeValueWithoutWill(bytes);
+        assertEquals(session.isConnected(), result2.isConnected());
+        assertEquals(10000L, result2.getSessionExpiryInterval());
+        assertNull(result2.getWillPublish());
     }
 
     @Test

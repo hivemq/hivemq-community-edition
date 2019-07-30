@@ -31,12 +31,14 @@ public class ListenerImpl implements Listener {
     private final int port;
     private final @NotNull String bindAddress;
     private final @NotNull ListenerType listenerType;
+    private final @NotNull String name;
 
     public ListenerImpl(final @NotNull com.hivemq.configuration.service.entity.Listener hiveMQListener) {
         Preconditions.checkNotNull(hiveMQListener, "listener must never be null");
         this.port = hiveMQListener.getPort();
         this.bindAddress = hiveMQListener.getBindAddress();
         this.listenerType = PluginInformationUtil.listenerTypeFromInstance(hiveMQListener);
+        this.name = hiveMQListener.getName();
     }
 
     @Override
@@ -52,5 +54,10 @@ public class ListenerImpl implements Listener {
     @Override
     public @NotNull ListenerType getListenerType() {
         return listenerType;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return name;
     }
 }

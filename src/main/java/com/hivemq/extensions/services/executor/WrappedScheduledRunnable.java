@@ -18,7 +18,7 @@ package com.hivemq.extensions.services.executor;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.CompletableScheduledFuture;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 /**
@@ -37,21 +37,21 @@ public class WrappedScheduledRunnable implements Runnable {
     private final CompletableScheduledFuture<?> future;
 
     @NotNull
-    private final HiveMQPlugins hiveMQPlugins;
+    private final HiveMQExtensions hiveMQExtensions;
 
     WrappedScheduledRunnable(
             @NotNull final Runnable runnable, @NotNull final IsolatedPluginClassloader classLoader,
-            @NotNull final CompletableScheduledFuture<?> future, @NotNull final HiveMQPlugins hiveMQPlugins) {
+            @NotNull final CompletableScheduledFuture<?> future, @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.runnable = runnable;
         this.classLoader = classLoader;
         this.future = future;
-        this.hiveMQPlugins = hiveMQPlugins;
+        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
     public void run() {
 
-        if (hiveMQPlugins.getPluginForClassloader(classLoader) == null) {
+        if (hiveMQExtensions.getExtensionForClassloader(classLoader) == null) {
             if (!future.isCancelled()) {
                 future.cancel(true);
             }

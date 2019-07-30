@@ -55,6 +55,8 @@ class ClientQueuePersistenceSerializer {
     private static final byte PUBREL_BIT = (byte) 0b0100_0000;
     private static final byte RETAINED_BIT = (byte) 0b0010_0000;
     private static final byte DUPLICATE_DELIVERY_BIT = (byte) 0b0001_0000;
+    //This bit is only set if the messages was sent as a result of a subscribe messages, regardless of the retain as published option.
+    private static final byte RETAINED_MESSAGE_BIT = (byte) 0b0000_0100;
     private static final byte QOS_BITS = (byte) 0b0000_0011;
 
     private static final byte RESPONSE_TOPIC_PRESENT_BIT = (byte) 0b1000_0000;
@@ -158,9 +160,10 @@ class ClientQueuePersistenceSerializer {
     // ********** Value **********
 
     @NotNull
-    ByteIterable serializePublishWithoutPacketId(@NotNull final PUBLISH publish) {
-        return XodusUtils.bytesToByteIterable(createPublishBytes(publish));
+    ByteIterable serializePublishWithoutPacketId(@NotNull final PUBLISH publish, boolean retained) {
+        return XodusUtils.bytesToByteIterable(createPublishBytes(publish, retained));
     }
+
 
     @NotNull
     ByteIterable serializeAndSetPacketId(@NotNull final ByteIterable serializedValue, final int packetId) {
@@ -170,8 +173,8 @@ class ClientQueuePersistenceSerializer {
     }
 
     @NotNull
-    ByteIterable serializePubRel(@NotNull final PUBREL pubrel) {
-        return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier()));
+    ByteIterable serializePubRel(@NotNull final PUBREL pubrel, final boolean retained) {
+        return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(), retained));
     }
 
     int deserializePacketId(@NotNull final ByteIterable serializedValue) {
@@ -182,7 +185,7 @@ class ClientQueuePersistenceSerializer {
     MessageWithID deserializeValue(@NotNull final ByteIterable serializedValue) {
         final byte[] bytes = serializedValue.getBytesUnsafe();
 
-        if (bytes[Short.BYTES] == PUBREL_BIT) {
+        if ((bytes[Short.BYTES] & PUBREL_BIT) == PUBREL_BIT) {
             final int packetId = Bytes.readUnsignedShort(bytes, 0);
             return new PUBREL(packetId);
         }
@@ -193,17 +196,25 @@ class ClientQueuePersistenceSerializer {
         throw new IllegalArgumentException("Invalid client queue persistence value to deserialize");
     }
 
+    boolean deserializeRetained(@NotNull final ByteIterable serializedValue) {
+        final byte[] bytes = serializedValue.getBytesUnsafe();
+        return (bytes[Short.BYTES] & RETAINED_MESSAGE_BIT) == RETAINED_MESSAGE_BIT;
+    }
+
     @NotNull
-    private byte[] createPubrelBytes(final int packetId) {
+    private byte[] createPubrelBytes(final int packetId, final boolean retained) {
         final byte[] result = new byte[Short.BYTES + 1];
         int cursor = 0;
         cursor = XodusUtils.serializeShort(packetId, result, cursor);
         result[cursor] = PUBREL_BIT;
+        if (retained) {
+            result[cursor] |= RETAINED_MESSAGE_BIT;
+        }
         return result;
     }
 
     @NotNull
-    private byte[] createPublishBytes(@NotNull final PUBLISH message) {
+    private byte[] createPublishBytes(@NotNull final PUBLISH message, final boolean retained) {
 
         final byte[] topic = message.getTopic().getBytes(UTF_8);
         final byte[] hivemqId = message.getHivemqId().getBytes(UTF_8);
@@ -244,6 +255,9 @@ class ClientQueuePersistenceSerializer {
         }
         if (message.isRetain()) {
             flags |= RETAINED_BIT;
+        }
+        if (retained) {
+            flags |= RETAINED_MESSAGE_BIT;
         }
         cursor = XodusUtils.serializeByte(flags, result, cursor);
 

@@ -37,7 +37,6 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
 
     private static final Logger log = LoggerFactory.getLogger(ListenerConfigurationServiceImpl.class);
 
-
     /**
      * The actual listener. COWAL because we read a lot more than we write
      */
@@ -48,7 +47,6 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
      */
     final List<InternalListenerConfigurationService.UpdateListener> updateListeners = new CopyOnWriteArrayList<>();
 
-
     @Override
     public <T extends Listener> void addListener(final T listener) {
         if (listener.getClass().equals(TcpListener.class) ||
@@ -56,12 +54,9 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
                 listener.getClass().equals(WebsocketListener.class) ||
                 listener.getClass().equals(TlsWebsocketListener.class)) {
 
-            log.debug("Adding {} of type {} on bind address {} and port {}.",
-                    listener.readableName(),
-                    listener.getClass().getSimpleName(),
-                    listener.getBindAddress(),
-                    listener.getPort());
-
+            log.debug("Adding {} on bind address {} and port {}. Name: {}.",
+                    listener.readableName(), listener.getBindAddress(),
+                    listener.getPort(), listener.getName());
             listeners.add(listener);
 
             final ImmutableList<Listener> allListeners = ImmutableList.copyOf(listeners);
@@ -109,7 +104,6 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
         listeners.clear();
     }
 
-
     <T extends Listener> ImmutableList<T> filterListeners(final Class<T> clazz) {
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (final Listener listener : listeners) {
@@ -120,7 +114,6 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
         }
         return builder.build();
     }
-
 
     /**
      * {@inheritDoc}

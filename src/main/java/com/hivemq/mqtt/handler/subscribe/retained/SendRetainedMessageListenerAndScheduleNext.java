@@ -43,50 +43,55 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
     private static final Logger log = LoggerFactory.getLogger(SendRetainedMessageListenerAndScheduleNext.class);
 
     private final @NotNull Topic subscription;
-    private final @NotNull String lastTopic;
     private final @NotNull Queue<String> topics;
     private final @NotNull Channel channel;
     private final @NotNull RetainedMessagesSender retainedMessagesSender;
+    private final int batchSizeMax;
 
     SendRetainedMessageListenerAndScheduleNext(
             final @NotNull Topic subscription,
-            final @NotNull String lastTopic,
             final @NotNull Queue<String> topics,
             final @NotNull Channel channel,
-            final @NotNull RetainedMessagesSender retainedMessagesSender) {
+            final @NotNull RetainedMessagesSender retainedMessagesSender,
+            final int batchSizeMax) {
 
         checkNotNull(subscription, "Subscription must not be null");
-        checkNotNull(lastTopic, "Last Topic must not be null");
         checkNotNull(topics, "Topics must not be null");
         checkNotNull(channel, "Channel must not be null");
         checkNotNull(retainedMessagesSender, "RetainedMessagesSender must not be null");
 
         this.subscription = subscription;
-        this.lastTopic = lastTopic;
         this.topics = topics;
         this.channel = channel;
         this.retainedMessagesSender = retainedMessagesSender;
+        this.batchSizeMax = batchSizeMax;
     }
 
     @Override
     public void onSuccess(final Void result) {
-        if (channel.isActive()) {
-            final String nextTopic = topics.poll();
-            if (nextTopic != null) {
-                send(nextTopic);
-            }
+        if (!channel.isActive()) {
+            return;
         }
+        send();
     }
 
-    private void send(final @NotNull String topic) {
-        final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessage(
-                new Topic(topic, subscription.getQoS(), subscription.isNoLocal(),
-                        subscription.isRetainAsPublished(), subscription.getRetainHandling(),
-                        subscription.getSubscriptionIdentifier()),
-                channel);
+    private void send() {
+        final int remainingTopics = topics.size();
+        if (remainingTopics == 0) {
+            return;
+        }
+        final int batchSize = Math.min(remainingTopics, batchSizeMax);
+        final Topic[] topicBatch = new Topic[batchSize];
+        for (int i = 0; i < batchSize; i++) {
+            final String nextTopic = topics.poll();
+            topicBatch[i] = new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
+                    subscription.isRetainAsPublished(), subscription.getRetainHandling(),
+                    subscription.getSubscriptionIdentifier());
+        }
 
-        Futures.addCallback(sentFuture, new SendRetainedMessageListenerAndScheduleNext(
-                subscription, topic, topics, channel, retainedMessagesSender), channel.eventLoop());
+        final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessages(channel, topicBatch);
+
+        Futures.addCallback(sentFuture, new SendRetainedMessageListenerAndScheduleNext(subscription, topics, channel, retainedMessagesSender, batchSizeMax), channel.eventLoop());
     }
 
     @Override
@@ -104,12 +109,12 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
                         log.trace("Retrying retained message for client '{}' on topic '{}'.",
                                 channel.attr(ChannelAttributes.CLIENT_ID).get(), subscription.getTopic());
                     }
-                    send(lastTopic);
+                    send();
                 }, 1, TimeUnit.SECONDS);
             }
 
         } else {
-            Exceptions.rethrowError("Unable to send retained message on topic " + lastTopic +
+            Exceptions.rethrowError("Unable to send retained message for subscription " + subscription.getTopic() +
                     " to client " + channel.attr(ChannelAttributes.CLIENT_ID).get() + ".", throwable);
             channel.disconnect();
         }

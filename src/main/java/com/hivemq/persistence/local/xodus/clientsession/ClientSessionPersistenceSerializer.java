@@ -233,6 +233,20 @@ public class ClientSessionPersistenceSerializer {
     }
 
 
+    @NotNull
+    public ClientSession deserializeValueWithoutWill(final byte[] bytes) {
+
+        int cursor = 8;
+        final long timeToLive = Bytes.readLong(bytes, cursor);
+        cursor += 8;
+        final byte flags = bytes[cursor];
+        final boolean connected = Bytes.isBitSet(flags, 0);
+        cursor += 1;
+
+        return new ClientSession(connected, timeToLive);
+    }
+
+
     public long deserializeTimestamp(final byte[] bytes) {
         return Bytes.readLong(bytes, 0);
     }

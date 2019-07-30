@@ -55,10 +55,11 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
     private final @NotNull List<SubscriptionResult> subscriptions;
     private final @NotNull Set<Topic> ignoredTopics;
 
-    public SendRetainedMessagesListener(@NotNull final List<SubscriptionResult> subscriptions,
-                                        @NotNull final Set<Topic> ignoredTopics,
-                                        @NotNull final RetainedMessagePersistence retainedMessagePersistence,
-                                        @NotNull final RetainedMessagesSender retainedMessagesSender) {
+    public SendRetainedMessagesListener(
+            @NotNull final List<SubscriptionResult> subscriptions,
+            @NotNull final Set<Topic> ignoredTopics,
+            @NotNull final RetainedMessagePersistence retainedMessagePersistence,
+            @NotNull final RetainedMessagesSender retainedMessagesSender) {
 
         checkNotNull(subscriptions, "Subscriptions must not be null");
         checkNotNull(ignoredTopics, "ignoredTopics must not be null");
@@ -99,7 +100,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
         final List<Topic> topicsWithWildcards = new ArrayList<>(subscriptions.size());
         for (final SubscriptionResult subscription : subscriptions) {
 
-            if(subscription == null){
+            if (subscription == null) {
                 continue;
             }
 
@@ -109,7 +110,8 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
                 continue;
             }
 
-            if (subscriptionTopic.getRetainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST && subscription.subscriptionAlreadyExisted()) {
+            if (subscriptionTopic.getRetainHandling() == SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST &&
+                    subscription.subscriptionAlreadyExisted()) {
                 //do not send retained messages if the subscription already existed before
                 continue;
             }
@@ -125,8 +127,12 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
                     topicsWithWildcards.add(subscriptionTopic);
                 } else {
 
-                    final ListenableFuture<Void> writeFuture = retainedMessagesSender.writeRetainedMessage(subscriptionTopic, channel);
-                    Futures.addCallback(writeFuture, new SendRetainedMessageResultListener(channel, subscriptionTopic, retainedMessagesSender), channel.eventLoop());
+                    final ListenableFuture<Void> writeFuture =
+                            retainedMessagesSender.writeRetainedMessages(channel, subscriptionTopic);
+                    Futures.addCallback(
+                            writeFuture,
+                            new SendRetainedMessageResultListener(channel, subscriptionTopic, retainedMessagesSender),
+                            channel.eventLoop());
 
                 }
             }
@@ -144,27 +150,34 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
      * @param topicsWithWildcards a List of String which represents the topics with wildcards
      * @param channel             the {@link io.netty.channel.Channel} to write the matching retained messages to
      */
-    private void sendMatchingWildcardSubscriptions(@NotNull final List<Topic> topicsWithWildcards, @NotNull final Channel channel) {
+    private void sendMatchingWildcardSubscriptions(
+            @NotNull final List<Topic> topicsWithWildcards, @NotNull final Channel channel) {
 
         for (final Topic subscribedTopic : topicsWithWildcards) {
 
-            final List<ListenableFuture<Set<String>>> futures = retainedMessagePersistence.getWithWildcards(subscribedTopic.getTopic());
+            final List<ListenableFuture<Set<String>>> futures =
+                    retainedMessagePersistence.getWithWildcards(subscribedTopic.getTopic());
             for (final ListenableFuture<Set<String>> future : futures) {
-                Futures.addCallback(future, new RetainedMessagesHandleWildcardsCallback(subscribedTopic, channel, retainedMessagesSender), channel.eventLoop());
+                Futures.addCallback(
+                        future,
+                        new RetainedMessagesHandleWildcardsCallback(subscribedTopic, channel, retainedMessagesSender),
+                        channel.eventLoop());
             }
         }
     }
 
     static class RetainedMessagesHandleWildcardsCallback implements FutureCallback<Set<String>> {
+
         static final int CONCURRENT_MESSAGES = 25;
         private final @NotNull Topic subscription;
         private final @NotNull Channel channel;
 
         private final @NotNull RetainedMessagesSender retainedMessagesSender;
 
-        RetainedMessagesHandleWildcardsCallback(final @NotNull Topic subscription,
-                                                final @NotNull Channel channel,
-                                                final @NotNull RetainedMessagesSender retainedMessagesSender) {
+        RetainedMessagesHandleWildcardsCallback(
+                final @NotNull Topic subscription,
+                final @NotNull Channel channel,
+                final @NotNull RetainedMessagesSender retainedMessagesSender) {
             this.subscription = subscription;
             this.channel = channel;
             this.retainedMessagesSender = retainedMessagesSender;
@@ -172,7 +185,6 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
         @Override
         public void onSuccess(final @Nullable Set<String> retainedMessageTopics) {
-
             if (retainedMessageTopics == null || retainedMessageTopics.size() == 0) {
                 //Do nothing, we don't have retained messages
                 return;
@@ -183,24 +195,24 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
             final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
 
-            final int concurrentMessages = clientReceiveMaximum == null ? CONCURRENT_MESSAGES : Math.min(clientReceiveMaximum, CONCURRENT_MESSAGES);
+            int concurrentMessages = clientReceiveMaximum == null ? CONCURRENT_MESSAGES :
+                    Math.min(clientReceiveMaximum, CONCURRENT_MESSAGES);
+            concurrentMessages = Math.min(concurrentMessages, retainedMessageTopics.size());
 
+            final Topic[] topicBatch = new Topic[concurrentMessages];
             for (int i = 0; i < concurrentMessages; i++) {
                 final String nextTopic = topics.poll();
-
-                if (nextTopic == null) {
-                    return;
-                }
-
-                final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessage(
-                        new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
-                                subscription.isRetainAsPublished(), subscription.getRetainHandling(),
-                                subscription.getSubscriptionIdentifier()),
-                        channel);
-
-                Futures.addCallback(sentFuture, new SendRetainedMessageListenerAndScheduleNext(
-                        subscription, nextTopic, topics, channel, retainedMessagesSender), channel.eventLoop());
+                topicBatch[i] = new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
+                        subscription.isRetainAsPublished(), subscription.getRetainHandling(),
+                        subscription.getSubscriptionIdentifier());
             }
+
+
+            final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessages(channel, topicBatch);
+
+            Futures.addCallback(
+                    sentFuture, new SendRetainedMessageListenerAndScheduleNext(subscription, topics, channel,
+                            retainedMessagesSender, concurrentMessages), channel.eventLoop());
         }
 
         @Override

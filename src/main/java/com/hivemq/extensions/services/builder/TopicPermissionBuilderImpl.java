@@ -80,7 +80,7 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @NotNull
     @Override
     public TopicPermissionBuilder type(@NotNull final PermissionType type) {
-        Preconditions.checkNotNull(topicFilter, "Type cannot be null");
+        Preconditions.checkNotNull(type, "Type cannot be null");
 
         this.type = type;
         return this;
@@ -89,7 +89,7 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @NotNull
     @Override
     public TopicPermissionBuilder qos(@NotNull final Qos qos) {
-        Preconditions.checkNotNull(topicFilter, "QoS cannot be null");
+        Preconditions.checkNotNull(qos, "QoS cannot be null");
 
         this.qos = qos;
         return this;

@@ -75,7 +75,7 @@ public class PublishDistributorImplTest {
 
     @Test(timeout = 5000)
     public void test_not_connected() throws ExecutionException, InterruptedException {
-        when(clientSessionPersistence.getSession("client")).thenReturn(new ClientSession(false, 1000L));
+        when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(false, 1000L));
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
                 0, false, false, ImmutableList.of(1)).get();
@@ -86,7 +86,7 @@ public class PublishDistributorImplTest {
 
     @Test(timeout = 5000)
     public void test_session_expired() throws ExecutionException, InterruptedException {
-        when(clientSessionPersistence.getSession("client")).thenReturn(null);
+        when(clientSessionPersistence.getSession("client", false)).thenReturn(null);
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
                 0, false, false, ImmutableList.of(1)).get();
@@ -96,7 +96,7 @@ public class PublishDistributorImplTest {
 
     @Test(timeout = 5000)
     public void test_success() throws ExecutionException, InterruptedException {
-        when(clientSessionPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
+        when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(true, 1000L));
         when(clientQueuePersistence.add(eq("client"), eq(false), any(PUBLISH.class))).thenReturn(Futures.immediateFuture(null));
 
 
@@ -109,7 +109,7 @@ public class PublishDistributorImplTest {
 
     @Test(timeout = 5000)
     public void test_failed() throws ExecutionException, InterruptedException {
-        when(clientSessionPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
+        when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(true, 1000L));
         when(clientQueuePersistence.add(eq("client"), eq(false), any(PUBLISH.class))).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
 
 
@@ -134,8 +134,8 @@ public class PublishDistributorImplTest {
 
     @Test
     public void test_distribute_to_non_shared() {
-        when(clientSessionPersistence.getSession("client1")).thenReturn(new ClientSession(true, 1000L));
-        when(clientSessionPersistence.getSession("client2")).thenReturn(new ClientSession(true, 1000L));
+        when(clientSessionPersistence.getSession("client1", false)).thenReturn(new ClientSession(true, 1000L));
+        when(clientSessionPersistence.getSession("client2", false)).thenReturn(new ClientSession(true, 1000L));
         when(clientQueuePersistence.add(eq("client1"), eq(false), any(PUBLISH.class))).thenReturn(Futures.immediateFuture(null));
         when(clientQueuePersistence.add(eq("client2"), eq(false), any(PUBLISH.class))).thenReturn(Futures.immediateFuture(null));
 

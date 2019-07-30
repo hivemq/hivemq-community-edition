@@ -29,8 +29,10 @@ import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
-import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
+import com.hivemq.mqtt.message.pubrec.PUBREC;
+import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -42,10 +44,9 @@ import java.nio.channels.ClosedChannelException;
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.hivemq.configuration.service.InternalConfigurations.INFLIGHT_QUEUE_BUCKET_COUNT;
 
 /**
  * @author Dominik Obermaier
@@ -61,73 +62,63 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         CLOSED_CHANNEL_EXCEPTION.setStackTrace(new StackTraceElement[0]);
     }
 
-    private final Map<Integer, Integer> messageIdToBucketMap = new ConcurrentHashMap<>();
+
     private final Map<Integer, SettableFuture<PublishStatus>> messageIdToFutureMap = new ConcurrentHashMap<>();
 
-    private Queue<QueuedMessage>[] queues;
-
-    private boolean[] active;
+    @VisibleForTesting
+    final Queue<QueuedMessage> queue = new ArrayDeque<>();
 
     private final AtomicBoolean closedAlready = new AtomicBoolean(false);
-
-    @Override
-    public void handlerAdded(final ChannelHandlerContext ctx) throws Exception {
-
-        final Integer clientReceiveMaximum = ctx.channel().attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
-
-        if (clientReceiveMaximum != null && clientReceiveMaximum < INFLIGHT_QUEUE_BUCKET_COUNT) {
-            //noinspection unchecked
-            queues = new ArrayDeque[clientReceiveMaximum];
-            active = new boolean[clientReceiveMaximum];
-        } else {
-            //noinspection unchecked
-            queues = new ArrayDeque[INFLIGHT_QUEUE_BUCKET_COUNT];
-            active = new boolean[INFLIGHT_QUEUE_BUCKET_COUNT];
-        }
-
-        super.handlerAdded(ctx);
-    }
+    private final Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
 
         if (msg instanceof PUBACK || msg instanceof PUBCOMP) {
-
-            final int packetId = ((MessageWithID) msg).getPacketIdentifier();
-            messageFlowComplete(ctx, packetId);
+            messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
+        }
+        if (msg instanceof PUBREC) {
+            final PUBREC pubrec = (PUBREC) msg;
+            if (pubrec.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS &&
+                    pubrec.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
+                messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
+            }
         }
 
         super.channelRead(ctx, msg);
     }
 
-    private void messageFlowComplete(final ChannelHandlerContext ctx, final int packetId){
+    private void messageFlowComplete(@NotNull final ChannelHandlerContext ctx, final int packetId){
         final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
 
-        final Integer bucket = messageIdToBucketMap.remove(packetId);
         if (publishStatusFuture != null) {
             messageIdToFutureMap.remove(packetId);
             publishStatusFuture.set(PublishStatus.DELIVERED);
         }
 
-        if (bucket == null) {
+        final boolean removed = unacknowledgedMessages.remove(packetId);
+        if (!removed) {
             return;
         }
 
-        //The message for that ID was not queued
-        if (queues[bucket] == null || queues[bucket].isEmpty()) {
-
-            active[bucket] = false;
+        if (queue.isEmpty()) {
             return;
         }
 
-        final Queue<QueuedMessage> queue = queues[bucket];
+        final int maxInflightWindow = ChannelUtils.maxInflightWindow(ctx.channel());
 
-        final QueuedMessage poll = queue.poll();
-        ctx.writeAndFlush(poll.getPublish(), poll.getPromise());
+        do {
+            final QueuedMessage poll = queue.poll();
+            if (poll == null) {
+                return;
+            }
+            unacknowledgedMessages.add(poll.publish.getPacketIdentifier());
+            ctx.writeAndFlush(poll.getPublish(), poll.getPromise());
+        } while (unacknowledgedMessages.size() < maxInflightWindow);
     }
 
     @Override
-    public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
+    public void userEventTriggered(@NotNull final ChannelHandlerContext ctx, @NotNull final Object evt) throws Exception {
         if (!(evt instanceof PublishDroppedEvent)) {
             super.userEventTriggered(ctx, evt);
             return;
@@ -162,6 +153,9 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         final PUBLISH publish = (PUBLISH) msg;
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final int qosNumber = publish.getQoS().getQosNumber();
+        if (log.isTraceEnabled()) {
+            log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}", clientId, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());
+        }
 
         if (qosNumber < 1) {
             handleQosZero(ctx, publish, promise, future);
@@ -178,21 +172,13 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final String topic = publish.getTopic();
-        final int messageId = publish.getPacketIdentifier();
 
-        final int bucket = BucketUtils.getBucket(topic, INFLIGHT_QUEUE_BUCKET_COUNT);
-
-        //QoS messages which get resent must pass the queueing logic
-        if (publish.isDuplicateDelivery() && messageIdToBucketMap.containsKey(messageId)) {
-            super.write(ctx, msg, promise);
-            return;
-        }
-
-        if (!active[bucket]) {
-            handleInactiveBucket(ctx, publish, promise, messageId, bucket);
+        final int maxInflightWindow = ChannelUtils.maxInflightWindow(ctx.channel());
+        if (unacknowledgedMessages.size() >= maxInflightWindow) {
+            queueMessage(promise, publish, clientId);
         } else {
-            handleActiveBucket(promise, publish, clientId, bucket);
+            unacknowledgedMessages.add(publish.getPacketIdentifier());
+            super.write(ctx, publish, promise);
         }
     }
 
@@ -201,14 +187,10 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
 
         closedAlready.set(true);
 
-        for (final Queue<QueuedMessage> queue : queues) {
-            if (queue != null) {
-                for (final QueuedMessage queuedMessage : queue) {
-                    if (queuedMessage != null) {
-                        if (!queuedMessage.getPromise().isDone()) {
-                            queuedMessage.getPromise().setFailure(CLOSED_CHANNEL_EXCEPTION);
-                        }
-                    }
+        for (final QueuedMessage queuedMessage : queue) {
+            if (queuedMessage != null) {
+                if (!queuedMessage.getPromise().isDone()) {
+                    queuedMessage.getPromise().setFailure(CLOSED_CHANNEL_EXCEPTION);
                 }
             }
         }
@@ -223,36 +205,16 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         super.channelInactive(ctx);
     }
 
-    @NotNull
-    private Queue<QueuedMessage> getOrCreateQueue(final int bucket) {
-        Queue<QueuedMessage> queue = queues[bucket];
-        if (queue == null) {
-            queues[bucket] = new ArrayDeque<>();
-            queue = queues[bucket];
-        }
-        return queue;
-    }
-
-    private void handleActiveBucket(@NotNull final ChannelPromise promise, final PUBLISH publish, @NotNull final String clientId, final int bucket) {
-
-        final String topic = publish.getTopic();
-        final int messageId = publish.getPacketIdentifier();
+    private void queueMessage(@NotNull final ChannelPromise promise, @NotNull final PUBLISH publish, @NotNull final String clientId) {
 
         if (log.isTraceEnabled()) {
-            log.trace("Enqueued publish message with qos {} packetIdentifier {} and topic {} for client {}",
+            final String topic = publish.getTopic();
+            final int messageId = publish.getPacketIdentifier();
+            log.trace("Buffered publish message with qos {} packetIdentifier {} and topic {} for client {}, because the receive maximum is exceeded",
                     publish.getQoS().name(), messageId, topic, clientId);
-
         }
 
-        final Queue<QueuedMessage> queue = getOrCreateQueue(bucket);
         queue.add(new QueuedMessage(publish, promise));
-        messageIdToBucketMap.put(messageId, bucket);
-    }
-
-    private void handleInactiveBucket(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @NotNull final ChannelPromise promise, final int messageId, final int bucket) throws Exception {
-        active[bucket] = true;
-        messageIdToBucketMap.put(messageId, bucket);
-        super.write(ctx, publish, promise);
     }
 
     private void handleQosZero(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @NotNull final ChannelPromise promise, @Nullable final SettableFuture<PublishStatus> future) throws Exception {
@@ -262,14 +224,9 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         super.write(ctx, publish, promise);
     }
 
-    @VisibleForTesting
     @NotNull
-    Queue<QueuedMessage>[] getQueues() {
-        return queues;
-    }
-
-    public int inFlightSize() {
-        return messageIdToBucketMap.size();
+    public Set<Integer> unacknowledgedMessages() {
+        return unacknowledgedMessages;
     }
 
     @Immutable

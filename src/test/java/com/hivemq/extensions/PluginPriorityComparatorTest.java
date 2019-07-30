@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 public class PluginPriorityComparatorTest {
 
     @Mock
-    private HiveMQPlugins hiveMQPlugins;
+    private HiveMQExtensions hiveMQExtensions;
 
     private PluginPriorityComparator comparator;
 
@@ -42,15 +42,15 @@ public class PluginPriorityComparatorTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        comparator = new PluginPriorityComparator(hiveMQPlugins);
+        comparator = new PluginPriorityComparator(hiveMQExtensions);
     }
 
     @Test
     public void test_compare_plugins() {
         final HiveMQExtension plugin1 = getHiveMQPlugin(10);
         final HiveMQExtension plugin2 = getHiveMQPlugin(20);
-        when(hiveMQPlugins.getPlugin(eq("extension-1"))).thenReturn(plugin1);
-        when(hiveMQPlugins.getPlugin(eq("extension-2"))).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtension(eq("extension-1"))).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtension(eq("extension-2"))).thenReturn(plugin2);
 
         assertEquals(1, comparator.compare("extension-1", "extension-2"));
         assertEquals(-1, comparator.compare("extension-2", "extension-1"));
@@ -61,7 +61,7 @@ public class PluginPriorityComparatorTest {
     @Test
     public void test_compare_null_plugins() {
         final HiveMQExtension plugin1 = getHiveMQPlugin(10);
-        when(hiveMQPlugins.getPlugin(eq("extension-1"))).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtension(eq("extension-1"))).thenReturn(plugin1);
 
         assertEquals(0, comparator.compare("extension-3", "extension-4"));
         assertEquals(1, comparator.compare("extension-3", "extension-1"));

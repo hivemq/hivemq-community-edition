@@ -21,7 +21,7 @@ import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.services.CompletableScheduledFuture;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPlugins;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +60,7 @@ public class ManagedExecutorServicePerPluginTest {
     IsolatedPluginClassloader classLoader;
 
     @Mock
-    HiveMQPlugins hiveMQPlugins;
+    HiveMQExtensions hiveMQExtensions;
 
     @Mock
     HiveMQExtension plugin;
@@ -72,13 +72,14 @@ public class ManagedExecutorServicePerPluginTest {
         InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_KEEP_ALIVE_SECONDS.set(60);
         InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_SIZE.set(4);
 
-        when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(plugin);
 
         globalManagedPluginExecutorService = new GlobalManagedPluginExecutorService(shutdownHooks);
         globalManagedPluginExecutorService.postConstruct();
 
         managedExecutorServicePerPlugin =
-                new ManagedExecutorServicePerExtension(globalManagedPluginExecutorService, classLoader, hiveMQPlugins);
+                new ManagedExecutorServicePerExtension(globalManagedPluginExecutorService, classLoader,
+                        hiveMQExtensions);
     }
 
     @After
@@ -124,7 +125,7 @@ public class ManagedExecutorServicePerPluginTest {
 
         final CountDownLatch runLatch = new CountDownLatch(1);
 
-        when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(null);
+        when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
 
         managedExecutorServicePerPlugin.execute(() -> runLatch.countDown());
 
@@ -164,7 +165,7 @@ public class ManagedExecutorServicePerPluginTest {
 
         final CountDownLatch runLatch = new CountDownLatch(1);
 
-        when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(null);
+        when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
 
         final CompletableScheduledFuture<?> schedule =
                 managedExecutorServicePerPlugin.schedule(() -> runLatch.countDown(), 500, TimeUnit.MILLISECONDS);
@@ -232,7 +233,7 @@ public class ManagedExecutorServicePerPluginTest {
 
         final CountDownLatch runLatch = new CountDownLatch(1);
 
-        when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(null);
+        when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
 
         final CompletableScheduledFuture<String> scheduledFuture = managedExecutorServicePerPlugin.schedule(() -> {
             runLatch.countDown();
@@ -288,7 +289,7 @@ public class ManagedExecutorServicePerPluginTest {
             runLatch.countDown();
             if (runLatch.getCount() == 0) {
                 //cancels future
-                when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(null);
+                when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
             }
         };
 
@@ -525,7 +526,7 @@ public class ManagedExecutorServicePerPluginTest {
 
         final CountDownLatch runLatch = new CountDownLatch(1);
 
-        when(hiveMQPlugins.getPluginForClassloader(classLoader)).thenReturn(null);
+        when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
 
         final Runnable runnable = () -> {
         };

@@ -40,10 +40,27 @@ public class TlsTcpListener extends TcpListener {
      * @param bindAddress the bind address
      * @param tls         the TLS configuration
      */
-    public TlsTcpListener(final int port,
-                          final @NotNull String bindAddress,
-                          final @NotNull Tls tls) {
-        super(port, bindAddress);
+    public TlsTcpListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull Tls tls) {
+        this(port, bindAddress, tls, "tls-tcp-listener-" + port);
+    }
+
+    /**
+     * Creates a new TLS Listener which listens to a specific port and bind address
+     *
+     * @param port        the port
+     * @param bindAddress the bind address
+     * @param tls         the TLS configuration
+     * @param name        the name of the listener
+     */
+    public TlsTcpListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull Tls tls,
+            final @NotNull String name) {
+        super(port, bindAddress, name);
         checkNotNull(tls);
         this.tls = tls;
     }

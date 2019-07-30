@@ -20,6 +20,7 @@ package com.hivemq.extension.sdk.api.parameter;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,15 @@ public interface ExtensionStartInput {
      * @since 4.0.0
      */
     @NotNull ExtensionInformation getExtensionInformation();
+
+
+    /**
+     * Get information about the HiveMQ instance the extension is running in.
+     *
+     * @return The {@link ServerInformation} of the input.
+     * @since 4.2.0
+     */
+    @NotNull ServerInformation getServerInformation();
 
     /**
      * @return A {@link Map} of all currently enabled extensions. <br/>

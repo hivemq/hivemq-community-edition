@@ -18,6 +18,7 @@ package com.hivemq.extensions.parameters.start;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
@@ -31,18 +32,26 @@ import java.util.Optional;
  * @author Georg Held
  */
 public class ExtensionStartStopInputImpl implements ExtensionStartInput, ExtensionStopInput {
-    private final HiveMQExtension hiveMQExtension;
-    private final Map<String, HiveMQExtension> enabledHiveMQPlugins;
 
-    public ExtensionStartStopInputImpl(@NotNull final HiveMQExtension hiveMQExtension, @NotNull final Map<String, HiveMQExtension> enabledHiveMQPlugins) {
+    private final @NotNull HiveMQExtension hiveMQExtension;
+    private final @NotNull Map<String, HiveMQExtension> enabledHiveMQPlugins;
+    private final @NotNull ServerInformation serverInformation;
+
+    public ExtensionStartStopInputImpl(@NotNull final HiveMQExtension hiveMQExtension, @NotNull final Map<String, HiveMQExtension> enabledHiveMQPlugins, @NotNull final ServerInformation serverInformation) {
         this.hiveMQExtension = hiveMQExtension;
         this.enabledHiveMQPlugins = enabledHiveMQPlugins;
+        this.serverInformation = serverInformation;
     }
 
     @Override
     @NotNull
     public ExtensionInformation getExtensionInformation() {
         return new ExtensionInformationImpl(this.hiveMQExtension);
+    }
+
+    @Override
+    public @NotNull ServerInformation getServerInformation() {
+        return serverInformation;
     }
 
     @Override

@@ -181,7 +181,10 @@ public class WillPublishPacketImpl implements WillPublishPacket {
     @NotNull
     @Override
     public Optional<ByteBuffer> getCorrelationData() {
-        return Optional.ofNullable(correlationData);
+        if (correlationData == null) {
+            return Optional.empty();
+        }
+        return Optional.of(correlationData.asReadOnlyBuffer());
     }
 
     @NotNull
@@ -201,7 +204,7 @@ public class WillPublishPacketImpl implements WillPublishPacket {
     @Override
     public Optional<ByteBuffer> getPayload() {
         //will publish must have a payload
-        return Optional.of(payload);
+        return Optional.of(payload.asReadOnlyBuffer());
     }
 
     @NotNull

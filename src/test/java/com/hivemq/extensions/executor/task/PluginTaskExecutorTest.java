@@ -747,6 +747,11 @@ public class PluginTaskExecutorTest {
 
         }
 
+        @Override
+        public void resetAsyncStatus() {
+
+        }
+
         @Nullable
         @Override
         public SettableFuture<Boolean> getAsyncFuture() {

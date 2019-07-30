@@ -58,9 +58,9 @@ public interface Mqtt5CONNECT extends Message {
     //Flags
     boolean isCleanStart();
 
-    Boolean isResponseInformationRequested();
+    boolean isResponseInformationRequested();
 
-    Boolean isProblemInformationRequested();
+    boolean isProblemInformationRequested();
 
     long getSessionExpiryInterval();
 

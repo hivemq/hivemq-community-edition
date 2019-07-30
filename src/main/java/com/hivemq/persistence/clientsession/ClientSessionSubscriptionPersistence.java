@@ -23,6 +23,10 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dominik Obermaier
@@ -49,6 +53,16 @@ public interface ClientSessionSubscriptionPersistence {
     @NotNull
     @ReadOnly
     ImmutableSet<Topic> getSubscriptions(@NotNull String client);
+
+    /**
+     * Get a chunk of all the subscriptions from this node
+     *
+     * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
+     * @return a result containing the new cursor and a map of clientIds to their subscriptions
+     */
+    @NotNull
+    ListenableFuture<MultipleChunkResult<Map<String, Set<Topic>>>> getAllLocalSubscribersChunk(@NotNull ChunkCursor cursor);
+
 
     /**
      * Remove a subscription for a specific client and a specific topic.

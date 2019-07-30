@@ -40,6 +40,7 @@ import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.extensions.services.auth.Authorizers;
+import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
@@ -87,6 +88,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -918,7 +920,7 @@ public class ConnectHandlerTest {
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
 
-        handler.connectSuccessfulAuthenticated(ctx, connect);
+        handler.connectSuccessfulAuthenticated(ctx, connect, null);
 
         assertNull(embeddedChannel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
@@ -1236,6 +1238,28 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, connack.getReasonCode());
         assertFalse(embeddedChannel.isActive());
+    }
+
+    @Test(timeout = 5000)
+    public void test_set_client_settings() {
+        createHandler();
+        embeddedChannel.attr(ChannelAttributes.AUTH_METHOD).set("someMethod");
+        embeddedChannel.pipeline()
+                .addAfter(ChannelHandlerNames.MQTT_MESSAGE_DECODER,
+                        ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER,
+                        channelDependencies.getAuthInProgressMessageHandler());
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
+
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535);
+        clientSettings.setClientReceiveMaximum(123);
+        clientSettings.setOverloadProtectionThrottlingLevel(NONE);
+        handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
+
+        assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
+        assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get().intValue());
+        assertEquals(123, connect.getReceiveMaximum());
+        assertEquals(NONE, embeddedChannel.attr(ChannelAttributes.OVERLOAD_PROTECTION_THROTTLING_LEVEL).get());
     }
 
     private void createHandler() {

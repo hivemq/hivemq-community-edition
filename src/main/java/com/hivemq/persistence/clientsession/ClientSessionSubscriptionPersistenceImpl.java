@@ -18,6 +18,7 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -31,14 +32,13 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.SubscriptionFlags;
 import com.hivemq.mqtt.topic.TopicFilter;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ProducerQueues;
-import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.*;
 import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
+import com.hivemq.persistence.local.xodus.BucketChunkResult;
+import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -46,9 +46,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_BUCKET_COUNT;
+import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE;
 
 /**
  * @author Dominik Obermaier
@@ -348,6 +351,46 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).set(false);
                 log.trace("Invalidated cache and polled for shared subscription '{}' and client '{}'", sharedSubId, clientId);
             }
+        }
+    }
+
+    @NotNull
+    public ListenableFuture<MultipleChunkResult<Map<String, Set<Topic>>>> getAllLocalSubscribersChunk(@NotNull final ChunkCursor cursor) {
+        try {
+            checkNotNull(cursor, "Cursor must not be null");
+
+            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, Set<Topic>>>>> builder = ImmutableList.builder();
+
+            final int bucketCount = PERSISTENCE_BUCKET_COUNT.get();
+            final int maxResults = PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE / (bucketCount - cursor.getFinishedBuckets().size());
+            for (int i = 0; i < bucketCount; i++) {
+                //skip already finished buckets
+                if (!cursor.getFinishedBuckets().contains(i)) {
+                    final String lastKey = cursor.getLastKeys().get(i);
+                    builder.add(singleWriter.submit(i, (bucketIndex1, queueBuckets, queueIndex) -> {
+                        return localPersistence.getAllSubscribersChunk(MatchAllPersistenceFilter.INSTANCE, bucketIndex1, lastKey, maxResults);
+                    }));
+                }
+            }
+
+            return Futures.transform(Futures.allAsList(builder.build()), allBucketsResult -> {
+                Preconditions.checkNotNull(allBucketsResult, "Iteration result from all bucket cannot be null");
+
+                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, Set<Topic>>>> resultBuilder = ImmutableMap.builder();
+                for (final BucketChunkResult<Map<String, Set<Topic>>> bucketResult : allBucketsResult) {
+                    resultBuilder.put(bucketResult.getBucketIndex(), bucketResult);
+                }
+
+                for (final Integer finishedBucketId : cursor.getFinishedBuckets()) {
+                    resultBuilder.put(finishedBucketId, new BucketChunkResult<>(Map.of(), true, cursor.getLastKeys().get(finishedBucketId), finishedBucketId));
+                }
+
+                return new MultipleChunkResult<>(resultBuilder.build());
+
+            }, MoreExecutors.directExecutor());
+
+        } catch (final Throwable throwable) {
+            return Futures.immediateFailedFuture(throwable);
         }
     }
 

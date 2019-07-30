@@ -216,7 +216,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
 
-        removeNoConnectIdleHandler(ctx);
         addOrderedTopicHandler(ctx, connect);
 
         if (authenticators.areAuthenticatorsAvailable() || AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
@@ -224,7 +223,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        connectSuccessfulUnauthenticated(ctx, connect);
+        connectSuccessfulUnauthenticated(ctx, connect, null);
     }
 
     private void authenticate(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT connect) {
@@ -239,7 +238,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         if (authenticatorProviderMap.isEmpty()) {
-            connectSuccessfulUnauthenticated(ctx, connect);
+            connectSuccessfulUnauthenticated(ctx, connect, null);
             return;
         }
 
@@ -255,7 +254,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         final ConnectAuthTaskInput input = new ConnectAuthTaskInput(connect, ctx);
         final ConnectAuthTaskContext context =
                 new ConnectAuthTaskContext(connect.getClientIdentifier(), this, mqttConnacker, ctx, connect, asyncer,
-                        authenticatorProviderMap.size(), configurationService.securityConfiguration().validateUTF8());
+                        authenticatorProviderMap.size(), configurationService.securityConfiguration().validateUTF8(), createClientSettings(connect));
 
         final AuthenticatorProviderInput authenticatorProviderInput = authenticatorProviderInputFactory.createInput(ctx, connect.getClientIdentifier());
 
@@ -270,8 +269,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    public void connectSuccessfulUnauthenticated(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
+    private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
+        return new ModifiableClientSettingsImpl(connect.getReceiveMaximum());
+    }
+
+    public void connectSuccessfulUnauthenticated(final @NotNull ChannelHandlerContext ctx,
+                                                 final @NotNull CONNECT connect,
+                                                 final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
         if (AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
             final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "authentication not successful", connect.getUserProperties().getPluginUserProperties());
@@ -284,11 +288,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).setIfAbsent(new ModifiableDefaultPermissionsImpl());
         ctx.pipeline().channel().attr(ChannelAttributes.AUTH_AUTHENTICATED).set(false);
-        connectAuthenticated(ctx, connect);
+        connectAuthenticated(ctx, connect, clientSettings);
     }
 
-    public void connectSuccessfulAuthenticated(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
+    public void connectSuccessfulAuthenticated(final @NotNull ChannelHandlerContext ctx,
+                                               final @NotNull CONNECT connect,
+                                               final @Nullable ModifiableClientSettingsImpl clientSettings) {
         final ClientToken clientCredentialsData = ChannelUtils.tokenFromChannel(ctx.channel());
         ctx.pipeline().channel().attr(ChannelAttributes.AUTH_AUTHENTICATED).set(true);
         clientCredentialsData.setAuthenticated(true);
@@ -301,7 +306,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             }
         }
 
-        connectAuthenticated(ctx, connect);
+        connectAuthenticated(ctx, connect, clientSettings);
     }
 
     @Override
@@ -318,12 +323,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
         if (connect.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_NOT_SET) {
             connect.setMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
-        }
-        if (connect.isResponseInformationRequested() == null) {
-            connect.setResponseInformationRequested(DEFAULT_RESPONSE_INFORMATION_REQUESTED);
-        }
-        if (connect.isProblemInformationRequested() == null) {
-            connect.setProblemInformationRequested(DEFAULT_PROBLEM_INFORMATION_REQUESTED);
         }
         if (connect.isWill()) {
             final MqttWillPublish willPublish = connect.getWillPublish();
@@ -438,9 +437,15 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         return true;
     }
 
-    private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
+    private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx,
+                                      final @NotNull CONNECT msg,
+                                      final @Nullable ModifiableClientSettingsImpl clientSettings) {
         ctx.pipeline().channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
         ctx.pipeline().channel().attr(ChannelAttributes.PREVENT_LWT).set(true); //do not send will until it is authorized
+
+        if (clientSettings != null && clientSettings.isModified()) {
+            applyClientSettings(clientSettings, msg, ctx.channel());
+        }
 
         if (msg.getWillPublish() != null) {
             if (authorizers.areAuthorizersAvailable()) {
@@ -454,6 +459,14 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         } else {
             continueAfterWillAuthorization(ctx, msg);
         }
+    }
+
+    private void applyClientSettings(final @NotNull ModifiableClientSettingsImpl clientSettings,
+                                     final @NotNull CONNECT msg,
+                                     @NotNull final Channel channel) {
+        msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
+        channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(clientSettings.getClientReceiveMaximum());
+        channel.attr(ChannelAttributes.OVERLOAD_PROTECTION_THROTTLING_LEVEL).set(clientSettings.getOverloadProtectionThrottlingLevel());
     }
 
     private void continueAfterWillAuthorization(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
@@ -728,16 +741,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return Futures.immediateFuture(null);
         } finally {
             lock.unlock();
-        }
-    }
-
-    private void removeNoConnectIdleHandler(final @NotNull ChannelHandlerContext ctx) {
-        try {
-            ctx.pipeline().remove(NEW_CONNECTION_IDLE_HANDLER);
-            ctx.pipeline().remove(NO_CONNECT_IDLE_EVENT_HANDLER);
-        } catch (final NoSuchElementException ex) {
-            //no problem, because if these handlers are not in the pipeline anyway, we still get the expected result here
-            log.trace("Not able to remove no connect idle handler");
         }
     }
 
