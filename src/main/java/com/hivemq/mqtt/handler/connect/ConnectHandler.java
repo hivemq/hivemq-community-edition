@@ -260,12 +260,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         for (final WrappedAuthenticatorProvider wrapped : authenticatorProviderMap.values()) {
 
-            if (!pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    context, input, context, new SimpleAuthTask(wrapped, authenticatorProviderInput))) {
-                log.warn("Extension task queue full. Ignoring {}", wrapped.getAuthenticatorProvider());
-                context.increment();
-            }
-
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    context, input, context, new SimpleAuthTask(wrapped, authenticatorProviderInput));
         }
     }
 

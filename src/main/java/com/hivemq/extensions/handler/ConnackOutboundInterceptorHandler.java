@@ -151,22 +151,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             }
             final ConnackInterceptorTask interceptorTask = new ConnackInterceptorTask(interceptorProvider, providerInput, interceptorFuture, plugin.getId());
 
-            final boolean executionSuccessful = pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
-
-            //we need to increment since extension post method would not be called.
-            if (!executionSuccessful) {
-
-                String className = interceptorProvider.getClass().getSimpleName();
-
-                //may happen if interface not implemented.
-                if (className.isEmpty()) {
-                    className = "ConnackOutboundInterceptor";
-                }
-
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", className, plugin.getId());
-                output.forciblyDisconnect();
-                interceptorContext.increment(output.connackPrevented());
-            }
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
         final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, connack, ctx, promise, eventLog);

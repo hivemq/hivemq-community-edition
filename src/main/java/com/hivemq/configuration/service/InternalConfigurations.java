@@ -313,12 +313,6 @@ public class InternalConfigurations {
      */
     public static final AtomicInteger PLUGIN_SERVICE_RATE_LIMIT = new AtomicInteger(0); //unlimited
 
-    /**
-     * Global maximum size for all extension queues (all clients)
-     */
-    public static final int PLUGIN_TASK_QUEUE_MAX_SIZE = 5000;
-
-
     /* ********************
      *        Auth        *
      **********************/

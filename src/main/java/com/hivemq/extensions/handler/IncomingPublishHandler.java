@@ -172,21 +172,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
 
             final PublishInboundInterceptorTask interceptorTask = new PublishInboundInterceptorTask(interceptor, plugin.getId());
 
-            final boolean executionSuccessful = pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, inboundInput, inboundOutput, interceptorTask);
-
-            //we need to increment since extension post method would not be called.
-            if (!executionSuccessful) {
-
-                String className = interceptor.getClass().getSimpleName();
-
-                //may happen if interface not implemented.
-                if (className.isEmpty()) {
-                    className = "PublishInboundInterceptor";
-                }
-
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", className, plugin.getId());
-                interceptorContext.increment();
-            }
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, inboundInput, inboundOutput, interceptorTask);
         }
 
         final InterceptorFutureCallback callback = new InterceptorFutureCallback(inboundOutput, channel, clientId, publish, ctx, mqttDisconnector, messageDroppedService, pluginAuthorizerService);

@@ -53,7 +53,7 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
     }
 
     @Override
-    public <I extends PluginTaskInput> boolean handlePluginInTaskExecution(@NotNull final PluginInTaskContext pluginInTaskContext,
+    public <I extends PluginTaskInput> void handlePluginInTaskExecution(@NotNull final PluginInTaskContext pluginInTaskContext,
                                                                            @NotNull final Supplier<I> pluginInputSupplier,
                                                                            @NotNull final PluginInTask<I> pluginTask) {
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginInTaskContext);
@@ -62,13 +62,13 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         checkNotNull(pluginInputSupplier, "Input supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
 
-        return taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<I, DefaultPluginTaskOutput>(
+        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<I, DefaultPluginTaskOutput>(
                 pluginInTaskContext, pluginInputSupplier, null, pluginTask));
 
     }
 
     @Override
-    public <O extends PluginTaskOutput> boolean handlePluginOutTaskExecution(@NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
+    public <O extends PluginTaskOutput> void handlePluginOutTaskExecution(@NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
                                                                              @NotNull final Supplier<O> pluginOutputSupplier,
                                                                              @NotNull final PluginOutTask<O> pluginTask) {
 
@@ -77,12 +77,12 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         checkNotNull(pluginTask, "Extension task cannot be null");
 
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginOutTaskContext);
-        return taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<DefaultPluginTaskInput, O>(
+        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<DefaultPluginTaskInput, O>(
                 pluginOutTaskContext, null, pluginOutputSupplier, pluginTask));
     }
 
     @Override
-    public <I extends PluginTaskInput, O extends PluginTaskOutput> boolean handlePluginInOutTaskExecution(
+    public <I extends PluginTaskInput, O extends PluginTaskOutput> void handlePluginInOutTaskExecution(
             @NotNull final PluginInOutTaskContext<O> pluginInOutContext, @NotNull final Supplier<I> pluginInputSupplier,
             @NotNull final Supplier<O> pluginOutputSupplier, @NotNull final PluginInOutTask<I, O> pluginTask) {
 
@@ -92,7 +92,7 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         checkNotNull(pluginTask, "Extension task cannot be null");
 
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginInOutContext);
-        return taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<>(
+        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<>(
                 pluginInOutContext, pluginInputSupplier, pluginOutputSupplier, pluginTask));
     }
 

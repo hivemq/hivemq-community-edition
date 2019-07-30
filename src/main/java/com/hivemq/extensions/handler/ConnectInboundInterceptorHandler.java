@@ -141,20 +141,7 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             final ConnectInterceptorTask interceptorTask = new ConnectInterceptorTask(provider, providerInput, plugin.getId(), channel,
                     interceptorFuture, clientId);
 
-            final boolean executionSuccessful =
-                    pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output,
-                            interceptorTask);
-
-            //we need to increment since extension post method would not be called.
-            if (!executionSuccessful) {
-
-                log.warn("Extension task queue full on connect interceptor call. Connect failed for client {}.", clientId);
-                final String logMessage = "Connect with client ID " + clientId + " failed the extension task queue was full.";
-                connacker.connackError(channel, logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
-                        Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, "Extension interceptor timeout");
-                interceptorFuture.set(null);
-                return;
-            }
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
         final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, connect, ctx, hivemqId.get());

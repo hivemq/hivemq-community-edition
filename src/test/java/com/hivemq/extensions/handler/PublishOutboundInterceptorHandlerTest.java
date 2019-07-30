@@ -134,8 +134,6 @@ public class PublishOutboundInterceptorHandlerTest {
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-        when(pluginTaskExecutorService.handlePluginInOutTaskExecution(any(PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext.class),
-                any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class))).thenReturn(true);
 
         channel.writeOutbound(TestMessageUtil.createFullMqtt5Publish());
         final ArgumentCaptor<PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext> captor =

@@ -22,7 +22,6 @@ import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.common.annotations.GuardedBy;
-import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extensions.ioc.annotation.PluginTaskQueue;
 import com.hivemq.util.Exceptions;
@@ -73,7 +72,6 @@ public class PluginTaskExecutor {
     @Inject
     public PluginTaskExecutor(@NotNull @PluginTaskQueue final AtomicLong counterAllQueues) {
         this.counterAllQueues = counterAllQueues;
-
     }
 
     @VisibleForTesting
@@ -87,17 +85,13 @@ public class PluginTaskExecutor {
         executorService.shutdown();
     }
 
-    public boolean handlePluginTaskExecution(@NotNull final PluginTaskExecution pluginTaskExecution) {
+    public void handlePluginTaskExecution(@NotNull final PluginTaskExecution pluginTaskExecution) {
 
         if (!running.get()) {
             throw new RejectedExecutionException("Extension Task executor is already stopped");
         }
 
-        final long previousSize = counterAllQueues.getAndIncrement();
-        if (previousSize >= InternalConfigurations.PLUGIN_TASK_QUEUE_MAX_SIZE) {
-            counterAllQueues.decrementAndGet();
-            return false;
-        }
+        counterAllQueues.getAndIncrement();
 
         final String identifier = pluginTaskExecution.getPluginContext().getIdentifier();
 
@@ -111,7 +105,6 @@ public class PluginTaskExecutor {
             lock.unlock();
         }
         semaphore.release();
-        return true;
     }
 
     private static class CreateQueueIfNotPresent implements Function<String, Queue<PluginTaskExecution>> {
@@ -124,8 +117,6 @@ public class PluginTaskExecutor {
 
     private class PluginTaskExecutorRunnable implements Runnable {
 
-        private boolean taskExecuted = false;
-
         @Override
         public void run() {
             try {
@@ -134,7 +125,7 @@ public class PluginTaskExecutor {
 
                 while (running.get()) {
 
-                    taskExecuted = false;
+                    boolean taskExecuted = false;
                     final int availablePermitsBeforeLoop = semaphore.availablePermits();
 
                     for (final Map.Entry<String, Queue<PluginTaskExecution>> taskQueueEntry : taskQueues.entrySet()) {
