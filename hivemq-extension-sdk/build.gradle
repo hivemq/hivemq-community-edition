@@ -1,13 +1,8 @@
 version = '4.2.0-SNAPSHOT'
 
 dependencies {
-    compile([group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.0.2']) {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
-
-    compile(
-            [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'],
-    )
+    compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.0.2'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }
 
 jar {
@@ -44,7 +39,7 @@ javadoc {
     }
 }
 
-task javadocJar(type:Jar) {
+task javadocJar(type: Jar) {
 
     description = "Builds the EXTENSION-SDK Javadoc jar File"
     manifest {
@@ -72,34 +67,14 @@ task sourcesJar(type: Jar) {
 /*****************
  * Maven Publish *
  *****************/
-group = 'com.hivemq'
 
 publishing {
     publications {
-        extensionApi(MavenPublication) {
-            artifactId = 'hivemq-extension-sdk'
+        extensionSdk(MavenPublication) {
 
             from components.java
             artifact javadocJar
             artifact sourcesJar
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
-                    if (it.name.compareTo('unspecified') == 0 || it.group.compareTo('null') == 0 || it.version.compareTo('null') == 0) {
-                        return
-                    }
-                    println 'Adding dependency: ' + it.group + ':' + it.name + ':' + it.version
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                }
-
-                asNode().appendNode('packaging', 'jar')
-            }
 
             pom {
                 name = 'HiveMQ Extension SDK'
@@ -135,13 +110,14 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    url = 'http://github.com/hivemq/hivemq-extension-sdk/tree/master'
+                    connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    url = 'http://github.com/hivemq/hivemq-community-edition/tree/master'
                 }
             }
         }
     }
+
     repositories {
         mavenLocal()
     }

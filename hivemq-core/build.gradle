@@ -403,7 +403,6 @@ task javadocAll(type: Javadoc) {
     }
 }
 
-
 /*******************
  * OWASP CVE CHECK *
  *******************/
@@ -487,3 +486,60 @@ dependencyCheckAnalyze.enabled = false
 
 //disable
 forbiddenApisTest.enabled = false
+
+/*****************
+ * Maven Publish *
+ *****************/
+
+publishing {
+    publications {
+        distribution(MavenPublication) {
+
+            artifact zipJar
+
+            pom {
+                name = 'HiveMQ Community Edition'
+                description = 'HiveMQ Community Edition Distribution'
+                url = 'http://www.hivemq.com/'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'cschaebe'
+                        name = 'Christoph Schaebel'
+                        email = 'christoph.schaebel@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                    developer {
+                        id = 'lbrandl'
+                        name = 'Lukas Brandl'
+                        email = 'lukas.brandl@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                    developer {
+                        id = 'flimpoeck'
+                        name = 'Florian Limpoeck'
+                        email = 'florian.limpoeck@dc-square.de'
+                        organization = 'dc-square GmbH'
+                        organizationUrl = 'https://www.dc-square.de'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
+                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
+                    url = 'http://github.com/hivemq/hivemq-extension-sdk/tree/master'
+                }
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
