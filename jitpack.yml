@@ -1,2 +1,6 @@
 jdk:
   - openjdk11
+install:
+  - ./gradlew clean -xtest publishToMavenLocal packaging
+  - mkdir -p ~/.m2/repository/com/hivemq/hivemq-community-edition/
+  - mv build/zip/hivemq*.zip ~/.m2/repository/com/hivemq/hivemq-community-edition/

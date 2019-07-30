@@ -602,6 +602,7 @@ publishing {
     publications {
         extensionApi(MavenPublication) {
             artifactId = 'hivemq-extension-sdk'
+            version = extensionApiVersion
 
             artifact extensionApiJar
             artifact extensionApiJavadocJar
