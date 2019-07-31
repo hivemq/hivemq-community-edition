@@ -7,67 +7,52 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }
 
-jar {
-    description = "Builds the EXTENSION-SDK jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": version
+void addManifest(Jar jar) {
+    jar.manifest {
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Vendor': 'dc-square GmbH'
+        attributes 'Implementation-Version': project.version
     }
+}
+
+jar {
+    addManifest(it)
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 javadoc {
+    title "HiveMQ ${project.version} Extension SDK API"
+
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
-    source = sourceSets.main.allJava
 
     failOnError = true
 
-    classpath = sourceSets.main.allSource
-    classpath += sourceSets.main.compileClasspath
-    classpath += sourceSets.main.runtimeClasspath
-
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
-    options.destinationDirectory = reporting.file("api-javadoc")
-    options.addBooleanOption "-no-module-directories", true
+    options.addBooleanOption '-no-module-directories', true
 
     doLast {
         javaexec {
-            main = "-jar"
+            main = '-jar'
             args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }
 
 task javadocJar(type: Jar) {
-    description = "Builds the EXTENSION-SDK Javadoc jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": version
-    }
     from javadoc
-    classifier = 'javadoc'
+    classifier 'javadoc'
+    addManifest(it)
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 task sourcesJar(type: Jar) {
-    description = "Builds the EXTENSION-SDK Sources jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": version
-    }
     from sourceSets.main.allSource
-    classifier = 'sources'
+    classifier 'sources'
+    addManifest(it)
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
-
-/*****************
- * Maven Publish *
- *****************/
 
 publishing {
     publications {

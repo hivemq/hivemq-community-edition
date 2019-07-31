@@ -63,10 +63,10 @@ project.ext {
     spotbugsVersion = '3.1.8'
     shrinkwrapVersion = '1.2.6'
 
-    projectString = "hivemq-ce-$version"
-    packagingDir = "$project.buildDir/package"
-    packagingProjectDir = "$packagingDir/$projectString"
-    zipDir = "$project.buildDir/zip"
+    projectString = "hivemq-ce-${project.version}"
+    packagingDir = "${buildDir}/package"
+    packagingProjectDir = "${packagingDir}/${projectString}"
+    zipDir = "${buildDir}/zip"
 }
 
 configurations {
@@ -245,11 +245,11 @@ dependencies {
 jar {
 
     manifest {
-        attributes "Implementation-Title": "HiveMQ"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": version
-        attributes "HiveMQ-Version": version
-        attributes "Main-Class": mainClassName
+        attributes 'Implementation-Title': 'HiveMQ'
+        attributes 'Implementation-Vendor': 'dc-square GmbH'
+        attributes 'Implementation-Version': project.version
+        attributes 'HiveMQ-Version': project.version
+        attributes 'Main-Class': project.mainClassName
     }
 
     // remove the security files (from mail.jar / activation.jar) so that the jar will be executable.
@@ -313,8 +313,8 @@ spotbugs {
     toolVersion = spotbugsVersion
     sourceSets = [sourceSets.main]
     ignoreFailures = true
-    reportsDir = file("$project.buildDir/reports/findbugs")
-    reportLevel = "medium"
+    reportsDir = file("${buildDir}/reports/findbugs")
+    reportLevel = 'medium'
 }
 
 /****************************
@@ -322,7 +322,7 @@ spotbugs {
  ***************************/
 
 compileJava {
-    if (!System.properties['java.version'].startsWith("11")) {
+    if (!System.properties['java.version'].startsWith('11')) {
         throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
     }
 }
@@ -342,88 +342,84 @@ task cleanPackaging {
     group 'packaging'
 
     doFirst {
-        delete project.packagingDir
-        new File(project.packagingProjectDir).mkdirs()
-
-        new File(project.zipDir).mkdirs()
+        delete "${project.packagingDir}"
     }
 }
 
 task copyXml(type: Copy) {
     group 'packaging'
 
-    mustRunAfter cleanPackaging
+    mustRunAfter ':cleanPackaging'
 
-    from "$projectDir/src/main/resources/config.xml"
-    into "$project.packagingProjectDir/conf"
+    from "${projectDir}/src/main/resources/config.xml"
+    into "${project.packagingProjectDir}/conf"
 }
 
 task copyPackaging(type: Copy) {
     group 'packaging'
 
-    mustRunAfter cleanPackaging
+    mustRunAfter ':cleanPackaging'
 
-    from "$projectDir/src/packaging"
-    into "$project.packagingProjectDir"
+    from "${projectDir}/src/packaging"
+    into "${project.packagingProjectDir}"
 
     doLast {
-        new File("$packagingProjectDir/data").mkdirs()
-        new File("$packagingProjectDir/log").mkdirs()
-        new File("$packagingProjectDir/extensions").mkdirs()
+        new File("${project.packagingProjectDir}/data").mkdirs()
+        new File("${project.packagingProjectDir}/extensions").mkdirs()
+        new File("${project.packagingProjectDir}/log").mkdirs()
     }
 }
 
 task copyJar(type: Copy) {
     group 'packaging'
 
-    mustRunAfter cleanPackaging
-    dependsOn shadowJar
+    mustRunAfter ':cleanPackaging'
+    dependsOn ':shadowJar'
 
-    from "$project.buildDir/libs/$projectString" + ".jar"
-    into "$project.packagingProjectDir/bin"
+    from "${buildDir}/libs/${projectString}.jar"
+    into "${project.packagingProjectDir}/bin"
 
     rename { String fileName ->
-        fileName.replace("$projectString" + ".jar", "hivemq.jar")
+        fileName.replace("${projectString}.jar", "hivemq.jar")
     }
 }
 
 task packaging(type: Zip) {
     group 'packaging'
 
-    dependsOn cleanPackaging
-    dependsOn copyXml
-    dependsOn copyPackaging
-    dependsOn copyJar
+    dependsOn ':cleanPackaging'
+    dependsOn ':copyXml'
+    dependsOn ':copyPackaging'
+    dependsOn ':copyJar'
 
-    from project.packagingDir
+    from "${project.packagingDir}"
     destinationDir new File(project.zipDir)
-    archiveName = projectString + ".zip"
+    archiveName "${projectString}.zip"
     include '**'
 }
+
+defaultTasks 'clean', 'packaging'
 
 /************
  * JavaDoc  *
  ************/
 
-task javadocAll(type: Javadoc) {
+javadoc {
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
-    source = sourceSets.main.allJava
 
     failOnError = true
 
-    classpath = sourceSets.main.allSource
-    classpath += sourceSets.main.compileClasspath
-    classpath += sourceSets.main.runtimeClasspath
+    source += project(':hivemq-extension-sdk').sourceSets.main.allJava
 
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
-    options.addBooleanOption "-no-module-directories", true
+    options.addBooleanOption '-no-module-directories', true
 
     doLast {
         javaexec {
-            main = "-jar"
-            args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
+            main = '-jar'
+            args = ["${rootDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }
@@ -438,7 +434,7 @@ dependencyCheck {
     }
     format = 'ALL'
     scanConfigurations = ['compile']
-    suppressionFile = "gradle/dependency-check/suppress.xml"
+    suppressionFile = "${rootDir}/gradle/dependency-check/suppress.xml"
     failOnError = false
 }
 check.dependsOn dependencyCheckAnalyze
@@ -455,8 +451,6 @@ idea {
         downloadSources = true
     }
 }
-
-defaultTasks 'packaging'
 
 /**************
  * Compliance *
@@ -480,8 +474,8 @@ downloadLicenses {
 
 allprojects {
     license {
-        header file("$rootDir/HEADER")
-        exclude "*"
+        header file("${rootDir}/HEADER")
+        exclude '*'
     }
 }
 
@@ -489,11 +483,11 @@ task updateThirdPartyLicenses {
     dependsOn ':downloadLicenses'
     doLast {
         javaexec {
-            main = "-jar"
-            args = ["gradle/tools/license-third-party-tool-1.0.jar",
-                    "build/reports/license/dependency-license.xml",
-                    "src/packaging/third-party-licenses/licenses",
-                    "src/packaging/third-party-licenses/licenses.html"
+            main = '-jar'
+            args = ["${rootDir}/gradle/tools/license-third-party-tool-1.0.jar",
+                    "${buildDir}/reports/license/dependency-license.xml",
+                    "${projectDir}/src/packaging/third-party-licenses/licenses",
+                    "${projectDir}/src/packaging/third-party-licenses/licenses.html"
             ]
         }
     }
