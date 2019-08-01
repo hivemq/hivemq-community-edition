@@ -283,5 +283,10 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
             }
             return subscribeInboundOutput;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return interceptor.getClass().getClassLoader();
+        }
     }
 }

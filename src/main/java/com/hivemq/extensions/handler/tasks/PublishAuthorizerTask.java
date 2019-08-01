@@ -115,4 +115,10 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
         }
         return authorizer;
     }
+
+
+    @Override
+    public @NotNull ClassLoader getPluginClassLoader() {
+        return authorizerProvider.getClass().getClassLoader();
+    }
 }

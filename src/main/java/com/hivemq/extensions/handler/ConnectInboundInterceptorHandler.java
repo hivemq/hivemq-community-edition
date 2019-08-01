@@ -263,6 +263,11 @@ public class ConnectInboundInterceptorHandler extends SimpleChannelInboundHandle
             }
             return output;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return provider.getClass().getClassLoader();
+        }
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {

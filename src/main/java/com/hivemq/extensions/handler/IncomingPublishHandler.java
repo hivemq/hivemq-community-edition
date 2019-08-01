@@ -269,6 +269,11 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
             }
             return publishInboundOutput;
         }
+
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return interceptor.getClass().getClassLoader();
+        }
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {

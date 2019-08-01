@@ -364,6 +364,11 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             }
         }
 
+        @Override
+        public @NotNull ClassLoader getPluginClassLoader() {
+            return eventListenerProvider.getClass().getClassLoader();
+        }
+
         private @Nullable ClientLifecycleEventListener updateAndGetEventListener() {
 
             boolean contains = false;

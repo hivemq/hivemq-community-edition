@@ -60,4 +60,9 @@ public class SimpleAuthTask implements PluginInOutTask<ConnectAuthTaskInput, Con
         }
         return connectAuthTaskOutput;
     }
+
+    @Override
+    public @NotNull ClassLoader getPluginClassLoader() {
+        return wrappedAuthenticatorProvider.getClassLoader();
+    }
 }

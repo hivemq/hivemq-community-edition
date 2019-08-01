@@ -35,7 +35,8 @@ import java.util.Map;
 /**
  * @author Christoph Schäbel
  */
-public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionAuthorizerInputImpl, SubscriptionAuthorizerOutputImpl> {
+public class SubscriptionAuthorizerTask
+        implements PluginInOutTask<SubscriptionAuthorizerInputImpl, SubscriptionAuthorizerOutputImpl> {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionAuthorizerTask.class);
 
@@ -44,10 +45,11 @@ public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionA
     private final @NotNull String pluginId;
     private final @NotNull ClientAuthorizers clientAuthorizers;
 
-    public SubscriptionAuthorizerTask(final @NotNull AuthorizerProvider authorizerProvider,
-                                      final @NotNull String pluginId,
-                                      final @NotNull AuthorizerProviderInput input,
-                                      final @NotNull ClientAuthorizers clientAuthorizers) {
+    public SubscriptionAuthorizerTask(
+            final @NotNull AuthorizerProvider authorizerProvider,
+            final @NotNull String pluginId,
+            final @NotNull AuthorizerProviderInput input,
+            final @NotNull ClientAuthorizers clientAuthorizers) {
         this.authorizerProvider = authorizerProvider;
         this.pluginId = pluginId;
         this.authorizerProviderInput = input;
@@ -55,7 +57,9 @@ public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionA
     }
 
     @Override
-    public @NotNull SubscriptionAuthorizerOutputImpl apply(final @NotNull SubscriptionAuthorizerInputImpl input, final @NotNull SubscriptionAuthorizerOutputImpl output) {
+    public @NotNull SubscriptionAuthorizerOutputImpl apply(
+            final @NotNull SubscriptionAuthorizerInputImpl input,
+            final @NotNull SubscriptionAuthorizerOutputImpl output) {
 
         if (output.isCompleted()) {
             return output;
@@ -70,7 +74,8 @@ public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionA
             output.authorizerPresent();
             authorizer.authorizeSubscribe(input, output);
         } catch (final Throwable e) {
-            log.warn("Uncaught exception was thrown from extension with id \"{}\" at subscription authorization. Extensions are responsible on their own to handle exceptions.",
+            log.warn(
+                    "Uncaught exception was thrown from extension with id \"{}\" at subscription authorization. Extensions are responsible on their own to handle exceptions.",
                     pluginId);
             log.debug("Original exception:", e);
             Exceptions.rethrowError(e);
@@ -82,10 +87,13 @@ public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionA
     private @Nullable SubscriptionAuthorizer updateAndGetAuthorizer() {
 
         SubscriptionAuthorizer authorizer = null;
-        for (final Map.Entry<String, SubscriptionAuthorizer> authorizerEntry : clientAuthorizers.getSubscriptionAuthorizersMap().entrySet()) {
+        for (final Map.Entry<String, SubscriptionAuthorizer> authorizerEntry : clientAuthorizers.getSubscriptionAuthorizersMap()
+                .entrySet()) {
             final String pluginId = authorizerEntry.getKey();
             final SubscriptionAuthorizer subscriptionAuthorizer = authorizerEntry.getValue();
-            if (subscriptionAuthorizer.getClass().getClassLoader().equals(authorizerProvider.getClass().getClassLoader()) && pluginId.equals(this.pluginId)) {
+            if (subscriptionAuthorizer.getClass()
+                    .getClassLoader()
+                    .equals(authorizerProvider.getClass().getClassLoader()) && pluginId.equals(this.pluginId)) {
                 authorizer = subscriptionAuthorizer;
             }
         }
@@ -104,5 +112,10 @@ public class SubscriptionAuthorizerTask implements PluginInOutTask<SubscriptionA
             }
         }
         return authorizer;
+    }
+
+    @Override
+    public @NotNull ClassLoader getPluginClassLoader() {
+        return authorizerProvider.getClass().getClassLoader();
     }
 }

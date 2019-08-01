@@ -54,13 +54,20 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.assertj.core.util.Maps;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.exporter.ZipExporter;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.CollectUserEventsHandler;
 import util.TestMessageUtil;
 
+import java.io.File;
+import java.net.URL;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,6 +87,9 @@ import static org.mockito.Mockito.*;
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class PluginAuthorizerServiceImplTest {
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
     private Authorizers authorizers;
@@ -139,8 +149,9 @@ public class PluginAuthorizerServiceImplTest {
         mqtt3Disconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
 
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
-        pluginAuthorizerService = new PluginAuthorizerServiceImpl(authorizers, asyncer, pluginTaskExecutorService, serverInformation,
-                hiveMQExtensions, mqtt3Disconnector, mqtt5Disconnector, eventLog, incomingPublishService);
+        pluginAuthorizerService =
+                new PluginAuthorizerServiceImpl(authorizers, asyncer, pluginTaskExecutorService, serverInformation,
+                        hiveMQExtensions, mqtt3Disconnector, mqtt5Disconnector, eventLog, incomingPublishService);
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
@@ -171,7 +182,6 @@ public class PluginAuthorizerServiceImplTest {
 
         assertNull(channel.readOutbound());
     }
-
 
     @Test(timeout = 2000)
     public void test_will_client_id_null() {
@@ -337,7 +347,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch2 = new CountDownLatch(3);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(createSubscriptionAuthorizerMap(authorizeLatch1, authorizeLatch2));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(
+                createSubscriptionAuthorizerMap(authorizeLatch1, authorizeLatch2));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
@@ -345,7 +356,9 @@ public class PluginAuthorizerServiceImplTest {
 
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
-        assertEquals(2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+        assertEquals(
+                2,
+                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -356,7 +369,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch2 = new CountDownLatch(1);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(
+                createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
@@ -368,7 +382,8 @@ public class PluginAuthorizerServiceImplTest {
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
 
-        assertEquals(2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+        assertEquals(
+                2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 5000)
@@ -379,7 +394,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch2 = new CountDownLatch(1);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(
+                createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
@@ -396,7 +412,8 @@ public class PluginAuthorizerServiceImplTest {
         assertFalse(authorizeLatch1.await(1, TimeUnit.SECONDS));
         assertFalse(authorizeLatch2.await(0, TimeUnit.SECONDS));
 
-        assertEquals(1, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+        assertEquals(
+                1, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -407,7 +424,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch2 = new CountDownLatch(1);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(
+                createPublishAuthorizerMap(authorizeLatch1, authorizeLatch2));
 
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
@@ -420,7 +438,8 @@ public class PluginAuthorizerServiceImplTest {
             Thread.sleep(100);
         }
 
-        assertEquals(2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+        assertEquals(
+                2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -432,8 +451,8 @@ public class PluginAuthorizerServiceImplTest {
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
         when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of(
-                "plugin1", new TestAuthorizerForgetProvider(authorizeLatch1),
-                "plugin2", new TestAuthorizerForgetProvider(authorizeLatch2)));
+                "plugin1", getTestAuthorizerProvider("TestAuthorizerForgetProvider", authorizeLatch1),
+                "plugin2", getTestAuthorizerProvider("TestAuthorizerForgetProvider", authorizeLatch2)));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
@@ -441,7 +460,9 @@ public class PluginAuthorizerServiceImplTest {
 
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
-        assertEquals(2, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+        assertEquals(
+                2,
+                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -451,7 +472,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1", new TestTimeoutAuthorizerProvider(authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1",
+                getTestAuthorizerProvider("TestTimeoutAuthorizerProvider", authorizeLatch1)));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
@@ -459,7 +481,9 @@ public class PluginAuthorizerServiceImplTest {
 
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
-        assertEquals(1, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+        assertEquals(
+                1,
+                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -469,7 +493,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1", new TestAuthorizerDisconnectProvider(authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1",
+                getTestAuthorizerProvider("TestAuthorizerDisconnectProvider", authorizeLatch1)));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -478,7 +503,9 @@ public class PluginAuthorizerServiceImplTest {
 
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
-        assertEquals(1, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+        assertEquals(
+                1,
+                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);
@@ -492,7 +519,8 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
 
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1", new TestAuthorizerDisconnectProvider(authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("plugin1",
+                getTestAuthorizerProvider("TestAuthorizerDisconnectProvider", authorizeLatch1)));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
@@ -502,34 +530,61 @@ public class PluginAuthorizerServiceImplTest {
 
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
-        assertEquals(1, channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+        assertEquals(
+                1,
+                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);
         }
     }
 
-    private Map<String, AuthorizerProvider> createSubscriptionAuthorizerMap(final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) {
+    private Map<String, AuthorizerProvider> createSubscriptionAuthorizerMap(
+            final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) throws Exception {
 
         final Map<String, AuthorizerProvider> map = new TreeMap<>();
-        map.put("plugin1", new TestAuthorizerNextProvider(countDownLatch1));
-        map.put("plugin2", new TestAuthorizerNextProvider(countDownLatch2));
+        map.put("plugin1", getTestAuthorizerProvider("TestAuthorizerNextProvider", countDownLatch1));
+        map.put("plugin2", getTestAuthorizerProvider("TestAuthorizerNextProvider", countDownLatch2));
         return map;
     }
 
-    private Map<String, AuthorizerProvider> createPublishAuthorizerMap(final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) {
+    private Map<String, AuthorizerProvider> createPublishAuthorizerMap(
+            final CountDownLatch countDownLatch1, final CountDownLatch countDownLatch2) throws Exception {
 
         final Map<String, AuthorizerProvider> map = new TreeMap<>();
-        map.put("plugin1", new TestPubAuthorizerNextProvider(countDownLatch1));
-        map.put("plugin2", new TestPubAuthorizerNextProvider(countDownLatch2));
+        map.put("plugin1", getTestAuthorizerProvider("TestPubAuthorizerNextProvider", countDownLatch1));
+        map.put("plugin2", getTestAuthorizerProvider("TestPubAuthorizerNextProvider", countDownLatch2));
         return map;
     }
 
-    private class TestAuthorizerForgetProvider implements AuthorizerProvider {
+    private AuthorizerProvider getTestAuthorizerProvider(final String name, final CountDownLatch countDownLatch)
+            throws Exception {
+
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
+                .addClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name)
+                .addClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name + "$1");
+
+        final File jarFile = temporaryFolder.newFile();
+        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+
+        //This classloader contains the classes from the jar file
+        final IsolatedPluginClassloader cl =
+                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+
+        final Class<?> providerClass =
+                cl.loadClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name);
+
+        AuthorizerProvider testProvider =
+                (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
+                        .newInstance(countDownLatch);
+        return testProvider;
+    }
+
+    public static class TestAuthorizerForgetProvider implements AuthorizerProvider {
 
         private final CountDownLatch countDownLatch;
 
-        private TestAuthorizerForgetProvider(final CountDownLatch countDownLatch) {
+        public TestAuthorizerForgetProvider(final CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -537,8 +592,9 @@ public class PluginAuthorizerServiceImplTest {
         public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
             return new SubscriptionAuthorizer() {
                 @Override
-                public void authorizeSubscribe(@NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                                               @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
+                public void authorizeSubscribe(
+                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
+                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
                     System.out.println("authorize");
                     countDownLatch.countDown();
                 }
@@ -546,11 +602,11 @@ public class PluginAuthorizerServiceImplTest {
         }
     }
 
-    private class TestAuthorizerDisconnectProvider implements AuthorizerProvider {
+    public static class TestAuthorizerDisconnectProvider implements AuthorizerProvider {
 
         private final CountDownLatch countDownLatch;
 
-        private TestAuthorizerDisconnectProvider(final CountDownLatch countDownLatch) {
+        public TestAuthorizerDisconnectProvider(final CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -558,8 +614,9 @@ public class PluginAuthorizerServiceImplTest {
         public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
             return new SubscriptionAuthorizer() {
                 @Override
-                public void authorizeSubscribe(@NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                                               @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
+                public void authorizeSubscribe(
+                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
+                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
                     System.out.println("authorize");
                     subscriptionAuthorizerOutput.disconnectClient();
                     countDownLatch.countDown();
@@ -568,11 +625,11 @@ public class PluginAuthorizerServiceImplTest {
         }
     }
 
-    private class TestAuthorizerNextProvider implements AuthorizerProvider {
+    public static class TestAuthorizerNextProvider implements AuthorizerProvider {
 
         private final CountDownLatch countDownLatch;
 
-        private TestAuthorizerNextProvider(final CountDownLatch countDownLatch) {
+        public TestAuthorizerNextProvider(final CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -580,8 +637,9 @@ public class PluginAuthorizerServiceImplTest {
         public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
             return new SubscriptionAuthorizer() {
                 @Override
-                public void authorizeSubscribe(@NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                                               @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
+                public void authorizeSubscribe(
+                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
+                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
                     System.out.println("authorize");
                     subscriptionAuthorizerOutput.nextExtensionOrDefault();
                     countDownLatch.countDown();
@@ -590,11 +648,11 @@ public class PluginAuthorizerServiceImplTest {
         }
     }
 
-    private class TestPubAuthorizerNextProvider implements AuthorizerProvider {
+    public static class TestPubAuthorizerNextProvider implements AuthorizerProvider {
 
         private final CountDownLatch countDownLatch;
 
-        private TestPubAuthorizerNextProvider(final CountDownLatch countDownLatch) {
+        public TestPubAuthorizerNextProvider(final CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -611,11 +669,11 @@ public class PluginAuthorizerServiceImplTest {
         }
     }
 
-    private class TestTimeoutAuthorizerProvider implements AuthorizerProvider {
+    public static class TestTimeoutAuthorizerProvider implements AuthorizerProvider {
 
         private final CountDownLatch countDownLatch;
 
-        private TestTimeoutAuthorizerProvider(final CountDownLatch countDownLatch) {
+        public TestTimeoutAuthorizerProvider(final CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
 
@@ -623,7 +681,9 @@ public class PluginAuthorizerServiceImplTest {
         public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
             return new SubscriptionAuthorizer() {
                 @Override
-                public void authorizeSubscribe(@NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput, @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
+                public void authorizeSubscribe(
+                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
+                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
                     subscriptionAuthorizerOutput.async(Duration.ofMillis(1), TimeoutFallback.FAILURE);
 
                     System.out.println("authorize async");

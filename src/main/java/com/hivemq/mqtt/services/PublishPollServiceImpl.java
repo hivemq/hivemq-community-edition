@@ -65,7 +65,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_POLL_BATCH_MEMORY;
-import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_POLL_BATCH_SIZE;
 
 /**
  * @author Lukas Brandl
@@ -446,7 +445,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      */
     @NotNull
     private ImmutableIntArray createMessageIds(@NotNull final MessageIDPool messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
-        final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(PUBLISH_POLL_BATCH_SIZE);
+        final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(pollMessageLimit);
         for (int i = 0; i < pollMessageLimit; i++) {
             final int nextId = messageIDPool.takeNextId();
             builder.add(nextId);
