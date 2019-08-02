@@ -165,9 +165,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<ServerInitiatedDisconnectInputImpl> authFailedTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
-            if (!pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, disconnectInput, authFailedTask)) {
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", eventListenerEntry.getValue(), eventListenerEntry.getKey());
-            }
+            pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, disconnectInput, authFailedTask);
         }
     }
 
@@ -196,9 +194,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<ClientInitiatedDisconnectInputImpl> authFailedTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
-            if (!pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, disconnectInput, authFailedTask)) {
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", eventListenerEntry.getValue(), eventListenerEntry.getKey());
-            }
+            pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, disconnectInput, authFailedTask);
         }
 
     }
@@ -228,9 +224,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<AuthenticationFailedInputImpl> authFailedTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
-            if (!pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, failedInput, authFailedTask)) {
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", eventListenerEntry.getValue(), eventListenerEntry.getKey());
-            }
+            pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, failedInput, authFailedTask);
         }
     }
 
@@ -259,9 +253,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<AuthenticationSuccessfulInputImpl> authSuccessTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
-            if (!pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, input, authSuccessTask)) {
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", eventListenerEntry.getValue(), eventListenerEntry.getKey());
-            }
+            pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, input, authSuccessTask);
         }
     }
 
@@ -285,11 +277,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<ConnectionStartInputImpl> connectEventTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
-            if (!pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, connectionStartInput, connectEventTask)) {
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", eventListenerEntry.getValue(), eventListenerEntry.getKey());
-            } else {
-                ctx.channel().attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).setIfAbsent(true);
-            }
+            pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, connectionStartInput, connectEventTask);
+            ctx.channel().attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).setIfAbsent(true);
         }
 
     }

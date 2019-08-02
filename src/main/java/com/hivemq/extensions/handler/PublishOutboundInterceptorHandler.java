@@ -138,21 +138,7 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
 
             final PublishOutboundInterceptorTask interceptorTask = new PublishOutboundInterceptorTask(interceptor, extension.getId());
 
-            final boolean executionSuccessful = pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
-
-            //we need to increment since extension post method would not be called.
-            if (!executionSuccessful) {
-
-                String className = interceptor.getClass().getSimpleName();
-
-                //may happen if interface not implemented.
-                if (className.isEmpty()) {
-                    className = "PublishOutboundInterceptor";
-                }
-
-                log.warn("Extension task queue full. Ignoring '{}' from extension '{}'", className, extension.getId());
-                interceptorContext.increment();
-            }
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
         final SettableFuture<PublishStatus> publishFuture;

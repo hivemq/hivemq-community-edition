@@ -20,8 +20,6 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
-import com.hivemq.extensions.executor.task.PluginInOutTask;
-import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -48,7 +46,6 @@ import java.io.File;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -199,37 +196,6 @@ public class ConnectInboundInterceptorHandlerTest {
         }
 
         assertEquals("client", connect.getClientIdentifier());
-        verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
-                any(Mqtt3ConnAckReturnCode.class), anyString());
-    }
-
-    @Test
-    public void test_queue_full() throws Exception {
-        pluginTaskExecutorService = mock(PluginTaskExecutorService.class);
-
-        channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        when(plugin.getId()).thenReturn("plugin");
-
-        handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
-                pluginTaskExecutorService,
-                hivemqId, interceptors, serverInformation, connacker);
-
-        channel.pipeline().addFirst(handler);
-
-        when(pluginTaskExecutorService.handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class),
-                any(Supplier.class), any(PluginInOutTask.class))).thenReturn(false);
-        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
-        channel.writeInbound(testConnect());
-        channel.runPendingTasks();
-
-        final CONNECT connect = channel.readInbound();
-        assertNull(connect);
-
         verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
                 any(Mqtt3ConnAckReturnCode.class), anyString());
     }

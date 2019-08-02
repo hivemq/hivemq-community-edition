@@ -53,10 +53,9 @@ public interface PluginTaskExecutorService {
      * @param pluginInputSupplier a supplier for the the {@link PluginTaskInput} object.
      * @param pluginTask          a wrapper around the specific interceptor i.e..
      * @param <I>                 a type extending the {@link PluginTaskInput} marker interface.
-     * @return true if the task has been accepted for execution, false if the queue size is exceeded
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <I extends PluginTaskInput> boolean handlePluginInTaskExecution(@NotNull final PluginInTaskContext pluginInTaskContext,
+    <I extends PluginTaskInput> void handlePluginInTaskExecution(@NotNull final PluginInTaskContext pluginInTaskContext,
                                                                     @NotNull final Supplier<I> pluginInputSupplier,
                                                                     @NotNull final PluginInTask<I> pluginTask);
 
@@ -69,10 +68,9 @@ public interface PluginTaskExecutorService {
      * @param pluginOutputSupplier a supplier for the the {@link PluginTaskOutput} object.
      * @param pluginTask           a wrapper around the specific interceptor i.e..
      * @param <O>                  a type extending the {@link PluginTaskOutput} marker interface.
-     * @return true if the task has been accepted for execution, false if the queue size is exceeded
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <O extends PluginTaskOutput> boolean handlePluginOutTaskExecution(@NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
+    <O extends PluginTaskOutput> void handlePluginOutTaskExecution(@NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
                                                                       @NotNull final Supplier<O> pluginOutputSupplier,
                                                                       @NotNull final PluginOutTask<O> pluginTask);
 
@@ -87,10 +85,9 @@ public interface PluginTaskExecutorService {
      * @param pluginTask           a wrapper around the specific interceptor i.e..
      * @param <I>                  a type extending the {@link PluginTaskInput} marker interface.
      * @param <O>                  a type extending the {@link PluginTaskOutput} marker interface.
-     * @return true if the task has been accepted for execution, false if the queue size is exceeded
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <I extends PluginTaskInput, O extends PluginTaskOutput> boolean handlePluginInOutTaskExecution(@NotNull final PluginInOutTaskContext<O> pluginInOutContext,
+    <I extends PluginTaskInput, O extends PluginTaskOutput> void handlePluginInOutTaskExecution(@NotNull final PluginInOutTaskContext<O> pluginInOutContext,
                                                                                                    @NotNull final Supplier<I> pluginInputSupplier,
                                                                                                    @NotNull final Supplier<O> pluginOutputSupplier,
                                                                                                    @NotNull final PluginInOutTask<I, O> pluginTask);

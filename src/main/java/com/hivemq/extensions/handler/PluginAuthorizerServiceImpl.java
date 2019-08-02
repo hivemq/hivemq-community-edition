@@ -58,7 +58,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.MQTT_ALLOW
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since 4.1.0
  */
 @Singleton
 public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
@@ -225,19 +225,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                         providerMap.size(), ctx);
 
         for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-            final PublishAuthorizerTask task =
-                    new PublishAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput,
-                            clientAuthorizers, ctx);
-            final boolean success =
-                    pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
-            if (!success) {
-                log.warn(
-                        "Extension task queue full. Ignoring '{}' from extension '{}'",
-                        entry.getValue().getClass().getSimpleName(), entry.getKey());
-                output.authorizerPresent();
-                output.failAuthorization();
-                context.increment();
-            }
+            final PublishAuthorizerTask task = new PublishAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput, clientAuthorizers, ctx);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
         }
         return publishProcessedFuture;
     }
@@ -284,19 +273,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                             topicProcessedFuture, providerMap.size());
 
             for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-                final SubscriptionAuthorizerTask task =
-                        new SubscriptionAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput,
-                                clientAuthorizers);
-                final boolean success =
-                        pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
-                if (!success) {
-                    log.warn(
-                            "Extension task queue full. Ignoring '{}' from extension '{}'",
-                            entry.getValue().getClass().getSimpleName(), entry.getKey());
-                    output.authorizerPresent();
-                    output.failAuthorization();
-                    context.increment();
-                }
+                final SubscriptionAuthorizerTask task = new SubscriptionAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput, clientAuthorizers);
+                pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
             }
 
         }

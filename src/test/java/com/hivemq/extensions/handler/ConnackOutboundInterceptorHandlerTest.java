@@ -35,8 +35,6 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
-import com.hivemq.extensions.executor.task.PluginInOutTask;
-import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.logging.EventLog;
@@ -63,10 +61,9 @@ import java.io.File;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -208,39 +205,6 @@ public class ConnackOutboundInterceptorHandlerTest {
         }
 
         assertEquals("modified", connack.getServerReference());
-    }
-
-    @Test(timeout = 5000)
-    public void test_execution_unsuccessful() throws Exception {
-
-        channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
-        when(plugin.getId()).thenReturn("plugin");
-
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = Mockito.mock(PluginTaskExecutorServiceImpl.class);
-
-        handler = new ConnackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService, interceptors, serverInformation, eventLog);
-        channel.pipeline().addFirst(handler);
-
-        final ConnackOutboundInterceptorProvider interceptorProvider = connackOutboundProviderInput -> (ConnackOutboundInterceptor) (connackOutboundInput, connackOutboundOutput) -> System.out.println("intercept");
-        when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-
-        when(pluginTaskExecutorService.handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class))).thenReturn(false);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
-        channel.writeOutbound(testConnack());
-        channel.runPendingTasks();
-
-        while (channel.isActive()) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-        }
-
-        assertFalse(channel.isActive());
     }
 
     @Test(timeout = 5000)
