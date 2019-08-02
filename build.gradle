@@ -1,9 +1,9 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.3' apply false
+    id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
     id 'com.github.hierynomus.license' version '0.15.0' apply false
     id 'com.jfrog.bintray' version '1.8.4' apply false
-    id 'org.owasp.dependencycheck' version '3.1.2' apply false
-    id 'com.github.spotbugs' version '1.6.5' apply false
+    id 'org.owasp.dependencycheck' version '4.0.2' apply false
+    id 'com.github.spotbugs' version '1.6.9' apply false
     id 'de.thetaphi.forbiddenapis' version '2.6' apply false
 }
 
@@ -51,8 +51,8 @@ mainClassName = 'com.hivemq.HiveMQServer'
 project.ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.60'
-    jacksonVersion = '2.9.6'
-    nettyVersion = '4.1.32.Final'
+    jacksonVersion = '2.9.8'
+    nettyVersion = '4.1.34.Final'
     xodusVersion = '1.2.3'
     guiceVersion = '4.2.2'
     metricsVersion = '4.0.3'
@@ -60,7 +60,7 @@ project.ext {
     // Additional Versions
     jacocoVersion = '0.8.2'
     pmdVersion = '6.8.0'
-    spotbugsVersion = '3.1.8'
+    spotbugsVersion = '3.1.11'
     shrinkwrapVersion = '1.2.6'
 
     projectString = "hivemq-ce-${project.version}"
@@ -502,9 +502,6 @@ forbiddenApis {
     bundledSignatures = ['jdk-system-out']
     ignoreFailures = false
 }
-
-// dependency check fails at the moment, see https://github.com/jeremylong/dependency-check-gradle/issues/104
-dependencyCheckAnalyze.enabled = false
 
 //disable
 forbiddenApisTest.enabled = false

@@ -1,15 +1,13 @@
-build
 .gradle
+build/
 .java-version
-.gradletasknamecache
 .DS_Store
+.gradletasknamecache
 
 # IntelliJ
 out/
+*.iml
 .idea/*
 !.idea/codeStyles
 !.idea/inspectionProfiles
 !.idea/runConfigurations
-
-# JIRA extension
-atlassian-ide-plugin.xml
