@@ -41,6 +41,8 @@ javadoc {
 }
 
 task javadocJar(type: Jar) {
+    group 'documentation'
+
     from javadoc
     classifier 'javadoc'
     addManifest(it)
@@ -48,6 +50,8 @@ task javadocJar(type: Jar) {
 }
 
 task sourcesJar(type: Jar) {
+    group 'build'
+
     from sourceSets.main.allSource
     classifier 'sources'
     addManifest(it)

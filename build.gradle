@@ -480,6 +480,7 @@ allprojects {
 }
 
 task updateThirdPartyLicenses {
+    group 'license'
     dependsOn ':downloadLicenses'
     doLast {
         javaexec {
