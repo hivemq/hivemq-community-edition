@@ -1,29 +1,34 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'org.owasp:dependency-check-gradle:3.1.2'
-        classpath 'de.thetaphi:forbiddenapis:2.6'
-    }
-}
-
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '4.0.3'
-    id "com.github.hierynomus.license" version "0.15.0"
-    id "com.github.spotbugs" version "1.6.5"
-    id 'maven-publish'
-    id "com.jfrog.bintray" version "1.8.4"
+    id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
+    id 'com.github.hierynomus.license' version '0.15.0' apply false
+    id 'com.jfrog.bintray' version '1.8.4' apply false
+    id 'org.owasp.dependencycheck' version '5.2.0' apply false
+    id 'com.github.spotbugs' version '1.6.9' apply false
+    id 'de.thetaphi.forbiddenapis' version '2.6' apply false
 }
 
-apply plugin: 'java'
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://repo.eclipse.org/content/repositories/paho-releases/' }
+        maven { url 'https://oss.sonatype.org/content/groups/public' } // for snapshot artifacts
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.github.hierynomus.license'
+}
+
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'idea'
 apply plugin: 'org.owasp.dependencycheck'
 
-/**********************
+/************************
  * Code Quality Plugins *
  ***********************/
 apply plugin: 'jacoco'
@@ -31,15 +36,14 @@ apply plugin: 'pmd'
 apply plugin: 'com.github.spotbugs'
 apply plugin: 'de.thetaphi.forbiddenapis'
 
-/**********************
- * Compliance Plugin  *
- **********************/
-apply plugin: 'license'
+allprojects {
+    sourceCompatibility = 10
+    targetCompatibility = 10
 
-sourceCompatibility = 10
-targetCompatibility = 10
+    group 'com.hivemq'
+}
+
 version = '2019.2-SNAPSHOT'
-
 
 mainClassName = 'com.hivemq.HiveMQServer'
 
@@ -47,64 +51,35 @@ mainClassName = 'com.hivemq.HiveMQServer'
 project.ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.60'
-    jacksonVersion = '2.9.6'
-    nettyVersion = '4.1.32.Final'
+    jacksonVersion = '2.9.8'
+    nettyVersion = '4.1.34.Final'
     xodusVersion = '1.2.3'
     guiceVersion = '4.2.2'
     metricsVersion = '4.0.3'
 
-    //Additional Versions
+    // Additional Versions
     jacocoVersion = '0.8.2'
     pmdVersion = '6.8.0'
-    spotbugsVersion = '3.1.8'
+    spotbugsVersion = '3.1.11'
     shrinkwrapVersion = '1.2.6'
 
-    projectString = "hivemq-ce-$version"
-    packagingDir = "$project.buildDir/package"
-    extensionApiVersion = "4.2.0"
+    projectString = "hivemq-ce-${project.version}"
+    packagingDir = "${buildDir}/package"
+    packagingProjectDir = "${packagingDir}/${projectString}"
+    zipDir = "${buildDir}/zip"
 }
 
 configurations {
-    apiCompile
-    apiRuntime
     provided
 }
 
-
 sourceSets {
-
     main {
         compileClasspath += configurations.provided
     }
     test {
         compileClasspath += configurations.provided
         runtimeClasspath += configurations.provided
-    }
-
-    extensionApi {
-        java {
-            srcDir 'src/extensionApi/java'
-        }
-        resources {
-            srcDir 'src/extensionApi/resources'
-        }
-    }
-}
-
-/****************
- * Repositories *
- ***************/
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    jcenter()
-    maven { url 'https://repo.eclipse.org/content/repositories/paho-releases/' }
-    maven {         // for snapshot artifacts
-        url 'https://oss.sonatype.org/content/groups/public'
-    }
-    maven { // for bee
-        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
 }
 
@@ -113,14 +88,6 @@ repositories {
  ***************/
 
 dependencies {
-
-    extensionApiCompile([group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.0.2']) {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
-
-    extensionApiCompile(
-            [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'],
-    )
 
     compile(
             /* Netty */
@@ -225,6 +192,8 @@ dependencies {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
+    compile project(':hivemq-extension-sdk')
+
 
     testCompile(
             [group: 'junit', name: 'junit', version: '4.12'],
@@ -261,14 +230,6 @@ dependencies {
             [group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-impl-base', version: shrinkwrapVersion],
     )
 
-    compile(
-            sourceSets.extensionApi.output
-    )
-
-    testCompile(
-            sourceSets.extensionApi.output,
-    )
-
     provided(
             [group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.0'],
     )
@@ -284,11 +245,11 @@ dependencies {
 jar {
 
     manifest {
-        attributes "Implementation-Title": "HiveMQ"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": version
-        attributes "HiveMQ-Version": version
-        attributes "Main-Class": mainClassName
+        attributes 'Implementation-Title': 'HiveMQ'
+        attributes 'Implementation-Vendor': 'dc-square GmbH'
+        attributes 'Implementation-Version': project.version
+        attributes 'HiveMQ-Version': project.version
+        attributes 'Main-Class': project.mainClassName
     }
 
     // remove the security files (from mail.jar / activation.jar) so that the jar will be executable.
@@ -321,7 +282,7 @@ test {
         events "failed"
         exceptionFormat "short"
     }
-    
+
     /* use tmpdir from gradle property or the same tmpdir as the runner */
     if (project.hasProperty("test_temp_dir")) {
         jvmArgs "-Djava.io.tmpdir=" + test_temp_dir
@@ -352,8 +313,8 @@ spotbugs {
     toolVersion = spotbugsVersion
     sourceSets = [sourceSets.main]
     ignoreFailures = true
-    reportsDir = file("$project.buildDir/reports/findbugs")
-    reportLevel = "medium"
+    reportsDir = file("${buildDir}/reports/findbugs")
+    reportLevel = 'medium'
 }
 
 /****************************
@@ -361,7 +322,7 @@ spotbugs {
  ***************************/
 
 compileJava {
-    if (!System.properties['java.version'].startsWith("11")) {
+    if (!System.properties['java.version'].startsWith('11')) {
         throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
     }
 }
@@ -377,151 +338,90 @@ shadowJar {
     classifier = ''
 }
 
-task packaging {
-    delete "$project.buildDir/package"
-    project.packagingDir = new File("$project.buildDir/package/$projectString")
-    project.packagingDir.mkdirs()
+task cleanPackaging {
+    group 'packaging'
 
-    new File("$projectDir/src/packaging", "conf").mkdirs()
-
-    dependsOn shadowJar
-    dependsOn ':copyPackaging'
-    dependsOn ':copyJar'
-    dependsOn ':zipJar'
+    doFirst {
+        delete "${project.packagingDir}"
+    }
 }
 
-task(copyPackaging, type: org.gradle.api.tasks.Copy) {
-    dependsOn ':copyXml'
-    mustRunAfter ':copyXml'
-    from "$projectDir/src/packaging"
-    into "$project.packagingDir"
+task copyXml(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter ':cleanPackaging'
+
+    from "${projectDir}/src/main/resources/config.xml"
+    into "${project.packagingProjectDir}/conf"
+}
+
+task copyPackaging(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter ':cleanPackaging'
+
+    from "${projectDir}/src/packaging"
+    into "${project.packagingProjectDir}"
 
     doLast {
-        new File("$packagingDir/data").mkdirs()
-        new File("$packagingDir/log").mkdirs()
-        new File("$packagingDir/extensions").mkdirs()
+        new File("${project.packagingProjectDir}/data").mkdirs()
+        new File("${project.packagingProjectDir}/extensions").mkdirs()
+        new File("${project.packagingProjectDir}/log").mkdirs()
     }
 }
 
-task(copyJar, type: org.gradle.api.tasks.Copy) {
-    mustRunAfter shadowJar
-    from "$project.buildDir/libs/$projectString" + ".jar"
-    into "$project.packagingDir/bin"
+task copyJar(type: Copy) {
+    group 'packaging'
+
+    mustRunAfter ':cleanPackaging'
+    dependsOn ':shadowJar'
+
+    from "${buildDir}/libs/${projectString}.jar"
+    into "${project.packagingProjectDir}/bin"
+
     rename { String fileName ->
-        fileName.replace("$projectString" + ".jar", "hivemq.jar")
+        fileName.replace("${projectString}.jar", "hivemq.jar")
     }
 }
 
-task(copyXml, type: org.gradle.api.tasks.Copy) {
-    from "$projectDir/src/main/resources/config.xml"
-    into "$project.packagingDir/conf"
-}
+task packaging(type: Zip) {
+    group 'packaging'
 
-task(zipJar, type: Zip) {
-    mustRunAfter copyJar
-    mustRunAfter copyPackaging
-    destinationDir = new File("$project.buildDir/zip")
-    destinationDir.mkdirs()
-    destinationDir destinationDir
-    archiveName = projectString + ".zip"
-    from 'build/package'
+    dependsOn ':cleanPackaging'
+    dependsOn ':copyXml'
+    dependsOn ':copyPackaging'
+    dependsOn ':copyJar'
+
+    from "${project.packagingDir}"
+    destinationDir new File(project.zipDir)
+    archiveName "${projectString}.zip"
     include '**'
 }
+
+defaultTasks 'clean', 'packaging'
 
 /************
  * JavaDoc  *
  ************/
-configurations {
-    javadocDeps
-}
 
-task javadocAll(type: Javadoc) {
-    source = sourceSets.main.allJava
-    source += sourceSets.extensionApi.allJava
+javadoc {
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
 
     failOnError = true
 
-    classpath = sourceSets.main.allSource
-    classpath += sourceSets.main.compileClasspath
-    classpath += sourceSets.main.runtimeClasspath
-    classpath += configurations.javadocDeps
+    source += project(':hivemq-extension-sdk').sourceSets.main.allJava
 
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
-    options.addBooleanOption "-no-module-directories", true
+    options.addBooleanOption '-no-module-directories', true
 
     doLast {
         javaexec {
-            main = "-jar"
-            args = ["gradle/tools/javadoc-cleaner-1.0.jar"]
+            main = '-jar'
+            args = ["${rootDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
-}
-
-task javadocApi(type: Javadoc) {
-    source = sourceSets.extensionApi.allJava
-
-    failOnError = true
-
-    classpath = sourceSets.extensionApi.allSource
-    classpath += sourceSets.extensionApi.compileClasspath
-    classpath += sourceSets.extensionApi.runtimeClasspath
-    classpath += configurations.javadocDeps
-
-    options.addStringOption('Xdoclint:none', '-quiet')
-    options.addStringOption('-html5')
-    options.destinationDirectory = reporting.file("api-javadoc")
-    options.addBooleanOption "-no-module-directories", true
-
-    doLast {
-        javaexec {
-            main = "-jar"
-            args = ["gradle/tools/javadoc-cleaner-1.0.jar"]
-        }
-    }
-}
-
-/****************************
- *     EXTENSION-API-JAR    *
- ***************************/
-
-task extensionApiJar(type: Jar) {
-    description = "Builds the EXTENSION-SDK jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": extensionApiVersion
-    }
-    from(project.convention.getPlugin(JavaPluginConvention).sourceSets.extensionApi.output)
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
-    archiveName = "hivemq-extension-sdk-${extensionApiVersion}.jar"
-}
-
-task extensionApiJavadocJar(type: Jar) {
-    description = "Builds the EXTENSION-SDK Javadoc jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": extensionApiVersion
-    }
-    dependsOn javadocApi
-    classifier = 'javadoc'
-    from javadocApi.destinationDir
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
-    archiveName = "hivemq-extension-sdk-${extensionApiVersion}-javadoc.jar"
-}
-
-task extensionApiSourcesJar(type: Jar, dependsOn: extensionApiClasses) {
-    description = "Builds the EXTENSION-SDK Sources jar File"
-    manifest {
-        attributes "Implementation-Title": "hivemq-extension-sdk"
-        attributes "Implementation-Vendor": 'dc-square GmbH'
-        attributes "Implementation-Version": extensionApiVersion
-    }
-    classifier = 'sources'
-    from sourceSets.extensionApi.allSource
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
-    archiveName = "hivemq-extension-sdk-${extensionApiVersion}-sources.jar"
 }
 
 /*******************
@@ -534,7 +434,7 @@ dependencyCheck {
     }
     format = 'ALL'
     scanConfigurations = ['compile']
-    suppressionFile = "gradle/dependency-check/suppress.xml"
+    suppressionFile = "${rootDir}/gradle/dependency-check/suppress.xml"
     failOnError = false
 }
 check.dependsOn dependencyCheckAnalyze
@@ -551,8 +451,6 @@ idea {
         downloadSources = true
     }
 }
-
-defaultTasks 'packaging'
 
 /**************
  * Compliance *
@@ -574,60 +472,54 @@ downloadLicenses {
     ]
 }
 
-license {
-    exclude "*"
+allprojects {
+    license {
+        header file("${rootDir}/HEADER")
+        exclude '*'
+    }
 }
 
-
 task updateThirdPartyLicenses {
+    group 'license'
     dependsOn ':downloadLicenses'
     doLast {
         javaexec {
-            main = "-jar"
-            args = ["gradle/tools/license-third-party-tool-1.0.jar",
-                    "build/reports/license/dependency-license.xml",
-                    "src/packaging/third-party-licenses/licenses",
-                    "src/packaging/third-party-licenses/licenses.html"
+            main = '-jar'
+            args = ["${rootDir}/gradle/tools/license-third-party-tool-1.0.jar",
+                    "${buildDir}/reports/license/dependency-license.xml",
+                    "${projectDir}/src/packaging/third-party-licenses/licenses",
+                    "${projectDir}/src/packaging/third-party-licenses/licenses.html"
             ]
         }
     }
 }
 
+forbiddenApisMain {
+    exclude '**/BatchedException.class'
+    exclude '**/LoggingBootstrap.class'
+}
+
+forbiddenApis {
+    bundledSignatures = ['jdk-system-out']
+    ignoreFailures = false
+}
+
+//disable
+forbiddenApisTest.enabled = false
+
 /*****************
  * Maven Publish *
  *****************/
-group = 'com.hivemq'
 
 publishing {
     publications {
-        extensionApi(MavenPublication) {
-            artifactId = 'hivemq-extension-sdk'
+        distribution(MavenPublication) {
 
-            artifact extensionApiJar
-            artifact extensionApiJavadocJar
-            artifact extensionApiSourcesJar
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.extensionApiCompile.allDependencies.each {
-                    if (it.name.compareTo('unspecified') == 0 || it.group.compareTo('null') == 0 || it.version.compareTo('null') == 0) {
-                        return
-                    }
-                    println 'Adding dependency: ' + it.group + ':' + it.name + ':' + it.version
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                }
-
-                asNode().appendNode('packaging', 'jar')
-            }
+            artifact packaging
 
             pom {
-                name = 'HiveMQ Extension SDK'
-                description = 'SDK for the development of HiveMQ extensions'
+                name = 'HiveMQ Community Edition'
+                description = 'HiveMQ Community Edition Distribution'
                 url = 'http://www.hivemq.com/'
                 licenses {
                     license {
@@ -659,72 +551,15 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    url = 'http://github.com/hivemq/hivemq-extension-sdk/tree/master'
+                    connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                    url = 'https://github.com/hivemq/hivemq-community-edition/tree/master'
                 }
             }
         }
     }
+
     repositories {
         mavenLocal()
     }
 }
-
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['extensionApi'] //When uploading Maven-based publication files
-    dryRun = true //[Default: false] Whether to run this as dry-run, without deploying
-    publish = false //[Default: false] Whether version should be auto published after an upload
-    override = false //[Default: false] Whether to override version artifacts already published
-    //Package configuration. The plugin will use the repo and name properties to check if the package already exists. In that case, there's no need to configure the other package properties (like userOrg, desc, etc).
-    pkg {
-        repo = 'HiveMQ'
-        name = 'hivemq-extension-sdk'
-        userOrg = 'hivemq' //An optional organization name when the repo belongs to one of the user's orgs
-        desc = 'The enterprise MQTT broker HiveMQ offers this free and open source extension SDK. This allows everyone to extend HiveMQ and add custom functionality via extensions.'
-        websiteUrl = 'https://github.com/hivemq/hivemq-extension-sdk'
-        vcsUrl = 'https://github.com/hivemq/hivemq-extension-sdk.git'
-        licenses = ['Apache-2.0']
-        labels = ['hivemq']
-        publicDownloadNumbers = false
-        githubRepo = 'hivemq/hivemq-extension-sdk' //Optional Github repository
-        githubReleaseNotesFile = 'README.adoc' //Optional Github readme file
-
-        //Optional version descriptor
-        version {
-            name = "$extensionApiVersion" //Bintray logical version name
-            //Optional configuration for GPG signing
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-            }
-            //Optional configuration for Maven Central sync of the version
-            mavenCentralSync {
-                sync = false //[Default: true] Determines whether to sync the version to Maven Central.
-                user = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
-                //OSS user token: mandatory
-                password = project.hasProperty('mavenCentralKey') ? project.property('mavenCentralKey') : System.getenv('MAVEN_CENTRAL_KEY')
-                //OSS user password: mandatory
-                close = '0'
-                //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
-            }
-        }
-    }
-}
-
-forbiddenApisMain {
-    exclude '**/BatchedException.class'
-    exclude '**/LoggingBootstrap.class'
-}
-
-forbiddenApis {
-    bundledSignatures = ['jdk-system-out']
-    ignoreFailures = false
-}
-
-// dependency check fails at the moment, see https://github.com/jeremylong/dependency-check-gradle/issues/104
-dependencyCheckAnalyze.enabled = false
-
-//disable
-forbiddenApisTest.enabled = false
