@@ -214,7 +214,7 @@ public class SslContextStore {
                         tmf = null;
                     }
 
-                    final SslContext context = sslUtil.createSslServerContext(kmf, tmf, tls.getCipherSuites());
+                    final SslContext context = sslUtil.createSslServerContext(kmf, tmf, tls.getCipherSuites(), tls.getProtocols());
                     sslContextMap.put(tls, context);
                     checksumMap.put(tls, hash);
                     log.info("Successfully updated changed SSL Context");

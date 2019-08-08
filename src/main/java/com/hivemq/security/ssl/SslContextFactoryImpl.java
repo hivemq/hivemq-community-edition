@@ -40,7 +40,7 @@ public class SslContextFactoryImpl implements SslContextFactory {
     public SslContext createSslContext(@NotNull final Tls tls) throws SSLException {
         final KeyManagerFactory kmf = sslUtil.getKeyManagerFactory(tls);
         final TrustManagerFactory tmFactory = sslUtil.getTrustManagerFactory(tls);
-        return sslUtil.createSslServerContext(kmf, tmFactory, tls.getCipherSuites());
+        return sslUtil.createSslServerContext(kmf, tmFactory, tls.getCipherSuites(), tls.getProtocols());
     }
 
 
