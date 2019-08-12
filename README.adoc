@@ -57,6 +57,10 @@ You can now connect MQTT clients to `<ip address>:1883`.
 [CAUTION]
 If you want to connect devices on external networks to HiveMQ CE, please make sure your server is reachable from those networks and the required ports (default: 1883) are accessible through your firewall.
 
+== Nightly Builds
+
+Just in time builds for current branches on this repository and for specific commits are available https://hivemq.github.io/nightly-builds/[here].
+
 == Building from source
 
 === Prerequisites
