@@ -57,8 +57,6 @@ public class PingRespOutboundInterceptorHandlerTest {
     @Mock
     private PluginTaskExecutorService pluginTaskExecutorService;
 
-    private PingRespOutboundInterceptorHandler handler;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -74,7 +72,8 @@ public class PingRespOutboundInterceptorHandlerTest {
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        handler = new PingRespOutboundInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
+        final PingRespOutboundInterceptorHandler handler =
+                new PingRespOutboundInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
         channel.pipeline().addFirst(handler);
     }
 
@@ -85,14 +84,26 @@ public class PingRespOutboundInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_pingresp_successful() throws Exception {
+    public void test_pingresp_successful_mqtt3() throws Exception {
+        final PingResponseOutboundInterceptor pingResponseOutboundInterceptor = getInterceptor("TestPingResponseInterceptor");
+        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+
+        channel.writeOutbound(new PINGRESP());
+        channel.runPendingTasks();
+        final PINGRESP pingresp = channel.readOutbound();
+        Assert.assertNotNull(pingresp);
+    }
+
+    @Test(timeout = 5000)
+    public void test_pingresp_successful_mqtt5() throws Exception {
         final PingResponseOutboundInterceptor pingResponseOutboundInterceptor = getInterceptor("TestPingResponseInterceptor");
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(new PINGRESP());
         channel.runPendingTasks();
-        PINGRESP pingresp = channel.readOutbound();
+        final PINGRESP pingresp = channel.readOutbound();
         Assert.assertNotNull(pingresp);
     }
 

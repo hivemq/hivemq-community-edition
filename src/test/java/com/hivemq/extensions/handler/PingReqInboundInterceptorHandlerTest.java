@@ -44,14 +44,7 @@ import static org.mockito.Mockito.when;
  */
 public class PingReqInboundInterceptorHandlerTest {
 
-    private PluginTaskExecutorServiceImpl pluginTaskExecutorService;
-    private PingReqInboundInterceptorHandler pingreqHandler;
-    private PingRespOutboundInterceptorHandler pingrespHandler;
-    private FullConfigurationService configurationService;
-    private ChannelHandlerContext channelHandlerContext;
-    private PluginOutputAsyncerImpl asyncer;
     private PluginTaskExecutor executor1;
-    private CountDownLatch dropLatch;
     private EmbeddedChannel channel;
 
     @Rule
@@ -66,21 +59,19 @@ public class PingReqInboundInterceptorHandlerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        dropLatch = new CountDownLatch(1);
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        final PluginOutputAsyncerImpl asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
+        final PluginTaskExecutorServiceImpl pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        pingreqHandler = new PingReqInboundInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
+        final PingReqInboundInterceptorHandler pingreqHandler =
+                new PingReqInboundInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
 
         channel.pipeline().addFirst(pingreqHandler);
-        channelHandlerContext = channel.pipeline().context(PingReqInboundInterceptorHandler.class);
     }
 
     @After
@@ -113,6 +104,31 @@ public class PingReqInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+
+        channel.writeInbound(new PINGREQ());
+        PINGREQ pingreq = channel.readInbound();
+        while(pingreq == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            pingreq = channel.readInbound();
+        }
+
+        Assert.assertNotNull(pingreq);
+    }
+
+    @Test(timeout = 5000)
+    public void test_read_pingreq_mqtt5() throws Exception {
+        final ClientContextImpl clientContext
+                = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+
+        final PingRequestInboundInterceptor interceptor = getIsolatedInterceptor();
+
+        clientContext.addPingrequestInboundInterceptor(interceptor);
+
+        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
 
