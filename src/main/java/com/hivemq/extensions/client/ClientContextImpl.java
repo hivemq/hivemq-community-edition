@@ -19,9 +19,11 @@ package com.hivemq.extensions.client;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -59,6 +61,14 @@ public class ClientContextImpl {
         if (!interceptorList.contains(interceptor)) {
             interceptorList.add(interceptor);
         }
+    }
+
+    public void addPingrequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
     }
 
     public void addPublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
@@ -102,6 +112,48 @@ public class ClientContextImpl {
     public List<Interceptor> getAllInterceptors() {
         return interceptorList.stream()
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PingRequestInboundInterceptor)
+                .map(interceptor -> (PingRequestInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PingRequestInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PingRequestInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PingResponseOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PingResponseOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PingResponseOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparing(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PingResponseOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 

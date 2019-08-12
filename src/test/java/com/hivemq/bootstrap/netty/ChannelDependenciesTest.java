@@ -169,6 +169,12 @@ public class ChannelDependenciesTest {
     @Mock
     private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
+    @Mock
+    private PingReqInboundInterceptorHandler pingReqInboundInterceptorHandler;
+
+    @Mock
+    private PingRespOutboundInterceptorHandler pingRespOutboundInterceptorHandler;
+
     @Before
     public void setUp() throws Exception {
 
@@ -207,6 +213,8 @@ public class ChannelDependenciesTest {
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
                 () -> publishMessageExpiryHandler,
+                () -> pingReqInboundInterceptorHandler,
+                () -> pingRespOutboundInterceptorHandler,
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler);
@@ -250,5 +258,7 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
         assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
         assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPingReqInboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPingRespOutboundInterceptorHandler());
     }
 }

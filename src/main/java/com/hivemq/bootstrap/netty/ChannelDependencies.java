@@ -157,6 +157,12 @@ public class ChannelDependencies {
     private final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
 
     @NotNull
+    private final Provider<PingReqInboundInterceptorHandler> pingReqInboundInterceptorHandlerProvider;
+
+    @NotNull
+    private final  Provider<PingRespOutboundInterceptorHandler> pingRespOutboundInterceptorHandlerProvider;
+
+    @NotNull
     private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
 
     @NotNull
@@ -199,6 +205,8 @@ public class ChannelDependencies {
             @NotNull final Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
+            @NotNull final Provider<PingReqInboundInterceptorHandler> pingReqInboundInterceptorHandlerProvider,
+            @NotNull final Provider<PingRespOutboundInterceptorHandler> pingRespOutboundInterceptorHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler) {
@@ -236,6 +244,8 @@ public class ChannelDependencies {
         this.incomingPublishHandlerProvider = incomingPublishHandlerProvider;
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
+        this.pingReqInboundInterceptorHandlerProvider = pingReqInboundInterceptorHandlerProvider;
+        this.pingRespOutboundInterceptorHandlerProvider = pingRespOutboundInterceptorHandlerProvider;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
@@ -415,4 +425,15 @@ public class ChannelDependencies {
     public ConnackOutboundInterceptorHandler getConnackOutboundInterceptorHandler() {
         return connackOutboundInterceptorHandler;
     }
+
+    @NotNull
+    public PingReqInboundInterceptorHandler getPingReqInboundInterceptorHandler(){
+        return pingReqInboundInterceptorHandlerProvider.get();
+    }
+
+    @NotNull
+    public PingRespOutboundInterceptorHandler getPingRespOutboundInterceptorHandler() {
+        return pingRespOutboundInterceptorHandlerProvider.get();
+    }
+
 }
