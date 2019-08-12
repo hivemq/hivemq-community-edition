@@ -122,6 +122,7 @@ public class ChannelHandlerNames {
     public static final String SUBACK_OUTBOUND_INTERCEPTOR_HANDLER = "suback_outbound_interceptor_handler";
     public static final String UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER = "inbound_unsubscribe_interceptor_handler";
     public static final String UNSUBACK_OUTBOUND_INTERCEPTOR_HANDLER = "unsuback_outbound_interceptor_handler";
+    public static final String PING_INTERCEPTOR_HANDLER = "ping_interceptor_handler";
 
     /* *************
      *     Misc    *
