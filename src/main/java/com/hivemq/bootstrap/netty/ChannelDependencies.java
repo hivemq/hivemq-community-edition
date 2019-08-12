@@ -185,6 +185,9 @@ public class ChannelDependencies {
     @NotNull
     private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
 
+    @NotNull
+    private final PingInterceptorHandler pingInterceptorHandler;
+
     @Inject
     public ChannelDependencies(
             @NotNull final Provider<MetricsInitializer> statisticsInitializer,
@@ -229,7 +232,8 @@ public class ChannelDependencies {
             @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler,
             @NotNull final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler,
             @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
-            @NotNull final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler) {
+            @NotNull final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
+            @NotNull final PingInterceptorHandler pingInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -274,6 +278,7 @@ public class ChannelDependencies {
         this.subAckOutboundInterceptorHandler = subAckOutboundInterceptorHandler;
         this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
         this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
+        this.pingInterceptorHandler = pingInterceptorHandler;
     }
 
     @NotNull
@@ -489,5 +494,10 @@ public class ChannelDependencies {
     @NotNull
     public UnsubscribeInboundInterceptorHandler getUnsubscribeInboundInterceptorHandler() {
         return unsubscribeInboundInterceptorHandler;
+    }
+
+    @NotNull
+    public PingInterceptorHandler getPingInterceptorHandler() {
+        return pingInterceptorHandler;
     }
 }

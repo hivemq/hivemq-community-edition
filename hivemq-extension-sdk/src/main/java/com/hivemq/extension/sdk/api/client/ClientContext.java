@@ -22,6 +22,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingreq.PingReqInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresp.PingRespOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
@@ -200,6 +202,24 @@ public interface ClientContext {
     void addDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
 
     /**
+     * Adds an {@link PingReqInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pingReqInboundInterceptor The implementation of a PingReqInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+
+    /**
+     * Adds an {@link PingRespOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pingRespOutboundInterceptor The implementation of a PingRespOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPingRespOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
+
+    /**
      * Removes an {@link PublishInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
@@ -347,6 +367,24 @@ public interface ClientContext {
     void removeDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
 
     /**
+     * Removes a {@link PingReqInboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pingReqInboundInterceptor The implementation of a PingReqInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+
+    /**
+     * Removes a {@link PingRespOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pingRespOutboundInterceptor The implementation of a PingRespOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePingRespOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
+
+    /**
      * Returns all {@link Interceptor} which are registered for this client.
      *
      * @return List of Interceptors for this client.
@@ -486,6 +524,22 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors();
+
+    /**
+     * Returns all {@link PingReqInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingReqInboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptors();
+
+    /**
+     * Returns all {@link PingRespOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingRespOutboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every
