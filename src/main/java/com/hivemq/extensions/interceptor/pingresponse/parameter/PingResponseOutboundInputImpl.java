@@ -1,45 +1,41 @@
 package com.hivemq.extensions.interceptor.pingresponse.parameter;
 
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter.PingResponseOutboundInput;
-import com.hivemq.extension.sdk.api.packets.pingresponse.PingResponsePacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.mqtt.message.PINGRESP;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
- * @since 4.2.0
  */
 public class PingResponseOutboundInputImpl implements Supplier<PingResponseOutboundInputImpl>,
         PingResponseOutboundInput, PluginTaskInput {
 
-    private final @NotNull PingResponsePacket pingResponsePacket;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
+    private final @NotNull PINGRESP pingresp;
 
     public PingResponseOutboundInputImpl(
-            final @NotNull PingResponsePacket pingResponsePacket,
+            final @NotNull PINGRESP pingresp,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
-        this.pingResponsePacket = pingResponsePacket;
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.pingresp = pingresp;
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 
+    public PINGRESP getPingresp() {
+        return pingresp;
+    }
     @Override
     public PingResponseOutboundInputImpl get() {
         return this;
-    }
-
-    @Override
-    public @Immutable @NotNull PingResponsePacket getPingResponsePacket() {
-        return pingResponsePacket;
     }
 
     @Override

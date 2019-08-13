@@ -95,8 +95,7 @@ public class PingReqInboundInterceptorHandlerTest {
                 = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final PingRequestInboundInterceptor interceptor = getIsolatedInterceptor();
-
-        clientContext.addPingrequestInboundInterceptor(interceptor);
+        clientContext.addPingRequestInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -121,7 +120,7 @@ public class PingReqInboundInterceptorHandlerTest {
 
         final PingRequestInboundInterceptor interceptor = getIsolatedInterceptor();
 
-        clientContext.addPingrequestInboundInterceptor(interceptor);
+        clientContext.addPingRequestInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -135,7 +134,6 @@ public class PingReqInboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
         }
-
         Assert.assertNotNull(pingreq);
     }
 

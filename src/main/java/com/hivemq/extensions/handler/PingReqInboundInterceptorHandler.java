@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -17,7 +16,6 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.pingrequest.parameter.PingRequestInboundInputImpl;
 import com.hivemq.extensions.interceptor.pingrequest.parameter.PingRequestInboundOutputImpl;
-import com.hivemq.extensions.packets.pingrequest.PingRequestPacketImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
@@ -34,7 +32,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
- * @since 4.2.0
  */
 @ChannelHandler.Sharable
 @Singleton
@@ -56,7 +53,8 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
     }
 
     @Override
-    protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGREQ pingreq) throws Exception {
+    protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGREQ pingreq)
+            throws Exception {
 
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
@@ -74,58 +72,53 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
             return;
         }
 
-        final List<PingRequestInboundInterceptor> pingRequestInboundInterceptors = clientContext.getPingRequestInboundInterceptors();
+        final List<PingRequestInboundInterceptor> pingRequestInboundInterceptors =
+                clientContext.getPingRequestInboundInterceptors();
         final PingRequestInboundOutputImpl output = new PingRequestInboundOutputImpl(asyncer, pingreq);
         final PingRequestInboundInputImpl
-                input = new PingRequestInboundInputImpl(new PingRequestPacketImpl(pingreq), clientId, channel);
+                input = new PingRequestInboundInputImpl(pingreq, clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final PingRequestInboundInterceptorContext interceptorContext =
                 new PingRequestInboundInterceptorContext(PingRequestInboundInterceptorTask.class,
-                        clientId, output, input, interceptorFuture, pingRequestInboundInterceptors.size());
+                        clientId, interceptorFuture, pingRequestInboundInterceptors.size());
 
         for (final PingRequestInboundInterceptor interceptor : pingRequestInboundInterceptors) {
-            if (output.deliveryPrevented()) {
-                if (!interceptorFuture.isDone()) {
-                    interceptorFuture.set(null);
-                }
-                break;
+            if (!interceptorFuture.isDone()) {
+                interceptorFuture.set(null);
             }
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
-            if  (plugin == null) {
+            if (plugin == null) {
                 interceptorContext.increment();
                 continue;
             }
 
-            final PingRequestInboundInterceptorTask interceptorTask = new PingRequestInboundInterceptorTask(interceptor, plugin.getId());
+            final PingRequestInboundInterceptorTask interceptorTask =
+                    new PingRequestInboundInterceptorTask(interceptor, plugin.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    interceptorContext, input, output, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, ctx);
+        final InterceptorFutureCallback callback = new InterceptorFutureCallback(ctx);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
     private static class PingRequestInboundInterceptorContext extends
             PluginInOutTaskContext<PingRequestInboundOutputImpl> {
 
-        private final @NotNull PingRequestInboundOutputImpl output;
-        private final @NotNull PingRequestInboundInputImpl input;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-        protected PingRequestInboundInterceptorContext(final @NotNull Class<?> taskClazz,
+        protected PingRequestInboundInterceptorContext(
+                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
-                final @NotNull PingRequestInboundOutputImpl output,
-                final @NotNull PingRequestInboundInputImpl input,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, identifier);
-            this.output = output;
-            this.input = input;
             this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -133,10 +126,7 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
 
         @Override
         public void pluginPost(final @NotNull PingRequestInboundOutputImpl pluginOutput) {
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                pluginOutput.forciblyPreventPingRequestDelivery();
-            }
-            if (counter.incrementAndGet() == interceptorCount || pluginOutput.deliveryPrevented()) {
+            if (counter.incrementAndGet() == interceptorCount) {
                 interceptorFuture.set(null);
             }
         }
@@ -155,25 +145,23 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
         private final @NotNull PingRequestInboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        public PingRequestInboundInterceptorTask(final @NotNull PingRequestInboundInterceptor interceptor,
+        PingRequestInboundInterceptorTask(
+                final @NotNull PingRequestInboundInterceptor interceptor,
                 final @NotNull String pluginId) {
             this.interceptor = interceptor;
             this.pluginId = pluginId;
         }
 
-
         @Override
-        public PingRequestInboundOutputImpl apply(final @NotNull PingRequestInboundInputImpl pingRequestInboundInput,
+        public PingRequestInboundOutputImpl apply(
+                final @NotNull PingRequestInboundInputImpl pingRequestInboundInput,
                 final @NotNull PingRequestInboundOutputImpl pingRequestInboundOutput) {
-            if (pingRequestInboundOutput.deliveryPrevented()) {
-                return pingRequestInboundOutput;
-            }
             try {
                 interceptor.onPingReq(pingRequestInboundInput, pingRequestInboundOutput);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound ping request interception. Extensions are responsible for their own exception handling.",
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound ping request interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                pingRequestInboundOutput.forciblyPreventPingRequestDelivery();
                 Exceptions.rethrowError(e);
             }
             return pingRequestInboundOutput;
@@ -187,23 +175,16 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final @NotNull PingRequestInboundOutputImpl inboundOutput;
         private final @NotNull ChannelHandlerContext ctx;
 
-        public InterceptorFutureCallback(final @NotNull PingRequestInboundOutputImpl inboundOutput,
-                final @NotNull ChannelHandlerContext ctx) {
-            this.inboundOutput = inboundOutput;
+        InterceptorFutureCallback(final @NotNull ChannelHandlerContext ctx) {
             this.ctx = ctx;
         }
 
         @Override
-        public void onSuccess(@Nullable Void result) {
+        public void onSuccess(@Nullable final Void result) {
             final PINGREQ pingreq = new PINGREQ();
-            if (inboundOutput.deliveryPrevented()) {
-                ctx.channel().close();
-            } else {
-                ctx.fireChannelRead(pingreq);
-            }
+            ctx.fireChannelRead(pingreq);
         }
 
         @Override

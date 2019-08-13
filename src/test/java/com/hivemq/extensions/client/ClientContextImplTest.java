@@ -16,13 +16,11 @@
 
 package com.hivemq.extensions.client;
 
-import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,11 +55,17 @@ public class ClientContextImplTest {
         });
         clientContext.addSubscribeInboundInterceptor((input, output) -> {
         });
+        clientContext.addPingRequestInboundInterceptor((input, output) -> {
+        });
+        clientContext.addPingResponseOutboundInterceptor((input, output) -> {
+        });
 
-        assertEquals(3, clientContext.getAllInterceptors().size());
+        assertEquals(5, clientContext.getAllInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
         assertEquals(1, clientContext.getPublishOutboundInterceptors().size());
         assertEquals(1, clientContext.getSubscribeInboundInterceptors().size());
+        assertEquals(1, clientContext.getPingRequestInboundInterceptors().size());
+        assertEquals(1, clientContext.getPingResponseOutboundInterceptors().size());
     }
 
     @Test

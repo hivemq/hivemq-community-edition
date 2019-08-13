@@ -25,10 +25,6 @@ import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
-import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.IncomingPublishHandler;
-import com.hivemq.extensions.handler.IncomingSubscribeHandler;
-import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -160,7 +156,7 @@ public class ChannelDependencies {
     private final Provider<PingReqInboundInterceptorHandler> pingReqInboundInterceptorHandlerProvider;
 
     @NotNull
-    private final  Provider<PingRespOutboundInterceptorHandler> pingRespOutboundInterceptorHandlerProvider;
+    private final Provider<PingRespOutboundInterceptorHandler> pingRespOutboundInterceptorHandlerProvider;
 
     @NotNull
     private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;

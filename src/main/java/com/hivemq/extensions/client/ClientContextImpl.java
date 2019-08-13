@@ -63,7 +63,7 @@ public class ClientContextImpl {
         }
     }
 
-    public void addPingrequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void addPingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
@@ -75,6 +75,10 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void addSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
@@ -83,15 +87,19 @@ public class ClientContextImpl {
         removeInterceptor(interceptor);
     }
 
-    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        addInterceptor(interceptor);
-    }
-
     public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
 
     public void removeSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
+    public void removePingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
+    public void removePingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
 

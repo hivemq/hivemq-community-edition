@@ -7,8 +7,7 @@ import com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter.PingRespo
 
 /**
  * @author Robin Atherton
- * @since 4.2.0
- */
+x */
 public interface PingResponseOutboundInterceptor extends Interceptor {
 
     /**

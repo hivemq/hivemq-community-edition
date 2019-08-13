@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -17,7 +16,6 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.pingresponse.parameter.PingResponseOutboundInputImpl;
 import com.hivemq.extensions.interceptor.pingresponse.parameter.PingResponseOutboundOutputImpl;
-import com.hivemq.extensions.packets.pingresponse.PingResponsePacketImpl;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
@@ -31,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
- * @since 4.2.0
  */
 @Singleton
 @ChannelHandler.Sharable
@@ -53,17 +50,21 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
     }
 
     @Override
-    public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+    public void write(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
+            throws Exception {
         if (!(msg instanceof PINGRESP)) {
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePingResponse(ctx,(PINGRESP) msg, promise)) {
+        if (!handlePingResponse(ctx, (PINGRESP) msg, promise)) {
             super.write(ctx, msg, promise);
         }
     }
 
-    private boolean handlePingResponse(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGRESP pingresp, final @NotNull ChannelPromise promise) {
+    private boolean handlePingResponse(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull PINGRESP pingresp,
+            final @NotNull ChannelPromise promise) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return false;
@@ -79,35 +80,37 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
             return false;
         }
 
-        final List<PingResponseOutboundInterceptor> pingResponseOutboundInterceptors = clientContext.getPingResponseOutboundInterceptors();
+        final List<PingResponseOutboundInterceptor> pingResponseOutboundInterceptors =
+                clientContext.getPingResponseOutboundInterceptors();
         final PingResponseOutboundInputImpl
-                input = new PingResponseOutboundInputImpl(new PingResponsePacketImpl(pingresp), clientId, channel);
+                input = new PingResponseOutboundInputImpl(pingresp, clientId, channel);
         final PingResponseOutboundOutputImpl output = new PingResponseOutboundOutputImpl(asyncer, pingresp);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final PingResponseOutboundInterceptorContext interceptorContext =
                 new PingResponseOutboundInterceptorContext(
-                        PingResponseOutboundInterceptorTask.class, clientId, output, input, interceptorFuture, pingResponseOutboundInterceptors.size());
+                        PingResponseOutboundInterceptorTask.class, clientId, output, input, interceptorFuture,
+                        pingResponseOutboundInterceptors.size());
 
         for (final PingResponseOutboundInterceptor interceptor : pingResponseOutboundInterceptors) {
-            if (output.deliveryPrevented()) {
-                if (!interceptorFuture.isDone()) {
-                    interceptorFuture.set(null);
-                }
-                break;
+            if (!interceptorFuture.isDone()) {
+                interceptorFuture.set(null);
             }
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader((IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
+                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
             if (extension == null) {
                 interceptorContext.increment();
                 continue;
             }
 
-            final PingResponseOutboundInterceptorTask interceptorTask = new PingResponseOutboundInterceptorTask(interceptor, extension.getId());
+            final PingResponseOutboundInterceptorTask interceptorTask =
+                    new PingResponseOutboundInterceptorTask(interceptor, extension.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    interceptorContext, input, output, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, ctx);
+        final InterceptorFutureCallback callback = new InterceptorFutureCallback(ctx);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
         return true;
     }
@@ -121,7 +124,8 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-        private PingResponseOutboundInterceptorContext(final @NotNull Class<?> taskClazz,
+        private PingResponseOutboundInterceptorContext(
+                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull PingResponseOutboundOutputImpl output,
                 final @NotNull PingResponseOutboundInputImpl input,
@@ -137,11 +141,7 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
 
         @Override
         public void pluginPost(final @NotNull PingResponseOutboundOutputImpl pluginOutput) {
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                pluginOutput.forciblyPreventPingResponseDelivery();
-            }
-
-            if (counter.incrementAndGet() == interceptorCount || pluginOutput.deliveryPrevented()) {
+            if (counter.incrementAndGet() == interceptorCount) {
                 interceptorFuture.set(null);
             }
         }
@@ -168,17 +168,15 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
         }
 
         @Override
-        public PingResponseOutboundOutputImpl apply(final @NotNull PingResponseOutboundInputImpl pingResponseOutboundInput,
+        public PingResponseOutboundOutputImpl apply(
+                final @NotNull PingResponseOutboundInputImpl pingResponseOutboundInput,
                 final @NotNull PingResponseOutboundOutputImpl pingResponseOutboundOutput) {
-            if (pingResponseOutboundOutput.deliveryPrevented()) {
-                return pingResponseOutboundOutput;
-            }
             try {
                 interceptor.onPingResp(pingResponseOutboundInput, pingResponseOutboundOutput);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound ping response interception. Extensions are responsible for their own exception handling.",
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound ping response interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                pingResponseOutboundOutput.forciblyPreventPingResponseDelivery();
                 Exceptions.rethrowError(e);
             }
             return pingResponseOutboundOutput;
@@ -189,24 +187,19 @@ public class PingRespOutboundInterceptorHandler extends ChannelOutboundHandlerAd
             return interceptor.getClass().getClassLoader();
         }
     }
+
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final @NotNull PingResponseOutboundOutputImpl outboundOutput;
         private final @NotNull ChannelHandlerContext ctx;
 
-        private InterceptorFutureCallback(@NotNull final PingResponseOutboundOutputImpl outboundOutput, @NotNull final ChannelHandlerContext ctx) {
-            this.outboundOutput = outboundOutput;
+        private InterceptorFutureCallback(@NotNull final ChannelHandlerContext ctx) {
             this.ctx = ctx;
         }
 
         @Override
         public void onSuccess(@Nullable final Void result) {
             final PINGRESP pingresp = new PINGRESP();
-            if (outboundOutput.deliveryPrevented()) {
-                ctx.channel().close();
-            } else {
-                ctx.writeAndFlush(pingresp);
-            }
+            ctx.writeAndFlush(pingresp);
         }
 
         @Override
