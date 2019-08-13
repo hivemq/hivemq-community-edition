@@ -66,6 +66,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addPubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor pubackOutboundInterceptor) {
+        clientContext.addPubackOutboundInterceptor(pubackOutboundInterceptor);
+    }
+
+    @Override
     public void removePublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }

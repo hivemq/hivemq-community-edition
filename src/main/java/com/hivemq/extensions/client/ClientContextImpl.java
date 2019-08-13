@@ -66,6 +66,10 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addPubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void addSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }

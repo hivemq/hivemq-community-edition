@@ -61,6 +61,16 @@ public interface ClientContext {
     void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
 
     /**
+     * Adds an {@link PubackOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptord.
+     * @throws NullPointerException If the interceptor is null.
+     * @since 4.2.0
+     */
+    void addPubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
+
+    /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
