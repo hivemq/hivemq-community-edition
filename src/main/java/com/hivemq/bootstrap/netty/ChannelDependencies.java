@@ -48,6 +48,7 @@ import com.hivemq.mqtt.handler.publish.qos.QoSSenderHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 
@@ -164,6 +165,7 @@ public class ChannelDependencies {
 
     @NotNull
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
+    private PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -201,7 +203,8 @@ public class ChannelDependencies {
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
-            @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler) {
+            @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
+            @NotNull final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -239,6 +242,7 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
+        this.pubackOutboundInterceptorHandler = pubackOutboundInterceptorHandler;
     }
 
     @NotNull
@@ -414,5 +418,9 @@ public class ChannelDependencies {
     @NotNull
     public ConnackOutboundInterceptorHandler getConnackOutboundInterceptorHandler() {
         return connackOutboundInterceptorHandler;
+    }
+
+    public ChannelHandler getPubackOutboundInterceptorHandler() {
+        return pubackOutboundInterceptorHandler;
     }
 }

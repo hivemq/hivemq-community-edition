@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -101,6 +102,16 @@ public interface ClientContext {
     void removeSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Removes an {@link PubackOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pubackOutboundInterceptor The implementation of an SubscribeInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     * @since 4.2.0
+     */
+    void removePubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
+
+    /**
      * Returns all {@link Interceptor} which are registered for this client.
      *
      * @return List of Interceptors for this client.
@@ -135,6 +146,15 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link PubackOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PublishInboundInterceptor} for this client.
+     * @since 4.2.0
+     */
+    @Immutable
+    @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every

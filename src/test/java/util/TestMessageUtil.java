@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.reason.*;
@@ -377,5 +378,9 @@ public class TestMessageUtil {
                 .withCleanStart(false)
                 .withSessionExpiryInterval(100)
                 .build();
+    }
+
+    public static PUBACK createFullMqtt5Puback() {
+        return new PUBACK(1);
     }
 }

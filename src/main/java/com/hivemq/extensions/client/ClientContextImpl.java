@@ -19,6 +19,7 @@ package com.hivemq.extensions.client;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
@@ -165,6 +166,23 @@ public class ClientContextImpl {
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull @Immutable List<PubackOutboundInterceptor> getPubackOutboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubackOutboundInterceptor)
+                .map(interceptor -> (PubackOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull @Immutable List<PubackOutboundInterceptor> getPubackOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubackOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubackOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 

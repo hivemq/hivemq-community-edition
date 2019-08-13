@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.PUBACK_OUTBOUND_INTERCEPTOR_HANDLER;
 import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
 
 /**
@@ -91,6 +92,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
+        ch.pipeline().addLast(PUBACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPubackOutboundInterceptorHandler());
         ch.pipeline().addLast(PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPublishOutboundInterceptorHandler());
 
         ch.pipeline().addLast(LISTENER_ATTRIBUTE_ADDER, channelDependencies.getListenerAttributeAdderFactory().get(listener));
