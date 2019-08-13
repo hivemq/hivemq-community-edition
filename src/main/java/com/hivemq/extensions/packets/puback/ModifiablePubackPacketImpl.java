@@ -16,7 +16,6 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
- * @since 4.2.0
  */
 public class ModifiablePubackPacketImpl extends PubackPacketImpl implements ModifiablePubackPacket {
 

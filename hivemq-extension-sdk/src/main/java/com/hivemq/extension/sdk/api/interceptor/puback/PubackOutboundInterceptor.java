@@ -21,7 +21,6 @@ import java.time.Duration;
  * then the connection will be closed by the broker without another packet being sent to the client.
  *
  * @author Yannick Weber
- * @since 4.2.0
  */
 public interface PubackOutboundInterceptor extends Interceptor {
     
@@ -31,7 +30,6 @@ public interface PubackOutboundInterceptor extends Interceptor {
      *
      * @param pubackOutboundInput  The {@link PubackOutboundInput} parameter.
      * @param pubackOutboundOutput The {@link PubackOutboundOutput} parameter.
-     * @since 4.2.0
      */
     void onOutboundPuback(
             @NotNull PubackOutboundInput pubackOutboundInput, @NotNull PubackOutboundOutput pubackOutboundOutput);

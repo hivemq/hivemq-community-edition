@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
- * @since 4.2.0
  */
 public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl>, PubackOutboundInput,
         PluginTaskInput {

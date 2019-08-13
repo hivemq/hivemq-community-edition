@@ -12,7 +12,6 @@ import java.util.Optional;
  * Contains all values of an MQTT 5 PUBACK, but will also used to represent MQTT 3 connack packets.
  *
  * @author Yannick Weber
- * @since 4.2.0
  */
 public interface PubackPacket {
 
@@ -24,7 +23,6 @@ public interface PubackPacket {
      *
      * @return The puback reason code.
      * @see AckReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
-     * @since 4.2.0
      */
     @NotNull AckReasonCode getReasonCode();
 
@@ -34,7 +32,6 @@ public interface PubackPacket {
      * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
      *
      * @return An {@link Optional} containing the connack reason string if present.
-     * @since 4.2.0
      */
     @NotNull Optional<String> getReasonString();
 
@@ -44,7 +41,6 @@ public interface PubackPacket {
      * The properties will always be empty for an MQTT 3 client.
      *
      * @return The user properties.
-     * @since 4.2.0
      */
     @NotNull UserProperties getUserProperties();
 
