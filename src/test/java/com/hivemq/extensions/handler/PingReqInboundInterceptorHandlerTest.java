@@ -1,7 +1,6 @@
 package com.hivemq.extensions.handler;
 
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundInput;
@@ -17,7 +16,6 @@ import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -27,12 +25,10 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.channels.ClosedChannelException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.mockito.Matchers.any;
