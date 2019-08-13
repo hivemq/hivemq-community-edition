@@ -44,6 +44,7 @@ import com.hivemq.mqtt.handler.publish.qos.QoSSenderHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 
@@ -160,6 +161,7 @@ public class ChannelDependencies {
 
     @NotNull
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
+    private PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @NotNull
     private final DisconnectInterceptorHandler disconnectInterceptorHandler;
@@ -202,7 +204,8 @@ public class ChannelDependencies {
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
-            @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler) {
+            @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler,
+            @NotNull final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -240,6 +243,7 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
+        this.pubackOutboundInterceptorHandler = pubackOutboundInterceptorHandler;
         this.disconnectInterceptorHandler = disconnectInterceptorHandler;
     }
 
@@ -421,5 +425,9 @@ public class ChannelDependencies {
     @NotNull
     public DisconnectInterceptorHandler getDisconnectInterceptorHandler() {
         return disconnectInterceptorHandler;
+    }
+
+    public ChannelHandler getPubackOutboundInterceptorHandler() {
+        return pubackOutboundInterceptorHandler;
     }
 }

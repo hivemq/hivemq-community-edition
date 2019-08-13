@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -105,6 +106,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
+    @Override
+    public void removePubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor pubackOutboundInterceptor) {
+        clientContext.removeInterceptor(checkNotNull(pubackOutboundInterceptor, "The interceptor must never be null"));
+    }
+
     @NotNull
     @Override
     @Immutable
@@ -145,6 +151,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Immutable
     public List<DisconnectInboundInterceptor> getDisconnectInboundInterceptors() {
         return clientContext.getDisconnectInboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @Override
+    public @Immutable @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors() {
+        return clientContext.getPubackOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
