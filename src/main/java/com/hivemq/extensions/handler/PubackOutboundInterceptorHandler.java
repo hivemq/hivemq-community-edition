@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yannick Weber
- * @since 4.2.0
  */
 @Singleton
 @ChannelHandler.Sharable

@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
- * @since 4.2.0
  */
 public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutboundOutput>
         implements PubackOutboundOutput, Supplier<PubackOutboundOutputImpl> {
