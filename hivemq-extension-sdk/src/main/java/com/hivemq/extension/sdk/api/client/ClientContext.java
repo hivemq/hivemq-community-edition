@@ -64,9 +64,8 @@ public interface ClientContext {
      * Adds an {@link PubackOutboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
-     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptord.
+     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
-     * @since 4.2.0
      */
     void addPubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
 
@@ -115,9 +114,8 @@ public interface ClientContext {
      * Removes an {@link PubackOutboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param pubackOutboundInterceptor The implementation of an SubscribeInboundInterceptor.
+     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
-     * @since 4.2.0
      */
     void removePubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
 
@@ -161,7 +159,6 @@ public interface ClientContext {
      * Returns all {@link PubackOutboundInterceptor} which are registered for this client by this extension.
      *
      * @return List of {@link PublishInboundInterceptor} for this client.
-     * @since 4.2.0
      */
     @Immutable
     @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors();

@@ -55,12 +55,7 @@ public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         return MessageType.PUBACK;
     }
 
-    public static @NotNull PUBACK mergePubackPacket(
-            final @NotNull ModifiablePubackPacketImpl packet,
-            final @NotNull PUBACK origin) {
-        if (!packet.isModified()) {
-            return origin;
-        }
+    public static @NotNull PUBACK constructPUBACK(final @NotNull ModifiablePubackPacketImpl packet) {
 
         final int packetIdentifier = packet.getPacketIdentifier();
         final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.valueOf(packet.getReasonCode().name());

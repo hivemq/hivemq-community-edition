@@ -1,6 +1,6 @@
 package com.hivemq.extensions.interceptor.puback;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundInput;

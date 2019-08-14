@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.PUBACK_OUTBOUND_INTERCEPTOR_HANDLER;
 import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
 
 /**

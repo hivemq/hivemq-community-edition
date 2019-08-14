@@ -6,8 +6,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
-import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -20,8 +18,6 @@ import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.puback.PubackOutboundInputImpl;
 import com.hivemq.extensions.interceptor.puback.PubackOutboundOutputImpl;
 import com.hivemq.extensions.packets.puback.PubackPacketImpl;
-import com.hivemq.extensions.services.interceptor.Interceptors;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
@@ -55,31 +51,16 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
     @NotNull
     private final PluginTaskExecutorService pluginTaskExecutorService;
 
-    @NotNull
-    private final Interceptors interceptors;
-
-    @NotNull
-    private final ServerInformation serverInformation;
-
-    @NotNull
-    private final EventLog eventLog;
-
 
     @Inject
     public PubackOutboundInterceptorHandler(@NotNull final FullConfigurationService configurationService,
                                             @NotNull final PluginOutPutAsyncer asyncer,
                                             @NotNull final HiveMQExtensions hiveMQExtensions,
-                                            @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
-                                            @NotNull final Interceptors interceptors,
-                                            @NotNull final ServerInformation serverInformation,
-                                            @NotNull final EventLog eventLog) {
+                                            @NotNull final PluginTaskExecutorService pluginTaskExecutorService) {
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
-        this.interceptors = interceptors;
-        this.serverInformation = serverInformation;
-        this.eventLog = eventLog;
     }
 
     @Override
@@ -128,7 +109,7 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
             //disabled extension would be null
             if (plugin == null) {
-                interceptorContext.increment(output.pubackPrevented());
+                interceptorContext.increment();
                 continue;
             }
             final PubackInterceptorTask interceptorTask = new PubackInterceptorTask(interceptor, interceptorFuture, plugin.getId());
@@ -136,7 +117,7 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
             pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, puback, ctx, promise, eventLog);
+        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, puback, ctx, promise);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
 
     }
@@ -147,29 +128,20 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         private final @NotNull PUBACK puback;
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ChannelPromise promise;
-        private final @NotNull EventLog eventLog;
-
         InterceptorFutureCallback(final @NotNull PubackOutboundOutputImpl output,
                                   final @NotNull PUBACK puback,
                                   final @NotNull ChannelHandlerContext ctx,
-                                  final @NotNull ChannelPromise promise,
-                                  final @NotNull EventLog eventLog) {
+                                  final @NotNull ChannelPromise promise) {
             this.output = output;
             this.puback = puback;
             this.ctx = ctx;
             this.promise = promise;
-            this.eventLog = eventLog;
         }
 
         @Override
         public void onSuccess(final @Nullable Void result) {
             try {
-                if (output.pubackPrevented()) {
-                    eventLog.clientWasDisconnected(ctx.channel(), "Connection prevented by extension in PUBACK outbound interceptor");
-                    ctx.channel().close();
-                    return;
-                }
-                final PUBACK finalPuback = PUBACK.mergePubackPacket(output.getPubackPacket(), puback);
+                final PUBACK finalPuback = PUBACK.constructPUBACK(output.getPubackPacket());
                 ctx.writeAndFlush(finalPuback, promise);
             } catch (final Exception e) {
                 log.error("Exception while modifying an intercepted PUBACK message.", e);
@@ -206,22 +178,15 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
         @Override
         public void pluginPost(@NotNull final PubackOutboundOutputImpl pluginOutput) {
-
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                pluginOutput.forciblyDisconnect();
-                increment(pluginOutput.pubackPrevented());
-                return;
-            }
-
             if (pluginOutput.getPubackPacket().isModified()) {
                 input.updatePuback(pluginOutput.getPubackPacket());
             }
-            increment(pluginOutput.pubackPrevented());
+            increment();
         }
 
-        public void increment(final boolean pubackPrevented) {
+        public void increment() {
             //we must set the future when no more interceptors are registered
-            if (counter.incrementAndGet() == interceptorCount || pubackPrevented) {
+            if (counter.incrementAndGet() == interceptorCount) {
                 interceptorFuture.set(null);
             }
         }
@@ -253,7 +218,6 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
                         "Uncaught exception was thrown from extension with id \"{}\" on puback interception. The exception should be handled by the extension.",
                         pluginId);
                 log.debug("Original exception:", e);
-                output.forciblyDisconnect();
                 Exceptions.rethrowError(e);
             }
             return output;

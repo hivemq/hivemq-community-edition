@@ -165,7 +165,7 @@ public class ChannelDependencies {
 
     @NotNull
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-    private PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
+    private final @NotNull PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -420,6 +420,7 @@ public class ChannelDependencies {
         return connackOutboundInterceptorHandler;
     }
 
+    @NotNull
     public ChannelHandler getPubackOutboundInterceptorHandler() {
         return pubackOutboundInterceptorHandler;
     }
