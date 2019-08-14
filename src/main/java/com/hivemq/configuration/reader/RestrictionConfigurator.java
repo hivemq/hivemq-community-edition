@@ -19,9 +19,14 @@ package com.hivemq.configuration.reader;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.entity.RestrictionsEntity;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
 
 public class RestrictionConfigurator {
 
+    private static final Logger log = LoggerFactory.getLogger(RestrictionConfigurator.class);
 
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
 
@@ -34,8 +39,16 @@ public class RestrictionConfigurator {
         restrictionsConfigurationService.setMaxConnections(restrictionsEntity.getMaxConnections());
         restrictionsConfigurationService.setMaxClientIdLength(restrictionsEntity.getMaxClientIdLength());
         restrictionsConfigurationService.setNoConnectIdleTimeout(restrictionsEntity.getNoConnectIdleTimeout());
-        restrictionsConfigurationService.setIncomingLimit(restrictionsEntity.getIncomingBandwidthThrottling());
+        restrictionsConfigurationService.setIncomingLimit(validateIncomingLimit(restrictionsEntity.getIncomingBandwidthThrottling()));
         restrictionsConfigurationService.setMaxTopicLength(restrictionsEntity.getMaxTopicLength());
+    }
+
+    private long validateIncomingLimit(final long incomingLimit) {
+        if (incomingLimit < INCOMING_BANDWIDTH_THROTTLING_MINIMUM) {
+            log.warn("The configured incoming bandwidth throttling ({}) must not be negative. It was set to {} instead.", incomingLimit, INCOMING_BANDWIDTH_THROTTLING_DEFAULT);
+            return INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
+        }
+        return incomingLimit;
     }
 
 
