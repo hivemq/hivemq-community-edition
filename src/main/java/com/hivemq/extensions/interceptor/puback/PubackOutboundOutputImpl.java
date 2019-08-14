@@ -1,8 +1,8 @@
 package com.hivemq.extensions.interceptor.puback;
 
+import com.hivemq.annotations.Immutable;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
@@ -19,7 +19,6 @@ public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutbound
         implements PubackOutboundOutput, Supplier<PubackOutboundOutputImpl> {
 
     private final @NotNull ModifiablePubackPacketImpl modifiablePubackPacket;
-    private final @NotNull AtomicBoolean pubackPrevented = new AtomicBoolean(false);
 
     public PubackOutboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
@@ -37,12 +36,6 @@ public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutbound
     @Override
     public PubackOutboundOutputImpl get() {
         return this;
-    }
-
-    public void forciblyDisconnect()  {this.pubackPrevented.set(true); }
-
-    public boolean pubackPrevented() {
-        return pubackPrevented.get();
     }
 
 }

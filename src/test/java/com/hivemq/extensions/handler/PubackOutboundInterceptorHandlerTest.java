@@ -1,6 +1,5 @@
 package com.hivemq.extensions.handler;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
@@ -39,7 +38,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
@@ -107,7 +105,7 @@ public class PubackOutboundInterceptorHandlerTest {
         asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        handler = new PubackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService, interceptors, serverInformation, eventLog);
+        handler = new PubackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
     }
 
@@ -136,7 +134,7 @@ public class PubackOutboundInterceptorHandlerTest {
         assertNull(channel.readOutbound());
     }
 
-    @Test()
+    @Test(timeout = 5000)
     public void test_no_interceptors() throws Exception {
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(ImmutableList.of());
