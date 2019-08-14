@@ -19,6 +19,7 @@ package com.hivemq.extensions.client;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
@@ -69,6 +70,10 @@ public class ClientContextImpl {
     }
 
     public void addPubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubackInboundInterceptor(final @NotNull PubackInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
@@ -253,6 +258,23 @@ public class ClientContextImpl {
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (PubackOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull @Immutable List<PubackInboundInterceptor> getPubackInboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubackInboundInterceptor)
+                .map(interceptor -> (PubackInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull @Immutable List<PubackInboundInterceptor> getPubackInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubackInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubackInboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
