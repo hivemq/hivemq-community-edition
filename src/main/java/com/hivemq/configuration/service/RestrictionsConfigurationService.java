@@ -41,7 +41,11 @@ public interface RestrictionsConfigurationService {
     /**
      * BOUNDARY VALUES
      */
+    long MAX_CONNECTIONS_MINIMUM = -1;
+    int MAX_CLIENT_ID_LENGTH_MINIMUM = 0;
+    long NO_CONNECT_IDLE_TIMEOUT_MINIMUM = 0;
     long INCOMING_BANDWIDTH_THROTTLING_MINIMUM = 0;
+    int MAX_TOPIC_LENGTH_MINIMUM = 0;
 
     /**
      * Returns the maximum allowed connections.

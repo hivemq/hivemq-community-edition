@@ -22,8 +22,9 @@ import org.junit.Test;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
-public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
 
+public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
 
     @Test
     public void test_restrictions_xml() throws Exception {
@@ -47,6 +48,31 @@ public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
         assertEquals(400, restrictionsConfigurationService.maxTopicLength());
         assertEquals(300, restrictionsConfigurationService.noConnectIdleTimeout());
         assertEquals(200, restrictionsConfigurationService.incomingLimit());
+
+    }
+
+    @Test
+    public void test_restriction_negative_values() throws Exception {
+
+        final String contents =
+                "<hivemq>" +
+                        "<restrictions>" +
+                        "<max-connections>-100</max-connections>" +
+                        "<max-client-id-length>-100</max-client-id-length>" +
+                        "<max-topic-length>-100</max-topic-length>" +
+                        "<no-connect-idle-timeout>-100</no-connect-idle-timeout>" +
+                        "<incoming-bandwidth-throttling>-100</incoming-bandwidth-throttling>" +
+                        "</restrictions>" +
+                        "</hivemq>";
+        Files.write(contents.getBytes(UTF_8), xmlFile);
+
+        reader.applyConfig();
+
+        assertEquals(MAX_CONNECTIONS_DEFAULT, restrictionsConfigurationService.maxConnections());
+        assertEquals(MAX_CLIENT_ID_LENGTH_DEFAULT, restrictionsConfigurationService.maxClientIdLength());
+        assertEquals(MAX_TOPIC_LENGTH_DEFAULT, restrictionsConfigurationService.maxTopicLength());
+        assertEquals(NO_CONNECT_IDLE_TIMEOUT_DEFAULT, restrictionsConfigurationService.noConnectIdleTimeout());
+        assertEquals(INCOMING_BANDWIDTH_THROTTLING_DEFAULT, restrictionsConfigurationService.incomingLimit());
 
     }
 
