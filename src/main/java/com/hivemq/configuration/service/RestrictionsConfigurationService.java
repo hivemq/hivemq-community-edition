@@ -36,8 +36,12 @@ public interface RestrictionsConfigurationService {
     int MAX_CLIENT_ID_LENGTH_DEFAULT = 65535;
     long NO_CONNECT_IDLE_TIMEOUT_DEFAULT = 10000;
     long INCOMING_BANDWIDTH_THROTTLING_DEFAULT = 0;
-    long INCOMING_BANDWIDTH_THROTTLING_MINIMUM = 0;
     int MAX_TOPIC_LENGTH_DEFAULT = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
+
+    /**
+     * BOUNDARY VALUES
+     */
+    long INCOMING_BANDWIDTH_THROTTLING_MINIMUM = 0;
 
     /**
      * Returns the maximum allowed connections.
