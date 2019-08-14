@@ -2,9 +2,12 @@ package com.hivemq.extensions.handler;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.extension.sdk.api.interceptor.pingrequestresponse.PingRequestResponseInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.pingrequestresponse.parameter.PingRequestResponseInput;
-import com.hivemq.extension.sdk.api.interceptor.pingrequestresponse.parameter.PingRequestResponseOutput;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundInput;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundOutput;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter.PingResponseOutboundInput;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter.PingResponseOutboundOutput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -17,15 +20,13 @@ import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
+import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,6 +40,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author Robin Atherton
+ */
 public class PingRequestResponseInterceptorHandlerTest {
 
     private PluginTaskExecutor executor1;
@@ -76,7 +80,7 @@ public class PingRequestResponseInterceptorHandlerTest {
 
         final PingRequestResponseInterceptorHandler handler =
                 new PingRequestResponseInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
-        channel.pipeline().addFirst(handler);
+        channel.pipeline().addLast(handler);
     }
 
     @After
@@ -94,18 +98,19 @@ public class PingRequestResponseInterceptorHandlerTest {
     @Test(timeout = 5000, expected = ClosedChannelException.class)
     public void test_pingresp_channel_closed() {
         channel.close();
-        channel.writeInbound(new PINGRESP());
+        channel.writeOutbound(new PINGRESP());
     }
 
     @Test(timeout = 5000)
-    public void test_read_pingreq_send_pingresp() throws Exception {
+    public void test_read_simple_pingreq() throws Exception {
         final ClientContextImpl clientContext
                 = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
-        final PingRequestResponseInterceptor interceptor = getIsolatedInterceptor("TestInterceptor");
-        clientContext.addPingRequestResponseInterceptor(interceptor);
+        final PingRequestInboundInterceptor interceptor = getIsolatedInboundInterceptor("SimplePingReqTestInterceptor");
+        clientContext.addPingRequestInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
 
@@ -116,6 +121,24 @@ public class PingRequestResponseInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
         }
+        Assert.assertNotNull(pingreq);
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_read_simple_pingresp() throws Exception {
+        final ClientContextImpl clientContext
+                = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+
+        final PingResponseOutboundInterceptor interceptor =
+                getIsolatedOutboundInterceptor("SimplePingRespTestInterceptor");
+        clientContext.addPingResponseOutboundInterceptor(interceptor);
+
+        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+
         channel.writeOutbound(new PINGRESP());
         PINGRESP pingresp = channel.readOutbound();
         while (pingresp == null) {
@@ -123,10 +146,10 @@ public class PingRequestResponseInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
         }
-
+        Assert.assertNotNull(pingresp);
     }
 
-    private PingRequestResponseInterceptor getIsolatedInterceptor(final @NotNull String name) throws Exception {
+    private PingRequestInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
 
@@ -140,28 +163,50 @@ public class PingRequestResponseInterceptorHandlerTest {
         final Class<?> interceptorClass =
                 cl.loadClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
 
-        final PingRequestResponseInterceptor interceptor =
-                (PingRequestResponseInterceptor) interceptorClass.newInstance();
+        final PingRequestInboundInterceptor interceptor =
+                (PingRequestInboundInterceptor) interceptorClass.newInstance();
 
         return interceptor;
     }
 
-    public static class TestInterceptor implements PingRequestResponseInterceptor {
+    private PingResponseOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name)
+            throws Exception {
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
+                .addClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
 
-        int counter = 0;
+        final File jarFile = temporaryFolder.newFile();
+        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+
+        final IsolatedPluginClassloader
+                cl =
+                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+
+        final Class<?> interceptorClass =
+                cl.loadClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
+
+        final PingResponseOutboundInterceptor interceptor =
+                (PingResponseOutboundInterceptor) interceptorClass.newInstance();
+
+        return interceptor;
+    }
+
+    public static class SimplePingRespTestInterceptor implements PingResponseOutboundInterceptor {
 
         @Override
-        public void onPing(
-                @NotNull final PingRequestResponseInput pingRequestResponseInput,
-                @NotNull final PingRequestResponseOutput pingRequestResponseOutput) {
-            System.out.println("lul");
-            counter++;
-            if (counter == 1) {
-                System.out.println("Received Ping request");
-            }
-            if (counter == 2) {
-                System.out.println("Sent out Ping response");
-            }
+        public void onPingResp(
+                final @NotNull PingResponseOutboundInput pingResponseOutboundInput,
+                final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
+            System.out.println("Intercepting PINGRESP at " + System.currentTimeMillis());
+        }
+    }
+
+    public static class SimplePingReqTestInterceptor implements PingRequestInboundInterceptor {
+
+        @Override
+        public void onPingReq(
+                final @NotNull PingRequestInboundInput pingRequestInboundInput,
+                final @NotNull PingRequestInboundOutput pingRequestInboundOutput) {
+            System.out.println("Intercepting PINGREQ at " + System.currentTimeMillis());
         }
     }
 

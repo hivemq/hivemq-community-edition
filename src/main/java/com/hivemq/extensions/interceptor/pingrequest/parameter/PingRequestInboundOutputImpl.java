@@ -17,9 +17,9 @@ public class PingRequestInboundOutputImpl extends AbstractAsyncOutput<PingReques
 
     private final @NotNull PINGREQ pingreq;
 
-    public PingRequestInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer, final @NotNull PINGREQ pingreq) {
+    public PingRequestInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer) {
         super(asyncer);
-        this.pingreq = pingreq;
+        this.pingreq = new PINGREQ();
     }
 
     public PINGREQ getPingreq() {

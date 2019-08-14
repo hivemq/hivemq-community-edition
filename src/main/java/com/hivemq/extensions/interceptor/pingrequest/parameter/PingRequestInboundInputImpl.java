@@ -22,10 +22,9 @@ public class PingRequestInboundInputImpl implements Supplier<PingRequestInboundI
     private final @NotNull ClientInformation clientInformation;
 
     public PingRequestInboundInputImpl(
-            final @NotNull PINGREQ pingreq,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
-        this.pingreq = pingreq;
+        this.pingreq = new PINGREQ();
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
