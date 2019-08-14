@@ -20,6 +20,7 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequestresponse.PingRequestResponseInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
@@ -83,6 +84,10 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addPingRequestResponseInterceptor(final @NotNull PingRequestResponseInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void removePublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
@@ -103,6 +108,10 @@ public class ClientContextImpl {
         removeInterceptor(interceptor);
     }
 
+    public void removePingRequestResponseInterceptor(final @NotNull PingRequestResponseInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
+
     public void removeInterceptor(@NotNull final Interceptor interceptor) {
         interceptorList.remove(interceptor);
     }
@@ -120,6 +129,28 @@ public class ClientContextImpl {
     public List<Interceptor> getAllInterceptors() {
         return interceptorList.stream()
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PingRequestResponseInterceptor> getPingRequestResponseInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PingRequestResponseInterceptor)
+                .map(interceptor -> (PingRequestResponseInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PingRequestResponseInterceptor> getPingRequestResponseInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PingRequestResponseInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PingRequestResponseInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 

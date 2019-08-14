@@ -23,10 +23,6 @@ import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
-import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.IncomingPublishHandler;
-import com.hivemq.extensions.handler.IncomingSubscribeHandler;
-import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -170,10 +166,7 @@ public class ChannelDependenciesTest {
     private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @Mock
-    private PingReqInboundInterceptorHandler pingReqInboundInterceptorHandler;
-
-    @Mock
-    private PingRespOutboundInterceptorHandler pingRespOutboundInterceptorHandler;
+    private PingRequestResponseInterceptorHandler pingRequestResponseInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -213,8 +206,7 @@ public class ChannelDependenciesTest {
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
                 () -> publishMessageExpiryHandler,
-                () -> pingReqInboundInterceptorHandler,
-                () -> pingRespOutboundInterceptorHandler,
+                () -> pingRequestResponseInterceptorHandler,
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler);
@@ -258,7 +250,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
         assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
         assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getPingReqInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getPingRespOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPingRequestResponseInterceptorHandler());
     }
 }

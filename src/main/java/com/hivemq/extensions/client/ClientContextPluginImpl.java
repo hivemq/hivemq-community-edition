@@ -21,6 +21,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequestresponse.PingRequestResponseInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
@@ -77,6 +78,12 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addPingRequestResponseInterceptor(
+            @NotNull final PingRequestResponseInterceptor interceptor) {
+        clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
     public void removePublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
@@ -92,12 +99,18 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void removePingRequestInbound(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void removePingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @Override
     public void removePingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+        clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removePingRequestResponseInterceptor(
+            @NotNull final PingRequestResponseInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 

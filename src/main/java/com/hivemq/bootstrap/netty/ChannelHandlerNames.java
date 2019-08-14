@@ -104,6 +104,8 @@ public class ChannelHandlerNames {
     public static final String MQTT_MESSAGE_BARRIER = "mqtt_message_barrier";
     public static final String MQTT_SUBSCRIBE_MESSAGE_BARRIER = "mqtt_subscribe_message_barrier";
     public static final String STOP_READING_AFTER_CONNECT_HANDLER = "stop_reading_after_connect_handler";
+    public static final String PINGREQUEST_PINGRESPONSE_INTERCEPTOR_HANDLER =
+            "pingrequest_pingresponse_interceptor_handler";
 
     /* *************
      *   Extensions   *
@@ -113,8 +115,6 @@ public class ChannelHandlerNames {
     public static final String CLIENT_LIFECYCLE_EVENT_HANDLER = "client_lifecycle_event_handler";
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
     public static final String CONNECT_INBOUND_INTERCEPTOR_HANDLER = "connect_inbound_interceptor_handler";
-    public static final String PINGREQ_INBOUND_INTERCEPTOR_HANDLER = "pingreq_inbound_interceptor_handler";
-    public static final String PINGRESP_OUTBOUND_INTERCEPTOR_HANDLER = "pingresp_outbound_interceptor_handler";
     public static final String CONNACK_OUTBOUND_INTERCEPTOR_HANDLER = "connack_outbound_interceptor_handler";
 
     /* *************

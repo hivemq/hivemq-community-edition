@@ -188,7 +188,7 @@ public class PingReqInboundInterceptorHandler extends SimpleChannelInboundHandle
         }
 
         @Override
-        public void onFailure(Throwable t) {
+        public void onFailure(final Throwable t) {
             ctx.channel().close();
         }
     }
