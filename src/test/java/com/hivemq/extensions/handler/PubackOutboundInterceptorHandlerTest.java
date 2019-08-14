@@ -211,13 +211,11 @@ public class PubackOutboundInterceptorHandlerTest {
 
         channel.writeOutbound(testPuback());
 
-        while (channel.isActive()) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-            Thread.sleep(10);
-        }
+        channel.writeOutbound(testPuback());
+        channel.runPendingTasks();
+        channel.runScheduledPendingTasks();
 
-        assertFalse(channel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test(timeout = 5000)
@@ -232,13 +230,10 @@ public class PubackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testPuback());
+        channel.runPendingTasks();
+        channel.runScheduledPendingTasks();
 
-        while (channel.isActive()) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-        }
-
-        assertEquals(false, channel.isActive());
+        assertTrue(channel.isActive());
     }
 
 
