@@ -16,8 +16,12 @@
 
 package com.hivemq.security.ssl;
 
-
+import com.google.common.collect.Lists;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.handler.ssl.JdkSslContext;
+import io.netty.handler.ssl.SslContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -26,9 +30,9 @@ import util.TestKeyStoreGenerator;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Georg Held
@@ -47,8 +51,7 @@ public class SslUtilTest {
 
     @Test
     public void test_valid_kmf() throws Exception {
-        final File store = testKeyStoreGenerator.generateKeyStore("fun", "JKS", "pw", "pk");
-        final KeyManagerFactory kmf = sslUtil.createKeyManagerFactory("JKS", store.getAbsolutePath(), "pw", "pk");
+        final KeyManagerFactory kmf = createKeyManagerFactory();
         assertNotNull(kmf.getKeyManagers());
         assertEquals(1, kmf.getKeyManagers().length);
     }
@@ -89,5 +92,68 @@ public class SslUtilTest {
     public void test_wrong_tmf_ks_pw() throws Exception {
         final File store = testKeyStoreGenerator.generateKeyStore("fun", "JKS", "pw", "pk");
         sslUtil.createTrustManagerFactory("JKS", store.getAbsolutePath(), "wrong");
+    }
+
+    @Test
+    public void test_java_ssl_tls_1_context_created() throws Exception {
+        final KeyManagerFactory kmf = createKeyManagerFactory();
+
+        final SslContext sslServerContext =
+                sslUtil.createSslServerContext(kmf, null, null, Lists.newArrayList("TLSv1"));
+        assertTrue(sslServerContext instanceof JdkSslContext);
+
+        final List<String> protocols = getProtocolsFromContext(sslServerContext);
+        assertEquals(1, protocols.size());
+        assertEquals("TLSv1", protocols.get(0));
+    }
+
+    @Test
+    public void test_java_ssl_tls_1_1_context_created() throws Exception {
+        final KeyManagerFactory kmf = createKeyManagerFactory();
+
+        final SslContext sslServerContext =
+                sslUtil.createSslServerContext(kmf, null, null, Lists.newArrayList("TLSv1.1"));
+        assertTrue(sslServerContext instanceof JdkSslContext);
+
+        final List<String> protocols = getProtocolsFromContext(sslServerContext);
+        assertEquals(1, protocols.size());
+        assertEquals("TLSv1.1", protocols.get(0));
+    }
+
+    @Test
+    public void test_java_ssl_tls_1_2_context_created() throws Exception {
+        final KeyManagerFactory kmf = createKeyManagerFactory();
+
+        final SslContext sslServerContext =
+                sslUtil.createSslServerContext(kmf, null, null, Lists.newArrayList("TLSv1.2"));
+        assertTrue(sslServerContext instanceof JdkSslContext);
+
+        final List<String> protocols = getProtocolsFromContext(sslServerContext);
+        assertEquals(1, protocols.size());
+        assertEquals("TLSv1.2", protocols.get(0));
+    }
+
+    @Test
+    public void test_java_ssl_tls_1_3_context_created() throws Exception {
+        final KeyManagerFactory kmf = createKeyManagerFactory();
+
+        final SslContext sslServerContext =
+                sslUtil.createSslServerContext(kmf, null, null, Lists.newArrayList("TLSv1.3"));
+        assertTrue(sslServerContext instanceof JdkSslContext);
+
+        final List<String> protocols = getProtocolsFromContext(sslServerContext);
+        assertEquals(1, protocols.size());
+        assertEquals("TLSv1.3", protocols.get(0));
+    }
+
+    @NotNull
+    private KeyManagerFactory createKeyManagerFactory() throws Exception {
+        final File store = testKeyStoreGenerator.generateKeyStore("fun", "JKS", "pw", "pk");
+        return sslUtil.createKeyManagerFactory("JKS", store.getAbsolutePath(), "pw", "pk");
+    }
+
+    @NotNull
+    private List<String> getProtocolsFromContext(@NotNull final SslContext sslServerContext) {
+        return List.of(sslServerContext.newEngine(new PooledByteBufAllocator()).getEnabledProtocols());
     }
 }

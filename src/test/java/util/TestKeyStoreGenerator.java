@@ -16,9 +16,10 @@
 
 package util;
 
+import com.hivemq.annotations.NotNull;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -27,6 +28,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +39,10 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class TestKeyStoreGenerator {
 
@@ -47,17 +52,19 @@ public class TestKeyStoreGenerator {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public File generateKeyStore(final String name, final String keystoreType, final String keyStorePassword, final String privateKeyPassword) throws Exception {
-        return generateKeyStore(name, keystoreType, keyStorePassword, privateKeyPassword, true);
+    @NotNull
+    public File generateKeyStore(final @NotNull String name, final @NotNull String keystoreType, final @NotNull String keyStorePassword, final @NotNull String privateKeyPassword) throws Exception {
+        return generateKeyStore(name, keystoreType, keyStorePassword, privateKeyPassword, true, false);
     }
 
-    public File generateKeyStore(final String name, final String keystoreType, final String keyStorePassword, final String privateKeyPassword, final boolean withX500) throws Exception {
+    @NotNull
+    public File generateKeyStore(final @NotNull String name, final @NotNull String keystoreType, final @NotNull String keyStorePassword, final @NotNull String privateKeyPassword, final boolean withX500, final boolean eclipticCurve) throws Exception {
 
         final KeyStore ks = KeyStore.getInstance(keystoreType);
         ks.load(null);
 
-        final KeyPair keyPair = generateKeyPair();
-        final X509Certificate certificate = generateX509Certificate(keyPair, name, withX500);
+        final KeyPair keyPair = eclipticCurve ? generateECKeyPair() : generateRSAKeyPair();
+        final X509Certificate certificate = generateX509Certificate(keyPair, name, withX500, eclipticCurve);
 
         final X509Certificate[] certificateChain = {certificate};
 
@@ -73,11 +80,12 @@ public class TestKeyStoreGenerator {
         return keyStoreFile;
     }
 
-    public File generateKeyStoreWithChain(final String nameCert1, final String nameCert2, final String keystoreType, final String keyStorePassword, final String privateKeyPassword) throws Exception {
+    @NotNull
+    public File generateKeyStoreWithChain(final @NotNull String nameCert1, final @NotNull String nameCert2, final @NotNull String keystoreType, final String keyStorePassword, final String privateKeyPassword) throws Exception {
         final KeyStore ks = KeyStore.getInstance(keystoreType);
         ks.load(null);
 
-        final KeyPair keyPair = generateKeyPair();
+        final KeyPair keyPair = generateRSAKeyPair();
         final X509Certificate certificate = generateX509Certificate(keyPair, nameCert1);
         final X509Certificate certificate2 = generateX509Certificate(keyPair, nameCert2);
 
@@ -95,17 +103,24 @@ public class TestKeyStoreGenerator {
         return keyStoreFile;
     }
 
-    public X509Certificate generateX509Certificate(final KeyPair keyPair, final String name) throws Exception {
+    @NotNull
+    public X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name) throws Exception {
         return generateX509Certificate(keyPair, name, true);
     }
 
-    public X509Certificate generateX509Certificate(final KeyPair keyPair, final String name, final boolean withX500) throws Exception {
+    @NotNull
+    public X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name, final boolean withX500) throws Exception {
+        return generateX509Certificate(keyPair, name, withX500, false);
+    }
+
+    @NotNull
+    private X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name, final boolean withX500, final boolean eclipticCurve) throws Exception {
 
         final X500Name x500Name;
 
-        if(withX500){
+        if (withX500) {
             //CN = Common Name, OU = Organisational Unit, O = Organisation, C = Country, ST = State
-            x500Name = new X500Name("CN=" + name + ", OU=" +name+ ", O=" +name+ ", C=" +name+ ", ST=" +name);
+            x500Name = new X500Name("CN=" + name + ", OU=" + name + ", O=" + name + ", C=" + name + ", ST=" + name);
         } else {
             //At least 1 attribute is required
             x500Name = new X500Name("CN=" + name);
@@ -120,7 +135,13 @@ public class TestKeyStoreGenerator {
                 x500Name,
                 SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
 
-        final X509CertificateHolder holder = builder.build(createContentSigner(keyPair));
+        final List<GeneralName> altNames = new ArrayList<GeneralName>();
+        altNames.add(new GeneralName(GeneralName.dNSName, "localhost"));
+        altNames.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
+        final GeneralNames subjectAltNames = GeneralNames.getInstance(new DERSequence((GeneralName[]) altNames.toArray(new GeneralName[]{})));
+        builder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
+
+        final X509CertificateHolder holder = builder.build(eclipticCurve ? createECContentSigner(keyPair) : createRSAContentSigner(keyPair));
         final org.bouncycastle.asn1.x509.Certificate certificate = holder.toASN1Structure();
 
         final InputStream is = new ByteArrayInputStream(certificate.getEncoded());
@@ -130,13 +151,22 @@ public class TestKeyStoreGenerator {
         return x509Certificate;
     }
 
-    public KeyPair generateKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
+    @NotNull
+    public KeyPair generateRSAKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
         keyPairGenerator.initialize(2048, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
-    private ContentSigner createContentSigner(final KeyPair keyPair) throws Exception {
+    @NotNull
+    public KeyPair generateECKeyPair() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+        final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BC");
+        keyGen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
+        return keyGen.generateKeyPair();
+    }
+
+    @NotNull
+    private ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
         final AlgorithmIdentifier signatureAlgorithmId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
         final AlgorithmIdentifier digestAlgorithmId = new DefaultDigestAlgorithmIdentifierFinder().find(signatureAlgorithmId);
 
@@ -144,6 +174,17 @@ public class TestKeyStoreGenerator {
         final AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(encoded);
 
         return new BcRSAContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);
+    }
+
+    @NotNull
+    private ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
+        final AlgorithmIdentifier signatureAlgorithmId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withECDSA");
+        final AlgorithmIdentifier digestAlgorithmId = new DefaultDigestAlgorithmIdentifierFinder().find(signatureAlgorithmId);
+
+        final byte[] encoded = keyPair.getPrivate().getEncoded();
+        final AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(encoded);
+
+        return new BcECContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);
     }
 
 }

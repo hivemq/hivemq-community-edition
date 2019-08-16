@@ -69,7 +69,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
 
             } else if (cause.getCause() instanceof SSLException) {
                 logSSLException(ctx, cause);
-                eventLog.clientWasDisconnected(ctx.channel(), "SSL handshake failed");
+                eventLog.clientWasDisconnected(ctx.channel(), "SSL message transmission failed");
                 ctx.close();
                 return;
             }
