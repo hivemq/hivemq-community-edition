@@ -38,38 +38,41 @@ public class RestrictionConfigurator {
     void setRestrictionsConfig(@NotNull final RestrictionsEntity restrictionsEntity) {
         restrictionsConfigurationService.setMaxConnections(validateMaxConnections(restrictionsEntity.getMaxConnections()));
         restrictionsConfigurationService.setMaxClientIdLength(validateMaxClientIdLength(restrictionsEntity.getMaxClientIdLength()));
-        restrictionsConfigurationService.setNoConnectIdleTimeout(validateNoConnectIdleTimout(restrictionsEntity.getNoConnectIdleTimeout()));
+        restrictionsConfigurationService.setNoConnectIdleTimeout(validateNoConnectIdleTimeout(restrictionsEntity.getNoConnectIdleTimeout()));
         restrictionsConfigurationService.setIncomingLimit(validateIncomingLimit(restrictionsEntity.getIncomingBandwidthThrottling()));
         restrictionsConfigurationService.setMaxTopicLength(validateMaxTopicLength(restrictionsEntity.getMaxTopicLength()));
     }
 
     private long validateMaxConnections(final long maxConnections) {
+        if (maxConnections == UNLIMITED_CONNECTIONS) {
+            return maxConnections;
+        }
         if (maxConnections < MAX_CONNECTIONS_MINIMUM) {
-            log.warn("The configured max-connections ({}) must not be negative. The value was set to ({}) instead.", maxConnections, MAX_CONNECTIONS_DEFAULT);
+            log.warn("The configured max-connections ({}) must be greater than 0. The value was set to {} (unlimited) instead.", maxConnections, MAX_CONNECTIONS_DEFAULT);
             return MAX_CONNECTIONS_DEFAULT;
         }
         return maxConnections;
     }
 
     private int validateMaxClientIdLength(final int maxClientIdLength) {
-        if (maxClientIdLength < MAX_CLIENT_ID_LENGTH_MINIMUM) {
-            log.warn("The configured max-clientid-length ({}) must not be negative. The value was set to ({}) instead.", maxClientIdLength, MAX_CLIENT_ID_LENGTH_DEFAULT);
+        if (maxClientIdLength < MAX_CLIENT_ID_LENGTH_MINIMUM || maxClientIdLength > MAX_CLIENT_ID_LENGTH_MAXIMUM) {
+            log.warn("The configured max-clientid-length ({}) must be in the range {} - {}. The value was set to {} instead.", MAX_CLIENT_ID_LENGTH_MINIMUM, MAX_CLIENT_ID_LENGTH_MAXIMUM, maxClientIdLength, MAX_CLIENT_ID_LENGTH_DEFAULT);
             return MAX_CLIENT_ID_LENGTH_DEFAULT;
         }
         return maxClientIdLength;
     }
 
     private int validateMaxTopicLength(final int maxTopicLength) {
-        if (maxTopicLength < MAX_TOPIC_LENGTH_MINIMUM) {
-            log.warn("The configured no-connect-idle-timeout ({}) must not be negative. The value was set to ({}) instead.", maxTopicLength, MAX_TOPIC_LENGTH_DEFAULT);
+        if (maxTopicLength < MAX_TOPIC_LENGTH_MINIMUM || maxTopicLength > MAX_TOPIC_LENGTH_MAXIMUM) {
+            log.warn("The configured max-topic-length ({}) must be in the range {} - {}. The value was set to {} instead.", MAX_TOPIC_LENGTH_MINIMUM, MAX_TOPIC_LENGTH_MINIMUM, maxTopicLength, MAX_TOPIC_LENGTH_DEFAULT);
             return MAX_TOPIC_LENGTH_DEFAULT;
         }
         return maxTopicLength;
     }
 
-    private long validateNoConnectIdleTimout(final long noConnectIdleTimeout) {
+    private long validateNoConnectIdleTimeout(final long noConnectIdleTimeout) {
         if (noConnectIdleTimeout < NO_CONNECT_IDLE_TIMEOUT_MINIMUM) {
-            log.warn("The configured no-connect-idle-timeout ({}) must not be negative. The value was set to ({}) instead.", noConnectIdleTimeout, NO_CONNECT_IDLE_TIMEOUT_DEFAULT);
+            log.warn("The configured no-connect-idle-timeout ({}) must be greater than 0. The value was set to {} instead.", noConnectIdleTimeout, NO_CONNECT_IDLE_TIMEOUT_DEFAULT);
             return NO_CONNECT_IDLE_TIMEOUT_DEFAULT;
         }
         return noConnectIdleTimeout;

@@ -17,13 +17,17 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.io.Files;
+import io.netty.util.internal.UnstableApi;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
 import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
 
     @Test
@@ -76,5 +80,26 @@ public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
 
     }
 
+    @Test
+    public void test_tooHigh() throws IOException {
+        final String contents =
+                "<hivemq>" +
+                        "<restrictions>" +
+                        "<max-connections>500</max-connections>" +
+                        "<max-client-id-length>123456</max-client-id-length>" +
+                        "<max-topic-length>123456</max-topic-length>" +
+                        "<no-connect-idle-timeout>300</no-connect-idle-timeout>" +
+                        "<incoming-bandwidth-throttling>200</incoming-bandwidth-throttling>" +
+                        "</restrictions>" +
+                        "</hivemq>";
+        Files.write(contents.getBytes(UTF_8), xmlFile);
 
+        reader.applyConfig();
+
+        assertEquals(500, restrictionsConfigurationService.maxConnections());
+        assertEquals(MAX_CLIENT_ID_LENGTH_DEFAULT, restrictionsConfigurationService.maxClientIdLength());
+        assertEquals(MAX_TOPIC_LENGTH_DEFAULT, restrictionsConfigurationService.maxTopicLength());
+        assertEquals(300, restrictionsConfigurationService.noConnectIdleTimeout());
+        assertEquals(200, restrictionsConfigurationService.incomingLimit());
+    }
 }
