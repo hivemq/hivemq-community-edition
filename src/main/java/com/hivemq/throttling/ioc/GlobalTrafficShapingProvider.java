@@ -65,7 +65,6 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
         registry.add(shutdownHook);
 
         final long incomingLimit = restrictionsConfigurationService.incomingLimit();
-        log.debug("Throttling incoming traffic to {} B/s", incomingLimit);
 
         final long outgoinglimit = InternalConfigurations.OUTGOING_BANDWIDTH_THROTTLING_DEFAULT;
         log.debug("Throttling outgoing traffic to {} B/s", outgoinglimit);
