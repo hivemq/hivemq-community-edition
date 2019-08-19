@@ -92,7 +92,8 @@ public class RestrictionConfigurator {
     private long validateIncomingLimit(final long incomingLimit) {
         if (incomingLimit < INCOMING_BANDWIDTH_THROTTLING_MINIMUM) {
             log.warn(
-                    "The configured incoming-bandwidth-throttling ({} bytes/second) must not be negative. The default value (unlimited) is used instead.",
+                    "The configured incoming-bandwidth-throttling ({} bytes/second) must not be at last {}. The default value (unlimited) is used instead.",
+                    INCOMING_BANDWIDTH_THROTTLING_MINIMUM,
                     incomingLimit);
             return INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
         }
