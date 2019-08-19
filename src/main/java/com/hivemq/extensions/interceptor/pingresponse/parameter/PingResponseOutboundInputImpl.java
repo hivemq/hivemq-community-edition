@@ -22,11 +22,10 @@ public class PingResponseOutboundInputImpl implements Supplier<PingResponseOutbo
     private final @NotNull PINGRESP pingresp;
 
     public PingResponseOutboundInputImpl(
-            final @NotNull PINGRESP pingresp,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.pingresp = pingresp;
+        this.pingresp = new PINGRESP();
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 

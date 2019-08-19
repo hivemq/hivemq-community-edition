@@ -153,8 +153,8 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
         final List<PingResponseOutboundInterceptor> pingResponseOutboundInterceptors =
                 clientContext.getPingResponseOutboundInterceptors();
         final PingResponseOutboundInputImpl
-                input = new PingResponseOutboundInputImpl(pingresp, clientId, channel);
-        final PingResponseOutboundOutputImpl output = new PingResponseOutboundOutputImpl(asyncer, pingresp);
+                input = new PingResponseOutboundInputImpl(clientId, channel);
+        final PingResponseOutboundOutputImpl output = new PingResponseOutboundOutputImpl(asyncer);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final PingResponseOutboundInterceptorContext interceptorContext =
                 new PingResponseOutboundInterceptorContext(

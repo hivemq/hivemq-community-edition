@@ -17,10 +17,9 @@ public class PingResponseOutboundOutputImpl extends AbstractAsyncOutput<PingResp
 
     private final PINGRESP pingresp;
 
-
-    public PingResponseOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer, final @NotNull PINGRESP pingresp) {
+    public PingResponseOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer) {
         super(asyncer);
-        this.pingresp = pingresp;
+        this.pingresp = new PINGRESP();
     }
 
     public PINGRESP getPingresp() {
