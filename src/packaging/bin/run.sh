@@ -25,7 +25,6 @@ echo "-------------------------------------------------------------------------"
 echo ""
 echo "  HiveMQ Start Script for Linux/Unix v1.10"
 echo ""
-set -o xtrace
 
 if hash java 2>/dev/null; then
 
