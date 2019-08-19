@@ -28,6 +28,7 @@ import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
+import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
@@ -90,6 +91,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 .thenReturn(temporaryFolder.newFolder());
 
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024);
         InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
 
         persistence = new ClientQueueXodusLocalPersistence(
@@ -915,6 +917,96 @@ public class ClientQueueXodusLocalPersistenceTest {
         assertTrue(notExpectedMessages.isEmpty());
     }
 
+    @Test(timeout = 5000)
+    public void test_increase_negative_size() {
+
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNull(clientQos0MemoryMap.get("client"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_increase_positive_size() {
+
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNotNull(clientQos0MemoryMap.get("client"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_multiple_increases() {
+
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNull(clientQos0MemoryMap.get("client"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_increase_decrease_increase_decrease_increase() {
+
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
+        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNotNull(clientQos0MemoryMap.get("client"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_add_qos_0_per_client_exceeded() {
+
+        persistence.add("client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic", 1, 500), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
+        persistence.add("client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic", 1, 500), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
+
+        verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic"), eq(0), anyLong(), eq(1024L));
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNotNull(clientQos0MemoryMap.get("client"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void test_add_qos_0_per_client_exactly_exceeded() {
+
+
+        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[753]);
+
+        assertEquals(1024, exactly1024bytesPublish.getEstimatedSizeInMemory());
+
+        persistence.add("client", false, exactly1024bytesPublish, 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
+        persistence.add("client", false, createPublish(2, QoS.AT_MOST_ONCE, "topic", 2), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
+
+        verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic"), eq(0), anyLong(), eq(1024L));
+
+        final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
+
+        assertNotNull(clientQos0MemoryMap.get("client"));
+
+    }
+
     private PUBLISH createPublish(final int packetId, final QoS qos) {
         return createPublish(packetId, qos, "topic");
     }
@@ -948,6 +1040,19 @@ public class ClientQueueXodusLocalPersistenceTest {
                 .withQoS(qos)
                 .withPayloadId(1L)
                 .withPayload("message".getBytes())
+                .withTopic(topic)
+                .withHivemqId("hivemqId")
+                .withPersistence(payloadPersistence)
+                .withPublishId(publishId)
+                .build();
+    }
+
+
+    private PUBLISH createPublish(final int packetId, final QoS qos, final String topic, final int publishId, final byte[] message) {
+        return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
+                .withQoS(qos)
+                .withPayloadId(1L)
+                .withPayload(message)
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
                 .withPersistence(payloadPersistence)
