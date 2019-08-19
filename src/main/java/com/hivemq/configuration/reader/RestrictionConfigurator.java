@@ -56,7 +56,10 @@ public class RestrictionConfigurator {
 
     private int validateMaxClientIdLength(final int maxClientIdLength) {
         if (maxClientIdLength < MAX_CLIENT_ID_LENGTH_MINIMUM || maxClientIdLength > MAX_CLIENT_ID_LENGTH_MAXIMUM) {
-            log.warn("The configured max-clientid-length ({}) must be in the range {} - {}. The value was set to {} instead.", MAX_CLIENT_ID_LENGTH_MINIMUM, MAX_CLIENT_ID_LENGTH_MAXIMUM, maxClientIdLength, MAX_CLIENT_ID_LENGTH_DEFAULT);
+            log.warn(
+                    "The configured max-clientid-length ({}) must be in the range {} - {}. The value was set to {} instead.",
+                    maxClientIdLength, MAX_CLIENT_ID_LENGTH_MINIMUM, MAX_CLIENT_ID_LENGTH_MAXIMUM,
+                    MAX_CLIENT_ID_LENGTH_DEFAULT);
             return MAX_CLIENT_ID_LENGTH_DEFAULT;
         }
         return maxClientIdLength;
@@ -64,7 +67,9 @@ public class RestrictionConfigurator {
 
     private int validateMaxTopicLength(final int maxTopicLength) {
         if (maxTopicLength < MAX_TOPIC_LENGTH_MINIMUM || maxTopicLength > MAX_TOPIC_LENGTH_MAXIMUM) {
-            log.warn("The configured max-topic-length ({}) must be in the range {} - {}. The value was set to {} instead.", MAX_TOPIC_LENGTH_MINIMUM, MAX_TOPIC_LENGTH_MINIMUM, maxTopicLength, MAX_TOPIC_LENGTH_DEFAULT);
+            log.warn(
+                    "The configured max-topic-length ({}) must be in the range {} - {}. The value was set to {} instead.",
+                    maxTopicLength, MAX_TOPIC_LENGTH_MINIMUM, MAX_TOPIC_LENGTH_MAXIMUM, MAX_TOPIC_LENGTH_DEFAULT);
             return MAX_TOPIC_LENGTH_DEFAULT;
         }
         return maxTopicLength;
@@ -72,7 +77,9 @@ public class RestrictionConfigurator {
 
     private long validateNoConnectIdleTimeout(final long noConnectIdleTimeout) {
         if (noConnectIdleTimeout < NO_CONNECT_IDLE_TIMEOUT_MINIMUM) {
-            log.warn("The configured no-connect-idle-timeout ({}) must be greater than 0. The value was set to {} instead.", noConnectIdleTimeout, NO_CONNECT_IDLE_TIMEOUT_DEFAULT);
+            log.warn(
+                    "The configured no-connect-idle-timeout ({}ms) must be greater than 0ms. The value was set to {}ms instead.",
+                    noConnectIdleTimeout, NO_CONNECT_IDLE_TIMEOUT_DEFAULT);
             return NO_CONNECT_IDLE_TIMEOUT_DEFAULT;
         }
         return noConnectIdleTimeout;
@@ -80,7 +87,9 @@ public class RestrictionConfigurator {
 
     private long validateIncomingLimit(final long incomingLimit) {
         if (incomingLimit < INCOMING_BANDWIDTH_THROTTLING_MINIMUM) {
-            log.warn("The configured incoming-bandwidth-throttling ({} bytes/second) must not be negative. The value was set to {} bytes/second instead.", incomingLimit, INCOMING_BANDWIDTH_THROTTLING_DEFAULT);
+            log.warn(
+                    "The configured incoming-bandwidth-throttling ({} bytes/second) must not be negative. The value was set to {} (unlimited) instead.",
+                    incomingLimit, INCOMING_BANDWIDTH_THROTTLING_DEFAULT);
             return INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
         }
         return incomingLimit;

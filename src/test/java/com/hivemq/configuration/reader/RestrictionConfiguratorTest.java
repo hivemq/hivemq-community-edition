@@ -17,15 +17,13 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.io.Files;
-import io.netty.util.internal.UnstableApi;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
-
-import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
