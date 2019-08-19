@@ -97,11 +97,15 @@ public class SslUtil {
     }
 
     @NotNull
-    public SslContext createSslServerContext(@NotNull final KeyManagerFactory kmf, @Nullable final TrustManagerFactory tmFactory, @Nullable final List<String> cipherSuites) throws SSLException {
+    public SslContext createSslServerContext(@NotNull final KeyManagerFactory kmf, @Nullable final TrustManagerFactory tmFactory, @Nullable final List<String> cipherSuites, @Nullable final List<String> protocols) throws SSLException {
 
         final SslContextBuilder sslContextBuilder = SslContextBuilder.forServer(kmf);
 
         sslContextBuilder.sslProvider(SslProvider.JDK).trustManager(tmFactory);
+
+        if (protocols != null && !protocols.isEmpty()) {
+            sslContextBuilder.protocols(protocols.toArray(new String[0]));
+        }
 
         //set chosen cipher suites if available
         if (cipherSuites != null && cipherSuites.size() > 0) {
