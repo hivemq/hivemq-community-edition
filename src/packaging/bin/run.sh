@@ -25,6 +25,7 @@ echo "-------------------------------------------------------------------------"
 echo ""
 echo "  HiveMQ Start Script for Linux/Unix v1.10"
 echo ""
+set -o xtrace
 
 if hash java 2>/dev/null; then
 
@@ -76,9 +77,12 @@ if hash java 2>/dev/null; then
                 echo ERROR! HiveMQ JAR not found.
                 echo $HIVEMQ_FOLDER;
             else
-                HIVEMQ_FOLDER=$(echo "$HIVEMQ_FOLDER" | sed 's/ /\\ /g')
+                # shellcheck disable=SC2001
+#                HIVEMQ_FOLDER="$(echo $HIVEMQ_FOLDER | sed 's/ /\\ /g')"
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
-                JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$HIVEMQ_FOLDER/heap-dump.hprof"
+                JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+                HEAPDUMP_PATH="$HIVEMQ_FOLDER/heap-dump.hprof"
+                JAVA_OPTS="${JAVA_OPTS} -XX:HeapDumpPath=${HEAPDUMP_PATH}"
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
@@ -92,7 +96,7 @@ if hash java 2>/dev/null; then
                 echo ""
                 # Run HiveMQ
                 JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
-                exec "java" ${HOME_OPT} ${JAVA_OPTS} -jar ${JAR_PATH}
+                exec "java" "${HOME_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
             fi
         fi
     fi
