@@ -50,7 +50,8 @@ public class RestrictionConfigurator {
         if (maxConnections < MAX_CONNECTIONS_MINIMUM) {
             log.warn(
                     "The configured max-connections ({}) must be at least {}. The default value (unlimited) is used instead.",
-                    maxConnections, MAX_CONNECTIONS_MINIMUM);
+                    maxConnections,
+                    MAX_CONNECTIONS_MINIMUM);
             return MAX_CONNECTIONS_DEFAULT;
         }
         return maxConnections;
@@ -60,7 +61,9 @@ public class RestrictionConfigurator {
         if (maxClientIdLength < MAX_CLIENT_ID_LENGTH_MINIMUM || maxClientIdLength > MAX_CLIENT_ID_LENGTH_MAXIMUM) {
             log.warn(
                     "The configured max-clientid-length ({}) must be in the range {} - {}. The default value ({}) is used instead.",
-                    maxClientIdLength, MAX_CLIENT_ID_LENGTH_MINIMUM, MAX_CLIENT_ID_LENGTH_MAXIMUM,
+                    maxClientIdLength,
+                    MAX_CLIENT_ID_LENGTH_MINIMUM,
+                    MAX_CLIENT_ID_LENGTH_MAXIMUM,
                     MAX_CLIENT_ID_LENGTH_DEFAULT);
             return MAX_CLIENT_ID_LENGTH_DEFAULT;
         }
@@ -93,8 +96,8 @@ public class RestrictionConfigurator {
         if (incomingLimit < INCOMING_BANDWIDTH_THROTTLING_MINIMUM) {
             log.warn(
                     "The configured incoming-bandwidth-throttling ({} bytes/second) must not be at least {} bytes/second. The default value (unlimited) is used instead.",
-                    INCOMING_BANDWIDTH_THROTTLING_MINIMUM,
-                    incomingLimit);
+                    incomingLimit,
+                    INCOMING_BANDWIDTH_THROTTLING_MINIMUM);
             return INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
         }
         return incomingLimit;

@@ -46,7 +46,7 @@ public interface RestrictionsConfigurationService {
     /**
      * BOUNDARY VALUES
      */
-    long MAX_CONNECTIONS_MINIMUM = 1;
+    long MAX_CONNECTIONS_MINIMUM = 0;
     int MAX_CLIENT_ID_LENGTH_MINIMUM = 1;
     int MAX_CLIENT_ID_LENGTH_MAXIMUM = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
     long NO_CONNECT_IDLE_TIMEOUT_MINIMUM = 1;
