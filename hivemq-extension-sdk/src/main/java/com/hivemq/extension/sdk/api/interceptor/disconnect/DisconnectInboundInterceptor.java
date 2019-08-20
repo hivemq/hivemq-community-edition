@@ -14,7 +14,7 @@ public interface DisconnectInboundInterceptor extends Interceptor {
      * @param disconnectInboundInput  The {@link DisconnectInboundInput} parameter.
      * @param disconnectInboundOutput The {@link DisconnectInboundOutput} parameter.
      */
-    void onDisconnect(
+    void onInboundDisconnect(
             @NotNull DisconnectInboundInput disconnectInboundInput,
             @NotNull DisconnectInboundOutput disconnectInboundOutput);
 }
