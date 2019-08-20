@@ -11,6 +11,7 @@ public interface DisconnectInboundOutput extends AsyncOutput<DisconnectInboundOu
 
     /**
      *
+     * @return the disconnect packet.
      */
     @NotNull DisconnectPacket getDisconnectPacket();
 
