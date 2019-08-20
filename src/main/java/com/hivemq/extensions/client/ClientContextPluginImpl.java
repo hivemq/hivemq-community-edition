@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -43,8 +44,9 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @NotNull
     private final ClientContextImpl clientContext;
 
-    public ClientContextPluginImpl(final @NotNull IsolatedPluginClassloader pluginClassloader,
-                                   final @NotNull ClientContextImpl clientContext) {
+    public ClientContextPluginImpl(
+            final @NotNull IsolatedPluginClassloader pluginClassloader,
+            final @NotNull ClientContextImpl clientContext) {
         this.pluginClassloader = pluginClassloader;
         this.clientContext = clientContext;
     }
@@ -65,6 +67,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addPubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor interceptor) {
+        clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
     public void removePublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
@@ -77,6 +84,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Override
     public void removeSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removePubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor) {
+        clientContext.removeInterceptor(checkNotNull(pubrecOutboundInterceptor, "The interceptor must never be null"));
     }
 
     @NotNull
@@ -105,6 +117,13 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Immutable
     public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
         return clientContext.getSubscribeInboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
+    @Immutable
+    public List<PubrecOutboundInterceptor> getPubrecOutboundInterceptors() {
+        return clientContext.getPubrecOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull

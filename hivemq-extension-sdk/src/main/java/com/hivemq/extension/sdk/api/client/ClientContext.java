@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 
@@ -60,6 +61,15 @@ public interface ClientContext {
     void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
 
     /**
+     * Adds an {@link PubrecOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
+     * ignored. Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pubrecOutboundInterceptor The implementation of an PubrecOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubrecOutboundInterceptor(@NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor);
+
+    /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
@@ -79,6 +89,14 @@ public interface ClientContext {
      */
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
 
+    /**
+     * Removes an {@link PubrecOutboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
+     * be removed, has not been added in the first place.
+     *
+     * @param pubrecOutboundInterceptor The implementation of an PubrecOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubrecOutboundInterceptor(@NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor);
 
     /**
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
@@ -135,6 +153,14 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link PubrecOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubrecOutboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubrecOutboundInterceptor> getPubrecOutboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every
