@@ -3,6 +3,7 @@ package com.hivemq.extensions.handler;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.inject.Inject;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -43,6 +44,7 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull FullConfigurationService configurationService;
 
+    @Inject
     public DisconnectInboundInterceptorHandler(
             @NotNull final FullConfigurationService configurationService,
             @NotNull final PluginOutPutAsyncer asyncer,
