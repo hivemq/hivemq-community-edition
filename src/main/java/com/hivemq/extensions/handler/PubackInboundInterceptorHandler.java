@@ -20,7 +20,6 @@ import com.hivemq.extensions.interceptor.puback.PubackInboundOutputImpl;
 import com.hivemq.extensions.packets.puback.PubackPacketImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -90,7 +89,8 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
                 input = new PubackInboundInputImpl(new PubackPacketImpl(puback), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final PubackInterceptorContext interceptorContext = new PubackInterceptorContext(
-                PubackInterceptorTask.class, clientId, input, interceptorFuture, pubackInboundInterceptors.size());
+                PubackInterceptorTask.class, clientId, input, output, interceptorFuture,
+                pubackInboundInterceptors.size());
 
         for (final PubackInboundInterceptor interceptor : pubackInboundInterceptors) {
 
@@ -134,7 +134,7 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         @Override
         public void onSuccess(final @Nullable Void result) {
             try {
-                final PUBACK finalPuback = PUBACK.constructPUBACK(output.getPubackPacket());
+                final PUBACK finalPuback = PUBACK.createPubackFrom(output.getPubackPacket());
                 ctx.fireChannelRead(finalPuback);
             } catch (final Exception e) {
                 log.error("Exception while modifying an intercepted PUBACK message.", e);
@@ -152,6 +152,7 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
     private static class PubackInterceptorContext extends PluginInOutTaskContext<PubackInboundOutputImpl> {
 
         private final @NotNull PubackInboundInputImpl input;
+        private final @NotNull PubackInboundOutputImpl output;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
@@ -160,10 +161,12 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         PubackInterceptorContext(final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubackInboundInputImpl input,
+                final @NotNull PubackInboundOutputImpl output,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, clientId);
             this.input = input;
+            this.output = output;
             this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -173,6 +176,7 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         public void pluginPost(@NotNull final PubackInboundOutputImpl pluginOutput) {
             if (pluginOutput.getPubackPacket().isModified()) {
                 input.updatePuback(pluginOutput.getPubackPacket());
+                output.update(pluginOutput.getPubackPacket());
             }
             increment();
         }
@@ -211,7 +215,10 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
                         "Uncaught exception was thrown from extension with id \"{}\" on puback interception. The exception should be handled by the extension.",
                         pluginId);
                 log.debug("Original exception:", e);
-                Exceptions.rethrowError(e);
+
+                // this is needed since the PUBACK could be incompletely modified
+                final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
+                output.update(unmodifiedPuback);
             }
             return output;
         }
