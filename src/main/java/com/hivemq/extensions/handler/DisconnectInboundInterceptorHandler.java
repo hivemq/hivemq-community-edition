@@ -84,28 +84,25 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getDisconnectInboundInterceptors().isEmpty()) {
-            super.channelRead(ctx, msg);
-            return;
-        }
-
         final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
                 clientContext.getDisconnectInboundInterceptors();
 
+        if (disconnectInboundInterceptors.isEmpty()) {
+            super.channelRead(ctx, disconnect);
+            return;
+        }
+
         final DisconnectInboundOutputImpl output =
                 new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
-
-        final DisconnectInboundInputImpl input =
-                new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
-
+        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(disconnect, clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output,
+                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId,
                         interceptorFuture, disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
-            if (interceptorFuture.isDone()) {
-                break;
+            if (!interceptorFuture.isDone()) {
+                interceptorFuture.set(null);
             }
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
@@ -116,13 +113,12 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
             }
 
             final DisconnectInboundInterceptorTask interceptorTask =
-                    new DisconnectInboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
+                    new DisconnectInboundInterceptorTask(interceptor, extension.getId());
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
 
-        final DisconnectInterceptorFutureCallback callback =
-                new DisconnectInterceptorFutureCallback(ctx, output, disconnect);
+        final DisconnectInterceptorFutureCallback callback = new DisconnectInterceptorFutureCallback(ctx);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
