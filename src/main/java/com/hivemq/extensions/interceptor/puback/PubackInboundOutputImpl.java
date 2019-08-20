@@ -14,13 +14,15 @@ import java.util.function.Supplier;
 public class PubackInboundOutputImpl extends AbstractAsyncOutput<PubackInboundOutput>
         implements PubackInboundOutput, Supplier<PubackInboundOutputImpl> {
 
-    private final ModifiablePubackPacketImpl modifiablePubackPacket;
+    private final @NotNull FullConfigurationService configurationService;
+    private ModifiablePubackPacketImpl modifiablePubackPacket;
 
     public PubackInboundOutputImpl(final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBACK puback) {
         super(asyncer);
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+        this.configurationService = configurationService;
+        modifiablePubackPacket = new ModifiablePubackPacketImpl(this.configurationService, puback);
     }
 
     @Override
@@ -32,5 +34,13 @@ public class PubackInboundOutputImpl extends AbstractAsyncOutput<PubackInboundOu
     @Override
     public PubackInboundOutputImpl get() {
         return this;
+    }
+
+    public void update(final @NotNull PUBACK puback) {
+        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+    }
+
+    public void update(final @NotNull ModifiablePubackPacketImpl packet) {
+        this.modifiablePubackPacket = packet;
     }
 }

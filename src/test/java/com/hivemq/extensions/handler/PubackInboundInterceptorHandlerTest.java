@@ -10,6 +10,7 @@ import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundOutput;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
+import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -25,7 +26,6 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -63,15 +63,9 @@ public class PubackInboundInterceptorHandlerTest {
     @Mock
     private ClientContextImpl clientContext;
 
-    private PluginOutPutAsyncer asyncer;
-
-    private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor1;
 
     private EmbeddedChannel channel;
-
-    private PluginTaskExecutorService pluginTaskExecutorService;
 
     private PubackInboundInterceptorHandler handler;
 
@@ -88,11 +82,13 @@ public class PubackInboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         when(plugin.getId()).thenReturn("plugin");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        handler = new PubackInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
+        handler = new PubackInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+                pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
     }
 
@@ -222,6 +218,31 @@ public class PubackInboundInterceptorHandlerTest {
         assertTrue(channel.isActive());
     }
 
+    @Test(timeout = 5000)
+    public void test_noPartialModificationWhenException() throws Exception {
+
+        final PubackInboundInterceptor interceptor =
+                getInterceptor("TestPartialModifiedInboundInterceptor");
+        final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
+
+        when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.writeInbound(testPuback());
+        channel.runPendingTasks();
+        PUBACK puback = channel.readInbound();
+        while (puback == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            puback = channel.readInbound();
+        }
+
+        assertNotEquals("modified", puback.getReasonString());
+        assertNotEquals(AckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
+    }
+
 
     @NotNull
     private PUBACK testPuback() {
@@ -267,6 +288,20 @@ public class PubackInboundInterceptorHandlerTest {
 
         @Override
         public void onInboundPuback(@NotNull final PubackInboundInput pubackInboundInput, @NotNull final PubackInboundOutput pubackInboundOutput) {
+            throw new RuntimeException();
+        }
+    }
+
+    public static class TestPartialModifiedInboundInterceptor implements PubackInboundInterceptor {
+
+        @Override
+        public void onInboundPuback(
+                final @NotNull PubackInboundInput pubackInboundInput,
+                final @NotNull PubackInboundOutput pubackInboundOutput) {
+            final ModifiablePubackPacket pubackPacket =
+                    pubackInboundOutput.getPubackPacket();
+            pubackPacket.setReasonString("modified");
+            pubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
             throw new RuntimeException();
         }
     }
