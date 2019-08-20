@@ -69,7 +69,7 @@ public class DisconnectInboundInterceptorHandlerTest {
         when(extension.getId()).thenReturn("extension");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
 
         final DisconnectInboundInterceptorHandler handler = new DisconnectInboundInterceptorHandler(
@@ -151,7 +151,7 @@ public class DisconnectInboundInterceptorHandlerTest {
     public static class SimpleDisconnectTestInterceptor implements DisconnectInboundInterceptor {
 
         @Override
-        public void onDisconnect(
+        public void onInboundDisconnect(
                 final @NotNull DisconnectInboundInput disconnectInboundInput,
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             System.out.println("Intercepting DISCONNECT at: " + System.currentTimeMillis());
@@ -161,7 +161,7 @@ public class DisconnectInboundInterceptorHandlerTest {
     public static class AsyncDisconnectTestInterceptor implements DisconnectInboundInterceptor {
 
         @Override
-        public void onDisconnect(
+        public void onInboundDisconnect(
                 @NotNull final DisconnectInboundInput disconnectInboundInput,
                 @NotNull final DisconnectInboundOutput disconnectInboundOutput) {
             final Async<DisconnectInboundOutput> async =
