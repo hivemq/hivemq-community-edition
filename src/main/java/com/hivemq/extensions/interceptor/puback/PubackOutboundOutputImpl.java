@@ -9,7 +9,6 @@ import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.packets.puback.ModifiablePubackPacketImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -18,14 +17,16 @@ import java.util.function.Supplier;
 public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutboundOutput>
         implements PubackOutboundOutput, Supplier<PubackOutboundOutputImpl> {
 
-    private final @NotNull ModifiablePubackPacketImpl modifiablePubackPacket;
+    private final @NotNull FullConfigurationService configurationService;
+    private @NotNull ModifiablePubackPacketImpl modifiablePubackPacket;
 
     public PubackOutboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBACK puback) {
         super(asyncer);
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+        this.configurationService = configurationService;
+        modifiablePubackPacket = new ModifiablePubackPacketImpl(this.configurationService, puback);
     }
 
     @Override
@@ -38,4 +39,11 @@ public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutbound
         return this;
     }
 
+    public void update(final @NotNull PUBACK puback) {
+        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+    }
+
+    public void update(final @NotNull ModifiablePubackPacketImpl packet) {
+        this.modifiablePubackPacket = packet;
+    }
 }

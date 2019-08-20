@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extensions.packets.puback.ModifiablePubackPacketImpl;
+import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
@@ -55,7 +55,7 @@ public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         return MessageType.PUBACK;
     }
 
-    public static @NotNull PUBACK constructPUBACK(final @NotNull ModifiablePubackPacketImpl packet) {
+    public static @NotNull PUBACK createPubackFrom(final @NotNull PubackPacket packet) {
 
         final int packetIdentifier = packet.getPacketIdentifier();
         final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.valueOf(packet.getReasonCode().name());

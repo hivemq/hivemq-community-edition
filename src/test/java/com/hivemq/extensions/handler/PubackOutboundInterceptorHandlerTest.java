@@ -6,11 +6,11 @@ import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
-import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundInput;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
+import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -20,8 +20,6 @@ import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
-import com.hivemq.extensions.services.interceptor.Interceptors;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -65,26 +63,11 @@ public class PubackOutboundInterceptorHandlerTest {
     private HiveMQExtension plugin;
 
     @Mock
-    private Interceptors interceptors;
-
-    @Mock
-    private ServerInformation serverInformation;
-
-    @Mock
-    private EventLog eventLog;
-
-    @Mock
     private ClientContextImpl clientContext;
-
-    private PluginOutPutAsyncer asyncer;
-
-    private FullConfigurationService configurationService;
 
     private PluginTaskExecutor executor1;
 
     private EmbeddedChannel channel;
-
-    private PluginTaskExecutorService pluginTaskExecutorService;
 
     private PubackOutboundInterceptorHandler handler;
 
@@ -101,11 +84,13 @@ public class PubackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         when(plugin.getId()).thenReturn("plugin");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        handler = new PubackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
+        handler = new PubackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+                pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
     }
 
@@ -135,7 +120,7 @@ public class PubackOutboundInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_no_interceptors() throws Exception {
+    public void test_no_interceptors() {
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(ImmutableList.of());
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -236,6 +221,30 @@ public class PubackOutboundInterceptorHandlerTest {
         assertTrue(channel.isActive());
     }
 
+    @Test(timeout = 5000)
+    public void test_noPartialModificationWhenException() throws Exception {
+
+        final PubackOutboundInterceptor interceptor = getInterceptor("TestPartialModifiedOutboundInterceptor");
+        final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
+
+        when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.writeOutbound(testPuback());
+        channel.runPendingTasks();
+        PUBACK puback = channel.readOutbound();
+        while (puback == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            puback = channel.readOutbound();
+        }
+
+        assertNotEquals("modified", puback.getReasonString());
+        assertNotEquals(AckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
+    }
+
 
     @NotNull
     private PUBACK testPuback() {
@@ -281,6 +290,19 @@ public class PubackOutboundInterceptorHandlerTest {
 
         @Override
         public void onOutboundPuback(@NotNull final PubackOutboundInput pubackOutboundInput, @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+            throw new RuntimeException();
+        }
+    }
+
+    public static class TestPartialModifiedOutboundInterceptor implements PubackOutboundInterceptor {
+
+        @Override
+        public void onOutboundPuback(
+                @NotNull final PubackOutboundInput pubrecOutboundInput,
+                @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+            final ModifiablePubackPacket pubackPacket = pubackOutboundOutput.getPubackPacket();
+            pubackPacket.setReasonString("modified");
+            pubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
             throw new RuntimeException();
         }
     }
