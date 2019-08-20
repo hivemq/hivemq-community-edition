@@ -81,28 +81,10 @@ public interface ClientContext {
     void addDisconnectInboundInterceptor(@NotNull DisconnectInboundInterceptor disconnectInboundInterceptor);
 
     /**
-     * Adds an {@link DisconnectInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will
-     * be ignored.
+     * Removes an {@link PublishInboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param disconnectInboundInterceptor The implementation of an DisconnectInboundInterceptor.
-     * @throws NullPointerException If the interceptor is null.
-     */
-    void addDisconnectInboundInterceptor(@NotNull DisconnectInboundInterceptor disconnectInboundInterceptor);
-
-    /**
-     * Adds an {@link DisconnectOutboundInterceptor} for this client <br> Subsequent adding of the same interceptor will
-     * be ignored.
-     *
-     * @param disconnectOutboundInterceptor The implementation of an DisconnectOutboundInterceptor.
-     * @throws NullPointerException If the interceptor is null.
-     */
-    void addDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
-
-    /**
-     * Removes an {@link PublishInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
-     * be removed, has not been added in the first place.
-     *
-     * @param publishInboundInterceptor The implementation of an PublishInboundInterceptor.
+     * @param publishInboundInterceptor The implementation of a PublishInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.0.0
      */
