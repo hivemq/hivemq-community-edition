@@ -28,7 +28,7 @@ public class PUBACKTest {
                 new PUBACK(1);
         final ModifiablePubackPacketImpl packet =
                 new ModifiablePubackPacketImpl(configurationService, origin);
-        final PUBACK merged = PUBACK.constructPUBACK(packet);
+        final PUBACK merged = PUBACK.createPubackFrom(packet);
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBACKequals(origin, merged);
@@ -40,7 +40,7 @@ public class PUBACKTest {
                 new PUBACK(1, Mqtt5PubAckReasonCode.NOT_AUTHORIZED, "NotAuthorized", Mqtt5UserProperties.NO_USER_PROPERTIES);
         final ModifiablePubackPacketImpl packet =
                 new ModifiablePubackPacketImpl(configurationService, origin);
-        final PUBACK merged = PUBACK.constructPUBACK(packet);
+        final PUBACK merged = PUBACK.createPubackFrom(packet);
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBACKequals(origin, merged);
@@ -59,7 +59,7 @@ public class PUBACKTest {
                 new PUBACK(1, Mqtt5PubAckReasonCode.NOT_AUTHORIZED, "NotAuthorized", userProperties);
         final ModifiablePubackPacketImpl packet =
                 new ModifiablePubackPacketImpl(configurationService, origin);
-        final PUBACK merged = PUBACK.constructPUBACK(packet);
+        final PUBACK merged = PUBACK.createPubackFrom(packet);
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBACKequals(origin, merged);
