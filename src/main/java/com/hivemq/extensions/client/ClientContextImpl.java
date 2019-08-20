@@ -26,6 +26,8 @@ import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -180,12 +182,34 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
+    public List<PubrecOutboundInterceptor> getPubrecOutboundInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .map(interceptor -> (PubrecOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
     public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (PublishOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PubrecOutboundInterceptor> getPubrecOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubrecOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubrecOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
