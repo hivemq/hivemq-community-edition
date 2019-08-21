@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class DisconnectInboundInputImpl
         implements Supplier<DisconnectInboundInputImpl>, DisconnectInboundInput, PluginTaskInput {
 
-    private final @NotNull DisconnectPacket disconnectPacket;
+    private @NotNull DisconnectPacket disconnectPacket;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
 
@@ -52,5 +52,9 @@ public class DisconnectInboundInputImpl
     @Override
     public DisconnectInboundInputImpl get() {
         return this;
+    }
+
+    public void updateDisconnect(final @NotNull DisconnectPacket disconnectPacket) {
+        this.disconnectPacket = disconnectPacket;
     }
 }

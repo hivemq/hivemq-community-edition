@@ -84,12 +84,13 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(disconnect, clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId,
+                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output,
                         interceptorFuture, disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
             if (!interceptorFuture.isDone()) {
                 interceptorFuture.set(null);
+                break;
             }
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
@@ -112,6 +113,8 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
     private static class DisconnectInboundInterceptorContext
             extends PluginInOutTaskContext<DisconnectInboundOutputImpl> {
 
+        private final @NotNull DisconnectInboundInputImpl input;
+        private final @NotNull DisconnectInboundOutputImpl output;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
@@ -119,20 +122,27 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
         DisconnectInboundInterceptorContext(
                 @NotNull final Class<?> taskClazz,
                 @NotNull final String identifier,
+                @NotNull final DisconnectInboundInputImpl input,
+                @NotNull final DisconnectInboundOutputImpl output,
                 @NotNull final SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, identifier);
             this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.input = input;
+            this.output = output;
         }
 
         @Override
         public void pluginPost(
                 final @NotNull DisconnectInboundOutputImpl pluginOutput) {
-            if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+            if (pluginOutput.getDisconnectPacket().isModified()) {
+                input.updateDisconnect(pluginOutput.getDisconnectPacket());
+                output.update(pluginOutput.getDisconnectPacket());
             }
+
+            increment();
         }
 
         public void increment() {
