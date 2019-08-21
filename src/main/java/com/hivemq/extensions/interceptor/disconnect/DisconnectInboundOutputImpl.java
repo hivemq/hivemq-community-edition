@@ -3,8 +3,6 @@ package com.hivemq.extensions.interceptor.disconnect;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
@@ -20,24 +18,33 @@ public class DisconnectInboundOutputImpl extends AbstractAsyncOutput<DisconnectI
         implements DisconnectInboundOutput,
         PluginTaskOutput, Supplier<DisconnectInboundOutputImpl> {
 
-    private final @NotNull ModifiableDisconnectPacket disconnectPacket;
+    private @NotNull ModifiableDisconnectPacketImpl disconnectPacket;
+    private final @NotNull FullConfigurationService configurationService;
 
     public DisconnectInboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull DISCONNECT disconnect) {
         super(asyncer);
-
+        this.configurationService = configurationService;
         this.disconnectPacket = new ModifiableDisconnectPacketImpl(configurationService, disconnect);
     }
 
     @Override
-    public @NotNull DisconnectPacket getDisconnectPacket() {
+    public @NotNull ModifiableDisconnectPacketImpl getDisconnectPacket() {
         return this.disconnectPacket;
     }
 
     @Override
     public DisconnectInboundOutputImpl get() {
         return this;
+    }
+
+    public void update(final @NotNull ModifiableDisconnectPacketImpl modifiedDisconnectPacket) {
+        this.disconnectPacket = modifiedDisconnectPacket;
+    }
+
+    public void update(final @NotNull DISCONNECT disconnect) {
+        this.disconnectPacket = new ModifiableDisconnectPacketImpl(configurationService, disconnect);
     }
 }

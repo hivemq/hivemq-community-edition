@@ -1,5 +1,6 @@
 package com.hivemq.extensions.handler;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -8,6 +9,7 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -20,6 +22,8 @@ import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -35,8 +39,10 @@ import util.TestConfigurationBootstrap;
 import java.io.File;
 import java.net.URL;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +56,9 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     @Mock
     private HiveMQExtensions hiveMQExtensions;
+
+    @Mock
+    private ClientContextImpl clientContext;
 
     @Mock
     private FullConfigurationService configurationService;
@@ -66,6 +75,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         when(extension.getId()).thenReturn("extension");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -97,7 +107,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new DISCONNECT());
+        channel.writeInbound(testDisconnect());
         DISCONNECT disconnect = channel.readInbound();
         while (disconnect == null) {
             channel.runPendingTasks();
@@ -121,7 +131,8 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new DISCONNECT());
+        channel.writeInbound(testDisconnect());
+        channel.runPendingTasks();
         DISCONNECT disconnect = channel.readInbound();
         while (disconnect == null) {
             channel.runPendingTasks();
@@ -129,6 +140,35 @@ public class DisconnectInboundInterceptorHandlerTest {
             disconnect = channel.readInbound();
         }
         Assert.assertNotNull(disconnect);
+    }
+
+    @Test(timeout = 20000)
+    public void test_modified() throws Exception {
+        //TODO Why is there null in the reasonString
+        final DisconnectInboundInterceptor interceptor =
+                getIsolatedInboundInterceptor("TestModifyInboundInterceptor");
+        final List<DisconnectInboundInterceptor> interceptors = ImmutableList.of(interceptor);
+
+        when(clientContext.getDisconnectInboundInterceptors()).thenReturn(interceptors);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
+
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.writeInbound(testDisconnect());
+        channel.runPendingTasks();
+        DISCONNECT disconnect = channel.readInbound();
+        while (disconnect == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            disconnect = channel.readInbound();
+        }
+        assertEquals("modified", disconnect.getReasonString());
+    }
+
+    private @NotNull DISCONNECT testDisconnect() {
+        return new DISCONNECT(
+                Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "serverReference", 1);
     }
 
     private DisconnectInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
@@ -173,5 +213,18 @@ public class DisconnectInboundInterceptorHandlerTest {
             }
         }
     }
+
+    public static class TestModifyInboundInterceptor implements DisconnectInboundInterceptor {
+
+        @Override
+        public void onInboundDisconnect(
+                final @NotNull DisconnectInboundInput disconnectInboundInput,
+                final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
+            final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
+            packet.setReasonString("modified");
+        }
+    }
+
+
 
 }
