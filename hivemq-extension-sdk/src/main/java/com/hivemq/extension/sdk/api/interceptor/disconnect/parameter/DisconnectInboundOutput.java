@@ -2,7 +2,7 @@ package com.hivemq.extension.sdk.api.interceptor.disconnect.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
 
 /**
  *
@@ -13,9 +13,10 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 public interface DisconnectInboundOutput extends AsyncOutput<DisconnectInboundOutput> {
 
     /**
+     *  Use this object to make any changes to the DISCONNECT message.
      *
-     * @return the disconnect packet.
+     * @return a modifiable disconnect packet.
      */
-    @NotNull DisconnectPacket getDisconnectPacket();
+    @NotNull ModifiableDisconnectPacket getDisconnectPacket();
 
 }

@@ -82,7 +82,6 @@ public class DisconnectOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
