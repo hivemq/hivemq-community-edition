@@ -172,6 +172,22 @@ public interface ClientContext {
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
 
     /**
+     * Returns all {@link DisconnectOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of DisconnectOutboundInterceptors for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors();
+
+    /**
+     * Returns all {@link DisconnectInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of DisconnectInboundInterceptors for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull DisconnectInboundInterceptor> getDisconnectInboundInterceptors();
+
+    /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every MQTT
      * PUBLISH and SUBSCRIBE packet sent by this client.
      *

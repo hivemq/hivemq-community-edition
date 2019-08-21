@@ -135,6 +135,20 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @NotNull
     @Override
+    @Immutable
+    public List<DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors() {
+        return clientContext.getDisconnectOutboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
+    @Immutable
+    public List<DisconnectInboundInterceptor> getDisconnectInboundInterceptors() {
+        return clientContext.getDisconnectInboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
     public ModifiableDefaultPermissions getDefaultPermissions() {
         return clientContext.getDefaultPermissions();
     }
