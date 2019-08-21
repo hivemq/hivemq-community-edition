@@ -2,6 +2,7 @@ package com.hivemq.extensions.packets.disconnect;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 
@@ -10,31 +11,48 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
  */
 public class DisconnectPacketImpl implements DisconnectPacket {
 
-    private final @NotNull DISCONNECT disconnect;
+    private final @NotNull DisconnectReasonCode reasonCode;
+    private final String serverReference;
+    private final String reasonString;
+    private final @NotNull UserProperties userProperties;
+    private final long sessionExpiryInterval;
 
     public DisconnectPacketImpl(
             @NotNull final DISCONNECT disconnect) {
-        this.disconnect = disconnect;
+        this.serverReference = disconnect.getServerReference();
+        this.reasonString = disconnect.getReasonString();
+        this.reasonCode = DisconnectReasonCode.valueOf(disconnect.getReasonCode().name());
+        this.userProperties = disconnect.getUserProperties().getPluginUserProperties();
+        this.sessionExpiryInterval = disconnect.getSessionExpiryInterval();
     }
 
-    public DISCONNECT getDisconnect() {
-        return disconnect;
+    public DisconnectPacketImpl(final @NotNull DisconnectPacket disconnectPacket) {
+        this.serverReference = disconnectPacket.getServerReference();
+        this.reasonString = disconnectPacket.getReasonString();
+        this.reasonCode = disconnectPacket.getReasonCode();
+        this.userProperties = disconnectPacket.getUserProperties();
+        this.sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval();
     }
 
     public String getServerReference() {
-        return disconnect.getServerReference();
+        return this.serverReference;
+    }
+
+    @Override
+    public DisconnectReasonCode getReasonCode() {
+        return reasonCode;
     }
 
     public String getReasonString() {
-        return disconnect.getReasonString();
+        return this.reasonString;
     }
 
     public long getSessionExpiryInterval() {
-        return disconnect.getSessionExpiryInterval();
+        return this.sessionExpiryInterval;
     }
 
     public @NotNull UserProperties getUserProperties() {
-        return disconnect.getUserProperties().getPluginUserProperties();
+        return userProperties;
     }
 
 }
