@@ -97,12 +97,13 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(disconnect, clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId,
+                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output,
                         interceptorFuture, disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
             if (!interceptorFuture.isDone()) {
                 interceptorFuture.set(null);
+                break;
             }
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
