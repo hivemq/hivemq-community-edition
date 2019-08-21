@@ -159,7 +159,7 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
                 final @NotNull DisconnectInboundInputImpl disconnectInboundInput,
                 final @NotNull DisconnectInboundOutputImpl disconnectInboundOutput) {
             try {
-                interceptor.onDisconnect(disconnectInboundInput, disconnectInboundOutput);
+                interceptor.onInboundDisconnect(disconnectInboundInput, disconnectInboundOutput);
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound disconnect request interception." +

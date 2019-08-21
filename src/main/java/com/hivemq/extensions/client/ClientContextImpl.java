@@ -20,6 +20,7 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -74,6 +75,10 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addDisconnectOutboundInterceptor(@NotNull final DisconnectOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void removePublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
@@ -94,6 +99,9 @@ public class ClientContextImpl {
         removeInterceptor(interceptor);
     }
 
+    public void removeDisconnectOutboundInterceptor(@NotNull final DisconnectOutboundInterceptor interceptor) {
+        removeInterceptor(interceptor);
+    }
     public void removeInterceptor(@NotNull final Interceptor interceptor) {
         interceptorList.remove(interceptor);
     }
@@ -188,6 +196,17 @@ public class ClientContextImpl {
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (DisconnectInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<DisconnectOutboundInterceptor> getDisconnectOutboundInterceptor() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof DisconnectOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (DisconnectOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
