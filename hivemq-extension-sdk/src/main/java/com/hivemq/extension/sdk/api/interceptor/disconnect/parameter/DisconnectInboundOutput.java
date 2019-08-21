@@ -5,6 +5,9 @@ import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 
 /**
+ *
+ *
+ *
  * @author Robin Atherton
  */
 public interface DisconnectInboundOutput extends AsyncOutput<DisconnectInboundOutput> {

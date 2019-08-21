@@ -59,6 +59,11 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
     }
 
     @Override
+    public boolean isModified() {
+        return modified;
+    }
+
+    @Override
     public String getServerReference() {
         return this.serverReference;
     }
