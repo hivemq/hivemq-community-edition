@@ -34,8 +34,8 @@ public class DisconnectInboundInputImpl
     }
 
     @Override
-    public @Immutable
-    @NotNull DisconnectPacket getDisconnectPacket() {
+    @Immutable
+    public @NotNull DisconnectPacket getDisconnectPacket() {
         return disconnectPacket;
     }
 

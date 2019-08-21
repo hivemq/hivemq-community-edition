@@ -82,7 +82,7 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getPublishOutboundInterceptors().isEmpty()) {
+        if (clientContext == null || clientContext.getDisconnectOutboundInterceptors().isEmpty()) {
             super.write(ctx, msg, promise);
             return;
         }
@@ -132,7 +132,7 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-        public DisconnectOutboundInterceptorContext(
+        DisconnectOutboundInterceptorContext(
                 @NotNull final Class<?> taskClazz,
                 @NotNull final String identifier,
                 @NotNull final DisconnectOutboundInputImpl input,
@@ -172,7 +172,7 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
-        public DisconnectOutboundInterceptorTask(
+        DisconnectOutboundInterceptorTask(
                 @NotNull final DisconnectOutboundInterceptor interceptor,
                 @NotNull final SettableFuture<Void> interceptorFuture,
                 @NotNull final String pluginId) {
