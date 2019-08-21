@@ -22,7 +22,6 @@ import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundOutputImpl
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.Exceptions;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +66,7 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
 
         if (!(msg instanceof DISCONNECT)) {
             super.write(ctx, msg, promise);
+            return;
         }
 
         final DISCONNECT disconnect = (DISCONNECT) msg;
@@ -83,11 +83,12 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null || clientContext.getPublishOutboundInterceptors().isEmpty()) {
+            super.write(ctx, msg, promise);
             return;
         }
 
         final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors =
-                clientContext.getDisconnectOutboundInterceptor();
+                clientContext.getDisconnectOutboundInterceptors();
         final DisconnectOutboundInputImpl input =
                 new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
         final DisconnectOutboundOutputImpl output =
@@ -111,9 +112,9 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
 
             if (extension == null) {
                 interceptorContext.increment();
+                continue;
             }
 
-            assert extension != null;
             final DisconnectOutboundInterceptorTask interceptorTask =
                     new DisconnectOutboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
 
@@ -149,13 +150,11 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         @Override
         public void pluginPost(
                 final @NotNull DisconnectOutboundOutputImpl pluginOutput) {
-            if (output.getDisconnectPacket().isModified()) {
-                input.updateDisconnect(output.getDisconnectPacket());
+            if (pluginOutput.getDisconnectPacket().isModified()) {
+                input.updateDisconnect(pluginOutput.getDisconnectPacket());
+                output.update(pluginOutput.getDisconnectPacket());
             }
-
-            if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
-            }
+            increment();
         }
 
         public void increment() {
@@ -197,7 +196,6 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
                 log.debug("Original exception: ", e);
                 final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 output.update(disconnect);
-                Exceptions.rethrowError(e);
             }
             return output;
         }
@@ -235,7 +233,6 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
                 log.error("Exception while modifying an intercepted disconnect message.", e);
                 ctx.writeAndFlush(disconnect, promise);
             }
-
         }
 
         @Override

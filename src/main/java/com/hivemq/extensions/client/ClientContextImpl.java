@@ -102,6 +102,7 @@ public class ClientContextImpl {
     public void removeDisconnectOutboundInterceptor(@NotNull final DisconnectOutboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
+
     public void removeInterceptor(@NotNull final Interceptor interceptor) {
         interceptorList.remove(interceptor);
     }
@@ -190,6 +191,17 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
+    public List<DisconnectInboundInterceptor> getDisconnectInboundInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof DisconnectInboundInterceptor)
+                .map(interceptor -> (DisconnectInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
     public List<DisconnectInboundInterceptor> getDisconnectInboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof DisconnectInboundInterceptor)
@@ -201,7 +213,18 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
-    public List<DisconnectOutboundInterceptor> getDisconnectOutboundInterceptor() {
+    public List<DisconnectOutboundInterceptor> getDisconnectOutboundInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof DisconnectOutboundInterceptor)
+                .map(interceptor -> (DisconnectOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof DisconnectOutboundInterceptor)
                 .filter(this::hasPluginForClassloader)

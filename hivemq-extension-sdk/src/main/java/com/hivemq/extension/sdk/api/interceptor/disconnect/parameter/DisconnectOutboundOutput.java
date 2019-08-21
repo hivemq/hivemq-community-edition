@@ -26,12 +26,19 @@ public interface DisconnectOutboundOutput {
     @NotNull ModifiableDisconnectPacket getDisconnectPacket();
 
     /**
-     * //TODO Write appropriate DOC
+     * If the timeout expires before {@link Async#resume()} is called then the outcome is handled either as failed or
+     * successful, depending on the specified fallback.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     * <p>
+     * {@link TimeoutFallback#FAILURE} results in closed connection without a DISCONNECT sent to the client.
+     * <p>
+     * {@link TimeoutFallback#SUCCESS} will proceed the DISCONNECT.
      *
-     * @param timeout
-     * @param timeoutFallback
-     * @return
+     * @param timeout Timeout that HiveMQ waits for the result of the async operation.
+     * @param fallback Fallback behavior if a timeout occurs.
+     * @throws UnsupportedOperationException if async is called more than once.
      */
-    @NotNull Async<DisconnectOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback);
+    @NotNull Async<DisconnectOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
 
 }
