@@ -3,6 +3,7 @@ package com.hivemq.extensions.packets.disconnect;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
@@ -17,6 +18,8 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
+    private final @NotNull DisconnectReasonCode reasonCode;
+
 
     private long sessionExpiryInterval;
     private String reasonString;
@@ -27,6 +30,7 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull DISCONNECT originalDisconnect) {
         this.configurationService = fullConfigurationService;
+        this.reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
         this.userProperties = new ModifiableUserPropertiesImpl(
                 originalDisconnect.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
@@ -34,6 +38,7 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
         this.sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         this.serverReference = originalDisconnect.getServerReference();
     }
+
 
     @Override
     public synchronized void setReasonString(final @NotNull String reasonString) {
@@ -66,6 +71,11 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
     @Override
     public String getServerReference() {
         return this.serverReference;
+    }
+
+    @Override
+    public DisconnectReasonCode getReasonCode() {
+        return reasonCode;
     }
 
     @Override

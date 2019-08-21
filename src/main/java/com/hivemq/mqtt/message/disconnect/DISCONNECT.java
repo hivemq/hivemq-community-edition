@@ -16,12 +16,16 @@
 
 package com.hivemq.mqtt.message.disconnect;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
@@ -53,6 +57,19 @@ public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithRea
         super(reasonCode, reasonString, userProperties);
         this.serverReference = serverReference;
         this.sessionExpiryInterval = sessionExpiryInterval;
+    }
+
+    public static DISCONNECT createDisconnectFrom(final @NotNull DisconnectPacket packet) {
+        final Mqtt5DisconnectReasonCode reasonCode = Mqtt5DisconnectReasonCode.valueOf(packet.getReasonCode().name());
+        final String reasonString = packet.getReasonString();
+        final String serverReference = packet.getServerReference();
+        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        final long sessionExpiryInterval = packet.getSessionExpiryInterval();
+        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
+        return new DISCONNECT(reasonCode, reasonString, mqtt5UserProperties, serverReference, sessionExpiryInterval);
     }
 
     @Override
