@@ -72,7 +72,7 @@ public interface ClientContext {
     void addSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
-     * Ads an {@link DisconnectInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will
+     * Adds an {@link DisconnectInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will
      * be ignored.
      *
      * @param disconnectInboundInterceptor The implementation of a DisconnectInboundInterceptor.
