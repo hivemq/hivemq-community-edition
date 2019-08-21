@@ -8,7 +8,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * This is the input parameter of any {@link DisconnectOutboundInterceptor} providing DISCONNECT. //TODO more
+ * This is the input parameter of any {@link DisconnectOutboundInterceptor} providing DISCONNECT information.
  *
  * @author Robin Atherton
  */
@@ -16,7 +16,9 @@ import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 public interface DisconnectOutboundInput extends ClientBasedInput {
 
     /**
-     * //TODO Write appropriate DOC
+     * The unmodifiable DISCONNECT packet that was intercepted.
+     *
+     * @return an unmodifiable {@link DisconnectPacket}
      */
     @Immutable
     @NotNull DisconnectPacket getDisconnectPacket();

@@ -4,12 +4,15 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
+/**
+ * @author Robin Atherton
+ */
 public interface ModifiableDisconnectPacket extends DisconnectPacket {
 
     /**
      * Sets a reasonString for the DISCONNECT packet.
      *
-     * @param reasonString the reason to set.
+     * @param reasonString the reason to be set as a string.
      */
     void setReasonString(String reasonString);
 
@@ -23,12 +26,14 @@ public interface ModifiableDisconnectPacket extends DisconnectPacket {
     /**
      * Sets the server reference of the DISCONNECT packet.
      *
-     * @param serverReference the server reference to set.
+     * @param serverReference the server reference value to be set.
      */
     void setServerReference(String serverReference);
 
     /**
      * Gets the modifiable {@link UserProperties} of the DISCONNECT packet.
+     *
+     * @return Modifiable user properties.
      */
     @Override
     @NotNull ModifiableUserProperties getUserProperties();

@@ -5,6 +5,9 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 import java.util.Optional;
 
+/**
+ * @author Robin Atherton
+ */
 public interface DisconnectPacket {
 
     /**

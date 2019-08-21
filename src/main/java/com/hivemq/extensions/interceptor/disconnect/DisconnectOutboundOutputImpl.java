@@ -3,7 +3,6 @@ package com.hivemq.extensions.interceptor.disconnect;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundOutput;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
@@ -27,12 +26,12 @@ public class DisconnectOutboundOutputImpl extends AbstractAsyncOutput<Disconnect
             final @NotNull FullConfigurationService configurationService,
             final @NotNull DISCONNECT disconnect) {
         super(asyncer);
-        this.disconnectPacket = new ModifiableDisconnectPacketImpl(configurationService, disconnect);
         this.configurationService = configurationService;
+        this.disconnectPacket = new ModifiableDisconnectPacketImpl(this.configurationService, disconnect);
     }
 
     @Override
-    public @NotNull ModifiableDisconnectPacket getDisconnectPacket() {
+    public @NotNull ModifiableDisconnectPacketImpl getDisconnectPacket() {
         return disconnectPacket;
     }
 
