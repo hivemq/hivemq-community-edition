@@ -1,6 +1,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
 import com.hivemq.annotations.Nullable;
@@ -8,7 +9,9 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundOutput;
+import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -91,6 +94,33 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
                 new DisconnectOutboundOutputImpl(asyncer, configurationService, disconnect);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
 
+        final DisconnectOutboundInterceptorContext interceptorContext =
+                new DisconnectOutboundInterceptorContext(
+                        DisconnectOutboundInterceptorTask.class,
+                        clientId, input, output, interceptorFuture,
+                        disconnectOutboundInterceptors.size());
+
+        for (final DisconnectOutboundInterceptor interceptor : disconnectOutboundInterceptors) {
+
+            if (interceptorFuture.isDone()) {
+                break;
+            }
+
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
+                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+
+            if (extension == null) {
+                interceptorContext.increment();
+            }
+
+            assert extension != null;
+            final DisconnectOutboundInterceptorTask interceptorTask =
+                    new DisconnectOutboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
+
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+        }
+        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, disconnect, ctx, promise);
+        Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
     static class DisconnectOutboundInterceptorContext extends PluginInOutTaskContext<DisconnectOutboundOutputImpl> {
@@ -104,16 +134,16 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         public DisconnectOutboundInterceptorContext(
                 @NotNull final Class<?> taskClazz,
                 @NotNull final String identifier,
-                @NotNull final DisconnectOutboundOutputImpl output,
                 @NotNull final DisconnectOutboundInputImpl input,
-                @NotNull final SettableFuture<Void> interceptorFuture, final int interceptorCount,
-                @NotNull final AtomicInteger counter) {
+                @NotNull final DisconnectOutboundOutputImpl output,
+                @NotNull final SettableFuture<Void> interceptorFuture,
+                final int interceptorCount) {
             super(taskClazz, identifier);
             this.output = output;
             this.input = input;
             this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
-            this.counter = counter;
+            this.counter = new AtomicInteger(0);
         }
 
         @Override
@@ -136,32 +166,40 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         }
     }
 
-    private class DisconnectOutboundInterceptorTask
+    private static class DisconnectOutboundInterceptorTask
             implements PluginInOutTask<DisconnectOutboundInputImpl, DisconnectOutboundOutputImpl> {
 
         private final @NotNull DisconnectOutboundInterceptor interceptor;
+        private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
         public DisconnectOutboundInterceptorTask(
                 @NotNull final DisconnectOutboundInterceptor interceptor,
+                @NotNull final SettableFuture<Void> interceptorFuture,
                 @NotNull final String pluginId) {
             this.interceptor = interceptor;
+            this.interceptorFuture = interceptorFuture;
             this.pluginId = pluginId;
         }
 
         @Override
         public DisconnectOutboundOutputImpl apply(
-                final @NotNull DisconnectOutboundInputImpl disconnectOutboundInput,
-                final @NotNull DisconnectOutboundOutputImpl disconnectOutboundOutput) {
+                final @NotNull DisconnectOutboundInputImpl input,
+                final @NotNull DisconnectOutboundOutputImpl output) {
             try {
-                interceptor.onOutboundDisconnect(disconnectOutboundInput, disconnectOutboundOutput);
+                if (!interceptorFuture.isDone()) {
+                    interceptor.onOutboundDisconnect(input, output);
+                }
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound disconnect interception. " +
                                 "Extensions are responsible on their own to handle exceptions.", pluginId);
+                log.debug("Original exception: ", e);
+                final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
+                output.update(disconnect);
                 Exceptions.rethrowError(e);
             }
-            return disconnectOutboundOutput;
+            return output;
         }
 
         @Override
@@ -172,17 +210,17 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final @NotNull DisconnectOutboundOutput outboundOutput;
+        private final @NotNull DisconnectOutboundOutput output;
         private final @NotNull DISCONNECT disconnect;
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ChannelPromise promise;
 
         public InterceptorFutureCallback(
-                @NotNull final DisconnectOutboundOutput outboundOutput,
+                @NotNull final DisconnectOutboundOutput output,
                 @NotNull final DISCONNECT disconnect,
                 @NotNull final ChannelHandlerContext ctx,
                 @NotNull final ChannelPromise promise) {
-            this.outboundOutput = outboundOutput;
+            this.output = output;
             this.disconnect = disconnect;
             this.ctx = ctx;
             this.promise = promise;
@@ -190,16 +228,19 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
 
         @Override
         public void onSuccess(@Nullable final Void result) {
-            //TODO
-            //try {
-            //  @NotNull ModifiableDisconnectPacket dc = outboundOutput.getDisconnectPacket();
+            try {
+                final DISCONNECT finalDisconnect = DISCONNECT.createDisconnectFrom(output.getDisconnectPacket());
+                ctx.writeAndFlush(finalDisconnect, promise);
+            } catch (final Exception e) {
+                log.error("Exception while modifying an intercepted disconnect message.", e);
+                ctx.writeAndFlush(disconnect, promise);
+            }
 
-            //}
         }
 
         @Override
         public void onFailure(final Throwable t) {
-
+            ctx.channel().close();
         }
     }
 }

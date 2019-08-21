@@ -15,6 +15,13 @@ public interface DisconnectPacket {
     String getServerReference();
 
     /**
+     * //TODO
+     *
+     * @return an enum containing the reason for disconnecting.
+     */
+    DisconnectReasonCode getReasonCode();
+
+    /**
      * The reason string of the DISCONNECT packet.
      *
      * @return a string containing the disconnect reason if present.
