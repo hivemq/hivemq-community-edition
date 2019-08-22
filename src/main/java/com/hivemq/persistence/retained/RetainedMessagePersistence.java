@@ -65,7 +65,7 @@ public interface RetainedMessagePersistence {
      */
     @NotNull
     @ReadOnly
-    ImmutableList<ListenableFuture<Set<String>>> getWithWildcards(@NotNull String topicWithWildcards);
+    ListenableFuture<Set<String>> getWithWildcards(@NotNull String topicWithWildcards);
 
     /**
      * Close the file persistence.

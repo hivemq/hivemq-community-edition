@@ -16,6 +16,7 @@
 
 package com.hivemq.persistence.local.xodus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -68,6 +70,9 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
     private final AtomicLong retainMessageCounter = new AtomicLong(0);
 
+    @VisibleForTesting
+    final ConcurrentHashMap<Integer, PublishTopicTree> topicTrees = new ConcurrentHashMap<>();
+
     @Inject
     public RetainedMessageXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
                                                 final @NotNull PublishPayloadPersistence payloadPersistence,
@@ -78,7 +83,9 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
         this.payloadPersistence = payloadPersistence;
         this.serializer = new RetainedMessageXodusSerializer();
-
+        for (int i = 0; i < bucketCount; i++) {
+            topicTrees.put(i, new PublishTopicTree());
+        }
     }
 
     @NotNull
@@ -113,7 +120,9 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     protected void init() {
 
         try {
-            for (final Bucket bucket : buckets) {
+            for (int i = 0; i < buckets.length; i++) {
+                final Bucket bucket = buckets[i];
+                final int bucketIndex = i;
                 bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                     try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
 
@@ -123,7 +132,8 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                             if (payloadId != null) {
                                 payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
                             }
-
+                            final String topic = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                            topicTrees.get(bucketIndex).add(topic);
                             retainMessageCounter.incrementAndGet();
                         }
                     }
@@ -141,6 +151,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     public void clear(final int bucketIndex) {
 
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+        topicTrees.put(bucketIndex, new PublishTopicTree());
 
         final Bucket bucket = buckets[bucketIndex];
 
@@ -177,6 +188,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
             log.trace("Removing retained message for topic {}", topic);
             bucket.getStore().delete(txn, key);
+            topicTrees.get(bucketIndex).remove(topic);
             payloadPersistence.decrementReferenceCounter(message.getPayloadId());
             retainMessageCounter.decrementAndGet();
         });
@@ -255,6 +267,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     log.trace("Creating new retained message for topic {}", topic);
                     //persist needs increment.
                     retainMessageCounter.incrementAndGet();
+                    topicTrees.get(bucketIndex).add(topic);
                 }
             }
         });
@@ -262,27 +275,11 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
     @NotNull
     @Override
-    public Set<String> getAllTopics(@NotNull final PersistenceFilter filter, final int bucketId) {
+    public Set<String> getAllTopics(@NotNull final String subscription, final int bucketId) {
         checkArgument(bucketId >= 0 && bucketId < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
-        final Bucket bucket = buckets[bucketId];
-        return bucket.getEnvironment().computeInReadonlyTransaction((TransactionalComputable<Set<String>>) txn -> {
-
-            final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-
-            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-                if (cursor.getNext()) {
-                    do {
-                        final String topic = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                        if (filter.match(topic)) {
-                            builder.add(topic);
-                        }
-                    } while (cursor.getNext());
-                }
-            }
-            return builder.build();
-        });
+        return topicTrees.get(bucketId).get(subscription);
     }
 
     @Override
