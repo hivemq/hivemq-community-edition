@@ -136,6 +136,7 @@ public class PublishTopicTree {
                         childNodes = null;
                     }
                 }
+                // Never remove here because if this would have been the only child node, the childNodes map would have been null
                 return false;
             }
         }

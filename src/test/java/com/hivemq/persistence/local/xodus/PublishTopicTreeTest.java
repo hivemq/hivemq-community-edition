@@ -134,6 +134,7 @@ public class PublishTopicTreeTest {
 
     @Test
     public void test_remove() {
+        // Make sure no exception is thrown when remove is called on an empty tree
         tree.remove("topic");
         tree.remove("topic/a");
 
