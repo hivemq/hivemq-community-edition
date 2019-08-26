@@ -63,29 +63,36 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
     }
 
     @Override
-    public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
-
+    public void write(
+            @NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise)
+            throws Exception {
         if (!(msg instanceof PUBACK)) {
             super.write(ctx, msg, promise);
             return;
         }
+        if (!handlePuback(ctx, (PUBACK) msg, promise)) {
+            super.write(ctx, msg, promise);
+        }
 
-        final PUBACK puback = (PUBACK) msg;
+    }
 
+    private boolean handlePuback(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull PUBACK puback,
+            final @NotNull ChannelPromise promise) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
-            return;
+            return false;
         }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            return;
+            return false;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null || clientContext.getPubackOutboundInterceptors().isEmpty()) {
-            super.write(ctx, msg, promise);
-            return;
+            return false;
         }
         final List<PubackOutboundInterceptor> pubackOutboundInterceptors = clientContext.getPubackOutboundInterceptors();
 
@@ -118,7 +125,7 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
         final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, puback, ctx, promise);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
-
+        return true;
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
@@ -163,13 +170,13 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-
-        PubackInterceptorContext(final @NotNull Class<?> taskClazz,
-                                  final @NotNull String clientId,
-                                  final @NotNull PubackOutboundInputImpl input,
+        PubackInterceptorContext(
+                final @NotNull Class<?> taskClazz,
+                final @NotNull String clientId,
+                final @NotNull PubackOutboundInputImpl input,
                 final @NotNull PubackOutboundOutputImpl output,
-                                  final @NotNull SettableFuture<Void> interceptorFuture,
-                                  final int interceptorCount) {
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final int interceptorCount) {
             super(taskClazz, clientId);
             this.input = input;
             this.output = output;
@@ -182,7 +189,8 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         public void pluginPost(@NotNull final PubackOutboundOutputImpl pluginOutput) {
             if (pluginOutput.getPubackPacket().isModified()) {
                 input.updatePuback(pluginOutput.getPubackPacket());
-                output.update(pluginOutput.getPubackPacket());
+                final PUBACK updatedPuback = PUBACK.createPubackFrom(output.getPubackPacket());
+                output.update(updatedPuback);
             }
             increment();
         }
@@ -202,9 +210,10 @@ public class PubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
-        private PubackInterceptorTask(final @NotNull PubackOutboundInterceptor interceptor,
-                                       final @NotNull SettableFuture<Void> interceptorFuture,
-                                       final @NotNull String pluginId) {
+        private PubackInterceptorTask(
+                final @NotNull PubackOutboundInterceptor interceptor,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @NotNull String pluginId) {
             this.interceptor = interceptor;
             this.interceptorFuture = interceptorFuture;
             this.pluginId = pluginId;

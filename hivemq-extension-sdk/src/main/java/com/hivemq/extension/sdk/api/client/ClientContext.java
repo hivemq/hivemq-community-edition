@@ -158,7 +158,7 @@ public interface ClientContext {
     /**
      * Returns all {@link PubackOutboundInterceptor} which are registered for this client by this extension.
      *
-     * @return List of {@link PublishInboundInterceptor} for this client.
+     * @return List of {@link PubackOutboundInterceptor} for this client.
      */
     @Immutable
     @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors();

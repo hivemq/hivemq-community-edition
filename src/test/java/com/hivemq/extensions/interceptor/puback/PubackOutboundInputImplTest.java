@@ -7,8 +7,8 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 import util.TestMessageUtil;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 /**
  * @author Yannick Weber
@@ -58,7 +58,7 @@ public class PubackOutboundInputImplTest {
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(pubackPacket1, "client", embeddedChannel);
         input.updatePuback(pubackPacket2);
 
-        assertNotEquals(pubackPacket1, input.getPubackPacket());
-        assertNotEquals(pubackPacket2, input.getPubackPacket());
+        assertNotSame(pubackPacket1, input.getPubackPacket());
+        assertNotSame(pubackPacket2, input.getPubackPacket());
     }
 }
