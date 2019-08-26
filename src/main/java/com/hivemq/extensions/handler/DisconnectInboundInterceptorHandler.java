@@ -20,7 +20,6 @@ import com.hivemq.extensions.interceptor.disconnect.DisconnectInboundInputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectInboundOutputImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -168,18 +167,19 @@ public class DisconnectInboundInterceptorHandler extends SimpleChannelInboundHan
 
         @Override
         public DisconnectInboundOutputImpl apply(
-                final @NotNull DisconnectInboundInputImpl disconnectInboundInput,
-                final @NotNull DisconnectInboundOutputImpl disconnectInboundOutput) {
+                final @NotNull DisconnectInboundInputImpl input,
+                final @NotNull DisconnectInboundOutputImpl output) {
             try {
-                interceptor.onInboundDisconnect(disconnectInboundInput, disconnectInboundOutput);
+                interceptor.onInboundDisconnect(input, output);
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound disconnect request interception." +
                                 "Extensions are responsible for their own exception handling.",
                         pluginId);
-                Exceptions.rethrowError(e);
+                final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
+                output.update(disconnect);
             }
-            return disconnectInboundOutput;
+            return output;
         }
 
         @Override
