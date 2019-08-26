@@ -35,10 +35,6 @@ public class PubrecOutboundOutputImpl extends AbstractAsyncOutput<PubrecOutbound
         return this;
     }
 
-    public void update(final @NotNull ModifiablePubrecPacketImpl pubrecPacket) {
-        this.modifiablePubrecPacket = pubrecPacket;
-    }
-
     public void update(final @NotNull PUBREC unmodifiedPubrec) {
         this.modifiablePubrecPacket = new ModifiablePubrecPacketImpl(configurationService, unmodifiedPubrec);
     }

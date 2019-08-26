@@ -64,30 +64,34 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
+            @NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise)
             throws Exception {
-
         if (!(msg instanceof PUBREC)) {
             super.write(ctx, msg, promise);
             return;
         }
+        if (!handlePuback(ctx, (PUBREC) msg, promise)) {
+            super.write(ctx, msg, promise);
+        }
+    }
 
-        final PUBREC pubrec = (PUBREC) msg;
+    private boolean handlePuback(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREC pubrec,
+            final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
-            return;
+            return false;
         }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            return;
+            return false;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null || clientContext.getPubrecOutboundInterceptors().isEmpty()) {
-            super.write(ctx, msg, promise);
-            return;
+            return false;
         }
         final List<PubrecOutboundInterceptor> pubrecOutboundInterceptors =
                 clientContext.getPubrecOutboundInterceptors();
@@ -125,7 +129,7 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
         final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, pubrec, ctx, promise);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
-
+        return true;
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
@@ -191,7 +195,8 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         public void pluginPost(@NotNull final PubrecOutboundOutputImpl pluginOutput) {
             if (pluginOutput.getPubrecPacket().isModified()) {
                 input.updatePubrec(pluginOutput.getPubrecPacket());
-                output.update(pluginOutput.getPubrecPacket());
+                final PUBREC modifiedPubrec = PUBREC.createPubrecFrom(pluginOutput.getPubrecPacket());
+                output.update(modifiedPubrec);
             }
             increment();
         }
