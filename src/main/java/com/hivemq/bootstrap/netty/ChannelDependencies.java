@@ -161,7 +161,9 @@ public class ChannelDependencies {
 
     @NotNull
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-    private final @NotNull PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
+
+    @NotNull
+    private final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @NotNull
     private final DisconnectInterceptorHandler disconnectInterceptorHandler;

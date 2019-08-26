@@ -42,8 +42,4 @@ public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutbound
     public void update(final @NotNull PUBACK puback) {
         modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
     }
-
-    public void update(final @NotNull ModifiablePubackPacketImpl packet) {
-        this.modifiablePubackPacket = packet;
-    }
 }
