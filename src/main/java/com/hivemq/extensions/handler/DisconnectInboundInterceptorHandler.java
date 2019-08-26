@@ -94,7 +94,10 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
 
         final DisconnectInboundOutputImpl output =
                 new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
-        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(disconnect, clientId, channel);
+
+        final DisconnectInboundInputImpl input =
+                new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
                 new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output,
