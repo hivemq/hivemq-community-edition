@@ -100,7 +100,7 @@ public class PubackInboundInterceptorHandlerTest {
         channel.writeInbound(testPuback());
         channel.runPendingTasks();
 
-        assertNull(channel.readInbound());
+        assertNotNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
@@ -113,7 +113,7 @@ public class PubackInboundInterceptorHandlerTest {
 
         channel.runPendingTasks();
 
-        assertNull(channel.readInbound());
+        assertNotNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)

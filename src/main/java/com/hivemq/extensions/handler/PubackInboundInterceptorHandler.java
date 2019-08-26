@@ -64,23 +64,25 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
             super.channelRead(ctx, msg);
             return;
         }
+        if (!handlePuback(ctx, (PUBACK) msg)) {
+            super.channelRead(ctx, msg);
+        }
+    }
 
-        final PUBACK puback = (PUBACK) msg;
-
+    private boolean handlePuback(final ChannelHandlerContext ctx, final PUBACK puback) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
-            return;
+            return false;
         }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            return;
+            return false;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null || clientContext.getPubackInboundInterceptors().isEmpty()) {
-            super.channelRead(ctx, msg);
-            return;
+            return false;
         }
         final List<PubackInboundInterceptor> pubackInboundInterceptors = clientContext.getPubackInboundInterceptors();
 
@@ -115,6 +117,7 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         final InterceptorFutureCallback callback =
                 new InterceptorFutureCallback(output, puback, ctx);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
+        return true;
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
@@ -157,8 +160,8 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-
-        PubackInterceptorContext(final @NotNull Class<?> taskClazz,
+        PubackInterceptorContext(
+                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubackInboundInputImpl input,
                 final @NotNull PubackInboundOutputImpl output,
@@ -176,7 +179,8 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         public void pluginPost(@NotNull final PubackInboundOutputImpl pluginOutput) {
             if (pluginOutput.getPubackPacket().isModified()) {
                 input.updatePuback(pluginOutput.getPubackPacket());
-                output.update(pluginOutput.getPubackPacket());
+                final PUBACK updatedPuback = PUBACK.createPubackFrom(pluginOutput.getPubackPacket());
+                output.update(updatedPuback);
             }
             increment();
         }
@@ -196,7 +200,8 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
-        private PubackInterceptorTask(final @NotNull PubackInboundInterceptor interceptor,
+        private PubackInterceptorTask(
+                final @NotNull PubackInboundInterceptor interceptor,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final @NotNull String pluginId) {
             this.interceptor = interceptor;
