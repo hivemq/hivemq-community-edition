@@ -18,12 +18,12 @@ public class DisconnectOutboundOutputImpl extends AbstractAsyncOutput<Disconnect
         implements DisconnectOutboundOutput,
         PluginTaskOutput, Supplier<DisconnectOutboundOutputImpl> {
 
-    private final @NotNull FullConfigurationService configurationService;
     private @NotNull ModifiableDisconnectPacketImpl disconnectPacket;
+    private final @NotNull FullConfigurationService configurationService;
 
     public DisconnectOutboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull DISCONNECT disconnect) {
         super(asyncer);
         this.configurationService = configurationService;

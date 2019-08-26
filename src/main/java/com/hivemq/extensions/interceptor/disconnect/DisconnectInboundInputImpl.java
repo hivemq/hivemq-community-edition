@@ -9,7 +9,6 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
-import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
@@ -25,10 +24,10 @@ public class DisconnectInboundInputImpl
     private final @NotNull ClientInformation clientInformation;
 
     public DisconnectInboundInputImpl(
-            final @NotNull DISCONNECT disconnect,
+            final @NotNull DisconnectPacket disconnectPacket,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
-        this.disconnectPacket = new DisconnectPacketImpl(disconnect);
+        this.disconnectPacket = disconnectPacket;
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
