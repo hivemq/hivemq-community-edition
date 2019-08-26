@@ -13,12 +13,12 @@ public interface DisconnectPacket {
     /**
      * Sets the server reference of the DISCONNECT packet.
      *
-     * @return a String representing the  the server reference to set.
+     * @return a String representing the server reference to set.
      */
     String getServerReference();
 
     /**
-     * //TODO
+     * The reason code of the DISCONNECT packet.
      *
      * @return an enum containing the reason for disconnecting.
      */
