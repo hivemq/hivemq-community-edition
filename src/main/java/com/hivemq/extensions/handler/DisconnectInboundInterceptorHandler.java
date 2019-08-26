@@ -84,13 +84,13 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
-                clientContext.getDisconnectInboundInterceptors();
-
-        if (disconnectInboundInterceptors.isEmpty()) {
-            super.channelRead(ctx, disconnect);
+        if (clientContext == null || clientContext.getDisconnectInboundInterceptors().isEmpty()) {
+            super.channelRead(ctx, msg);
             return;
         }
+
+        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
+                clientContext.getDisconnectInboundInterceptors();
 
         final DisconnectInboundOutputImpl output =
                 new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
@@ -101,8 +101,7 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
                         interceptorFuture, disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
-            if (!interceptorFuture.isDone()) {
-                interceptorFuture.set(null);
+            if (interceptorFuture.isDone()) {
                 break;
             }
 
@@ -114,12 +113,13 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
             }
 
             final DisconnectInboundInterceptorTask interceptorTask =
-                    new DisconnectInboundInterceptorTask(interceptor, extension.getId());
+                    new DisconnectInboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
 
-        final DisconnectInterceptorFutureCallback callback = new DisconnectInterceptorFutureCallback(ctx);
+        final DisconnectInterceptorFutureCallback callback =
+                new DisconnectInterceptorFutureCallback(ctx, output, disconnect);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
