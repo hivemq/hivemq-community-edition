@@ -7,8 +7,8 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 import util.TestMessageUtil;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 public class PubrecOutboundInputImplTest {
 
@@ -55,8 +55,8 @@ public class PubrecOutboundInputImplTest {
         final PubrecOutboundInputImpl input = new PubrecOutboundInputImpl(pubrecPacket1, "client", embeddedChannel);
         input.updatePubrec(pubrecPacket2);
 
-        assertNotEquals(pubrecPacket1, input.getPubrecPacket());
-        assertNotEquals(pubrecPacket2, input.getPubrecPacket());
+        assertNotSame(pubrecPacket1, input.getPubrecPacket());
+        assertNotSame(pubrecPacket2, input.getPubrecPacket());
     }
 
 }

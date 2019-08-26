@@ -26,7 +26,6 @@ import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -64,15 +63,9 @@ public class PubrecOutboundInterceptorHandlerTest {
     @Mock
     private ClientContextImpl clientContext;
 
-    private PluginOutPutAsyncer asyncer;
-
-    private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor1;
 
     private EmbeddedChannel channel;
-
-    private PluginTaskExecutorService pluginTaskExecutorService;
 
     private PubrecOutboundInterceptorHandler handler;
 
@@ -89,9 +82,10 @@ public class PubrecOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         when(plugin.getId()).thenReturn("plugin");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
         handler = new PubrecOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);
@@ -106,7 +100,7 @@ public class PubrecOutboundInterceptorHandlerTest {
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
 
-        assertNull(channel.readOutbound());
+        assertNotNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
@@ -116,7 +110,7 @@ public class PubrecOutboundInterceptorHandlerTest {
 
         channel.close();
 
-        handler.write(context, testPubrec(), mock(ChannelPromise.class));
+        handler.write(context, testPubrec(), context.newPromise());
 
         channel.runPendingTasks();
 
