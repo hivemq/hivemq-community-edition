@@ -26,7 +26,6 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -112,11 +111,11 @@ public class PubackOutboundInterceptorHandlerTest {
 
         channel.close();
 
-        handler.write(context, testPuback(), mock(ChannelPromise.class));
+        handler.write(context, testPuback(), context.newPromise());
 
         channel.runPendingTasks();
 
-        assertNotNull(channel.readOutbound());
+        assertNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
