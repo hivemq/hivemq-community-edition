@@ -55,6 +55,6 @@ public class DisconnectInboundInputImpl
     }
 
     public void updateDisconnect(final @NotNull DisconnectPacket disconnectPacket) {
-        this.disconnectPacket = disconnectPacket;
+        this.disconnectPacket = new DisconnectPacketImpl(disconnectPacket);
     }
 }

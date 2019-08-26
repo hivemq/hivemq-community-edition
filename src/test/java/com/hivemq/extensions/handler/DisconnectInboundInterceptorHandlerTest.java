@@ -75,6 +75,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         when(extension.getId()).thenReturn("extension");
 
@@ -144,7 +145,6 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 20000)
     public void test_modified() throws Exception {
-        //TODO Why is there null in the reasonString
         final DisconnectInboundInterceptor interceptor =
                 getIsolatedInboundInterceptor("TestModifyInboundInterceptor");
         final List<DisconnectInboundInterceptor> interceptors = ImmutableList.of(interceptor);
@@ -222,6 +222,7 @@ public class DisconnectInboundInterceptorHandlerTest {
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
             packet.setReasonString("modified");
+            System.out.println("wtf");
         }
     }
 
