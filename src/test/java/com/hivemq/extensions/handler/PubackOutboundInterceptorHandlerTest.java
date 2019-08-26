@@ -102,7 +102,7 @@ public class PubackOutboundInterceptorHandlerTest {
         channel.writeOutbound(testPuback());
         channel.runPendingTasks();
 
-        assertNull(channel.readOutbound());
+        assertNotNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
@@ -116,7 +116,7 @@ public class PubackOutboundInterceptorHandlerTest {
 
         channel.runPendingTasks();
 
-        assertNull(channel.readOutbound());
+        assertNotNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
