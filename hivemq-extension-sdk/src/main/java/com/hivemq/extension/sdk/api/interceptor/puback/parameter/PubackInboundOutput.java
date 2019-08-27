@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.puback.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
@@ -16,6 +17,7 @@ import java.time.Duration;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
 
     /**
@@ -45,7 +47,7 @@ public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results in closed connection without a PUBACK sent to the client.
+     * This means that the outcome results an unmodified PUBACK is sent to the client.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
