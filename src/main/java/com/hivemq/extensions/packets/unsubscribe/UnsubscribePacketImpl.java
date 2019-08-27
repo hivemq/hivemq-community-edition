@@ -15,15 +15,18 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
 
     private final @NotNull List<String> topics;
     private final @NotNull UserProperties userProperties;
+    private final int packetIdentifier;
 
     public UnsubscribePacketImpl(final UNSUBSCRIBE unsubscribe) {
         this.topics = unsubscribe.getTopics();
         this.userProperties = unsubscribe.getUserProperties().getPluginUserProperties();
+        this.packetIdentifier = unsubscribe.getPacketIdentifier();
     }
 
     public UnsubscribePacketImpl(final ModifiableUnsubscribePacket unsubscribe) {
         this.topics = unsubscribe.getTopics();
         this.userProperties = unsubscribe.getUserProperties();
+        this.packetIdentifier = unsubscribe.getPacketIdentifier();
     }
 
     @Override
@@ -34,6 +37,11 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
     @Override
     public UserProperties getUserProperties() {
         return this.userProperties;
+    }
+
+    @Override
+    public int getPacketIdentifier() {
+        return this.packetIdentifier;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.packets.unsubscribe;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
@@ -15,9 +16,13 @@ import java.util.List;
 public interface UnsubscribePacket {
 
     /**
+     * Gets the list of topics to be unsubscribed from.
+     *
      * @return the list of topics to be unsubscribed from.
      */
-    @NotNull List<String> getTopics();
+    @Immutable
+    @NotNull
+    List<String> getTopics();
 
     /**
      * Get the unmodifiable {@link UserProperties} of the UNSUBSCRIBE packet.
@@ -25,4 +30,9 @@ public interface UnsubscribePacket {
      * @return user properties.
      */
     UserProperties getUserProperties();
+
+    /**
+     * @return the packet identifier.
+     */
+    int getPacketIdentifier();
 }
