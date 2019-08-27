@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
@@ -34,6 +33,7 @@ import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor
 import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -315,6 +315,24 @@ public class ClientContextImpl {
                 .filter(this::hasPluginForClassloader)
                 .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
                 .map(interceptor -> (SubackOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof UnsubscribeInboundInterceptor)
+                .map(interceptor -> (UnsubscribeInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof UnsubscribeInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (UnsubscribeInboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
