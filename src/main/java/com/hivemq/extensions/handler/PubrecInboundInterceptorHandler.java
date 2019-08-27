@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -15,28 +15,24 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.pubrec.PubrecOutboundInputImpl;
-import com.hivemq.extensions.interceptor.pubrec.PubrecOutboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubrec.PubrecInboundInputImpl;
+import com.hivemq.extensions.interceptor.pubrec.PubrecInboundOutputImpl;
 import com.hivemq.extensions.packets.pubrec.PubrecPacketImpl;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Yannick Weber
- */
-@Singleton
-@ChannelHandler.Sharable
-public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
+public class PubrecInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(PubrecOutboundInterceptorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PubrecInboundInterceptorHandler.class);
 
     @NotNull
     private final FullConfigurationService configurationService;
@@ -51,7 +47,7 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
     private final PluginTaskExecutorService pluginTaskExecutorService;
 
     @Inject
-    public PubrecOutboundInterceptorHandler(
+    public PubrecInboundInterceptorHandler(
             @NotNull final FullConfigurationService configurationService,
             @NotNull final PluginOutPutAsyncer asyncer,
             @NotNull final HiveMQExtensions hiveMQExtensions,
@@ -63,22 +59,17 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
     }
 
     @Override
-    public void write(
-            @NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise)
-            throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
         if (!(msg instanceof PUBREC)) {
-            super.write(ctx, msg, promise);
+            super.channelRead(ctx, msg);
             return;
         }
-        if (!handlePubrec(ctx, (PUBREC) msg, promise)) {
-            super.write(ctx, msg, promise);
+        if (!handlePubrec(ctx, (PUBREC) msg)) {
+            super.channelRead(ctx, msg);
         }
     }
 
-    private boolean handlePubrec(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREC pubrec,
-            final @NotNull ChannelPromise promise) {
-
+    private boolean handlePubrec(final ChannelHandlerContext ctx, final PUBREC pubrec) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return false;
@@ -90,21 +81,20 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getPubrecOutboundInterceptors().isEmpty()) {
+        if (clientContext == null || clientContext.getPubrecInboundInterceptors().isEmpty()) {
             return false;
         }
-        final List<PubrecOutboundInterceptor> pubrecOutboundInterceptors =
-                clientContext.getPubrecOutboundInterceptors();
+        final List<PubrecInboundInterceptor> pubrecInboundInterceptors = clientContext.getPubrecInboundInterceptors();
 
-        final PubrecOutboundOutputImpl output = new PubrecOutboundOutputImpl(configurationService, asyncer, pubrec);
-
-        final PubrecOutboundInputImpl
-                input = new PubrecOutboundInputImpl(new PubrecPacketImpl(pubrec), clientId, channel);
+        final PubrecInboundOutputImpl output = new PubrecInboundOutputImpl(configurationService, asyncer, pubrec);
+        final PubrecInboundInputImpl
+                input = new PubrecInboundInputImpl(new PubrecPacketImpl(pubrec), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
-        final PubrecInterceptorContext interceptorContext = new PubrecInterceptorContext(PubrecInterceptorTask.class,
-                clientId, input, output, interceptorFuture, pubrecOutboundInterceptors.size());
+        final PubrecInterceptorContext interceptorContext = new PubrecInterceptorContext(
+                PubrecInterceptorTask.class, clientId, input, output, interceptorFuture,
+                pubrecInboundInterceptors.size());
 
-        for (final PubrecOutboundInterceptor interceptor : pubrecOutboundInterceptors) {
+        for (final PubrecInboundInterceptor interceptor : pubrecInboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
                 // The future is set in case an async interceptor timeout failed
@@ -122,42 +112,39 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
             final PubrecInterceptorTask interceptorTask =
                     new PubrecInterceptorTask(interceptor, interceptorFuture, plugin.getId());
 
-
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, pubrec, ctx, promise);
+        final InterceptorFutureCallback callback =
+                new InterceptorFutureCallback(output, pubrec, ctx);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
         return true;
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final @NotNull PubrecOutboundOutputImpl output;
+        private final @NotNull PubrecInboundOutputImpl output;
         private final @NotNull PUBREC pubrec;
         private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull ChannelPromise promise;
 
         InterceptorFutureCallback(
-                final @NotNull PubrecOutboundOutputImpl output,
+                final @NotNull PubrecInboundOutputImpl output,
                 final @NotNull PUBREC pubrec,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise) {
+                final @NotNull ChannelHandlerContext ctx) {
             this.output = output;
             this.pubrec = pubrec;
             this.ctx = ctx;
-            this.promise = promise;
         }
 
         @Override
         public void onSuccess(final @Nullable Void result) {
             try {
-                final PUBREC finalpubrec = PUBREC.createPubrecFrom(output.getPubrecPacket());
-                ctx.writeAndFlush(finalpubrec, promise);
+                final PUBREC finalPubrec = PUBREC.createPubrecFrom(output.getPubrecPacket());
+                ctx.fireChannelRead(finalPubrec);
             } catch (final Exception e) {
-                log.error("Exception while modifying an intercepted pubrec message.", e);
-                ctx.writeAndFlush(pubrec, promise);
+                log.error("Exception while modifying an intercepted PUBREC message.", e);
+                ctx.fireChannelRead(pubrec);
             }
         }
 
@@ -168,10 +155,10 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         }
     }
 
-    private static class PubrecInterceptorContext extends PluginInOutTaskContext<PubrecOutboundOutputImpl> {
+    private static class PubrecInterceptorContext extends PluginInOutTaskContext<PubrecInboundOutputImpl> {
 
-        private final @NotNull PubrecOutboundInputImpl input;
-        private final @NotNull PubrecOutboundOutputImpl output;
+        private final @NotNull PubrecInboundInputImpl input;
+        private final @NotNull PubrecInboundOutputImpl output;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
@@ -179,8 +166,8 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         PubrecInterceptorContext(
                 final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
-                final @NotNull PubrecOutboundInputImpl input,
-                final @NotNull PubrecOutboundOutputImpl output,
+                final @NotNull PubrecInboundInputImpl input,
+                final @NotNull PubrecInboundOutputImpl output,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, clientId);
@@ -192,11 +179,11 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         }
 
         @Override
-        public void pluginPost(@NotNull final PubrecOutboundOutputImpl pluginOutput) {
+        public void pluginPost(@NotNull final PubrecInboundOutputImpl pluginOutput) {
             if (pluginOutput.getPubrecPacket().isModified()) {
                 input.updatePubrec(pluginOutput.getPubrecPacket());
-                final PUBREC modifiedPubrec = PUBREC.createPubrecFrom(pluginOutput.getPubrecPacket());
-                output.update(modifiedPubrec);
+                final PUBREC updatedPubrec = PUBREC.createPubrecFrom(pluginOutput.getPubrecPacket());
+                output.update(updatedPubrec);
             }
             increment();
         }
@@ -210,14 +197,14 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
     }
 
     private static class PubrecInterceptorTask implements
-            PluginInOutTask<PubrecOutboundInputImpl, PubrecOutboundOutputImpl> {
+            PluginInOutTask<PubrecInboundInputImpl, PubrecInboundOutputImpl> {
 
-        private final @NotNull PubrecOutboundInterceptor interceptor;
+        private final @NotNull PubrecInboundInterceptor interceptor;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
         private PubrecInterceptorTask(
-                final @NotNull PubrecOutboundInterceptor interceptor,
+                final @NotNull PubrecInboundInterceptor interceptor,
                 final @NotNull SettableFuture<Void> interceptorFuture,
                 final @NotNull String pluginId) {
             this.interceptor = interceptor;
@@ -226,20 +213,20 @@ public class PubrecOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         }
 
         @Override
-        public @NotNull PubrecOutboundOutputImpl apply(
-                final @NotNull PubrecOutboundInputImpl input, final @NotNull PubrecOutboundOutputImpl output) {
-
+        public @NotNull PubrecInboundOutputImpl apply(
+                final @NotNull PubrecInboundInputImpl input, final @NotNull PubrecInboundOutputImpl output) {
             try {
                 if (!interceptorFuture.isDone()) {
-                    interceptor.onOutboundPubrec(input, output);
+                    interceptor.onInboundPubrec(input, output);
                 }
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on PUBREC interception. The exception should be handled by the extension.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on pubrec interception. The exception should " +
+                                "be handled by the extension.",
                         pluginId);
                 log.debug("Original exception:", e);
 
-                // this is needed since the interceptor can throw an exception, while modifying the packet and leave it in an invalid state
+                // this is needed since the PUBREC could be incompletely modified
                 final PUBREC unmodifiedPubrec = PUBREC.createPubrecFrom(input.getPubrecPacket());
                 output.update(unmodifiedPubrec);
             }
