@@ -39,6 +39,10 @@ allprojects {
     sourceCompatibility = 10
     targetCompatibility = 10
 
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
+    javadoc.options.encoding = 'UTF-8'
+
     group 'com.hivemq'
 }
 
@@ -261,7 +265,7 @@ jar {
 }
 
 test {
-    jvmArgs += ["-noverify", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.nio=ALL-UNNAMED", "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "jdk.management/com.sun.management.internal=ALL-UNNAMED", "--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"]
+    jvmArgs += ["-Dfile.encoding=UTF-8", "-noverify", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.nio=ALL-UNNAMED", "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "jdk.management/com.sun.management.internal=ALL-UNNAMED", "--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"]
     minHeapSize = "128m"
     maxHeapSize = "2048m"
 
@@ -273,14 +277,8 @@ test {
         logger.lifecycle("Excluded " + lines.size() + " tests for this execution")
     }
 
-    beforeTest { descriptor ->
-        logger.lifecycle("Running test: " + descriptor)
-    }
-
-    testLogging {
-        events "failed"
-        exceptionFormat "short"
-    }
+    testLogging.events("failed")
+    testLogging.exceptionFormat("full")
 
     /* use tmpdir from gradle property or the same tmpdir as the runner */
     if (project.hasProperty("test_temp_dir")) {
