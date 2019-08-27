@@ -39,8 +39,9 @@ allprojects {
     sourceCompatibility = 10
     targetCompatibility = 10
 
-    compileJava.options.encoding = 'UTF-8'
-    compileTestJava.options.encoding = 'UTF-8'
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
     javadoc.options.encoding = 'UTF-8'
 
     group 'com.hivemq'
