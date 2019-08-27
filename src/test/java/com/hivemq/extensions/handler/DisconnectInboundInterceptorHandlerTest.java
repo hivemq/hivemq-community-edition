@@ -222,7 +222,6 @@ public class DisconnectInboundInterceptorHandlerTest {
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
             packet.setReasonString("modified");
-            System.out.println("wtf");
         }
     }
 
