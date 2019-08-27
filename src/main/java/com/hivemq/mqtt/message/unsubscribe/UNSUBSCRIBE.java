@@ -20,9 +20,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 
 import java.util.List;
 
@@ -63,6 +66,19 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
 
         this.topics = topicFilters;
         setPacketIdentifier(packetIdentifier);
+    }
+
+    public static UNSUBSCRIBE createUnsubscribeFrom(final @NotNull UnsubscribePacket packet) {
+
+        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
+
+        final ImmutableList<String> topics = ImmutableList.copyOf(packet.getTopics());
+
+        return new UNSUBSCRIBE(topics, packet.getPacketIdentifier(), mqtt5UserProperties);
     }
 
     /**
