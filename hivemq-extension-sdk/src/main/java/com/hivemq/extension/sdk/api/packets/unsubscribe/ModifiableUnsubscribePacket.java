@@ -1,7 +1,7 @@
 package com.hivemq.extension.sdk.api.packets.unsubscribe;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 import java.util.List;
 
@@ -10,17 +10,25 @@ import java.util.List;
  *
  * @author Robin Atherton
  */
-public interface ModifiableUnsubscribePacket {
+public interface ModifiableUnsubscribePacket extends UnsubscribePacket {
 
     /**
-     * @return the list of topics to be unsubscribed from.
-     */
-    List<String> getTopics();
-
-    /**
-     * Get the modifiable {@link UserProperties} of the UNSUBSCRIBE packet.
+     * Sets the list of Topics to be unsubscribed from.
      *
-     * @return the modifiable user properties.
+     * @param topics the list of Topics to unsubscribe from.
      */
-    ModifiableUserProperties getUserProperties();
+    void setTopics(List<String> topics);
+
+    /**
+     * Gets the modifiable {@link ModifiableUserProperties} of the UNSUBSCRIBE packet.
+     */
+    @Override
+    @NotNull ModifiableUserProperties getUserProperties();
+
+    /**
+     * Used to check if an UNSUBSCRIBE package has been modified.
+     *
+     * @return true if the UNSUBSCRIBE package has been modified, false if it has not.
+     */
+    boolean isModified();
 }

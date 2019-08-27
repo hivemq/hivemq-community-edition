@@ -15,9 +15,10 @@ import java.util.List;
 public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePacket {
 
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
-    private final @NotNull List<String> topics;
+    private @NotNull List<String> topics;
+    private final int packetIdentifier;
 
-    private final boolean modified = false;
+    private boolean modified = false;
 
     public ModifiableUnsubscribePacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService, final @NotNull
@@ -28,6 +29,9 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
         this.userProperties = new ModifiableUserPropertiesImpl(
                 unsubscribe.getUserProperties().getPluginUserProperties(),
                 fullConfigurationService.securityConfiguration().validateUTF8());
+
+        this.packetIdentifier = unsubscribe.getPacketIdentifier();
+
     }
 
     @Override
@@ -36,13 +40,23 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     }
 
     @Override
+    public void setTopics(final List<String> topics) {
+        this.topics = topics;
+        this.modified = true;
+    }
+
+    @Override
     public ModifiableUserProperties getUserProperties() {
         return this.userProperties;
     }
 
-    public synchronized boolean isModified() {
-        //TODO
-        return true;
+    @Override
+    public int getPacketIdentifier() {
+        return this.packetIdentifier;
+    }
+
+    public boolean isModified() {
+        return modified;
     }
 
 }

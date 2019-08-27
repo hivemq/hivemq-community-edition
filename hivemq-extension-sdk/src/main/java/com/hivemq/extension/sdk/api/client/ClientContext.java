@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 
 import java.util.List;
@@ -70,6 +71,15 @@ public interface ClientContext {
     void addSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Adds an {@link UnsubscribeInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor
+     * will be ignoretd.
+     *
+     * @param unsubscribeInboundInterceptor The implementation of an UnsubscribeInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addUnsubscribeInboundInterceptor(@NotNull UnsubscribeInboundInterceptor unsubscribeInboundInterceptor);
+
+    /**
      * Removes an {@link PublishInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
@@ -78,7 +88,6 @@ public interface ClientContext {
      * @since 4.0.0
      */
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
-
 
     /**
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
@@ -99,6 +108,15 @@ public interface ClientContext {
      * @since 4.2.0
      */
     void removeSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
+
+    /**
+     * Removes an {@link UnsubscribeInboundInterceptor} for this client. <br> Nothing happens if the interceptor that
+     * should be removed, has not been added in the first place.
+     *
+     * @param unsubscribeInboundInterceptor The implementation of an UnsubscribeInboundInterceptor.
+     * @throws NullPointerException If the interceptors is null.
+     */
+    void removeUnsubscribeInboundInterceptor(@NotNull UnsubscribeInboundInterceptor unsubscribeInboundInterceptor);
 
     /**
      * Returns all {@link Interceptor} which are registered for this client.
