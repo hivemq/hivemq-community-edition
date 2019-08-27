@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pubrec.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
@@ -11,6 +12,7 @@ import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface PubrecOutboundInput extends ClientBasedInput {
 
     /**

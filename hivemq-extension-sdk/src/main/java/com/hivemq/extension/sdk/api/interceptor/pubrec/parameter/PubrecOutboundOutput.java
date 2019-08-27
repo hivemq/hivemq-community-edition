@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pubrec.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
@@ -15,6 +16,7 @@ import java.time.Duration;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface PubrecOutboundOutput extends AsyncOutput<PubrecOutboundOutput> {
 
     /**
@@ -31,7 +33,7 @@ public interface PubrecOutboundOutput extends AsyncOutput<PubrecOutboundOutput> 
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      * <p>
-     * {@link TimeoutFallback#FAILURE} results in closed connection without a PUBREC sent to the client.
+     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBREC sent to the client.
      * <p>
      * {@link TimeoutFallback#SUCCESS} will proceed the PUBREC.
      *
