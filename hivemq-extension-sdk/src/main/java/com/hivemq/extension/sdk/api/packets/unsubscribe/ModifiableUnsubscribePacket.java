@@ -20,6 +20,20 @@ public interface ModifiableUnsubscribePacket extends UnsubscribePacket {
     void setTopics(List<String> topics);
 
     /**
+     * Adds one or more topics to the UNSUBSCRIBE packet.
+     *
+     * @param topics one or more topics to be added.
+     */
+    void addTopics(String... topics);
+
+    /**
+     * Removes one or more topics from the UNSUBSCRIBE packet.
+     *
+     * @param topics one or more topics to be removed.
+     */
+    void removeTopics(String... topics);
+
+    /**
      * Gets the modifiable {@link ModifiableUserProperties} of the UNSUBSCRIBE packet.
      */
     @Override

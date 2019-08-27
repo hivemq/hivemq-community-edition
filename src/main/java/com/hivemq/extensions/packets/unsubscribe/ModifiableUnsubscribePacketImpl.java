@@ -7,6 +7,7 @@ import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePac
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,6 +44,24 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     public void setTopics(final List<String> topics) {
         this.topics = topics;
         this.modified = true;
+    }
+
+    @Override
+    public void addTopics(final String... topics) {
+        if (topics.length == 1) {
+            this.topics.add(Arrays.toString(topics));
+        } else {
+            this.topics.addAll(Arrays.asList(topics));
+        }
+    }
+
+    @Override
+    public void removeTopics(final String... topics) {
+        if (topics.length == 1) {
+            this.topics.remove(Arrays.toString(topics));
+        } else {
+            this.topics.removeAll(Arrays.asList(topics));
+        }
     }
 
     @Override
