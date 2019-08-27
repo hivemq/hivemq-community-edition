@@ -6,19 +6,19 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
-import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 
 import java.time.Duration;
 
 /**
- * This is the output parameter of any {@link PubackOutboundInterceptor}
+ * This is the output parameter of any {@link PubackInboundInterceptor}
  *
  * @author Yannick Weber
  */
 @DoNotImplement
-public interface PubackOutboundOutput extends AsyncOutput<PubackOutboundOutput> {
+public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
 
     /**
      * Use this object to make any changes to the PUBACK message.
@@ -43,11 +43,11 @@ public interface PubackOutboundOutput extends AsyncOutput<PubackOutboundOutput> 
      * @throws UnsupportedOperationException If async is called more than once.
      */
     @Override
-    @NotNull Async<PubackOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
+    @NotNull Async<PubackInboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results in closed connection without a PUBACK sent to the client.
+     * This means that the outcome results an unmodified PUBACK is sent to the client.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
@@ -55,6 +55,5 @@ public interface PubackOutboundOutput extends AsyncOutput<PubackOutboundOutput> 
      * @throws UnsupportedOperationException If async is called more than once.
      */
     @Override
-    @NotNull Async<PubackOutboundOutput> async(@NotNull Duration timeout);
-
+    @NotNull Async<PubackInboundOutput> async(@NotNull Duration timeout);
 }

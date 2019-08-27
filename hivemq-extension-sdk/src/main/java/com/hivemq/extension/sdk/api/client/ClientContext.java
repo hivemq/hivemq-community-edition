@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
@@ -68,6 +69,15 @@ public interface ClientContext {
      * @throws NullPointerException If the interceptor is null.
      */
     void addPubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
+
+    /**
+     * Adds an {@link PubackInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
+     * ignored.
+     *
+     * @param pubackInboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);
 
     /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
@@ -120,6 +130,15 @@ public interface ClientContext {
     void removePubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
 
     /**
+     * Removes an {@link PubackInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
+     * be removed, has not been added in the first place.
+     *
+     * @param pubackInboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);
+
+    /**
      * Returns all {@link Interceptor} which are registered for this client.
      *
      * @return List of Interceptors for this client.
@@ -162,6 +181,14 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors();
+
+    /**
+     * Returns all {@link PubackInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubackInboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubackInboundInterceptor> getPubackInboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every
