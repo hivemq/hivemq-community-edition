@@ -34,6 +34,7 @@ import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor
 import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.executor.task.AbstractOutput;
@@ -120,6 +121,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addUnsubscribeInboundInterceptor(final @NotNull UnsubscribeInboundInterceptor interceptor) {
+        clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
     public void addUnsubackOutboundInterceptor(final @NotNull UnsubackOutboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
@@ -191,6 +197,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @Override
     public void removeSubackOutboundInterceptor(final @NotNull SubackOutboundInterceptor interceptor) {
+        clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removeUnsubscribeInboundInterceptor(final @NotNull UnsubscribeInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
@@ -272,6 +283,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Override
     public @Immutable @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptors() {
         return clientContext.getSubackOutboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @Override
+    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptors() {
+        return clientContext.getUnsubscribeInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @Override

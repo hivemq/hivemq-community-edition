@@ -180,6 +180,9 @@ public class ChannelDependencies {
     private final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
 
     @NotNull
+    private final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+
+    @NotNull
     private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
 
     @Inject
@@ -225,7 +228,8 @@ public class ChannelDependencies {
             @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler,
             @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler,
             @NotNull final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler,
-            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler) {
+            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
+            @NotNull final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -269,6 +273,7 @@ public class ChannelDependencies {
         this.pubcompInterceptorhandler = pubcompInterceptorHandler;
         this.subAckOutboundInterceptorHandler = subAckOutboundInterceptorHandler;
         this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
+        this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
     }
 
     @NotNull
@@ -479,5 +484,10 @@ public class ChannelDependencies {
     @NotNull
     public UnsubackOutboundInterceptorHandler getUnsubackOutboundInterceptorHandler() {
         return unsubackOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public UnsubscribeInboundInterceptorHandler getUnsubscribeInboundInterceptorHandler() {
+        return unsubscribeInboundInterceptorHandler;
     }
 }
