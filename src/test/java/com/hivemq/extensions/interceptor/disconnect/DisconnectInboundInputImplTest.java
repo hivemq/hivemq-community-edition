@@ -65,8 +65,8 @@ public class DisconnectInboundInputImplTest {
                 new DisconnectInboundInputImpl(disconnectPacket1, "client", embeddedChannel);
         input.updateDisconnect(disconnectPacket2);
 
-        Assert.assertNotEquals(input.getDisconnectPacket(), disconnectPacket1);
-        Assert.assertEquals(input.getDisconnectPacket(), disconnectPacket2);
+        Assert.assertNotSame(input.getDisconnectPacket(), disconnectPacket1);
+        Assert.assertNotSame(input.getDisconnectPacket(), disconnectPacket2);
     }
 
     @Test
