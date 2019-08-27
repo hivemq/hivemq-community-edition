@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -61,6 +62,15 @@ public interface ClientContext {
     void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
 
     /**
+     * Adds an {@link PubrecInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
+     * ignored. Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubrecInboundInterceptor(@NotNull PubrecInboundInterceptor pubrecInboundInterceptor);
+
+    /**
      * Adds an {@link PubrecOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
      * ignored. Subsequent adding of the same interceptor will be ignored.
      *
@@ -97,6 +107,15 @@ public interface ClientContext {
      * @throws NullPointerException If the interceptor is null.
      */
     void removePubrecOutboundInterceptor(@NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor);
+
+    /**
+     * Removes an {@link PubrecInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
+     * be removed, has not been added in the first place.
+     *
+     * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubrecInboundInterceptor(@NotNull PubrecInboundInterceptor pubrecInboundInterceptor);
 
     /**
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
@@ -161,6 +180,14 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull PubrecOutboundInterceptor> getPubrecOutboundInterceptors();
+
+    /**
+     * Returns all {@link PubrecInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubrecInboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubrecInboundInterceptor> getPubrecInboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every

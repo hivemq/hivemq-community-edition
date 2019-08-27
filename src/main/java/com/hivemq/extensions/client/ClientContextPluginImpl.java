@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -67,6 +68,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
+    public void addPubrecInboundInterceptor(final @NotNull PubrecInboundInterceptor interceptor) {
+        clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+    }
+
+    @Override
     public void addPubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
@@ -89,6 +95,11 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Override
     public void removePubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor) {
         clientContext.removeInterceptor(checkNotNull(pubrecOutboundInterceptor, "The interceptor must never be null"));
+    }
+
+    @Override
+    public void removePubrecInboundInterceptor(final @NotNull PubrecInboundInterceptor pubrecInboundInterceptor) {
+        clientContext.removeInterceptor(checkNotNull(pubrecInboundInterceptor, "The interceptor must never be null"));
     }
 
     @NotNull
@@ -124,6 +135,13 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @Immutable
     public List<PubrecOutboundInterceptor> getPubrecOutboundInterceptors() {
         return clientContext.getPubrecOutboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
+    @Immutable
+    public List<PubrecInboundInterceptor> getPubrecInboundInterceptors() {
+        return clientContext.getPubrecInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
