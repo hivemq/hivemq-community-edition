@@ -143,6 +143,12 @@ public class ConnectPacketImplTest {
         assertFalse(emptyPacket.getPassword().isPresent());
     }
 
+    @Test
+    public void test_passwordArray() {
+        assertArrayEquals("password".getBytes(StandardCharsets.UTF_8), connectPacket.getPasswordAsArray());
+        assertNull(emptyPacket.getPasswordAsArray());
+    }
+
     @Test(timeout = 5000)
     public void test_auth_method() {
         assertEquals("method", connectPacket.getAuthenticationMethod().get());

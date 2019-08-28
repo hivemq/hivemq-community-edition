@@ -19,6 +19,7 @@ package com.hivemq.extension.sdk.api.packets.publish;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -26,7 +27,6 @@ import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.builder.WillPublishBuilder;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -181,6 +181,13 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * @since 4.2.0
      */
     void setPassword(@Nullable ByteBuffer password);
+
+    /**
+     * Set the password.
+     *
+     * @param bytes The new password for the CONNECT.
+     */
+    void setPassword(@Nullable byte[] bytes);
 
     /**
      * Get the modifiable {@link UserProperties} of the CONNECT packet.

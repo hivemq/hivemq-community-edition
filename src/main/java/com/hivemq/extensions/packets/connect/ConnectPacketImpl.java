@@ -26,6 +26,7 @@ import com.hivemq.extensions.packets.general.MqttVersionUtil;
 import com.hivemq.mqtt.message.connect.CONNECT;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -137,5 +138,16 @@ public class ConnectPacketImpl implements ConnectPacket {
             return Optional.empty();
         }
         return Optional.of(ByteBuffer.wrap(password));
+    }
+
+    @Nullable
+    @Override
+    public byte[] getPasswordAsArray() {
+        final byte[] password = connect.getPassword();
+        if (password == null) {
+            return null;
+        } else {
+            return Arrays.copyOf(password, password.length);
+        }
     }
 }

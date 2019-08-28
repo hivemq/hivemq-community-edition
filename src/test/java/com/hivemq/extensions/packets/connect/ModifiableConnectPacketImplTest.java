@@ -8,6 +8,7 @@ import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.*;
 
@@ -188,5 +189,21 @@ public class ModifiableConnectPacketImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_client_id_empty() {
         modifiablePacket.setClientId("");
+    }
+
+    @Test
+    public void test_change_password_array_changes_both() {
+        final byte[] bytes = "password".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setPassword(bytes);
+        assertArrayEquals(bytes, modifiablePacket.getPasswordAsArray());
+        assertEquals(ByteBuffer.wrap(bytes), modifiablePacket.getPassword().get());
+    }
+
+    @Test
+    public void test_change_password_buffer_changes_both() {
+        final byte[] bytes = "password".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setPassword(ByteBuffer.wrap(bytes));
+        assertArrayEquals(bytes, modifiablePacket.getPasswordAsArray());
+        assertEquals(ByteBuffer.wrap(bytes), modifiablePacket.getPassword().get());
     }
 }

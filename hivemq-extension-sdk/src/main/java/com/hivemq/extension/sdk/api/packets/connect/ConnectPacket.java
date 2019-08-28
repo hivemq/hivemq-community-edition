@@ -19,10 +19,11 @@ package com.hivemq.extension.sdk.api.packets.connect;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -205,4 +206,12 @@ public interface ConnectPacket {
      * @since 4.0.0
      */
     @NotNull Optional<ByteBuffer> getPassword();
+
+    /**
+     * If a password is set in the CONNECT packet, a copy of it is returned as a byte array. If no password is set null
+     * is returned.
+     *
+     * @return the password from the CONNECT packet or null.
+     */
+    @Nullable byte[] getPasswordAsArray();
 }
