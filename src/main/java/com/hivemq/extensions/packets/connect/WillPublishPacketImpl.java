@@ -26,6 +26,7 @@ import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -185,6 +186,14 @@ public class WillPublishPacketImpl implements WillPublishPacket {
             return Optional.empty();
         }
         return Optional.of(correlationData.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @Nullable byte[] getCorrelationDataAsArray() {
+        if (correlationData == null) {
+            return null;
+        }
+        return Arrays.copyOf(correlationData.array(), correlationData.array().length);
     }
 
     @NotNull

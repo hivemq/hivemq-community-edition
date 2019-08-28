@@ -104,6 +104,13 @@ public interface ModifiablePublishPacket extends PublishPacket {
     void setCorrelationData(@Nullable ByteBuffer correlationData);
 
     /**
+     * Sets the correlation data
+     *
+     * @param correlationData The new correlation data for the publish.
+     */
+    void setCorrelationData(byte[] correlationData);
+
+    /**
      * Sets the content type.
      *
      * @param contentType The new content type for the publish.

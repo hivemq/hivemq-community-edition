@@ -377,7 +377,7 @@ public class ModifiablePublishPacketImplTest {
     @Test
     public void test_change_CorrelationData_null() {
 
-        modifiablePublishPacket.setCorrelationData(null);
+        modifiablePublishPacket.setCorrelationData((ByteBuffer) null);
 
         final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
 
@@ -394,7 +394,7 @@ public class ModifiablePublishPacketImplTest {
 
         modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, TestMessageUtil.createMqtt5Publish());
 
-        modifiablePublishPacket.setCorrelationData(null);
+        modifiablePublishPacket.setCorrelationData((ByteBuffer) null);
 
         final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
 

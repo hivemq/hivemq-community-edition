@@ -17,6 +17,7 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -24,6 +25,7 @@ import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -95,6 +97,16 @@ public class PublishPacketImpl implements PublishPacket {
             return Optional.empty();
         }
         return Optional.of(ByteBuffer.wrap(correlationData).asReadOnlyBuffer());
+    }
+
+    @Override
+    public @Nullable byte[] getCorrelationDataAsArray() {
+        @Nullable final byte[] correlationData = publish.getCorrelationData();
+        if (correlationData == null) {
+            return null;
+        } else {
+            return Arrays.copyOf(correlationData, correlationData.length);
+        }
     }
 
     @Override
