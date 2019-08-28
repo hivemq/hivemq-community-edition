@@ -18,6 +18,7 @@ package com.hivemq.extensions.services.builder;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -39,6 +40,7 @@ import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -360,6 +362,12 @@ public class RetainedPublishBuilderImplTest {
         @Override
         public Optional<ByteBuffer> getCorrelationData() {
             return Optional.of(ByteBuffer.wrap("correlation_data".getBytes()));
+        }
+
+        @Override
+        public @Nullable byte[] getCorrelationDataAsArray() {
+            final byte[] correlationBytes = "correlation_data".getBytes();
+            return Arrays.copyOf(correlationBytes, correlationBytes.length);
         }
 
         @Override

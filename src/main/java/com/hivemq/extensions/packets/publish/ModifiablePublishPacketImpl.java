@@ -25,17 +25,16 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.ModifiablePublishPacket;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +60,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     private long messageExpiryInterval;
     private @Nullable String responseTopic;
     private @Nullable ByteBuffer correlationData;
+    private @Nullable byte[] correlationDataBytes;
     private final @Nullable List<Integer> subscriptionIdentifiers;
     private @Nullable String contentType;
     private @Nullable ByteBuffer payload;
@@ -90,6 +90,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.messageExpiryInterval = publish.getMessageExpiryInterval();
         this.responseTopic = publish.getResponseTopic();
         this.correlationData = publish.getCorrelationData() != null ? ByteBuffer.wrap(publish.getCorrelationData()).asReadOnlyBuffer() : null;
+        this.correlationDataBytes = publish.getCorrelationData();
         this.subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         this.contentType = publish.getContentType();
         this.payload = publish.getPayload() != null ? ByteBuffer.wrap(publish.getPayload()).asReadOnlyBuffer() : null;
@@ -124,12 +125,21 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.messageExpiryInterval = messageExpiryInterval;
         this.responseTopic = responseTopic;
         this.correlationData = correlationData;
+        this.correlationDataBytes = convertCorrelationDataToBytes(correlationData);
         this.subscriptionIdentifiers = subscriptionIdentifiers;
         this.contentType = contentType;
         this.payload = payload;
         this.userProperties = new ModifiableUserPropertiesImpl(userProperties, configurationService.securityConfiguration().validateUTF8());
         this.packetId = packetId;
         this.duplicateDelivery = duplicateDelivery;
+    }
+
+    private byte[] convertCorrelationDataToBytes(final @Nullable ByteBuffer correlationData) {
+        if (correlationData != null) {
+            return correlationData.array();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -227,6 +237,18 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
+    public void setCorrelationData(final byte[] correlationData) {
+        if (correlationData != null && Arrays.equals(correlationData, this.correlationDataBytes)) {
+            return;
+        }
+        if (correlationData == null && this.correlationDataBytes == null) {
+            return;
+        }
+        this.correlationDataBytes = correlationData;
+        this.modified = true;
+    }
+
+    @Override
     public synchronized void setContentType(final @Nullable String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
 
@@ -298,6 +320,15 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
             return Optional.empty();
         }
         return Optional.of(correlationData.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @Nullable byte[] getCorrelationDataAsArray() {
+        if (correlationDataBytes == null) {
+            return null;
+        } else {
+            return Arrays.copyOf(correlationDataBytes, correlationDataBytes.length);
+        }
     }
 
     @Override
