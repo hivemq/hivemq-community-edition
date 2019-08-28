@@ -21,15 +21,22 @@ import com.hivemq.extensions.packets.puback.PubackPacketImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @author Yannick Weber
+ */
+@Singleton
+@ChannelHandler.Sharable
 public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(PubackInboundInterceptorHandler.class);
@@ -45,7 +52,6 @@ public class PubackInboundInterceptorHandler extends ChannelInboundHandlerAdapte
 
     @NotNull
     private final PluginTaskExecutorService pluginTaskExecutorService;
-
 
     @Inject
     public PubackInboundInterceptorHandler(@NotNull final FullConfigurationService configurationService,
