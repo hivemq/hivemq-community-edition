@@ -17,6 +17,7 @@
 package com.hivemq.extension.sdk.api.packets.connack;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -240,5 +241,12 @@ public interface ConnackPacket {
      */
     @NotNull
     Optional<ByteBuffer> getAuthenticationData();
+
+    /**
+     * Convenience method to retrieve authentication data as a byte array.
+     *
+     * @return the authentication data as a byte array.
+     */
+    @Nullable byte[] getAuthenticationDataAsArray();
 
 }

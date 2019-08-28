@@ -157,6 +157,16 @@ public class ConnackPacketImpl implements ConnackPacket {
         return Optional.ofNullable(authenticationData);
     }
 
+    @Nullable
+    @Override
+    public byte[] getAuthenticationDataAsArray() {
+        if (authenticationData != null) {
+            return authenticationData.array();
+        } else {
+            return null;
+        }
+    }
+
     @NotNull
     @Override
     public UserProperties getUserProperties() {
