@@ -18,6 +18,7 @@ package com.hivemq.extension.sdk.api.services.session;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.exception.IncompatibleHiveMQVersionException;
 import com.hivemq.extension.sdk.api.services.exception.IterationFailedException;
@@ -85,6 +86,17 @@ public interface ClientService {
      * @since 4.0.0
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId);
+
+    /**
+     * @param clientId
+     * @param prevenWillMessage
+     * @param reasonCode
+     * @param reasonString
+     * @return
+     */
+    @NotNull CompletableFuture<Boolean> disconnectClient(
+            @NotNull String clientId, boolean prevenWillMessage, @NotNull DisconnectReasonCode reasonCode,
+            @NotNull String reasonString);
 
     /**
      * Forcefully disconnect a client with the specified clientId.

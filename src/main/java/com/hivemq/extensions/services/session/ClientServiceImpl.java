@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.general.IterationCallback;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
@@ -125,6 +126,21 @@ public class ClientServiceImpl implements ClientService {
 
     @NotNull
     @Override
+    public CompletableFuture<Boolean> disconnectClient(
+            final @NotNull String clientId,
+            final boolean preventWillMessage,
+            final @NotNull DisconnectReasonCode reasonCode,
+            final @NotNull String reasonString) {
+        if (pluginServiceRateLimitService.rateLimitExceeded()) {
+            return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
+        }
+        return ListenableFutureConverter.toCompletable(
+                clientSessionPersistence.forceDisconnectClient(
+                        clientId, preventWillMessage, EXTENSION, reasonCode, reasonString));
+    }
+
+    @NotNull
+    @Override
     public CompletableFuture<Boolean> invalidateSession(@NotNull final String clientId) {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -172,7 +188,9 @@ public class ClientServiceImpl implements ClientService {
         final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
                 new AllClientsFetchCallback(clientSessionPersistence);
         final AsyncIterator<ChunkCursor, SessionInformation>
-                asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllClientsItemCallback(callbackExecutor, callback));
+                asyncIterator = asyncIteratorFactory.createIterator(
+                fetchCallback,
+                new AllClientsItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 
@@ -243,7 +261,8 @@ public class ClientServiceImpl implements ClientService {
         }
 
         @Override
-        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SessionInformation>> fetchNextResults(@Nullable final ChunkCursor cursor) {
+        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SessionInformation>> fetchNextResults(
+                @Nullable final ChunkCursor cursor) {
 
             final ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> persistenceFuture =
                     clientSessionPersistence.getAllLocalClientsChunk(cursor != null ? cursor : new ChunkCursor());

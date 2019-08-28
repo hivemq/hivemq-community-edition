@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
@@ -93,6 +94,21 @@ public interface ClientSessionPersistence {
      */
     @NotNull
     ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
+
+    /**
+     * TODO
+     *
+     * @param clientId
+     * @param preventLwtMesage
+     * @param source
+     * @param reasonCode
+     * @param reasonString
+     * @return
+     */
+    @NotNull
+    ListenableFuture<Boolean> forceDisconnectClient(
+            @NotNull String clientId, boolean preventLwtMesage, @NotNull DisconnectSource source,
+            @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
 
     /**
      * Sets the session expiry interval for a client in seconds.
