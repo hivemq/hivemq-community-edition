@@ -170,6 +170,9 @@ public class ChannelDependenciesTest {
 
 
     @Mock
+    private PubackInboundInterceptorHandler pubackInboundInterceptorHandler;
+
+    @Mock
     private PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @Before
@@ -214,6 +217,7 @@ public class ChannelDependenciesTest {
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler,
                 disconnectInterceptorHandler,
+                pubackInboundInterceptorHandler,
                 pubackOutboundInterceptorHandler);
 
     }

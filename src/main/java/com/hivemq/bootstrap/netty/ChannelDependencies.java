@@ -163,6 +163,9 @@ public class ChannelDependencies {
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @NotNull
+    private final PubackInboundInterceptorHandler pubackInboundInterceptorHandler;
+
+    @NotNull
     private final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
 
     @NotNull
@@ -207,6 +210,7 @@ public class ChannelDependencies {
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
             @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler,
+            @NotNull final PubackInboundInterceptorHandler pubackInboundInterceptorHandler,
             @NotNull final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler) {
 
 
@@ -245,6 +249,7 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
+        this.pubackInboundInterceptorHandler = pubackInboundInterceptorHandler;
         this.pubackOutboundInterceptorHandler = pubackOutboundInterceptorHandler;
         this.disconnectInterceptorHandler = disconnectInterceptorHandler;
     }
@@ -427,6 +432,11 @@ public class ChannelDependencies {
     @NotNull
     public DisconnectInterceptorHandler getDisconnectInterceptorHandler() {
         return disconnectInterceptorHandler;
+    }
+
+    @NotNull
+    public ChannelHandler getPubackInboundInterceptorHandler() {
+        return pubackInboundInterceptorHandler;
     }
 
     @NotNull
