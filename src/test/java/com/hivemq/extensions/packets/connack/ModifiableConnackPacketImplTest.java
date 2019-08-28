@@ -27,6 +27,8 @@ import org.junit.Test;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.*;
 
 /**
@@ -38,12 +40,15 @@ public class ModifiableConnackPacketImplTest {
     private ModifiableConnackPacketImpl modifiableConnackPacket;
     private FullConfigurationService fullConfigurationService;
     private CONNACK fullMqtt5Connack;
+    private CONNACK empty;
 
     @Before
     public void setUp() throws Exception {
         fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         fullMqtt5Connack = TestMessageUtil.createFullMqtt5Connack();
         modifiableConnackPacket = new ModifiableConnackPacketImpl(fullConfigurationService, fullMqtt5Connack, true);
+        empty = TestMessageUtil.createConnackWithoutAuthData();
+
     }
 
     @Test(expected = IllegalStateException.class)
@@ -151,6 +156,12 @@ public class ModifiableConnackPacketImplTest {
     public void test_add_user_prop() {
         modifiableConnackPacket.getUserProperties().addUserProperty("user", "prop");
         assertTrue(modifiableConnackPacket.isModified());
+    }
+
+    @Test
+    public void test_passwordArray() {
+        assertArrayEquals("auth data".getBytes(StandardCharsets.UTF_8), fullMqtt5Connack.getAuthData());
+        assertNull(empty.getAuthData());
     }
 
     @Test

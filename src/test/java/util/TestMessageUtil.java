@@ -310,6 +310,30 @@ public class TestMessageUtil {
                 .build();
     }
 
+    public static CONNACK createConnackWithoutAuthData() {
+        return new CONNACK.Mqtt5Builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
+                .withReasonString("success")
+                .withUserProperties(TEST_USER_PROPERTIES)
+                .withSessionPresent(true)
+                .withSessionExpiryInterval(720)
+                .withServerKeepAlive(120)
+                .withAssignedClientIdentifier("assigned")
+                .withAuthMethod("auth method")
+                .withAuthData(null)
+                .withReceiveMaximum(100)
+                .withTopicAliasMaximum(5)
+                .withMaximumPacketSize(100)
+                .withMaximumQoS(QoS.AT_LEAST_ONCE)
+                .withRetainAvailable(true)
+                .withWildcardSubscriptionAvailable(true)
+                .withSubscriptionIdentifierAvailable(true)
+                .withSharedSubscriptionAvailable(true)
+                .withResponseInformation("response")
+                .withServerReference("server")
+                .build();
+    }
+
     public static SUBSCRIBE createFullMqtt5Subscribe() {
         final ImmutableList.Builder<Topic> topicBuilder = new ImmutableList.Builder<>();
         topicBuilder.add(new Topic(topics.get(0), QoS.AT_MOST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
