@@ -435,12 +435,12 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public ChannelHandler getPubackInboundInterceptorHandler() {
+    public PubackInboundInterceptorHandler getPubackInboundInterceptorHandler() {
         return pubackInboundInterceptorHandler;
     }
 
     @NotNull
-    public ChannelHandler getPubackOutboundInterceptorHandler() {
+    public PubackOutboundInterceptorHandler getPubackOutboundInterceptorHandler() {
         return pubackOutboundInterceptorHandler;
     }
 }
