@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class PublishTopicTree {
 
-    private final Node root = new Node(null);
+    private final Node root = new Node();
 
     public void add(@NotNull final String topic) {
         final ArrayList<String> subTopics =
@@ -34,11 +34,6 @@ public class PublishTopicTree {
     }
 
     private static class Node {
-
-        // Parent node is null if this is the root node
-        @Nullable
-        final Node parent;
-
         // child and childSubTopic are only used if there is no more than one child node.
         @Nullable
         Node child = null;
@@ -53,31 +48,29 @@ public class PublishTopicTree {
         */
         boolean directMatch = false;
 
-        private Node(@Nullable final Node parent) {
-            this.parent = parent;
-        }
-
         public void add(@NotNull final ArrayList<String> subTopics) {
-            if (child != null) {
+            final String currentSubTopic = subTopics.get(0);
+            if (child != null && !currentSubTopic.equals(childSubTopic)) {
                 childNodes = new HashMap<>(1);
                 childNodes.put(childSubTopic, child);
                 child = null;
                 childSubTopic = null;
             }
 
-            final String currentSubTopic = subTopics.get(0);
             Node nextChild;
             if (childNodes != null) {
                 //This is NOT the first child node that is added
                 nextChild = childNodes.get(currentSubTopic);
                 if (nextChild == null) {
-                    nextChild = new Node(this);
+                    nextChild = new Node();
                     childNodes.put(currentSubTopic, nextChild);
                 }
-            } else {
+            } else if (child == null) {
                 //This is the first child node that is added
-                child = new Node(this);
+                child = new Node();
                 childSubTopic = currentSubTopic;
+                nextChild = child;
+            } else {
                 nextChild = child;
             }
 
@@ -112,10 +105,11 @@ public class PublishTopicTree {
                     final ArrayList<String> nextSubTopics = new ArrayList<>(subTopics);
                     nextSubTopics.remove(0);
                     final boolean removed = child.remove(nextSubTopics);
-                    if (removed) {
+                    if (removed && (!child.directMatch)) {
                         child = null;
+                        return true;
                     }
-                    return removed;
+                    return false;
                 } else {
                     return false;
                 }
@@ -127,7 +121,7 @@ public class PublishTopicTree {
                 final ArrayList<String> nextSubTopics = new ArrayList<>(subTopics);
                 nextSubTopics.remove(0);
                 final boolean removed = node.remove(nextSubTopics);
-                if (removed) {
+                if (removed && !node.directMatch) {
                     childNodes.remove(currentSubTopic);
                     if (childNodes.size() == 1) {
                         final Map.Entry<String, Node> entry = childNodes.entrySet().iterator().next();

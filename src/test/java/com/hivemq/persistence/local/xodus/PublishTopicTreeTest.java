@@ -191,4 +191,36 @@ public class PublishTopicTreeTest {
         assertEquals(1, tree.get("topic/a/c").size());
 
     }
+
+    @Test
+    public void test_remove_edge_cases_2() {
+        tree.add("topic/a");
+        tree.add("topic/a/b");
+        tree.add("topic/a/b/c");
+        tree.remove("topic/a/b/c");
+        Set<String> result = tree.get("#");
+        assertEquals(2, result.size());
+        assertTrue(result.contains("topic/a"));
+        assertTrue(result.contains("topic/a/b"));
+
+        tree.add("topic/a/b/c");
+        tree.add("topic/a/d/c");
+        tree.remove("topic/a/b/c");
+
+        result = tree.get("#");
+        assertEquals(3, result.size());
+        assertTrue(result.contains("topic/a"));
+        assertTrue(result.contains("topic/a/b"));
+        assertTrue(result.contains("topic/a/d/c"));
+
+        tree.add("topic/a/b/c");
+        tree.remove("topic/a/d/c");
+
+        result = tree.get("#");
+        assertEquals(3, result.size());
+        assertTrue(result.contains("topic/a"));
+        assertTrue(result.contains("topic/a/b"));
+        assertTrue(result.contains("topic/a/b/c"));
+
+    }
 }
