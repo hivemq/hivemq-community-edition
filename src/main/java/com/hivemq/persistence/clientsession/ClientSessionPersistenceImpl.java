@@ -282,7 +282,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                     logMessage,
                     eventLogMessage,
                     null,
-                    reasonString);
+                    null);
         }
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
         channel.closeFuture().addListener((ChannelFutureListener) future -> {
