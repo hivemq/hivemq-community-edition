@@ -121,7 +121,9 @@ public class ClientServiceImpl implements ClientService {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION), managedExtensionExecutorService);
+        return ListenableFutureConverter.toCompletable(
+                clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION),
+                managedExtensionExecutorService);
     }
 
     @NotNull
@@ -129,8 +131,8 @@ public class ClientServiceImpl implements ClientService {
     public CompletableFuture<Boolean> disconnectClient(
             final @NotNull String clientId,
             final boolean preventWillMessage,
-            final @NotNull DisconnectReasonCode reasonCode,
-            final @NotNull String reasonString) {
+            final @Nullable DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString) {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
@@ -196,7 +198,7 @@ public class ClientServiceImpl implements ClientService {
 
         final SettableFuture<Void> settableFuture = SettableFuture.create();
         asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
-            if(throwable != null) {
+            if (throwable != null) {
                 settableFuture.setException(throwable);
             } else {
                 settableFuture.set(null);
@@ -208,8 +210,10 @@ public class ClientServiceImpl implements ClientService {
 
     static class AllClientsItemCallback implements AsyncIterator.ItemCallback<SessionInformation> {
 
-        private @NotNull final Executor callbackExecutor;
-        private @NotNull final IterationCallback<SessionInformation> callback;
+        private @NotNull
+        final Executor callbackExecutor;
+        private @NotNull
+        final IterationCallback<SessionInformation> callback;
 
         AllClientsItemCallback(
                 @NotNull final Executor callbackExecutor,
@@ -227,10 +231,10 @@ public class ClientServiceImpl implements ClientService {
             //this is not a lambda because we want it to be identifiable in a heap-dump
             callbackExecutor.execute(() -> {
 
-                    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                    try {
-                        Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
-                        for (final SessionInformation sessionInformation : items) {
+                final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
+                    for (final SessionInformation sessionInformation : items) {
 
                         callback.iterate(iterationContext, sessionInformation);
 

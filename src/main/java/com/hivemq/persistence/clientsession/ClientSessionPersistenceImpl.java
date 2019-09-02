@@ -224,8 +224,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             final @NotNull String clientId,
             final boolean preventLwtMessage,
             final @NotNull DisconnectSource source,
-            final @NotNull DisconnectReasonCode reasonCode,
-            final @NotNull String reasonString) {
+            final @Nullable DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString) {
 
         Preconditions.checkNotNull(clientId, "Parameter clientId cannot be null");
         Preconditions.checkNotNull(source, "Disconnect source cannot be null");
@@ -432,7 +432,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
                 if (sessionExists) {
                     final ListenableFuture<Boolean> disconnectClientFuture =
-                            forceDisconnectClient(clientId, false, disconnectSource, null, null);
+                            forceDisconnectClient(clientId, false, disconnectSource);
                     resultFuture.setFuture(disconnectClientFuture);
                 } else {
                     resultFuture.set(null);
