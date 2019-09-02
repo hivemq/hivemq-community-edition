@@ -265,7 +265,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final String eventLogMessage = "Disconnected via extension system";
 
         if (version == ProtocolVersion.MQTTv5) {
-            if (reasonCode != null) {
+            if (reasonCode != null && reasonString != null) {
                 mqtt5ServerDisconnector.disconnect(
                         channel,
                         logMessage,

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.session.SessionInformation;
@@ -240,6 +241,16 @@ public class ClientServiceImplTest {
     public void test_disconnect_client_prevent_lwt_true_success() throws Throwable {
         when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION)).thenReturn(Futures.immediateFuture(true));
         assertEquals(true, clientService.disconnectClient(clientId, true).get());
+    }
+
+    @Test(timeout = 20000)
+    public void test_disconnect_with_reason_Code() throws Throwable {
+        when(clientSessionPersistence.forceDisconnectClient(
+                clientId, true, EXTENSION, DisconnectReasonCode.NORMAL_DISCONNECTION,
+                "Disconnecting Normally")).thenReturn(Futures.immediateFuture(true));
+        assertEquals(
+                true, clientService.disconnectClient(clientId, true, DisconnectReasonCode.NORMAL_DISCONNECTION,
+                        "Disconnecting Normally").get());
     }
 
     @Test(timeout = 20000)
