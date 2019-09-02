@@ -96,14 +96,15 @@ public interface ClientSessionPersistence {
     ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
 
     /**
-     * TODO
+     * Enforce a client disconnect from a specific source, preventing or delivering the will message.
      *
-     * @param clientId
-     * @param preventLwtMesage
-     * @param source
-     * @param reasonCode
-     * @param reasonString
-     * @return
+     * @param clientId          The client id of the client to disconnect.
+     * @param preventLwtMesage  The flag if the will message should be prevented or delivered.
+     * @param source            The source of the enforce call.
+     * @param reasonCode        The reason code for the enforced disconnect.
+     * @param reasonString      The reason string for the enforced disconnect.
+     * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
+     * connected (false).
      */
     @NotNull
     ListenableFuture<Boolean> forceDisconnectClient(

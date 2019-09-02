@@ -88,11 +88,13 @@ public interface ClientService {
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId);
 
     /**
-     * @param clientId
-     * @param prevenWillMessage
-     * @param reasonCode
-     * @param reasonString
-     * @return
+     * @param clientId The client identifier of the client to disconnect.
+     * @param prevenWillMessage If <b>true</b> the Will message for this client is not published when the client gets
+     *                          disconnected.
+     * @param reasonCode The reason for disconnecting this client.
+     * @param reasonString The reason for disconnecting this client as a String.
+     * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
+     * disconnected and <b>false</b> if no client with that id was found.
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(
             @NotNull String clientId, boolean prevenWillMessage, @NotNull DisconnectReasonCode reasonCode,
