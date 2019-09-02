@@ -99,7 +99,7 @@ public interface ClientSessionPersistence {
      * Enforce a client disconnect from a specific source, preventing or delivering the will message.
      *
      * @param clientId          The client id of the client to disconnect.
-     * @param preventLwtMesage  The flag if the will message should be prevented or delivered.
+     * @param preventLwtMessage The flag if the will message should be prevented or delivered.
      * @param source            The source of the enforce call.
      * @param reasonCode        The reason code for the enforced disconnect.
      * @param reasonString      The reason string for the enforced disconnect.
@@ -108,8 +108,11 @@ public interface ClientSessionPersistence {
      */
     @NotNull
     ListenableFuture<Boolean> forceDisconnectClient(
-            @NotNull String clientId, boolean preventLwtMesage, @NotNull DisconnectSource source,
-            @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
+            @NotNull String clientId,
+            boolean preventLwtMessage,
+            @NotNull DisconnectSource source,
+            @Nullable DisconnectReasonCode reasonCode,
+            @Nullable String reasonString);
 
     /**
      * Sets the session expiry interval for a client in seconds.

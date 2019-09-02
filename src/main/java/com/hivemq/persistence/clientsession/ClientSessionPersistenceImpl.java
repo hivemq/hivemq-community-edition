@@ -233,7 +233,9 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final ClientSession session = getSession(clientId, false);
 
         if (session == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.");
+            log.trace(
+                    "Ignoring forced client disconnect request for client '{}', because client is not connected.",
+                    clientId);
             return Futures.immediateFuture(false);
         }
         if (preventLwtMessage) {
@@ -246,7 +248,9 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final Channel channel = channelPersistence.get(clientId);
 
         if (channel == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.");
+            log.trace(
+                    "Ignoring forced client disconnect request for client '{}', because client is not connected.",
+                    clientId);
             return Futures.immediateFuture(false);
         }
 
