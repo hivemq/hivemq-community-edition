@@ -117,13 +117,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public CompletableFuture<Boolean> disconnectClient(
             @NotNull final String clientId, final boolean preventWillMessage) {
-        Preconditions.checkNotNull(clientId, "A client id must never be null");
-        if (pluginServiceRateLimitService.rateLimitExceeded()) {
-            return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
-        }
-        return ListenableFutureConverter.toCompletable(
-                clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION),
-                managedExtensionExecutorService);
+        return disconnectClient(clientId, preventWillMessage, null, null);
     }
 
     @NotNull
@@ -133,12 +127,20 @@ public class ClientServiceImpl implements ClientService {
             final boolean preventWillMessage,
             final @Nullable DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
+        Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(
-                clientSessionPersistence.forceDisconnectClient(
-                        clientId, preventWillMessage, EXTENSION, reasonCode, reasonString));
+        if (reasonCode != null && reasonString != null) {
+            return ListenableFutureConverter.toCompletable(
+                    clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION, reasonCode,
+                            reasonString), managedExtensionExecutorService);
+        } else {
+            return ListenableFutureConverter.toCompletable(
+                    clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION),
+                    managedExtensionExecutorService);
+        }
+
     }
 
     @NotNull

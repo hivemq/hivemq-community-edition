@@ -295,6 +295,12 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return resultFuture;
     }
 
+    @Override
+    public @NotNull ListenableFuture<Boolean> forceDisconnectClient(
+            final @NotNull String clientId, final boolean preventLwtMessage, final @NotNull DisconnectSource source) {
+        return forceDisconnectClient(clientId, preventLwtMessage, source, null, null);
+    }
+
     @NotNull
     public ListenableFuture<Void> cleanClientData(@NotNull final String clientId) {
 
@@ -317,12 +323,6 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                     return clientSessions;
                 });
         return FutureUtils.combineSetResults(Futures.allAsList(futures));
-    }
-
-    @Override
-    public @NotNull ListenableFuture<Boolean> forceDisconnectClient(
-            final @NotNull String clientId, final boolean preventLwtMessage, final @NotNull DisconnectSource source) {
-        return forceDisconnectClient(clientId, preventLwtMessage, source, null, null);
     }
 
     @Nullable
