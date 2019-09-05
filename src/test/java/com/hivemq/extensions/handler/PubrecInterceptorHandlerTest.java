@@ -424,7 +424,7 @@ public class PubrecInterceptorHandlerTest {
     private PubrecOutboundInterceptor getOutboundInterceptor(@NotNull final String name) throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PubrecOutboundInterceptorHandlerTest$" + name);
+                .addClass("com.hivemq.extensions.handler.PubrecInterceptorHandlerTest$" + name);
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -435,7 +435,7 @@ public class PubrecInterceptorHandlerTest {
                 new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.PubrecOutboundInterceptorHandlerTest$" + name);
+                cl.loadClass("com.hivemq.extensions.handler.PubrecInterceptorHandlerTest$" + name);
 
         return (PubrecOutboundInterceptor) interceptorClass.newInstance();
     }
