@@ -166,7 +166,7 @@ public class ChannelDependenciesTest {
     private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @Mock
-    private PubrecOutboundInterceptorHandler pubrecOutboundInterceptorHandler;
+    private PubrecInterceptorHandler pubrecInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -209,7 +209,7 @@ public class ChannelDependenciesTest {
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler,
-                pubrecOutboundInterceptorHandler);
+                pubrecInterceptorHandler);
 
     }
 
