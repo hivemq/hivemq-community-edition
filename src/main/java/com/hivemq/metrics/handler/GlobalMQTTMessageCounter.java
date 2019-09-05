@@ -55,6 +55,10 @@ public class GlobalMQTTMessageCounter extends ChannelDuplexHandler {
 
             if (msg instanceof CONNECT) {
                 metricsHolder.getIncomingConnectCounter().inc();
+
+                if (((CONNECT) msg).getWillPublish() != null) {
+                    metricsHolder.getLastWillTestamentCounter().inc();
+                }
             }
 
             if (msg instanceof PUBLISH) {

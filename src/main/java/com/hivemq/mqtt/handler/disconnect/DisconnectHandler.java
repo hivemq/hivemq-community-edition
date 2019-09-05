@@ -83,6 +83,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         log.trace("The client [{}] sent a disconnect message. ", clientId);
         if (msg.getReasonCode() == DISCONNECT_WITH_WILL_MESSAGE) {
             ctx.channel().attr(SEND_WILL).set(true);
+            metricsHolder.getLastWillTestamentCounter().dec();
         } else {
             ctx.channel().attr(SEND_WILL).set(false);
         }
