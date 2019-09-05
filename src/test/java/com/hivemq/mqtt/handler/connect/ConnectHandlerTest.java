@@ -88,7 +88,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.*;
+import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.NONE;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -1314,7 +1314,9 @@ public class ConnectHandlerTest {
         when(clientSessionSubscriptionPersistence.getSubscriptions(anyString())).thenReturn(ImmutableSet.of(new Topic("t1", QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_MOST_ONCE)));
 
         embeddedChannel.pipeline().addAfter(ChannelHandlerNames.MQTT_CONNECT_HANDLER, ChannelHandlerNames.MQTT_CONNECT_PERSISTENCE_HANDLER,
-                new ConnectPersistenceUpdateHandler(clientSessionPersistence, clientSessionSubscriptionPersistence, mock(MessageIDPools.class), channelPersistence, singleWriterService));
+                new ConnectPersistenceUpdateHandler(
+                        clientSessionPersistence, clientSessionSubscriptionPersistence, mock(MessageIDPools.class),
+                        channelPersistence, singleWriterService, metricsHolder));
 
         ctx = embeddedChannel.pipeline().context(ConnectHandler.class);
 

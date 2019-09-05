@@ -46,6 +46,7 @@ public class MetricsHolder {
     private final @NotNull Counter closedConnectionsCounter;
 
     private final @NotNull Counter lastWillTestamentCounter;
+    private final @NotNull Counter lastWillTestamentSentCounter;
 
     public MetricsHolder(final MetricRegistry metricRegistry) {
 
@@ -66,6 +67,8 @@ public class MetricsHolder {
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
 
         lastWillTestamentCounter = metricRegistry.counter(LWT_CURRENT.name());
+
+        lastWillTestamentSentCounter = metricRegistry.counter(LWT_SENT.name());
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {
@@ -106,5 +109,9 @@ public class MetricsHolder {
 
     public @NotNull Counter getLastWillTestamentCounter() {
         return lastWillTestamentCounter;
+    }
+
+    public Counter getLastWillTestamentSentCounter() {
+        return lastWillTestamentSentCounter;
     }
 }

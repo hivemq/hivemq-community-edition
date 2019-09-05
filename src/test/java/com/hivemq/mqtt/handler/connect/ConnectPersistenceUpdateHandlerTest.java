@@ -16,8 +16,10 @@
 
 package com.hivemq.mqtt.handler.connect;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -84,6 +86,7 @@ public class ConnectPersistenceUpdateHandlerTest {
     @Mock
     ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
 
+    MetricsHolder metricsHolder;
     ConnectPersistenceUpdateHandler persistenceUpdateHandler;
     SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
@@ -99,10 +102,11 @@ public class ConnectPersistenceUpdateHandlerTest {
         when(channel.attr(eq(ChannelAttributes.TAKEN_OVER))).thenReturn(new TestChannelAttribute<Boolean>(false));
         when(channel.attr(eq(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED))).thenReturn(new TestChannelAttribute<Boolean>(true));
 
+        metricsHolder = new MetricsHolder(new MetricRegistry());
         when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyInt(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
         when(ctx.channel()).thenReturn(channel);
         persistenceUpdateHandler = new ConnectPersistenceUpdateHandler(clientSessionPersistence, clientSessionSubscriptionPersistence,
-                messageIDPools, channelPersistence, singleWriterService);
+                messageIDPools, channelPersistence, singleWriterService, metricsHolder);
     }
 
     @Test

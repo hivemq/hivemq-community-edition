@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
@@ -55,18 +56,21 @@ public class ConnectPersistenceUpdateHandler extends ChannelInboundHandlerAdapte
     private final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
     private final MessageIDPools messageIDPools;
     private final ChannelPersistence channelPersistence;
+    private final MetricsHolder metricsHolder;
 
     @Inject
     ConnectPersistenceUpdateHandler(final ClientSessionPersistence clientSessionPersistence,
                                     final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
                                     final MessageIDPools messageIDPools,
                                     final ChannelPersistence channelPersistence,
-                                    final SingleWriterService singleWriterService) {
+            final SingleWriterService singleWriterService,
+            final MetricsHolder metricsHolder) {
 
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.messageIDPools = messageIDPools;
         this.channelPersistence = channelPersistence;
+        this.metricsHolder = metricsHolder;
     }
 
     @Override
@@ -143,6 +147,7 @@ public class ConnectPersistenceUpdateHandler extends ChannelInboundHandlerAdapte
                     public void onSuccess(@Nullable final Void result) {
                         if (!channel.attr(ChannelAttributes.TAKEN_OVER).get()) {
                             channelPersistence.remove(clientId);
+                            metricsHolder.getLastWillTestamentSentCounter().inc();
                         }
 
                         final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.DISCONNECT_FUTURE).get();
