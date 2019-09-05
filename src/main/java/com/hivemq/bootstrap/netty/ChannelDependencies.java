@@ -162,10 +162,7 @@ public class ChannelDependencies {
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @NotNull
-    private final PubackInboundInterceptorHandler pubackInboundInterceptorHandler;
-
-    @NotNull
-    private final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
+    private final PubackInterceptorHandler pubackInterceptorHandler;
 
     @NotNull
     private final DisconnectInterceptorHandler disconnectInterceptorHandler;
@@ -209,8 +206,7 @@ public class ChannelDependencies {
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
             @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler,
-            @NotNull final PubackInboundInterceptorHandler pubackInboundInterceptorHandler,
-            @NotNull final PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler) {
+            @NotNull final PubackInterceptorHandler pubackInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -248,8 +244,7 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
-        this.pubackInboundInterceptorHandler = pubackInboundInterceptorHandler;
-        this.pubackOutboundInterceptorHandler = pubackOutboundInterceptorHandler;
+        this.pubackInterceptorHandler = pubackInterceptorHandler;
         this.disconnectInterceptorHandler = disconnectInterceptorHandler;
     }
 
@@ -434,12 +429,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PubackInboundInterceptorHandler getPubackInboundInterceptorHandler() {
-        return pubackInboundInterceptorHandler;
-    }
-
-    @NotNull
-    public PubackOutboundInterceptorHandler getPubackOutboundInterceptorHandler() {
-        return pubackOutboundInterceptorHandler;
+    public PubackInterceptorHandler getPubackInterceptorHandler() {
+        return pubackInterceptorHandler;
     }
 }

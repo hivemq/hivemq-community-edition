@@ -170,10 +170,7 @@ public class ChannelDependenciesTest {
 
 
     @Mock
-    private PubackInboundInterceptorHandler pubackInboundInterceptorHandler;
-
-    @Mock
-    private PubackOutboundInterceptorHandler pubackOutboundInterceptorHandler;
+    private PubackInterceptorHandler pubackInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -217,8 +214,7 @@ public class ChannelDependenciesTest {
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler,
                 disconnectInterceptorHandler,
-                pubackInboundInterceptorHandler,
-                pubackOutboundInterceptorHandler);
+                pubackInterceptorHandler);
 
     }
 
@@ -260,7 +256,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
         assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
         assertNotNull(channelDependencies.getDisconnectInterceptorHandler());
-        assertNotNull(channelDependencies.getPubackInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getPubackOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPubackInterceptorHandler());
     }
 }
