@@ -173,7 +173,7 @@ public class ChannelDependenciesTest {
     private PubackInterceptorHandler pubackInterceptorHandler;
 
     @Mock
-    private PubrecOutboundInterceptorHandler pubrecOutboundInterceptorHandler;
+    private PubrecInterceptorHandler pubrecInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -218,7 +218,7 @@ public class ChannelDependenciesTest {
                 connackOutboundInterceptorHandler,
                 disconnectInterceptorHandler,
                 pubackInterceptorHandler,
-                pubrecOutboundInterceptorHandler);
+                pubrecInterceptorHandler);
 
     }
 
