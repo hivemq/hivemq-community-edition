@@ -5,8 +5,6 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundOutput;
-import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundInput;
-import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
 
 import java.time.Duration;
 
@@ -20,7 +18,7 @@ import java.time.Duration;
  * <p>
  * When the method {@link #onInboundPuback(PubackInboundInput, PubackInboundOutput)} throws an exception or a call
  * to {@link PubackInboundOutput#async(Duration)} times out with {@link TimeoutFallback#FAILURE},
- * then the connection will be closed by the broker without another packet being sent to the client.
+ * the exception will be logged and the PUBACK will be sent to the client without any changes.
  *
  * @author Yannick Weber
  */

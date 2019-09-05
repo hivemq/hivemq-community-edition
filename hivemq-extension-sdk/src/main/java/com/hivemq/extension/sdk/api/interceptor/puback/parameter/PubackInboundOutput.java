@@ -34,7 +34,7 @@ public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      * <p>
-     * {@link TimeoutFallback#FAILURE} results in closed connection without a PUBACK sent to the client.
+     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBACK sent to the client.
      * <p>
      * {@link TimeoutFallback#SUCCESS} will proceed the PUBACK.
      *

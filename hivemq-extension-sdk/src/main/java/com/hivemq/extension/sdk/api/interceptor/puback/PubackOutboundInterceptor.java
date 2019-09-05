@@ -18,7 +18,7 @@ import java.time.Duration;
  * <p>
  * When the method {@link #onOutboundPuback(PubackOutboundInput, PubackOutboundOutput)} throws an exception or a call
  * to {@link PubackOutboundOutput#async(Duration)} times out with {@link TimeoutFallback#FAILURE},
- * then the connection will be closed by the broker without another packet being sent to the client.
+ * the exception will be logged and the PUBACK will be sent to the client without any changes.
  *
  * @author Yannick Weber
  */

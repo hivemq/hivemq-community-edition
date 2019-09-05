@@ -112,8 +112,7 @@ public class ChannelHandlerNames {
     public static final String PLUGIN_INITIALIZER_HANDLER = "plugin_initializer_handler";
     public static final String CLIENT_LIFECYCLE_EVENT_HANDLER = "client_lifecycle_event_handler";
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
-    public static final String PUBACK_INBOUND_INTERCEPTOR_HANDLER = "puback_inbound_interceptor_handler";
-    public static final String PUBACK_OUTBOUND_INTERCEPTOR_HANDLER = "puback_outbound_interceptor_handler";
+    public static final String PUBACK_INTERCEPTOR_HANDLER = "puback_interceptor_handler";
     public static final String CONNECT_INBOUND_INTERCEPTOR_HANDLER = "connect_inbound_interceptor_handler";
     public static final String CONNACK_OUTBOUND_INTERCEPTOR_HANDLER = "connack_outbound_interceptor_handler";
 
