@@ -16,11 +16,8 @@
 
 package com.hivemq.persistence.retained;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.mqtt.topic.TopicMatcher;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -66,7 +63,9 @@ public class RetainedMessagePersistenceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1L, 1000);
-        retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence, topicMatcher, payloadPersistence, TestSingleWriterFactory.defaultSingleWriter());
+        retainedMessagePersistence =
+                new RetainedMessagePersistenceImpl(localPersistence, topicMatcher, payloadPersistence,
+                        TestSingleWriterFactory.defaultSingleWriter());
     }
 
     @Test(expected = NullPointerException.class)
@@ -99,7 +98,7 @@ public class RetainedMessagePersistenceImplTest {
     @Test(expected = NullPointerException.class)
     public void test_get_with_wildcards_topic_null() throws Throwable {
         try {
-            retainedMessagePersistence.getWithWildcards(null).get(0).get();
+            retainedMessagePersistence.getWithWildcards(null).get();
         } catch (final InterruptedException | ExecutionException e) {
             throw e.getCause();
         }
@@ -108,7 +107,7 @@ public class RetainedMessagePersistenceImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_get_with_wildcards_topic_without_wildcard() throws Throwable {
         try {
-            retainedMessagePersistence.getWithWildcards("topic").get(0).get();
+            retainedMessagePersistence.getWithWildcards("topic").get();
         } catch (final InterruptedException |
                 ExecutionException e) {
             throw e.getCause();
@@ -129,15 +128,13 @@ public class RetainedMessagePersistenceImplTest {
 
     @Test
     public void test_get_with_wildcards_success() throws ExecutionException, InterruptedException {
-        when(localPersistence.getAllTopics(any(PersistenceFilter.class), anyInt())).thenReturn(Sets.newHashSet("topic/1", "topic/2", "topic/3"));
-        final ImmutableList<ListenableFuture<Set<String>>> topic = retainedMessagePersistence.getWithWildcards("topic/#");
+        when(localPersistence.getAllTopics(anyString(), anyInt())).thenReturn(
+                Sets.newHashSet("topic/1", "topic/2", "topic/3"));
+        final Set<String> topics = retainedMessagePersistence.getWithWildcards("topic/#").get();
 
-        for (final ListenableFuture<Set<String>> future : topic) {
-            assertTrue(future.get().contains("topic/1"));
-            assertTrue(future.get().contains("topic/2"));
-            assertTrue(future.get().contains("topic/3"));
-        }
-
+        assertTrue(topics.contains("topic/1"));
+        assertTrue(topics.contains("topic/2"));
+        assertTrue(topics.contains("topic/3"));
     }
 
     @Test
@@ -175,7 +172,6 @@ public class RetainedMessagePersistenceImplTest {
         }
         verify(localPersistence, never()).put(any(RetainedMessage.class), anyString(), anyInt());
     }
-
 
     @Test(expected = NullPointerException.class)
     public void test_persist_message_null() throws Throwable {

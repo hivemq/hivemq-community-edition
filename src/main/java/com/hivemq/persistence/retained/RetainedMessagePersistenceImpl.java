@@ -22,7 +22,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.mqtt.topic.TopicMatcher;
-import com.hivemq.persistence.*;
+import com.hivemq.persistence.AbstractPersistence;
+import com.hivemq.persistence.ProducerQueues;
+import com.hivemq.persistence.RetainedMessage;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 
@@ -46,10 +49,11 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     private final @NotNull ProducerQueues singleWriter;
 
     @Inject
-    RetainedMessagePersistenceImpl(final @NotNull RetainedMessageLocalPersistence localPersistence,
-                                   final @NotNull TopicMatcher topicMatcher,
-                                   final @NotNull PublishPayloadPersistence payloadPersistence,
-                                   final @NotNull SingleWriterService singleWriterService) {
+    RetainedMessagePersistenceImpl(
+            final @NotNull RetainedMessageLocalPersistence localPersistence,
+            final @NotNull TopicMatcher topicMatcher,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull SingleWriterService singleWriterService) {
 
         this.localPersistence = localPersistence;
         this.topicMatcher = topicMatcher;
@@ -65,7 +69,8 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         try {
             checkNotNull(topic, "Topic must not be null");
             if (topic.contains("+") || topic.contains("#")) {
-                throw new IllegalArgumentException("Topic contains wildcard characters. Call getWithWildcards method instead.");
+                throw new IllegalArgumentException(
+                        "Topic contains wildcard characters. Call getWithWildcards method instead.");
             }
 
             return singleWriter.submit(topic, (bucketIndex, queueBuckets, queueIndex) -> {
@@ -127,23 +132,26 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
 
     @NotNull
     @Override
-    public ImmutableList<ListenableFuture<Set<String>>> getWithWildcards(@NotNull final String topicWithWildcards) {
+    public ListenableFuture<Set<String>> getWithWildcards(@NotNull final String subscription) {
         try {
-            checkNotNull(topicWithWildcards, "Topic must not be null");
-            if (!topicWithWildcards.contains("+") && !topicWithWildcards.contains("#")) {
-                throw new IllegalArgumentException("Topic does not contain wildcard characters. Call get method instead.");
+            checkNotNull(subscription, "Topic must not be null");
+            if (!subscription.contains("+") && !subscription.contains("#")) {
+                throw new IllegalArgumentException(
+                        "Topic does not contain wildcard characters. Call get method instead.");
             }
 
-            return ImmutableList.copyOf(singleWriter.submitToAllQueues((bucketIndex, queueBuckets, queueIndex) -> {
-                final Set<String> topics = new HashSet<>();
-                for (final Integer bucket : queueBuckets) {
-                    topics.addAll(localPersistence.getAllTopics(new TopicMatchingFilter(topicWithWildcards, topicMatcher), bucket));
-                }
-                return topics;
-            }));
+            final ListenableFuture<List<Set<String>>> futures =
+                    singleWriter.submitToAllQueuesAsList((bucketIndex, queueBuckets, queueIndex) -> {
+                        final Set<String> topics = new HashSet<>();
+                        for (final Integer bucket : queueBuckets) {
+                            topics.addAll(localPersistence.getAllTopics(subscription, bucket));
+                        }
+                        return topics;
+                    });
+            return FutureUtils.combineSetResults(futures);
 
         } catch (final Throwable throwable) {
-            return ImmutableList.of(Futures.immediateFailedFuture(throwable));
+            return Futures.immediateFailedFuture(throwable);
         }
     }
 
@@ -165,12 +173,13 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @NotNull
     @Override
     public ListenableFuture<Void> clear() {
-        final List<ListenableFuture<Void>> futureList = singleWriter.submitToAllQueues((bucketIndex, queueBuckets, queueIndex) -> {
-            for (final Integer bucket : queueBuckets) {
-                localPersistence.clear(bucket);
-            }
-            return null;
-        });
+        final List<ListenableFuture<Void>> futureList =
+                singleWriter.submitToAllQueues((bucketIndex, queueBuckets, queueIndex) -> {
+                    for (final Integer bucket : queueBuckets) {
+                        localPersistence.clear(bucket);
+                    }
+                    return null;
+                });
         return FutureUtils.voidFutureFromList(ImmutableList.copyOf(futureList));
     }
 }
