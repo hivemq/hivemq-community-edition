@@ -140,6 +140,6 @@ public class HiveMQMetrics {
      * represents a {@link Counter}, which measures the count of last will testaments spread to clients.
      */
     public static final HiveMQMetric<Counter> LWT_SENT =
-            HiveMQMetric.valueOf("com.hivemq.last-will-testaments.sent", Counter.class);
+            HiveMQMetric.valueOf("com.hivemq.will.sent.count", Counter.class);
 }
 
