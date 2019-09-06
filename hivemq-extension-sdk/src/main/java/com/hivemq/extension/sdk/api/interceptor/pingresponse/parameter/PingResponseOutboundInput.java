@@ -4,8 +4,7 @@ import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboun
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * This is the input parameter of any {@link PingResponseOutboundInterceptor}
- * providing PINGRESP
+ * This is the input parameter of any {@link PingResponseOutboundInterceptor}.
  *
  * @author Robin Atherton
  */

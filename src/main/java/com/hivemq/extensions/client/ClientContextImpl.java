@@ -63,11 +63,11 @@ public class ClientContextImpl {
         }
     }
 
-    public void addPingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void addPingRequestInboundInterceptor(@NotNull final PingRequestInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
-    public void addPingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+    public void addPingResponseOutboundInterceptor(@NotNull final PingResponseOutboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
@@ -95,11 +95,11 @@ public class ClientContextImpl {
         removeInterceptor(interceptor);
     }
 
-    public void removePingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void removePingRequestInboundInterceptor(@NotNull final PingRequestInboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
 
-    public void removePingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+    public void removePingResponseOutboundInterceptor(@NotNull final PingResponseOutboundInterceptor interceptor) {
         removeInterceptor(interceptor);
     }
 
@@ -125,7 +125,8 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
-    public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+    public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
                 .filter(interceptor -> interceptor instanceof PingRequestInboundInterceptor)
@@ -145,7 +146,8 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
-    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptorsForPlugin(final @NotNull IsolatedPluginClassloader pluginClassloader) {
+    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof PingResponseOutboundInterceptor)
                 .filter(this::hasPluginForClassloader)

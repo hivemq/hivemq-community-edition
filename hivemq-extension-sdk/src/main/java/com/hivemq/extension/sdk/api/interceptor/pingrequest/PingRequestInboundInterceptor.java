@@ -23,7 +23,6 @@ public interface PingRequestInboundInterceptor extends Interceptor {
      *
      * @param pingRequestInboundInput  The {@link PingRequestInboundInput} parameter.
      * @param pingRequestInboundOutput The {@link PingRequestInboundOutput} parameter.
-     * @since 4.2.0
      */
     void onPingReq(
             @NotNull PingRequestInboundInput pingRequestInboundInput,

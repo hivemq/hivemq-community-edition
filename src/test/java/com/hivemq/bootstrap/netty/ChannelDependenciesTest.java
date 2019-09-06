@@ -206,7 +206,7 @@ public class ChannelDependenciesTest {
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
                 () -> publishMessageExpiryHandler,
-                () -> pingRequestResponseInterceptorHandler,
+                pingRequestResponseInterceptorHandler,
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler);

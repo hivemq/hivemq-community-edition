@@ -24,7 +24,6 @@ public interface PingResponseOutboundInterceptor extends Interceptor {
      *
      * @param pingResponseOutboundInput  The {@link PingResponseOutboundInput} parameter.
      * @param pingResponseOutboundOutput The {@link PingResponseOutboundOutput} parameter.
-     * @since 4.2.0
      */
     void onPingResp(
             @NotNull PingResponseOutboundInput pingResponseOutboundInput,
