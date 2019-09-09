@@ -295,6 +295,11 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onInboundPuback(input, output);
                 }
+                if (output.isTimedOut()) {
+                    log.warn("Async timeout on inbound PUBACK interception.");
+                    final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
+                    output.update(unmodifiedPuback);
+                }
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on puback interception. The exception should be handled by the extension.",
@@ -413,6 +418,11 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             try {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onOutboundPuback(input, output);
+                }
+                if (output.isTimedOut()) {
+                    log.warn("Async timeout on outbound PUBACK interception.");
+                    final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
+                    output.update(unmodifiedPuback);
                 }
             } catch (final Throwable e) {
                 log.warn(
