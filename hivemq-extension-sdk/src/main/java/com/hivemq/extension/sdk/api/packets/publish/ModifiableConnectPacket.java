@@ -185,9 +185,9 @@ public interface ModifiableConnectPacket extends ConnectPacket {
     /**
      * Set the password.
      *
-     * @param bytes The new password for the CONNECT.
+     * @param password The new password for the CONNECT.
      */
-    void setPassword(@Nullable byte[] bytes);
+    void setPassword(@Nullable byte[] password);
 
     /**
      * Get the modifiable {@link UserProperties} of the CONNECT packet.

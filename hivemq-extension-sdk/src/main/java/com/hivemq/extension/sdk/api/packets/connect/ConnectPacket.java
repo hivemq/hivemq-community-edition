@@ -208,7 +208,7 @@ public interface ConnectPacket {
     @NotNull Optional<ByteBuffer> getPassword();
 
     /**
-     * If a password is set in the CONNECT packet, a copy of it is returned as a byte array. If no password is set null
+     * If a password is set in the CONNECT packet, a copy of it is returned as a byte array. If no password is set, null
      * is returned.
      *
      * @return the password from the CONNECT packet or null.

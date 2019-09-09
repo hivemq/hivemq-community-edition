@@ -294,15 +294,15 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
-    public void setPassword(@Nullable final byte[] bytes) {
-        if (bytes != null && Arrays.equals(bytes, this.passwordBytes)) {
+    public void setPassword(@Nullable final byte[] password) {
+        if (Arrays.equals(password, this.passwordBytes)) {
             return;
         }
-        if (bytes == null && this.passwordBytes == null) {
+        if (password == null && this.passwordBytes == null) {
             return;
         }
-        this.passwordBytes = bytes;
-        this.password = bytes == null ? null : ByteBuffer.wrap(bytes);
+        this.passwordBytes = password;
+        this.password = password == null ? null : ByteBuffer.wrap(password);
         modified = true;
     }
 
