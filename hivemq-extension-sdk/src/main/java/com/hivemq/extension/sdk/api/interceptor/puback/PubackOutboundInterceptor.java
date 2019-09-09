@@ -26,7 +26,7 @@ public interface PubackOutboundInterceptor extends Interceptor {
     
     /**
      * When a {@link PubackOutboundInterceptor} is set through any extension,
-     * this method gets called for every outbound PUBACK packet from any MQTT client.
+     * this method gets called for every outgoing PUBACK packet from any MQTT client.
      *
      * @param pubackOutboundInput  The {@link PubackOutboundInput} parameter.
      * @param pubackOutboundOutput The {@link PubackOutboundOutput} parameter.
