@@ -26,7 +26,7 @@ public interface PubrecOutboundInterceptor extends Interceptor {
 
     /**
      * When a {@link PubrecOutboundInterceptor} is set through any extension, this method gets called for every outbound
-     * PUBREC packet from any MQTT client.
+     * PUBREC packet for any MQTT client.
      *
      * @param pubrecOutboundInput  The {@link PubrecOutboundInput} parameter.
      * @param pubrecOutboundOutput The {@link PubrecOutboundOutput} parameter.
