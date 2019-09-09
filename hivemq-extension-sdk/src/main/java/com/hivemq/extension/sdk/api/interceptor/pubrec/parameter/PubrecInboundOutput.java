@@ -33,7 +33,7 @@ public interface PubrecInboundOutput extends AsyncOutput<PubrecInboundOutput> {
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      * <p>
-     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBREC sent to the client.
+     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBREC sent to the server.
      * <p>
      * {@link TimeoutFallback#SUCCESS} will proceed the PUBREC.
      *
@@ -46,7 +46,7 @@ public interface PubrecInboundOutput extends AsyncOutput<PubrecInboundOutput> {
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. This
-     * means that the outcome results in closed connection without a PUBREC sent to the client.
+     * means that the outcome results in closed connection without a PUBREC sent to the server.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

@@ -18,7 +18,7 @@ import java.time.Duration;
  * <p>
  * When the method {@link #onInboundPubrec(PubrecInboundInput, PubrecInboundOutput)} throws an exception or a call to
  * {@link PubrecInboundOutput#async(Duration)} times out with {@link TimeoutFallback#FAILURE}, then an error will be
- * logged. The connection will not be terminated and the original PUBREC will be sent to the client.
+ * logged. The connection will not be terminated and the original PUBREC will be sent to the server.
  *
  * @author Yannick Weber
  */
