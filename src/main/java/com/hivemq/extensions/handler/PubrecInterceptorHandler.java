@@ -296,6 +296,11 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onInboundPubrec(input, output);
                 }
+                if (output.isTimedOut()) {
+                    log.warn("Async timeout on inbound PUBREC interception.");
+                    final PUBREC unmodifiedPubrec = PUBREC.createPubrecFrom(input.getPubrecPacket());
+                    output.update(unmodifiedPubrec);
+                }
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on pubrec interception. The exception should " +
@@ -416,6 +421,11 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
             try {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onOutboundPubrec(input, output);
+                }
+                if (output.isTimedOut()) {
+                    log.warn("Async timeout on outbound PUBREC interception.");
+                    final PUBREC unmodifiedPubrec = PUBREC.createPubrecFrom(input.getPubrecPacket());
+                    output.update(unmodifiedPubrec);
                 }
             } catch (final Throwable e) {
                 log.warn(
