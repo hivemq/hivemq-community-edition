@@ -34,7 +34,7 @@ public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      * <p>
-     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBACK sent to the client.
+     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBACK sent to the server.
      * <p>
      * {@link TimeoutFallback#SUCCESS} will proceed the PUBACK.
      *
@@ -47,7 +47,7 @@ public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results an unmodified PUBACK is sent to the client.
+     * This means that the outcome results an unmodified PUBACK is sent to the server.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

@@ -18,7 +18,7 @@ import java.time.Duration;
  * <p>
  * When the method {@link #onInboundPuback(PubackInboundInput, PubackInboundOutput)} throws an exception or a call
  * to {@link PubackInboundOutput#async(Duration)} times out with {@link TimeoutFallback#FAILURE},
- * the exception will be logged and the PUBACK will be sent to the client without any changes.
+ * the exception will be logged and the PUBACK will be sent to the server without any changes.
  *
  * @author Yannick Weber
  */
