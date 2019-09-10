@@ -80,6 +80,14 @@ public class ClientContextImpl {
         addInterceptor(interceptor);
     }
 
+    public void addPubrecInboundInterceptor(@NotNull final PubrecInboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubrecOutboundInterceptor(@NotNull final PubrecOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
     public void addSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }

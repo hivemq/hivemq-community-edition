@@ -21,6 +21,8 @@ import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
@@ -121,6 +123,28 @@ public class ClientContextImplTest {
         clientContext.addPubackOutboundInterceptor(pubackOutboundInterceptor);
         assertEquals(1, clientContext.getPubackOutboundInterceptors().size());
         assertSame(pubackOutboundInterceptor, clientContext.getPubackOutboundInterceptors().get(0));
+
+        assertEquals(2, clientContext.getAllInterceptors().size());
+
+        clientContext.removeInterceptor(pubackInboundInterceptor);
+        clientContext.removeInterceptor(pubackOutboundInterceptor);
+
+        assertEquals(0, clientContext.getAllInterceptors().size());
+    }
+
+    @Test
+    public void test_add_remove_pubrec_interceptors() {
+        final PubrecOutboundInterceptor pubackOutboundInterceptor = (pubackOutboundInput, pubackOutboundOutput) -> { };
+
+        final PubrecInboundInterceptor pubackInboundInterceptor = (pubackInboundInput, pubackInboundOutput) -> { };
+
+        clientContext.addPubrecInboundInterceptor(pubackInboundInterceptor);
+        assertEquals(1, clientContext.getPubrecInboundInterceptors().size());
+        assertSame(pubackInboundInterceptor, clientContext.getPubrecInboundInterceptors().get(0));
+
+        clientContext.addPubrecOutboundInterceptor(pubackOutboundInterceptor);
+        assertEquals(1, clientContext.getPubrecOutboundInterceptors().size());
+        assertSame(pubackOutboundInterceptor, clientContext.getPubrecOutboundInterceptors().get(0));
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 
