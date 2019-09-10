@@ -85,7 +85,7 @@ public interface ClientContext {
 
     /**
      * Adds an {@link PubrecInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
-     * ignored. Subsequent adding of the same interceptor will be ignored.
+     * ignored.
      *
      * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
@@ -94,7 +94,7 @@ public interface ClientContext {
 
     /**
      * Adds an {@link PubrecOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
-     * ignored. Subsequent adding of the same interceptor will be ignored.
+     * ignored.
      *
      * @param pubrecOutboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
