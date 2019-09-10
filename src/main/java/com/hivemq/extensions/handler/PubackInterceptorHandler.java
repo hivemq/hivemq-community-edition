@@ -256,7 +256,11 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void pluginPost(@NotNull final PubackInboundOutputImpl pluginOutput) {
-            if (pluginOutput.getPubackPacket().isModified()) {
+            if (output.isTimedOut()) {
+                log.warn("Async timeout on inbound PUBACK interception.");
+                final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
+                output.update(unmodifiedPuback);
+            } else if (pluginOutput.getPubackPacket().isModified()) {
                 input.updatePuback(pluginOutput.getPubackPacket());
                 final PUBACK updatedPuback = PUBACK.createPubackFrom(pluginOutput.getPubackPacket());
                 output.update(updatedPuback);
@@ -294,11 +298,6 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             try {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onInboundPuback(input, output);
-                }
-                if (output.isTimedOut()) {
-                    log.warn("Async timeout on inbound PUBACK interception.");
-                    final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
-                    output.update(unmodifiedPuback);
                 }
             } catch (final Throwable e) {
                 log.warn(
@@ -384,6 +383,10 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 input.updatePuback(pluginOutput.getPubackPacket());
                 final PUBACK updatedPuback = PUBACK.createPubackFrom(output.getPubackPacket());
                 output.update(updatedPuback);
+            } else if (output.isTimedOut()) {
+                log.warn("Async timeout on outbound PUBACK interception.");
+                final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
+                output.update(unmodifiedPuback);
             }
             increment();
         }
@@ -418,11 +421,6 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             try {
                 if (!interceptorFuture.isDone()) {
                     interceptor.onOutboundPuback(input, output);
-                }
-                if (output.isTimedOut()) {
-                    log.warn("Async timeout on outbound PUBACK interception.");
-                    final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
-                    output.update(unmodifiedPuback);
                 }
             } catch (final Throwable e) {
                 log.warn(
