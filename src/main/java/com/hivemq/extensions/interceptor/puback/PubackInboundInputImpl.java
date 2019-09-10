@@ -25,8 +25,8 @@ public class PubackInboundInputImpl implements PubackInboundInput, Supplier<Puba
             final @NotNull Channel channel) {
 
         this.pubackPacket = pubackPacket;
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     @Override
