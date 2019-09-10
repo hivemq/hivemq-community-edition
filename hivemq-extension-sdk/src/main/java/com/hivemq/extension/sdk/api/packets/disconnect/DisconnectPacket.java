@@ -3,17 +3,15 @@ package com.hivemq.extension.sdk.api.packets.disconnect;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
-import java.util.Optional;
-
 /**
  * @author Robin Atherton
  */
 public interface DisconnectPacket {
 
     /**
-     * Sets the server reference of the DISCONNECT packet.
+     * Gets the server reference of the DISCONNECT packet.
      *
-     * @return a String representing the server reference to set.
+     * @return a String representing the server reference.
      */
     String getServerReference();
 
@@ -25,16 +23,14 @@ public interface DisconnectPacket {
     DisconnectReasonCode getReasonCode();
 
     /**
-     * The reason string of the DISCONNECT packet.
+     * The reason String of the DISCONNECT packet.
      *
-     * @return a string containing the disconnect reason if present.
+     * @return a String containing the disconnect reason if present.
      */
     String getReasonString();
 
     /**
-     * Duration in seconds how long session for the client is stored.
-     * <p>
-     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
+     * The Duration in seconds for which the clients session is stored.
      *
      * @return a long representing the session expiry interval.
      */

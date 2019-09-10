@@ -153,11 +153,14 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
         @Override
         public void pluginPost(
                 final @NotNull DisconnectInboundOutputImpl pluginOutput) {
-            if (pluginOutput.getDisconnectPacket().isModified()) {
+            if (output.isTimedOut()) {
+                log.warn("Async timeout on inbound DISCONNECT interception");
+                final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
+                output.update(unmodifiedDisconnect);
+            } else if (pluginOutput.getDisconnectPacket().isModified()) {
                 input.updateDisconnect(pluginOutput.getDisconnectPacket());
                 output.update(pluginOutput.getDisconnectPacket());
             }
-
             increment();
         }
 

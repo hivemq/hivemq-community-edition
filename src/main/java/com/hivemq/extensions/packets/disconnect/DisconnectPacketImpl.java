@@ -12,8 +12,8 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 public class DisconnectPacketImpl implements DisconnectPacket {
 
     private final @NotNull DisconnectReasonCode reasonCode;
-    private final String serverReference;
-    private final String reasonString;
+    private final @NotNull String serverReference;
+    private final @NotNull String reasonString;
     private final @NotNull UserProperties userProperties;
     private final long sessionExpiryInterval;
 

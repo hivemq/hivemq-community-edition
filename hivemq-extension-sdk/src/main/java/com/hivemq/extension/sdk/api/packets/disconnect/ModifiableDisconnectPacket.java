@@ -12,7 +12,7 @@ public interface ModifiableDisconnectPacket extends DisconnectPacket {
     /**
      * Sets a reasonString for the DISCONNECT packet.
      *
-     * @param reasonString the reason to be set as a string.
+     * @param reasonString the reason to be set as a String.
      */
     void setReasonString(String reasonString);
 

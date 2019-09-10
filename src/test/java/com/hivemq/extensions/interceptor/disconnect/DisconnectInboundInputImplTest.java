@@ -7,6 +7,9 @@ import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
 import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Assert;
@@ -27,6 +30,24 @@ public class DisconnectInboundInputImplTest {
         Assert.assertNotNull(input.getClientInformation());
         Assert.assertNotNull(input.getConnectionInformation());
         Assert.assertNotNull(input.getDisconnectPacket());
+    }
+
+    @Test
+    public void create_DISCONNECT_from_package_test() {
+        //
+        final DisconnectPacketImpl disconnectPacket =
+                new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
+        final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, "reason",
+                Mqtt5UserProperties.of(
+                        new MqttUserProperty("user1", "property1"), new MqttUserProperty("user2", "property2")),
+                "server reference", 360);
+        final DISCONNECT disconnectFrom = DISCONNECT.createDisconnectFrom(disconnectPacket);
+        Assert.assertEquals(disconnect.getUserProperties(), disconnectFrom.getUserProperties());
+        Assert.assertEquals(disconnect.getReasonString(), disconnectFrom.getReasonString());
+        Assert.assertEquals(disconnect.getServerReference(), disconnect.getServerReference());
+        Assert.assertEquals(disconnect.getReasonCode(), disconnect.getReasonCode());
+        Assert.assertEquals(disconnect.getSessionExpiryInterval(), disconnect.getSessionExpiryInterval());
+
     }
 
     @Test(expected = NullPointerException.class)

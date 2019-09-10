@@ -40,6 +40,7 @@ import java.io.File;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
@@ -65,11 +66,12 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     private PluginTaskExecutor executor;
     private EmbeddedChannel channel;
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
+        isTriggered.set(false);
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
@@ -115,6 +117,7 @@ public class DisconnectInboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             disconnect = channel.readInbound();
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(disconnect);
     }
 
@@ -140,6 +143,7 @@ public class DisconnectInboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             disconnect = channel.readInbound();
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(disconnect);
     }
 
@@ -161,6 +165,7 @@ public class DisconnectInboundInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             disconnect = channel.readInbound();
+            Assert.assertTrue(isTriggered.get());
         }
         assertEquals("modified", disconnect.getReasonString());
     }
@@ -195,6 +200,7 @@ public class DisconnectInboundInterceptorHandlerTest {
                 final @NotNull DisconnectInboundInput disconnectInboundInput,
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             System.out.println("Intercepting DISCONNECT at: " + System.currentTimeMillis());
+            isTriggered.set(true);
         }
     }
 
@@ -211,6 +217,7 @@ public class DisconnectInboundInterceptorHandlerTest {
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
+            isTriggered.set(true);
         }
     }
 
@@ -222,6 +229,7 @@ public class DisconnectInboundInterceptorHandlerTest {
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
             packet.setReasonString("modified");
+            isTriggered.set(true);
         }
     }
 

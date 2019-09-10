@@ -22,8 +22,8 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
 
     private long sessionExpiryInterval;
-    private String reasonString;
-    private String serverReference;
+    private @NotNull String reasonString;
+    private @NotNull String serverReference;
     private final @Nullable ModifiableUserPropertiesImpl userProperties;
 
     public ModifiableDisconnectPacketImpl(

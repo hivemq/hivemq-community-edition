@@ -15,8 +15,7 @@ import java.util.function.Supplier;
  * @author Robin Atherton
  */
 public class DisconnectOutboundOutputImpl extends AbstractAsyncOutput<DisconnectOutboundOutput>
-        implements DisconnectOutboundOutput,
-        PluginTaskOutput, Supplier<DisconnectOutboundOutputImpl> {
+        implements DisconnectOutboundOutput, PluginTaskOutput, Supplier<DisconnectOutboundOutputImpl> {
 
     private @NotNull ModifiableDisconnectPacketImpl disconnectPacket;
     private final @NotNull FullConfigurationService configurationService;

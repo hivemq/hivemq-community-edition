@@ -21,7 +21,7 @@ public interface DisconnectOutboundOutput {
     /**
      * Use this object to make changes to the outbound DISCONNECT.
      *
-     * @return A modifiable DISCONNECT packet.
+     * @return a {@link ModifiableDisconnectPacket}
      */
     @NotNull ModifiableDisconnectPacket getDisconnectPacket();
 

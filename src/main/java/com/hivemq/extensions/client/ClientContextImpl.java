@@ -109,7 +109,8 @@ public class ClientContextImpl {
 
     @NotNull
     @Immutable
-    public List<Interceptor> getAllInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
+    public List<Interceptor> getAllInterceptorsForPlugin(
+            @NotNull final IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
                 .collect(Collectors.toUnmodifiableList());

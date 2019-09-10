@@ -20,6 +20,7 @@ import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundInputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundOutputImpl;
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
+import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
@@ -150,9 +151,14 @@ public class DisconnectOutboundInterceptorHandler extends ChannelOutboundHandler
         @Override
         public void pluginPost(
                 final @NotNull DisconnectOutboundOutputImpl pluginOutput) {
-            if (pluginOutput.getDisconnectPacket().isModified()) {
-                input.updateDisconnect(pluginOutput.getDisconnectPacket());
-                output.update(pluginOutput.getDisconnectPacket());
+            if (output.isTimedOut()) {
+                log.warn("Async timeout on inbound DISCONNECT interception");
+                final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
+                output.update(unmodifiedDisconnect);
+            } else if (pluginOutput.getDisconnectPacket().isModified()) {
+                @NotNull final ModifiableDisconnectPacketImpl disconnectPacket = pluginOutput.getDisconnectPacket();
+                input.updateDisconnect(disconnectPacket);
+                output.update(disconnectPacket);
             }
             increment();
         }
