@@ -126,9 +126,9 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingreq);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
 
     }
@@ -153,9 +153,9 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingreq);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
     }
 
@@ -178,9 +178,9 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingreq);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
     }
 
@@ -204,9 +204,9 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingresp);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
     }
 
@@ -230,9 +230,9 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingresp);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
     }
 
@@ -256,15 +256,15 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
+            Assert.assertTrue(isTriggered.get());
         }
         Assert.assertNotNull(pingresp);
-        Assert.assertTrue(isTriggered.get());
         isTriggered.set(false);
     }
 
     private PingRequestInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
+                .addClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -274,7 +274,7 @@ public class PingInterceptorHandlerTest {
                 new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
+                cl.loadClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
 
         final PingRequestInboundInterceptor interceptor =
                 (PingRequestInboundInterceptor) interceptorClass.newInstance();
@@ -285,7 +285,7 @@ public class PingInterceptorHandlerTest {
     private PingResponseOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name)
             throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
+                .addClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -295,7 +295,7 @@ public class PingInterceptorHandlerTest {
                 new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.PingRequestResponseInterceptorHandlerTest$" + name);
+                cl.loadClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
 
         final PingResponseOutboundInterceptor interceptor =
                 (PingResponseOutboundInterceptor) interceptorClass.newInstance();
