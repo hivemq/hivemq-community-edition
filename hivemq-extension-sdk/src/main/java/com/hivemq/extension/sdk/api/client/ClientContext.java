@@ -74,7 +74,7 @@ public interface ClientContext {
      * Adds an {@link PubackInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
      * ignored.
      *
-     * @param pubackInboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @param pubackInboundInterceptor The implementation of an PubackInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
     void addPubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);

@@ -379,14 +379,14 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void pluginPost(@NotNull final PubackOutboundOutputImpl pluginOutput) {
-            if (pluginOutput.getPubackPacket().isModified()) {
-                input.updatePuback(pluginOutput.getPubackPacket());
-                final PUBACK updatedPuback = PUBACK.createPubackFrom(output.getPubackPacket());
-                output.update(updatedPuback);
-            } else if (output.isTimedOut()) {
+            if (output.isTimedOut()) {
                 log.warn("Async timeout on outbound PUBACK interception.");
                 final PUBACK unmodifiedPuback = PUBACK.createPubackFrom(input.getPubackPacket());
                 output.update(unmodifiedPuback);
+            } else if (pluginOutput.getPubackPacket().isModified()) {
+                input.updatePuback(pluginOutput.getPubackPacket());
+                final PUBACK updatedPuback = PUBACK.createPubackFrom(output.getPubackPacket());
+                output.update(updatedPuback);
             }
             increment();
         }
