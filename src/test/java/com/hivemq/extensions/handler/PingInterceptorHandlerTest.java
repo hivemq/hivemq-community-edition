@@ -38,6 +38,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.channels.ClosedChannelException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.mockito.Matchers.any;
@@ -46,10 +47,12 @@ import static org.mockito.Mockito.when;
 /**
  * @author Robin Atherton
  */
-public class PingRequestResponseInterceptorHandlerTest {
+public class PingInterceptorHandlerTest {
 
     private PluginTaskExecutor executor1;
     private EmbeddedChannel channel;
+
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -69,7 +72,7 @@ public class PingRequestResponseInterceptorHandlerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        isTriggered.set(false);
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
@@ -81,8 +84,8 @@ public class PingRequestResponseInterceptorHandlerTest {
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
 
-        final PingRequestResponseInterceptorHandler handler =
-                new PingRequestResponseInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
+        final PingInterceptorHandler handler =
+                new PingInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
         channel.pipeline().addLast(handler);
     }
 
@@ -125,6 +128,8 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingreq = channel.readInbound();
         }
         Assert.assertNotNull(pingreq);
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
 
     }
 
@@ -150,7 +155,8 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingreq = channel.readInbound();
         }
         Assert.assertNotNull(pingreq);
-
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
     }
 
     @Test(timeout = 5000)
@@ -174,7 +180,8 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingreq = channel.readInbound();
         }
         Assert.assertNotNull(pingreq);
-
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
     }
 
     @Test(timeout = 5000)
@@ -199,9 +206,11 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingresp = channel.readOutbound();
         }
         Assert.assertNotNull(pingresp);
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 40000)
     public void test_read_advanced_pingresp() throws Exception {
         final ClientContextImpl clientContext
                 = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
@@ -223,6 +232,8 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingresp = channel.readOutbound();
         }
         Assert.assertNotNull(pingresp);
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
     }
 
     @Test(timeout = 5000)
@@ -247,6 +258,8 @@ public class PingRequestResponseInterceptorHandlerTest {
             pingresp = channel.readOutbound();
         }
         Assert.assertNotNull(pingresp);
+        Assert.assertTrue(isTriggered.get());
+        isTriggered.set(false);
     }
 
     private PingRequestInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
@@ -293,10 +306,11 @@ public class PingRequestResponseInterceptorHandlerTest {
     public static class SimplePingReqTestInterceptor implements PingRequestInboundInterceptor {
 
         @Override
-        public void onPingReq(
+        public void onInboundPingReq(
                 final @NotNull PingRequestInboundInput pingRequestInboundInput,
                 final @NotNull PingRequestInboundOutput pingRequestInboundOutput) {
             System.out.println("Intercepting PINGREQ at " + System.currentTimeMillis());
+            isTriggered.set(true);
         }
 
     }
@@ -304,21 +318,23 @@ public class PingRequestResponseInterceptorHandlerTest {
     public static class SimplePingRespTestInterceptor implements PingResponseOutboundInterceptor {
 
         @Override
-        public void onPingResp(
+        public void onOutboundPingResp(
                 final @NotNull PingResponseOutboundInput pingResponseOutboundInput,
                 final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
             System.out.println("Intercepting PINGRESP at " + System.currentTimeMillis());
+            isTriggered.set(true);
         }
     }
 
     public static class AdvancedPingReqTestInterceptor implements PingRequestInboundInterceptor {
 
         @Override
-        public void onPingReq(
+        public void onInboundPingReq(
                 final @NotNull PingRequestInboundInput pingRequestInboundInput,
                 final @NotNull PingRequestInboundOutput pingRequestInboundOutput) {
             System.out.println(
-                    "Intercepted PINGREQ for client" + pingRequestInboundInput.getClientInformation().getClientId());
+                    "Intercepted PINGREQ for client: " + pingRequestInboundInput.getClientInformation().getClientId());
+            isTriggered.set(true);
 
         }
 
@@ -327,12 +343,12 @@ public class PingRequestResponseInterceptorHandlerTest {
     public static class AdvancedPingRespTestInterceptor implements PingResponseOutboundInterceptor {
 
         @Override
-        public void onPingResp(
+        public void onOutboundPingResp(
                 final @NotNull PingResponseOutboundInput pingResponseOutboundInput,
                 final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
             System.out.println("Intercepted PINGRESP for client: " +
                     pingResponseOutboundInput.getClientInformation().getClientId());
-
+            isTriggered.set(true);
         }
 
     }
@@ -340,7 +356,7 @@ public class PingRequestResponseInterceptorHandlerTest {
     public static class SleepPingReqTestInterceptor implements PingRequestInboundInterceptor {
 
         @Override
-        public void onPingReq(
+        public void onInboundPingReq(
                 final @NotNull PingRequestInboundInput pingRequestInboundInput,
                 final @NotNull PingRequestInboundOutput pingRequestInboundOutput) {
             final Async<PingRequestInboundOutput> async =
@@ -351,6 +367,7 @@ public class PingRequestResponseInterceptorHandlerTest {
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
+            isTriggered.set(true);
 
         }
 
@@ -359,7 +376,7 @@ public class PingRequestResponseInterceptorHandlerTest {
     public static class SleepPingRespTestInterceptor implements PingResponseOutboundInterceptor {
 
         @Override
-        public void onPingResp(
+        public void onOutboundPingResp(
                 final @NotNull PingResponseOutboundInput pingResponseOutboundInput,
                 final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
             final Async<PingResponseOutboundOutput> async =
@@ -370,6 +387,7 @@ public class PingRequestResponseInterceptorHandlerTest {
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
+            isTriggered.set(true);
         }
 
     }

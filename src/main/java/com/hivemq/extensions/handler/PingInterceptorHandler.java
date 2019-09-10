@@ -22,7 +22,6 @@ import com.hivemq.extensions.interceptor.pingresponse.parameter.PingResponseOutb
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.Exceptions;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +35,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @ChannelHandler.Sharable
 @Singleton
-public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler {
+public class PingInterceptorHandler extends ChannelDuplexHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(PingRequestResponseInterceptorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PingInterceptorHandler.class);
 
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
 
-    public PingRequestResponseInterceptorHandler(
+    public PingInterceptorHandler(
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions) {
@@ -63,7 +62,7 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePingResponse(ctx, (PINGRESP) msg, promise)) {
+        if (!handlePingResponse(ctx, promise)) {
             super.write(ctx, msg, promise);
         }
     }
@@ -73,11 +72,11 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
         if (!(msg instanceof PINGREQ)) {
             super.channelRead(ctx, msg);
         } else {
-            readPingReq(ctx, ((PINGREQ) msg));
+            handlePingRequest(ctx, ((PINGREQ) msg));
         }
     }
 
-    private void readPingReq(final @NotNull ChannelHandlerContext ctx, final PINGREQ pingreq) throws Exception {
+    private void handlePingRequest(final @NotNull ChannelHandlerContext ctx, final PINGREQ pingreq) throws Exception {
 
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
@@ -133,7 +132,6 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
 
     private boolean handlePingResponse(
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull PINGRESP pingresp,
             final @NotNull ChannelPromise promise) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
@@ -205,12 +203,12 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
                 final @NotNull PingRequestInboundInputImpl pingRequestInboundInput,
                 final @NotNull PingRequestInboundOutputImpl pingRequestInboundOutput) {
             try {
-                interceptor.onPingReq(pingRequestInboundInput, pingRequestInboundOutput);
+                interceptor.onInboundPingReq(pingRequestInboundInput, pingRequestInboundOutput);
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound ping request interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                Exceptions.rethrowError(e);
+                //TODO
             }
             return pingRequestInboundOutput;
         }
@@ -241,12 +239,12 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
                 final @NotNull PingResponseOutboundInputImpl pingResponseOutboundInput,
                 final @NotNull PingResponseOutboundOutputImpl pingResponseOutboundOutput) {
             try {
-                interceptor.onPingResp(pingResponseOutboundInput, pingResponseOutboundOutput);
+                interceptor.onOutboundPingResp(pingResponseOutboundInput, pingResponseOutboundOutput);
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound ping response interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                Exceptions.rethrowError(e);
+                //TODO
             }
             return pingResponseOutboundOutput;
         }
@@ -279,9 +277,7 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
 
         @Override
         public void pluginPost(final @NotNull PingRequestInboundOutputImpl pluginOutput) {
-            if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
-            }
+            increment();
         }
 
         public void increment() {
@@ -313,9 +309,10 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
 
         @Override
         public void pluginPost(final @NotNull PingResponseOutboundOutputImpl pluginOutput) {
-            if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+            if (pluginOutput.isTimedOut()) {
+                //TODO
             }
+            increment();
         }
 
         public void increment() {
@@ -342,8 +339,8 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
         }
 
         @Override
-        public void onFailure(final Throwable t) {
-            ctx.channel().close();
+        public void onFailure(final @NotNull Throwable t) {
+            log.error(t.getMessage());
         }
     }
 
@@ -362,8 +359,8 @@ public class PingRequestResponseInterceptorHandler extends ChannelDuplexHandler 
         }
 
         @Override
-        public void onFailure(Throwable t) {
-            ctx.channel().close();
+        public void onFailure(final @NotNull Throwable t) {
+            log.error(t.getMessage());
         }
 
     }

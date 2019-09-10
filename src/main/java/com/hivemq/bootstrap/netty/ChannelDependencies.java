@@ -153,7 +153,7 @@ public class ChannelDependencies {
     private final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
 
     @NotNull
-    private final PingRequestResponseInterceptorHandler pingRequestResponseInterceptorHandler;
+    private final PingInterceptorHandler pingInterceptorHandler;
 
     @NotNull
     private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
@@ -198,7 +198,7 @@ public class ChannelDependencies {
             @NotNull final Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
-            @NotNull final PingRequestResponseInterceptorHandler pingRequestResponseInterceptorHandler,
+            @NotNull final PingInterceptorHandler pingInterceptorHandler,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler) {
@@ -236,7 +236,7 @@ public class ChannelDependencies {
         this.incomingPublishHandlerProvider = incomingPublishHandlerProvider;
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
-        this.pingRequestResponseInterceptorHandler = pingRequestResponseInterceptorHandler;
+        this.pingInterceptorHandler = pingInterceptorHandler;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
@@ -418,7 +418,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PingRequestResponseInterceptorHandler getPingRequestResponseInterceptorHandler() {
-        return pingRequestResponseInterceptorHandler;
+    public PingInterceptorHandler getPingInterceptorHandler() {
+        return pingInterceptorHandler;
     }
 }

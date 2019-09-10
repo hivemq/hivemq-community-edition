@@ -94,7 +94,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline()
                 .addLast(
                         PINGREQUEST_PINGRESPONSE_INTERCEPTOR_HANDLER,
-                        channelDependencies.getPingRequestResponseInterceptorHandler());
+                        channelDependencies.getPingInterceptorHandler());
 
         ch.pipeline().addLast(PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPublishOutboundInterceptorHandler());
 
