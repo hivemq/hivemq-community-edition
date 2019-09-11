@@ -114,7 +114,7 @@ public class ChannelHandlerNames {
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
     public static final String CONNECT_INBOUND_INTERCEPTOR_HANDLER = "connect_inbound_interceptor_handler";
     public static final String CONNACK_OUTBOUND_INTERCEPTOR_HANDLER = "connack_outbound_interceptor_handler";
-    public static final String PUBREC_OUTBOUND_INTERCEPTOR_HANDLER = "pubrec_outbound_interceptor_handler";
+    public static final String PUBREC_INTERCEPTOR_HANDLER = "pubrec_outbound_interceptor_handler";
 
     /* *************
      *     Misc    *

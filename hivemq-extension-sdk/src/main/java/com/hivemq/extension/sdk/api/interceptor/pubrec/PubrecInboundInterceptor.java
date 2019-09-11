@@ -25,7 +25,7 @@ import java.time.Duration;
 public interface PubrecInboundInterceptor extends Interceptor {
 
     /**
-     * When a {@link PubrecInboundInterceptor} is set through any extension, this method gets called for every outbound
+     * When a {@link PubrecInboundInterceptor} is set through any extension, this method gets called for every inbound
      * PUBREC packet from any MQTT client.
      *
      * @param pubrecInboundInput  The {@link PubrecInboundInput} parameter.
