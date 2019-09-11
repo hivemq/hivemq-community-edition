@@ -5,7 +5,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
+import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.puback.ModifiablePubackPacketImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * @author Yannick Weber
  */
-public class PubackOutboundOutputImpl extends AbstractAsyncOutput<PubackOutboundOutput>
+public class PubackOutboundOutputImpl extends AbstractSimpleAsyncOutput<PubackOutboundOutput>
         implements PubackOutboundOutput, Supplier<PubackOutboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;

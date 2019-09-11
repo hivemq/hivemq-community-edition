@@ -22,6 +22,7 @@ import java.time.Duration;
  *
  * @author Yannick Weber
  */
+@FunctionalInterface
 public interface PubackOutboundInterceptor extends Interceptor {
     
     /**

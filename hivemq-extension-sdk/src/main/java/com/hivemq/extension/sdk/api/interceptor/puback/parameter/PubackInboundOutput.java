@@ -4,8 +4,7 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
-import com.hivemq.extension.sdk.api.async.AsyncOutput;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
@@ -18,7 +17,7 @@ import java.time.Duration;
  * @author Yannick Weber
  */
 @DoNotImplement
-public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
+public interface PubackInboundOutput extends SimpleAsyncOutput<PubackInboundOutput> {
 
     /**
      * Use this object to make any changes to the PUBACK message.
@@ -27,23 +26,6 @@ public interface PubackInboundOutput extends AsyncOutput<PubackInboundOutput> {
      */
     @Immutable
     @NotNull ModifiablePubackPacket getPubackPacket();
-
-    /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
-     * <p>
-     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBACK sent to the server.
-     * <p>
-     * {@link TimeoutFallback#SUCCESS} will proceed the PUBACK.
-     *
-     * @param timeout  Timeout that HiveMQ waits for the result of the async operation.
-     * @param fallback Fallback behaviour if a timeout occurs.
-     * @throws UnsupportedOperationException If async is called more than once.
-     */
-    @Override
-    @NotNull Async<PubackInboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.

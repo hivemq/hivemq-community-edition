@@ -32,7 +32,7 @@ public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl
         connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
     }
 
-    @com.hivemq.annotations.NotNull
+    @NotNull
     @Override
     public PubackPacket getPubackPacket() {
         return pubackPacket;
