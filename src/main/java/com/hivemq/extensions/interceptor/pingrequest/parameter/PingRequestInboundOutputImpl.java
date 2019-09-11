@@ -3,7 +3,7 @@ package com.hivemq.extensions.interceptor.pingrequest.parameter;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
+import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.mqtt.message.PINGREQ;
 
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 /**
  * @author Robin Atherton
  */
-public class PingRequestInboundOutputImpl extends AbstractAsyncOutput<PingRequestInboundOutput>
+public class PingRequestInboundOutputImpl extends AbstractSimpleAsyncOutput<PingRequestInboundOutput>
         implements PingRequestInboundOutput, PluginTaskOutput, Supplier<PingRequestInboundOutputImpl> {
 
     private final @NotNull PINGREQ pingreq;

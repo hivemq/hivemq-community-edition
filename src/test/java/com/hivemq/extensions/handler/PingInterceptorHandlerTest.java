@@ -2,8 +2,6 @@ package com.hivemq.extensions.handler;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.extension.sdk.api.async.Async;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundOutput;
@@ -37,7 +35,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.net.URL;
 import java.nio.channels.ClosedChannelException;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -160,31 +157,6 @@ public class PingInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_read_sleep_pingreq() throws Exception {
-        final ClientContextImpl clientContext
-                = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-
-        final PingRequestInboundInterceptor interceptor = getIsolatedInboundInterceptor("SleepPingReqTestInterceptor");
-        clientContext.addPingRequestInboundInterceptor(interceptor);
-
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
-
-        channel.writeInbound(new PINGREQ());
-        PINGREQ pingreq = channel.readInbound();
-        while (pingreq == null) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-            pingreq = channel.readInbound();
-            Assert.assertTrue(isTriggered.get());
-        }
-        Assert.assertNotNull(pingreq);
-        isTriggered.set(false);
-    }
-
-    @Test(timeout = 5000)
     public void test_read_simple_pingresp() throws Exception {
         final ClientContextImpl clientContext
                 = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
@@ -236,31 +208,6 @@ public class PingInterceptorHandlerTest {
         isTriggered.set(false);
     }
 
-    @Test(timeout = 5000)
-    public void test_read_sleep_pingresp() throws Exception {
-        final ClientContextImpl clientContext
-                = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-
-        final PingResponseOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("SleepPingRespTestInterceptor");
-        clientContext.addPingResponseOutboundInterceptor(interceptor);
-
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
-
-        channel.writeOutbound(new PINGRESP());
-        PINGRESP pingresp = channel.readOutbound();
-        while (pingresp == null) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-            pingresp = channel.readOutbound();
-            Assert.assertTrue(isTriggered.get());
-        }
-        Assert.assertNotNull(pingresp);
-        isTriggered.set(false);
-    }
 
     private PingRequestInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
@@ -348,45 +295,6 @@ public class PingInterceptorHandlerTest {
                 final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
             System.out.println("Intercepted PINGRESP for client: " +
                     pingResponseOutboundInput.getClientInformation().getClientId());
-            isTriggered.set(true);
-        }
-
-    }
-
-    public static class SleepPingReqTestInterceptor implements PingRequestInboundInterceptor {
-
-        @Override
-        public void onInboundPingReq(
-                final @NotNull PingRequestInboundInput pingRequestInboundInput,
-                final @NotNull PingRequestInboundOutput pingRequestInboundOutput) {
-            final Async<PingRequestInboundOutput> async =
-                    pingRequestInboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
-            try {
-                Thread.sleep(100);
-                async.resume();
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
-            isTriggered.set(true);
-
-        }
-
-    }
-
-    public static class SleepPingRespTestInterceptor implements PingResponseOutboundInterceptor {
-
-        @Override
-        public void onOutboundPingResp(
-                final @NotNull PingResponseOutboundInput pingResponseOutboundInput,
-                final @NotNull PingResponseOutboundOutput pingResponseOutboundOutput) {
-            final Async<PingResponseOutboundOutput> async =
-                    pingResponseOutboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
-            try {
-                Thread.sleep(100);
-                async.resume();
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
             isTriggered.set(true);
         }
 

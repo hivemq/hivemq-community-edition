@@ -1,6 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter;
 
-import com.hivemq.extension.sdk.api.async.AsyncOutput;
+import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 
 /**
@@ -8,5 +8,5 @@ import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboun
  *
  * @author Robin Atherton
  */
-public interface PingResponseOutboundOutput extends AsyncOutput<PingResponseOutboundOutput> {
+public interface PingResponseOutboundOutput extends SimpleAsyncOutput<PingResponseOutboundOutput> {
 }
