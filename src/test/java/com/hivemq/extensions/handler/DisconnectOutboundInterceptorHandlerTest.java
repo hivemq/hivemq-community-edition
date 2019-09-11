@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundInput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundOutput;
@@ -39,7 +38,6 @@ import util.TestConfigurationBootstrap;
 
 import java.io.File;
 import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -179,25 +177,6 @@ public class DisconnectOutboundInterceptorHandlerTest {
         assertEquals("modified", disconnect.getReasonString());
     }
 
-    @Test(timeout = 10_000)
-    public void test_timeout_failed() throws Exception {
-
-        final DisconnectOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("TestTimeoutFailedOutboundInterceptor");
-        final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
-
-        when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
-        channel.writeOutbound(testDisconnect());
-
-        channel.runPendingTasks();
-        channel.runScheduledPendingTasks();
-
-        assertTrue(channel.isActive());
-    }
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
@@ -252,15 +231,6 @@ public class DisconnectOutboundInterceptorHandlerTest {
         }
     }
 
-    public static class TestTimeoutFailedOutboundInterceptor implements DisconnectOutboundInterceptor {
-
-        @Override
-        public void onOutboundDisconnect(
-                final @NotNull DisconnectOutboundInput disconnectOutboundInput,
-                final @NotNull DisconnectOutboundOutput disconnectOutboundOutput) {
-            disconnectOutboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
-        }
-    }
 
     public static class TestExceptionOutboundInterceptor implements DisconnectOutboundInterceptor {
 
