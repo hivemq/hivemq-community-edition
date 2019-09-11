@@ -5,7 +5,6 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.parameter.PubrecInboundInput;
@@ -457,7 +456,7 @@ public class PubrecInterceptorHandlerTest {
         public void onInboundPubrec(
                 @NotNull final PubrecInboundInput pubrecInboundInput,
                 @NotNull final PubrecInboundOutput pubrecInboundOutput) {
-            pubrecInboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
+            pubrecInboundOutput.async(Duration.ofMillis(10));
         }
     }
 
@@ -502,7 +501,7 @@ public class PubrecInterceptorHandlerTest {
         public void onOutboundPubrec(
                 @NotNull final PubrecOutboundInput pubrecOutboundInput,
                 @NotNull final PubrecOutboundOutput pubrecOutboundOutput) {
-            pubrecOutboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
+            pubrecOutboundOutput.async(Duration.ofMillis(10));
         }
     }
 
