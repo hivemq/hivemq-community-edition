@@ -208,7 +208,6 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound ping request interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                //TODO
             }
             return pingRequestInboundOutput;
         }
