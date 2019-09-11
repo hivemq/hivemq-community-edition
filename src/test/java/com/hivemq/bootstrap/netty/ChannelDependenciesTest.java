@@ -261,6 +261,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
         assertNotNull(channelDependencies.getDisconnectInterceptorHandler());
         assertNotNull(channelDependencies.getPubackInterceptorHandler());
-        assertNotNull(channelDependencies.getPubrecOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPubrecInterceptorHandler());
     }
 }

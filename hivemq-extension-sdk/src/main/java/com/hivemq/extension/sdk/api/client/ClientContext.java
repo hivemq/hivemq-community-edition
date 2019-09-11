@@ -84,8 +84,8 @@ public interface ClientContext {
     void addPubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);
 
     /**
-     * Adds an {@link PubrecInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
-     * ignored.
+     * Adds an {@link PubrecInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
      *
      * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
@@ -93,8 +93,8 @@ public interface ClientContext {
     void addPubrecInboundInterceptor(@NotNull PubrecInboundInterceptor pubrecInboundInterceptor);
 
     /**
-     * Adds an {@link PubrecOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
-     * ignored.
+     * Adds an {@link PubrecOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
      *
      * @param pubrecOutboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
@@ -140,8 +140,8 @@ public interface ClientContext {
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
 
     /**
-     * Removes an {@link PubrecOutboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
-     * be removed, has not been added in the first place.
+     * Removes an {@link PubrecOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
      * @param pubrecOutboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
@@ -149,8 +149,8 @@ public interface ClientContext {
     void removePubrecOutboundInterceptor(@NotNull PubrecOutboundInterceptor pubrecOutboundInterceptor);
 
     /**
-     * Removes an {@link PubrecInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
-     * be removed, has not been added in the first place.
+     * Removes an {@link PubrecInboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
      * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.

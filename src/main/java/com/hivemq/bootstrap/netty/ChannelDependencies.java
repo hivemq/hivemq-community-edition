@@ -438,7 +438,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PubrecInterceptorHandler getPubrecOutboundInterceptorHandler() {
+    public PubrecInterceptorHandler getPubrecInterceptorHandler() {
         return pubrecInterceptorHandler;
     }
 }
