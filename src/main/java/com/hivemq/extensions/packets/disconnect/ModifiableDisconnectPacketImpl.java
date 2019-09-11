@@ -65,7 +65,7 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
     @Override
     public boolean isModified() {
-        return modified;
+        return modified || userProperties.isModified();
     }
 
     @Override
