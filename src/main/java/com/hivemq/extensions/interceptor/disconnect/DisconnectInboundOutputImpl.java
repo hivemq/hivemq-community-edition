@@ -4,7 +4,7 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
+import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * @author Robin Atherton
  */
-public class DisconnectInboundOutputImpl extends AbstractAsyncOutput<DisconnectInboundOutput>
+public class DisconnectInboundOutputImpl extends AbstractSimpleAsyncOutput<DisconnectInboundOutput>
         implements DisconnectInboundOutput, PluginTaskOutput, Supplier<DisconnectInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
