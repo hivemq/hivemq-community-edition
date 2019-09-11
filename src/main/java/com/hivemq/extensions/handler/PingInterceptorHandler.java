@@ -244,7 +244,6 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound ping response interception. Extensions are responsible for their own exception handling.",
                         pluginId);
-                //TODO
             }
             return pingResponseOutboundOutput;
         }
@@ -309,9 +308,6 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void pluginPost(final @NotNull PingResponseOutboundOutputImpl pluginOutput) {
-            if (pluginOutput.isTimedOut()) {
-                //TODO
-            }
             increment();
         }
 
@@ -360,7 +356,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void onFailure(final @NotNull Throwable t) {
-            log.error(t.getMessage());
+            log.error("Intercepting a ping response has failed \n" + t.getMessage());
         }
 
     }

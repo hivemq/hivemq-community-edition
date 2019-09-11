@@ -6,7 +6,6 @@ import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.parameter.PingResponseOutboundInput;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
-import com.hivemq.mqtt.message.PINGRESP;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
@@ -19,19 +18,14 @@ public class PingResponseOutboundInputImpl implements Supplier<PingResponseOutbo
 
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
-    private final @NotNull PINGRESP pingresp;
 
     public PingResponseOutboundInputImpl(
             final @NotNull String clientId,
             final @NotNull Channel channel) {
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.pingresp = new PINGRESP();
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 
-    public PINGRESP getPingresp() {
-        return pingresp;
-    }
     @Override
     public PingResponseOutboundInputImpl get() {
         return this;

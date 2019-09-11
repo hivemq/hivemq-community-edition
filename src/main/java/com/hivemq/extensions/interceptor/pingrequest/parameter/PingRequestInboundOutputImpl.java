@@ -5,7 +5,6 @@ import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingReques
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
-import com.hivemq.mqtt.message.PINGREQ;
 
 import java.util.function.Supplier;
 
@@ -15,16 +14,11 @@ import java.util.function.Supplier;
 public class PingRequestInboundOutputImpl extends AbstractSimpleAsyncOutput<PingRequestInboundOutput>
         implements PingRequestInboundOutput, PluginTaskOutput, Supplier<PingRequestInboundOutputImpl> {
 
-    private final @NotNull PINGREQ pingreq;
 
     public PingRequestInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer) {
         super(asyncer);
-        this.pingreq = new PINGREQ();
     }
 
-    public PINGREQ getPingreq() {
-        return pingreq;
-    }
     @Override
     public PingRequestInboundOutputImpl get() {
         return this;

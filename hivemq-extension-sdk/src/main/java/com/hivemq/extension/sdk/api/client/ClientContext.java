@@ -121,7 +121,7 @@ public interface ClientContext {
     void removePingRequestInboundInterceptor(@NotNull PingRequestInboundInterceptor pingRequestInboundInterceptor);
 
     /**
-     * Adds an {@link PingRequestInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor
+     * Adds an {@link PingResponseOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor
      * will be ignored.
      *
      * @param pingResponseOutboundInterceptor The implementation of a PingResponseOutboundInterceptor.
