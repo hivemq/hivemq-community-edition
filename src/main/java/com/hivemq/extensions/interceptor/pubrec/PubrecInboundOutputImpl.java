@@ -4,13 +4,13 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.parameter.PubrecInboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
+import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.pubrec.ModifiablePubrecPacketImpl;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 
 import java.util.function.Supplier;
 
-public class PubrecInboundOutputImpl extends AbstractAsyncOutput<PubrecInboundOutput>
+public class PubrecInboundOutputImpl extends AbstractSimpleAsyncOutput<PubrecInboundOutput>
         implements PubrecInboundOutput, Supplier<PubrecInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
