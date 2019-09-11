@@ -60,7 +60,7 @@ public class RestrictionConfigurator {
     private int validateMaxClientIdLength(final int maxClientIdLength) {
         if (maxClientIdLength < MAX_CLIENT_ID_LENGTH_MINIMUM || maxClientIdLength > MAX_CLIENT_ID_LENGTH_MAXIMUM) {
             log.warn(
-                    "The configured max-clientid-length ({}) must be in the range {} - {}. The default value ({}) is used instead.",
+                    "The configured max-client-id-length ({}) must be in the range {} - {}. The default value ({}) is used instead.",
                     maxClientIdLength,
                     MAX_CLIENT_ID_LENGTH_MINIMUM,
                     MAX_CLIENT_ID_LENGTH_MAXIMUM,
