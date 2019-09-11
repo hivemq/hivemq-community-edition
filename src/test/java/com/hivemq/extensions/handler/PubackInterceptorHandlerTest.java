@@ -5,7 +5,6 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundInput;
@@ -458,7 +457,7 @@ public class PubackInterceptorHandlerTest {
         public void onInboundPuback(
                 @NotNull final PubackInboundInput pubackInboundInput,
                 @NotNull final PubackInboundOutput pubackInboundOutput) {
-            pubackInboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
+            pubackInboundOutput.async(Duration.ofMillis(10));
         }
 
     }
@@ -507,7 +506,7 @@ public class PubackInterceptorHandlerTest {
         public void onOutboundPuback(
                 @NotNull final PubackOutboundInput pubackOutboundInput,
                 @NotNull final PubackOutboundOutput pubackOutboundOutput) {
-            pubackOutboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
+            pubackOutboundOutput.async(Duration.ofMillis(10));
         }
 
     }
