@@ -5,7 +5,6 @@ import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.pubrec.ModifiablePubrecPacket;
 
@@ -26,23 +25,6 @@ public interface PubrecOutboundOutput extends AsyncOutput<PubrecOutboundOutput> 
      */
     @Immutable
     @NotNull ModifiablePubrecPacket getPubrecPacket();
-
-    /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled either as failed or
-     * successful, depending on the specified fallback.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
-     * <p>
-     * {@link TimeoutFallback#FAILURE} results in an unmodified PUBREC sent to the client.
-     * <p>
-     * {@link TimeoutFallback#SUCCESS} will proceed the PUBREC.
-     *
-     * @param timeout  Timeout that HiveMQ waits for the result of the async operation.
-     * @param fallback Fallback behaviour if a timeout occurs.
-     * @throws UnsupportedOperationException If async is called more than once.
-     */
-    @Override
-    @NotNull Async<PubrecOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. This
