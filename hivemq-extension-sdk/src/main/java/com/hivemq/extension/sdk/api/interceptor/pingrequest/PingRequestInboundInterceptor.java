@@ -15,6 +15,7 @@ import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingReques
  *
  * @author Robin Atherton
  */
+@FunctionalInterface
 public interface PingRequestInboundInterceptor extends Interceptor {
 
     /**

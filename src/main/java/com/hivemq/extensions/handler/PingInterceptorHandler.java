@@ -26,6 +26,7 @@ import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +44,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
 
+    @Inject
     public PingInterceptorHandler(
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull PluginOutPutAsyncer asyncer,
@@ -62,7 +64,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePingResponse(ctx, promise)) {
+        if (!handlePingResponse(ctx)) {
             super.write(ctx, msg, promise);
         }
     }
@@ -131,8 +133,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
     }
 
     private boolean handlePingResponse(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull ChannelPromise promise) {
+            final @NotNull ChannelHandlerContext ctx) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return false;
