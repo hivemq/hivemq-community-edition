@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.async.Async;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
@@ -38,7 +36,6 @@ import util.TestConfigurationBootstrap;
 
 import java.io.File;
 import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -121,32 +118,6 @@ public class DisconnectInboundInterceptorHandlerTest {
         Assert.assertNotNull(disconnect);
     }
 
-    @Test
-    public void test_read_async_disconnect() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-
-        final DisconnectInboundInterceptor interceptor =
-                getIsolatedInboundInterceptor("AsyncDisconnectTestInterceptor");
-        clientContext.addDisconnectInboundInterceptor(interceptor);
-
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
-
-        channel.writeInbound(testDisconnect());
-        channel.runPendingTasks();
-        DISCONNECT disconnect = channel.readInbound();
-        while (disconnect == null) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-            disconnect = channel.readInbound();
-        }
-        Assert.assertTrue(isTriggered.get());
-        Assert.assertNotNull(disconnect);
-    }
-
     @Test(timeout = 20000)
     public void test_modified() throws Exception {
         final DisconnectInboundInterceptor interceptor =
@@ -165,8 +136,8 @@ public class DisconnectInboundInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             disconnect = channel.readInbound();
-            Assert.assertTrue(isTriggered.get());
         }
+        Assert.assertTrue(isTriggered.get());
         assertEquals("modified", disconnect.getReasonString());
     }
 
@@ -204,22 +175,6 @@ public class DisconnectInboundInterceptorHandlerTest {
         }
     }
 
-    public static class AsyncDisconnectTestInterceptor implements DisconnectInboundInterceptor {
-
-        @Override
-        public void onInboundDisconnect(
-                @NotNull final DisconnectInboundInput disconnectInboundInput,
-                @NotNull final DisconnectInboundOutput disconnectInboundOutput) {
-            final Async<DisconnectInboundOutput> async =
-                    disconnectInboundOutput.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
-            isTriggered.set(true);
-        }
-    }
 
     public static class TestModifyInboundInterceptor implements DisconnectInboundInterceptor {
 
@@ -228,6 +183,7 @@ public class DisconnectInboundInterceptorHandlerTest {
                 final @NotNull DisconnectInboundInput disconnectInboundInput,
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
             final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
+            System.out.println("Modifed disconnect packet");
             packet.setReasonString("modified");
             isTriggered.set(true);
         }

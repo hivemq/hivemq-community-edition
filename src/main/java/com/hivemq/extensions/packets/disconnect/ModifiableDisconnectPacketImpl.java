@@ -18,7 +18,7 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-    private final @NotNull DisconnectReasonCode reasonCode;
+    private @NotNull DisconnectReasonCode reasonCode;
 
 
     private long sessionExpiryInterval;
@@ -43,6 +43,12 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
     @Override
     public synchronized void setReasonString(final @NotNull String reasonString) {
         this.reasonString = reasonString;
+        modified = true;
+    }
+
+    @Override
+    public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+        this.reasonCode = reasonCode;
         modified = true;
     }
 

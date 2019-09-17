@@ -159,7 +159,8 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
                 output.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {
                 input.updateDisconnect(pluginOutput.getDisconnectPacket());
-                output.update(pluginOutput.getDisconnectPacket());
+                final DISCONNECT updatedDisconnect = DISCONNECT.createDisconnectFrom(output.getDisconnectPacket());
+                output.update(updatedDisconnect);
             }
             increment();
         }
@@ -201,6 +202,7 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound disconnect request interception." +
                                 "Extensions are responsible for their own exception handling.",
                         pluginId);
+                log.debug("Original exception:", e);
                 final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 output.update(disconnect);
             }
@@ -215,8 +217,8 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
 
     private static class DisconnectInterceptorFutureCallback implements FutureCallback<Void> {
 
-        private final DisconnectInboundOutputImpl output;
-        private final DISCONNECT disconnect;
+        private final @NotNull DisconnectInboundOutputImpl output;
+        private final @NotNull DISCONNECT disconnect;
         private final @NotNull ChannelHandlerContext ctx;
 
         DisconnectInterceptorFutureCallback(
@@ -240,7 +242,7 @@ public class DisconnectInboundInterceptorHandler extends ChannelInboundHandlerAd
         }
 
         @Override
-        public void onFailure(final Throwable t) {
+        public void onFailure(final @NotNull Throwable t) {
             ctx.channel().close();
         }
     }

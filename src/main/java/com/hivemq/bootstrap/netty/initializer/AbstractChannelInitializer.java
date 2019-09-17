@@ -116,6 +116,9 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 
         ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
+
+        ch.pipeline().addLast(DISCONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInboundInterceptorHandler());
+        ch.pipeline().addLast(DISCONNECT_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectOutboundInterceptorHandler());
         ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
 
         ch.pipeline().addLast(MQTT_QOS_RECEIVER_HANDLER, channelDependencies.getQoSReceiverHandler());
@@ -126,8 +129,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(INCOMING_PUBLISH_HANDLER, channelDependencies.getIncomingPublishHandler());
         ch.pipeline().addLast(INCOMING_SUBSCRIBE_HANDLER, channelDependencies.getIncomingSubscribeHandler());
 
-        ch.pipeline().addLast(DISCONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInboundInterceptorHandler());
-        ch.pipeline().addLast(DISCONNECT_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectOutboundInterceptorHandler());
+
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
         ch.pipeline().addLast(MQTT_PUBLISH_USER_EVENT_HANDLER, channelDependencies.getPublishUserEventReceivedHandler());

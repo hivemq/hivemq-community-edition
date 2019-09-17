@@ -17,6 +17,13 @@ public interface ModifiableDisconnectPacket extends DisconnectPacket {
     void setReasonString(String reasonString);
 
     /**
+     * Sets a reasonCode for the DISCONNECT packet.
+     *
+     * @param reasonCode the reason to be set as a enum.
+     */
+    void setReasonCode(DisconnectReasonCode reasonCode);
+
+    /**
      * Sets the session expiry interval of the DISCONNECT packet.
      *
      * @param expiryInterval a settable value indicating the interval after which the session will expire.
