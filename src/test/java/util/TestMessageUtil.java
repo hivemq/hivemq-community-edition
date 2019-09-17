@@ -33,6 +33,7 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
+import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.*;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -387,5 +388,9 @@ public class TestMessageUtil {
 
     public static PUBREC createSuccessPubrec() {
         return new PUBREC(1);
+    }
+
+    public static PUBREL createFullMqtt5Pubrel() {
+        return new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 }
