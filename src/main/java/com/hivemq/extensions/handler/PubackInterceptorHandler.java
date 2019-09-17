@@ -23,10 +23,7 @@ import com.hivemq.extensions.interceptor.puback.PubackOutboundOutputImpl;
 import com.hivemq.extensions.packets.puback.PubackPacketImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +31,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@ChannelHandler.Sharable
 public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubackInterceptorHandler.class);
