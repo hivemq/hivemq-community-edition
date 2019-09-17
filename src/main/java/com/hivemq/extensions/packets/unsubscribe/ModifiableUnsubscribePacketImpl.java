@@ -48,20 +48,23 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
 
     @Override
     public void addTopics(final String... topics) {
-        if (topics.length == 1) {
+        if (topics.length >= 1) {
             this.topics.add(Arrays.toString(topics));
         } else {
             this.topics.addAll(Arrays.asList(topics));
         }
+        this.modified = true;
+
     }
 
     @Override
     public void removeTopics(final String... topics) {
-        if (topics.length == 1) {
+        if (topics.length >= 1) {
             this.topics.remove(Arrays.toString(topics));
         } else {
             this.topics.removeAll(Arrays.asList(topics));
         }
+        this.modified = true;
     }
 
     @Override
