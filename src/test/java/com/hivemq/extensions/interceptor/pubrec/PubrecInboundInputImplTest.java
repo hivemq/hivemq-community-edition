@@ -18,7 +18,7 @@ public class PubrecInboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createFullMqtt5Pubrec());
+        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
 
         final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, "client", embeddedChannel);
         assertNotNull(input.getClientInformation());
@@ -28,13 +28,13 @@ public class PubrecInboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_client_id_null() {
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createFullMqtt5Pubrec());
+        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
         final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, null, new EmbeddedChannel());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createFullMqtt5Pubrec());
+        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
         final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, "client", null);
     }
 
@@ -49,8 +49,8 @@ public class PubrecInboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubrecPacketImpl pubrecPacket1 = new PubrecPacketImpl(TestMessageUtil.createFullMqtt5Pubrec());
-        final PubrecPacketImpl pubrecPacket2 = new PubrecPacketImpl(TestMessageUtil.createFullMqtt5Pubrec());
+        final PubrecPacketImpl pubrecPacket1 = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
+        final PubrecPacketImpl pubrecPacket2 = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
 
         final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket1, "client", embeddedChannel);
         input.updatePubrec(pubrecPacket2);

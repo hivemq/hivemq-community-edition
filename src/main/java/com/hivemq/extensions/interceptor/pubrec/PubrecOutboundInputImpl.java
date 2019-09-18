@@ -17,21 +17,21 @@ public class PubrecOutboundInputImpl implements Supplier<PubrecOutboundInputImpl
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    private @NotNull PubrecPacket pubackPacket;
+    private @NotNull PubrecPacket pubrecPacket;
 
     public PubrecOutboundInputImpl(
-            final @NotNull PubrecPacket pubackPacket,
+            final @NotNull PubrecPacket pubrecPacket,
             final @NotNull String clientId,
             final @NotNull Channel channel) {
 
-        this.pubackPacket = pubackPacket;
+        this.pubrecPacket = pubrecPacket;
         clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
         connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     @Override
     public @NotNull PubrecPacket getPubrecPacket() {
-        return pubackPacket;
+        return pubrecPacket;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class PubrecOutboundInputImpl implements Supplier<PubrecOutboundInputImpl
         return this;
     }
 
-    public void updatePubrec(final @NotNull PubrecPacket pubackPacket) {
-        this.pubackPacket = new PubrecPacketImpl(pubackPacket);
+    public void updatePubrec(final @NotNull PubrecPacket pubrecPacket) {
+        this.pubrecPacket = new PubrecPacketImpl(pubrecPacket);
     }
 }
