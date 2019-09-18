@@ -13,6 +13,9 @@ import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubcompInboundInputImpl
         implements PubcompInboundInput, Supplier<PubcompInboundInputImpl>, PluginTaskInput {
 

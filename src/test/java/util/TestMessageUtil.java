@@ -380,7 +380,7 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBCOMP createFullMqtt5Pubcomp() {
-        return new PUBCOMP(1, Mqtt5PubCompReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    public static PUBCOMP createSuccessPupcomp() {
+        return new PUBCOMP(1);
     }
 }
