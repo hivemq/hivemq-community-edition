@@ -30,6 +30,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.puback.PUBACK;
+import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
@@ -392,5 +393,9 @@ public class TestMessageUtil {
 
     public static PUBREL createSuccessPubrel() {
         return new PUBREL(1);
+    }
+
+    public static PUBCOMP createFullMqtt5Pubcomp() {
+        return new PUBCOMP(1, Mqtt5PubCompReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 }

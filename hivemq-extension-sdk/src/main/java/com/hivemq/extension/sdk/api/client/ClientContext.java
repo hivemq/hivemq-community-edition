@@ -24,6 +24,8 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInte
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
@@ -122,6 +124,24 @@ public interface ClientContext {
     void addPubrelInboundInterceptor(@NotNull PubrelInboundInterceptor pubrelInboundInterceptor);
 
     /**
+     * Adds an {@link PubcompOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will
+     * be ignored.
+     *
+     * @param pubcompOutboundInterceptor The implementation of an PubcompOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubcompOutboundInterceptor(@NotNull PubcompOutboundInterceptor pubcompOutboundInterceptor);
+
+    /**
+     * Adds an {@link PubcompInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
+     * ignored.
+     *
+     * @param pubcompInboundInterceptor The implementation of an PubcompInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubcompInboundInterceptor(@NotNull PubcompInboundInterceptor pubcompInboundInterceptor);
+
+    /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
@@ -206,6 +226,24 @@ public interface ClientContext {
     void removePubrelInboundInterceptor(@NotNull PubrelInboundInterceptor pubrelInboundInterceptor);
 
     /**
+     * Removes an {@link PubcompOutboundInterceptor} for this client. <br> Nothing happens if the interceptor that
+     * should be removed, has not been added in the first place.
+     *
+     * @param pubcompOutboundInterceptor The implementation of an PubcompOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubcompOutboundInterceptor(@NotNull PubcompOutboundInterceptor pubcompOutboundInterceptor);
+
+    /**
+     * Removes an {@link PubcompInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
+     * be removed, has not been added in the first place.
+     *
+     * @param pubcompInboundInterceptor The implementation of an PubcompOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubcompInboundInterceptor(@NotNull PubcompInboundInterceptor pubcompInboundInterceptor);
+
+    /**
      * Removes an {@link SubscribeInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
@@ -284,6 +322,22 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link PubcompOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubcompOutboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubcompOutboundInterceptor> getPubcompOutboundInterceptors();
+
+    /**
+     * Returns all {@link PubcompInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubcompInboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubcompInboundInterceptor> getPubcompInboundInterceptors();
 
     /**
      * Returns all {@link PubrelOutboundInterceptor} which are registered for this client by this extension.

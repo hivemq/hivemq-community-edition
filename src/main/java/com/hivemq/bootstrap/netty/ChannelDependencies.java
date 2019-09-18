@@ -173,6 +173,9 @@ public class ChannelDependencies {
     @NotNull
     private final PubrelInterceptorHandler pubrelInterceptorHandler;
 
+    @NotNull
+    private final PubcompInterceptorHandler pubcompInterceptorhandler;
+
     @Inject
     public ChannelDependencies(
             @NotNull final Provider<MetricsInitializer> statisticsInitializer,
@@ -213,7 +216,8 @@ public class ChannelDependencies {
             @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler,
             @NotNull final PubackInterceptorHandler pubackInterceptorHandler,
             @NotNull final PubrecInterceptorHandler pubrecInterceptorHandler,
-            @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler) {
+            @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler,
+            @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -255,6 +259,7 @@ public class ChannelDependencies {
         this.disconnectInterceptorHandler = disconnectInterceptorHandler;
         this.pubrecInterceptorHandler = pubrecInterceptorHandler;
         this.pubrelInterceptorHandler = pubrelInterceptorHandler;
+        this.pubcompInterceptorhandler = pubcompInterceptorHandler;
     }
 
     @NotNull
@@ -450,5 +455,10 @@ public class ChannelDependencies {
     @NotNull
     public PubrelInterceptorHandler getPubrelInterceptorHandler() {
         return pubrelInterceptorHandler;
+    }
+
+    @NotNull
+    public PubcompInterceptorHandler getPubcompInterceptorHandler() {
+        return pubcompInterceptorhandler;
     }
 }
