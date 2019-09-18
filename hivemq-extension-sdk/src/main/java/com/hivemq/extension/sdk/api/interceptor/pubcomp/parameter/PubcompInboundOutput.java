@@ -29,7 +29,7 @@ public interface PubcompInboundOutput extends SimpleAsyncOutput<PubcompInboundOu
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. This
-     * means that the outcome results an unmodified PUBCOMP is sent to the server.
+     * means that the outcome results an unmodified PUBCOMP sent to the server.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

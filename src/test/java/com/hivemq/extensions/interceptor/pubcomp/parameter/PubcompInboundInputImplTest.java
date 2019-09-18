@@ -21,7 +21,7 @@ public class PubcompInboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createFullMqtt5Pubcomp());
+        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createSuccessPupcomp());
 
         final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(pubcomPacket, "client", embeddedChannel);
         assertNotNull(input.getClientInformation());
@@ -31,13 +31,13 @@ public class PubcompInboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_client_id_null() {
-        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createFullMqtt5Pubcomp());
+        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createSuccessPupcomp());
         final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(pubcomPacket, null, new EmbeddedChannel());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createFullMqtt5Pubcomp());
+        final PubcompPacketImpl pubcomPacket = new PubcompPacketImpl(TestMessageUtil.createSuccessPupcomp());
         final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(pubcomPacket, "client", null);
     }
 
@@ -52,8 +52,8 @@ public class PubcompInboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubcompPacketImpl pubcomPacket1 = new PubcompPacketImpl(TestMessageUtil.createFullMqtt5Pubcomp());
-        final PubcompPacketImpl pubcomPacket2 = new PubcompPacketImpl(TestMessageUtil.createFullMqtt5Pubcomp());
+        final PubcompPacketImpl pubcomPacket1 = new PubcompPacketImpl(TestMessageUtil.createSuccessPupcomp());
+        final PubcompPacketImpl pubcomPacket2 = new PubcompPacketImpl(TestMessageUtil.createSuccessPupcomp());
 
         final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(pubcomPacket1, "client", embeddedChannel);
         input.updatePubcomp(pubcomPacket2);

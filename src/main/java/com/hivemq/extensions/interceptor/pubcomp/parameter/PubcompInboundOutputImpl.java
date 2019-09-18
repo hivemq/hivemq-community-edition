@@ -11,6 +11,9 @@ import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubcompInboundOutputImpl extends AbstractSimpleAsyncOutput<PubcompInboundOutput>
         implements PubcompInboundOutput, Supplier<PubcompInboundOutputImpl> {
 

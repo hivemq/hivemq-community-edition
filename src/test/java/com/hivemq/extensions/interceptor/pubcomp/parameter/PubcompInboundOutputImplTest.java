@@ -31,7 +31,7 @@ public class PubcompInboundOutputImplTest {
         MockitoAnnotations.initMocks(this);
         final FullConfigurationService fullConfigurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
-        pubcomp = TestMessageUtil.createFullMqtt5Pubcomp();
+        pubcomp = TestMessageUtil.createSuccessPupcomp();
         output = new PubcompOutboundOutputImpl(fullConfigurationService, asyncer, pubcomp);
     }
 
