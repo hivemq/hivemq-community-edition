@@ -28,7 +28,7 @@ public class PubrecInboundOutputImplTest {
         MockitoAnnotations.initMocks(this);
         final FullConfigurationService fullConfigurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
-        pubrec = TestMessageUtil.createFullMqtt5Pubrec();
+        pubrec = TestMessageUtil.createSuccessPubrec();
         output = new PubrecInboundOutputImpl(fullConfigurationService, asyncer, pubrec);
     }
 
