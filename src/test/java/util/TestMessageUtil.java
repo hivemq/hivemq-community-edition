@@ -390,7 +390,7 @@ public class TestMessageUtil {
         return new PUBREC(1);
     }
 
-    public static PUBREL createFullMqtt5Pubrel() {
-        return new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    public static PUBREL createSuccessPubrel() {
+        return new PUBREL(1);
     }
 }

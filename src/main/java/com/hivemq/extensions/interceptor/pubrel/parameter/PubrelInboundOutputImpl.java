@@ -11,6 +11,9 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubrelInboundOutputImpl extends AbstractSimpleAsyncOutput<PubrelInboundOutput>
         implements PubrelInboundOutput, Supplier<PubrelInboundOutputImpl> {
 

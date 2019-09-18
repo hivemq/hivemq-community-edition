@@ -5,8 +5,7 @@ package com.hivemq.extension.sdk.api.packets.publish;
  * <p>
  * MQTT 3 does not support reason codes for the above mentioned MQTT packet.
  *
- * @author Christoph Schäbel
- * @since 4.0.0
+ * @author Yannick Weber
  */
 public enum PubrelReasonCode {
 

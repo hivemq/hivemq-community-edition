@@ -31,7 +31,7 @@ public class PubrelOutboundOutputImplTest {
         MockitoAnnotations.initMocks(this);
         final FullConfigurationService fullConfigurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
-        pubrel = TestMessageUtil.createFullMqtt5Pubrel();
+        pubrel = TestMessageUtil.createSuccessPubrel();
         output = new PubrelOutboundOutputImpl(fullConfigurationService, asyncer, pubrel);
     }
 

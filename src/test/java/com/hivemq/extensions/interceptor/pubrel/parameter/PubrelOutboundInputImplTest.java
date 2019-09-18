@@ -21,7 +21,7 @@ public class PubrelOutboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createFullMqtt5Pubrel());
+        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createSuccessPubrel());
 
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(pubrelPacket, "client", embeddedChannel);
         assertNotNull(input.getClientInformation());
@@ -31,13 +31,13 @@ public class PubrelOutboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_client_id_null() {
-        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createFullMqtt5Pubrel());
+        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createSuccessPubrel());
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(pubrelPacket, null, new EmbeddedChannel());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createFullMqtt5Pubrel());
+        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(TestMessageUtil.createSuccessPubrel());
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(pubrelPacket, "client", null);
     }
 
@@ -52,8 +52,8 @@ public class PubrelOutboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubrelPacketImpl pubrelPacket1 = new PubrelPacketImpl(TestMessageUtil.createFullMqtt5Pubrel());
-        final PubrelPacketImpl pubrelPacket2 = new PubrelPacketImpl(TestMessageUtil.createFullMqtt5Pubrel());
+        final PubrelPacketImpl pubrelPacket1 = new PubrelPacketImpl(TestMessageUtil.createSuccessPubrel());
+        final PubrelPacketImpl pubrelPacket2 = new PubrelPacketImpl(TestMessageUtil.createSuccessPubrel());
 
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(pubrelPacket1, "client", embeddedChannel);
         input.updatePubrel(pubrelPacket2);
