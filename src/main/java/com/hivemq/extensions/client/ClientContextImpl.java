@@ -125,9 +125,9 @@ public class ClientContextImpl {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public @NotNull
+    @NotNull
     @Immutable
-    List<PubrelOutboundInterceptor> getPubrelOutboundInterceptorsForPlugin(
+    public List<PubrelOutboundInterceptor> getPubrelOutboundInterceptorsForPlugin(
             final @NotNull IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
@@ -136,9 +136,9 @@ public class ClientContextImpl {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public @NotNull
+    @NotNull
     @Immutable
-    List<PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
+    public List<PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof PubrelOutboundInterceptor)
                 .filter(this::hasPluginForClassloader)
@@ -147,9 +147,9 @@ public class ClientContextImpl {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public @NotNull
+    @NotNull
     @Immutable
-    List<PubrelInboundInterceptor> getPubrelInboundInterceptorsForPlugin(
+    public List<PubrelInboundInterceptor> getPubrelInboundInterceptorsForPlugin(
             final @NotNull IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
@@ -158,9 +158,9 @@ public class ClientContextImpl {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public @NotNull
+    @NotNull
     @Immutable
-    List<PubrelInboundInterceptor> getPubrelInboundInterceptors() {
+    public List<PubrelInboundInterceptor> getPubrelInboundInterceptors() {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor instanceof PubrelInboundInterceptor)
                 .filter(this::hasPluginForClassloader)
