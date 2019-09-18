@@ -122,15 +122,17 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
         return clientContext.getPublishOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
+    @NotNull
     @Override
-    public @Immutable
-    @NotNull List<@NotNull PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
+    @Immutable
+    public List<@NotNull PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
         return clientContext.getPubrelOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
+    @NotNull
     @Override
-    public @Immutable
-    @NotNull List<@NotNull PubrelInboundInterceptor> getPubrelInboundInterceptors() {
+    @Immutable
+    public List<@NotNull PubrelInboundInterceptor> getPubrelInboundInterceptors() {
         return clientContext.getPubrelInboundInterceptorsForPlugin(pluginClassloader);
     }
 
