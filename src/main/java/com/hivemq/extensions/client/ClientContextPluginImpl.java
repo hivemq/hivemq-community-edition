@@ -92,8 +92,8 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void removePubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor pubackInboundInterceptor) {
-        clientContext.removeInterceptor(checkNotNull(pubackInboundInterceptor, "The interceptor must never be null"));
+    public void removePubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor pubrelInboundInterceptor) {
+        clientContext.removeInterceptor(checkNotNull(pubrelInboundInterceptor, "The interceptor must never be null"));
     }
 
     @Override
