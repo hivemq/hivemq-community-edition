@@ -13,6 +13,9 @@ import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.*;
 
+/**
+ * @author Yannick Weber
+ */
 public class PUBRELTest {
 
     private FullConfigurationService configurationService;
