@@ -29,7 +29,7 @@ public interface PubackInboundOutput extends SimpleAsyncOutput<PubackInboundOutp
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results an unmodified PUBACK is sent to the server.
+     * This means that the outcome results an unmodified PUBACK sent to the server.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

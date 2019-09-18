@@ -21,7 +21,7 @@ public class PubackOutboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createFullMqtt5Puback());
+        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createSuccessMqtt5Puback());
 
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(pubackPacket, "client", embeddedChannel);
         assertNotNull(input.getClientInformation());
@@ -31,13 +31,13 @@ public class PubackOutboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_client_id_null() {
-        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createFullMqtt5Puback());
+        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createSuccessMqtt5Puback());
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(pubackPacket, null, new EmbeddedChannel());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createFullMqtt5Puback());
+        final PubackPacketImpl pubackPacket = new PubackPacketImpl(TestMessageUtil.createSuccessMqtt5Puback());
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(pubackPacket, "client", null);
     }
 
@@ -52,8 +52,8 @@ public class PubackOutboundInputImplTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
 
-        final PubackPacketImpl pubackPacket1 = new PubackPacketImpl(TestMessageUtil.createFullMqtt5Puback());
-        final PubackPacketImpl pubackPacket2 = new PubackPacketImpl(TestMessageUtil.createFullMqtt5Puback());
+        final PubackPacketImpl pubackPacket1 = new PubackPacketImpl(TestMessageUtil.createSuccessMqtt5Puback());
+        final PubackPacketImpl pubackPacket2 = new PubackPacketImpl(TestMessageUtil.createSuccessMqtt5Puback());
 
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(pubackPacket1, "client", embeddedChannel);
         input.updatePuback(pubackPacket2);

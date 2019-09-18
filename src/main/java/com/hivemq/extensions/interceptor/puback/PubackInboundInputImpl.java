@@ -13,6 +13,9 @@ import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubackInboundInputImpl implements PubackInboundInput, Supplier<PubackInboundInputImpl>, PluginTaskInput {
 
     private @NotNull PubackPacket pubackPacket;

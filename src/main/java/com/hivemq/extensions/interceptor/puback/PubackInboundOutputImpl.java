@@ -11,6 +11,9 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubackInboundOutputImpl extends AbstractSimpleAsyncOutput<PubackInboundOutput>
         implements PubackInboundOutput, Supplier<PubackInboundOutputImpl> {
 

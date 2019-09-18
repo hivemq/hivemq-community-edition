@@ -30,7 +30,7 @@ public class PubackOutboundOutputImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        puback = TestMessageUtil.createFullMqtt5Puback();
+        puback = TestMessageUtil.createSuccessMqtt5Puback();
         output = new PubackOutboundOutputImpl(fullConfigurationService, asyncer, puback);
     }
 

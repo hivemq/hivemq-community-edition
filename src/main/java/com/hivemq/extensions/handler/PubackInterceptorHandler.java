@@ -31,6 +31,9 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @author Yannick Weber
+ */
 @ChannelHandler.Sharable
 public class PubackInterceptorHandler extends ChannelDuplexHandler {
 

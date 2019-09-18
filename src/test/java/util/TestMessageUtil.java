@@ -380,7 +380,7 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBACK createFullMqtt5Puback() {
+    public static PUBACK createSuccessMqtt5Puback() {
         return new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 }
