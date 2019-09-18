@@ -10,6 +10,9 @@ import util.TestMessageUtil;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubrecInboundInputImplTest {
 
     @Test

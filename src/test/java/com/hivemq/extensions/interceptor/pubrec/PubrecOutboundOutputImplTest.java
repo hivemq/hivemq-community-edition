@@ -15,6 +15,9 @@ import util.TestMessageUtil;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubrecOutboundOutputImplTest {
 
     private PUBREC pubrec;

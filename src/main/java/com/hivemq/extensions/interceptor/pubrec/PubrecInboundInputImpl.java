@@ -12,6 +12,9 @@ import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubrecInboundInputImpl implements Supplier<PubrecInboundInputImpl>, PubrecInboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;

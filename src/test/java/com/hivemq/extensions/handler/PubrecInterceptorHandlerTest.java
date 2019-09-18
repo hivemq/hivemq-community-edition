@@ -51,6 +51,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author Yannick Weber
+ */
 public class PubrecInterceptorHandlerTest {
 
     @Rule
