@@ -32,6 +32,7 @@ import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -153,6 +154,15 @@ public interface ClientContext {
     void addSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Adds a {@link SubackOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param subAckOutboundInterceptor The implementation of a SubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addSubackOutboundInterceptor(@NotNull SubackOutboundInterceptor subAckOutboundInterceptor);
+
+    /**
      * Adds an {@link UnsubackOutboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
@@ -193,7 +203,7 @@ public interface ClientContext {
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param publishOutboundInterceptor The implementation of a PublishOutboundInterceptor.
+     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
@@ -280,6 +290,15 @@ public interface ClientContext {
      * @since 4.2.0
      */
     void removeSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
+
+    /**
+     * Removes a {@link SubackOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param subackOutboundInterceptor The implementation of a SubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removeSubackOutboundInterceptor(@NotNull SubackOutboundInterceptor subackOutboundInterceptor);
 
     /**
      * Removes an {@link UnsubackOutboundInterceptor} for this client <br>
@@ -403,9 +422,18 @@ public interface ClientContext {
      * Returns all {@link SubscribeInboundInterceptor} which are registered for this client by this extension.
      *
      * @return List of SubscribeInboundInterceptors for this client.
+     * @since 4.2.0
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link SubackOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of SubackOutboundInterceptor for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptors();
 
     /**
      * Returns all {@link UnsubackOutboundInterceptor} which are registered for this client by this extension.
