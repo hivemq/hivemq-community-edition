@@ -16,19 +16,20 @@
 
 package com.hivemq.extensions.client;
 
-import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Florian Limpöck
@@ -105,5 +106,28 @@ public class ClientContextImplTest {
         assertEquals(0, clientContext.getSubscribeInboundInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
 
+    }
+
+    @Test
+    public void test_add_remove_pubcomp_interceptors() {
+        final PubcompOutboundInterceptor pubcompOutboundInterceptor =
+                (pubcompOutboundInput, pubcompOutboundOutput) -> { };
+
+        final PubcompInboundInterceptor pubcompInboundInterceptor = (pubcompInboundInput, pubcompInboundOutput) -> { };
+
+        clientContext.addPubcompInboundInterceptor(pubcompInboundInterceptor);
+        assertEquals(1, clientContext.getPubcompInboundInterceptors().size());
+        assertSame(pubcompInboundInterceptor, clientContext.getPubcompInboundInterceptors().get(0));
+
+        clientContext.addPubcompOutboundInterceptor(pubcompOutboundInterceptor);
+        assertEquals(1, clientContext.getPubcompOutboundInterceptors().size());
+        assertSame(pubcompOutboundInterceptor, clientContext.getPubcompOutboundInterceptors().get(0));
+
+        assertEquals(2, clientContext.getAllInterceptors().size());
+
+        clientContext.removeInterceptor(pubcompInboundInterceptor);
+        clientContext.removeInterceptor(pubcompOutboundInterceptor);
+
+        assertEquals(0, clientContext.getAllInterceptors().size());
     }
 }
