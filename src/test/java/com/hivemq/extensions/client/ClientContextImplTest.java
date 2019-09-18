@@ -136,20 +136,20 @@ public class ClientContextImplTest {
     public void test_add_remove_pubrec_interceptors() {
         final PubrecOutboundInterceptor pubackOutboundInterceptor = (pubackOutboundInput, pubackOutboundOutput) -> { };
 
-        final PubrecInboundInterceptor pubackInboundInterceptor = (pubackInboundInput, pubackInboundOutput) -> { };
+        final PubrecInboundInterceptor pubrecInboundInterceptor = (pubrecInboundInput, pubrecInboundOutput) -> { };
 
-        clientContext.addPubrecInboundInterceptor(pubackInboundInterceptor);
+        clientContext.addPubrecInboundInterceptor(pubrecInboundInterceptor);
         assertEquals(1, clientContext.getPubrecInboundInterceptors().size());
-        assertSame(pubackInboundInterceptor, clientContext.getPubrecInboundInterceptors().get(0));
+        assertSame(pubrecInboundInterceptor, clientContext.getPubrecInboundInterceptors().get(0));
 
-        clientContext.addPubrecOutboundInterceptor(pubackOutboundInterceptor);
+        clientContext.addPubrecOutboundInterceptor(pubrecOutboundInterceptor);
         assertEquals(1, clientContext.getPubrecOutboundInterceptors().size());
-        assertSame(pubackOutboundInterceptor, clientContext.getPubrecOutboundInterceptors().get(0));
+        assertSame(pubrecOutboundInterceptor, clientContext.getPubrecOutboundInterceptors().get(0));
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 
-        clientContext.removeInterceptor(pubackInboundInterceptor);
-        clientContext.removeInterceptor(pubackOutboundInterceptor);
+        clientContext.removeInterceptor(pubrecInboundInterceptor);
+        clientContext.removeInterceptor(pubrecOutboundInterceptor);
 
         assertEquals(0, clientContext.getAllInterceptors().size());
     }

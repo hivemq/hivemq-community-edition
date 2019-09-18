@@ -152,7 +152,7 @@ public interface ClientContext {
      * Removes an {@link PubrecInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param pubrecInboundInterceptor The implementation of an PubrecOutboundInterceptor.
+     * @param pubrecInboundInterceptor The implementation of an PubrecInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
     void removePubrecInboundInterceptor(@NotNull PubrecInboundInterceptor pubrecInboundInterceptor);

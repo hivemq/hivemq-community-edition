@@ -385,7 +385,7 @@ public class TestMessageUtil {
         return new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    public static PUBREC createFullMqtt5Pubrec() {
-        return new PUBREC(1, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    public static PUBREC createSuccessPubrec() {
+        return new PUBREC(1);
     }
 }
