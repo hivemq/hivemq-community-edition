@@ -104,7 +104,7 @@ public class ChannelHandlerNames {
     public static final String MQTT_MESSAGE_BARRIER = "mqtt_message_barrier";
     public static final String MQTT_SUBSCRIBE_MESSAGE_BARRIER = "mqtt_subscribe_message_barrier";
     public static final String STOP_READING_AFTER_CONNECT_HANDLER = "stop_reading_after_connect_handler";
-    public static final String PINGREQUEST_PINGRESPONSE_INTERCEPTOR_HANDLER =
+    public static final String PING_INTERCEPTOR_HANDLER =
             "pingrequest_pingresponse_interceptor_handler";
 
     /* *************
