@@ -123,8 +123,8 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
-            Assert.assertTrue(isTriggered.get());
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(pingreq);
         isTriggered.set(false);
 
