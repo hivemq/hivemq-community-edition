@@ -108,9 +108,6 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
                         clientId, interceptorFuture, pingRequestInboundInterceptors.size());
 
         for (final PingRequestInboundInterceptor interceptor : pingRequestInboundInterceptors) {
-            if (!interceptorFuture.isDone()) {
-                interceptorFuture.set(null);
-            }
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
@@ -161,9 +158,6 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
                         pingResponseOutboundInterceptors.size());
 
         for (final PingResponseOutboundInterceptor interceptor : pingResponseOutboundInterceptors) {
-            if (!interceptorFuture.isDone()) {
-                interceptorFuture.set(null);
-            }
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
@@ -336,7 +330,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void onFailure(final @NotNull Throwable t) {
-            log.error(t.getMessage());
+            log.debug("Future of ping request interception has failed", t);
         }
     }
 
@@ -356,7 +350,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public void onFailure(final @NotNull Throwable t) {
-            log.error("Intercepting a ping response has failed \n" + t.getMessage());
+            log.debug("Intercepting a ping response has failed", t);
         }
 
     }

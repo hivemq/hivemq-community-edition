@@ -150,8 +150,8 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingreq = channel.readInbound();
-            Assert.assertTrue(isTriggered.get());
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(pingreq);
         isTriggered.set(false);
     }
@@ -176,8 +176,8 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
-            Assert.assertTrue(isTriggered.get());
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(pingresp);
         isTriggered.set(false);
     }
@@ -202,8 +202,8 @@ public class PingInterceptorHandlerTest {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             pingresp = channel.readOutbound();
-            Assert.assertTrue(isTriggered.get());
         }
+        Assert.assertTrue(isTriggered.get());
         Assert.assertNotNull(pingresp);
         isTriggered.set(false);
     }
