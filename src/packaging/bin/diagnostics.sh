@@ -77,12 +77,9 @@ if hash java 2>/dev/null; then
                 echo "ERROR! HiveMQ JAR not found."
                 echo $HIVEMQ_FOLDER;
             else
-                HIVEMQ_FOLDER=$(echo "$HIVEMQ_FOLDER" | sed 's/ /\\ /g')
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-
                 HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=\"$HIVEMQ_FOLDER/heap-dump.hprof\""
-
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
