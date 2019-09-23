@@ -17,6 +17,8 @@
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -109,5 +111,27 @@ public class ClientContextImplTest {
         assertEquals(0, clientContext.getSubscribeInboundInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
 
+    }
+
+    @Test
+    public void test_add_remove_specific_pingreq_pingresp() {
+        final PingRequestInboundInterceptor pingRequestInboundInterceptor = ((input, output) -> {
+
+        });
+        final PingResponseOutboundInterceptor pingResponseOutboundInterceptor = ((input, output) -> {
+
+        });
+
+        clientContext.addPingRequestInboundInterceptor(pingRequestInboundInterceptor);
+        clientContext.addPingResponseOutboundInterceptor(pingResponseOutboundInterceptor);
+
+        assertEquals(1, clientContext.getPingRequestInboundInterceptors().size());
+        assertEquals(1, clientContext.getPingResponseOutboundInterceptors().size());
+
+        clientContext.removePingRequestInboundInterceptor(pingRequestInboundInterceptor);
+        clientContext.removePingResponseOutboundInterceptor(pingResponseOutboundInterceptor);
+
+        assertEquals(0, clientContext.getPingRequestInboundInterceptors().size());
+        assertEquals(0, clientContext.getPingResponseOutboundInterceptors().size());
     }
 }
