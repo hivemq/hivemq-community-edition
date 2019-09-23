@@ -175,7 +175,6 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         for (final PubrecInboundInterceptor interceptor : pubrecInboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
                 break;
             }
 
@@ -271,7 +270,6 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         }
 
         public void increment() {
-            //we must set the future when no more interceptors are registered
             if (counter.incrementAndGet() == interceptorCount) {
                 interceptorFuture.set(null);
             }
