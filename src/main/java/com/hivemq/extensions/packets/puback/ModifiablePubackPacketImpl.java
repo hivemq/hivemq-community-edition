@@ -35,7 +35,6 @@ public class ModifiablePubackPacketImpl extends PubackPacketImpl implements Modi
         this.configurationService = configurationService;
         this.reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
         this.reasonString = puback.getReasonString();
-        this.reasonString = puback.getReasonString();
         this.userProperties = new ModifiableUserPropertiesImpl(puback.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
