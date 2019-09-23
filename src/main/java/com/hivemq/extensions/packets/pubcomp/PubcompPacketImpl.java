@@ -14,20 +14,20 @@ import java.util.Optional;
  */
 public class PubcompPacketImpl implements PubcompPacket {
 
-    private final PubcompReasonCode ackReasonCode;
+    private final PubcompReasonCode pubcompReasonCode;
     private final int packetIdentifier;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
-        ackReasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
+        pubcompReasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
         packetIdentifier = pubcomp.getPacketIdentifier();
         reasonString = pubcomp.getReasonString();
         userProperties = pubcomp.getUserProperties().getPluginUserProperties();
     }
 
     public PubcompPacketImpl(final @NotNull PubcompPacket pubcompPacket) {
-        this.ackReasonCode = pubcompPacket.getReasonCode();
+        this.pubcompReasonCode = pubcompPacket.getReasonCode();
         this.packetIdentifier = pubcompPacket.getPacketIdentifier();
         this.reasonString = pubcompPacket.getReasonString().orElse(null);
         this.userProperties = pubcompPacket.getUserProperties();
@@ -38,10 +38,9 @@ public class PubcompPacketImpl implements PubcompPacket {
         return packetIdentifier;
     }
 
-    @com.hivemq.annotations.NotNull
     @Override
-    public PubcompReasonCode getReasonCode() {
-        return ackReasonCode;
+    public @NotNull PubcompReasonCode getReasonCode() {
+        return pubcompReasonCode;
     }
 
     @Override

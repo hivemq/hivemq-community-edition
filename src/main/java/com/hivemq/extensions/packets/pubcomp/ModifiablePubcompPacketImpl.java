@@ -33,7 +33,6 @@ public class ModifiablePubcompPacketImpl extends PubcompPacketImpl implements Mo
         super(pubcomp);
         this.configurationService = configurationService;
         this.reasonString = pubcomp.getReasonString();
-        this.reasonString = pubcomp.getReasonString();
         this.userProperties = new ModifiableUserPropertiesImpl(
                 pubcomp.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
