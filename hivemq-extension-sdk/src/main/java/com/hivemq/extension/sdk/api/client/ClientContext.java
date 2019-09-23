@@ -177,6 +177,23 @@ public interface ClientContext {
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
 
     /**
+     * Returns all {@link PingRequestInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingRequestInboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingRequestInboundInterceptor> getPingRequestInboundInterceptors();
+
+    /**
+     * Returns all {@link PingResponseOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingResponseOutboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingResponseOutboundInterceptor> getPingResponseOutboundInterceptors();
+
+
+    /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every
      * MQTT PUBLISH and SUBSCRIBE packet sent by this client.
      *

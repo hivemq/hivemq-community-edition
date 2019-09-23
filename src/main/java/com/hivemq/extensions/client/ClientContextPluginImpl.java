@@ -132,6 +132,20 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @NotNull
     @Override
+    @Immutable
+    public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptors() {
+        return clientContext.getPingRequestInboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
+    @Immutable
+    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptors() {
+        return clientContext.getPingResponseOutboundInterceptorsForPlugin(pluginClassloader);
+    }
+
+    @NotNull
+    @Override
     public ModifiableDefaultPermissions getDefaultPermissions() {
         return clientContext.getDefaultPermissions();
     }
