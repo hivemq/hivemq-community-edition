@@ -121,7 +121,6 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         for (final PubackOutboundInterceptor interceptor : pubackOutboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
                 break;
             }
 
@@ -174,7 +173,6 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         for (final PubackInboundInterceptor interceptor : pubackInboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
                 break;
             }
 
