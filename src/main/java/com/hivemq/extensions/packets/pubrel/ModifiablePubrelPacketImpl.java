@@ -33,7 +33,6 @@ public class ModifiablePubrelPacketImpl extends PubrelPacketImpl implements Modi
         super(pubrel);
         this.configurationService = configurationService;
         this.reasonString = pubrel.getReasonString();
-        this.reasonString = pubrel.getReasonString();
         this.userProperties = new ModifiableUserPropertiesImpl(
                 pubrel.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());

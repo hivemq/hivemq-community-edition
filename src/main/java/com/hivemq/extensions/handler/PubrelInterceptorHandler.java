@@ -121,7 +121,6 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         for (final PubrelOutboundInterceptor interceptor : pubrelOutboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
                 break;
             }
 
@@ -174,7 +173,6 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         for (final PubrelInboundInterceptor interceptor : pubrelInboundInterceptors) {
 
             if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
                 break;
             }
 
