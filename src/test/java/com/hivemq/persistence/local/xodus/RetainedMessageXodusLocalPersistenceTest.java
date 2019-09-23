@@ -16,15 +16,12 @@
 
 package com.hivemq.persistence.local.xodus;
 
-import com.hivemq.annotations.NotNull;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.persistence.MatchAllPersistenceFilter;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -72,7 +69,8 @@ public class RetainedMessageXodusLocalPersistenceTest {
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(BUCKETSIZE);
-        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
+        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
+                temporaryFolder.newFolder());
 
         when(payloadPersistence.getPayloadOrNull(0)).thenReturn("message0".getBytes());
         when(payloadPersistence.get(0)).thenReturn("message0".getBytes());
@@ -102,24 +100,38 @@ public class RetainedMessageXodusLocalPersistenceTest {
     @Test
     public void test_persist_get_no_payload_found() {
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 100L, MqttConfigurationDefaults.TTL_DISABLED), "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 100L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
 
         assertNull(persistence.get("topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE)));
     }
 
     @Test
     public void test_persist_same_topic() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic",
+                BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic",
+                BucketUtils.getBucket("topic", BUCKETSIZE));
 
         //existing entry has newer timestamp, so we expect the "old" value
-        assertEquals("message0", new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)).getMessage()));
+        assertEquals(
+                "message0",
+                new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)).getMessage()));
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED), "topic",
+                BucketUtils.getBucket("topic", BUCKETSIZE));
 
-        assertEquals("message3", new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)).getMessage()));
+        assertEquals(
+                "message3",
+                new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)).getMessage()));
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 4L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 4L, MqttConfigurationDefaults.TTL_DISABLED), "topic",
+                BucketUtils.getBucket("topic", BUCKETSIZE));
 
         assertEquals("message4", new String(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE))
                 .getMessage()));
@@ -128,59 +140,87 @@ public class RetainedMessageXodusLocalPersistenceTest {
     @Test
     public void test_getAllTopics() {
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED), "topic/1", BucketUtils.getBucket("topic/1", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.EXACTLY_ONCE, 2L, MqttConfigurationDefaults.TTL_DISABLED), "topic/2", BucketUtils.getBucket("topic/2", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/0", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/1", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.EXACTLY_ONCE, 2L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/2", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED), "topic",
+                0);
 
-        persistence.remove("topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
+        final Set<String> allTopics1 = persistence.getAllTopics("#", 0);
 
-        final Set<String> allTopics1 = persistence.getAllTopics(getContainsSlashFilter(), BucketUtils.getBucket("topic/1", BUCKETSIZE));
-
-        assertEquals(1, allTopics1.size());
-        assertEquals("topic/1", allTopics1.iterator().next());
-
-
-        final Set<String> allTopics0 = persistence.getAllTopics(getContainsSlashFilter(), BucketUtils.getBucket("topic/0", BUCKETSIZE));
-
-        assertEquals(0, allTopics0.size());
+        assertEquals(4, allTopics1.size());
+        assertTrue(allTopics1.contains("topic/0"));
+        assertTrue(allTopics1.contains("topic/1"));
+        assertTrue(allTopics1.contains("topic/2"));
+        assertTrue(allTopics1.contains("topic"));
     }
 
     @Test
     public void decrement_payload_reference_count_remove() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED), "topic/1", BucketUtils.getBucket("topic/1", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/0", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/1", 0);
 
-        persistence.remove("topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
-        persistence.remove("topic/1", BucketUtils.getBucket("topic/1", BUCKETSIZE));
+        persistence.remove("topic/0", 0);
+        persistence.remove("topic/1", 0);
 
         verify(payloadPersistence).decrementReferenceCounter(0);
         verify(payloadPersistence).decrementReferenceCounter(1);
+
+        final Set<String> topics = persistence.topicTrees.get(0).get("#");
+        assertTrue(topics.isEmpty());
     }
 
     @Test
     public void decrement_payload_reference_count_put() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED), "topic/1", BucketUtils.getBucket("topic/1", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/0", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/1", 0);
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED), "topic/0", BucketUtils.getBucket("topic/0", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED), "topic/1", BucketUtils.getBucket("topic/1", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/0", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                "topic/1", 0);
 
         verify(payloadPersistence).decrementReferenceCounter(0);
         verify(payloadPersistence).decrementReferenceCounter(1);
+
+        final Set<String> topics = persistence.topicTrees.get(0).get("#");
+        assertEquals(2, topics.size());
+        assertTrue(topics.contains("topic/0"));
+        assertTrue(topics.contains("topic/1"));
     }
 
     @Test
     public void test_clean_up_expiry() {
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, System.currentTimeMillis() - 2000), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, System.currentTimeMillis()), "topic2", BucketUtils.getBucket("topic2", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null,
+                        null, null, null, System.currentTimeMillis() - 2000), "topic", 0);
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null,
+                        null, null, null, System.currentTimeMillis()), "topic2", 0);
 
         persistence.cleanUp(BucketUtils.getBucket("topic", BUCKETSIZE));
         persistence.cleanUp(BucketUtils.getBucket("topic2", BUCKETSIZE));
 
-        assertNull(persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE)));
-        assertNotNull(persistence.get("topic2", BucketUtils.getBucket("topic2", BUCKETSIZE)));
+        assertNull(persistence.get("topic", 0));
+        assertNotNull(persistence.get("topic2", 0));
 
         verify(payloadPersistence).decrementReferenceCounter(1L);
         verify(payloadPersistence, never()).decrementReferenceCounter(2L);
@@ -188,7 +228,10 @@ public class RetainedMessageXodusLocalPersistenceTest {
 
     @Test
     public void test_expiry() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, System.currentTimeMillis() - 2000), "topic", BucketUtils.getBucket("topic", BUCKETSIZE));
+        persistence.put(
+                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1, Mqtt5UserProperties.NO_USER_PROPERTIES, null,
+                        null, null, null, System.currentTimeMillis() - 2000), "topic",
+                BucketUtils.getBucket("topic", BUCKETSIZE));
 
         final RetainedMessage message = persistence.get("topic", BucketUtils.getBucket("topic", BUCKETSIZE));
         assertNull(message);
@@ -220,7 +263,9 @@ public class RetainedMessageXodusLocalPersistenceTest {
     public void test_clear() {
 
         for (int i = 0; i < BUCKETSIZE; i++) {
-            persistence.put(new RetainedMessage(new byte[0], QoS.AT_LEAST_ONCE, (long) i + 1, MqttConfigurationDefaults.TTL_DISABLED), "topic" + i, 0);
+            persistence.put(
+                    new RetainedMessage(new byte[0], QoS.AT_LEAST_ONCE, (long) i + 1,
+                            MqttConfigurationDefaults.TTL_DISABLED), "topic" + i, 0);
         }
 
         assertEquals(BUCKETSIZE, persistence.size());
@@ -230,19 +275,8 @@ public class RetainedMessageXodusLocalPersistenceTest {
         }
 
         assertEquals(0, persistence.size());
-        final Set<String> allEntries = persistence.getAllTopics(MatchAllPersistenceFilter.INSTANCE, 1);
+        final Set<String> allEntries = persistence.getAllTopics("#", 1);
         assertEquals(0, allEntries.size());
 
     }
-
-    @NotNull
-    private PersistenceFilter getContainsSlashFilter() {
-        return new PersistenceFilter() {
-            @Override
-            public boolean match(final String key) {
-                return key.contains("/");
-            }
-        };
-    }
-
 }

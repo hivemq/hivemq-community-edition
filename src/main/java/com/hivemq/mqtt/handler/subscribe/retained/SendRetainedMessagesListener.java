@@ -155,14 +155,12 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
         for (final Topic subscribedTopic : topicsWithWildcards) {
 
-            final List<ListenableFuture<Set<String>>> futures =
+            final ListenableFuture<Set<String>> future =
                     retainedMessagePersistence.getWithWildcards(subscribedTopic.getTopic());
-            for (final ListenableFuture<Set<String>> future : futures) {
-                Futures.addCallback(
-                        future,
-                        new RetainedMessagesHandleWildcardsCallback(subscribedTopic, channel, retainedMessagesSender),
-                        channel.eventLoop());
-            }
+            Futures.addCallback(
+                    future,
+                    new RetainedMessagesHandleWildcardsCallback(subscribedTopic, channel, retainedMessagesSender),
+                    channel.eventLoop());
         }
     }
 

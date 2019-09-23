@@ -66,15 +66,15 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     void put(@NotNull RetainedMessage retainedMessage, @NotNull String topic, int bucketIndex);
 
     /**
-     * Get all topics for specific {@link PersistenceFilter} from a persistence bucket
+     * Get the topics of all retained messages for a subscription from a persistence bucket
      *
-     * @param filter The filter to receive retained messages for.
+     * @param subscription The filter to receive retained messages for.
      * @param bucket The index of the bucket in which the retained messages are stored.
      * @return a readonly set of topic strings.
      */
     @NotNull
     @ReadOnly
-    Set<String> getAllTopics(@NotNull PersistenceFilter filter, int bucket);
+    Set<String> getAllTopics(@NotNull String subscription, int bucket);
 
     /**
      * Trigger a cleanup for a specific bucket.

@@ -66,20 +66,20 @@ if hash java 2>/dev/null; then
     fi
 
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
-        echo ERROR! HiveMQ Home Folder not found.
+        echo "ERROR! HiveMQ Home Folder not found."
     else
 
         if [ ! -w "$HIVEMQ_FOLDER" ]; then
-            echo ERROR! HiveMQ Home Folder Permissions not correct.
+            echo "ERROR! HiveMQ Home Folder Permissions not correct."
         else
 
             if [ ! -f "$HIVEMQ_FOLDER/bin/hivemq.jar" ]; then
-                echo ERROR! HiveMQ JAR not found.
+                echo "ERROR! HiveMQ JAR not found."
                 echo $HIVEMQ_FOLDER;
             else
-                HIVEMQ_FOLDER=$(echo "$HIVEMQ_FOLDER" | sed 's/ /\\ /g')
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
-                JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$HIVEMQ_FOLDER/heap-dump.hprof"
+                JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=\"$HIVEMQ_FOLDER/heap-dump.hprof\""
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
@@ -93,11 +93,11 @@ if hash java 2>/dev/null; then
                 echo ""
                 # Run HiveMQ
                 JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
-                exec "java" ${HOME_OPT} ${JAVA_OPTS} -jar ${JAR_PATH}
+                exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
             fi
         fi
     fi
 
 else
-    echo You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again.
+  echo "ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again."
 fi

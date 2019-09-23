@@ -69,6 +69,9 @@ public class InternalConfigurations {
     // The configuration for qos 0 memory hard limit divisor, must be greater than 0.
     public static final AtomicInteger QOS_0_MEMORY_HARD_LIMIT_DIVISOR = new AtomicInteger(4);
 
+    // The configuration for qos 0 memory limit per client, must be greater than 0.
+    public static final AtomicInteger QOS_0_MEMORY_LIMIT_PER_CLIENT = new AtomicInteger(1024 * 1024 * 5);
+
     // The amount of qos 0 messages that are queued if the channel is not writable
     public static final AtomicInteger NOT_WRITABLE_QUEUE_SIZE = new AtomicInteger(1000);
 
