@@ -35,7 +35,6 @@ public class ModifiablePubrecPacketImpl extends PubrecPacketImpl implements Modi
         this.configurationService = configurationService;
         this.reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
         this.reasonString = pubrec.getReasonString();
-        this.reasonString = pubrec.getReasonString();
         this.userProperties = new ModifiableUserPropertiesImpl(
                 pubrec.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
