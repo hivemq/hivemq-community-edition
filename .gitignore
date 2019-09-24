@@ -11,3 +11,5 @@ out/
 !.idea/codeStyles
 !.idea/inspectionProfiles
 !.idea/runConfigurations
+# jib packaging files
+src/main/jib

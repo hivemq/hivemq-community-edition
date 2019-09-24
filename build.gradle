@@ -5,7 +5,7 @@ plugins {
     id 'org.owasp.dependencycheck' version '5.2.0' apply false
     id 'com.github.spotbugs' version '1.6.9' apply false
     id 'de.thetaphi.forbiddenapis' version '2.6' apply false
-    id "com.google.cloud.tools.jib" version "1.0.2" apply false
+    id "com.google.cloud.tools.jib" version "1.6.1" apply false
 }
 
 allprojects {
@@ -576,16 +576,36 @@ publishing {
 /*****************
  *      Jib      *
  *****************/
+clean.doFirst {
+    delete "${project.rootDir}/src/main/jib"
+}
+task copyJibContent(type: Copy) {
+    group 'jib'
 
+    from "${project.rootDir}/src/packaging/"
+    from "${project.rootDir}/src/main/resources/config.xml"
+    into "${project.rootDir}/src/main/jib/opt/hivemq"
 
+    rename { String fileName ->
+        fileName.replace("config.xml", "conf/config.xml")
+    }
+}
+
+task cleanJib {
+    delete "${project.rootDir}/src/main/jib"
+}
+tasks.jib.dependsOn tasks.copyJibContent
+tasks.jibDockerBuild.dependsOn tasks.copyJibContent
+
+tasks.jib.finalizedBy tasks.cleanJib
+tasks.jibDockerBuild.finalizedBy tasks.cleanJib
 jib {
     container {
         environment = [
-                "HIVEMQ_HOME": "/",
-                "JAVA_OPTS"  : "-XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport -XX:InitialRAMPercentage=25 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=25",
-                "LOG_LEVEL"  : "INFO"
+                "HIVEMQ_HOME": "/opt/hivemq",
+                "HIVEMQ_LOG_LEVEL"  : "INFO"
         ]
-        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '-XX:+UnlockExperimentalVMOptions', '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25', '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
     }
 
     to {
