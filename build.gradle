@@ -96,27 +96,6 @@ sourceSets {
             srcDir 'src/extensionApi/resources'
         }
     }
-
-    integrationTestSingle {
-        java {
-            srcDir 'src/it/single/java'
-            srcDir 'src/it/util/java'
-        }
-        resources {
-            srcDir 'src/it/single/resources'
-        }
-        compileClasspath += test.compileClasspath
-    }
-
-    integrationTestLongrunning {
-        java {
-            srcDir 'src/it/longrunning/java'
-        }
-        resources {
-            srcDir 'src/it/longrunning/resources'
-        }
-        compileClasspath += integrationTestSingle.compileClasspath
-    }
 }
 
 /****************
