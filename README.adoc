@@ -61,6 +61,26 @@ If you want to connect devices on external networks to HiveMQ CE, please make su
 
 Just in time builds for current branches on this repository and for specific commits are available https://hivemq.github.io/nightly-builds/[here].
 
+== Run with Docker
+
+=== Build Docker image manually
+
+Check out the git repository and build the Docker image.
+
+[source,bash]
+----
+git clone https://github.com/hivemq/hivemq-community-edition.git
+
+cd hivemq-community-edition
+
+./gradlew clean jibDockerBuild --image=hivemq-ce
+
+docker run hivemq-ce
+----
+
+The local image hivemq-ce is created.
+You can adjust the `--image` parameter or tag and push it to a different repository.
+
 == Building from source
 
 === Prerequisites

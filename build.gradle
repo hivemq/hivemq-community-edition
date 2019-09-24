@@ -5,6 +5,7 @@ plugins {
     id 'org.owasp.dependencycheck' version '5.2.0' apply false
     id 'com.github.spotbugs' version '1.6.9' apply false
     id 'de.thetaphi.forbiddenapis' version '2.6' apply false
+    id "com.google.cloud.tools.jib" version "1.0.2" apply false
 }
 
 allprojects {
@@ -26,6 +27,7 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'idea'
 apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'com.google.cloud.tools.jib'
 
 /************************
  * Code Quality Plugins *
@@ -83,6 +85,37 @@ sourceSets {
     test {
         compileClasspath += configurations.provided
         runtimeClasspath += configurations.provided
+    }
+
+    extensionApi {
+        java {
+            srcDir 'src/extensionApi/java'
+
+        }
+        resources {
+            srcDir 'src/extensionApi/resources'
+        }
+    }
+
+    integrationTestSingle {
+        java {
+            srcDir 'src/it/single/java'
+            srcDir 'src/it/util/java'
+        }
+        resources {
+            srcDir 'src/it/single/resources'
+        }
+        compileClasspath += test.compileClasspath
+    }
+
+    integrationTestLongrunning {
+        java {
+            srcDir 'src/it/longrunning/java'
+        }
+        resources {
+            srcDir 'src/it/longrunning/resources'
+        }
+        compileClasspath += integrationTestSingle.compileClasspath
     }
 }
 
@@ -558,5 +591,29 @@ publishing {
 
     repositories {
         mavenLocal()
+    }
+}
+
+/*****************
+ *      Jib      *
+ *****************/
+
+
+jib {
+    container {
+        environment = [
+                "HIVEMQ_HOME": "/",
+                "JAVA_OPTS"  : "-XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport -XX:InitialRAMPercentage=25 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=25",
+                "LOG_LEVEL"  : "INFO"
+        ]
+        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+    }
+
+    to {
+        image = 'hivemq/device-simulator'
+        auth {
+            username = System.getenv("DOCKER_USER")
+            password = System.getenv("DOCKER_PASSWORD")
+        }
     }
 }

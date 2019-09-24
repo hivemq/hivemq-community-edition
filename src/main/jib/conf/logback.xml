@@ -1,0 +1,27 @@
+<configuration scan="false">
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-30(%d %level)- %msg%n%ex</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="migrations" level="WARN" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+    <logger name="jetbrains.exodus" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="ERROR"/>
+    <logger name="com.google.common.util.concurrent.Futures.CombinedFuture" level="OFF"/>
+    <logger name="oshi" level="ERROR"/>
+
+</configuration>
