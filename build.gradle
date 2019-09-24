@@ -589,6 +589,12 @@ task copyJibContent(type: Copy) {
     rename { String fileName ->
         fileName.replace("config.xml", "conf/config.xml")
     }
+
+    doFirst {
+        project.file("${project.rootDir}/src/main/jib/opt/hivemq/data").mkdirs()
+        project.file("${project.rootDir}/src/main/jib/opt/hivemq/extensions").mkdirs()
+        project.file("${project.rootDir}/src/main/jib/opt/hivemq/log").mkdirs()
+    }
 }
 
 task cleanJib {
@@ -606,19 +612,19 @@ jib {
                 "HIVEMQ_LOG_LEVEL": "INFO"
         ]
         jvmFlags = [
-                    /* Reflection options */
-                    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-                    '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
-                    '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
-                    '--add-opens', 'jdk.management/com.sun.management.internal=ALL-UNNAMED',
-                    '--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
-                    /* Misc HiveMQ options */
-                    '-XX:+CrashOnOutOfMemoryError', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath="/opt/hivemq/heap-dump.hprof"',
-                    '-Djava.net.preferIPv4Stack=true', '-noverify',
-                    /* Container options */
-                    '-XX:+UnlockExperimentalVMOptions',
-                    '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25',
-                    '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
+                /* Reflection options */
+                '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+                '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+                '--add-opens', 'jdk.management/com.sun.management.internal=ALL-UNNAMED',
+                '--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
+                /* Misc HiveMQ options */
+                '-XX:+CrashOnOutOfMemoryError', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath="/opt/hivemq/heap-dump.hprof"',
+                '-Djava.net.preferIPv4Stack=true', '-noverify',
+                /* Container options */
+                '-XX:+UnlockExperimentalVMOptions',
+                '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25',
+                '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
         ports = ['1883']
         labels = ['version': project.version]
     }
