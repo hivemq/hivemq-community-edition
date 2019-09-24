@@ -4,7 +4,6 @@ ARG HIVEMQ_VERSION=2019.1
 
 COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 
-RUN ls -l /
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
 FROM openjdk:11-jre-slim
@@ -42,7 +41,7 @@ COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
 
 # HiveMQ setup
 COPY --from=unzip /hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
-RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq && ls -l /opt/ \
+RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && mv /opt/config.xml /opt/hivemq/conf/config.xml \
     && groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
