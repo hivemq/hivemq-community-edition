@@ -64,6 +64,12 @@ Just in time builds for current branches on this repository and for specific com
 == Run with Docker
 
 The current state of the `master` branch will be pushed to the https://hub.docker.com/r/hivemq/hivemq-ce[hivemq/hivemq-ce] repository.
+To execute this image, simply run the following command:
+
+[source,bash]
+----
+docker run --name hivemq-ce -d -p 1883:1883 /hivemq/hivemq-ce
+----
 
 === Build Docker image manually
 
