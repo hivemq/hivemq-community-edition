@@ -602,10 +602,14 @@ tasks.jibDockerBuild.finalizedBy tasks.cleanJib
 jib {
     container {
         environment = [
-                "HIVEMQ_HOME": "/opt/hivemq",
-                "HIVEMQ_LOG_LEVEL"  : "INFO"
+                "HIVEMQ_HOME"     : "/opt/hivemq",
+                "HIVEMQ_LOG_LEVEL": "INFO"
         ]
-        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '-XX:+UnlockExperimentalVMOptions', '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25', '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
+        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '-XX:+UnlockExperimentalVMOptions',
+                    '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25',
+                    '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
+        ports = ['1883']
+        labels = ['version': project.version]
     }
 
     to {
