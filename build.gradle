@@ -605,7 +605,18 @@ jib {
                 "HIVEMQ_HOME"     : "/opt/hivemq",
                 "HIVEMQ_LOG_LEVEL": "INFO"
         ]
-        jvmFlags = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '-XX:+UnlockExperimentalVMOptions',
+        jvmFlags = [
+                    /* Reflection options */
+                    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                    '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+                    '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+                    '--add-opens', 'jdk.management/com.sun.management.internal=ALL-UNNAMED',
+                    '--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
+                    /* Misc HiveMQ options */
+                    '-XX:+CrashOnOutOfMemoryError', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath="/opt/hivemq/heap-dump.hprof"',
+                    '-Djava.net.preferIPv4Stack=true', '-noverify',
+                    /* Container options */
+                    '-XX:+UnlockExperimentalVMOptions',
                     '-XX:+UseContainerSupport', '-XX:InitialRAMPercentage=25',
                     '-XX:MaxRAMPercentage=70', '-XX:MinRAMPercentage=25']
         ports = ['1883']

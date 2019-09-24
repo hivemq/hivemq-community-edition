@@ -63,6 +63,8 @@ Just in time builds for current branches on this repository and for specific com
 
 == Run with Docker
 
+The current state of the `master` branch will be pushed to the https://hub.docker.com/r/hivemq/hivemq-ce[hivemq/hivemq-ce] repository.
+
 === Build Docker image manually
 
 Check out the git repository and build the Docker image.
@@ -80,6 +82,10 @@ docker run hivemq-ce
 
 The local image hivemq-ce is created.
 You can adjust the `--image` parameter or tag and push it to a different repository.
+
+=== Debugging on Docker
+
+You can also attach a debugger to the Docker image. See https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#how-do-i-enable-debugging[jib FAQ] for more information.
 
 == Building from source
 
