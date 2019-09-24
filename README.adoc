@@ -65,6 +65,33 @@ If you want to connect devices on external networks to HiveMQ CE, please make su
 
 Just in time builds for current branches on this repository and for specific commits are available https://hivemq.github.io/nightly-builds/[here].
 
+== Run with Docker
+
+The current state of the `master` branch will be pushed to the https://hub.docker.com/r/hivemq/hivemq-ce[hivemq/hivemq-ce] repository.
+To execute this image, simply run the following command:
+
+[source,bash]
+----
+docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 /hivemq/hivemq-ce
+----
+
+=== Build Docker image manually
+
+Check out the git repository and build the Docker image.
+
+[source,bash]
+----
+git clone https://github.com/hivemq/hivemq-community-edition.git
+
+cd hivemq-community-edition
+
+docker/build.sh
+
+docker run hivemq/hivemq-ce
+----
+
+You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
+
 == Building from source
 
 === Prerequisites
