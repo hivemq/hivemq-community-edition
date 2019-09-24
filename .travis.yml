@@ -9,6 +9,8 @@ jdk:
 stages:
   - test
   - build
+  - name: docker
+    if: branch = master && type != pull_request
 
 jobs:
   include:
