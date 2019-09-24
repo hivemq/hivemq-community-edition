@@ -68,7 +68,7 @@ To execute this image, simply run the following command:
 
 [source,bash]
 ----
-docker run --name hivemq-ce -d -p 1883:1883 /hivemq/hivemq-ce
+docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 /hivemq/hivemq-ce
 ----
 
 === Build Docker image manually
@@ -92,6 +92,21 @@ You can adjust the `--image` parameter or tag and push it to a different reposit
 === Debugging on Docker
 
 You can also attach a debugger to the Docker image. See https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#how-do-i-enable-debugging[jib FAQ] for more information.
+
+=== Installing extensions
+
+Extensions can be installed into the usual path at `/opt/hivemq/extensions/`. Note that this image uses https://github.com/GoogleContainerTools/distroless[distroless] and therefore does not have a shell to use in your Docker build.
+
+To utilize `RUN` statements to configure your image beforehand, you can use https://docs.docker.com/develop/develop-images/multistage-build/[multi stage builds].
+
+To install an extension, you can simply use the `COPY` directive in your `Dockerfile`. For example, to install the (already extracted) https://www.hivemq.com/extension/file-rbac-extension/[file RBAC extension].
+
+[source,dockerfile]
+----
+FROM hivemq/hivemq-ce:latest
+
+COPY hivemq-file-rbac-extension  /opt/hivemq/extensions/hivemq-file-rbac-extension/
+----
 
 == Building from source
 
