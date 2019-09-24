@@ -86,16 +86,6 @@ sourceSets {
         compileClasspath += configurations.provided
         runtimeClasspath += configurations.provided
     }
-
-    extensionApi {
-        java {
-            srcDir 'src/extensionApi/java'
-
-        }
-        resources {
-            srcDir 'src/extensionApi/resources'
-        }
-    }
 }
 
 /****************
