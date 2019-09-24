@@ -49,10 +49,6 @@ RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq && ls -l /opt/ \
     && chmod -R 775 /opt \
     && chmod +x /opt/hivemq/bin/run.sh /opt/docker-entrypoint.sh
 
-# Substitute eval for exec and replace OOM flag if necessary (for older releases). This is necessary for proper signal propagation
-RUN sed -i -e 's|eval \\"java\\" "$HOME_OPT" "$JAVA_OPTS" -jar "$JAR_PATH"|exec "java" $HOME_OPT $JAVA_OPTS -jar "$JAR_PATH"|' /opt/hivemq/bin/run.sh && \
-    sed -i -e "s|-XX:OnOutOfMemoryError='sleep 5; kill -9 %p'|-XX:+CrashOnOutOfMemoryError|" /opt/hivemq/bin/run.sh
-
 # Make broker data persistent throughout stop/start cycles
 VOLUME /opt/hivemq/data
 
