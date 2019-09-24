@@ -610,10 +610,10 @@ jib {
     }
 
     to {
-        image = 'hivemq/device-simulator'
         auth {
             username = System.getenv("DOCKER_USER")
             password = System.getenv("DOCKER_PASSWORD")
         }
+        image = 'hivemq/hivemq-ce'
     }
 }
