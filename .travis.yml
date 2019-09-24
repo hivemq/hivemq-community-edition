@@ -16,6 +16,9 @@ jobs:
       script: ./gradlew test
     - stage: build
       script: ./gradlew packaging
+    - stage: docker
+      install: true
+      script: ./gradlew jib --image=hivemq-ce
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
