@@ -20,8 +20,8 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
-import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingReqInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingRespOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -67,12 +67,12 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void addPingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void addPingRequestInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @Override
-    public void addPingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+    public void addPingResponseOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
@@ -92,12 +92,12 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void removePingRequestInboundInterceptor(final @NotNull PingRequestInboundInterceptor interceptor) {
+    public void removePingRequestInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @Override
-    public void removePingResponseOutboundInterceptor(final @NotNull PingResponseOutboundInterceptor interceptor) {
+    public void removePingResponseOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
@@ -133,14 +133,14 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @NotNull
     @Override
     @Immutable
-    public List<PingRequestInboundInterceptor> getPingRequestInboundInterceptors() {
+    public List<PingReqInboundInterceptor> getPingRequestInboundInterceptors() {
         return clientContext.getPingRequestInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
     @Override
     @Immutable
-    public List<PingResponseOutboundInterceptor> getPingResponseOutboundInterceptors() {
+    public List<PingRespOutboundInterceptor> getPingResponseOutboundInterceptors() {
         return clientContext.getPingResponseOutboundInterceptorsForPlugin(pluginClassloader);
     }
 

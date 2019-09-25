@@ -3,7 +3,7 @@ package com.hivemq.extensions.interceptor.pingrequest.parameter;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingRequestInboundInput;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter.PingReqInboundInput;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import io.netty.channel.Channel;
@@ -13,13 +13,13 @@ import java.util.function.Supplier;
 /**
  * @author Robin Atherton
  */
-public class PingRequestInboundInputImpl implements Supplier<PingRequestInboundInputImpl>, PingRequestInboundInput,
+public class PingReqInboundInputImpl implements Supplier<PingReqInboundInputImpl>, PingReqInboundInput,
         PluginTaskInput {
 
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
 
-    public PingRequestInboundInputImpl(
+    public PingReqInboundInputImpl(
             final @NotNull String clientId,
             final @NotNull Channel channel) {
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
@@ -37,7 +37,7 @@ public class PingRequestInboundInputImpl implements Supplier<PingRequestInboundI
     }
 
     @Override
-    public PingRequestInboundInputImpl get() {
+    public PingReqInboundInputImpl get() {
         return this;
     }
 

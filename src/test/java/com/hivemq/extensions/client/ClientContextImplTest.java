@@ -17,8 +17,8 @@
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingRequestInboundInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingResponseOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingReqInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingRespOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -115,21 +115,21 @@ public class ClientContextImplTest {
 
     @Test
     public void test_add_remove_specific_pingreq_pingresp() {
-        final PingRequestInboundInterceptor pingRequestInboundInterceptor = ((input, output) -> {
+        final PingReqInboundInterceptor pingReqInboundInterceptor = ((input, output) -> {
 
         });
-        final PingResponseOutboundInterceptor pingResponseOutboundInterceptor = ((input, output) -> {
+        final PingRespOutboundInterceptor pingRespOutboundInterceptor = ((input, output) -> {
 
         });
 
-        clientContext.addPingRequestInboundInterceptor(pingRequestInboundInterceptor);
-        clientContext.addPingResponseOutboundInterceptor(pingResponseOutboundInterceptor);
+        clientContext.addPingRequestInboundInterceptor(pingReqInboundInterceptor);
+        clientContext.addPingResponseOutboundInterceptor(pingRespOutboundInterceptor);
 
         assertEquals(1, clientContext.getPingRequestInboundInterceptors().size());
         assertEquals(1, clientContext.getPingResponseOutboundInterceptors().size());
 
-        clientContext.removePingRequestInboundInterceptor(pingRequestInboundInterceptor);
-        clientContext.removePingResponseOutboundInterceptor(pingResponseOutboundInterceptor);
+        clientContext.removePingRequestInboundInterceptor(pingReqInboundInterceptor);
+        clientContext.removePingResponseOutboundInterceptor(pingRespOutboundInterceptor);
 
         assertEquals(0, clientContext.getPingRequestInboundInterceptors().size());
         assertEquals(0, clientContext.getPingResponseOutboundInterceptors().size());
