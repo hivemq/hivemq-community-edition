@@ -82,7 +82,7 @@ public class DisconnectInboundInterceptorHandlerTest {
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
 
-        final DisconnectInboundInterceptorHandler handler = new DisconnectInboundInterceptorHandler(
+        final DisconnectInterceptorHandler handler = new DisconnectInterceptorHandler(
                 configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
     }

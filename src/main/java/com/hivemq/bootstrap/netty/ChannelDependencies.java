@@ -162,10 +162,7 @@ public class ChannelDependencies {
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @NotNull
-    private final DisconnectInboundInterceptorHandler disconnectInboundInterceptorHandler;
-
-    @NotNull
-    private final DisconnectOutboundInterceptorHandler disconnectOutboundInterceptorHandler;
+    private final DisconnectInterceptorHandler disconnectInterceptorHandler;
 
 
     @Inject
@@ -205,8 +202,7 @@ public class ChannelDependencies {
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
-            @NotNull final DisconnectInboundInterceptorHandler disconnectInboundInterceptorHandler,
-            @NotNull final DisconnectOutboundInterceptorHandler disconnectOutboundInterceptorHandler) {
+            @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler) {
 
 
         this.statisticsInitializer = statisticsInitializer;
@@ -244,8 +240,7 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
-        this.disconnectInboundInterceptorHandler = disconnectInboundInterceptorHandler;
-        this.disconnectOutboundInterceptorHandler = disconnectOutboundInterceptorHandler;
+        this.disconnectInterceptorHandler = disconnectInterceptorHandler;
     }
 
     @NotNull
@@ -424,12 +419,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public DisconnectInboundInterceptorHandler getDisconnectInboundInterceptorHandler() {
-        return disconnectInboundInterceptorHandler;
-    }
-
-    @NotNull
-    public DisconnectOutboundInterceptorHandler getDisconnectOutboundInterceptorHandler() {
-        return disconnectOutboundInterceptorHandler;
+    public DisconnectInterceptorHandler getDisconnectInterceptorHandler() {
+        return disconnectInterceptorHandler;
     }
 }

@@ -70,7 +70,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     private PluginTaskExecutorService pluginTaskExecutorService;
 
-    private DisconnectOutboundInterceptorHandler handler;
+    private DisconnectInterceptorHandler handler;
 
     @Before
     public void setUp() throws Exception {
@@ -89,7 +89,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
         asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
 
-        handler = new DisconnectOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        handler = new DisconnectInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
     }
