@@ -8,16 +8,16 @@ jdk:
 
 stages:
   - test
-  - build
   - name: docker
     if: branch = master && type != pull_request
 
 jobs:
   include:
     - stage: test
+      install: skip
       script: ./gradlew test license forbiddenApis javadoc packaging
     - stage: docker
-      install: true
+      install: skip
       script: PUSH_IMAGE=true docker/build.sh
 
 before_cache:

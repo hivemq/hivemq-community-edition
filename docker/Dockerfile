@@ -1,3 +1,4 @@
+# We use multi-stage here to unzip in an initial layer so we don't have to COPY and then RUN unzip (two layers). ADD can lead to larger layers as well.
 FROM busybox AS unzip
 
 ARG HIVEMQ_VERSION=2019.1
