@@ -82,13 +82,13 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePubcomp(ctx, (PUBCOMP) msg, promise)) {
+        if (!handleOutboundPubcomp(ctx, (PUBCOMP) msg, promise)) {
             super.write(ctx, msg, promise);
         }
 
     }
 
-    private boolean handlePubcomp(
+    private boolean handleOutboundPubcomp(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBCOMP pubcomp,
             final @NotNull ChannelPromise promise) {
