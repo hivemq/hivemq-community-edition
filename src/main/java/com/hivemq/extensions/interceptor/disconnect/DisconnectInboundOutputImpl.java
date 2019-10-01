@@ -39,9 +39,6 @@ public class DisconnectInboundOutputImpl extends AbstractSimpleAsyncOutput<Disco
         return this;
     }
 
-    public void update(final @NotNull ModifiableDisconnectPacketImpl modifiedDisconnectPacket) {
-        this.disconnectPacket = modifiedDisconnectPacket;
-    }
 
     public void update(final @NotNull DISCONNECT disconnect) {
         this.disconnectPacket = new ModifiableDisconnectPacketImpl(configurationService, disconnect);

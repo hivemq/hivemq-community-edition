@@ -1,12 +1,12 @@
 package com.hivemq.extensions.interceptor.disconnect;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
-import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
+import com.hivemq.extensions.packets.disconnect.ModifiableOutboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<DisconnectOutboundOutput>
         implements DisconnectOutboundOutput, PluginTaskOutput, Supplier<DisconnectOutboundOutputImpl> {
 
-    private @NotNull ModifiableDisconnectPacketImpl disconnectPacket;
+    private @NotNull ModifiableOutboundDisconnectPacketImpl disconnectPacket;
     private final @NotNull FullConfigurationService configurationService;
 
     public DisconnectOutboundOutputImpl(
@@ -26,11 +26,11 @@ public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<Disc
             final @NotNull DISCONNECT disconnect) {
         super(asyncer);
         this.configurationService = configurationService;
-        this.disconnectPacket = new ModifiableDisconnectPacketImpl(this.configurationService, disconnect);
+        this.disconnectPacket = new ModifiableOutboundDisconnectPacketImpl(this.configurationService, disconnect);
     }
 
     @Override
-    public @NotNull ModifiableDisconnectPacketImpl getDisconnectPacket() {
+    public @NotNull ModifiableOutboundDisconnectPacketImpl getDisconnectPacket() {
         return disconnectPacket;
     }
 
@@ -39,11 +39,11 @@ public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<Disc
         return this;
     }
 
-    public void update(final @NotNull ModifiableDisconnectPacketImpl modifiedDisconnectPacket) {
+    public void update(final @NotNull ModifiableOutboundDisconnectPacketImpl modifiedDisconnectPacket) {
         this.disconnectPacket = modifiedDisconnectPacket;
     }
 
     public void update(final @NotNull DISCONNECT disconnect) {
-        this.disconnectPacket = new ModifiableDisconnectPacketImpl(configurationService, disconnect);
+        this.disconnectPacket = new ModifiableOutboundDisconnectPacketImpl(configurationService, disconnect);
     }
 }

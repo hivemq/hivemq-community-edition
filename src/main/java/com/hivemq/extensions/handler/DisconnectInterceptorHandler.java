@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -23,13 +24,10 @@ import com.hivemq.extensions.interceptor.disconnect.DisconnectInboundOutputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundInputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundOutputImpl;
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
-import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
+import com.hivemq.extensions.packets.disconnect.ModifiableOutboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
- * @since 4.3.0
  */
+@Singleton
+@ChannelHandler.Sharable
 public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DisconnectInterceptorHandler.class);
@@ -77,6 +76,26 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DISCONNECT disconnect = (DISCONNECT) msg;
 
 
+        handleRead(ctx, msg, disconnect);
+    }
+
+    @Override
+    public void write(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
+            throws Exception {
+
+        if (!(msg instanceof DISCONNECT)) {
+            super.write(ctx, msg, promise);
+            return;
+        }
+
+        final DISCONNECT disconnect = (DISCONNECT) msg;
+
+        handleWrite(ctx, msg, promise, disconnect);
+    }
+
+
+    private void handleRead(@NotNull final ChannelHandlerContext ctx, final Object msg, final DISCONNECT disconnect) throws Exception {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return;
@@ -126,23 +145,12 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                     interceptorContext, input, output, interceptorTask);
         }
 
-        final DisconnectInterceptorFutureCallback callback =
-                new DisconnectInterceptorFutureCallback(ctx, output, disconnect);
+        final DisconnectInboundInterceptorFutureCallback callback =
+                new DisconnectInboundInterceptorFutureCallback(ctx, output, disconnect);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
-            throws Exception {
-
-        if (!(msg instanceof DISCONNECT)) {
-            super.write(ctx, msg, promise);
-            return;
-        }
-
-        final DISCONNECT disconnect = (DISCONNECT) msg;
-
+    private void handleWrite(@NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise, final DISCONNECT disconnect) throws Exception {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return;
@@ -192,7 +200,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
 
             executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, disconnect, ctx, promise);
+        final DisconnectOutboundInterceptorFutureCallback callback = new DisconnectOutboundInterceptorFutureCallback(output, disconnect, ctx, promise);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
@@ -227,7 +235,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 output.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {
-                @NotNull final ModifiableDisconnectPacketImpl disconnectPacket = pluginOutput.getDisconnectPacket();
+                @NotNull final ModifiableOutboundDisconnectPacketImpl disconnectPacket = pluginOutput.getDisconnectPacket();
                 input.updateDisconnect(disconnectPacket);
                 output.update(disconnectPacket);
             }
@@ -283,14 +291,14 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class InterceptorFutureCallback implements FutureCallback<Void> {
+    private static class DisconnectOutboundInterceptorFutureCallback implements FutureCallback<Void> {
 
         private final @NotNull DisconnectOutboundOutput output;
         private final @NotNull DISCONNECT disconnect;
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ChannelPromise promise;
 
-        public InterceptorFutureCallback(
+        public DisconnectOutboundInterceptorFutureCallback(
                 @NotNull final DisconnectOutboundOutput output,
                 @NotNull final DISCONNECT disconnect,
                 @NotNull final ChannelHandlerContext ctx,
@@ -407,13 +415,13 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class DisconnectInterceptorFutureCallback implements FutureCallback<Void> {
+    private static class DisconnectInboundInterceptorFutureCallback implements FutureCallback<Void> {
 
         private final @NotNull DisconnectInboundOutputImpl output;
         private final @NotNull DISCONNECT disconnect;
         private final @NotNull ChannelHandlerContext ctx;
 
-        DisconnectInterceptorFutureCallback(
+        DisconnectInboundInterceptorFutureCallback(
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull DisconnectInboundOutputImpl output,
                 final @NotNull DISCONNECT disconnect) {

@@ -7,7 +7,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundInput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectOutboundOutput;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -226,11 +226,10 @@ public class DisconnectOutboundInterceptorHandlerTest {
         public void onOutboundDisconnect(
                 final @NotNull DisconnectOutboundInput disconnectOutboundInput,
                 final @NotNull DisconnectOutboundOutput disconnectOutboundOutput) {
-            final ModifiableDisconnectPacket packet = disconnectOutboundOutput.getDisconnectPacket();
+            final ModifiableOutboundDisconnectPacket packet = disconnectOutboundOutput.getDisconnectPacket();
             packet.setReasonString("modified");
         }
     }
-
 
     public static class TestExceptionOutboundInterceptor implements DisconnectOutboundInterceptor {
 

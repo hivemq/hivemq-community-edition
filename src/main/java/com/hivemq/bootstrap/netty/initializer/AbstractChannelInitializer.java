@@ -117,7 +117,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
 
-        ch.pipeline().addLast(DISCONNECT_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectHandler());
+        ch.pipeline().addLast(DISCONNECT_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInterceptorHandler());
         ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
 
         ch.pipeline().addLast(MQTT_QOS_RECEIVER_HANDLER, channelDependencies.getQoSReceiverHandler());

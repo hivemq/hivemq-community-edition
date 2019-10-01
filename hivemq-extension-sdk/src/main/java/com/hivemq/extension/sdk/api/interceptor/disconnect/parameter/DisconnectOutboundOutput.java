@@ -2,9 +2,12 @@ package com.hivemq.extension.sdk.api.interceptor.disconnect.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
+
+import java.time.Duration;
 
 /**
  * This is the output parameter of any {@link DisconnectOutboundInterceptor} providing methods to define the outcome of
@@ -18,9 +21,20 @@ public interface DisconnectOutboundOutput extends SimpleAsyncOutput<DisconnectOu
     /**
      * Use this object to make changes to the outbound DISCONNECT.
      *
-     * @return a {@link ModifiableDisconnectPacket}
+     * @return a {@link ModifiableOutboundDisconnectPacket}
      */
-    @NotNull ModifiableDisconnectPacket getDisconnectPacket();
+    @NotNull ModifiableOutboundDisconnectPacket getDisconnectPacket();
+
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     *
+     * @param timeout Timeout that HiveMQ waits for the result of the async operation.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.3.0
+     */
+    @NotNull Async<DisconnectOutboundOutput> async(@NotNull Duration timeout);
 
 
 }

@@ -1,32 +1,30 @@
 package com.hivemq.extensions.packets.disconnect;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * @author Robin Atherton
  */
-public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacket {
+public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboundDisconnectPacket {
 
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
     private @NotNull DisconnectReasonCode reasonCode;
 
 
-    private long sessionExpiryInterval;
+    private final long sessionExpiryInterval;
     private @NotNull String reasonString;
     private @NotNull String serverReference;
     private final @Nullable ModifiableUserPropertiesImpl userProperties;
 
-    public ModifiableDisconnectPacketImpl(
+    public ModifiableOutboundDisconnectPacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull DISCONNECT originalDisconnect) {
         this.configurationService = fullConfigurationService;
@@ -41,7 +39,7 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
 
     @Override
-    public synchronized void setReasonString(final @NotNull String reasonString) {
+    public void setReasonString(final @NotNull String reasonString) {
         this.reasonString = reasonString;
         modified = true;
     }
@@ -52,19 +50,6 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
         modified = true;
     }
 
-    @Override
-    public synchronized void setSessionExpiryInterval(final long sessionExpiryInterval) {
-        if (!modified && this.sessionExpiryInterval == 0) {
-            return;
-        }
-        this.sessionExpiryInterval = sessionExpiryInterval;
-        final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
-        checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must NOT be less than 0");
-        checkArgument(
-                sessionExpiryInterval < configuredMaximum,
-                "Expiry interval must be less than the configured maximum of" + configuredMaximum);
-        modified = true;
-    }
 
     @Override
     public synchronized void setServerReference(final @NotNull String serverReference) {
@@ -77,16 +62,19 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
         return modified || userProperties.isModified();
     }
 
+    @NotNull
     @Override
     public String getServerReference() {
         return this.serverReference;
     }
 
+    @NotNull
     @Override
     public DisconnectReasonCode getReasonCode() {
         return reasonCode;
     }
 
+    @NotNull
     @Override
     public String getReasonString() {
         return this.reasonString;
