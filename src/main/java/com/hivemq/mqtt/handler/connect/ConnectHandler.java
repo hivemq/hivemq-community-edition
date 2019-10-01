@@ -720,7 +720,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                         msg.getClientIdentifier());
 
                 oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
-                eventLog.clientWasDisconnected(oldClient, "Another client connected with the same client id");
+                final String reason = "Another client connected with the same client id";
+                eventLog.clientWasDisconnected(oldClient, reason);
+                oldClient.pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(DisconnectedReasonCode.SESSION_TAKEN_OVER, reason, msg.getUserProperties()));
                 if (disconnectFuture != null) {
                     // The disconnect future is not set in case the client is not fully connected yet
                     oldClient.close();

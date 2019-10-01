@@ -607,7 +607,7 @@ public class ConnectHandlerTest {
     }
 
     @Test
-    public void test_client_takeover() {
+    public void test_client_takeover() throws InterruptedException {
 
         final EmbeddedChannel oldChannel = new EmbeddedChannel(new DummyHandler());
 
@@ -620,15 +620,19 @@ public class ConnectHandlerTest {
                 .withClientIdentifier("sameClientId")
                 .build();
 
+        final CountDownLatch eventLatch = new CountDownLatch(1);
+        oldChannel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
+
         embeddedChannel.writeInbound(connect1);
 
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
         assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
-    public void test_client_takeover_retry() {
+    public void test_client_takeover_retry() throws InterruptedException {
 
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         final EmbeddedChannel oldChannel = new EmbeddedChannel(new DummyHandler());
@@ -644,6 +648,9 @@ public class ConnectHandlerTest {
                 .withClientIdentifier("sameClientId")
                 .build();
 
+        final CountDownLatch eventLatch = new CountDownLatch(1);
+        oldChannel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
+
         embeddedChannel.writeInbound(connect1);
 
         assertTrue(oldChannel.isOpen());
@@ -657,6 +664,7 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
         assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
