@@ -82,13 +82,13 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePubrel(ctx, (PUBREL) msg, promise)) {
+        if (!handleOutboundPubrel(ctx, (PUBREL) msg, promise)) {
             super.write(ctx, msg, promise);
         }
 
     }
 
-    private boolean handlePubrel(
+    private boolean handleOutboundPubrel(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBREL pubrel,
             final @NotNull ChannelPromise promise) {
