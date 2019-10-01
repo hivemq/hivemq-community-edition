@@ -382,7 +382,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                             " characters. This is not allowed.";
             final String eventlogMessage = "Sent CONNECT with Client identifier too long";
             final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
-                    ReasonStrings.CONNACK_CLIENT_IDENTIFIER_TOO_LONG, msg.getUserProperties());
+                    ReasonStrings.CONNACK_CLIENT_IDENTIFIER_TOO_LONG, Mqtt5UserProperties.NO_USER_PROPERTIES);
             mqttConnacker.connackError(ctx.channel(), logMessage, eventlogMessage,
                     Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                     Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED,
@@ -395,7 +395,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private boolean checkWillPublish(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
         if (msg.getWillPublish() != null) {
             if (Topics.containsWildcard(msg.getWillPublish().getTopic())) {
-                final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.TOPIC_NAME_INVALID, ReasonStrings.CONNACK_NOT_AUTHORIZED_WILL_WILDCARD, msg.getUserProperties());
+                final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.TOPIC_NAME_INVALID,
+                        ReasonStrings.CONNACK_NOT_AUTHORIZED_WILL_WILDCARD, Mqtt5UserProperties.NO_USER_PROPERTIES);
                 mqttConnacker.connackError(ctx.channel(),
                         "A client (IP: {}) sent a CONNECT with a wildcard character in the Will Topic (# or +). This is not allowed.",
                         "Sent CONNECT with wildcard character in the Will Topic (#/+)",
@@ -409,7 +410,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final int maxQos = configurationService.mqttConfiguration().maximumQos().getQosNumber();
             if (willQos > maxQos) {
                 final String reasonString = String.format(ReasonStrings.CONNACK_QOS_NOT_SUPPORTED_WILL, willQos, maxQos);
-                final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.QOS_NOT_SUPPORTED, reasonString, msg.getUserProperties());
+                final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.QOS_NOT_SUPPORTED, reasonString,
+                        Mqtt5UserProperties.NO_USER_PROPERTIES);
                 mqttConnacker.connackError(ctx.channel(),
                         "A client (IP: {}) sent a CONNECT with a Will QoS higher than the maximum configured QoS. This is not allowed.",
                         "Sent CONNECT with Will QoS (" + willQos + ") higher than the allowed maximum (" + maxQos + ")",
@@ -424,7 +426,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private boolean checkWillRetained(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
         if (msg.getWillPublish() != null && msg.getWillPublish().isRetain() &&
                 !configurationService.mqttConfiguration().retainedMessagesEnabled()) {
-            final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.RETAIN_NOT_SUPPORTED, ReasonStrings.CONNACK_RETAIN_NOT_SUPPORTED, msg.getUserProperties());
+            final OnServerDisconnectEvent event = new OnServerDisconnectEvent(DisconnectedReasonCode.RETAIN_NOT_SUPPORTED,
+                    ReasonStrings.CONNACK_RETAIN_NOT_SUPPORTED, Mqtt5UserProperties.NO_USER_PROPERTIES);
             mqttConnacker.connackError(ctx.channel(),
                     "A client (IP: {}) sent a CONNECT with Will Retain set to 1 although retain is not available.",
                     "Sent a CONNECT with Will Retain set to 1 although retain is not available",

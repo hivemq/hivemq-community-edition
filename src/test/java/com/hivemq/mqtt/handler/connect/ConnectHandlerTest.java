@@ -29,6 +29,7 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
+import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
@@ -696,8 +697,9 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        final CONNECT connect1 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("sameClientId")
+                .withMqtt5UserProperties(Mqtt5UserProperties.of(new MqttUserProperty("test", "test")))
                 .build();
 
         embeddedChannel.writeInbound(connect1);
@@ -742,7 +744,7 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        final CONNECT connect1 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv5)
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("sameClientId")
                 .build();
 
@@ -1449,7 +1451,10 @@ public class ConnectHandlerTest {
         @Override
         public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
             if (evt instanceof OnServerDisconnectEvent) {
-                eventLatch.countDown();
+                final UserProperties userProperties = ((OnServerDisconnectEvent) evt).getUserProperties();
+                if (userProperties == null || userProperties.isEmpty()) {
+                    eventLatch.countDown();
+                }
             }
         }
     }
