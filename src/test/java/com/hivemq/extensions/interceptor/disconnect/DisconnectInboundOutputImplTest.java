@@ -1,7 +1,7 @@
 package com.hivemq.extensions.interceptor.disconnect;
 
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import org.junit.Before;
@@ -32,12 +32,12 @@ public class DisconnectInboundOutputImplTest {
 
     @Test
     public void test_getModifiable() {
-        final ModifiableDisconnectPacket modifiableDisconnectPacket = output.get().getDisconnectPacket();
-        assertEquals(disconnect.getServerReference(), modifiableDisconnectPacket.getServerReference());
-        assertEquals(disconnect.getSessionExpiryInterval(), modifiableDisconnectPacket.getSessionExpiryInterval());
-        assertEquals(disconnect.getReasonCode().name(), modifiableDisconnectPacket.getReasonCode().name());
-        assertEquals(disconnect.getReasonString(), modifiableDisconnectPacket.getReasonString());
+        final ModifiableInboundDisconnectPacket modifiableInboundDisconnectPacket = output.get().getDisconnectPacket();
+        assertEquals(disconnect.getServerReference(), modifiableInboundDisconnectPacket.getServerReference());
+        assertEquals(disconnect.getSessionExpiryInterval(), modifiableInboundDisconnectPacket.getSessionExpiryInterval());
+        assertEquals(disconnect.getReasonCode().name(), modifiableInboundDisconnectPacket.getReasonCode().name());
+        assertEquals(disconnect.getReasonString(), modifiableInboundDisconnectPacket.getReasonString());
         assertEquals(
-                disconnect.getUserProperties().size(), modifiableDisconnectPacket.getUserProperties().asList().size());
+                disconnect.getUserProperties().size(), modifiableInboundDisconnectPacket.getUserProperties().asList().size());
     }
 }

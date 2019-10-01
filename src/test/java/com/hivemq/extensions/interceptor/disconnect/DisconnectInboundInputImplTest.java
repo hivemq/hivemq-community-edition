@@ -2,9 +2,9 @@ package com.hivemq.extensions.interceptor.disconnect;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
-import com.hivemq.extensions.packets.disconnect.ModifiableDisconnectPacketImpl;
+import com.hivemq.extensions.packets.disconnect.ModifiableInboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -99,8 +99,8 @@ public class DisconnectInboundInputImplTest {
                 new TestConfigurationBootstrap().getFullConfigurationService();
         final DISCONNECT disconnect = TestMessageUtil.createFullMqtt5Disconnect();
 
-        final ModifiableDisconnectPacket disconnectPacket =
-                new ModifiableDisconnectPacketImpl(fullConfigurationService, disconnect);
+        final ModifiableInboundDisconnectPacket disconnectPacket =
+                new ModifiableInboundDisconnectPacketImpl(fullConfigurationService, disconnect);
         disconnectPacket.setReasonString("modified");
 
         Assert.assertEquals("modified", disconnectPacket.getReasonString());

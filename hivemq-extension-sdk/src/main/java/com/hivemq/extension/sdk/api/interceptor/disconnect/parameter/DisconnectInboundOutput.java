@@ -5,7 +5,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 
 import java.time.Duration;
 
@@ -26,9 +26,9 @@ public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInb
     /**
      * Use this object to make any changes to the DISCONNECT message.
      *
-     * @return a {@link ModifiableDisconnectPacket} disconnect packet.
+     * @return a {@link ModifiableInboundDisconnectPacket} disconnect packet.
      */
-    @NotNull ModifiableDisconnectPacket getDisconnectPacket();
+    @NotNull ModifiableInboundDisconnectPacket getDisconnectPacket();
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.

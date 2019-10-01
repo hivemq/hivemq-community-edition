@@ -8,7 +8,7 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInte
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -275,7 +275,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         @Override
         public void onInboundDisconnect(@NotNull final DisconnectInboundInput disconnectInboundInput, @NotNull final DisconnectInboundOutput disconnectInboundOutput) {
-            final ModifiableDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
+            final ModifiableInboundDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
             packet.setReasonString("modified");
         }
     }
@@ -297,7 +297,7 @@ public class DisconnectInboundInterceptorHandlerTest {
         public void onInboundDisconnect(
                 final @NotNull DisconnectInboundInput disconnectInboundInput,
                 final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
-            final ModifiableDisconnectPacket disconnectPacket =
+            final ModifiableInboundDisconnectPacket disconnectPacket =
                     disconnectInboundOutput.getDisconnectPacket();
             disconnectPacket.setReasonString("modified");
             disconnectPacket.setReasonCode(DisconnectReasonCode.ADMINISTRATIVE_ACTION);

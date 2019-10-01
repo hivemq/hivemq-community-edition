@@ -1,5 +1,6 @@
 package com.hivemq.extensions.packets.disconnect;
 
+import com.google.common.base.Preconditions;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -7,7 +8,10 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
+import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+
+import java.util.Objects;
 
 /**
  * @author Robin Atherton
@@ -40,12 +44,21 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public void setReasonString(final @NotNull String reasonString) {
+        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.reasonString, reasonString)) {
+            return;
+        }
         this.reasonString = reasonString;
         modified = true;
     }
 
     @Override
     public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+        Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
+        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.reasonCode, reasonCode)) {
+            return;
+        }
         this.reasonCode = reasonCode;
         modified = true;
     }
@@ -53,6 +66,10 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public synchronized void setServerReference(final @NotNull String serverReference) {
+        PluginBuilderUtil.checkServerReference(serverReference, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.serverReference, serverReference)) {
+            return;
+        }
         this.serverReference = serverReference;
         modified = true;
     }

@@ -1,20 +1,24 @@
 package com.hivemq.extensions.packets.disconnect;
 
+import com.google.common.base.Preconditions;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
-import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableDisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
+import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author Robin Atherton
  */
-public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacket {
+public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundDisconnectPacket {
 
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
@@ -22,11 +26,11 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
 
     private long sessionExpiryInterval;
-    private @NotNull String reasonString;
-    private @NotNull String serverReference;
+    private String reasonString;
+    private String serverReference;
     private final @Nullable ModifiableUserPropertiesImpl userProperties;
 
-    public ModifiableDisconnectPacketImpl(
+    public ModifiableInboundDisconnectPacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull DISCONNECT originalDisconnect) {
         this.configurationService = fullConfigurationService;
@@ -41,13 +45,23 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
 
     @Override
-    public synchronized void setReasonString(final @NotNull String reasonString) {
+    public void setReasonString(final @NotNull String reasonString) {
+        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.reasonString, reasonString)) {
+            return;
+        }
         this.reasonString = reasonString;
         modified = true;
     }
 
     @Override
     public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+        Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
+        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
+
+        if (Objects.equals(this.reasonCode, reasonCode)) {
+            return;
+        }
         this.reasonCode = reasonCode;
         modified = true;
     }
@@ -68,6 +82,10 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
 
     @Override
     public synchronized void setServerReference(final @NotNull String serverReference) {
+        PluginBuilderUtil.checkServerReference(serverReference, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.serverReference, serverReference)) {
+            return;
+        }
         this.serverReference = serverReference;
         modified = true;
     }
@@ -77,16 +95,19 @@ public class ModifiableDisconnectPacketImpl implements ModifiableDisconnectPacke
         return modified || userProperties.isModified();
     }
 
+    @NotNull
     @Override
     public String getServerReference() {
         return this.serverReference;
     }
 
+    @NotNull
     @Override
     public DisconnectReasonCode getReasonCode() {
         return reasonCode;
     }
 
+    @NotNull
     @Override
     public String getReasonString() {
         return this.reasonString;
