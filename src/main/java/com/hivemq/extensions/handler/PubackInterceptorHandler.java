@@ -82,13 +82,13 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             super.write(ctx, msg, promise);
             return;
         }
-        if (!handlePuback(ctx, (PUBACK) msg, promise)) {
+        if (!handleOutboundPuback(ctx, (PUBACK) msg, promise)) {
             super.write(ctx, msg, promise);
         }
 
     }
 
-    private boolean handlePuback(
+    private boolean handleOutboundPuback(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBACK puback,
             final @NotNull ChannelPromise promise) {
