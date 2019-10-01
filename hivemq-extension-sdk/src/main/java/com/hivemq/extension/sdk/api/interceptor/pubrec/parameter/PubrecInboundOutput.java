@@ -28,7 +28,7 @@ public interface PubrecInboundOutput extends SimpleAsyncOutput<PubrecInboundOutp
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results in an unmodified PUBREC sent to the server.
+     * In that case an unmodified PUBREC is forwarded to the server, all changes made by this interceptor are not passed on.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
