@@ -50,8 +50,10 @@ import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -716,27 +718,54 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                     }
                 }
 
-                log.debug("Disconnecting already connected client with id {} because another client connects with that id",
-                        msg.getClientIdentifier());
-
-                oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
-                eventLog.clientWasDisconnected(oldClient, "Another client connected with the same client id");
-                if (disconnectFuture != null) {
-                    // The disconnect future is not set in case the client is not fully connected yet
-                    oldClient.close();
-                    Checkpoints.checkpoint("ClientTakeOverDisconnected");
-                    return disconnectFuture;
-                } else {
-                    final SettableFuture<Void> resultFuture = SettableFuture.create();
-                    final ChannelFuture channelFuture = oldClient.close();
-                    channelFuture.addListener(future -> resultFuture.set(null));
-                    Checkpoints.checkpoint("ClientTakeOverDisconnected");
-                    return resultFuture;
-                }
+                return disconnectPreviousClient(msg, oldClient, disconnectFuture);
             }
             return Futures.immediateFuture(null);
         } finally {
             lock.unlock();
+        }
+    }
+
+    @NotNull
+    private ListenableFuture<Void> disconnectPreviousClient(final @NotNull CONNECT msg, @NotNull final Channel oldClient,
+                                                            @Nullable final SettableFuture<Void> disconnectFuture) {
+
+        log.debug("Disconnecting already connected client with id {} because another client connects with that id",
+                msg.getClientIdentifier());
+
+        oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
+        eventLog.clientWasDisconnected(oldClient, ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
+
+        final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER, Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null, SESSION_EXPIRY_NOT_SET);
+
+        if (oldClient.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
+            oldClient.pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
+        }
+
+        if (disconnectFuture != null) {
+            if (ProtocolVersion.MQTTv5 == oldClient.attr(ChannelAttributes.MQTT_VERSION).get()) {
+                oldClient.writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                oldClient.close();
+            }
+            Checkpoints.checkpoint("ClientTakeOverDisconnected");
+            return disconnectFuture;
+        } else {
+            // The disconnect future is not set in case the client is not fully connected yet
+            final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+            if (ProtocolVersion.MQTTv5 == oldClient.attr(ChannelAttributes.MQTT_VERSION).get()) {
+                oldClient.writeAndFlush(disconnect).addListener(future -> {
+                    oldClient.close().addListener(closeFuture -> resultFuture.set(null));
+                });
+            } else {
+                oldClient.close().addListener(closeFuture -> resultFuture.set(null));
+            }
+
+            Checkpoints.checkpoint("ClientTakeOverDisconnected");
+            return resultFuture;
         }
     }
 
