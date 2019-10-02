@@ -50,5 +50,6 @@ public class Mqtt3ServerDisconnector implements MqttServerDisconnector {
             mqttDisconnectUtil.logDisconnect(channel, logMessage, eventLogMessage);
             mqttDisconnectUtil.disconnect(channel);
         }
+
     }
 }

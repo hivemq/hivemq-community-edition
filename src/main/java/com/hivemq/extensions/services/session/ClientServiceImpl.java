@@ -37,6 +37,7 @@ import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.extensions.services.general.IterationContextImpl;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -131,16 +132,15 @@ public class ClientServiceImpl implements ClientService {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        if (reasonCode != null && reasonString != null) {
-            return ListenableFutureConverter.toCompletable(
-                    clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION, reasonCode,
-                            reasonString), managedExtensionExecutorService);
-        } else {
-            return ListenableFutureConverter.toCompletable(
-                    clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION),
-                    managedExtensionExecutorService);
-        }
 
+        final Mqtt5DisconnectReasonCode disconnectReasonCode =
+                reasonCode != null ? Mqtt5DisconnectReasonCode.valueOf(reasonCode.name()) : null;
+
+        final ListenableFuture<Boolean> disconnectFuture =
+                clientSessionPersistence.forceDisconnectClient(
+                        clientId, preventWillMessage, EXTENSION, disconnectReasonCode, reasonString);
+
+        return ListenableFutureConverter.toCompletable(disconnectFuture, managedExtensionExecutorService);
     }
 
     @NotNull
@@ -192,8 +192,7 @@ public class ClientServiceImpl implements ClientService {
         final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
                 new AllClientsFetchCallback(clientSessionPersistence);
         final AsyncIterator<ChunkCursor, SessionInformation>
-                asyncIterator = asyncIteratorFactory.createIterator(
-                fetchCallback,
+                asyncIterator = asyncIteratorFactory.createIterator(fetchCallback,
                 new AllClientsItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();

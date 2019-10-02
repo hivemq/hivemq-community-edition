@@ -89,19 +89,6 @@ public interface ClientService {
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId);
 
     /**
-     * @param clientId The client identifier of the client to disconnect.
-     * @param preventWillMessage If <b>true</b> the Will message for this client is not published when the client gets
-     *                          disconnected.
-     * @param reasonCode The reason for disconnecting this client.
-     * @param reasonString The reason for disconnecting this client as a String.
-     * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
-     * disconnected and <b>false</b> if no client with that id was found.
-     */
-    @NotNull CompletableFuture<Boolean> disconnectClient(
-            @NotNull String clientId, boolean preventWillMessage, @Nullable DisconnectReasonCode reasonCode,
-            @Nullable String reasonString);
-
-    /**
      * Forcefully disconnect a client with the specified clientId.
      * <p>
      * Setting the boolean parameter to true will prevent the sending of potential Will messages the client may have
@@ -118,6 +105,26 @@ public interface ClientService {
      * @since 4.0.0
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage);
+
+    /**
+     * Forcefully disconnect a client with the specified clientId.
+     * <p>
+     * Setting the boolean parameter to true will prevent the sending of potential Will messages the client may have
+     * specified in its CONNECT packet.
+     * <p>
+     * {@link CompletableFuture} fails with a {@link RateLimitExceededException} if the extension service rate limit was
+     * exceeded.
+     *
+     * @param clientId           The client identifier of the client to disconnect.
+     * @param preventWillMessage If <b>true</b> the Will message for this client is not published when the client gets
+     *                           disconnected.
+     * @param reasonCode         The reason for disconnecting this client.
+     * @param reasonString       The reason for disconnecting this client as a String.
+     * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
+     * disconnected and <b>false</b> if no client with that id was found.
+     */
+    @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage,
+                                                         @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
 
     /**
      * Invalidates the client session for a client with the given client identifier. If the client is currently

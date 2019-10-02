@@ -32,6 +32,7 @@ import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -139,7 +140,7 @@ public class ClientServiceImplTest {
     @Test(expected = ExecutionException.class)
     public void test_disconnect_prevent_lwt_failed() throws Throwable {
 
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
         clientService.disconnectClient(clientId, true).get();
 
     }
@@ -147,7 +148,7 @@ public class ClientServiceImplTest {
     @Test(expected = ExecutionException.class)
     public void test_disconnect_do_not_prevent_lwt_failed() throws Throwable {
 
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
         clientService.disconnectClient(clientId).get();
 
     }
@@ -215,38 +216,38 @@ public class ClientServiceImplTest {
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_null_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION)).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(null));
         assertEquals(null, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_true_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION)).thenReturn(Futures.immediateFuture(true));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(true));
         assertEquals(true, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_false_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION)).thenReturn(Futures.immediateFuture(false));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(false));
         assertEquals(false, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_null_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION)).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(null));
         assertEquals(null, clientService.disconnectClient(clientId, true).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_true_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION)).thenReturn(Futures.immediateFuture(true));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(true));
         assertEquals(true, clientService.disconnectClient(clientId, true).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_with_reason_Code() throws Throwable {
         when(clientSessionPersistence.forceDisconnectClient(
-                clientId, true, EXTENSION, DisconnectReasonCode.NORMAL_DISCONNECTION,
+                clientId, true, EXTENSION, Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                 "Disconnecting Normally")).thenReturn(Futures.immediateFuture(true));
         assertEquals(
                 true, clientService.disconnectClient(clientId, true, DisconnectReasonCode.NORMAL_DISCONNECTION,
@@ -255,7 +256,7 @@ public class ClientServiceImplTest {
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_false_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION)).thenReturn(Futures.immediateFuture(false));
+        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(Futures.immediateFuture(false));
         assertEquals(false, clientService.disconnectClient(clientId, true).get());
     }
 
