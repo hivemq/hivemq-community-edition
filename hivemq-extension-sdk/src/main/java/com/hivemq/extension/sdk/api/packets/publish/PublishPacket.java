@@ -123,8 +123,9 @@ public interface PublishPacket {
      * Convenience method to retrieve correlation data as a byte array.
      *
      * @return the correlation data as a byte array.
+     * @since 4.3.0
      */
-    Optional<byte[]> getCorrelationDataAsArray();
+    Optional<byte[]> getCorrelationDataAsByteArray();
 
     /**
      * The list of subscription identifiers for PUBLISH.

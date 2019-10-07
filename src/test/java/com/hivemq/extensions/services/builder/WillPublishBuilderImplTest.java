@@ -18,7 +18,6 @@ package com.hivemq.extensions.services.builder;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -39,7 +38,6 @@ import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -389,9 +387,9 @@ public class WillPublishBuilderImplTest {
         }
 
         @Override
-        public @Nullable byte[] getCorrelationDataAsArray() {
+        public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
             final byte[] correlationBytes = "correlation_data".getBytes();
-            return Arrays.copyOf(correlationBytes, correlationBytes.length);
+            return Optional.of(correlationBytes);
         }
 
         @Override
@@ -474,7 +472,7 @@ public class WillPublishBuilderImplTest {
         }
 
         @Override
-        public @Nullable byte[] getCorrelationDataAsArray() {
+        public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
             return null;
         }
 

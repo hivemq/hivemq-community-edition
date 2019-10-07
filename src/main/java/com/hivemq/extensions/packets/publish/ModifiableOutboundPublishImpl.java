@@ -33,7 +33,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -260,11 +259,11 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public @Nullable byte[] getCorrelationDataAsArray() {
-        if (correlationData != null) {
-            return Arrays.copyOf(correlationData.array(), correlationData.array().length);
+    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
+        if (correlationData == null) {
+            return Optional.empty();
         } else {
-            return null;
+            return Optional.of(publish.getCorrelationData());
         }
     }
 

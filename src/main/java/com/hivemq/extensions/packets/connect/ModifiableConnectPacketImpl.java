@@ -262,6 +262,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         modified = true;
     }
 
+
     @Override
     public synchronized void setUserName(final @Nullable String userName) {
         if (Objects.equals(this.userName, userName)) {
@@ -367,6 +368,14 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
+    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
+        if (authData == null) {
+            return Optional.empty();
+        }
+        return Optional.of(authData.array());
+    }
+
+    @Override
     public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
@@ -382,5 +391,13 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
             return Optional.empty();
         }
         return Optional.of(password.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getPasswordAsByteArray() {
+        if (password == null) {
+            return Optional.empty();
+        }
+        return Optional.of(password.array());
     }
 }
