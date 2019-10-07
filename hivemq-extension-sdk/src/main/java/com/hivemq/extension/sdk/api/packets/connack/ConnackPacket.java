@@ -245,8 +245,8 @@ public interface ConnackPacket {
     /**
      * Convenience method to retrieve authentication data as a byte array.
      *
-     * @return the authentication data as a byte array.
+     * @return the authentication data as a an optional byte array.
      */
-    @Nullable byte[] getAuthenticationDataAsArray();
+    @Nullable Optional<byte[]> getAuthenticationDataAsByteArray();
 
 }
