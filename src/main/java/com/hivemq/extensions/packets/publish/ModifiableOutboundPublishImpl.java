@@ -260,7 +260,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
 
     @Override
     public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-        if (correlationData == null) {
+        if (publish.getCorrelationData() == null) {
             return Optional.empty();
         } else {
             return Optional.of(publish.getCorrelationData());

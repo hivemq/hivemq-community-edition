@@ -108,7 +108,7 @@ public interface ModifiablePublishPacket extends PublishPacket {
      *
      * @param correlationData The new correlation data for the publish.
      */
-    void setCorrelationData(byte[] correlationData);
+    void setCorrelationData(@Nullable byte[] correlationData);
 
     /**
      * Sets the content type.
@@ -128,6 +128,14 @@ public interface ModifiablePublishPacket extends PublishPacket {
      * @since 4.0.0
      */
     void setPayload(@NotNull ByteBuffer payload);
+
+    /**
+     * Sets the payload.
+     *
+     * @param payload The new payload for the publish as a byte array.
+     * @throws NullPointerException If payload is null.
+     */
+    void setPayload(@NotNull byte[] payload);
 
     /**
      * Get the modifiable {@link UserProperties} of the PUBLISH packet.

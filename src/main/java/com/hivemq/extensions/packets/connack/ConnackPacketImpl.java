@@ -157,9 +157,8 @@ public class ConnackPacketImpl implements ConnackPacket {
         return Optional.ofNullable(authenticationData);
     }
 
-    @Nullable
     @Override
-    public Optional<byte[]> getAuthenticationDataAsByteArray() {
+    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
         if (authenticationData != null) {
             return Optional.of(authenticationData.array());
         } else {

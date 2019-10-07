@@ -473,7 +473,8 @@ public class WillPublishBuilderImplTest {
 
         @Override
         public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-            return null;
+            final byte[] correlationBytes = "correlation_data".getBytes();
+            return Optional.of(correlationBytes);
         }
 
         @Override

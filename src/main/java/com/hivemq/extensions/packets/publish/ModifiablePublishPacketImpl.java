@@ -34,10 +34,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,7 +57,6 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     private long messageExpiryInterval;
     private @Nullable String responseTopic;
     private @Nullable ByteBuffer correlationData;
-    private @Nullable byte[] correlationDataBytes;
     private final @Nullable List<Integer> subscriptionIdentifiers;
     private @Nullable String contentType;
     private @Nullable ByteBuffer payload;
@@ -90,7 +86,6 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.messageExpiryInterval = publish.getMessageExpiryInterval();
         this.responseTopic = publish.getResponseTopic();
         this.correlationData = publish.getCorrelationData() != null ? ByteBuffer.wrap(publish.getCorrelationData()).asReadOnlyBuffer() : null;
-        this.correlationDataBytes = publish.getCorrelationData();
         this.subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         this.contentType = publish.getContentType();
         this.payload = publish.getPayload() != null ? ByteBuffer.wrap(publish.getPayload()).asReadOnlyBuffer() : null;
@@ -125,21 +120,12 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.messageExpiryInterval = messageExpiryInterval;
         this.responseTopic = responseTopic;
         this.correlationData = correlationData;
-        this.correlationDataBytes = convertCorrelationDataToBytes(correlationData);
         this.subscriptionIdentifiers = subscriptionIdentifiers;
         this.contentType = contentType;
         this.payload = payload;
         this.userProperties = new ModifiableUserPropertiesImpl(userProperties, configurationService.securityConfiguration().validateUTF8());
         this.packetId = packetId;
         this.duplicateDelivery = duplicateDelivery;
-    }
-
-    private byte[] convertCorrelationDataToBytes(final @Nullable ByteBuffer correlationData) {
-        if (correlationData != null) {
-            return correlationData.array();
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -237,14 +223,15 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setCorrelationData(final byte[] correlationData) {
-        if (correlationData != null && Arrays.equals(correlationData, this.correlationDataBytes)) {
+    public void setCorrelationData(final @Nullable byte[] correlationData) {
+        //ignore unnecessary change
+        if (correlationData != null && Arrays.equals(correlationData, Objects.requireNonNull(this.correlationData).array())) {
             return;
         }
-        if (correlationData == null && this.correlationDataBytes == null) {
+        if (correlationData == null && this.correlationData == null) {
             return;
         }
-        this.correlationDataBytes = correlationData;
+        this.correlationData = ByteBuffer.wrap(Objects.requireNonNull(correlationData));
         this.modified = true;
     }
 
@@ -271,6 +258,17 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
             return;
         }
         this.payload = payload;
+        this.modified = true;
+    }
+
+    @Override
+    public void setPayload(@NotNull final byte[] payload) {
+        Preconditions.checkNotNull(payload, "payload must never be null");
+        if (payload.equals(this.payload)) {
+            //deny unnecessary change
+            return;
+        }
+        this.payload = ByteBuffer.wrap(payload);
         this.modified = true;
     }
 
@@ -327,7 +325,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         if (correlationData == null) {
             return Optional.empty();
         } else {
-            return Optional.of(correlationDataBytes);
+            return Optional.of(correlationData.array());
         }
     }
 
