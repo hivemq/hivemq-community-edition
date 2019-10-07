@@ -1,7 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.puback.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
@@ -24,7 +23,6 @@ public interface PubackOutboundOutput extends SimpleAsyncOutput<PubackOutboundOu
      *
      * @return An modifiable {@link PubackPacket}
      */
-    @Immutable
     @NotNull ModifiablePubackPacket getPubackPacket();
 
     /**

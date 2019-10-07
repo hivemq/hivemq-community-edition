@@ -15,6 +15,12 @@ import java.util.Optional;
  */
 public interface PubackPacket {
 
+    /**
+     * The packet identifier of the PUBACK.
+     *
+     * @return The packet identifier.
+     * @since 4.3.0
+     */
     int getPacketIdentifier();
 
     /**
