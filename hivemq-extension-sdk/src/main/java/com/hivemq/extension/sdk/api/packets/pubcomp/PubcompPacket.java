@@ -15,6 +15,12 @@ import java.util.Optional;
  */
 public interface PubcompPacket {
 
+    /**
+     * The packet identifier of the PUBCOMP.
+     *
+     * @return The packet identifier.
+     * @since 4.3.0
+     */
     int getPacketIdentifier();
 
     /**
