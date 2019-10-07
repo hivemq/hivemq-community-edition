@@ -1,7 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
@@ -24,7 +23,6 @@ public interface PubcompOutboundOutput extends SimpleAsyncOutput<PubcompOutbound
      *
      * @return An modifiable {@link PubcompPacket}
      */
-    @Immutable
     @NotNull ModifiablePubcompPacket getPubcompPacket();
 
     /**
