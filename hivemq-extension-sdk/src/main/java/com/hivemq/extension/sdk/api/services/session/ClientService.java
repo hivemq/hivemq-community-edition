@@ -39,6 +39,7 @@ import java.util.concurrent.Executor;
  * @author Lukas Brandl
  * @author Christoph Schäbel
  * @author Florian Limpöck
+ * @author Robin Atherton
  * @since 4.0.0
  */
 @DoNotImplement
@@ -91,6 +92,9 @@ public interface ClientService {
     /**
      * Forcefully disconnect a client with the specified clientId.
      * <p>
+     * If a specific reason code and/or reason string should be sent with the DISCONNECT packet use
+     * {@link ClientService#disconnectClient(String, boolean, DisconnectReasonCode, String)}.
+     * <p>
      * Setting the boolean parameter to true will prevent the sending of potential Will messages the client may have
      * specified in its CONNECT packet.
      * <p>
@@ -100,8 +104,8 @@ public interface ClientService {
      * @param clientId           The client identifier of the client to disconnect.
      * @param preventWillMessage If <b>true</b> the Will message for this client is not published when the client gets
      *                           disconnected.
-     * @return A {@link CompletableFuture} which contains a {@link Boolean} that is true when the client has been
-     * disconnected and false if no client with that id was found.
+     * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
+     * disconnected and <b>false</b> if no client with that id was found.
      * @since 4.0.0
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage);
@@ -109,6 +113,8 @@ public interface ClientService {
     /**
      * Forcefully disconnect a client with the specified clientId.
      * <p>
+     * A specific reason code and/or reason string can be set when wanted.
+     * <p>
      * Setting the boolean parameter to true will prevent the sending of potential Will messages the client may have
      * specified in its CONNECT packet.
      * <p>
@@ -118,10 +124,11 @@ public interface ClientService {
      * @param clientId           The client identifier of the client to disconnect.
      * @param preventWillMessage If <b>true</b> the Will message for this client is not published when the client gets
      *                           disconnected.
-     * @param reasonCode         The reason for disconnecting this client.
-     * @param reasonString       The reason for disconnecting this client as a String.
+     * @param reasonCode         The reason code for disconnecting this client.
+     * @param reasonString       The user defined reason string for disconnecting this client.
      * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
      * disconnected and <b>false</b> if no client with that id was found.
+     * @since 4.3.0
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage,
                                                          @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
