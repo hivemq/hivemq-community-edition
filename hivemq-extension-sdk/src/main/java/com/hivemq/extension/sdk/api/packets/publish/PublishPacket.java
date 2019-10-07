@@ -18,7 +18,6 @@ package com.hivemq.extension.sdk.api.packets.publish;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
@@ -125,7 +124,7 @@ public interface PublishPacket {
      *
      * @return the correlation data as a byte array.
      */
-    @Nullable byte[] getCorrelationDataAsArray();
+    Optional<byte[]> getCorrelationDataAsArray();
 
     /**
      * The list of subscription identifiers for PUBLISH.
