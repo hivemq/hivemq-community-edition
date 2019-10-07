@@ -1,7 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pubrec.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
@@ -23,7 +22,6 @@ public interface PubrecInboundOutput extends SimpleAsyncOutput<PubrecInboundOutp
      *
      * @return A modifiable {@link ModifiablePubrecPacket}
      */
-    @Immutable
     @NotNull ModifiablePubrecPacket getPubrecPacket();
 
     /**
