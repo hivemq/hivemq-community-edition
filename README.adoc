@@ -72,25 +72,8 @@ To execute this image, simply run the following command:
 
 [source,bash]
 ----
-docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 /hivemq/hivemq-ce
+docker run --name hivemq-ce -d -p 1883:1883 hivemq/hivemq-ce
 ----
-
-=== Build Docker image manually
-
-Check out the git repository and build the Docker image.
-
-[source,bash]
-----
-git clone https://github.com/hivemq/hivemq-community-edition.git
-
-cd hivemq-community-edition
-
-docker/build.sh
-
-docker run hivemq/hivemq-ce
-----
-
-You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
 
 == Building from source
 
@@ -113,6 +96,26 @@ cd hivemq-community-edition
 
 The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
 
+=== Building the Docker image
+
+Check out the git repository and build the Docker image.
+
+[source,bash]
+----
+git clone https://github.com/hivemq/hivemq-community-edition.git
+
+cd hivemq-community-edition
+
+docker/build.sh
+
+docker run hivemq/hivemq-ce
+----
+
+The Docker image `hivemq/hivemq-ce` is created locally.
+
+You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
+
+To change the default log level you can set the environment variable `HIVEMQ_LOG_LEVEL` when running the container.
 
 == Start
 Unzip the created binary package 
