@@ -127,7 +127,7 @@ public interface ClientContext {
      * @param pingRespOutboundInterceptor The implementation of a PingResponseOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
-    void removePingResponseOutboundInterceptor(
+    void removePingRespOutboundInterceptor(
             @NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
 
     /**
@@ -137,7 +137,7 @@ public interface ClientContext {
      * @param pingReqInboundInterceptor The implementation of a PingRequestInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
-    void removePingRequestInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+    void removePingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
 
     /**
      * Returns all {@link Interceptor} which are registered for this client.

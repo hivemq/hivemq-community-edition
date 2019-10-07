@@ -92,12 +92,12 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void removePingRequestInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
+    public void removePingReqInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @Override
-    public void removePingResponseOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
+    public void removePingRespOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
