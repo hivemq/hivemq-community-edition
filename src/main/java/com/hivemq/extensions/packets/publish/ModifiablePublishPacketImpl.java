@@ -323,11 +323,11 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public @Nullable byte[] getCorrelationDataAsArray() {
-        if (correlationDataBytes == null) {
-            return null;
+    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
+        if (correlationData == null) {
+            return Optional.empty();
         } else {
-            return Arrays.copyOf(correlationDataBytes, correlationDataBytes.length);
+            return Optional.of(correlationDataBytes);
         }
     }
 

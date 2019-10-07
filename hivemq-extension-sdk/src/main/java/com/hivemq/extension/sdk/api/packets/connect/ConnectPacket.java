@@ -19,10 +19,10 @@ package com.hivemq.extension.sdk.api.packets.connect;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
-import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -181,6 +181,17 @@ public interface ConnectPacket {
     @NotNull Optional<ByteBuffer> getAuthenticationData();
 
     /**
+     * If this property is present it contains the {@link ByteBuffer}s data in array format.
+     * The contents of this data are defined by the authentication method.
+     * <p>
+     * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
+     *
+     * @return An {@link Optional} that contains the authentication data if as an array if present.
+     * @since 4.3.0
+     */
+    @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
+
+    /**
      * The user properties from the CONNECT packet.
      * <p>
      * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
@@ -205,4 +216,12 @@ public interface ConnectPacket {
      * @since 4.0.0
      */
     @NotNull Optional<ByteBuffer> getPassword();
+
+    /**
+     * Returns the password of the client, if it is present, as a byte array.
+     *
+     * @return An {@link Optional} that contains the password as a byte array if present.
+     * @since 4.3.0
+     */
+    @NotNull Optional<byte[]> getPasswordAsByteArray();
 }

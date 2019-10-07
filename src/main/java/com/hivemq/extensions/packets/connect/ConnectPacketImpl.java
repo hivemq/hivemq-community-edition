@@ -117,6 +117,15 @@ public class ConnectPacketImpl implements ConnectPacket {
         return Optional.of(ByteBuffer.wrap(authData));
     }
 
+    @Override
+    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
+        final byte[] authData = connect.getAuthData();
+        if (authData == null) {
+            return Optional.empty();
+        }
+        return Optional.of(authData);
+    }
+
     @NotNull
     @Override
     public UserProperties getUserProperties() {
@@ -137,5 +146,15 @@ public class ConnectPacketImpl implements ConnectPacket {
             return Optional.empty();
         }
         return Optional.of(ByteBuffer.wrap(password));
+    }
+
+    @NotNull
+    @Override
+    public Optional<byte[]> getPasswordAsByteArray() {
+        final byte[] password = connect.getPassword();
+        if (password == null) {
+            return Optional.empty();
+        }
+        return Optional.of(password);
     }
 }
