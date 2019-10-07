@@ -117,8 +117,9 @@ public class ConnectPacketImpl implements ConnectPacket {
         return Optional.of(ByteBuffer.wrap(authData));
     }
 
+    @NotNull
     @Override
-    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
+    public Optional<byte[]> getAuthenticationDataAsByteArray() {
         final byte[] authData = connect.getAuthData();
         if (authData == null) {
             return Optional.empty();

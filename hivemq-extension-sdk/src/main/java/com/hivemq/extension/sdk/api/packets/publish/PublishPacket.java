@@ -120,12 +120,13 @@ public interface PublishPacket {
     @NotNull Optional<@Immutable ByteBuffer> getCorrelationData();
 
     /**
-     * Convenience method to retrieve correlation data as a byte array.
+     * If this property is present, this is the correlation data.
+     * <p>
+     * For an MQTT 3 PUBLISH this MQTT 5 property will always be empty.
      *
-     * @return the correlation data as a byte array.
-     * @since 4.3.0
+     * @return An {@link Optional} that contains the correlation data as an array if present.
      */
-    Optional<byte[]> getCorrelationDataAsByteArray();
+    @NotNull Optional<byte[]> getCorrelationDataAsByteArray();
 
     /**
      * The list of subscription identifiers for PUBLISH.

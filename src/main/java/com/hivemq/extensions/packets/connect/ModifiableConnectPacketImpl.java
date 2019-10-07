@@ -262,7 +262,6 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         modified = true;
     }
 
-
     @Override
     public synchronized void setUserName(final @Nullable String userName) {
         if (Objects.equals(this.userName, userName)) {

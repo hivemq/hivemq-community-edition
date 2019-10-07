@@ -17,7 +17,6 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -99,12 +98,11 @@ public class PublishPacketImpl implements PublishPacket {
     }
 
     @Override
-    public Optional<byte[]> getCorrelationDataAsByteArray() {
-        @Nullable final byte[] correlationData = publish.getCorrelationData();
-        if (correlationData == null) {
+    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
+        if (publish.getCorrelationData() == null) {
             return Optional.empty();
         } else {
-            return Optional.of(correlationData);
+            return Optional.of(publish.getCorrelationData());
         }
     }
 

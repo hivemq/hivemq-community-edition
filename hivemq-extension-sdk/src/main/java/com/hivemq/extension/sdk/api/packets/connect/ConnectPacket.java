@@ -186,8 +186,7 @@ public interface ConnectPacket {
      * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication data if as an array if present.
-     * @since 4.3.0
-     */
+    ≥     */
     @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
 
     /**
@@ -220,7 +219,6 @@ public interface ConnectPacket {
      * Returns the password of the client, if it is present, as a byte array.
      *
      * @return An {@link Optional} that contains the password as a byte array if present.
-     * @since 4.3.0
      */
     @NotNull Optional<byte[]> getPasswordAsByteArray();
 }
