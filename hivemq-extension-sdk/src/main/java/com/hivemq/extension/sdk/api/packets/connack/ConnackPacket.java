@@ -17,7 +17,6 @@
 package com.hivemq.extension.sdk.api.packets.connack;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -243,10 +242,13 @@ public interface ConnackPacket {
     Optional<ByteBuffer> getAuthenticationData();
 
     /**
-     * Convenience method to retrieve authentication data as a byte array.
+     * If this property is present, the {@link ByteBuffer} contains the data used for the extended authentication.
+     * The contents of this data are defined by the authentication method.
+     * <p>
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.
      *
      * @return the authentication data as a an optional byte array.
      */
-    @Nullable Optional<byte[]> getAuthenticationDataAsByteArray();
+    @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
 
 }
