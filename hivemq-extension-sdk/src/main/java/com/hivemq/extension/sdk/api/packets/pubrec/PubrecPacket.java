@@ -15,6 +15,12 @@ import java.util.Optional;
  */
 public interface PubrecPacket {
 
+    /**
+     * The packet identifier of the PUBREC.
+     *
+     * @return The packet identifier.
+     * @since 4.3.0
+     */
     int getPacketIdentifier();
 
     /**
