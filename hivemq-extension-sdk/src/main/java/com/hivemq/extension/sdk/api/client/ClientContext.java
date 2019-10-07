@@ -45,19 +45,19 @@ public interface ClientContext {
      * Adds an {@link PingReqInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor
      * will be ignored.
      *
-     * @param pingReqInboundInterceptor The implementation of a PingRequestInInboundInterceptor.
+     * @param pingReqInboundInterceptor The implementation of a PingReqInInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
-    void addPingRequestInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+    void addPingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
 
     /**
      * Adds an {@link PingRespOutboundInterceptor} for this client. <br> Subsequent adding of the same interceptor
      * will be ignored.
      *
-     * @param pingRespOutboundInterceptor The implementation of a PingResponseOutboundInterceptor.
+     * @param pingRespOutboundInterceptor The implementation of a PingRespOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
-    void addPingResponseOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
+    void addPingRespOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
 
     /**
      * Adds an {@link PublishInboundInterceptor} for this client. <br>
@@ -178,18 +178,18 @@ public interface ClientContext {
     /**
      * Returns all {@link PingReqInboundInterceptor} which are registered for this client by this extension.
      *
-     * @return List of {@link PingReqInboundInterceptor}s for this client.
+     * @return List of PingReqInboundInterceptors for this client.
      */
     @Immutable
-    @NotNull List<@NotNull PingReqInboundInterceptor> getPingRequestInboundInterceptors();
+    @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptors();
 
     /**
      * Returns all {@link PingRespOutboundInterceptor} which are registered for this client by this extension.
      *
-     * @return List of {@link PingRespOutboundInterceptor}s for this client.
+     * @return List of PingRespOutboundInterceptors for this client.
      */
     @Immutable
-    @NotNull List<@NotNull PingRespOutboundInterceptor> getPingResponseOutboundInterceptors();
+    @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptors();
 
 
     /**

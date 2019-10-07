@@ -67,12 +67,12 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void addPingRequestInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
+    public void addPingReqInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
     @Override
-    public void addPingResponseOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
+    public void addPingRespOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
@@ -133,14 +133,14 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     @NotNull
     @Override
     @Immutable
-    public List<PingReqInboundInterceptor> getPingRequestInboundInterceptors() {
+    public List<PingReqInboundInterceptor> getPingReqInboundInterceptors() {
         return clientContext.getPingRequestInboundInterceptorsForPlugin(pluginClassloader);
     }
 
     @NotNull
     @Override
     @Immutable
-    public List<PingRespOutboundInterceptor> getPingResponseOutboundInterceptors() {
+    public List<PingRespOutboundInterceptor> getPingRespOutboundInterceptors() {
         return clientContext.getPingResponseOutboundInterceptorsForPlugin(pluginClassloader);
     }
 
