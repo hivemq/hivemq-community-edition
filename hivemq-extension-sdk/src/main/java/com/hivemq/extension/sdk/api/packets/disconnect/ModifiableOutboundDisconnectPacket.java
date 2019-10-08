@@ -13,8 +13,6 @@ public interface ModifiableOutboundDisconnectPacket extends DisconnectPacket {
 
     /**
      * Set a {@link DisconnectReasonCode} for the DISCONNECT packet.
-     * <p>
-     * Switching from successful to unsuccessful and vice versa is not supported.
      *
      * @param reasonCode The reason code to set.
      * @throws NullPointerException  If reason code is <null>.
