@@ -13,9 +13,6 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 
 import java.util.Objects;
 
-/**
- * @author Robin Atherton
- */
 public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboundDisconnectPacket {
 
     private final @NotNull FullConfigurationService configurationService;
@@ -43,7 +40,8 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
 
     @Override
-    public void setReasonString(final @NotNull String reasonString) {
+    public synchronized void setReasonString(final @NotNull String reasonString) {
+        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
         PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.reasonString, reasonString)) {
             return;
@@ -53,9 +51,8 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     @Override
-    public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+    public synchronized void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
-        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.reasonCode, reasonCode)) {
             return;
         }
@@ -66,6 +63,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public synchronized void setServerReference(final @NotNull String serverReference) {
+        Preconditions.checkNotNull(serverReference, "Server reference must never be null");
         PluginBuilderUtil.checkServerReference(serverReference, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.serverReference, serverReference)) {
             return;

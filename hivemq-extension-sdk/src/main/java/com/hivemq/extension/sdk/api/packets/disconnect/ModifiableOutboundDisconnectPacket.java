@@ -5,31 +5,44 @@ import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 /**
+ * An outbound {@link DisconnectPacket} that can be modified before it is sent to the client.
+ *
  * @author Robin Atherton
  */
 public interface ModifiableOutboundDisconnectPacket extends DisconnectPacket {
 
     /**
-     * Sets a reasonString for the DISCONNECT packet.
+     * Set a {@link DisconnectReasonCode} for the DISCONNECT packet.
+     * <p>
+     * Switching from successful to unsuccessful and vice versa is not supported.
      *
-     * @param reasonString the reason to be set as a String.
-     * @since 4.3.0
-     */
-    void setReasonString(@NotNull String reasonString);
-
-    /**
-     * Sets a reasonCode for the DISCONNECT packet.
-     *
-     * @param reasonCode the reason to be set as a enum.
-     * @since 4.3.0
+     * @param reasonCode The reason code to set.
+     * @throws NullPointerException  If reason code is <null>.
+     * @see DisconnectReasonCode What reason codes exist for disconnecting.
      */
     void setReasonCode(@NotNull DisconnectReasonCode reasonCode);
 
     /**
-     * Sets the server reference of the DISCONNECT packet.
+     * Set the reason string.
+     * <p>
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
-     * @param serverReference the server reference value to be set.
-     * @since 4.3.0
+     * @param reasonString The reason string to set.
+     * @throws NullPointerException     If reason String is <null>
+     * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.
+     * @throws IllegalArgumentException If the reason string exceeds the UTF-8 string length limit.
+     */
+    void setReasonString(@NotNull String reasonString);
+
+    /**
+     * Set the server reference.
+     * <p>
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     *
+     * @param serverReference The server reference for the DISCONNECT.
+     * @throws NullPointerException     If the server reference is <null>
+     * @throws IllegalArgumentException If the server reference is not a valid UTF-8 string.
+     * @throws IllegalArgumentException If the server reference exceeds the UTF-8 string length limit.
      */
     void setServerReference(@NotNull String serverReference);
 
@@ -37,7 +50,6 @@ public interface ModifiableOutboundDisconnectPacket extends DisconnectPacket {
      * Gets the modifiable {@link UserProperties} of the DISCONNECT packet.
      *
      * @return Modifiable user properties.
-     * @since 4.3.0
      */
     @Override
     @NotNull ModifiableUserProperties getUserProperties();

@@ -37,7 +37,6 @@ public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInb
      *
      * @param timeout Timeout that HiveMQ waits for the result of the async operation.
      * @throws UnsupportedOperationException If async is called more than once.
-     * @since 4.3.0
      */
     @NotNull Async<DisconnectInboundOutput> async(@NotNull Duration timeout);
 

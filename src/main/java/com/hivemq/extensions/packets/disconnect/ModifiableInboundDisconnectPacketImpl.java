@@ -14,6 +14,7 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @author Robin Atherton
@@ -26,8 +27,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
 
     private long sessionExpiryInterval;
-    private String reasonString;
-    private String serverReference;
+    private @NotNull String reasonString;
+    private @NotNull String serverReference;
     private final @Nullable ModifiableUserPropertiesImpl userProperties;
 
     public ModifiableInboundDisconnectPacketImpl(
@@ -45,7 +46,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
 
     @Override
-    public void setReasonString(final @NotNull String reasonString) {
+    public synchronized void setReasonString(final @NotNull String reasonString) {
+        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
         PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.reasonString, reasonString)) {
             return;
@@ -55,10 +57,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     }
 
     @Override
-    public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+    public synchronized void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
-        PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
-
         if (Objects.equals(this.reasonCode, reasonCode)) {
             return;
         }
@@ -67,21 +67,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     }
 
     @Override
-    public synchronized void setSessionExpiryInterval(final long sessionExpiryInterval) {
-        if (!modified && this.sessionExpiryInterval == 0) {
-            return;
-        }
-        this.sessionExpiryInterval = sessionExpiryInterval;
-        final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
-        checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must NOT be less than 0");
-        checkArgument(
-                sessionExpiryInterval < configuredMaximum,
-                "Expiry interval must be less than the configured maximum of" + configuredMaximum);
-        modified = true;
-    }
-
-    @Override
     public synchronized void setServerReference(final @NotNull String serverReference) {
+        Preconditions.checkNotNull(serverReference, "Server reference must never be null");
         PluginBuilderUtil.checkServerReference(serverReference, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.serverReference, serverReference)) {
             return;
@@ -89,6 +76,20 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         this.serverReference = serverReference;
         modified = true;
     }
+
+    @Override
+    public synchronized void setSessionExpiryInterval(final long sessionExpiryInterval) {
+        if (sessionExpiryInterval == this.sessionExpiryInterval) {
+            return;
+        }
+        checkState(this.sessionExpiryInterval != 0, "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
+        checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must be greater than 0");
+        final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
+        checkArgument(sessionExpiryInterval < configuredMaximum, "Session expiry interval must not be greater than the configured maximum of " + configuredMaximum);
+        this.sessionExpiryInterval = sessionExpiryInterval;
+        modified = true;
+    }
+
 
     @Override
     public boolean isModified() {
