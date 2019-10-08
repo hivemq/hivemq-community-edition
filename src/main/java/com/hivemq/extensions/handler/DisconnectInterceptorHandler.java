@@ -113,27 +113,23 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
-                clientContext.getDisconnectInboundInterceptors();
+        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors = clientContext.getDisconnectInboundInterceptors();
 
-        final DisconnectInboundOutputImpl output =
-                new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
+        final DisconnectInboundOutputImpl output = new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
 
-        final DisconnectInboundInputImpl input =
-                new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
 
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output,
-                        interceptorFuture, disconnectInboundInterceptors.size());
+                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output, interceptorFuture, disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
             if (interceptorFuture.isDone()) {
                 break;
             }
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader((IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+
             if (extension == null) {
                 interceptorContext.increment();
                 continue;
@@ -141,12 +137,10 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
 
             final DisconnectInboundInterceptorTask interceptorTask =
                     new DisconnectInboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
-        final DisconnectInboundInterceptorFutureCallback callback =
-                new DisconnectInboundInterceptorFutureCallback(ctx, output, disconnect);
+        final DisconnectInboundInterceptorFutureCallback callback = new DisconnectInboundInterceptorFutureCallback(ctx, output, disconnect);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
@@ -167,19 +161,16 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors =
-                clientContext.getDisconnectOutboundInterceptors();
-        final DisconnectOutboundInputImpl input =
-                new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
-        final DisconnectOutboundOutputImpl output =
-                new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
+        final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors = clientContext.getDisconnectOutboundInterceptors();
+
+        final DisconnectOutboundInputImpl input = new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+
+        final DisconnectOutboundOutputImpl output = new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
+
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
 
         final DisconnectOutboundInterceptorContext interceptorContext =
-                new DisconnectOutboundInterceptorContext(
-                        DisconnectOutboundInterceptorTask.class,
-                        clientId, input, output, interceptorFuture,
-                        disconnectOutboundInterceptors.size());
+                new DisconnectOutboundInterceptorContext(DisconnectOutboundInterceptorTask.class, clientId, input, output, interceptorFuture, disconnectOutboundInterceptors.size());
 
         for (final DisconnectOutboundInterceptor interceptor : disconnectOutboundInterceptors) {
 
@@ -187,8 +178,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 break;
             }
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader((IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             if (extension == null) {
                 interceptorContext.increment();
