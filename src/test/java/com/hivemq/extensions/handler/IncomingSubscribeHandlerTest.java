@@ -355,7 +355,7 @@ public class IncomingSubscribeHandlerTest {
         assertTrue(subackLatch.await(5, TimeUnit.SECONDS));
     }
 
-    @Test(timeout = 500000)
+    @Test(timeout = 5000)
     public void test_read_subscribe_extension_null() throws Exception {
 
         final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());

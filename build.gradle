@@ -200,7 +200,7 @@ dependencies {
 
     testCompile(
             [group: 'junit', name: 'junit', version: '4.12'],
-            [group: 'org.mockito', name: 'mockito-core', version: '1.+'],
+            [group: 'org.mockito', name: 'mockito-core', version: '2.28.2'],
             [group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.9.0'],
             [group: 'net.jodah', name: 'concurrentunit', version: '0.4.2'],
 

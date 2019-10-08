@@ -903,10 +903,10 @@ public class SubscriptionStoreImplTest {
         }
     }
 
-    @NotNull
-    public GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
-        final FullConfigurationService fullConfigurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
-        return new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+    private GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
+        final GlobalManagedPluginExecutorService globalManagedPluginExecutorService =
+                new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+        globalManagedPluginExecutorService.postConstruct();
+        return globalManagedPluginExecutorService;
     }
 }

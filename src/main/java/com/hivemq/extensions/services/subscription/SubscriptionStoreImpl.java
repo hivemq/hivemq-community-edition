@@ -113,9 +113,9 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             public void onFailure(final @NotNull Throwable t) {
                 settableFuture.setException(t);
             }
-        }, MoreExecutors.directExecutor());
+        }, managedExtensionExecutorService);
 
-        return ListenableFutureConverter.toCompletable(settableFuture);
+        return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -164,9 +164,9 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             public void onFailure(final @NotNull Throwable t) {
                 settableFuture.setException(t);
             }
-        }, MoreExecutors.directExecutor());
+        }, managedExtensionExecutorService);
 
-        return ListenableFutureConverter.toCompletable(settableFuture);
+        return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         if (!Topics.isValidToSubscribe(topicFilter)) {
             return CompletableFuture.failedFuture(new InvalidTopicException(topicFilter));
         }
-        return ListenableFutureConverter.toCompletable(subscriptionPersistence.remove(clientID, topicFilter));
+        return ListenableFutureConverter.toCompletable(subscriptionPersistence.remove(clientID, topicFilter), managedExtensionExecutorService);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
 
         if (failedTopics.isEmpty()) {
-            return ListenableFutureConverter.toVoidCompletable(subscriptionPersistence.removeSubscriptions(clientID, ImmutableSet.copyOf(topicFilters)));
+            return ListenableFutureConverter.toVoidCompletable(subscriptionPersistence.removeSubscriptions(clientID, ImmutableSet.copyOf(topicFilters)), managedExtensionExecutorService);
         } else {
             return CompletableFuture.failedFuture(new InvalidTopicException("Topics not valid: " + failedTopics));
         }
