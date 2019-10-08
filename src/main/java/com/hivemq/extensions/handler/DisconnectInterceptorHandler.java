@@ -120,6 +120,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
 
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
+
         final DisconnectInboundInterceptorContext interceptorContext =
                 new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, output, interceptorFuture, disconnectInboundInterceptors.size());
 
