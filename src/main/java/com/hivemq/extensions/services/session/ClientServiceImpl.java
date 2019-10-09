@@ -128,7 +128,25 @@ public class ClientServiceImpl implements ClientService {
             final boolean preventWillMessage,
             final @Nullable DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
+
         Preconditions.checkNotNull(clientId, "A client id must never be null");
+        Preconditions.checkArgument(
+                !DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.equals(reasonCode),
+                DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.toString() +
+                        " is not a valid reason code for server side DISCONNECT messages. " +
+                        "It is only valid if used in the CONNACK message.");
+        Preconditions.checkArgument(
+                !DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE.equals(reasonCode),
+                DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.toString() +
+                        " is not a valid reason code for server side DISCONNECT messages. " +
+                        "It is only valid if used by a DISCONNECT messages sent by a client.");
+        Preconditions.checkArgument(
+                !DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.equals(reasonCode),
+                DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.toString() +
+                        " is not a valid reason code for server side DISCONNECT messages. " +
+                        "This reason code is not contained in the MQTT specification for DISCONNECT messages.");
+
+
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }

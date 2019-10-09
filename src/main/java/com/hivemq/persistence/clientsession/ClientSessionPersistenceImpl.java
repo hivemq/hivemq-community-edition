@@ -219,7 +219,6 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         Preconditions.checkNotNull(source, "Disconnect source cannot be null");
 
         final ClientSession session = getSession(clientId, false);
-
         if (session == null) {
             log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
             return Futures.immediateFuture(false);
