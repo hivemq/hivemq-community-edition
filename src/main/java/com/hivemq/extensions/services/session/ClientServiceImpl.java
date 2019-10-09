@@ -137,14 +137,14 @@ public class ClientServiceImpl implements ClientService {
                         "It is only valid if used in the CONNACK message.");
         Preconditions.checkArgument(
                 !DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE.equals(reasonCode),
-                DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.toString() +
+                DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE.toString() +
                         " is not a valid reason code for server side DISCONNECT messages. " +
                         "It is only valid if used by a DISCONNECT messages sent by a client.");
         Preconditions.checkArgument(
                 !DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.equals(reasonCode),
                 DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.toString() +
                         " is not a valid reason code for server side DISCONNECT messages. " +
-                        "This reason code is not contained in the MQTT specification for DISCONNECT messages.");
+                        "It is only valid if used in the CONNACK message.");
 
 
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
