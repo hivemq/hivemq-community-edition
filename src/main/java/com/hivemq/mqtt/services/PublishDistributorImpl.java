@@ -40,7 +40,6 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.hivemq.mqtt.handler.publish.PublishStatus.*;
