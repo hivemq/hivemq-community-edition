@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
@@ -25,7 +26,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     private boolean modified = false;
     private @NotNull DisconnectReasonCode reasonCode;
 
-
+    private final @Immutable long originalSessionExpiryInterval;
     private long sessionExpiryInterval;
     private @NotNull String reasonString;
     private @NotNull String serverReference;
@@ -42,6 +43,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         this.reasonString = originalDisconnect.getReasonString();
         this.sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         this.serverReference = originalDisconnect.getServerReference();
+        originalSessionExpiryInterval = sessionExpiryInterval;
     }
 
 
@@ -82,7 +84,9 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         if (sessionExpiryInterval == this.sessionExpiryInterval) {
             return;
         }
-        checkState(this.sessionExpiryInterval != 0, "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
+        checkState(
+                originalSessionExpiryInterval != 0,
+                "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
         checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must be greater than 0");
         final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
         checkArgument(sessionExpiryInterval < configuredMaximum, "Session expiry interval must not be greater than the configured maximum of " + configuredMaximum);

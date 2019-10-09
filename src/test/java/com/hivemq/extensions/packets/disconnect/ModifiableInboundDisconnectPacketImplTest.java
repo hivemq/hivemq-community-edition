@@ -25,10 +25,7 @@ public class ModifiableInboundDisconnectPacketImplTest {
 
     @Before
     public void setUp() throws Exception {
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        final Mqtt5UserPropertiesBuilder builder = Mqtt5UserProperties.builder().add(new MqttUserProperty("test", "test"));
-        final Mqtt5UserProperties properties = builder.build();
-        original = new DISCONNECT(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION, "administrative Action", properties, "serverReference", 5);
+        original = createTestDisconnect(5);
         packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
     }
 
@@ -117,9 +114,26 @@ public class ModifiableInboundDisconnectPacketImplTest {
         packet.setSessionExpiryInterval(Long.MAX_VALUE);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void sessionExpiryInterval_was_already_zero() {
+    @Test
+    public void sessionExpiryInterval_set_to_zero_and_back() {
         packet.setSessionExpiryInterval(0);
+        packet.setSessionExpiryInterval(5);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void sessionExpiryInterval_set_to_zero() {
+        original = createTestDisconnect(0);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
         packet.setSessionExpiryInterval(1);
+    }
+
+    private DISCONNECT createTestDisconnect(final int sessionExpiryInterval) {
+        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        final Mqtt5UserPropertiesBuilder builder =
+                Mqtt5UserProperties.builder().add(new MqttUserProperty("test", "test"));
+        final Mqtt5UserProperties properties = builder.build();
+        return new DISCONNECT(
+                Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION, "administrative Action", properties, "serverReference",
+                sessionExpiryInterval);
     }
 }
