@@ -29,7 +29,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     private final @Immutable long originalSessionExpiryInterval;
     private long sessionExpiryInterval;
     private @NotNull String reasonString;
-    private @NotNull String serverReference;
+    private @NotNull
+    final String serverReference;
     private final @Nullable ModifiableUserPropertiesImpl userProperties;
 
     public ModifiableInboundDisconnectPacketImpl(
@@ -65,17 +66,6 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             return;
         }
         this.reasonCode = reasonCode;
-        modified = true;
-    }
-
-    @Override
-    public synchronized void setServerReference(final @NotNull String serverReference) {
-        Preconditions.checkNotNull(serverReference, "Server reference must never be null");
-        PluginBuilderUtil.checkServerReference(serverReference, configurationService.securityConfiguration().validateUTF8());
-        if (Objects.equals(this.serverReference, serverReference)) {
-            return;
-        }
-        this.serverReference = serverReference;
         modified = true;
     }
 

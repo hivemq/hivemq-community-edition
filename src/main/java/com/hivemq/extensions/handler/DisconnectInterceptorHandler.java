@@ -218,7 +218,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         public void pluginPost(
                 final @NotNull DisconnectOutboundOutputImpl pluginOutput) {
             if (pluginOutput.isTimedOut()) {
-                log.warn("Async timeout on inbound DISCONNECT interception");
+                log.debug("Async timeout on inbound DISCONNECT interception");
                 final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 pluginOutput.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {
@@ -338,7 +338,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         public void pluginPost(
                 final @NotNull DisconnectInboundOutputImpl pluginOutput) {
             if (pluginOutput.isTimedOut()) {
-                log.warn("Async timeout on inbound DISCONNECT interception");
+                log.debug("Async timeout on inbound DISCONNECT interception");
                 final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 pluginOutput.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {

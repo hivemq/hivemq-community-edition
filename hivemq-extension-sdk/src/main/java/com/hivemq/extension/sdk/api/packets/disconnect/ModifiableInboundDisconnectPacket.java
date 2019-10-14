@@ -33,18 +33,6 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
     void setReasonString(@NotNull String reasonString);
 
     /**
-     * Set the server reference.
-     * <p>
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
-     *
-     * @param serverReference The server reference for the DISCONNECT.
-     * @throws NullPointerException     If the server reference is <null>
-     * @throws IllegalArgumentException If the server reference is not a valid UTF-8 string.
-     * @throws IllegalArgumentException If the server reference exceeds the UTF-8 string length limit.
-     */
-    void setServerReference(@NotNull String serverReference);
-
-    /**
      * Sets the session expiry interval of the DISCONNECT packet.
      *
      * @param expiryInterval a settable value indicating the interval after which the session will expire.

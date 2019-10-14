@@ -68,7 +68,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         this.eventLog = eventLog;
     }
 
-    //@formatter:off
     @Override
     protected void initChannel(@NotNull final Channel ch) throws Exception {
 
@@ -140,7 +139,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(EXCEPTION_HANDLER, channelDependencies.getExceptionHandler());
     }
-    //@formatter:on
 
     protected void addNoConnectIdleHandler(@NotNull final Channel ch) {
 
