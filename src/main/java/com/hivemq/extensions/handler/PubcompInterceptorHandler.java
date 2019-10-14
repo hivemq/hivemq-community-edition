@@ -259,7 +259,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubcompInboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on inbound PUBCOMP interception.");
+                log.debug("Async timeout on inbound PUBCOMP interception.");
                 final PUBCOMP unmodifiedPubcomp = PUBCOMP.createPubcompFrom(input.getPubcompPacket());
                 output.update(unmodifiedPubcomp);
             } else if (pluginOutput.getPubcompPacket().isModified()) {
@@ -382,7 +382,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubcompOutboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on outbound PUBCOMP interception.");
+                log.debug("Async timeout on outbound PUBCOMP interception.");
                 final PUBCOMP unmodifiedPubcomp = PUBCOMP.createPubcompFrom(input.getPubcompPacket());
                 output.update(unmodifiedPubcomp);
             } else if (pluginOutput.getPubcompPacket().isModified()) {
