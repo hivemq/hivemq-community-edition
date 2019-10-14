@@ -258,7 +258,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubrecInboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on inbound PUBREC interception.");
+                log.debug("Async timeout on inbound PUBREC interception.");
                 final PUBREC unmodifiedPubrec = PUBREC.createPubrecFrom(input.getPubrecPacket());
                 output.update(unmodifiedPubrec);
             } else if (pluginOutput.getPubrecPacket().isModified()) {
@@ -381,7 +381,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubrecOutboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on outbound PUBREC interception.");
+                log.debug("Async timeout on outbound PUBREC interception.");
                 final PUBREC unmodifiedPubrec = PUBREC.createPubrecFrom(input.getPubrecPacket());
                 output.update(unmodifiedPubrec);
             } else if (pluginOutput.getPubrecPacket().isModified()) {
