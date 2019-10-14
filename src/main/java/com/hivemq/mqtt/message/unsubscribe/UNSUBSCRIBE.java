@@ -76,7 +76,7 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
         }
         final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
 
-        final ImmutableList<String> topics = ImmutableList.copyOf(packet.getTopics());
+        final ImmutableList<String> topics = ImmutableList.copyOf(packet.getTopicFilters());
 
         return new UNSUBSCRIBE(topics, packet.getPacketIdentifier(), mqtt5UserProperties);
     }
