@@ -16,22 +16,25 @@ public interface ModifiableUnsubscribePacket extends UnsubscribePacket {
      * Sets the list of Topics to be unsubscribed from.
      *
      * @param topics the list of Topics to unsubscribe from.
+     * @throws NullPointerException If the passed topic filter is <null>.
      */
-    void setTopics(List<String> topics);
+    void setTopics(@NotNull List<String> topics);
 
     /**
      * Adds one or more topics to the UNSUBSCRIBE packet.
      *
      * @param topics one or more topics to be added.
+     * @throws NullPointerException If the passed topic or topics is <null>.
      */
-    void addTopics(String... topics);
+    void addTopics(@NotNull String... topics);
 
     /**
      * Removes one or more topics from the UNSUBSCRIBE packet.
      *
      * @param topics one or more topics to be removed.
+     * @throws NullPointerException If the passed topic or topics is <null>.
      */
-    void removeTopics(String... topics);
+    void removeTopics(@NotNull String... topics);
 
     /**
      * Gets the modifiable {@link ModifiableUserProperties} of the UNSUBSCRIBE packet.

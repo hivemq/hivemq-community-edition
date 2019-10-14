@@ -21,15 +21,14 @@ public interface UnsubscribePacket {
      * @return the list of topics to be unsubscribed from.
      */
     @Immutable
-    @NotNull
-    List<String> getTopics();
+    @NotNull List<String> getTopicFilters();
 
     /**
      * Get the unmodifiable {@link UserProperties} of the UNSUBSCRIBE packet.
      *
      * @return user properties.
      */
-    UserProperties getUserProperties();
+    @NotNull UserProperties getUserProperties();
 
     /**
      * @return the packet identifier.
