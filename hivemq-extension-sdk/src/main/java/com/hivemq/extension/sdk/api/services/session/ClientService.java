@@ -128,6 +128,9 @@ public interface ClientService {
      * @param reasonString       The user defined reason string for disconnecting this client.
      * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
      * disconnected and <b>false</b> if no client with that id was found.
+     * @throws IllegalArgumentException if the disconnect reason code is CLIENT_IDENTIFIER_NOT_VALID.
+     * @throws IllegalArgumentException if the disconnect reason code is DISCONNECT_WITH_WILL_MESSAGE.
+     * @throws IllegalArgumentException if the disconnect reason code is BAD_AUTHENTICATION METHOD.
      * @since 4.3.0
      */
     @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage,
