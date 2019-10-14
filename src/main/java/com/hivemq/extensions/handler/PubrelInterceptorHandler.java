@@ -256,7 +256,7 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubrelInboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on inbound PUBREL interception.");
+                log.debug("Async timeout on inbound PUBREL interception.");
                 final PUBREL unmodifiedPubrel = PUBREL.createPubrelFrom(input.getPubrelPacket());
                 output.update(unmodifiedPubrel);
             } else if (pluginOutput.getPubrelPacket().isModified()) {
@@ -379,7 +379,7 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(@NotNull final PubrelOutboundOutputImpl pluginOutput) {
             if (output.isTimedOut()) {
-                log.warn("Async timeout on outbound PUBREL interception.");
+                log.debug("Async timeout on outbound PUBREL interception.");
                 final PUBREL unmodifiedPubrel = PUBREL.createPubrelFrom(input.getPubrelPacket());
                 output.update(unmodifiedPubrel);
             } else if (pluginOutput.getPubrelPacket().isModified()) {
