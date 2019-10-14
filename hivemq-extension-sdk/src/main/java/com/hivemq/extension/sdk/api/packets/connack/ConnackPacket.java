@@ -242,7 +242,7 @@ public interface ConnackPacket {
     Optional<ByteBuffer> getAuthenticationData();
 
     /**
-     * If this property is present, the {@link ByteBuffer} contains the data used for the extended authentication.
+     * If this property is present, the byte array contains the data used for the extended authentication.
      * The contents of this data are defined by the authentication method.
      * <p>
      * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty.

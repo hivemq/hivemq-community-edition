@@ -181,7 +181,7 @@ public interface ConnectPacket {
     @NotNull Optional<ByteBuffer> getAuthenticationData();
 
     /**
-     * If this property is present it contains the {@link ByteBuffer}s data in array format.
+     * If this property is present it contains the byte arrays data.
      * The contents of this data are defined by the authentication method.
      * <p>
      * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
