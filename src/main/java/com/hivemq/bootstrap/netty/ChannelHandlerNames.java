@@ -83,6 +83,8 @@ public class ChannelHandlerNames {
     public static final String MQTT_AUTH_HANDLER = "mqtt_auth_handler";
     public static final String AUTH_IN_PROGRESS_MESSAGE_HANDLER = "auth_in_progress_message_handler";
 
+    public static final String INBOUND_UNSUBSCRIBE_INTERCEPTOR_HANDLER = "inbound_unsubscribe_interceptor_handler";
+
 
     /* *************
      *   Outgoing  *

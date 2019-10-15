@@ -28,33 +28,33 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test
     public void test_add_topics_same() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.addTopics("Test");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
         assertEquals(sizeAfter, sizeBefore);
     }
 
     @Test
     public void test_add_topics_different() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.addTopics("Test/Different");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
         assertNotEquals(sizeAfter, sizeBefore);
     }
 
     @Test
     public void remove_existing_topic() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.removeTopics("Test");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
         assertNotEquals(sizeAfter, sizeBefore);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void remove_non_existent_topic() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.removeTopics("Non Existing  ");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopicFilters().size();
+        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
         assertNotEquals(sizeAfter, sizeBefore);
     }
 
