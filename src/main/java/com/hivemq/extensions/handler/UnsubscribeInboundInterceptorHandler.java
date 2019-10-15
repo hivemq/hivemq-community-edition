@@ -21,18 +21,22 @@ import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
  */
+@ChannelHandler.Sharable
+@Singleton
 public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeInboundInterceptorHandler.class);

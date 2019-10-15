@@ -23,10 +23,6 @@ import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
-import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.IncomingPublishHandler;
-import com.hivemq.extensions.handler.IncomingSubscribeHandler;
-import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -169,6 +165,9 @@ public class ChannelDependenciesTest {
     @Mock
     private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
+    @Mock
+    private UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+
     @Before
     public void setUp() throws Exception {
 
@@ -209,7 +208,8 @@ public class ChannelDependenciesTest {
                 () -> publishMessageExpiryHandler,
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
-                connackOutboundInterceptorHandler);
+                connackOutboundInterceptorHandler,
+                unsubscribeInboundInterceptorHandler);
 
     }
 
