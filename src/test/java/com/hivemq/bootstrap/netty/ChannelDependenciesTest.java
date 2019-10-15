@@ -250,5 +250,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
         assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
         assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
     }
 }
