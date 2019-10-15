@@ -24,13 +24,13 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
     }
 
     public UnsubscribePacketImpl(final ModifiableUnsubscribePacket unsubscribe) {
-        this.topics = unsubscribe.getTopicFilters();
+        this.topics = unsubscribe.getTopics();
         this.userProperties = unsubscribe.getUserProperties();
         this.packetIdentifier = unsubscribe.getPacketIdentifier();
     }
 
     @Override
-    public @NotNull List<String> getTopicFilters() {
+    public @NotNull List<String> getTopics() {
         return this.topics;
     }
 

@@ -34,7 +34,7 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     }
 
     @Override
-    public ImmutableList<String> getTopicFilters() {
+    public ImmutableList<String> getTopics() {
         return this.topics;
     }
 
