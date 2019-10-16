@@ -42,7 +42,7 @@ public class PluginBuilderUtil {
     }
 
     public static void checkMessageExpiryInterval(final long messageExpiryInterval, final long maxMessageExpiryInterval) {
-        checkArgument(messageExpiryInterval < maxMessageExpiryInterval,
+        checkArgument(messageExpiryInterval <= maxMessageExpiryInterval,
                 "Message expiry interval " + messageExpiryInterval + " not allowed. Maximum = " + maxMessageExpiryInterval);
         checkArgument(messageExpiryInterval > 0,
                 "Message expiry interval must be bigger than 0 was " + messageExpiryInterval + ".");
