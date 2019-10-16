@@ -67,8 +67,7 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void addUnsubscribeInboundInterceptor(
-            final @NotNull UnsubscribeInboundInterceptor interceptor) {
+    public void addUnsubscribeInboundInterceptor(final @NotNull UnsubscribeInboundInterceptor interceptor) {
         clientContext.addInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
@@ -88,8 +87,7 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     }
 
     @Override
-    public void removeUnsubscribeInboundInterceptor(
-            final @NotNull UnsubscribeInboundInterceptor interceptor) {
+    public void removeUnsubscribeInboundInterceptor(final @NotNull UnsubscribeInboundInterceptor interceptor) {
         clientContext.removeInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
     }
 
