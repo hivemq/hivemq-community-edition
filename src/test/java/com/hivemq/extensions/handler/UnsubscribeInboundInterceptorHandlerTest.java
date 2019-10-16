@@ -36,9 +36,11 @@ import util.TestConfigurationBootstrap;
 import java.io.File;
 import java.net.URL;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -62,8 +64,12 @@ public class UnsubscribeInboundInterceptorHandlerTest {
     private PluginTaskExecutor executor;
     private EmbeddedChannel channel;
 
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
+    private UnsubscribeInboundInterceptorHandler handler;
+
     @Before
     public void setup() {
+        isTriggered.set(false);
         MockitoAnnotations.initMocks(this);
 
         executor = new PluginTaskExecutor(new AtomicLong());
@@ -79,7 +85,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
 
-        final UnsubscribeInboundInterceptorHandler handler =
+        handler =
                 new UnsubscribeInboundInterceptorHandler(configurationService, asyncer, extensions,
                         pluginTaskExecutorService);
         channel.pipeline().addFirst(handler);
@@ -90,6 +96,15 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         executor.stop();
         channel.close();
     }
+
+    @Test(timeout = 5000)
+    public void test_client_id_not_set() {
+        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.writeOutbound(testUnsubscribe());
+        channel.runPendingTasks();
+        assertNull(channel.readOutbound());
+    }
+
 
     @Test
     public void test_simple_intercept() throws Exception {
@@ -113,6 +128,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
             unsubscribe = channel.readInbound();
         }
         Assert.assertNotNull(unsubscribe);
+        Assert.assertTrue(isTriggered.get());
     }
 
     @Test
@@ -166,7 +182,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         public void onInboundUnsubscribe(
                 final @NotNull UnsubscribeInboundInput input,
                 final @NotNull UnsubscribeInboundOutput output) {
-            System.out.println("Intercepting UNSUBSCRIBE at:" + System.currentTimeMillis());
+            isTriggered.set(true);
         }
     }
 
