@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Robin Atherton
  */
-@ChannelHandler.Sharable
 @Singleton
+@ChannelHandler.Sharable
 public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeInboundInterceptorHandler.class);
@@ -97,8 +97,9 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
 
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final UnsubscribeInboundInterceptorContext interceptorContext =
-                new UnsubscribeInboundInterceptorContext(UnsubscribeInboundInterceptorTask.class, clientId, input,
-                        output, interceptorFuture, unsubscribeInboundInterceptors.size());
+                new UnsubscribeInboundInterceptorContext(
+                        UnsubscribeInboundInterceptorTask.class, clientId, input, interceptorFuture,
+                        unsubscribeInboundInterceptors.size());
 
         for (final UnsubscribeInboundInterceptor interceptor : unsubscribeInboundInterceptors) {
             if (interceptorFuture.isDone()) {
@@ -118,8 +119,8 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                     interceptorContext, input, output, interceptorTask);
         }
 
-        final UnsubscribeInterceptorFutureCallback callback =
-                new UnsubscribeInterceptorFutureCallback(ctx, output, unsubscribe);
+        final UnsubscribeInboundInterceptorFutureCallback callback =
+                new UnsubscribeInboundInterceptorFutureCallback(ctx, output, unsubscribe);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
 
     }
@@ -128,37 +129,42 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
             extends PluginInOutTaskContext<UnsubscribeInboundOutputImpl> {
 
         private final @NotNull UnsubscribeInboundInputImpl input;
-        private final @NotNull UnsubscribeInboundOutputImpl output;
         private final @NotNull SettableFuture<Void> interceptorFuture;
-        private final int intereceptorCount;
+        private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
         UnsubscribeInboundInterceptorContext(
                 @NotNull final Class<?> taskClazz,
                 @NotNull final String identifier,
                 @NotNull final UnsubscribeInboundInputImpl input,
-                @NotNull final UnsubscribeInboundOutputImpl output,
-                @NotNull final SettableFuture<Void> interceptorFuture, final int intereceptorCount) {
+                @NotNull final SettableFuture<Void> interceptorFuture, final int interceptorCount) {
             super(taskClazz, identifier);
             this.input = input;
-            this.output = output;
             this.interceptorFuture = interceptorFuture;
-            this.intereceptorCount = intereceptorCount;
+            this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
         }
 
         @Override
         public void pluginPost(
                 final @NotNull UnsubscribeInboundOutputImpl pluginOutput) {
-            if (pluginOutput.getUnsubscribePacket().isModified()) {
+
+            if (pluginOutput.isTimedOut()) {
+                log.debug("Async timeout on inbound UNSUBSCRIBE interception.");
+                final UNSUBSCRIBE unmodifiedUnsubscribe =
+                        UNSUBSCRIBE.createUnsubscribeFrom(input.getUnsubscribePacket());
+                pluginOutput.update(unmodifiedUnsubscribe);
+            } else if (pluginOutput.getUnsubscribePacket().isModified()) {
                 input.updateUnsubscribe(pluginOutput.getUnsubscribePacket());
-                output.update(pluginOutput.getUnsubscribePacket());
+                final UNSUBSCRIBE updatedUnsubscribe =
+                        UNSUBSCRIBE.createUnsubscribeFrom(pluginOutput.getUnsubscribePacket());
+                pluginOutput.update(updatedUnsubscribe);
             }
             increment();
         }
 
         public void increment() {
-            if (counter.incrementAndGet() == intereceptorCount) {
+            if (counter.incrementAndGet() == interceptorCount) {
                 interceptorFuture.set(null);
             }
         }
@@ -204,13 +210,13 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
         }
     }
 
-    private static class UnsubscribeInterceptorFutureCallback implements FutureCallback<Void> {
+    private static class UnsubscribeInboundInterceptorFutureCallback implements FutureCallback<Void> {
 
         private final UnsubscribeInboundOutputImpl output;
         private final UNSUBSCRIBE unsubscribe;
         private final @NotNull ChannelHandlerContext ctx;
 
-        UnsubscribeInterceptorFutureCallback(
+        UnsubscribeInboundInterceptorFutureCallback(
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull UnsubscribeInboundOutputImpl output,
                 final @NotNull UNSUBSCRIBE unsubscribe) {
