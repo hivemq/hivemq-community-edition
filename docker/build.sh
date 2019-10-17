@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-IMAGE=${TARGET_IMAGE:-hivemq/hivemq-ce}
+IMAGE=${TARGET_IMAGE:-hivemq/hivemq-ce:snapshot}
 
 if [[ ${TRAVIS} == "true" ]]; then
     echo "Logging into DockerHub"
@@ -27,6 +27,13 @@ if [[ ! -z ${TRAVIS_TAG} ]]; then
     if [[ ${PUSH_IMAGE} == true ]]; then
         docker push ${TAGGED_IMAGE}
     fi
+
+    # If we're building a tagged commit, it will also be the new :latest image on Docker Hub.
+    if [[ ${PUSH_IMAGE} == true ]]; then
+        docker tag ${IMAGE} "${IMAGE//:*}:latest"
+        docker push ${IMAGE//:*}:latest
+    fi
+
 fi
 
 if [[ ${PUSH_IMAGE} == true ]]; then
