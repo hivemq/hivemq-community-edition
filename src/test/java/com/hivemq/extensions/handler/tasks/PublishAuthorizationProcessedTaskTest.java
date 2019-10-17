@@ -89,7 +89,7 @@ public class PublishAuthorizationProcessedTaskTest {
         task.onSuccess(output);
 
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), anyString());
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class PublishAuthorizationProcessedTaskTest {
         task.onSuccess(output);
 
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), anyString());
+                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), eq(null));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
-        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), any(), anyString());
+        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(null), eq(null));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
-        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), any(), anyString());
+        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(null), eq(null));
     }
 
     @Test
@@ -305,6 +305,6 @@ public class PublishAuthorizationProcessedTaskTest {
         task.onFailure(new RuntimeException("test"));
 
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), anyString());
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
 }

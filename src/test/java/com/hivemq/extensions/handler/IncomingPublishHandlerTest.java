@@ -45,7 +45,6 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
@@ -509,7 +508,7 @@ public class IncomingPublishHandlerTest {
         }
 
         assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
-        verify(mqtt3ServerDisconnector).disconnect(eq(channel), anyString(), anyString(), any(Mqtt5DisconnectReasonCode.class), anyString());
+        verify(mqtt3ServerDisconnector).disconnect(eq(channel), anyString(), anyString(), any(), any());
 
     }
 

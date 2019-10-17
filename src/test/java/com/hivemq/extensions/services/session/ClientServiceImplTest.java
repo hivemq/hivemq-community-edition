@@ -427,9 +427,11 @@ public class ClientServiceImplTest {
         assertEquals(3, chunkResult.getResults().size());
     }
 
-
     @NotNull
-    public GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
-        return new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+    private GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
+        final GlobalManagedPluginExecutorService globalManagedPluginExecutorService =
+                new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+        globalManagedPluginExecutorService.postConstruct();
+        return globalManagedPluginExecutorService;
     }
 }

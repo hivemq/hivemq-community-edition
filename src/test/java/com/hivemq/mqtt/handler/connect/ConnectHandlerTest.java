@@ -150,7 +150,7 @@ public class ConnectHandlerTest {
 
         MockitoAnnotations.initMocks(this);
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyInt(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any())).thenReturn(Futures.immediateFuture(null));
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
@@ -1107,6 +1107,8 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_will_authorization_success() {
         createHandler();
+
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
 
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
                 .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();

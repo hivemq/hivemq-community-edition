@@ -43,9 +43,10 @@ import util.TestSingleWriterFactory;
 import static com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler.StartConnectPersistence;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -99,7 +100,8 @@ public class ConnectPersistenceUpdateHandlerTest {
         when(channel.attr(eq(ChannelAttributes.TAKEN_OVER))).thenReturn(new TestChannelAttribute<Boolean>(false));
         when(channel.attr(eq(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED))).thenReturn(new TestChannelAttribute<Boolean>(true));
 
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyInt(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), eq(null))).thenReturn(Futures.immediateFuture(null));
         when(ctx.channel()).thenReturn(channel);
         persistenceUpdateHandler = new ConnectPersistenceUpdateHandler(clientSessionPersistence, clientSessionSubscriptionPersistence,
                 messageIDPools, channelPersistence, singleWriterService);
@@ -124,7 +126,7 @@ public class ConnectPersistenceUpdateHandlerTest {
 
         when(channel.attr(eq(ChannelAttributes.CLIENT_ID))).thenReturn(new TestChannelAttribute<>("client"));
         when(channel.attr(eq(ChannelAttributes.CLEAN_START))).thenReturn(new TestChannelAttribute<>(true));
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyInt(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), eq(null))).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
 
         final StartConnectPersistence startConnectPersistence = new StartConnectPersistence(connect, true, 1000);
         persistenceUpdateHandler.userEventTriggered(channelHandlerContext, startConnectPersistence);

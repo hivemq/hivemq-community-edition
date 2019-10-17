@@ -120,8 +120,7 @@ public class ClientServiceImpl implements ClientService {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(
-                clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION));
+        return ListenableFutureConverter.toCompletable(clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION), managedExtensionExecutorService);
     }
 
     @NotNull
@@ -149,9 +148,9 @@ public class ClientServiceImpl implements ClientService {
                 Exceptions.rethrowError(t);
                 setSessionSettableFuture.setException(t);
             }
-        }, MoreExecutors.directExecutor());
+        }, managedExtensionExecutorService);
 
-        return ListenableFutureConverter.toCompletable(setSessionSettableFuture);
+        return ListenableFutureConverter.toCompletable(setSessionSettableFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -177,15 +176,22 @@ public class ClientServiceImpl implements ClientService {
 
         asyncIterator.fetchAndIterate();
 
-        return asyncIterator.getFinishedFuture();
+        final SettableFuture<Void> settableFuture = SettableFuture.create();
+        asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
+            if(throwable != null) {
+                settableFuture.setException(throwable);
+            } else {
+                settableFuture.set(null);
+            }
+        });
+
+        return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
     static class AllClientsItemCallback implements AsyncIterator.ItemCallback<SessionInformation> {
 
-        private @NotNull
-        final Executor callbackExecutor;
-        private @NotNull
-        final IterationCallback<SessionInformation> callback;
+        private @NotNull final Executor callbackExecutor;
+        private @NotNull final IterationCallback<SessionInformation> callback;
 
         AllClientsItemCallback(
                 @NotNull final Executor callbackExecutor,
@@ -201,29 +207,26 @@ public class ClientServiceImpl implements ClientService {
             final SettableFuture<Boolean> resultFuture = SettableFuture.create();
 
             //this is not a lambda because we want it to be identifiable in a heap-dump
-            callbackExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
+            callbackExecutor.execute(() -> {
 
                     final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                     try {
                         Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
                         for (final SessionInformation sessionInformation : items) {
 
-                            callback.iterate(iterationContext, sessionInformation);
+                        callback.iterate(iterationContext, sessionInformation);
 
-                            if (iterationContext.isAborted()) {
-                                resultFuture.set(false);
-                                break;
-                            }
+                        if (iterationContext.isAborted()) {
+                            resultFuture.set(false);
+                            break;
                         }
-                    } catch (final Exception e) {
-                        resultFuture.setException(e);
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(contextClassLoader);
                     }
-                    resultFuture.set(true);
+                } catch (final Exception e) {
+                    resultFuture.setException(e);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(contextClassLoader);
                 }
+                resultFuture.set(true);
             });
 
             return resultFuture;

@@ -16,7 +16,9 @@
 
 package com.hivemq.extensions.services.publish;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -26,6 +28,7 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
@@ -33,6 +36,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import util.TestConfigurationBootstrap;
 import util.TestException;
 
 import java.nio.ByteBuffer;
@@ -61,7 +65,9 @@ public class RetainedMessageStoreImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, pluginServiceRateLimitService);
+        final GlobalManagedPluginExecutorService managedPluginExecutorService = new GlobalManagedPluginExecutorService(Mockito.mock(ShutdownHooks.class));
+        managedPluginExecutorService.postConstruct();
+        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 
@@ -165,39 +171,48 @@ public class RetainedMessageStoreImplTest {
     }
 
     @Test
-    public void test_remove_success() {
+    public void test_remove_success() throws InterruptedException {
 
         when(retainedMessagePersistence.remove(eq("topic"))).thenReturn(Futures.immediateFuture(null));
 
         final CompletableFuture<Void> remove = retainedMessageStore.remove("topic");
 
         assertNotNull(remove);
+        while (!remove.isDone()){
+            Thread.sleep(10);
+        }
         assertTrue(remove.isDone());
         assertFalse(remove.isCompletedExceptionally());
 
     }
 
     @Test
-    public void test_clear_success() {
+    public void test_clear_success() throws InterruptedException {
 
         when(retainedMessagePersistence.clear()).thenReturn(Futures.immediateFuture(null));
 
         final CompletableFuture<Void> clear = retainedMessageStore.clear();
 
         assertNotNull(clear);
+        while (!clear.isDone()){
+            Thread.sleep(10);
+        }
         assertTrue(clear.isDone());
         assertFalse(clear.isCompletedExceptionally());
 
     }
 
     @Test
-    public void test_add_or_replace_success() {
+    public void test_add_or_replace_success() throws InterruptedException {
 
         when(retainedMessagePersistence.persist(eq("topic"), any(RetainedMessage.class))).thenReturn(Futures.immediateFuture(null));
 
         final CompletableFuture<Void> addOrReplace = retainedMessageStore.addOrReplace(getRetainedPublish());
 
         assertNotNull(addOrReplace);
+        while (!addOrReplace.isDone()){
+            Thread.sleep(10);
+        }
         assertTrue(addOrReplace.isDone());
         assertFalse(addOrReplace.isCompletedExceptionally());
 

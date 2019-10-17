@@ -47,7 +47,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,7 +114,7 @@ public class ClientSessionPersistenceImplTest {
         final ClientSession previousSession = new ClientSession(false, 0);
         when(clientQueuePersistence.removeAllQos0Messages("client", false)).thenReturn(Futures.immediateFuture(null));
         when(subscriptionPersistence.removeAll("client")).thenReturn(Futures.immediateFuture(null));
-        when(localPersistence.disconnect(eq("client"), anyInt(), eq(true), anyInt(), eq(10L))).
+        when(localPersistence.disconnect(eq("client"), anyLong(), eq(true), anyInt(), eq(10L))).
                 thenReturn(previousSession);
         clientSessionPersistence.clientDisconnected("client", true, 10).get();
         verify(pendingWillMessages).addWill("client", previousSession);
@@ -159,7 +162,7 @@ public class ClientSessionPersistenceImplTest {
         final Boolean result = future.get();
         assertTrue(result);
         verify(pendingWillMessages).cancelWill("client");
-        verify(mqtt5ServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), anyString());
+        verify(mqtt5ServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), any());
     }
 
     @Test
