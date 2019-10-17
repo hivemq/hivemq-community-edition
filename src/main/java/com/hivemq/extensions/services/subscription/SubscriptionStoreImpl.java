@@ -261,7 +261,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
 
         final ImmutableSet<String> subscribers = topicTree.getSubscribersForTopic(topic, new SubscriptionTypeItemFilter(subscriptionType), false);
 
-        final CompletableFuture<Void> iterationFinishedFuture = new CompletableFuture<>();
+        final SettableFuture<Void> iterationFinishedFuture = SettableFuture.create();
 
         callbackExecutor.execute(() -> {
 
@@ -274,22 +274,22 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
                     try {
                         callback.iterate(iterationContext, new SubscriberForTopicResultImpl(subscriber));
                         if (iterationContext.isAborted()) {
-                            iterationFinishedFuture.complete(null);
+                            iterationFinishedFuture.set(null);
                             return;
                         }
 
                     } catch (final Exception e) {
-                        iterationFinishedFuture.completeExceptionally(e);
+                        iterationFinishedFuture.setException(e);
                         return;
                     }
                 }
-                iterationFinishedFuture.complete(null);
+                iterationFinishedFuture.set(null);
             } finally {
                 Thread.currentThread().setContextClassLoader(previousClassLoader);
             }
         });
 
-        return iterationFinishedFuture;
+        return ListenableFutureConverter.toCompletable(iterationFinishedFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -332,7 +332,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         final ImmutableSet<String> subscribers =
                 topicTree.getSubscribersWithFilter(topicFilter, new SubscriptionTypeItemFilter(subscriptionType));
 
-        final CompletableFuture<Void> iterationFinishedFuture = new CompletableFuture<>();
+        final SettableFuture<Void> iterationFinishedFuture = SettableFuture.create();
         callbackExecutor.execute(() -> {
 
             final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
@@ -344,22 +344,22 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
                     try {
                         callback.iterate(iterationContext, new SubscriberWithFilterResultImpl(subscriber));
                         if (iterationContext.isAborted()) {
-                            iterationFinishedFuture.complete(null);
+                            iterationFinishedFuture.set(null);
                             return;
                         }
 
                     } catch (final Exception e) {
-                        iterationFinishedFuture.completeExceptionally(e);
+                        iterationFinishedFuture.setException(e);
                         return;
                     }
                 }
-                iterationFinishedFuture.complete(null);
+                iterationFinishedFuture.set(null);
             } finally {
                 Thread.currentThread().setContextClassLoader(previousClassLoader);
             }
         });
 
-        return iterationFinishedFuture;
+        return ListenableFutureConverter.toCompletable(iterationFinishedFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -383,7 +383,17 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
 
         asyncIterator.fetchAndIterate();
 
-        return asyncIterator.getFinishedFuture();
+        final SettableFuture<Void> iterationFinishedFuture = SettableFuture.create();
+
+        asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
+            if (throwable != null) {
+                iterationFinishedFuture.setException(throwable);
+            } else {
+                iterationFinishedFuture.set(null);
+            }
+        });
+
+        return ListenableFutureConverter.toCompletable(iterationFinishedFuture, managedExtensionExecutorService);
     }
 
     private static class ClientSubscriptionsToTopicSubscriptions implements Function<ImmutableSet<Topic>, Set<TopicSubscription>> {

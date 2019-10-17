@@ -176,7 +176,16 @@ public class ClientServiceImpl implements ClientService {
 
         asyncIterator.fetchAndIterate();
 
-        return asyncIterator.getFinishedFuture();
+        final SettableFuture<Void> settableFuture = SettableFuture.create();
+        asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
+            if(throwable != null) {
+                settableFuture.setException(throwable);
+            } else {
+                settableFuture.set(null);
+            }
+        });
+
+        return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
     static class AllClientsItemCallback implements AsyncIterator.ItemCallback<SessionInformation> {
