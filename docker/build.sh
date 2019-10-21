@@ -18,7 +18,6 @@ cp ../build/zip/hivemq-ce-${HIVEMQ_VERSION}.zip .
 docker build --build-arg HIVEMQ_VERSION=${HIVEMQ_VERSION} -f Dockerfile -t ${IMAGE} .
 rm -f hivemq-ce-${HIVEMQ_VERSION}.zip
 
-set -o xtrace
 if [[ ! -z ${TRAVIS_TAG} ]]; then
     echo "Tagging image as ${TRAVIS_TAG}"
     TAGGED_IMAGE="${IMAGE//:*}:${TRAVIS_TAG}"
