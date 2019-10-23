@@ -26,7 +26,7 @@ echo ""
 echo "  HiveMQ Start Script for Linux/Unix v1.11"
 echo ""
 
-echoerr() { printf "%s\n" "$*" >&s; }
+echoerr() { printf "%s\n" "$*" >&2; }
 
 if hash java 2>/dev/null; then
 
