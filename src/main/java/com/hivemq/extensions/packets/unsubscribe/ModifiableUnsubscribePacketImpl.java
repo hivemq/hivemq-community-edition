@@ -1,7 +1,5 @@
 package com.hivemq.extensions.packets.unsubscribe;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
@@ -19,14 +17,14 @@ import java.util.List;
 public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePacket {
 
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
-    private @NotNull ImmutableList<String> topics;
+    private @NotNull List<String> topics;
     private final int packetIdentifier;
 
     private boolean modified = false;
 
     public ModifiableUnsubscribePacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService, final @NotNull UNSUBSCRIBE unsubscribe) {
-        this.topics = unsubscribe.getTopics();
+        this.topics = new ArrayList<>(unsubscribe.getTopics());
         this.userProperties = new ModifiableUserPropertiesImpl(
                 unsubscribe.getUserProperties().getPluginUserProperties(),
                 fullConfigurationService.securityConfiguration().validateUTF8());
@@ -34,28 +32,25 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     }
 
     @Override
-    public ImmutableList<String> getTopics() {
+    public List<String> getTopics() {
         return this.topics;
     }
 
     @Override
     public void setTopics(final @NotNull List<String> topics) {
-        this.topics = ImmutableList.copyOf(topics);
+        this.topics = topics;
         this.modified = true;
     }
 
     @Override
     public void addTopics(final @NotNull String... topics) {
-        final ArrayList<String> topicList = new ArrayList<>();
         for (final String topic : topics) {
             if (!this.topics.contains(topic)) {
-                topicList.add(topic);
+                this.topics.add(topic);
+            } else {
+                throw new IllegalArgumentException("Cannot unsubscribe from topics twice.");
             }
         }
-        final ArrayList<String> demutedTopics =
-                Lists.newArrayList(this.topics);
-        demutedTopics.addAll(topicList);
-        this.topics = ImmutableList.copyOf(demutedTopics);
         this.modified = true;
     }
 
@@ -69,17 +64,14 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
                 throw new IllegalArgumentException("Cannot remove topics to which the client is not subscribed.");
             }
         }
-        final ArrayList<String> demutedTopics =
-                Lists.newArrayList(this.topics);
-        final Iterator<String> iterator = demutedTopics.iterator();
+        final Iterator<String> iterator = this.topics.iterator();
         while (iterator.hasNext()) {
             for (final String topic : topicList) {
                 if (iterator.next().equals(topic)) {
-                    demutedTopics.remove(topic);
+                    iterator.remove();
                 }
             }
         }
-        this.topics = ImmutableList.copyOf(demutedTopics);
         this.modified = true;
     }
 
