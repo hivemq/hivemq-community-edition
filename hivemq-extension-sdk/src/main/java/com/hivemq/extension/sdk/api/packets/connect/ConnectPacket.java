@@ -187,7 +187,7 @@ public interface ConnectPacket {
      * For an MQTT 3 client this property can be set in the {@link ConnectInboundInterceptor}.
      *
      * @return An {@link Optional} that contains the authentication data if as an array if present.
-    ≥     */
+     */
     @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
 
     /**
