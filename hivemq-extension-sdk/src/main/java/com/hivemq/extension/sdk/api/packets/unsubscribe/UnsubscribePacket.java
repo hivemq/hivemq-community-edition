@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Represents an UNSUBSCRIBE packet.
  * <p>
- * Contains all values of an MQTT 5 UNSUBSCRIBE, but will also be used to represent an MQTT 3 SUBSCRIBE.
+ * Contains all values of an MQTT 5 UNSUBSCRIBE, but will also be used to represent an MQTT 3 UNSUBSCRIBE.
  *
  * @author Robin Atherton
  */
@@ -31,6 +31,8 @@ public interface UnsubscribePacket {
     @NotNull UserProperties getUserProperties();
 
     /**
+     * Gets the packet identifier.
+     *
      * @return the packet identifier.
      */
     int getPacketIdentifier();
