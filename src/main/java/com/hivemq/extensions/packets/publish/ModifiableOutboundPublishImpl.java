@@ -264,7 +264,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
             return Optional.empty();
         } else {
             final byte[] bytesArray = new byte[correlationData.remaining()];
-            correlationData.get(bytesArray, 0, bytesArray.length);
+            correlationData.asReadOnlyBuffer().clear().get(bytesArray);
             return Optional.of(bytesArray);
         }
     }
