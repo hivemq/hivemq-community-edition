@@ -24,9 +24,9 @@ import java.time.Duration;
 public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInboundOutput> {
 
     /**
-     * Use this object to make any changes to the DISCONNECT message.
+     * Use this object to make any changes to the inbound DISCONNECT message.
      *
-     * @return a {@link ModifiableInboundDisconnectPacket} disconnect packet.
+     * @return A {@link ModifiableInboundDisconnectPacket} disconnect packet.
      */
     @NotNull ModifiableInboundDisconnectPacket getDisconnectPacket();
 

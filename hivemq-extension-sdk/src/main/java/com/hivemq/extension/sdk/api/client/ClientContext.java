@@ -84,7 +84,7 @@ public interface ClientContext {
      * Adds an {@link DisconnectInboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
-     * @param disconnectOutboundInterceptor The implementation of a DisconnectInboundInterceptor.
+     * @param disconnectOutboundInterceptor The implementation of a DisconnectOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      */
     void addDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);

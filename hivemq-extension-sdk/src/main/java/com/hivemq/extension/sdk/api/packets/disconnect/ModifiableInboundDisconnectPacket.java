@@ -15,7 +15,7 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
      * Set a {@link DisconnectReasonCode} for the DISCONNECT packet.
      *
      * @param reasonCode The reason code to set.
-     * @throws NullPointerException  If reason code is <null>.
+     * @throws NullPointerException If reason code is <b>null</b>.
      * @see DisconnectReasonCode What reason codes exist for disconnecting.
      */
     void setReasonCode(@NotNull DisconnectReasonCode reasonCode);
@@ -26,7 +26,7 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
      * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param reasonString The reason string to set.
-     * @throws NullPointerException     If reason String is <null>
+     * @throws NullPointerException     If reason String is <b>null</b>.
      * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the reason string exceeds the UTF-8 string length limit.
      */
@@ -35,7 +35,7 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
     /**
      * Sets the session expiry interval of the DISCONNECT packet.
      *
-     * @param expiryInterval a settable value indicating the interval after which the session will expire.
+     * @param expiryInterval A settable value indicating the interval after which the session will expire.
      * @throws IllegalStateException    If the session expiry interval is modified while it already is 0.
      * @throws IllegalArgumentException If the session expiry interval is less than 0.
      * @throws IllegalArgumentException If the session expiry interval is greater than the configured maximum.

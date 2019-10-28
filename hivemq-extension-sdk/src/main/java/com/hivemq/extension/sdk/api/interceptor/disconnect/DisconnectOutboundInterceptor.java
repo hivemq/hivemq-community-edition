@@ -8,8 +8,10 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectO
 /**
  * Interface for the outbound DISCONNECT interception.
  * <p>
- * Interceptors are always called by the same Thread for all messages from the same client. If the same instance is
- * shared between multiple clients it can be called in different Threads and must therefore be thread-safe.
+ * Interceptors are always called by the same Thread for all messages from the same client.
+ * <p>
+ * If the same instance is shared between multiple clients it can be called in different Threads and must therefore be
+ * thread-safe.
  * </p>
  *
  * @author Robin Atherton

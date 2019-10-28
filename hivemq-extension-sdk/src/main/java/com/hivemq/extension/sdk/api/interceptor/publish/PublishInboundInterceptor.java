@@ -42,8 +42,7 @@ public interface PublishInboundInterceptor extends Interceptor {
      * this method gets called for every inbound PUBLISH packet from any MQTT client.
      * <p>
      * When the extension is enabled after HiveMQ is already running, this method will also be called for future
-     * PUBLISHes
-     * of clients that are already connected.
+     * PUBLISHes of clients that are already connected.
      *
      * @param publishInboundInput  The {@link PublishInboundInput} parameter.
      * @param publishInboundOutput The {@link PublishInboundOutput} parameter.

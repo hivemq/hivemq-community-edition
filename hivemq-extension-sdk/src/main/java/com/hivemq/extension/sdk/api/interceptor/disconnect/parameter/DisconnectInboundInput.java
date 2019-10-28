@@ -18,7 +18,7 @@ public interface DisconnectInboundInput extends ClientBasedInput {
     /**
      * The unmodifiable DISCONNECT packet that was intercepted.
      *
-     * @return an unmodifiable {@link DisconnectPacket}.
+     * @return An unmodifiable {@link DisconnectPacket}.
      */
     @Immutable
     @NotNull DisconnectPacket getDisconnectPacket();
