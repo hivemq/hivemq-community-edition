@@ -28,12 +28,14 @@ echo ""
 echo "                 DIAGNOSTIC MODE "
 echo ""
 
+echoerr() { printf "%s\n" "$*" >&2; }
+
 if hash java 2>/dev/null; then
 
     java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
 
     if [[ "$((java_version))" -lt 11 ]]; then
-        echo "HiveMQ requires at least Java version 11"
+        echoerr "HiveMQ requires at least Java version 11"
         exit 1
     fi
 
@@ -66,16 +68,16 @@ if hash java 2>/dev/null; then
     fi
 
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
-        echo "ERROR! HiveMQ Home Folder not found."
+        echoerr "ERROR! HiveMQ Home Folder not found."
     else
 
         if [ ! -w "$HIVEMQ_FOLDER" ]; then
-            echo "ERROR! HiveMQ Home Folder Permissions not correct."
+            echoerr "ERROR! HiveMQ Home Folder Permissions not correct."
         else
 
             if [ ! -f "$HIVEMQ_FOLDER/bin/hivemq.jar" ]; then
-                echo "ERROR! HiveMQ JAR not found."
-                echo $HIVEMQ_FOLDER;
+                echoerr "ERROR! HiveMQ JAR not found."
+                echoerr $HIVEMQ_FOLDER;
             else
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
@@ -99,5 +101,5 @@ if hash java 2>/dev/null; then
     fi
 
 else
-  echo "ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again."
+  echoerr "ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again."
 fi
