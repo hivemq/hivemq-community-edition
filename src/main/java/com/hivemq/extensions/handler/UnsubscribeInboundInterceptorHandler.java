@@ -198,6 +198,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                 log.debug(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound unsubscribe request interception." +
                                 "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original Exception:" + e);
                 final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.createUnsubscribeFrom(input.getUnsubscribePacket());
                 output.update(unsubscribe);
             }
@@ -220,9 +221,9 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull UnsubscribeInboundOutputImpl output,
                 final @NotNull UNSUBSCRIBE unsubscribe) {
+            this.ctx = ctx;
             this.output = output;
             this.unsubscribe = unsubscribe;
-            this.ctx = ctx;
         }
 
         @Override

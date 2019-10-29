@@ -100,9 +100,9 @@ public class UnsubscribeInboundInterceptorHandlerTest {
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
         channel.attr(ChannelAttributes.CLIENT_ID).set(null);
-        channel.writeOutbound(testUnsubscribe());
+        channel.writeInbound(testUnsubscribe());
         channel.runPendingTasks();
-        assertNull(channel.readOutbound());
+        assertNull(channel.readInbound());
     }
 
 
@@ -194,6 +194,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
                 final @NotNull UnsubscribeInboundOutput output) {
             final ModifiableUnsubscribePacket packet = output.getUnsubscribePacket();
             packet.setTopics(Collections.singletonList("not topics"));
+            isTriggered.set(true);
         }
     }
 

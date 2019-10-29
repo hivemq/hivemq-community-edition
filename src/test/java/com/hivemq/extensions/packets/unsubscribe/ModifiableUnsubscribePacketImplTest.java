@@ -26,12 +26,9 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiableUnsubscribePacket = testUnsubscribePacket();
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void test_add_topics_same() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.addTopics("Test");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
-        assertEquals(sizeAfter, sizeBefore);
     }
 
     @Test
