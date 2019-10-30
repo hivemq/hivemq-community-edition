@@ -33,6 +33,10 @@ HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Pa
 
 The documentation for the HiveMQ CE can be found https://github.com/hivemq/hivemq-community-edition/wiki[here].
 
+* MQTT Resources
+** https://www.hivemq.com/mqtt-essentials/[MQTT Essentials]
+** https://www.hivemq.com/mqtt-5/[MQTT 5 Essentials]
+
 = HiveMQ Community Forum
 
 The ideal place for questions or discussions about the HiveMQ Community Edition is our brand new https://community.hivemq.com/[HiveMQ Community Forum].
