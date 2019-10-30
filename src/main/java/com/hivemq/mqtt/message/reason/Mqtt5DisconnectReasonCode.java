@@ -29,7 +29,7 @@ import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
 
     NORMAL_DISCONNECTION(0x00),
-    DISCONNECT_WITH_WILL_MESSAGE(0x04),
+    @Deprecated DISCONNECT_WITH_WILL_MESSAGE(0x04),
     UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
     MALFORMED_PACKET(MqttCommonReasonCode.MALFORMED_PACKET),
     PROTOCOL_ERROR(MqttCommonReasonCode.PROTOCOL_ERROR),
@@ -37,7 +37,7 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
     NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
     SERVER_BUSY(MqttCommonReasonCode.SERVER_BUSY),
     SERVER_SHUTTING_DOWN(0x8B),
-    BAD_AUTHENTICATION_METHOD(MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD),
+    @Deprecated BAD_AUTHENTICATION_METHOD(MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD),
     KEEP_ALIVE_TIMEOUT(0x8D),
     SESSION_TAKEN_OVER(0x8E),
     TOPIC_FILTER_INVALID(MqttCommonReasonCode.TOPIC_FILTER_INVALID),

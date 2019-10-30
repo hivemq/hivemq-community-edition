@@ -31,6 +31,7 @@ import com.hivemq.extensions.iteration.ChunkResult;
 import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ChunkCursor;
@@ -39,6 +40,8 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.MultipleChunkResult;
+import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -53,7 +56,7 @@ import java.util.concurrent.*;
 
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -252,6 +255,16 @@ public class ClientServiceImplTest {
         assertEquals(
                 true, clientService.disconnectClient(clientId, true, DisconnectReasonCode.NORMAL_DISCONNECTION,
                         "Disconnecting Normally").get());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_disconnect_with_deprecated_reason_code() {
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        when(clientSessionPersistence.getSession(eq("client"), anyBoolean())).thenReturn(new ClientSession(true, 0));
+        @NotNull final CompletableFuture<Boolean> clientFuture =
+                clientService.disconnectClient("client", true, DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
+                        "reason-string");
     }
 
     @Test(timeout = 20000)
