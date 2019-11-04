@@ -72,7 +72,6 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
         modified = true;
     }
 
-    @Override
     public boolean isModified() {
         return modified || userProperties.isModified();
     }

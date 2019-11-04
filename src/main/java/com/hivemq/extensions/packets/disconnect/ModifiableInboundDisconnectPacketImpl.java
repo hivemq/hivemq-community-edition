@@ -84,8 +84,6 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         modified = true;
     }
 
-
-    @Override
     public boolean isModified() {
         return modified || userProperties.isModified();
     }

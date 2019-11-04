@@ -50,5 +50,4 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
     @Override
     @NotNull ModifiableUserProperties getUserProperties();
 
-    boolean isModified();
 }
