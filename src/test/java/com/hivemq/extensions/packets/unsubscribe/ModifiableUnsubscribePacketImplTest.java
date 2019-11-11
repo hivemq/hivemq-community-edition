@@ -31,6 +31,11 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiableUnsubscribePacket.addTopics("Test");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void remove_non_existing_topic() {
+        modifiableUnsubscribePacket.removeTopics("Test123");
+    }
+
     @Test
     public void test_add_topics_different() {
         final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
@@ -64,7 +69,6 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiableUnsubscribePacket.setTopics(topics);
         assertEquals("Test3", topics.get(2));
     }
-
     private ModifiableUnsubscribePacketImpl testUnsubscribePacket() {
         final ImmutableList<String> topics = ImmutableList.of("Test", "Test/Topic");
         final @NotNull Mqtt5UserProperties props =
