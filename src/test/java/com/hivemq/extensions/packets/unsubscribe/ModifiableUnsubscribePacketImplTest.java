@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+/**
+ * @author Robin Atherton
+ */
 public class ModifiableUnsubscribePacketImplTest {
 
     private FullConfigurationService configurationService;
@@ -69,6 +72,7 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiableUnsubscribePacket.setTopics(topics);
         assertEquals("Test3", topics.get(2));
     }
+
     private ModifiableUnsubscribePacketImpl testUnsubscribePacket() {
         final ImmutableList<String> topics = ImmutableList.of("Test", "Test/Topic");
         final @NotNull Mqtt5UserProperties props =
