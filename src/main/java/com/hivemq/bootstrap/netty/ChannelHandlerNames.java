@@ -83,7 +83,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_AUTH_HANDLER = "mqtt_auth_handler";
     public static final String AUTH_IN_PROGRESS_MESSAGE_HANDLER = "auth_in_progress_message_handler";
 
-    public static final String INBOUND_UNSUBSCRIBE_INTERCEPTOR_HANDLER = "inbound_unsubscribe_interceptor_handler";
 
 
     /* *************
@@ -116,6 +115,8 @@ public class ChannelHandlerNames {
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
     public static final String CONNECT_INBOUND_INTERCEPTOR_HANDLER = "connect_inbound_interceptor_handler";
     public static final String CONNACK_OUTBOUND_INTERCEPTOR_HANDLER = "connack_outbound_interceptor_handler";
+    public static final String UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER = "inbound_unsubscribe_interceptor_handler";
+
 
     /* *************
      *     Misc    *

@@ -13,8 +13,10 @@ import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
+import util.TestMessageUtil;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 /**
  * @author Robin Atherton
@@ -40,4 +42,44 @@ public class UnsubscribeInboundInputImplTest {
         assertEquals(client.getClientInformation().getClientId(), "client");
         assertEquals(client.getConnectionInformation().getMqttVersion(), MqttVersion.V_5);
     }
+
+    @Test(expected = NullPointerException.class)
+    public void test_client_id_null() {
+        final UnsubscribePacketImpl unsubscribePacket =
+                new UnsubscribePacketImpl(TestMessageUtil.createFullMqtt5Unsubscribe());
+        final UnsubscribeInboundInputImpl input =
+                new UnsubscribeInboundInputImpl(unsubscribePacket, null, new EmbeddedChannel());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_channel_null() {
+        final UnsubscribePacketImpl unsubscribePacket =
+                new UnsubscribePacketImpl(TestMessageUtil.createFullMqtt5Unsubscribe());
+        final UnsubscribeInboundInputImpl input = new UnsubscribeInboundInputImpl(unsubscribePacket, "client", null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_packet_null() {
+        final UnsubscribeInboundInputImpl input =
+                new UnsubscribeInboundInputImpl(null, "client", new EmbeddedChannel());
+    }
+
+    @Test
+    public void test_update() {
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
+        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        final UnsubscribePacketImpl unsubscribePacket1 =
+                new UnsubscribePacketImpl(TestMessageUtil.createFullMqtt5Unsubscribe());
+        final UnsubscribePacketImpl unsubscribePacket2 =
+                new UnsubscribePacketImpl(TestMessageUtil.createFullMqtt5Unsubscribe());
+
+        final UnsubscribeInboundInputImpl input =
+                new UnsubscribeInboundInputImpl(unsubscribePacket1, "client1", embeddedChannel);
+        input.updateUnsubscribe(unsubscribePacket2);
+
+        assertNotSame(unsubscribePacket1, input.getUnsubscribePacket());
+        assertNotSame(unsubscribePacket2, input.getUnsubscribePacket());
+    }
+
 }

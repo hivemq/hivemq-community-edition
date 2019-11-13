@@ -1,11 +1,14 @@
 package com.hivemq.extensions.packets.unsubscribe;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePacket;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,15 +19,17 @@ import java.util.List;
  */
 public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePacket {
 
+    Logger logger = LoggerFactory.getLogger(ModifiableUnsubscribePacketImpl.class);
+
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
-    private @NotNull List<String> topics;
+    private @NotNull ImmutableList<String> topics;
     private final int packetIdentifier;
 
     private boolean modified = false;
 
     public ModifiableUnsubscribePacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService, final @NotNull UNSUBSCRIBE unsubscribe) {
-        this.topics = new ArrayList<>(unsubscribe.getTopics());
+        this.topics = ImmutableList.copyOf(unsubscribe.getTopics());
         this.userProperties = new ModifiableUserPropertiesImpl(
                 unsubscribe.getUserProperties().getPluginUserProperties(),
                 fullConfigurationService.securityConfiguration().validateUTF8());
@@ -38,20 +43,28 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
 
     @Override
     public void setTopics(final @NotNull List<String> topics) {
-        this.topics = topics;
+        this.topics = ImmutableList.copyOf(topics);
         this.modified = true;
     }
 
     @Override
     public void addTopics(final @NotNull String... topics) {
+        boolean modifiedFlag = true;
+        final List<String> temp = new ArrayList<>(this.topics);
         for (final String topic : topics) {
-            if (!this.topics.contains(topic)) {
-                this.topics.add(topic);
+            if (!temp.contains(topic)) {
+                temp.add(topic);
             } else {
-                throw new IllegalArgumentException("Cannot unsubscribe from topics twice.");
+                logger.warn("Cannot unsubscribe from topics twice.");
+                if (topics.length == 1) {
+                    modifiedFlag = false;
+                }
             }
         }
-        this.modified = true;
+        this.topics = ImmutableList.copyOf(temp);
+        if (modifiedFlag) {
+            this.modified = true;
+        }
     }
 
     @Override
@@ -61,10 +74,12 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
             if (this.topics.contains(topic)) {
                 topicList.add(topic);
             } else {
-                throw new IllegalArgumentException("Cannot remove topics to which the client is not subscribed.");
+                logger.warn("Removing the same topic from the unsubscribe message's twice is not possible.");
+                return;
             }
         }
-        final Iterator<String> iterator = this.topics.iterator();
+        final List<String> temp = new ArrayList<>(this.topics);
+        final Iterator<String> iterator = temp.iterator();
         while (iterator.hasNext()) {
             for (final String topic : topicList) {
                 if (iterator.next().equals(topic)) {
@@ -72,6 +87,7 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
                 }
             }
         }
+        this.topics = ImmutableList.copyOf(temp);
         this.modified = true;
     }
 

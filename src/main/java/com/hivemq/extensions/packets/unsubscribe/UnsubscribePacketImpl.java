@@ -2,7 +2,6 @@ package com.hivemq.extensions.packets.unsubscribe;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePacket;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 
@@ -23,7 +22,7 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
         this.packetIdentifier = unsubscribe.getPacketIdentifier();
     }
 
-    public UnsubscribePacketImpl(final ModifiableUnsubscribePacket unsubscribe) {
+    public UnsubscribePacketImpl(final UnsubscribePacket unsubscribe) {
         this.topics = unsubscribe.getTopics();
         this.userProperties = unsubscribe.getUserProperties();
         this.packetIdentifier = unsubscribe.getPacketIdentifier();
@@ -35,7 +34,7 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
     }
 
     @Override
-    public UserProperties getUserProperties() {
+    public @NotNull UserProperties getUserProperties() {
         return this.userProperties;
     }
 

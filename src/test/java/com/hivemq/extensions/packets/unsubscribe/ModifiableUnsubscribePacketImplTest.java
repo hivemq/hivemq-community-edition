@@ -12,8 +12,7 @@ import util.TestConfigurationBootstrap;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Robin Atherton
@@ -29,38 +28,32 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiableUnsubscribePacket = testUnsubscribePacket();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void test_add_topics_same() {
         modifiableUnsubscribePacket.addTopics("Test");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void remove_non_existing_topic() {
-        modifiableUnsubscribePacket.removeTopics("Test123");
+        assertEquals(2, modifiableUnsubscribePacket.getTopics().size());
+        assertFalse(modifiableUnsubscribePacket.isModified());
     }
 
     @Test
     public void test_add_topics_different() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.addTopics("Test/Different");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
-        assertNotEquals(sizeAfter, sizeBefore);
+        assertEquals(3, modifiableUnsubscribePacket.getTopics().size());
+        assertTrue(modifiableUnsubscribePacket.isModified());
     }
 
     @Test
     public void remove_existing_topic() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
         modifiableUnsubscribePacket.removeTopics("Test");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
-        assertNotEquals(sizeAfter, sizeBefore);
+        assertEquals(1, modifiableUnsubscribePacket.getTopics().size());
+        assertTrue(modifiableUnsubscribePacket.isModified());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void remove_non_existent_topic() {
-        final int sizeBefore = modifiableUnsubscribePacket.getTopics().size();
-        modifiableUnsubscribePacket.removeTopics("Non Existing  ");
-        final int sizeAfter = modifiableUnsubscribePacket.getTopics().size();
-        assertNotEquals(sizeAfter, sizeBefore);
+        modifiableUnsubscribePacket.removeTopics("Non Existing");
+        assertEquals(2, modifiableUnsubscribePacket.getTopics().size());
+        assertFalse(modifiableUnsubscribePacket.isModified());
     }
 
     @Test
@@ -69,8 +62,13 @@ public class ModifiableUnsubscribePacketImplTest {
         topics.add("Test1");
         topics.add("Test2");
         topics.add("Test3");
+        modifiableUnsubscribePacket.addTopics("Test1");
+        modifiableUnsubscribePacket.addTopics("Test2");
+        modifiableUnsubscribePacket.addTopics("Test3");
+        assertEquals(5, modifiableUnsubscribePacket.getTopics().size());
         modifiableUnsubscribePacket.setTopics(topics);
-        assertEquals("Test3", topics.get(2));
+        assertEquals(3, modifiableUnsubscribePacket.getTopics().size());
+
     }
 
     private ModifiableUnsubscribePacketImpl testUnsubscribePacket() {

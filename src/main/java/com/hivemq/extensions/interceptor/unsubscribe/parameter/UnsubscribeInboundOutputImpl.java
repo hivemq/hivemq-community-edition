@@ -35,13 +35,10 @@ public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<Unsubscrib
     }
 
     @Override
-    public UnsubscribeInboundOutputImpl get() {
+    public @NotNull UnsubscribeInboundOutputImpl get() {
         return this;
     }
 
-    public void update(final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket) {
-        this.unsubscribePacket = unsubscribePacket;
-    }
 
     public void update(final @NotNull UNSUBSCRIBE unsubscribe) {
         this.unsubscribePacket = new ModifiableUnsubscribePacketImpl(configurationService, unsubscribe);

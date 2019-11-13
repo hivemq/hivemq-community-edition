@@ -68,7 +68,7 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
         setPacketIdentifier(packetIdentifier);
     }
 
-    public static UNSUBSCRIBE createUnsubscribeFrom(final @NotNull UnsubscribePacket packet) {
+    public static @NotNull UNSUBSCRIBE createUnsubscribeFrom(final @NotNull UnsubscribePacket packet) {
 
         final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
         for (final UserProperty userProperty : packet.getUserProperties().asList()) {

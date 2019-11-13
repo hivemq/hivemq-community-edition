@@ -4,7 +4,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.parameter.UnsubscribeInboundInput;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePacket;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
@@ -52,7 +51,7 @@ public class UnsubscribeInboundInputImpl implements Supplier<UnsubscribeInboundI
         return this;
     }
 
-    public void updateUnsubscribe(final @NotNull ModifiableUnsubscribePacket unsubscribePacket) {
+    public void updateUnsubscribe(final @NotNull UnsubscribePacket unsubscribePacket) {
         this.unsubscribePacket = new UnsubscribePacketImpl(unsubscribePacket);
     }
 }

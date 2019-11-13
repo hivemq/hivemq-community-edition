@@ -91,7 +91,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
         ch.pipeline()
                 .addLast(
-                        INBOUND_UNSUBSCRIBE_INTERCEPTOR_HANDLER,
+                        UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER,
                         channelDependencies.getUnsubscribeInboundInterceptorHandler());
 
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
