@@ -23,6 +23,11 @@ package com.hivemq.persistence;
 public interface FilePersistence {
 
     /**
+     * start a file persistence sequentially without monitoring.
+     */
+    void startExternal();
+
+    /**
      * start a file persistence by creating all persistence buckets.
      */
     void start();

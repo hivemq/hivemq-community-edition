@@ -16,9 +16,12 @@
 
 package com.hivemq.configuration.service;
 
+import com.hivemq.migration.meta.PersistenceType;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.hivemq.persistence.local.xodus.EnvironmentUtil.GCType;
 
@@ -110,6 +113,9 @@ public class InternalConfigurations {
     // The amount of qos > 0 retained messages that are queued
     public static final AtomicInteger RETAINED_MESSAGE_QUEUE_SIZE = new AtomicInteger(100_000);
 
+    //The configuration if rocks db is used instead of xodus for retained messages.
+    public static final AtomicReference<PersistenceType> RETAINED_MESSAGE_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
+
     /* ************************
      *   Payload Persistence  *
      **************************/
@@ -128,6 +134,9 @@ public class InternalConfigurations {
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_THREADS = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
     // The bucket count for the payload persistence.
     public static final AtomicInteger PAYLOAD_PERSISTENCE_BUCKET_COUNT = new AtomicInteger(64);
+
+    //The configuration if rocks db is used instead of xodus for payload persistence.
+    public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     // In case we tried to decrement a reference count that was already zero, a stacktrace will be logged to warn, if this flag is true (default is debug)
     public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;

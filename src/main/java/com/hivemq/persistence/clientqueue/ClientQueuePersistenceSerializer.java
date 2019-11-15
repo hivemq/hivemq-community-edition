@@ -160,7 +160,7 @@ class ClientQueuePersistenceSerializer {
     // ********** Value **********
 
     @NotNull
-    ByteIterable serializePublishWithoutPacketId(@NotNull final PUBLISH publish, boolean retained) {
+    ByteIterable serializePublishWithoutPacketId(@NotNull final PUBLISH publish, final boolean retained) {
         return XodusUtils.bytesToByteIterable(createPublishBytes(publish, retained));
     }
 

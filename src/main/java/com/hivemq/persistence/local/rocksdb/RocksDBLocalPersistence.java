@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.hivemq.persistence.local.xodus;
+package com.hivemq.persistence.local.rocksdb;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.persistence.FilePersistence;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceStartup;
-import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import jetbrains.exodus.ExodusException;
-import jetbrains.exodus.env.*;
+import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -33,44 +33,30 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRIES;
-import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL;
 
 /**
- * @author Silvio Giebl
+ * @author Florian Limpöck
  */
-public abstract class XodusLocalPersistence implements LocalPersistence, FilePersistence {
+public abstract class RocksDBLocalPersistence implements LocalPersistence, FilePersistence {
 
-
-    private final @NotNull EnvironmentUtil environmentUtil;
+    protected final AtomicBoolean stopped = new AtomicBoolean(false);
+    protected final @NotNull RocksDB[] buckets;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull PersistenceStartup persistenceStartup;
     private final AtomicBoolean constructed = new AtomicBoolean(false);
-    protected final AtomicBoolean stopped = new AtomicBoolean(false);
-
-    protected @NotNull Bucket[] buckets;
-    protected int bucketCount;
+    private final int bucketCount;
     private final boolean enabled;
 
-    private final int closeRetries;
-    private final int closeRetryInterval;
-
-    protected XodusLocalPersistence(
-            final @NotNull EnvironmentUtil environmentUtil,
+    protected RocksDBLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup,
             final int internalBucketCount,
             final boolean enabled) {
-
-        this.environmentUtil = environmentUtil;
         this.localPersistenceFileUtil = localPersistenceFileUtil;
         this.persistenceStartup = persistenceStartup;
         this.bucketCount = internalBucketCount;
-        this.buckets = new Bucket[bucketCount];
+        this.buckets = new RocksDB[bucketCount];
         this.enabled = enabled;
-
-        this.closeRetries = PERSISTENCE_CLOSE_RETRIES.get();
-        this.closeRetryInterval = PERSISTENCE_CLOSE_RETRY_INTERVAL.get();
     }
 
     @NotNull
@@ -79,15 +65,15 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
     @NotNull
     protected abstract String getVersion();
 
-    public int getBucketCount() {
-        return bucketCount;
-    }
-
     @NotNull
-    protected abstract StoreConfig getStoreConfig();
+    protected abstract Options getOptions();
 
     @NotNull
     protected abstract Logger getLogger();
+
+    public int getBucketCount() {
+        return bucketCount;
+    }
 
     protected void postConstruct() {
 
@@ -95,6 +81,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         if (constructed.getAndSet(true)) {
             return;
         }
+        RocksDB.loadLibrary();
         if(enabled) {
             persistenceStartup.submitPersistenceStart(this);
         } else {
@@ -107,23 +94,19 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         final String name = getName();
         final String version = getVersion();
-        final int bucketCount = getBucketCount();
-        final StoreConfig storeConfig = getStoreConfig();
+        final Options options = getOptions();
         final Logger logger = getLogger();
 
         try {
-            final EnvironmentConfig environmentConfig = environmentUtil.createEnvironmentConfig(name);
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
 
             for (int i = 0; i < bucketCount; i++) {
                 final File persistenceFile = new File(persistenceFolder, name + "_" + i);
-                final Environment environment = Environments.newContextualInstance(persistenceFile, environmentConfig);
-                final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
-
-                buckets[i] = new Bucket(environment, store);
+                final RocksDB rocksDB = RocksDB.open(options, persistenceFile.getAbsolutePath());
+                buckets[i] = rocksDB;
             }
 
-        } catch (final ExodusException e) {
+        } catch (final RocksDBException e) {
             logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
             logger.debug("Original Exception:", e);
             throw new UnrecoverableException();
@@ -137,12 +120,10 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         final String name = getName();
         final String version = getVersion();
-        final int bucketCount = getBucketCount();
-        final StoreConfig storeConfig = getStoreConfig();
+        final Options options = getOptions();
         final Logger logger = getLogger();
 
         try {
-            final EnvironmentConfig environmentConfig = environmentUtil.createEnvironmentConfig(name);
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
 
             final CountDownLatch counter = new CountDownLatch(bucketCount);
@@ -150,19 +131,20 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
             for (int i = 0; i < bucketCount; i++) {
                 final int finalI = i;
                 persistenceStartup.submitEnvironmentCreate(() -> {
-
-                    final File persistenceFile = new File(persistenceFolder, name + "_" + finalI);
-                    final Environment environment = Environments.newContextualInstance(persistenceFile, environmentConfig);
-                    final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
-
-                    buckets[finalI] = new Bucket(environment, store);
-                    counter.countDown();
+                    try {
+                        final File persistenceFile = new File(persistenceFolder, name + "_" + finalI);
+                        final RocksDB rocksDB = RocksDB.open(options, persistenceFile.getAbsolutePath());
+                        buckets[finalI] = rocksDB;
+                        counter.countDown();
+                    } catch (final Exception e) {
+                        e.printStackTrace();
+                    }
                 });
             }
 
             counter.await();
 
-        } catch (final ExodusException | InterruptedException e) {
+        } catch (final InterruptedException e) {
             logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
             logger.debug("Original Exception:", e);
             throw new UnrecoverableException();
@@ -188,23 +170,13 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
     @Override
     public void closeDB(final int bucketIndex) {
-
         checkBucketIndex(bucketIndex);
-
-        final Bucket bucket = buckets[bucketIndex];
-        if (bucket == null) {
-            //bucket not initialized
-            return;
-        }
-        if (bucket.close()) {
-            if (bucket.getEnvironment().isOpen()) {
-                new EnvironmentCloser(getName() + "-closer", bucket.getEnvironment(), closeRetries, closeRetryInterval).close();
-            }
-        }
+        final RocksDB bucket = buckets[bucketIndex];
+        bucket.close();
     }
 
     @NotNull
-    public Bucket getBucket(final @NotNull String key) {
+    protected RocksDB getRocksDb(final @NotNull String key) {
         return buckets[BucketUtils.getBucket(key, bucketCount)];
     }
 

@@ -27,6 +27,11 @@ import com.hivemq.annotations.ReadOnly;
 public interface PublishPayloadLocalPersistence {
 
     /**
+     * initialize the publish payload local persistence to set the next payload id.
+     */
+    void init();
+
+    /**
      * Put a payload for a specific id.
      *
      * @param id      The payload id.
@@ -66,4 +71,15 @@ public interface PublishPayloadLocalPersistence {
      * close the persistence with all buckets.
      */
     void closeDB();
+
+    /**
+     * iterate over all entries.
+     * @param callback the callback called at every iteration.
+     */
+    void iterate(final @NotNull Callback callback);
+
+    @FunctionalInterface
+    interface Callback {
+        void call(long id, @Nullable byte[] payload);
+    }
 }

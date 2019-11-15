@@ -32,6 +32,9 @@ import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.metrics.MetricRegistryLogger;
+import com.hivemq.migration.MigrationUnit;
+import com.hivemq.migration.Migrations;
+import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.statistics.UsageStatistics;
@@ -41,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -124,6 +129,18 @@ public class HiveMQServer {
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;
         }
+
+        log.trace("Checking for migrations");
+        final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
+        if (migrations.size() > 0) {
+            log.info("Persistence types has been changed, migrating persistent data.");
+            for (final MigrationUnit migrationUnit : migrations.keySet()) {
+                log.debug("{} needs to be migrated", migrationUnit);
+            }
+            Migrations.migrate(persistenceInjector, migrations);
+        }
+
+        Migrations.afterMigration(systemInformation);
 
         log.trace("Initializing Guice");
         final Injector injector =

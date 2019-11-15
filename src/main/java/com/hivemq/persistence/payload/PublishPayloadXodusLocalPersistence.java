@@ -23,6 +23,7 @@ import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
@@ -30,15 +31,15 @@ import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.ExodusException;
-import jetbrains.exodus.env.Cursor;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,10 +53,11 @@ import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 @LazySingleton
 public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence implements PublishPayloadLocalPersistence {
 
-    private static final Logger log = LoggerFactory.getLogger(PublishPayloadXodusLocalPersistence.class);
+    private static final Logger log = LoggerFactory.getLogger(
+            PublishPayloadXodusLocalPersistence.class);
 
-    private static final String PERSISTENCE_NAME = "publish_payload_store";
-    private static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_NAME = "publish_payload_store";
+    public static final String PERSISTENCE_VERSION = "040000";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
 
     private final @NotNull PublishPayloadXodusSerializer serializer;
@@ -67,8 +69,11 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get());
-
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
+                InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE);
         serializer = new PublishPayloadXodusSerializer();
     }
 
@@ -102,7 +107,7 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
     }
 
     @Override
-    protected void init() {
+    public void init() {
 
         try {
             final AtomicLong prevMax = new AtomicLong(0);
@@ -111,7 +116,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
                     try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                         while (cursor.getNext()) {
                             final KeyPair keypair = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-
                             if (keypair.getId() > prevMax.get()) {
                                 prevMax.set(keypair.getId());
                             }
@@ -119,7 +123,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
                     }
                 });
             }
-
             maxId = prevMax.get();
 
         } catch (final ExodusException e) {
@@ -242,6 +245,15 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
                 }
             }
         });
+    }
+
+    @Override
+    public void iterate(final @NotNull Callback callback) {
+        final ImmutableList<Long> ids = getAllIds();
+        for (final Long id : ids) {
+            final byte[] bytes = get(id);
+            callback.call(id, bytes);
+        }
     }
 
     @Override

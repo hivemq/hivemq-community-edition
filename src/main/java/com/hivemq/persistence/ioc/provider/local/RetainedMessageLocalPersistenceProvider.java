@@ -16,7 +16,11 @@
 
 package com.hivemq.persistence.ioc.provider.local;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.migration.meta.PersistenceType;
+import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 
@@ -27,20 +31,31 @@ import javax.inject.Provider;
  * The persistence provider for retained messages.
  *
  * @author Dominik Obermaier
+ * @author Florian Limpöck
  */
 @LazySingleton
 public class RetainedMessageLocalPersistenceProvider implements Provider<RetainedMessageLocalPersistence> {
 
-    private final Provider<RetainedMessageXodusLocalPersistence> persistence;
+    private final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider;
+    private final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusProvider;
+    private final @NotNull PersistenceType persistenceType;
 
     @Inject
-    public RetainedMessageLocalPersistenceProvider(final Provider<RetainedMessageXodusLocalPersistence> persistence) {
-        this.persistence = persistence;
+    public RetainedMessageLocalPersistenceProvider(final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider,
+                                                   final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusProvider) {
+        this.rocksDBProvider = rocksDBProvider;
+        this.xodusProvider = xodusProvider;
+        this.persistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
 
+    @NotNull
     @Override
     public RetainedMessageLocalPersistence get() {
-        return persistence.get();
+        if(persistenceType == PersistenceType.FILE_NATIVE) {
+            return rocksDBProvider.get();
+        } else {
+            return xodusProvider.get();
+        }
     }
 
 }

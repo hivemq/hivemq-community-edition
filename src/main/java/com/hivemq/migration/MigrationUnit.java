@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package com.hivemq.persistence.payload;
+package com.hivemq.migration;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import com.hivemq.annotations.NotNull;
 
 /**
+ * @author Christoph Schäbel
  * @author Florian Limpöck
  */
-public class PublishPayloadXodusSerializerTest {
+public enum MigrationUnit {
 
-    private final PublishPayloadXodusSerializer serializer = new PublishPayloadXodusSerializer();
+    // As the MigrationUnit enum is used in a TreeSet the order of declaration is the order of persistence migration
+    FILE_PERSISTENCE_PUBLISH_PAYLOAD("publish payload file persistence"),
+    FILE_PERSISTENCE_RETAINED_MESSAGES("retained message file persistence");
 
-    @Test
-    public void test_serialize_key() throws Exception {
-        final byte[] bytes = serializer.serializeKey(1234L, 5L);
+    private final @NotNull String description;
 
-        assertEquals(16, bytes.length);
+    MigrationUnit(final @NotNull String description) {
+        this.description = description;
+    }
 
-        final PublishPayloadXodusLocalPersistence.KeyPair keyPair = serializer.deserializeKey(bytes);
-
-        assertEquals(1234L, keyPair.getId());
-        assertEquals(5L, keyPair.getChunkIndex());
+    @NotNull
+    @Override
+    public String toString() {
+        return description;
     }
 }

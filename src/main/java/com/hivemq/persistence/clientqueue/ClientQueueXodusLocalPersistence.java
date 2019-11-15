@@ -75,7 +75,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     private static final Logger log = LoggerFactory.getLogger(ClientQueueXodusLocalPersistence.class);
 
     private static final String PERSISTENCE_NAME = "client_queue";
-    private static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_VERSION = "040000";
     private static final int LINKED_LIST_NODE_OVERHEAD = 24;
 
     private final @NotNull ClientQueuePersistenceSerializer serializer;
@@ -110,7 +110,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final @NotNull MessageDroppedService messageDroppedService) {
 
         super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
-                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get());
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
         retainedMessageMax = InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.get();
         qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.get();
 
@@ -706,6 +706,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                             payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
                             bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                             replacedId[0] = publish.getUniqueId();
+                            return false;
                         }
                         bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                         return false;
