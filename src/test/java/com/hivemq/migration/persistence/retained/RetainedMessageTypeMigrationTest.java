@@ -159,8 +159,6 @@ public class RetainedMessageTypeMigrationTest {
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
         assertEquals(RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION, metaInformation.getRetainedMessagesPersistenceVersion());
-
-        persistence.stop();
     }
 
     @Test
@@ -206,7 +204,6 @@ public class RetainedMessageTypeMigrationTest {
         assertEquals(PersistenceType.FILE, metaInformation.getRetainedMessagesPersistenceType());
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
 
-        xodus.stop();
     }
 
     @Test
@@ -242,8 +239,6 @@ public class RetainedMessageTypeMigrationTest {
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
         assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION, metaInformation.getRetainedMessagesPersistenceVersion());
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
-
-        xodus.stop();
 
     }
 
