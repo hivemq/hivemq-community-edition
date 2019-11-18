@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
+import static com.hivemq.configuration.info.SystemInformationImpl.DEVELOPMENT_VERSION;
+
 /**
  * @author Christoph Schäbel
  * @author Florian Limpöck
@@ -49,6 +51,11 @@ public class Migrations {
         MIGRATION_LOGGER.info("Checking for migrations (HiveMQ version {})", systemInformation.getHiveMQVersion());
 
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
+
+        if(systemInformation.getHiveMQVersion().equals(DEVELOPMENT_VERSION)){
+            MIGRATION_LOGGER.info("Skipping migration because it is a Development Snapshot");
+            return Collections.emptyMap();
+        }
 
         if (!metaInformation.isDataFolderPresent()) {
             log.trace("No data folder present, skip migrations.");

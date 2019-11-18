@@ -18,6 +18,7 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hivemq.util.ThreadPreConditions.ThreadPreConditionException;
+import org.junit.After;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,6 +30,11 @@ import static org.junit.Assert.assertNull;
  * @author Lukas Brandl
  */
 public class ThreadPreConditionsTest {
+
+    @After
+    public void tearDown() {
+        ThreadPreConditions.disable();
+    }
 
     @Test
     public void test_starts_with_success() throws InterruptedException {

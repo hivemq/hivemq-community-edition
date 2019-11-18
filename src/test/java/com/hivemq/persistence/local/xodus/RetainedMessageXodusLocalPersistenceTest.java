@@ -64,7 +64,6 @@ public class RetainedMessageXodusLocalPersistenceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ThreadPreConditions.disable();
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
@@ -94,7 +93,6 @@ public class RetainedMessageXodusLocalPersistenceTest {
         for (int i = 0; i < BUCKETSIZE; i++) {
             persistence.closeDB(i);
         }
-        ThreadPreConditions.enable();
     }
 
     @Test
