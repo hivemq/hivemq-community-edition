@@ -44,19 +44,17 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
     private static final Logger log = LoggerFactory.getLogger(DisconnectInterceptorHandler.class);
 
     private final @NotNull FullConfigurationService configurationService;
-
     private final @NotNull PluginOutPutAsyncer asyncer;
-
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     private final @NotNull PluginTaskExecutorService executorService;
 
     @Inject
     public DisconnectInterceptorHandler(
-            @NotNull final FullConfigurationService configurationService,
-            @NotNull final PluginOutPutAsyncer asyncer,
-            @NotNull final HiveMQExtensions hiveMQExtensions,
-            @NotNull final PluginTaskExecutorService executorService) {
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginTaskExecutorService executorService) {
+
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -64,19 +62,14 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(
-            final @NotNull ChannelHandlerContext ctx, final Object msg) throws Exception {
-
+    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
 
         if (!(msg instanceof DISCONNECT)) {
             super.channelRead(ctx, msg);
             return;
         }
 
-        final DISCONNECT disconnect = (DISCONNECT) msg;
-
-
-        handleRead(ctx, disconnect);
+        handleRead(ctx, (DISCONNECT) msg);
     }
 
     @Override
@@ -89,18 +82,16 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final DISCONNECT disconnect = (DISCONNECT) msg;
-
-        handleWrite(ctx, disconnect, promise);
+        handleWrite(ctx, (DISCONNECT) msg, promise);
     }
 
+    private void handleRead(final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect)
+            throws Exception {
 
-    private void handleRead(@NotNull final ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) throws Exception {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return;
         }
-
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -108,20 +99,28 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getDisconnectInboundInterceptors().isEmpty()) {
+        if (clientContext == null) {
+            super.channelRead(ctx, disconnect);
+            return;
+        }
+        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
+                clientContext.getDisconnectInboundInterceptors();
+        if (disconnectInboundInterceptors.isEmpty()) {
             super.channelRead(ctx, disconnect);
             return;
         }
 
-        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors = clientContext.getDisconnectInboundInterceptors();
+        final DisconnectInboundOutputImpl output =
+                new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
 
-        final DisconnectInboundOutputImpl output = new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
-
-        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+        final DisconnectInboundInputImpl input =
+                new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
 
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, interceptorFuture, disconnectInboundInterceptors.size());
+                new DisconnectInboundInterceptorContext(
+                        DisconnectInboundInterceptorTask.class, clientId, input, interceptorFuture,
+                        disconnectInboundInterceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
             if (interceptorFuture.isDone()) {
@@ -135,7 +134,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 continue;
             }
 
-            final DisconnectInboundInterceptorTask interceptorTask = new DisconnectInboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
+            final DisconnectInboundInterceptorTask interceptorTask =
+                    new DisconnectInboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
             executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
 
@@ -144,7 +144,10 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
-    private void handleWrite(@NotNull final ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect, @NotNull final ChannelPromise promise) throws Exception {
+    private void handleWrite(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect,
+            final @NotNull ChannelPromise promise) throws Exception {
+
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return;
@@ -161,16 +164,21 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors = clientContext.getDisconnectOutboundInterceptors();
+        final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors =
+                clientContext.getDisconnectOutboundInterceptors();
 
-        final DisconnectOutboundInputImpl input = new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+        final DisconnectOutboundInputImpl input =
+                new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
 
-        final DisconnectOutboundOutputImpl output = new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
+        final DisconnectOutboundOutputImpl output =
+                new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
 
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
 
         final DisconnectOutboundInterceptorContext interceptorContext =
-                new DisconnectOutboundInterceptorContext(DisconnectOutboundInterceptorTask.class, clientId, input, interceptorFuture, disconnectOutboundInterceptors.size());
+                new DisconnectOutboundInterceptorContext(
+                        DisconnectOutboundInterceptorTask.class, clientId, input, interceptorFuture,
+                        disconnectOutboundInterceptors.size());
 
         for (final DisconnectOutboundInterceptor interceptor : disconnectOutboundInterceptors) {
 
@@ -186,26 +194,28 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 continue;
             }
 
-            final DisconnectOutboundInterceptorTask interceptorTask = new DisconnectOutboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
+            final DisconnectOutboundInterceptorTask interceptorTask =
+                    new DisconnectOutboundInterceptorTask(interceptor, interceptorFuture, extension.getId());
 
             executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
-        final DisconnectOutboundInterceptorFutureCallback callback = new DisconnectOutboundInterceptorFutureCallback(output, disconnect, ctx, promise);
+        final DisconnectOutboundInterceptorFutureCallback callback =
+                new DisconnectOutboundInterceptorFutureCallback(output, disconnect, ctx, promise);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
     static class DisconnectOutboundInterceptorContext extends PluginInOutTaskContext<DisconnectOutboundOutputImpl> {
 
         private final @NotNull DisconnectOutboundInputImpl input;
-        final @NotNull SettableFuture<Void> interceptorFuture;
+        private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
         DisconnectOutboundInterceptorContext(
-                @NotNull final Class<?> taskClazz,
-                @NotNull final String identifier,
-                @NotNull final DisconnectOutboundInputImpl input,
-                @NotNull final SettableFuture<Void> interceptorFuture,
+                final @NotNull Class<?> taskClazz,
+                final @NotNull String identifier,
+                final @NotNull DisconnectOutboundInputImpl input,
+                final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, identifier);
             this.input = input;
@@ -215,14 +225,13 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
 
         @Override
-        public void pluginPost(
-                final @NotNull DisconnectOutboundOutputImpl pluginOutput) {
+        public void pluginPost(final @NotNull DisconnectOutboundOutputImpl pluginOutput) {
             if (pluginOutput.isTimedOut()) {
                 log.debug("Async timeout on inbound DISCONNECT interception");
                 final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
                 pluginOutput.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {
-                @NotNull final ModifiableOutboundDisconnectPacketImpl disconnectPacket = pluginOutput.getDisconnectPacket();
+                final ModifiableOutboundDisconnectPacketImpl disconnectPacket = pluginOutput.getDisconnectPacket();
                 input.updateDisconnect(disconnectPacket);
                 pluginOutput.update(disconnectPacket);
             }
@@ -245,9 +254,9 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull String pluginId;
 
         DisconnectOutboundInterceptorTask(
-                @NotNull final DisconnectOutboundInterceptor interceptor,
-                @NotNull final SettableFuture<Void> interceptorFuture,
-                @NotNull final String pluginId) {
+                final @NotNull DisconnectOutboundInterceptor interceptor,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @NotNull String pluginId) {
             this.interceptor = interceptor;
             this.interceptorFuture = interceptorFuture;
             this.pluginId = pluginId;
@@ -285,11 +294,11 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ChannelPromise promise;
 
-        public DisconnectOutboundInterceptorFutureCallback(
-                @NotNull final DisconnectOutboundOutput output,
-                @NotNull final DISCONNECT disconnect,
-                @NotNull final ChannelHandlerContext ctx,
-                @NotNull final ChannelPromise promise) {
+        DisconnectOutboundInterceptorFutureCallback(
+                final @NotNull DisconnectOutboundOutput output,
+                final @NotNull DISCONNECT disconnect,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise) {
             this.output = output;
             this.disconnect = disconnect;
             this.ctx = ctx;
@@ -322,10 +331,10 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         DisconnectInboundInterceptorContext(
-                @NotNull final Class<?> taskClazz,
-                @NotNull final String identifier,
-                @NotNull final DisconnectInboundInputImpl input,
-                @NotNull final SettableFuture<Void> interceptorFuture,
+                final @NotNull Class<?> taskClazz,
+                final @NotNull String identifier,
+                final @NotNull DisconnectInboundInputImpl input,
+                final @NotNull SettableFuture<Void> interceptorFuture,
                 final int interceptorCount) {
             super(taskClazz, identifier);
             this.interceptorFuture = interceptorFuture;
@@ -343,7 +352,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 pluginOutput.update(unmodifiedDisconnect);
             } else if (pluginOutput.getDisconnectPacket().isModified()) {
                 input.updateDisconnect(pluginOutput.getDisconnectPacket());
-                final DISCONNECT updatedDisconnect = DISCONNECT.createDisconnectFrom(pluginOutput.getDisconnectPacket());
+                final DISCONNECT updatedDisconnect =
+                        DISCONNECT.createDisconnectFrom(pluginOutput.getDisconnectPacket());
                 pluginOutput.update(updatedDisconnect);
             }
             increment();

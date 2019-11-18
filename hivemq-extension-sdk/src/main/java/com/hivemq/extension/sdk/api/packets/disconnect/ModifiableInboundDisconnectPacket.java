@@ -1,6 +1,8 @@
 package com.hivemq.extension.sdk.api.packets.disconnect;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
@@ -9,45 +11,43 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
  *
  * @author Robin Atherton
  */
+@DoNotImplement
 public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
 
     /**
-     * Set a {@link DisconnectReasonCode} for the DISCONNECT packet.
+     * Set the {@link DisconnectReasonCode} of the DISCONNECT packet.
      *
      * @param reasonCode The reason code to set.
-     * @throws NullPointerException If reason code is <b>null</b>.
+     * @throws NullPointerException If reason code is <code>null</code>.
      * @see DisconnectReasonCode What reason codes exist for disconnecting.
      */
     void setReasonCode(@NotNull DisconnectReasonCode reasonCode);
 
     /**
-     * Set the reason string.
-     * <p>
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Set the reason string of the DISCONNECT packet.
      *
-     * @param reasonString The reason string to set.
-     * @throws NullPointerException     If reason String is <b>null</b>.
+     * @param reasonString The reason string to set or <code>null</code> to remove the reason string.
      * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the reason string exceeds the UTF-8 string length limit.
      */
-    void setReasonString(@NotNull String reasonString);
+    void setReasonString(@Nullable String reasonString);
 
     /**
      * Sets the session expiry interval of the DISCONNECT packet.
      *
-     * @param expiryInterval A settable value indicating the interval after which the session will expire.
-     * @throws IllegalStateException    If the session expiry interval is modified while it already is 0.
+     * @param sessionExpiryInterval The session expiry interval to set or <code>null</code> to use the session expiry
+     *                              interval of the CONNECT/CONNACK handshake.
+     * @throws IllegalStateException    If the session expiry interval is modified while it already is 0. // FIXME wrong
      * @throws IllegalArgumentException If the session expiry interval is less than 0.
      * @throws IllegalArgumentException If the session expiry interval is greater than the configured maximum.
      */
-    void setSessionExpiryInterval(long expiryInterval);
+    void setSessionExpiryInterval(@Nullable Long sessionExpiryInterval);
 
     /**
-     * Gets the modifiable {@link UserProperties} of the DISCONNECT packet.
+     * The modifiable {@link UserProperties} of the DISCONNECT packet.
      *
-     * @return Modifiable user properties.
+     * @return The modifiable user properties.
      */
     @Override
     @NotNull ModifiableUserProperties getUserProperties();
-
 }
