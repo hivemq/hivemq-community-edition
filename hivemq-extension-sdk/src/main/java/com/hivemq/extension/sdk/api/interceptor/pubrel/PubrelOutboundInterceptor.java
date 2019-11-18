@@ -33,7 +33,6 @@ public interface PubrelOutboundInterceptor extends Interceptor {
      * @param pubrelOutboundOutput The {@link PubrelOutboundOutput} parameter.
      */
     void onOutboundPubrel(
-            @NotNull PubrelOutboundInput pubrelOutboundInput, @NotNull PubrelOutboundOutput pubrelOutboundOutput)
-            throws InterruptedException;
-
+            @NotNull PubrelOutboundInput pubrelOutboundInput,
+            @NotNull PubrelOutboundOutput pubrelOutboundOutput);
 }

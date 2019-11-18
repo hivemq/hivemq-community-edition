@@ -33,6 +33,6 @@ public interface PubrelInboundInterceptor extends Interceptor {
      * @param pubrelInboundOutput The {@link PubrelInboundOutput} parameter.
      */
     void onInboundPubrel(
-            @NotNull PubrelInboundInput pubrelInboundInput, @NotNull PubrelInboundOutput pubrelInboundOutput);
-
+            @NotNull PubrelInboundInput pubrelInboundInput,
+            @NotNull PubrelInboundOutput pubrelInboundOutput);
 }

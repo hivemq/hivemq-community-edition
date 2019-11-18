@@ -11,26 +11,27 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class PubrelPacketImpl implements PubrelPacket {
 
-    private final PubrelReasonCode pubrelReasonCode;
     private final int packetIdentifier;
+    private final @NotNull PubrelReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
 
     public PubrelPacketImpl(final @NotNull PUBREL pubrel) {
-        pubrelReasonCode = PubrelReasonCode.valueOf(pubrel.getReasonCode().name());
         packetIdentifier = pubrel.getPacketIdentifier();
+        reasonCode = PubrelReasonCode.valueOf(pubrel.getReasonCode().name());
         reasonString = pubrel.getReasonString();
         userProperties = pubrel.getUserProperties().getPluginUserProperties();
     }
 
     public PubrelPacketImpl(final @NotNull PubrelPacket pubrelPacket) {
-        this.pubrelReasonCode = pubrelPacket.getReasonCode();
-        this.packetIdentifier = pubrelPacket.getPacketIdentifier();
-        this.reasonString = pubrelPacket.getReasonString().orElse(null);
-        this.userProperties = pubrelPacket.getUserProperties();
+        packetIdentifier = pubrelPacket.getPacketIdentifier();
+        reasonCode = pubrelPacket.getReasonCode();
+        reasonString = pubrelPacket.getReasonString().orElse(null);
+        userProperties = pubrelPacket.getUserProperties();
     }
 
     @Override
@@ -40,7 +41,7 @@ public class PubrelPacketImpl implements PubrelPacket {
 
     @Override
     public @NotNull PubrelReasonCode getReasonCode() {
-        return pubrelReasonCode;
+        return reasonCode;
     }
 
     @Override
