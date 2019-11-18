@@ -6,7 +6,6 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectO
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
-import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.disconnect.ModifiableOutboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 
@@ -17,7 +16,7 @@ import java.util.function.Supplier;
  * @author Silvio Giebl
  */
 public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<DisconnectOutboundOutput>
-        implements DisconnectOutboundOutput, PluginTaskOutput, Supplier<DisconnectOutboundOutputImpl> {
+        implements DisconnectOutboundOutput, Supplier<DisconnectOutboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
     private @NotNull ModifiableOutboundDisconnectPacketImpl disconnectPacket;
@@ -29,7 +28,7 @@ public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<Disc
 
         super(asyncer);
         this.configurationService = configurationService;
-        this.disconnectPacket = new ModifiableOutboundDisconnectPacketImpl(configurationService, disconnect);
+        disconnectPacket = new ModifiableOutboundDisconnectPacketImpl(configurationService, disconnect);
     }
 
     @Override

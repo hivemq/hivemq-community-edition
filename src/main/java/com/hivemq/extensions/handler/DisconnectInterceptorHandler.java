@@ -93,9 +93,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             ctx.fireChannelRead(disconnect);
             return;
         }
-        final List<DisconnectInboundInterceptor> disconnectInboundInterceptors =
-                clientContext.getDisconnectInboundInterceptors();
-        if (disconnectInboundInterceptors.isEmpty()) {
+        final List<DisconnectInboundInterceptor> interceptors = clientContext.getDisconnectInboundInterceptors();
+        if (interceptors.isEmpty()) {
             ctx.fireChannelRead(disconnect);
             return;
         }
@@ -113,9 +112,9 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DisconnectInboundInterceptorContext interceptorContext =
                 new DisconnectInboundInterceptorContext(
                         DisconnectInboundInterceptorTask.class, clientId, input, ctx,
-                        disconnectInboundInterceptors.size());
+                        interceptors.size());
 
-        for (final DisconnectInboundInterceptor interceptor : disconnectInboundInterceptors) {
+        for (final DisconnectInboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
@@ -146,9 +145,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             ctx.write(disconnect, promise);
             return;
         }
-        final List<DisconnectOutboundInterceptor> disconnectOutboundInterceptors =
-                clientContext.getDisconnectOutboundInterceptors();
-        if (disconnectOutboundInterceptors.isEmpty()) {
+        final List<DisconnectOutboundInterceptor> interceptors = clientContext.getDisconnectOutboundInterceptors();
+        if (interceptors.isEmpty()) {
             ctx.write(disconnect, promise);
             return;
         }
@@ -161,9 +159,9 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DisconnectOutboundInterceptorContext interceptorContext =
                 new DisconnectOutboundInterceptorContext(
                         DisconnectOutboundInterceptorTask.class, clientId, input,
-                        ctx, promise, disconnectOutboundInterceptors.size());
+                        ctx, promise, interceptors.size());
 
-        for (final DisconnectOutboundInterceptor interceptor : disconnectOutboundInterceptors) {
+        for (final DisconnectOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());

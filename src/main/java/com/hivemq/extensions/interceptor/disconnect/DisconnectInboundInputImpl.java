@@ -30,9 +30,9 @@ public class DisconnectInboundInputImpl
             final @NotNull Channel channel,
             final @NotNull DISCONNECT disconnect) {
 
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.disconnectPacket = new DisconnectPacketImpl(disconnect);
+        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        disconnectPacket = new DisconnectPacketImpl(disconnect);
     }
 
     @Override

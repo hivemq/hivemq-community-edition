@@ -41,13 +41,13 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             final @NotNull DISCONNECT originalDisconnect,
             final long originalSessionExpiryInterval) {
 
-        this.configurationService = fullConfigurationService;
-        this.reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
-        this.reasonString = originalDisconnect.getReasonString();
-        this.sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
+        configurationService = fullConfigurationService;
+        reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
+        reasonString = originalDisconnect.getReasonString();
+        sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         this.originalSessionExpiryInterval = originalSessionExpiryInterval;
-        this.serverReference = originalDisconnect.getServerReference();
-        this.userProperties = new ModifiableUserPropertiesImpl(
+        serverReference = originalDisconnect.getServerReference();
+        userProperties = new ModifiableUserPropertiesImpl(
                 originalDisconnect.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
@@ -57,14 +57,13 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             final @NotNull DisconnectPacket disconnectPacket,
             final long originalSessionExpiryInterval) {
 
-        this.configurationService = fullConfigurationService;
-        this.reasonCode = disconnectPacket.getReasonCode();
-        this.reasonString = disconnectPacket.getReasonString().orElse(null);
-        this.sessionExpiryInterval =
-                disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
+        configurationService = fullConfigurationService;
+        reasonCode = disconnectPacket.getReasonCode();
+        reasonString = disconnectPacket.getReasonString().orElse(null);
+        sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
         this.originalSessionExpiryInterval = originalSessionExpiryInterval;
-        this.serverReference = disconnectPacket.getServerReference().orElse(null);
-        this.userProperties = new ModifiableUserPropertiesImpl(
+        serverReference = disconnectPacket.getServerReference().orElse(null);
+        userProperties = new ModifiableUserPropertiesImpl(
                 (InternalUserProperties) disconnectPacket.getUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
