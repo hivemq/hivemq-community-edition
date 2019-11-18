@@ -82,9 +82,6 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
     private void handleRead(final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -138,9 +135,6 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
