@@ -8,6 +8,8 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectO
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
+import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
@@ -15,30 +17,21 @@ import java.util.function.Supplier;
 /**
  * @author Robin Atherton
  */
-public class DisconnectOutboundInputImpl implements Supplier<DisconnectOutboundInputImpl>, DisconnectOutboundInput,
-        PluginTaskInput {
+public class DisconnectOutboundInputImpl
+        implements Supplier<DisconnectOutboundInputImpl>, DisconnectOutboundInput, PluginTaskInput {
 
-    private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
-    private @NotNull DisconnectPacket disconnectPacket;
+    private final @NotNull ConnectionInformation connectionInformation;
+    private @NotNull DisconnectPacketImpl disconnectPacket;
 
     public DisconnectOutboundInputImpl(
-            final @NotNull DisconnectPacket disconnectPacket,
             final @NotNull String clientId,
-            final @NotNull Channel channel) {
-        this.disconnectPacket = disconnectPacket;
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+            final @NotNull Channel channel,
+            final @NotNull DISCONNECT disconnect) {
+
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-    }
-
-    @Override
-    public @Immutable @NotNull DisconnectPacket getDisconnectPacket() {
-        return disconnectPacket;
-    }
-
-    @Override
-    public @NotNull ConnectionInformation getConnectionInformation() {
-        return connectionInformation;
+        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.disconnectPacket = new DisconnectPacketImpl(disconnect);
     }
 
     @Override
@@ -47,11 +40,21 @@ public class DisconnectOutboundInputImpl implements Supplier<DisconnectOutboundI
     }
 
     @Override
-    public DisconnectOutboundInputImpl get() {
+    public @NotNull ConnectionInformation getConnectionInformation() {
+        return connectionInformation;
+    }
+
+    @Override
+    public @Immutable @NotNull DisconnectPacket getDisconnectPacket() {
+        return disconnectPacket;
+    }
+
+    @Override
+    public @NotNull DisconnectOutboundInputImpl get() {
         return this;
     }
 
-    public void updateDisconnect(final @NotNull DisconnectPacket disconnectPacket) {
-        this.disconnectPacket = disconnectPacket;
+    public void update(final @NotNull DisconnectPacket disconnectPacket) {
+        this.disconnectPacket = new DisconnectPacketImpl(disconnectPacket);
     }
 }

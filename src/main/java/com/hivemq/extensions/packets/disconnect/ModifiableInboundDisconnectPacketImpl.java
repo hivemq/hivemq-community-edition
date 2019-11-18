@@ -4,9 +4,11 @@ import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
+import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
@@ -46,6 +48,21 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         this.serverReference = originalDisconnect.getServerReference();
         this.userProperties = new ModifiableUserPropertiesImpl(
                 originalDisconnect.getUserProperties().getPluginUserProperties(),
+                configurationService.securityConfiguration().validateUTF8());
+    }
+
+    public ModifiableInboundDisconnectPacketImpl(
+            final @NotNull FullConfigurationService fullConfigurationService,
+            final @NotNull DisconnectPacket disconnectPacket) {
+
+        this.configurationService = fullConfigurationService;
+        this.reasonCode = disconnectPacket.getReasonCode();
+        this.reasonString = disconnectPacket.getReasonString().orElse(null);
+        this.sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
+        originalSessionExpiryInterval = sessionExpiryInterval; // FIXME wrong
+        this.serverReference = disconnectPacket.getServerReference().orElse(null);
+        this.userProperties = new ModifiableUserPropertiesImpl(
+                (InternalUserProperties) disconnectPacket.getUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
 

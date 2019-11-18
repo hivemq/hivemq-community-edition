@@ -4,9 +4,11 @@ import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
+import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
@@ -41,6 +43,20 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
         serverReference = originalDisconnect.getServerReference();
         userProperties = new ModifiableUserPropertiesImpl(
                 originalDisconnect.getUserProperties().getPluginUserProperties(),
+                configurationService.securityConfiguration().validateUTF8());
+    }
+
+    public ModifiableOutboundDisconnectPacketImpl(
+            final @NotNull FullConfigurationService fullConfigurationService,
+            final @NotNull DisconnectPacket disconnectPacket) {
+
+        configurationService = fullConfigurationService;
+        reasonCode = disconnectPacket.getReasonCode();
+        reasonString = disconnectPacket.getReasonString().orElse(null);
+        sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
+        serverReference = disconnectPacket.getServerReference().orElse(null);
+        userProperties = new ModifiableUserPropertiesImpl(
+                (InternalUserProperties) disconnectPacket.getUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
 

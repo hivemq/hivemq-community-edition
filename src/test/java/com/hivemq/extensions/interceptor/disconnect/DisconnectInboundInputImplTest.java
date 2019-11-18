@@ -1,7 +1,6 @@
 package com.hivemq.extensions.interceptor.disconnect;
 
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
 import com.hivemq.extensions.packets.disconnect.ModifiableInboundDisconnectPacketImpl;
@@ -24,9 +23,9 @@ public class DisconnectInboundInputImplTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-        final DisconnectPacket disconnectPacket = new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
+        final DISCONNECT disconnectPacket = TestMessageUtil.createFullMqtt5Disconnect();
         final DisconnectInboundInputImpl input =
-                new DisconnectInboundInputImpl(disconnectPacket, "client", embeddedChannel);
+                new DisconnectInboundInputImpl("client", embeddedChannel, disconnectPacket);
         Assert.assertNotNull(input.getClientInformation());
         Assert.assertNotNull(input.getConnectionInformation());
         Assert.assertNotNull(input.getDisconnectPacket());
@@ -52,24 +51,20 @@ public class DisconnectInboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_clientId_null() {
-        final DisconnectPacketImpl disconnectPacket =
-                new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
-        final DisconnectInboundInputImpl disconnectInboundInput =
-                new DisconnectInboundInputImpl(disconnectPacket, null, new EmbeddedChannel());
+        final DISCONNECT disconnectPacket = TestMessageUtil.createFullMqtt5Disconnect();
+        new DisconnectInboundInputImpl(null, new EmbeddedChannel(), disconnectPacket);
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final DisconnectPacketImpl disconnectPacket =
-                new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
-        final DisconnectInboundInputImpl disconnectInboundInput =
-                new DisconnectInboundInputImpl(disconnectPacket, "client", null);
+        final DISCONNECT disconnectPacket = TestMessageUtil.createFullMqtt5Disconnect();
+        new DisconnectInboundInputImpl("client", null, disconnectPacket);
     }
 
     @Test(expected = NullPointerException.class)
     public void test_packet_null() {
         final DisconnectInboundInputImpl disconnectInboundInput =
-                new DisconnectInboundInputImpl(null, null, new EmbeddedChannel());
+                new DisconnectInboundInputImpl(null, new EmbeddedChannel(), null);
     }
 
     @Test
@@ -77,14 +72,12 @@ public class DisconnectInboundInputImplTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-        final DisconnectPacketImpl disconnectPacket1 =
-                new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
-        final DisconnectPacketImpl disconnectPacket2 =
-                new DisconnectPacketImpl(TestMessageUtil.createFullMqtt5Disconnect());
+        final DISCONNECT disconnectPacket1 = TestMessageUtil.createFullMqtt5Disconnect();
+        final DISCONNECT disconnectPacket2 = TestMessageUtil.createFullMqtt5Disconnect();
 
         final DisconnectInboundInputImpl input =
-                new DisconnectInboundInputImpl(disconnectPacket1, "client", embeddedChannel);
-        input.updateDisconnect(disconnectPacket2);
+                new DisconnectInboundInputImpl("client", embeddedChannel, disconnectPacket1);
+        input.update(new DisconnectPacketImpl(disconnectPacket2));
 
         Assert.assertNotSame(input.getDisconnectPacket(), disconnectPacket1);
         Assert.assertNotSame(input.getDisconnectPacket(), disconnectPacket2);
@@ -103,7 +96,7 @@ public class DisconnectInboundInputImplTest {
                 new ModifiableInboundDisconnectPacketImpl(fullConfigurationService, disconnect);
         disconnectPacket.setReasonString("modified");
 
-        Assert.assertEquals("modified", disconnectPacket.getReasonString());
+        Assert.assertEquals("modified", disconnectPacket.getReasonString().get());
     }
 
 }

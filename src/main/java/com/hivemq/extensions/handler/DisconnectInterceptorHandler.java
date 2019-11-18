@@ -18,8 +18,6 @@ import com.hivemq.extensions.interceptor.disconnect.DisconnectInboundInputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectInboundOutputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundInputImpl;
 import com.hivemq.extensions.interceptor.disconnect.DisconnectOutboundOutputImpl;
-import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
-import com.hivemq.extensions.packets.disconnect.ModifiableOutboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
@@ -107,8 +105,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DisconnectInboundOutputImpl output =
                 new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
 
-        final DisconnectInboundInputImpl input =
-                new DisconnectInboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientId, channel, disconnect);
 
         final DisconnectInboundInterceptorContext interceptorContext =
                 new DisconnectInboundInterceptorContext(
@@ -156,8 +153,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final DisconnectOutboundInputImpl input =
-                new DisconnectOutboundInputImpl(new DisconnectPacketImpl(disconnect), clientId, channel);
+        final DisconnectOutboundInputImpl input = new DisconnectOutboundInputImpl(clientId, channel, disconnect);
 
         final DisconnectOutboundOutputImpl output =
                 new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
@@ -212,11 +208,9 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         public void pluginPost(final @NotNull DisconnectOutboundOutputImpl output) {
             if (output.isTimedOut()) {
                 log.debug("Async timeout on inbound DISCONNECT interception");
-                final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
-                output.update(unmodifiedDisconnect);
+                output.update(input.getDisconnectPacket());
             } else if (output.getDisconnectPacket().isModified()) {
-                final ModifiableOutboundDisconnectPacketImpl disconnectPacket = output.getDisconnectPacket();
-                input.updateDisconnect(disconnectPacket);
+                input.update(output.getDisconnectPacket());
             }
             increment(output);
         }
@@ -247,6 +241,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         public @NotNull DisconnectOutboundOutputImpl apply(
                 final @NotNull DisconnectOutboundInputImpl input,
                 final @NotNull DisconnectOutboundOutputImpl output) {
+
             try {
                 interceptor.onOutboundDisconnect(input, output);
             } catch (final Throwable e) {
@@ -254,8 +249,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound disconnect interception. " +
                                 "Extensions are responsible on their own to handle exceptions.", pluginId);
                 log.debug("Original exception: ", e);
-                final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
-                output.update(disconnect);
+                output.update(input.getDisconnectPacket());
             }
             return output;
         }
@@ -292,12 +286,9 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         public void pluginPost(final @NotNull DisconnectInboundOutputImpl output) {
             if (output.isTimedOut()) {
                 log.debug("Async timeout on inbound DISCONNECT interception");
-                final DISCONNECT unmodifiedDisconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
-                output.update(unmodifiedDisconnect);
+                output.update(input.getDisconnectPacket());
             } else if (output.getDisconnectPacket().isModified()) {
-                input.updateDisconnect(output.getDisconnectPacket());
-                final DISCONNECT updatedDisconnect = DISCONNECT.createDisconnectFrom(output.getDisconnectPacket());
-                output.update(updatedDisconnect);
+                input.update(output.getDisconnectPacket());
             }
             increment(output);
         }
@@ -337,8 +328,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                                 "Extensions are responsible for their own exception handling.",
                         pluginId);
                 log.debug("Original exception:", e);
-                final DISCONNECT disconnect = DISCONNECT.createDisconnectFrom(input.getDisconnectPacket());
-                output.update(disconnect);
+                output.update(input.getDisconnectPacket());
             }
             return output;
         }

@@ -11,9 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 
 public class ModifiableInboundDisconnectPacketImplTest {
 
@@ -33,13 +31,11 @@ public class ModifiableInboundDisconnectPacketImplTest {
     public void test_change_all_valid_values() {
         packet.setReasonCode(DisconnectReasonCode.NORMAL_DISCONNECTION);
         packet.setReasonString("normal disconnection");
-        packet.setServerReference("test server reference");
-        packet.setSessionExpiryInterval(0);
+        packet.setSessionExpiryInterval(0L);
 
-        assertEquals("normal disconnection", packet.getReasonString());
-        assertEquals("test server reference", packet.getServerReference());
+        assertEquals("normal disconnection", packet.getReasonString().get());
         assertEquals(DisconnectReasonCode.NORMAL_DISCONNECTION, packet.getReasonCode());
-        assertEquals(0, packet.getSessionExpiryInterval());
+        assertEquals(0, (long) packet.getSessionExpiryInterval().get());
     }
 
     @Test
@@ -53,11 +49,7 @@ public class ModifiableInboundDisconnectPacketImplTest {
         assertTrue(packet.isModified());
 
         packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
-        packet.setSessionExpiryInterval(0);
-        assertTrue(packet.isModified());
-
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
-        packet.setServerReference("server reference changed");
+        packet.setSessionExpiryInterval(0L);
         assertTrue(packet.isModified());
     }
 
@@ -66,14 +58,10 @@ public class ModifiableInboundDisconnectPacketImplTest {
         packet.setReasonCode(null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void reasonString_null() {
         packet.setReasonString(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void serverReference_null() {
-        packet.setServerReference(null);
+        assertFalse(packet.getReasonString().isPresent());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -91,22 +79,8 @@ public class ModifiableInboundDisconnectPacketImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void serverReference_invalid_input() {
-        packet.setServerReference("topic" + '\u0001');
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void serverReference_exceeds_max_length() {
-        final StringBuilder s = new StringBuilder("s");
-        for (int i = 0; i < 65535; i++) {
-            s.append("s");
-        }
-        packet.setServerReference(s.toString());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void sessionExpiryInterval_is_less_than_0() {
-        packet.setSessionExpiryInterval(-1);
+        packet.setSessionExpiryInterval(-1L);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -116,15 +90,15 @@ public class ModifiableInboundDisconnectPacketImplTest {
 
     @Test
     public void sessionExpiryInterval_set_to_zero_and_back() {
-        packet.setSessionExpiryInterval(0);
-        packet.setSessionExpiryInterval(5);
+        packet.setSessionExpiryInterval(0L);
+        packet.setSessionExpiryInterval(5L);
     }
 
     @Test(expected = IllegalStateException.class)
     public void sessionExpiryInterval_set_to_zero() {
         original = createTestDisconnect(0);
         packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
-        packet.setSessionExpiryInterval(1);
+        packet.setSessionExpiryInterval(1L);
     }
 
     private DISCONNECT createTestDisconnect(final int sessionExpiryInterval) {

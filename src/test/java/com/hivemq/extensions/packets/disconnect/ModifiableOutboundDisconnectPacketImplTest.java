@@ -11,8 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ModifiableOutboundDisconnectPacketImplTest {
 
@@ -37,8 +36,8 @@ public class ModifiableOutboundDisconnectPacketImplTest {
         packet.setReasonString("normal disconnection");
         packet.setServerReference("test server reference");
 
-        assertEquals("normal disconnection", packet.getReasonString());
-        assertEquals("test server reference", packet.getServerReference());
+        assertEquals("normal disconnection", packet.getReasonString().get());
+        assertEquals("test server reference", packet.getServerReference().get());
         assertEquals(DisconnectReasonCode.NORMAL_DISCONNECTION, packet.getReasonCode());
     }
 
@@ -62,14 +61,16 @@ public class ModifiableOutboundDisconnectPacketImplTest {
         packet.setReasonCode(null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void reasonString_null() {
         packet.setReasonString(null);
+        assertFalse(packet.getReasonString().isPresent());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void serverReference_null() {
         packet.setServerReference(null);
+        assertFalse(packet.getServerReference().isPresent());
     }
 
     @Test(expected = IllegalArgumentException.class)

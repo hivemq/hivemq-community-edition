@@ -33,11 +33,14 @@ public class DisconnectOutboundOutputImplTest {
     @Test
     public void test_getModifiable() {
         final ModifiableOutboundDisconnectPacket modifiableDisconnectPacket = output.get().getDisconnectPacket();
-        assertEquals(disconnect.getServerReference(), modifiableDisconnectPacket.getServerReference());
-        assertEquals(disconnect.getSessionExpiryInterval(), modifiableDisconnectPacket.getSessionExpiryInterval());
+        assertEquals(disconnect.getServerReference(), modifiableDisconnectPacket.getServerReference().get());
+        assertEquals(
+                disconnect.getSessionExpiryInterval(),
+                (long) modifiableDisconnectPacket.getSessionExpiryInterval().get());
         assertEquals(disconnect.getReasonCode().name(), modifiableDisconnectPacket.getReasonCode().name());
-        assertEquals(disconnect.getReasonString(), modifiableDisconnectPacket.getReasonString());
-        assertEquals(disconnect.getUserProperties().size(), modifiableDisconnectPacket.getUserProperties().asList().size());
+        assertEquals(disconnect.getReasonString(), modifiableDisconnectPacket.getReasonString().get());
+        assertEquals(
+                disconnect.getUserProperties().size(), modifiableDisconnectPacket.getUserProperties().asList().size());
     }
 
 }
