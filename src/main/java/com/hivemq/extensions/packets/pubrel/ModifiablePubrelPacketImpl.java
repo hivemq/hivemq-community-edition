@@ -84,7 +84,7 @@ public class ModifiablePubrelPacketImpl implements ModifiablePubrelPacket {
             return;
         }
         this.reasonString = reasonString;
-        this.modified = true;
+        modified = true;
     }
 
     @Override
