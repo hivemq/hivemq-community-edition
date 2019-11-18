@@ -20,6 +20,5 @@ public interface PubrelInboundInput extends ClientBasedInput {
      *
      * @return An unmodifiable {@link PubrelPacket}.
      */
-    @NotNull @Immutable PubrelPacket getPubrelPacket();
-
+    @Immutable @NotNull PubrelPacket getPubrelPacket();
 }

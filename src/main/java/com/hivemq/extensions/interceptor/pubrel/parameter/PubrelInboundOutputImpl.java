@@ -1,9 +1,10 @@
 package com.hivemq.extensions.interceptor.pubrel.parameter;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.parameter.PubrelInboundOutput;
+import com.hivemq.extension.sdk.api.packets.pubrel.PubrelPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.pubrel.ModifiablePubrelPacketImpl;
@@ -13,34 +14,35 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class PubrelInboundOutputImpl extends AbstractSimpleAsyncOutput<PubrelInboundOutput>
         implements PubrelInboundOutput, Supplier<PubrelInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
-    private ModifiablePubrelPacketImpl modifiablePubrelPacket;
+    private @NotNull ModifiablePubrelPacketImpl pubrelPacket;
 
     public PubrelInboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBREL pubrel) {
+
         super(asyncer);
         this.configurationService = configurationService;
-        modifiablePubrelPacket = new ModifiablePubrelPacketImpl(this.configurationService, pubrel);
+        pubrelPacket = new ModifiablePubrelPacketImpl(configurationService, pubrel);
     }
 
     @Override
-    public @Immutable
-    @NotNull ModifiablePubrelPacketImpl getPubrelPacket() {
-        return modifiablePubrelPacket;
+    public @Immutable @NotNull ModifiablePubrelPacketImpl getPubrelPacket() {
+        return pubrelPacket;
     }
 
     @Override
-    public PubrelInboundOutputImpl get() {
+    public @NotNull PubrelInboundOutputImpl get() {
         return this;
     }
 
-    public void update(final @NotNull PUBREL pubrel) {
-        modifiablePubrelPacket = new ModifiablePubrelPacketImpl(configurationService, pubrel);
+    public void update(final @NotNull PubrelPacket pubrelPacket) {
+        this.pubrelPacket = new ModifiablePubrelPacketImpl(configurationService, pubrelPacket);
     }
 }
