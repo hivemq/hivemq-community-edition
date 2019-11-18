@@ -5,7 +5,10 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundInput;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectInboundOutput;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
+import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -38,6 +41,7 @@ import util.TestConfigurationBootstrap;
 
 import java.io.File;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -275,5 +279,50 @@ public class DisconnectInboundInterceptorHandlerTest {
                 cl.loadClass("com.hivemq.extensions.handler.DisconnectInboundInterceptorHandlerTest$" + name);
 
         return (DisconnectInboundInterceptor) interceptorClass.newInstance();
+    }
+
+    public static class TestModifyInboundInterceptor implements DisconnectInboundInterceptor {
+
+        @Override
+        public void onInboundDisconnect(
+                @NotNull final DisconnectInboundInput disconnectInboundInput,
+                @NotNull final DisconnectInboundOutput disconnectInboundOutput) {
+            final ModifiableInboundDisconnectPacket packet = disconnectInboundOutput.getDisconnectPacket();
+            packet.setReasonString("modified");
+        }
+    }
+
+    public static class TestExceptionInboundInterceptor implements DisconnectInboundInterceptor {
+
+        @Override
+        public void onInboundDisconnect(
+                final @NotNull DisconnectInboundInput disconnectInboundInput,
+                final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
+            throw new RuntimeException();
+        }
+    }
+
+    public static class TestPartialModifiedInboundInterceptor implements DisconnectInboundInterceptor {
+
+        @Override
+        public void onInboundDisconnect(
+                final @NotNull DisconnectInboundInput disconnectInboundInput,
+                final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
+            final ModifiableInboundDisconnectPacket disconnectPacket =
+                    disconnectInboundOutput.getDisconnectPacket();
+            disconnectPacket.setReasonString("modified");
+            disconnectPacket.setReasonCode(DisconnectReasonCode.ADMINISTRATIVE_ACTION);
+            throw new RuntimeException();
+        }
+    }
+
+    public static class TestTimeoutFailedInboundInterceptor implements DisconnectInboundInterceptor {
+
+        @Override
+        public void onInboundDisconnect(
+                final @NotNull DisconnectInboundInput disconnectInboundInput,
+                final @NotNull DisconnectInboundOutput disconnectInboundOutput) {
+            disconnectInboundOutput.async(Duration.ofMillis(10));
+        }
     }
 }
