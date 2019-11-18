@@ -38,13 +38,14 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
     public ModifiableInboundDisconnectPacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull DISCONNECT originalDisconnect) {
+            final @NotNull DISCONNECT originalDisconnect,
+            final long originalSessionExpiryInterval) {
 
         this.configurationService = fullConfigurationService;
         this.reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
         this.reasonString = originalDisconnect.getReasonString();
         this.sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
-        originalSessionExpiryInterval = sessionExpiryInterval; // FIXME wrong
+        this.originalSessionExpiryInterval = originalSessionExpiryInterval;
         this.serverReference = originalDisconnect.getServerReference();
         this.userProperties = new ModifiableUserPropertiesImpl(
                 originalDisconnect.getUserProperties().getPluginUserProperties(),
@@ -53,13 +54,15 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
     public ModifiableInboundDisconnectPacketImpl(
             final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull DisconnectPacket disconnectPacket) {
+            final @NotNull DisconnectPacket disconnectPacket,
+            final long originalSessionExpiryInterval) {
 
         this.configurationService = fullConfigurationService;
         this.reasonCode = disconnectPacket.getReasonCode();
         this.reasonString = disconnectPacket.getReasonString().orElse(null);
-        this.sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
-        originalSessionExpiryInterval = sessionExpiryInterval; // FIXME wrong
+        this.sessionExpiryInterval =
+                disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
+        this.originalSessionExpiryInterval = originalSessionExpiryInterval;
         this.serverReference = disconnectPacket.getServerReference().orElse(null);
         this.userProperties = new ModifiableUserPropertiesImpl(
                 (InternalUserProperties) disconnectPacket.getUserProperties(),
@@ -109,15 +112,16 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         if (this.sessionExpiryInterval == interval) {
             return;
         }
-        checkState( // FIXME wrong
-                originalSessionExpiryInterval != 0,
-                "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
         checkArgument(interval >= 0, "Session expiry interval must be greater than 0");
         final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
         checkArgument(
                 interval < configuredMaximum,
-                "Session expiry interval must not be greater than the configured maximum of " +
-                        configuredMaximum); // TODO
+                "Session expiry interval must not be greater than the configured maximum of " + configuredMaximum);
+        if (interval > 0) {
+            checkState(
+                    originalSessionExpiryInterval != 0,
+                    "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
+        }
         this.sessionExpiryInterval = interval;
         modified = true;
     }

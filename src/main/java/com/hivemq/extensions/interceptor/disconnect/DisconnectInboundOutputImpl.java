@@ -19,16 +19,20 @@ public class DisconnectInboundOutputImpl extends AbstractSimpleAsyncOutput<Disco
         implements DisconnectInboundOutput, PluginTaskOutput, Supplier<DisconnectInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
+    private final long originalSessionExpiryInterval;
     private @NotNull ModifiableInboundDisconnectPacketImpl disconnectPacket;
 
     public DisconnectInboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull DISCONNECT disconnect) {
+            final @NotNull DISCONNECT disconnect,
+            final long originalSessionExpiryInterval) {
 
         super(asyncer);
         this.configurationService = configurationService;
-        this.disconnectPacket = new ModifiableInboundDisconnectPacketImpl(configurationService, disconnect);
+        this.originalSessionExpiryInterval = originalSessionExpiryInterval;
+        this.disconnectPacket = new ModifiableInboundDisconnectPacketImpl(configurationService, disconnect,
+                originalSessionExpiryInterval);
     }
 
     @Override
@@ -42,6 +46,7 @@ public class DisconnectInboundOutputImpl extends AbstractSimpleAsyncOutput<Disco
     }
 
     public void update(final @NotNull DisconnectPacket disconnectPacket) {
-        this.disconnectPacket = new ModifiableInboundDisconnectPacketImpl(configurationService, disconnectPacket);
+        this.disconnectPacket = new ModifiableInboundDisconnectPacketImpl(configurationService, disconnectPacket,
+                originalSessionExpiryInterval);
     }
 }

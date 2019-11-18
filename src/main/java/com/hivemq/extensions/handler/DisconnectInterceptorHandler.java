@@ -104,8 +104,11 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
 
         channel.config().setOption(ChannelOption.ALLOW_HALF_CLOSURE, true);
 
+        final Long originalSessionExpiryInterval =
+                channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
         final DisconnectInboundOutputImpl output =
-                new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
+                new DisconnectInboundOutputImpl(
+                        configurationService, asyncer, disconnect, originalSessionExpiryInterval);
 
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientId, channel, disconnect);
 
