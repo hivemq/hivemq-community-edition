@@ -34,6 +34,8 @@ import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,8 +71,21 @@ public class PublishPayloadTypeMigrationTest {
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());
-        when(systemInformation.getHiveMQVersion()).thenReturn("2019.1");
+        when(systemInformation.getHiveMQVersion()).thenReturn("2019.2");
+
+        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
+
         configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
+        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
+        FileUtils.forceDelete(dataFolder);
     }
 
     @Test

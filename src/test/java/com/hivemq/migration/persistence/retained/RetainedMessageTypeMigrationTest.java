@@ -40,6 +40,8 @@ import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,16 +89,25 @@ public class RetainedMessageTypeMigrationTest {
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());
-        when(systemInformation.getHiveMQVersion()).thenReturn("4.3.0");
+        when(systemInformation.getHiveMQVersion()).thenReturn("2019.2");
         configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
-        InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
-        InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
+        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
 
         counter = new AtomicLong();
-        callback = new RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback(64, payloadLocalPersistence,
+        callback = new RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback(4, payloadLocalPersistence,
                 rocksDBLocalPersistence, payloadExceptionLogging, counter);
 
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
+        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
+        FileUtils.forceDelete(dataFolder);
     }
 
     @Test(timeout = 5000)
@@ -246,7 +257,7 @@ public class RetainedMessageTypeMigrationTest {
     private MetaInformation getMetaInformation() {
         final MetaInformation metaInformation = new MetaInformation();
 
-        metaInformation.setHivemqVersion("4.3.0");
+        metaInformation.setHivemqVersion("2019.2");
         metaInformation.setPublishPayloadPersistenceType(PersistenceType.FILE_NATIVE);
         metaInformation.setRetainedMessagesPersistenceType(PersistenceType.FILE_NATIVE);
         metaInformation.setDataFolderPresent(true);

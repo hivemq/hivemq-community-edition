@@ -70,8 +70,8 @@ public class Migrations {
             MIGRATION_LOGGER.info("Skipping migration because no meta file and no persistence folder is present, assuming new HiveMQ installation");
             return Collections.emptyMap();
         } else if (!metaInformation.isMetaFilePresent() && metaInformation.isPersistenceFolderPresent()) {
-            log.trace("No meta file present, assuming HiveMQ version 4.2.1 => Migration needed.");
-            MIGRATION_LOGGER.info("No meta file present, assuming HiveMQ version 4.2.1 => Migration needed.");
+            log.trace("No meta file present, assuming HiveMQ version 2019.1 => Migration needed.");
+            MIGRATION_LOGGER.info("No meta file present, assuming HiveMQ version 2019.1 => Migration needed.");
             previousPayloadType = PersistenceType.FILE;
             previousRetainedType = PersistenceType.FILE;
             final MetaInformation newMetaInformation = new MetaInformation();
