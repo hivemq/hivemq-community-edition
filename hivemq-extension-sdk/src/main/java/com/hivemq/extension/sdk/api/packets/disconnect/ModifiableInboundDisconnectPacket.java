@@ -37,7 +37,8 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
      *
      * @param sessionExpiryInterval The session expiry interval to set or <code>null</code> to use the session expiry
      *                              interval of the CONNECT/CONNACK handshake.
-     * @throws IllegalStateException    If the session expiry interval is modified while it already is 0. // FIXME wrong
+     * @throws IllegalStateException    If the session expiry interval is modified if the session expiry interval of the
+     *                                  CONNECT packet was 0.
      * @throws IllegalArgumentException If the session expiry interval is less than 0.
      * @throws IllegalArgumentException If the session expiry interval is greater than the configured maximum.
      */
