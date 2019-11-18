@@ -4,6 +4,7 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackInboundOutput;
+import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.puback.ModifiablePubackPacketImpl;
@@ -18,20 +19,20 @@ public class PubackInboundOutputImpl extends AbstractSimpleAsyncOutput<PubackInb
         implements PubackInboundOutput, Supplier<PubackInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
-    private ModifiablePubackPacketImpl modifiablePubackPacket;
+    private ModifiablePubackPacketImpl pubackPacket;
 
     public PubackInboundOutputImpl(final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBACK puback) {
         super(asyncer);
         this.configurationService = configurationService;
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(this.configurationService, puback);
+        this.pubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
     }
 
     @Override
     public @Immutable
     @NotNull ModifiablePubackPacketImpl getPubackPacket() {
-        return modifiablePubackPacket;
+        return pubackPacket;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class PubackInboundOutputImpl extends AbstractSimpleAsyncOutput<PubackInb
         return this;
     }
 
-    public void update(final @NotNull PUBACK puback) {
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+    public void update(final @NotNull PubackPacket puback) {
+        this.pubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
     }
 }

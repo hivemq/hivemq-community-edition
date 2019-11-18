@@ -9,38 +9,29 @@ import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.puback.PubackPacketImpl;
+import com.hivemq.mqtt.message.puback.PUBACK;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
+ * @author Robin Atherton
  */
-public class PubackInboundInputImpl implements PubackInboundInput, Supplier<PubackInboundInputImpl>, PluginTaskInput {
+public class PubackInboundInputImpl implements Supplier<PubackInboundInputImpl>, PubackInboundInput, PluginTaskInput {
 
-    private @NotNull PubackPacket pubackPacket;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
+    private @NotNull PubackPacketImpl pubackPacket;
 
     public PubackInboundInputImpl(
-            final @NotNull PubackPacket pubackPacket,
             final @NotNull String clientId,
-            final @NotNull Channel channel) {
+            final @NotNull Channel channel,
+            final @NotNull PUBACK puback) {
 
-        this.pubackPacket = pubackPacket;
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-    }
-
-    @Override
-    public @NotNull @Immutable
-    PubackPacket getPubackPacket() {
-        return pubackPacket;
-    }
-
-    @Override
-    public @NotNull ConnectionInformation getConnectionInformation() {
-        return connectionInformation;
+        this.pubackPacket = new PubackPacketImpl(puback);
     }
 
     @Override
@@ -49,11 +40,23 @@ public class PubackInboundInputImpl implements PubackInboundInput, Supplier<Puba
     }
 
     @Override
-    public PubackInboundInputImpl get() {
+    public @NotNull ConnectionInformation getConnectionInformation() {
+        return connectionInformation;
+    }
+
+    @Override
+    public @NotNull
+    @Immutable
+    PubackPacket getPubackPacket() {
+        return pubackPacket;
+    }
+
+    @Override
+    public @NotNull PubackInboundInputImpl get() {
         return this;
     }
 
-    public void updatePuback(final @NotNull PubackPacket pubackPacket) {
+    public void update(final @NotNull PubackPacket pubackPacket) {
         this.pubackPacket = new PubackPacketImpl(pubackPacket);
     }
 }

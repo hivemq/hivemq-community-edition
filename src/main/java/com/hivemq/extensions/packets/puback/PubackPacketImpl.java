@@ -38,9 +38,8 @@ public class PubackPacketImpl implements PubackPacket {
         return packetIdentifier;
     }
 
-    @com.hivemq.annotations.NotNull
     @Override
-    public AckReasonCode getReasonCode() {
+    public @NotNull AckReasonCode getReasonCode() {
         return ackReasonCode;
     }
 

@@ -45,6 +45,5 @@ public interface ModifiablePubackPacket extends PubackPacket {
      *
      * @return Modifiable user properties.
      */
-    @Override
     @NotNull ModifiableUserProperties getUserProperties();
 }

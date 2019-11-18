@@ -28,6 +28,7 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -60,7 +61,7 @@ public class PubackInterceptorHandlerTest {
     private HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private HiveMQExtension plugin;
+    private HiveMQExtension extension;
 
     @Mock
     private ClientContextImpl clientContext;
@@ -82,7 +83,7 @@ public class PubackInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
-        when(plugin.getId()).thenReturn("plugin");
+        when(extension.getId()).thenReturn("plugin");
 
         final FullConfigurationService configurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
@@ -102,7 +103,7 @@ public class PubackInterceptorHandlerTest {
         channel.writeInbound(testPuback());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readInbound());
+        assertNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
@@ -111,11 +112,11 @@ public class PubackInterceptorHandlerTest {
 
         channel.close();
 
-        handler.channelRead(context, testPuback());
+        handler.write(context, testPuback(), mock(ChannelPromise.class));
 
         channel.runPendingTasks();
 
-        assertNotNull(channel.readInbound());
+        assertNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
@@ -123,7 +124,7 @@ public class PubackInterceptorHandlerTest {
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(ImmutableList.of());
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         final PUBACK testPuback = testPuback();
         channel.writeInbound(testPuback);
@@ -144,7 +145,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -188,7 +189,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -207,7 +208,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -227,7 +228,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -252,7 +253,7 @@ public class PubackInterceptorHandlerTest {
         channel.writeOutbound(testPuback());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readOutbound());
+        assertNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
@@ -271,21 +272,21 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_no_interceptors() {
-
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(ImmutableList.of());
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
-        final PUBACK testPuback = testPuback();
-        channel.writeOutbound(testPuback);
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        final PUBACK puback = testPuback();
+        channel.writeOutbound(puback);
         channel.runPendingTasks();
-        PUBACK puback = channel.readOutbound();
-        while (puback == null) {
+        PUBACK readPuback = channel.readOutbound();
+        while (readPuback == null) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
-            puback = channel.readOutbound();
+            readPuback = channel.readOutbound();
         }
-        assertEquals(testPuback.getReasonCode(), puback.getReasonCode());
+        assertEquals(readPuback.getReasonCode(), readPuback.getReasonCode());
     }
 
     @Test(timeout = 5000)
@@ -295,7 +296,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -339,7 +340,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -359,7 +360,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
@@ -377,7 +378,7 @@ public class PubackInterceptorHandlerTest {
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
-        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 

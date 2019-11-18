@@ -4,6 +4,7 @@ import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
+import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.puback.ModifiablePubackPacketImpl;
@@ -39,7 +40,8 @@ public class PubackOutboundOutputImpl extends AbstractSimpleAsyncOutput<PubackOu
         return this;
     }
 
-    public void update(final @NotNull PUBACK puback) {
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
+    public void update(final @NotNull PubackPacket pubackPacket) {
+        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, pubackPacket);
     }
+
 }

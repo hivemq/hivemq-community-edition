@@ -8,6 +8,7 @@ import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.puback.PubackPacketImpl;
+import com.hivemq.mqtt.message.puback.PUBACK;
 import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
@@ -23,18 +24,18 @@ public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl
     private final @NotNull ConnectionInformation connectionInformation;
 
     public PubackOutboundInputImpl(
-            final @NotNull PubackPacket pubackPacket,
             final @NotNull String clientId,
-            final @NotNull Channel channel) {
+            final @NotNull Channel channel,
+            final @NotNull PUBACK puback) {
 
-        this.pubackPacket = pubackPacket;
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.pubackPacket = new PubackPacketImpl(puback);
     }
 
-    @NotNull
+
     @Override
-    public PubackPacket getPubackPacket() {
+    public @NotNull PubackPacket getPubackPacket() {
         return pubackPacket;
     }
 
@@ -49,11 +50,11 @@ public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl
     }
 
     @Override
-    public PubackOutboundInputImpl get() {
+    public @NotNull PubackOutboundInputImpl get() {
         return this;
     }
 
-    public void updatePuback(final @NotNull PubackPacket pubackPacket) {
+    public void update(final @NotNull PubackPacket pubackPacket) {
         this.pubackPacket = new PubackPacketImpl(pubackPacket);
     }
 }
