@@ -24,7 +24,7 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Before
     public void setUp() throws Exception {
         original = createTestDisconnect(5);
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
     }
 
     @Test
@@ -40,15 +40,15 @@ public class ModifiableInboundDisconnectPacketImplTest {
 
     @Test
     public void test_modify_packet() {
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
         packet.setReasonCode(DisconnectReasonCode.BAD_AUTHENTICATION_METHOD);
         assertTrue(packet.isModified());
 
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
         packet.setReasonString("DisconnectReasonCode.");
         assertTrue(packet.isModified());
 
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
         packet.setSessionExpiryInterval(0L);
         assertTrue(packet.isModified());
     }
@@ -97,7 +97,7 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test(expected = IllegalStateException.class)
     public void sessionExpiryInterval_set_to_zero() {
         original = createTestDisconnect(0);
-        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original);
+        packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 0);
         packet.setSessionExpiryInterval(1L);
     }
 

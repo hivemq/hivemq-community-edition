@@ -27,7 +27,7 @@ public class DisconnectInboundOutputImplTest {
         final FullConfigurationService configurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
         disconnect = TestMessageUtil.createFullMqtt5Disconnect();
-        output = new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
+        output = new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect, 0);
     }
 
     @Test

@@ -93,7 +93,7 @@ public class DisconnectInboundInputImplTest {
         final DISCONNECT disconnect = TestMessageUtil.createFullMqtt5Disconnect();
 
         final ModifiableInboundDisconnectPacket disconnectPacket =
-                new ModifiableInboundDisconnectPacketImpl(fullConfigurationService, disconnect);
+                new ModifiableInboundDisconnectPacketImpl(fullConfigurationService, disconnect, 0);
         disconnectPacket.setReasonString("modified");
 
         Assert.assertEquals("modified", disconnectPacket.getReasonString().get());
