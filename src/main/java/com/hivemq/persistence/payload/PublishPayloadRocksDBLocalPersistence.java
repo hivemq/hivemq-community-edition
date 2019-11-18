@@ -91,14 +91,15 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         try {
             long max = 0;
             for (final RocksDB bucket : buckets) {
-                final RocksIterator rocksIterator = bucket.newIterator();
-                rocksIterator.seekToFirst();
-                while (rocksIterator.isValid()) {
-                    final long key = deserializeKey(rocksIterator.key());
-                    if (key > max) {
-                        max = key;
+                try(final RocksIterator rocksIterator = bucket.newIterator()) {
+                    rocksIterator.seekToFirst();
+                    while (rocksIterator.isValid()) {
+                        final long key = deserializeKey(rocksIterator.key());
+                        if (key > max) {
+                            max = key;
+                        }
+                        rocksIterator.next();
                     }
-                    rocksIterator.next();
                 }
             }
             maxId = max;
@@ -139,12 +140,13 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
         final ImmutableList.Builder<Long> builder = ImmutableList.builder();
         for (final RocksDB bucket : buckets) {
-            final RocksIterator rocksIterator = bucket.newIterator();
-            rocksIterator.seekToFirst();
-            while (rocksIterator.isValid()) {
-                final byte[] key = rocksIterator.key();
-                builder.add(deserializeKey(key));
-                rocksIterator.next();
+            try(final RocksIterator rocksIterator = bucket.newIterator()) {
+                rocksIterator.seekToFirst();
+                while (rocksIterator.isValid()) {
+                    final byte[] key = rocksIterator.key();
+                    builder.add(deserializeKey(key));
+                    rocksIterator.next();
+                }
             }
         }
 
@@ -172,12 +174,13 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @Override
     public void iterate(final @NotNull Callback callback) {
         for (final RocksDB bucket : buckets) {
-            final RocksIterator rocksIterator = bucket.newIterator();
-            rocksIterator.seekToFirst();
-            while (rocksIterator.isValid()) {
-                final long payloadId = deserializeKey(rocksIterator.key());
-                callback.call(payloadId, rocksIterator.value());
-                rocksIterator.next();
+            try(final RocksIterator rocksIterator = bucket.newIterator()) {
+                rocksIterator.seekToFirst();
+                while (rocksIterator.isValid()) {
+                    final long payloadId = deserializeKey(rocksIterator.key());
+                    callback.call(payloadId, rocksIterator.value());
+                    rocksIterator.next();
+                }
             }
         }
     }
