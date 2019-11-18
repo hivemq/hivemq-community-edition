@@ -22,8 +22,6 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -103,11 +101,10 @@ public class DisconnectOutboundInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_channel_inactive() throws Exception {
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
+    public void test_channel_inactive() {
         channel.close();
 
-        handler.write(context, testDisconnect(), mock(ChannelPromise.class));
+        channel.write(testDisconnect());
         channel.runPendingTasks();
         assertNull(channel.readOutbound());
     }
@@ -176,7 +173,6 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
         assertEquals("modified", disconnect.getReasonString());
     }
-
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
