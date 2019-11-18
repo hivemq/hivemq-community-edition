@@ -16,6 +16,10 @@ import org.junit.Test;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
+/**
+ * @author Robin Atherton
+ * @author Silvio Giebl
+ */
 public class DisconnectInboundInputImplTest {
 
     @Test

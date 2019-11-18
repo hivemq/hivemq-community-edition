@@ -12,6 +12,7 @@ import java.util.Optional;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class DisconnectPacketImpl implements DisconnectPacket {
 

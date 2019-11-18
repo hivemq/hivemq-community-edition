@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @Singleton
 @ChannelHandler.Sharable

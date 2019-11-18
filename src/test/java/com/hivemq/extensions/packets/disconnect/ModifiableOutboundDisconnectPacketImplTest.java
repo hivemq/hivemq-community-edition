@@ -13,6 +13,10 @@ import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.*;
 
+/**
+ * @author Robin Atherton
+ * @author Silvio Giebl
+ */
 public class ModifiableOutboundDisconnectPacketImplTest {
 
     private ModifiableOutboundDisconnectPacketImpl packet;

@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class DisconnectInboundInputImpl
         implements Supplier<DisconnectInboundInputImpl>, DisconnectInboundInput, PluginTaskInput {
