@@ -102,6 +102,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
+        channel.config().setOption(ChannelOption.ALLOW_HALF_CLOSURE, true);
+
         final DisconnectInboundOutputImpl output =
                 new DisconnectInboundOutputImpl(configurationService, asyncer, disconnect);
 
