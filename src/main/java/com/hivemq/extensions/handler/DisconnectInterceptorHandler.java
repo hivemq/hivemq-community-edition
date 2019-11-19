@@ -78,7 +78,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
     }
 
     private void handleInboundDisconnect(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
 
@@ -223,14 +224,14 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<DisconnectOutboundInputImpl, DisconnectOutboundOutputImpl> {
 
         private final @NotNull DisconnectOutboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         DisconnectOutboundInterceptorTask(
                 final @NotNull DisconnectOutboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -243,7 +244,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound disconnect interception. " +
-                                "Extensions are responsible on their own to handle exceptions.", pluginId);
+                                "Extensions are responsible on their own to handle exceptions.", extensionId);
                 log.debug("Original exception: ", e);
                 output.update(input.getDisconnectPacket());
             }
@@ -301,14 +302,14 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<DisconnectInboundInputImpl, DisconnectInboundOutputImpl> {
 
         private final @NotNull DisconnectInboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         DisconnectInboundInterceptorTask(
                 final @NotNull DisconnectInboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -321,7 +322,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound disconnect interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
+                                "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception:", e);
                 output.update(input.getDisconnectPacket());
             }
