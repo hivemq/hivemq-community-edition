@@ -66,7 +66,8 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
             final @NotNull ChannelPromise promise) {
 
         if (!(msg instanceof PUBREL)) {
@@ -77,14 +78,14 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
     }
 
     private void handleOutboundPubrel(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREL pubrel,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull PUBREL pubrel,
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            ctx.write(pubrel, promise);
             return;
         }
 
@@ -129,7 +130,6 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            ctx.fireChannelRead(pubrel);
             return;
         }
 
@@ -225,7 +225,9 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public @NotNull PubrelInboundOutputImpl apply(
-                final @NotNull PubrelInboundInputImpl input, final @NotNull PubrelInboundOutputImpl output) {
+                final @NotNull PubrelInboundInputImpl input,
+                final @NotNull PubrelInboundOutputImpl output) {
+
             try {
                 interceptor.onInboundPubrel(input, output);
             } catch (final Throwable e) {
@@ -303,7 +305,9 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public @NotNull PubrelOutboundOutputImpl apply(
-                final @NotNull PubrelOutboundInputImpl input, final @NotNull PubrelOutboundOutputImpl output) {
+                final @NotNull PubrelOutboundInputImpl input,
+                final @NotNull PubrelOutboundOutputImpl output) {
+
             try {
                 interceptor.onOutboundPubrel(input, output);
             } catch (final Throwable e) {
