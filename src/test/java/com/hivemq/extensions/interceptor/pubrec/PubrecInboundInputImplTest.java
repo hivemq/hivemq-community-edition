@@ -2,6 +2,7 @@ package com.hivemq.extensions.interceptor.pubrec;
 
 import com.hivemq.extensions.packets.pubrec.PubrecPacketImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
@@ -20,10 +21,8 @@ public class PubrecInboundInputImplTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
-
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, "client", embeddedChannel);
+        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(
+                "client", embeddedChannel, TestMessageUtil.createSuccessPubrec());
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
         assertNotNull(input.getPubrecPacket());
@@ -31,19 +30,17 @@ public class PubrecInboundInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_client_id_null() {
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, null, new EmbeddedChannel());
+        new PubrecInboundInputImpl(null, new EmbeddedChannel(), TestMessageUtil.createSuccessPubrec());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket, "client", null);
+        new PubrecInboundInputImpl("client", null, TestMessageUtil.createSuccessPubrec());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_packet_null() {
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(null, "client", new EmbeddedChannel());
+        new PubrecInboundInputImpl("client", new EmbeddedChannel(), null);
     }
 
     @Test
@@ -51,12 +48,11 @@ public class PubrecInboundInputImplTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
+        final PUBREC pubrecPacket1 = TestMessageUtil.createSuccessPubrec();
+        final PUBREC pubrecPacket2 = TestMessageUtil.createSuccessPubrec();
 
-        final PubrecPacketImpl pubrecPacket1 = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
-        final PubrecPacketImpl pubrecPacket2 = new PubrecPacketImpl(TestMessageUtil.createSuccessPubrec());
-
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(pubrecPacket1, "client", embeddedChannel);
-        input.updatePubrec(pubrecPacket2);
+        final PubrecInboundInputImpl input = new PubrecInboundInputImpl("client", embeddedChannel, pubrecPacket1);
+        input.update(new PubrecPacketImpl(pubrecPacket2));
 
         assertNotSame(pubrecPacket1, input.getPubrecPacket());
         assertNotSame(pubrecPacket2, input.getPubrecPacket());
