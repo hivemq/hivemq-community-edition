@@ -35,5 +35,4 @@ public interface PubrecOutboundOutput extends SimpleAsyncOutput<PubrecOutboundOu
      */
     @Override
     @NotNull Async<PubrecOutboundOutput> async(@NotNull Duration timeout);
-
 }
