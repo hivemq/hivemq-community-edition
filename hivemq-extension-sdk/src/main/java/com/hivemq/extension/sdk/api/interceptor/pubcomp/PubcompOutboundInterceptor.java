@@ -33,7 +33,6 @@ public interface PubcompOutboundInterceptor extends Interceptor {
      * @param pubcompOutboundOutput The {@link PubcompOutboundOutput} parameter.
      */
     void onOutboundPubcomp(
-            @NotNull PubcompOutboundInput pubcompOutboundInput, @NotNull PubcompOutboundOutput pubcompOutboundOutput)
-            throws InterruptedException;
-
+            @NotNull PubcompOutboundInput pubcompOutboundInput,
+            @NotNull PubcompOutboundOutput pubcompOutboundOutput);
 }
