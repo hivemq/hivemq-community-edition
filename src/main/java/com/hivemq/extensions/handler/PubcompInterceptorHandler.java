@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
+@Singleton
 @ChannelHandler.Sharable
 public class PubcompInterceptorHandler extends ChannelDuplexHandler {
 
