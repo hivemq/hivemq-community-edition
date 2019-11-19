@@ -144,11 +144,16 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getPubackOutboundInterceptors().isEmpty()) {
+        if (clientContext == null) {
             return;
         }
         final List<PubackOutboundInterceptor> pubackOutboundInterceptors =
                 clientContext.getPubackOutboundInterceptors();
+
+        if (pubackOutboundInterceptors.isEmpty()) {
+            ctx.write(puback, promise);
+            return;
+        }
 
         final PubackOutboundOutputImpl output = new PubackOutboundOutputImpl(configurationService, asyncer, puback);
         final PubackOutboundInputImpl
