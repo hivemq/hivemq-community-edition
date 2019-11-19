@@ -105,16 +105,14 @@ public class PubrecInterceptorHandlerTest {
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readInbound());
+        assertNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
-    public void test_inbound_channel_inactive() throws Exception {
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
-
+    public void test_inbound_channel_inactive() {
         channel.close();
 
-        handler.channelRead(context, testPubrec());
+        channel.pipeline().fireChannelRead(testPubrec());
 
         channel.runPendingTasks();
 
@@ -255,17 +253,14 @@ public class PubrecInterceptorHandlerTest {
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readOutbound());
+        assertNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
-    public void test_outbound_channel_inactive() throws Exception {
-
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
-
+    public void test_outbound_channel_inactive() {
         channel.close();
 
-        handler.write(context, testPubrec(), context.newPromise());
+        channel.pipeline().write(testPubrec());
 
         channel.runPendingTasks();
 
