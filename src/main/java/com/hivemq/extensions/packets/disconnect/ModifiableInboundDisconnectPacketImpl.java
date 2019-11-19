@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundDisconnectPacket {
 

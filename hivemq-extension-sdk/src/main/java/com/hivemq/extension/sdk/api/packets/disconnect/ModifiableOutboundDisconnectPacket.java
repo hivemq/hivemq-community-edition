@@ -8,8 +8,11 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 /**
  * An outbound {@link DisconnectPacket} that can be modified before it is sent to the client.
+ * <p>
+ * This packet is only used for MQTT 5 clients as MQTT 3.x does not support outbound disconnects.
  *
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @DoNotImplement
 public interface ModifiableOutboundDisconnectPacket extends DisconnectPacket {

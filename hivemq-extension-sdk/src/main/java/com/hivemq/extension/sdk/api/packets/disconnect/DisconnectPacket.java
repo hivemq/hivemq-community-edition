@@ -13,9 +13,10 @@ import java.util.Optional;
  * Contains all values of an MQTT 5 DISCONNECT packet, but will also be used to represent MQTT 3.x DISCONNECT packets.
  *
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
-@DoNotImplement
 @Immutable
+@DoNotImplement
 public interface DisconnectPacket {
 
     /**

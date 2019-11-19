@@ -11,12 +11,7 @@ import java.time.Duration;
 
 /**
  * This is the output parameter of any {@link DisconnectInboundInterceptor} providing methods to define the outcome of a
- * DISCONNECT interception.
- * <p>
- * It can be used to
- * <ul>
- * <li>Modify a DISCONNECT packet</li>
- * </ul>
+ * DISCONNECT interception. It can be used to modify an inbound DISCONNECT packet.
  *
  * @author Robin Atherton
  */
@@ -24,14 +19,15 @@ import java.time.Duration;
 public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInboundOutput> {
 
     /**
-     * Use this object to make any changes to the inbound DISCONNECT message.
+     * Use this object to make any changes to the inbound DISCONNECT.
      *
-     * @return A {@link ModifiableInboundDisconnectPacket} disconnect packet.
+     * @return A {@link ModifiableInboundDisconnectPacket}.
      */
     @NotNull ModifiableInboundDisconnectPacket getDisconnectPacket();
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
+     * In that case an unmodified DISCONNECT is forwarded to the server and all changes made by this interceptor are discarded.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

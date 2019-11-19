@@ -10,6 +10,7 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
  * An inbound {@link DisconnectPacket} that can be modified before it is sent to the server.
  *
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @DoNotImplement
 public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
@@ -25,6 +26,8 @@ public interface ModifiableInboundDisconnectPacket extends DisconnectPacket {
 
     /**
      * Set the reason string of the DISCONNECT packet.
+     * <p>
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
      *
      * @param reasonString The reason string to set or <code>null</code> to remove the reason string.
      * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.

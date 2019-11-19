@@ -19,6 +19,7 @@ import java.util.Optional;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboundDisconnectPacket {
 

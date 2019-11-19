@@ -1,6 +1,6 @@
 package com.hivemq.extensions.packets.disconnect;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;

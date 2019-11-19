@@ -204,7 +204,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(final @NotNull DisconnectOutboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on inbound DISCONNECT interception");
+                log.debug("Async timeout on inbound DISCONNECT interception.");
                 output.update(input.getDisconnectPacket());
             } else if (output.getDisconnectPacket().isModified()) {
                 input.update(output.getDisconnectPacket());
@@ -244,7 +244,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound disconnect interception. " +
-                                "Extensions are responsible on their own to handle exceptions.", extensionId);
+                                "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception: ", e);
                 output.update(input.getDisconnectPacket());
             }
@@ -282,7 +282,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         @Override
         public void pluginPost(final @NotNull DisconnectInboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on inbound DISCONNECT interception");
+                log.debug("Async timeout on inbound DISCONNECT interception.");
                 output.update(input.getDisconnectPacket());
             } else if (output.getDisconnectPacket().isModified()) {
                 input.update(output.getDisconnectPacket());
@@ -323,7 +323,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound disconnect interception. " +
                                 "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception:", e);
+                log.debug("Original exception: ", e);
                 output.update(input.getDisconnectPacket());
             }
             return output;

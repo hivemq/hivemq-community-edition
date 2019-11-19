@@ -27,6 +27,7 @@ public interface DisconnectOutboundOutput extends SimpleAsyncOutput<DisconnectOu
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
+     * In that case an unmodified DISCONNECT is forwarded to the client and all changes made by this interceptor are discarded.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
