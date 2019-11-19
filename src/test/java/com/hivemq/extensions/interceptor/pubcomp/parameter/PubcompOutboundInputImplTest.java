@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotSame;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class PubcompOutboundInputImplTest {
 
