@@ -212,7 +212,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull PubackInboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        private PubackInboundInterceptorTask(
+        PubackInboundInterceptorTask(
                 final @NotNull PubackInboundInterceptor interceptor,
                 final @NotNull String pluginId) {
 
@@ -292,7 +292,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull PubackOutboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        private PubackOutboundInterceptorTask(
+        PubackOutboundInterceptorTask(
                 final @NotNull PubackOutboundInterceptor interceptor,
                 final @NotNull String extensionId) {
 

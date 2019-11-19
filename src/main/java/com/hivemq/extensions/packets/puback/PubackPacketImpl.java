@@ -1,6 +1,7 @@
 package com.hivemq.extensions.packets.puback;
 
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
@@ -12,6 +13,7 @@ import java.util.Optional;
 /**
  * @author Yannick Weber
  */
+@Immutable
 public class PubackPacketImpl implements PubackPacket {
 
     private final int packetIdentifier;
