@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -105,16 +104,14 @@ public class PubrelInterceptorHandlerTest {
         channel.writeInbound(testPubrel());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readInbound());
+        assertNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
-    public void test_inbound_channel_inactive() throws Exception {
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
-
+    public void test_inbound_channel_inactive() {
         channel.close();
 
-        handler.channelRead(context, testPubrel());
+        channel.pipeline().fireChannelRead(testPubrel());
 
         channel.runPendingTasks();
 
@@ -255,17 +252,15 @@ public class PubrelInterceptorHandlerTest {
         channel.writeOutbound(testPubrel());
         channel.runPendingTasks();
 
-        assertNotNull(channel.readOutbound());
+        assertNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
-    public void test_outbound_channel_inactive() throws Exception {
-
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
+    public void test_outbound_channel_inactive() {
 
         channel.close();
 
-        handler.write(context, testPubrel(), context.newPromise());
+        channel.pipeline().write(testPubrel());
 
         channel.runPendingTasks();
 
