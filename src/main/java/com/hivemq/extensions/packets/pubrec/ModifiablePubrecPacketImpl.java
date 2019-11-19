@@ -1,12 +1,14 @@
 package com.hivemq.extensions.packets.pubrec;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extension.sdk.api.packets.pubrec.ModifiablePubrecPacket;
+import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;
+import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
@@ -16,28 +18,48 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
-public class ModifiablePubrecPacketImpl extends PubrecPacketImpl implements ModifiablePubrecPacket {
+public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
 
     private final @NotNull FullConfigurationService configurationService;
+
+    private final int packetIdentifier;
+    private @NotNull AckReasonCode reasonCode;
+    private @Nullable String reasonString;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
     private boolean modified = false;
-
-    private @NotNull AckReasonCode reasonCode;
-    private @Nullable String reasonString;
 
     public ModifiablePubrecPacketImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PUBREC pubrec) {
 
-        super(pubrec);
         this.configurationService = configurationService;
-        this.reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
-        this.reasonString = pubrec.getReasonString();
-        this.userProperties = new ModifiableUserPropertiesImpl(
+        packetIdentifier = pubrec.getPacketIdentifier();
+        reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
+        reasonString = pubrec.getReasonString();
+        userProperties = new ModifiableUserPropertiesImpl(
                 pubrec.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
+    }
+
+    public ModifiablePubrecPacketImpl(
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PubrecPacket pubrecPacket) {
+
+        this.configurationService = configurationService;
+        packetIdentifier = pubrecPacket.getPacketIdentifier();
+        reasonCode = pubrecPacket.getReasonCode();
+        reasonString = pubrecPacket.getReasonString().orElse(null);
+        userProperties = new ModifiableUserPropertiesImpl(
+                (InternalUserProperties) pubrecPacket.getUserProperties(),
+                configurationService.securityConfiguration().validateUTF8());
+    }
+
+    @Override
+    public int getPacketIdentifier() {
+        return packetIdentifier;
     }
 
     @Override
@@ -55,13 +77,12 @@ public class ModifiablePubrecPacketImpl extends PubrecPacketImpl implements Modi
         if (this.reasonCode == reasonCode) {
             return;
         }
-        this.modified = true;
         this.reasonCode = reasonCode;
+        modified = true;
     }
 
-    @NotNull
     @Override
-    public Optional<String> getReasonString() {
+    public @NotNull Optional<String> getReasonString() {
         return Optional.ofNullable(reasonString);
     }
 
@@ -76,13 +97,12 @@ public class ModifiablePubrecPacketImpl extends PubrecPacketImpl implements Modi
         if (Objects.equals(this.reasonString, reasonString)) {
             return;
         }
-        this.modified = true;
         this.reasonString = reasonString;
+        modified = true;
     }
 
-    @NotNull
     @Override
-    public ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserProperties getUserProperties() {
         return userProperties;
     }
 
