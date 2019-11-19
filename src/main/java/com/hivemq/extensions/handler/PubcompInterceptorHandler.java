@@ -231,7 +231,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
                 interceptor.onInboundPubcomp(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound pubcomp interception." +
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound pubcomp interception. " +
                                 "Extensions are responsible for their own exception handling.", pluginId);
                 log.debug("Original exception:", e);
                 output.update(input.getPubcompPacket());
@@ -311,7 +311,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
                 interceptor.onOutboundPubcomp(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound pubcomp interception." +
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound pubcomp interception. " +
                                 "Extensions are responsible for their own exception handling.", pluginId);
                 log.debug("Original exception:", e);
                 output.update(input.getPubcompPacket());
