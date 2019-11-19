@@ -1,5 +1,6 @@
 package com.hivemq.extensions.packets.disconnect;
 
+import com.hivemq.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * @author Robin Atherton
  * @author Silvio Giebl
  */
+@Immutable
 public class DisconnectPacketImpl implements DisconnectPacket {
 
     private final @NotNull DisconnectReasonCode reasonCode;
