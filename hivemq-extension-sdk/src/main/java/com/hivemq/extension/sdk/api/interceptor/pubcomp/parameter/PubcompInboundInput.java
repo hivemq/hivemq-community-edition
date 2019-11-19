@@ -20,6 +20,5 @@ public interface PubcompInboundInput extends ClientBasedInput {
      *
      * @return An unmodifiable {@link PubcompPacket}.
      */
-    @NotNull @Immutable PubcompPacket getPubcompPacket();
-
+    @Immutable @NotNull PubcompPacket getPubcompPacket();
 }

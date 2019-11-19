@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.packets.pubcomp;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PubcompReasonCode;
@@ -13,13 +14,13 @@ import java.util.Optional;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface PubcompPacket {
 
     /**
      * The packet identifier of the PUBCOMP.
      *
      * @return The packet identifier.
-     * @since 4.3.0
      */
     int getPacketIdentifier();
 
@@ -49,5 +50,4 @@ public interface PubcompPacket {
      * @return The user properties.
      */
     @NotNull UserProperties getUserProperties();
-
 }

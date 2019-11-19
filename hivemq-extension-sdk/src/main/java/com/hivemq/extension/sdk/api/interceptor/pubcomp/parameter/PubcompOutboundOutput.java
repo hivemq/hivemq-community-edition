@@ -36,5 +36,4 @@ public interface PubcompOutboundOutput extends SimpleAsyncOutput<PubcompOutbound
      */
     @Override
     @NotNull Async<PubcompOutboundOutput> async(@NotNull Duration timeout);
-
 }
