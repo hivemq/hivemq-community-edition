@@ -1,6 +1,7 @@
 package com.hivemq.extension.sdk.api.packets.pubcomp;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PubcompReasonCode;
@@ -15,6 +16,7 @@ import java.util.Optional;
  * @author Yannick Weber
  */
 @DoNotImplement
+@Immutable
 public interface PubcompPacket {
 
     /**
