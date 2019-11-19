@@ -1,7 +1,8 @@
 package com.hivemq.extensions.packets.pubrec;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;
@@ -11,10 +12,12 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
+@Immutable
 public class PubrecPacketImpl implements PubrecPacket {
 
-    private final AckReasonCode ackReasonCode;
+    private final @NotNull AckReasonCode ackReasonCode;
     private final int packetIdentifier;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
@@ -27,10 +30,10 @@ public class PubrecPacketImpl implements PubrecPacket {
     }
 
     public PubrecPacketImpl(final @NotNull PubrecPacket pubrecPacket) {
-        this.ackReasonCode = pubrecPacket.getReasonCode();
-        this.packetIdentifier = pubrecPacket.getPacketIdentifier();
-        this.reasonString = pubrecPacket.getReasonString().orElse(null);
-        this.userProperties = pubrecPacket.getUserProperties();
+        ackReasonCode = pubrecPacket.getReasonCode();
+        packetIdentifier = pubrecPacket.getPacketIdentifier();
+        reasonString = pubrecPacket.getReasonString().orElse(null);
+        userProperties = pubrecPacket.getUserProperties();
     }
 
     @Override
