@@ -1,8 +1,8 @@
 package com.hivemq.extensions.packets.puback;
 
-import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
@@ -12,6 +12,7 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 @Immutable
 public class PubackPacketImpl implements PubackPacket {

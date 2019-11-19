@@ -1,8 +1,8 @@
 package com.hivemq.extensions.interceptor.puback;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -14,34 +14,36 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
+ * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class PubackOutboundOutputImpl extends AbstractSimpleAsyncOutput<PubackOutboundOutput>
         implements PubackOutboundOutput, Supplier<PubackOutboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
-    private @NotNull ModifiablePubackPacketImpl modifiablePubackPacket;
+    private @NotNull ModifiablePubackPacketImpl pubackPacket;
 
     public PubackOutboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBACK puback) {
+
         super(asyncer);
         this.configurationService = configurationService;
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(this.configurationService, puback);
+        pubackPacket = new ModifiablePubackPacketImpl(configurationService, puback);
     }
 
     @Override
     public @Immutable @NotNull ModifiablePubackPacketImpl getPubackPacket() {
-        return modifiablePubackPacket;
+        return pubackPacket;
     }
 
     @Override
-    public PubackOutboundOutputImpl get() {
+    public @NotNull PubackOutboundOutputImpl get() {
         return this;
     }
 
     public void update(final @NotNull PubackPacket pubackPacket) {
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(configurationService, pubackPacket);
+        this.pubackPacket = new ModifiablePubackPacketImpl(configurationService, pubackPacket);
     }
-
 }

@@ -1,9 +1,9 @@
 package com.hivemq.extensions.packets.puback;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
@@ -18,6 +18,7 @@ import java.util.Optional;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
 
@@ -57,6 +58,16 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
     }
 
     @Override
+    public int getPacketIdentifier() {
+        return this.packetIdentifier;
+    }
+
+    @Override
+    public @NotNull AckReasonCode getReasonCode() {
+        return reasonCode;
+    }
+
+    @Override
     public void setReasonCode(final @NotNull AckReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         final boolean switched = (reasonCode == AckReasonCode.SUCCESS && this.reasonCode != AckReasonCode.SUCCESS) ||
@@ -68,6 +79,11 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         }
         this.reasonCode = reasonCode;
         modified = true;
+    }
+
+    @Override
+    public @NotNull Optional<String> getReasonString() {
+        return Optional.ofNullable(reasonString);
     }
 
     @Override
@@ -83,21 +99,6 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         }
         this.reasonString = reasonString;
         modified = true;
-    }
-
-    @Override
-    public int getPacketIdentifier() {
-        return this.packetIdentifier;
-    }
-
-    @Override
-    public @NotNull AckReasonCode getReasonCode() {
-        return reasonCode;
-    }
-
-    @Override
-    public @NotNull Optional<String> getReasonString() {
-        return Optional.ofNullable(reasonString);
     }
 
     @Override

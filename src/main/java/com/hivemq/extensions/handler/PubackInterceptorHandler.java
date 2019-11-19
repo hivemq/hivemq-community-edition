@@ -179,6 +179,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 final @NotNull PubackInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
+
             super(taskClazz, clientId);
             this.input = input;
             this.ctx = ctx;
@@ -187,7 +188,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
 
         @Override
-        public void pluginPost(@NotNull final PubackInboundOutputImpl output) {
+        public void pluginPost(final @NotNull PubackInboundOutputImpl output) {
             if (output.isTimedOut()) {
                 log.debug("Async timeout on inbound PUBACK interception.");
                 output.update(input.getPubackPacket());
@@ -198,7 +199,6 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
 
         public void increment(final @NotNull PubackInboundOutputImpl output) {
-            //we must set the future when no more interceptors are registered
             if (counter.incrementAndGet() == interceptorCount) {
                 final PUBACK finalPuback = PUBACK.createPubackFrom(output.getPubackPacket());
                 ctx.fireChannelRead(finalPuback);
@@ -210,14 +210,14 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubackInboundInputImpl, PubackInboundOutputImpl> {
 
         private final @NotNull PubackInboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubackInboundInterceptorTask(
                 final @NotNull PubackInboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -229,9 +229,9 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 interceptor.onInboundPuback(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on puback interception. The exception should be handled by the extension.",
-                        pluginId);
-                log.debug("Original exception:", e);
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound puback interception. " +
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception: ", e);
                 output.update(input.getPubackPacket());
             }
             return output;
@@ -268,7 +268,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
 
         @Override
-        public void pluginPost(@NotNull final PubackOutboundOutputImpl output) {
+        public void pluginPost(final @NotNull PubackOutboundOutputImpl output) {
             if (output.isTimedOut()) {
                 log.debug("Async timeout on outbound PUBACK interception.");
                 output.update(input.getPubackPacket());
@@ -290,14 +290,14 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubackOutboundInputImpl, PubackOutboundOutputImpl> {
 
         private final @NotNull PubackOutboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubackOutboundInterceptorTask(
                 final @NotNull PubackOutboundInterceptor interceptor,
                 final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = extensionId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -310,7 +310,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound puback interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
+                                "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception: ", e);
                 output.update(input.getPubackPacket());
             }

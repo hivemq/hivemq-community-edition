@@ -28,7 +28,6 @@ public interface PubackPacket {
 
     /**
      * The reason code from the PUBACK packet.
-     * <p>
      *
      * @return The puback reason code.
      * @see AckReasonCode How reason codes are translated from MQTT 5 to MQTT 3.

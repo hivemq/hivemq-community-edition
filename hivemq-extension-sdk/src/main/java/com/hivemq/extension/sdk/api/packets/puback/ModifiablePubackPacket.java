@@ -18,12 +18,13 @@ public interface ModifiablePubackPacket extends PubackPacket {
     /**
      * Set a {@link AckReasonCode} to the PUBACK packet.
      * <p>
-     * Switching from successful to unsuccessful and vice versa is not supported,
-     * in that case an {@link IllegalStateException} is thrown.
+     * Switching from successful to unsuccessful and vice versa is not supported, in that case an {@link
+     * IllegalStateException} is thrown.
      *
      * @param reasonCode The reason code to set.
      * @throws NullPointerException  If reason code is <null>.
-     * @throws IllegalStateException If switching from successful reason code to unsuccessful reason code or vice versa.
+     * @throws IllegalStateException If switching from successful reason code to unsuccessful reason code or vice
+     *                               versa.
      * @see AckReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      */
     void setReasonCode(@NotNull AckReasonCode reasonCode);
@@ -47,5 +48,6 @@ public interface ModifiablePubackPacket extends PubackPacket {
      *
      * @return Modifiable user properties.
      */
+    @Override
     @NotNull ModifiableUserProperties getUserProperties();
 }

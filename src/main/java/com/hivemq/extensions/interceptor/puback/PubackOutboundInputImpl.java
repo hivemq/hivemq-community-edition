@@ -1,6 +1,7 @@
 package com.hivemq.extensions.interceptor.puback;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.puback.parameter.PubackOutboundInput;
@@ -15,13 +16,15 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
+ * @author Robin Atherton
+ * @author Silvio Giebl
  */
-public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl>, PubackOutboundInput,
-        PluginTaskInput {
+public class PubackOutboundInputImpl
+        implements Supplier<PubackOutboundInputImpl>, PubackOutboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    private @NotNull PubackPacket pubackPacket;
+    private @NotNull PubackPacketImpl pubackPacket;
 
     public PubackOutboundInputImpl(
             final @NotNull String clientId,
@@ -33,10 +36,9 @@ public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl
         this.pubackPacket = new PubackPacketImpl(puback);
     }
 
-
     @Override
-    public @NotNull PubackPacket getPubackPacket() {
-        return pubackPacket;
+    public @NotNull ClientInformation getClientInformation() {
+        return clientInformation;
     }
 
     @Override
@@ -45,8 +47,8 @@ public class PubackOutboundInputImpl implements Supplier<PubackOutboundInputImpl
     }
 
     @Override
-    public @NotNull ClientInformation getClientInformation() {
-        return clientInformation;
+    public @Immutable @NotNull PubackPacket getPubackPacket() {
+        return pubackPacket;
     }
 
     @Override
