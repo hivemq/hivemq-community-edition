@@ -119,7 +119,6 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
             final PubrecOutboundInterceptorTask
                     interceptorTask = new PubrecOutboundInterceptorTask(interceptor, plugin.getId());
 
-
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
