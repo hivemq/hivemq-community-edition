@@ -15,21 +15,21 @@ import java.util.Optional;
  */
 public class PubcompPacketImpl implements PubcompPacket {
 
-    private final @NotNull PubcompReasonCode reasonCode;
     private final int packetIdentifier;
+    private final @NotNull PubcompReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
-        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
         packetIdentifier = pubcomp.getPacketIdentifier();
+        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
         reasonString = pubcomp.getReasonString();
         userProperties = pubcomp.getUserProperties().getPluginUserProperties();
     }
 
     public PubcompPacketImpl(final @NotNull PubcompPacket pubcompPacket) {
-        reasonCode = pubcompPacket.getReasonCode();
         packetIdentifier = pubcompPacket.getPacketIdentifier();
+        reasonCode = pubcompPacket.getReasonCode();
         reasonString = pubcompPacket.getReasonString().orElse(null);
         userProperties = pubcompPacket.getUserProperties();
     }
