@@ -107,12 +107,10 @@ public class PubackInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_inbound_channel_inactive() throws Exception {
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
-
+    public void test_inbound_channel_inactive() {
         channel.close();
 
-        handler.write(context, testPuback(), mock(ChannelPromise.class));
+        channel.pipeline().write(testPuback());
 
         channel.runPendingTasks();
 
