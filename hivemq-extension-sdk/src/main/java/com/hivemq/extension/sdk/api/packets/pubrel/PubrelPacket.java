@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.packets.pubrel;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PubrelReasonCode;
@@ -13,6 +14,7 @@ import java.util.Optional;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface PubrelPacket {
 
     /**
@@ -49,5 +51,4 @@ public interface PubrelPacket {
      * @return The user properties.
      */
     @NotNull UserProperties getUserProperties();
-
 }
