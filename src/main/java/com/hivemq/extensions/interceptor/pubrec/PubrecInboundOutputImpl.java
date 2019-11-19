@@ -28,7 +28,7 @@ public class PubrecInboundOutputImpl extends AbstractSimpleAsyncOutput<PubrecInb
 
         super(asyncer);
         this.configurationService = configurationService;
-        this.pubrecPacket = new ModifiablePubrecPacketImpl(configurationService, pubrec);
+        pubrecPacket = new ModifiablePubrecPacketImpl(configurationService, pubrec);
     }
 
     @Override
