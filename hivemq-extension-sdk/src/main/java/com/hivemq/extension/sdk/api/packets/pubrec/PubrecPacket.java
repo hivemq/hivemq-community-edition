@@ -15,8 +15,8 @@ import java.util.Optional;
  *
  * @author Yannick Weber
  */
-@DoNotImplement
 @Immutable
+@DoNotImplement
 public interface PubrecPacket {
 
     /**
