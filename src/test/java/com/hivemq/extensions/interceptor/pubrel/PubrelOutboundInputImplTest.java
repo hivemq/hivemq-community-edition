@@ -1,4 +1,4 @@
-package com.hivemq.extensions.interceptor.pubrel.parameter;
+package com.hivemq.extensions.interceptor.pubrel;
 
 import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;

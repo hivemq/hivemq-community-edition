@@ -12,10 +12,10 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.pubrel.parameter.PubrelInboundInputImpl;
-import com.hivemq.extensions.interceptor.pubrel.parameter.PubrelInboundOutputImpl;
-import com.hivemq.extensions.interceptor.pubrel.parameter.PubrelOutboundInputImpl;
-import com.hivemq.extensions.interceptor.pubrel.parameter.PubrelOutboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubrel.PubrelInboundInputImpl;
+import com.hivemq.extensions.interceptor.pubrel.PubrelInboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubrel.PubrelOutboundInputImpl;
+import com.hivemq.extensions.interceptor.pubrel.PubrelOutboundOutputImpl;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
@@ -213,14 +213,14 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubrelInboundInputImpl, PubrelInboundOutputImpl> {
 
         private final @NotNull PubrelInboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubrelInboundInterceptorTask(
                 final @NotNull PubrelInboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -233,8 +233,8 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound pubrel interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
-                log.debug("Original exception:", e);
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception: ", e);
                 output.update(input.getPubrelPacket());
             }
             return output;
@@ -293,14 +293,14 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubrelOutboundInputImpl, PubrelOutboundOutputImpl> {
 
         private final @NotNull PubrelOutboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubrelOutboundInterceptorTask(
                 final @NotNull PubrelOutboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -313,8 +313,8 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound pubrel interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
-                log.debug("Original exception:", e);
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception: ", e);
                 output.update(input.getPubrelPacket());
             }
             return output;

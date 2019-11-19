@@ -1,4 +1,4 @@
-package com.hivemq.extensions.interceptor.pubrel.parameter;
+package com.hivemq.extensions.interceptor.pubrel;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;

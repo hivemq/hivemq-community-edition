@@ -1,10 +1,10 @@
-package com.hivemq.extensions.interceptor.pubrel.parameter;
+package com.hivemq.extensions.interceptor.pubrel;
 
-import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.interceptor.pubrel.parameter.PubrelOutboundInput;
+import com.hivemq.extension.sdk.api.interceptor.pubrel.parameter.PubrelInboundInput;
 import com.hivemq.extension.sdk.api.packets.pubrel.PubrelPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
@@ -18,14 +18,13 @@ import java.util.function.Supplier;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
-public class PubrelOutboundInputImpl
-        implements Supplier<PubrelOutboundInputImpl>, PubrelOutboundInput, PluginTaskInput {
+public class PubrelInboundInputImpl implements Supplier<PubrelInboundInputImpl>, PubrelInboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private @NotNull PubrelPacketImpl pubrelPacket;
 
-    public PubrelOutboundInputImpl(
+    public PubrelInboundInputImpl(
             final @NotNull String clientId,
             final @NotNull Channel channel,
             final @NotNull PUBREL pubrel) {
@@ -51,7 +50,7 @@ public class PubrelOutboundInputImpl
     }
 
     @Override
-    public @NotNull PubrelOutboundInputImpl get() {
+    public @NotNull PubrelInboundInputImpl get() {
         return this;
     }
 
