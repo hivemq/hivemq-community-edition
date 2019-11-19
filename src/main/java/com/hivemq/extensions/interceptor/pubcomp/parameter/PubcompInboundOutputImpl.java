@@ -1,9 +1,9 @@
 package com.hivemq.extensions.interceptor.pubcomp.parameter;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter.PubcompInboundOutput;
+import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
 import com.hivemq.extensions.packets.pubcomp.ModifiablePubcompPacketImpl;
@@ -13,34 +13,35 @@ import java.util.function.Supplier;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class PubcompInboundOutputImpl extends AbstractSimpleAsyncOutput<PubcompInboundOutput>
         implements PubcompInboundOutput, Supplier<PubcompInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
-    private ModifiablePubcompPacketImpl modifiablePubcompPacket;
+    private @NotNull ModifiablePubcompPacketImpl pubcompPacket;
 
     public PubcompInboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBCOMP pubcomp) {
+
         super(asyncer);
         this.configurationService = configurationService;
-        modifiablePubcompPacket = new ModifiablePubcompPacketImpl(this.configurationService, pubcomp);
+        pubcompPacket = new ModifiablePubcompPacketImpl(configurationService, pubcomp);
     }
 
     @Override
-    public @Immutable
-    @NotNull ModifiablePubcompPacketImpl getPubcompPacket() {
-        return modifiablePubcompPacket;
+    public @NotNull ModifiablePubcompPacketImpl getPubcompPacket() {
+        return pubcompPacket;
     }
 
     @Override
-    public PubcompInboundOutputImpl get() {
+    public @NotNull PubcompInboundOutputImpl get() {
         return this;
     }
 
-    public void update(final @NotNull PUBCOMP pubcomp) {
-        modifiablePubcompPacket = new ModifiablePubcompPacketImpl(configurationService, pubcomp);
+    public void update(final @NotNull PubcompPacket pubcompPacket) {
+        this.pubcompPacket = new ModifiablePubcompPacketImpl(configurationService, pubcompPacket);
     }
 }
