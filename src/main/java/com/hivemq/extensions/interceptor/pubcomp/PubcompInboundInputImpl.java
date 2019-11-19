@@ -1,10 +1,10 @@
-package com.hivemq.extensions.interceptor.pubcomp.parameter;
+package com.hivemq.extensions.interceptor.pubcomp;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter.PubcompOutboundInput;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter.PubcompInboundInput;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
@@ -18,14 +18,14 @@ import java.util.function.Supplier;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
-public class PubcompOutboundInputImpl
-        implements Supplier<PubcompOutboundInputImpl>, PubcompOutboundInput, PluginTaskInput {
+public class PubcompInboundInputImpl
+        implements Supplier<PubcompInboundInputImpl>, PubcompInboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private @NotNull PubcompPacketImpl pubcompPacket;
 
-    public PubcompOutboundInputImpl(
+    public PubcompInboundInputImpl(
             final @NotNull String clientId,
             final @NotNull Channel channel,
             final @NotNull PUBCOMP pubcomp) {
@@ -51,7 +51,7 @@ public class PubcompOutboundInputImpl
     }
 
     @Override
-    public @NotNull PubcompOutboundInputImpl get() {
+    public @NotNull PubcompInboundInputImpl get() {
         return this;
     }
 

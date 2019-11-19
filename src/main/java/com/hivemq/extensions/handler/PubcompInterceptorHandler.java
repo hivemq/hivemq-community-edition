@@ -12,10 +12,10 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompInboundInputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompInboundOutputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompOutboundInputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompOutboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.PubcompInboundInputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.PubcompInboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.PubcompOutboundInputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.PubcompOutboundOutputImpl;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
@@ -117,6 +117,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
                 interceptorContext.increment(output);
                 continue;
             }
+
             final PubcompOutboundInterceptorTask interceptorTask =
                     new PubcompOutboundInterceptorTask(interceptor, plugin.getId());
 
@@ -160,6 +161,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
                 interceptorContext.increment(output);
                 continue;
             }
+
             final PubcompInboundInterceptorTask interceptorTask =
                     new PubcompInboundInterceptorTask(interceptor, plugin.getId());
 
@@ -212,14 +214,14 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubcompInboundInputImpl, PubcompInboundOutputImpl> {
 
         private final @NotNull PubcompInboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubcompInboundInterceptorTask(
                 final @NotNull PubcompInboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -232,8 +234,8 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound pubcomp interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
-                log.debug("Original exception:", e);
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception: ", e);
                 output.update(input.getPubcompPacket());
             }
             return output;
@@ -292,14 +294,14 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             implements PluginInOutTask<PubcompOutboundInputImpl, PubcompOutboundOutputImpl> {
 
         private final @NotNull PubcompOutboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         PubcompOutboundInterceptorTask(
                 final @NotNull PubcompOutboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -312,8 +314,8 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound pubcomp interception. " +
-                                "Extensions are responsible for their own exception handling.", pluginId);
-                log.debug("Original exception:", e);
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception: ", e);
                 output.update(input.getPubcompPacket());
             }
             return output;

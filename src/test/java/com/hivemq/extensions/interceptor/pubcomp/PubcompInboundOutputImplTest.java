@@ -1,4 +1,4 @@
-package com.hivemq.extensions.interceptor.pubcomp.parameter;
+package com.hivemq.extensions.interceptor.pubcomp;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Yannick Weber
  */
-public class PubcompOutboundOutputImplTest {
+public class PubcompInboundOutputImplTest {
 
     private PUBCOMP pubcomp;
 
