@@ -63,7 +63,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        handleRead(ctx, (DISCONNECT) msg);
+        handleInboundDisconnect(ctx, (DISCONNECT) msg);
     }
 
     @Override
@@ -76,10 +76,11 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        handleWrite(ctx, (DISCONNECT) msg, promise);
+        handleOutboundDisconnect(ctx, (DISCONNECT) msg, promise);
     }
 
-    private void handleRead(final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
+    private void handleInboundDisconnect(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
 
@@ -129,7 +130,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleWrite(
+    private void handleOutboundDisconnect(
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect,
             final @NotNull ChannelPromise promise) {
 
