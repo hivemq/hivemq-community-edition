@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.packets.pubrec;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
@@ -11,6 +12,7 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface ModifiablePubrecPacket extends PubrecPacket {
 
     /**
@@ -24,7 +26,7 @@ public interface ModifiablePubrecPacket extends PubrecPacket {
      *                               versa.
      * @see AckReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      */
-    void setReasonCode(final @NotNull AckReasonCode reasonCode);
+    void setReasonCode(@NotNull AckReasonCode reasonCode);
 
     /**
      * Set the reason string.
@@ -38,7 +40,7 @@ public interface ModifiablePubrecPacket extends PubrecPacket {
      * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the reason string exceeds the UTF-8 string length limit.
      */
-    void setReasonString(final @Nullable String reasonString);
+    void setReasonString(@Nullable String reasonString);
 
     /**
      * Get the modifiable {@link UserProperties} of the PUBREC packet.
@@ -47,5 +49,4 @@ public interface ModifiablePubrecPacket extends PubrecPacket {
      */
     @Override
     @NotNull ModifiableUserProperties getUserProperties();
-
 }

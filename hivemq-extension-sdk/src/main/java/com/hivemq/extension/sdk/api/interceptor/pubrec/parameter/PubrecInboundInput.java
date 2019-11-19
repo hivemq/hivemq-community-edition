@@ -20,5 +20,5 @@ public interface PubrecInboundInput extends ClientBasedInput {
      *
      * @return An unmodifiable {@link PubrecPacket}.
      */
-    @NotNull @Immutable PubrecPacket getPubrecPacket();
+    @Immutable @NotNull PubrecPacket getPubrecPacket();
 }
