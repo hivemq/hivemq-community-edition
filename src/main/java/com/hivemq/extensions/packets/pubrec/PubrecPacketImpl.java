@@ -17,21 +17,21 @@ import java.util.Optional;
 @Immutable
 public class PubrecPacketImpl implements PubrecPacket {
 
-    private final @NotNull AckReasonCode ackReasonCode;
     private final int packetIdentifier;
+    private final @NotNull AckReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
 
     public PubrecPacketImpl(final @NotNull PUBREC pubrec) {
-        ackReasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
         packetIdentifier = pubrec.getPacketIdentifier();
+        reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
         reasonString = pubrec.getReasonString();
         userProperties = pubrec.getUserProperties().getPluginUserProperties();
     }
 
     public PubrecPacketImpl(final @NotNull PubrecPacket pubrecPacket) {
-        ackReasonCode = pubrecPacket.getReasonCode();
         packetIdentifier = pubrecPacket.getPacketIdentifier();
+        reasonCode = pubrecPacket.getReasonCode();
         reasonString = pubrecPacket.getReasonString().orElse(null);
         userProperties = pubrecPacket.getUserProperties();
     }
@@ -43,7 +43,7 @@ public class PubrecPacketImpl implements PubrecPacket {
 
     @Override
     public @NotNull AckReasonCode getReasonCode() {
-        return ackReasonCode;
+        return reasonCode;
     }
 
     @Override
@@ -55,5 +55,4 @@ public class PubrecPacketImpl implements PubrecPacket {
     public @NotNull UserProperties getUserProperties() {
         return userProperties;
     }
-
 }

@@ -231,7 +231,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
                 interceptor.onInboundPubrec(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound pubrec interception." +
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound pubrec interception. " +
                                 "Extensions are responsible for their own exception handling.", pluginId);
                 log.debug("Original exception:", e);
                 output.update(input.getPubrecPacket());
@@ -310,7 +310,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
                 interceptor.onOutboundPubrec(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound pubrec interception." +
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound pubrec interception. " +
                                 "Extensions are responsible for their own exception handling.", pluginId);
                 log.debug("Original exception:", e);
                 output.update(input.getPubrecPacket());
