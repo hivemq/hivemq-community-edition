@@ -1,5 +1,6 @@
 package com.hivemq.extensions.packets.pubcomp;
 
+import com.hivemq.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -13,6 +14,7 @@ import java.util.Optional;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
+@Immutable
 public class PubcompPacketImpl implements PubcompPacket {
 
     private final int packetIdentifier;
