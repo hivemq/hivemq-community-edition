@@ -67,7 +67,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        handleRead(ctx, (PUBACK) msg);
+        handleInboundPuback(ctx, (PUBACK) msg);
     }
 
     @Override
@@ -81,10 +81,10 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        handleWrite(ctx, (PUBACK) msg, promise);
+        handleOutboundPuback(ctx, (PUBACK) msg, promise);
     }
 
-    private void handleRead(final ChannelHandlerContext ctx, final PUBACK puback) {
+    private void handleInboundPuback(final ChannelHandlerContext ctx, final PUBACK puback) {
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
             return;
@@ -132,7 +132,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleWrite(
+    private void handleOutboundPuback(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBACK puback,
             final @NotNull ChannelPromise promise) {
