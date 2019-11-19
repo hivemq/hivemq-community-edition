@@ -37,10 +37,13 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
     @NotNull
     private final FullConfigurationService configurationService;
+
     @NotNull
     private final PluginOutPutAsyncer asyncer;
+
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
+
     @NotNull
     private final PluginTaskExecutorService executorService;
 

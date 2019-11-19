@@ -45,9 +45,8 @@ public class PubackInboundInputImpl implements Supplier<PubackInboundInputImpl>,
     }
 
     @Override
-    public @NotNull
     @Immutable
-    PubackPacket getPubackPacket() {
+    public @NotNull PubackPacket getPubackPacket() {
         return pubackPacket;
     }
 
