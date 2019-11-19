@@ -39,6 +39,4 @@ public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInb
      * @throws UnsupportedOperationException If async is called more than once.
      */
     @NotNull Async<DisconnectInboundOutput> async(@NotNull Duration timeout);
-
-
 }
