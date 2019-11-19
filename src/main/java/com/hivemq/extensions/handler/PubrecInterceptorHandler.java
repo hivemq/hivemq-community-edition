@@ -214,7 +214,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull PubrecInboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        private PubrecInboundInterceptorTask(
+        PubrecInboundInterceptorTask(
                 final @NotNull PubrecInboundInterceptor interceptor,
                 final @NotNull String pluginId) {
 
@@ -294,7 +294,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull PubrecOutboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        private PubrecOutboundInterceptorTask(
+        PubrecOutboundInterceptorTask(
                 final @NotNull PubrecOutboundInterceptor interceptor,
                 final @NotNull String pluginId) {
 
