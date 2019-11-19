@@ -36,8 +36,8 @@ public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
             final @NotNull PUBCOMP pubcomp) {
 
         this.configurationService = configurationService;
-        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
         packetIdentifier = pubcomp.getPacketIdentifier();
+        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
         reasonString = pubcomp.getReasonString();
         userProperties = new ModifiableUserPropertiesImpl(
                 pubcomp.getUserProperties().getPluginUserProperties(),
@@ -49,8 +49,8 @@ public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
             final @NotNull PubcompPacket pubcomp) {
 
         this.configurationService = configurationService;
-        reasonCode = pubcomp.getReasonCode();
         packetIdentifier = pubcomp.getPacketIdentifier();
+        reasonCode = pubcomp.getReasonCode();
         reasonString = pubcomp.getReasonString().orElse(null);
         userProperties = new ModifiableUserPropertiesImpl(
                 (InternalUserProperties) pubcomp.getUserProperties(),

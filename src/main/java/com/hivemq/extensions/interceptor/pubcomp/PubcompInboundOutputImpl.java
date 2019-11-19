@@ -1,8 +1,8 @@
-package com.hivemq.extensions.interceptor.pubcomp.parameter;
+package com.hivemq.extensions.interceptor.pubcomp;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter.PubcompOutboundOutput;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.parameter.PubcompInboundOutput;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
@@ -15,13 +15,13 @@ import java.util.function.Supplier;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
-public class PubcompOutboundOutputImpl extends AbstractSimpleAsyncOutput<PubcompOutboundOutput>
-        implements PubcompOutboundOutput, Supplier<PubcompOutboundOutputImpl> {
+public class PubcompInboundOutputImpl extends AbstractSimpleAsyncOutput<PubcompInboundOutput>
+        implements PubcompInboundOutput, Supplier<PubcompInboundOutputImpl> {
 
     private final @NotNull FullConfigurationService configurationService;
     private @NotNull ModifiablePubcompPacketImpl pubcompPacket;
 
-    public PubcompOutboundOutputImpl(
+    public PubcompInboundOutputImpl(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PUBCOMP pubcomp) {
@@ -37,7 +37,7 @@ public class PubcompOutboundOutputImpl extends AbstractSimpleAsyncOutput<Pubcomp
     }
 
     @Override
-    public @NotNull PubcompOutboundOutputImpl get() {
+    public @NotNull PubcompInboundOutputImpl get() {
         return this;
     }
 

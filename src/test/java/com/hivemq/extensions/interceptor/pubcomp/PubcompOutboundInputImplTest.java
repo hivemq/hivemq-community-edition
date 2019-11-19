@@ -1,4 +1,4 @@
-package com.hivemq.extensions.interceptor.pubcomp.parameter;
+package com.hivemq.extensions.interceptor.pubcomp;
 
 import com.hivemq.extensions.packets.pubcomp.PubcompPacketImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -15,15 +15,16 @@ import static org.junit.Assert.assertNotSame;
  * @author Yannick Weber
  * @author Silvio Giebl
  */
-public class PubcompInboundInputImplTest {
+public class PubcompOutboundInputImplTest {
 
     @Test
     public void test_construction_success() {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-        final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(
-                "client", embeddedChannel, TestMessageUtil.createSuccessPupcomp());
+
+        final PubcompOutboundInputImpl input =
+                new PubcompOutboundInputImpl("client", embeddedChannel, TestMessageUtil.createSuccessPupcomp());
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
         assertNotNull(input.getPubcompPacket());
@@ -48,7 +49,6 @@ public class PubcompInboundInputImplTest {
     public void test_update() {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
 
         final PUBCOMP pubcomPacket1 = TestMessageUtil.createSuccessPupcomp();
         final PUBCOMP pubcomPacket2 = TestMessageUtil.createSuccessPupcomp();

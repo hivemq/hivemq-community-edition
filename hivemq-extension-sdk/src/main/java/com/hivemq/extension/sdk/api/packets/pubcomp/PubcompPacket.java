@@ -15,8 +15,8 @@ import java.util.Optional;
  *
  * @author Yannick Weber
  */
-@DoNotImplement
 @Immutable
+@DoNotImplement
 public interface PubcompPacket {
 
     /**
@@ -28,7 +28,6 @@ public interface PubcompPacket {
 
     /**
      * The reason code from the PUBCOMP packet.
-     * <p>
      *
      * @return The pubcomp reason code.
      * @see PubcompReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
