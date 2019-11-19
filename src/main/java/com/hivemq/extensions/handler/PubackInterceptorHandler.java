@@ -35,24 +35,17 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubackInterceptorHandler.class);
 
-    @NotNull
-    private final FullConfigurationService configurationService;
-
-    @NotNull
-    private final PluginOutPutAsyncer asyncer;
-
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-
-    @NotNull
-    private final PluginTaskExecutorService executorService;
+    private final @NotNull FullConfigurationService configurationService;
+    private final @NotNull PluginOutPutAsyncer asyncer;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull PluginTaskExecutorService executorService;
 
     @Inject
     public PubackInterceptorHandler(
-            @NotNull final FullConfigurationService configurationService,
-            @NotNull final PluginOutPutAsyncer asyncer,
-            @NotNull final HiveMQExtensions hiveMQExtensions,
-            @NotNull final PluginTaskExecutorService executorService) {
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginTaskExecutorService executorService) {
 
         this.configurationService = configurationService;
         this.asyncer = asyncer;
@@ -61,34 +54,29 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
         if (!(msg instanceof PUBACK)) {
             ctx.fireChannelRead(msg);
             return;
         }
-
         handleInboundPuback(ctx, (PUBACK) msg);
     }
 
     @Override
     public void write(
-            @NotNull final ChannelHandlerContext ctx, @NotNull final Object msg,
-            @NotNull final ChannelPromise promise)
-            throws Exception {
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) {
 
         if (!(msg instanceof PUBACK)) {
             ctx.write(msg, promise);
             return;
         }
-
         handleOutboundPuback(ctx, (PUBACK) msg, promise);
     }
 
-    private void handleInboundPuback(final ChannelHandlerContext ctx, final PUBACK puback) {
+    private void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -100,21 +88,19 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             ctx.fireChannelRead(puback);
             return;
         }
-        final List<PubackInboundInterceptor> pubackInboundInterceptors = clientContext.getPubackInboundInterceptors();
-
-        if (pubackInboundInterceptors.isEmpty()) {
+        final List<PubackInboundInterceptor> interceptors = clientContext.getPubackInboundInterceptors();
+        if (interceptors.isEmpty()) {
             ctx.fireChannelRead(puback);
             return;
         }
 
         final PubackInboundOutputImpl output = new PubackInboundOutputImpl(configurationService, asyncer, puback);
-
         final PubackInboundInputImpl input = new PubackInboundInputImpl(clientId, channel, puback);
 
         final PubackInboundInterceptorContext interceptorContext = new PubackInboundInterceptorContext(
-                PubackInboundInterceptorTask.class, clientId, input, ctx, pubackInboundInterceptors.size());
+                PubackInboundInterceptorTask.class, clientId, input, ctx, interceptors.size());
 
-        for (final PubackInboundInterceptor interceptor : pubackInboundInterceptors) {
+        for (final PubackInboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
@@ -127,8 +113,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             final PubackInboundInterceptorTask interceptorTask =
                     new PubackInboundInterceptorTask(interceptor, extension.getId());
 
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
     }
 
@@ -136,10 +121,8 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBACK puback,
             final @NotNull ChannelPromise promise) {
+
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -148,26 +131,23 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null) {
+            ctx.write(puback, promise);
             return;
         }
-        final List<PubackOutboundInterceptor> pubackOutboundInterceptors =
-                clientContext.getPubackOutboundInterceptors();
-
-        if (pubackOutboundInterceptors.isEmpty()) {
+        final List<PubackOutboundInterceptor> interceptors = clientContext.getPubackOutboundInterceptors();
+        if (interceptors.isEmpty()) {
             ctx.write(puback, promise);
             return;
         }
 
         final PubackOutboundOutputImpl output = new PubackOutboundOutputImpl(configurationService, asyncer, puback);
-        final PubackOutboundInputImpl
-                input = new PubackOutboundInputImpl(clientId, channel, puback);
+        final PubackOutboundInputImpl input = new PubackOutboundInputImpl(clientId, channel, puback);
+
         final PubackOutboundInterceptorContext interceptorContext =
-                new PubackOutboundInterceptorContext(
-                        PubackOutboundInterceptorTask.class, clientId, input,
-                        ctx, promise, pubackOutboundInterceptors.size());
+                new PubackOutboundInterceptorContext(PubackOutboundInterceptorTask.class, clientId, input, ctx, promise,
+                        interceptors.size());
 
-
-        for (final PubackOutboundInterceptor interceptor : pubackOutboundInterceptors) {
+        for (final PubackOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
@@ -176,11 +156,11 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 interceptorContext.increment(output);
                 continue;
             }
+
             final PubackOutboundInterceptorTask interceptorTask =
                     new PubackOutboundInterceptorTask(interceptor, extension.getId());
 
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
     }
 
@@ -233,13 +213,16 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private PubackInboundInterceptorTask(
                 final @NotNull PubackInboundInterceptor interceptor,
                 final @NotNull String pluginId) {
+
             this.interceptor = interceptor;
             this.pluginId = pluginId;
         }
 
         @Override
         public @NotNull PubackInboundOutputImpl apply(
-                final @NotNull PubackInboundInputImpl input, final @NotNull PubackInboundOutputImpl output) {
+                final @NotNull PubackInboundInputImpl input,
+                final @NotNull PubackInboundOutputImpl output) {
+
             try {
                 interceptor.onInboundPuback(input, output);
             } catch (final Throwable e) {
@@ -273,6 +256,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
+
             super(taskClazz, clientId);
             this.input = input;
             this.ctx = ctx;
@@ -309,13 +293,16 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private PubackOutboundInterceptorTask(
                 final @NotNull PubackOutboundInterceptor interceptor,
                 final @NotNull String extensionId) {
+
             this.interceptor = interceptor;
             this.pluginId = extensionId;
         }
 
         @Override
         public @NotNull PubackOutboundOutputImpl apply(
-                final @NotNull PubackOutboundInputImpl input, final @NotNull PubackOutboundOutputImpl output) {
+                final @NotNull PubackOutboundInputImpl input,
+                final @NotNull PubackOutboundOutputImpl output) {
+
             try {
                 interceptor.onOutboundPuback(input, output);
             } catch (final Throwable e) {
@@ -333,5 +320,4 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
             return interceptor.getClass().getClassLoader();
         }
     }
-
 }

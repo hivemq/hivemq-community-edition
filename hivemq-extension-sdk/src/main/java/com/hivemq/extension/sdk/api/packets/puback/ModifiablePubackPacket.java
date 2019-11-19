@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.packets.puback;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
@@ -11,6 +12,7 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
  *
  * @author Yannick Weber
  */
+@DoNotImplement
 public interface ModifiablePubackPacket extends PubackPacket {
 
     /**
@@ -24,7 +26,7 @@ public interface ModifiablePubackPacket extends PubackPacket {
      * @throws IllegalStateException If switching from successful reason code to unsuccessful reason code or vice versa.
      * @see AckReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      */
-    void setReasonCode(final @NotNull AckReasonCode reasonCode);
+    void setReasonCode(@NotNull AckReasonCode reasonCode);
 
     /**
      * Set the reason string.
@@ -38,7 +40,7 @@ public interface ModifiablePubackPacket extends PubackPacket {
      * @throws IllegalArgumentException If the reason string is not a valid UTF-8 string.
      * @throws IllegalArgumentException If the reason string exceeds the UTF-8 string length limit.
      */
-    void setReasonString(final @Nullable String reasonString);
+    void setReasonString(@Nullable String reasonString);
 
     /**
      * Get the modifiable {@link UserProperties} of the PUBACK packet.

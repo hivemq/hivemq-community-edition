@@ -23,9 +23,9 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
 
     private final @NotNull FullConfigurationService configurationService;
 
+    private final int packetIdentifier;
     private @NotNull AckReasonCode reasonCode;
     private @Nullable String reasonString;
-    private int packetIdentifier;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
     private boolean modified = false;
@@ -35,10 +35,11 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
             final @NotNull PUBACK puback) {
 
         this.configurationService = configurationService;
-        this.reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
-        this.reasonString = puback.getReasonString();
-        this.packetIdentifier = puback.getPacketIdentifier();
-        this.userProperties = new ModifiableUserPropertiesImpl(puback.getUserProperties().getPluginUserProperties(),
+        packetIdentifier = puback.getPacketIdentifier();
+        reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
+        reasonString = puback.getReasonString();
+        userProperties = new ModifiableUserPropertiesImpl(
+                puback.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
 
@@ -47,10 +48,10 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
             final @NotNull PubackPacket pubackPacket) {
 
         this.configurationService = configurationService;
-        this.reasonCode = AckReasonCode.valueOf(pubackPacket.getReasonCode().name());
-        this.reasonString = pubackPacket.getReasonString().orElse(null);
-        this.packetIdentifier = pubackPacket.getPacketIdentifier();
-        this.userProperties = new ModifiableUserPropertiesImpl(
+        packetIdentifier = pubackPacket.getPacketIdentifier();
+        reasonCode = AckReasonCode.valueOf(pubackPacket.getReasonCode().name());
+        reasonString = pubackPacket.getReasonString().orElse(null);
+        userProperties = new ModifiableUserPropertiesImpl(
                 (InternalUserProperties) pubackPacket.getUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
     }
@@ -60,25 +61,28 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         final boolean switched = (reasonCode == AckReasonCode.SUCCESS && this.reasonCode != AckReasonCode.SUCCESS) ||
                 (reasonCode != AckReasonCode.SUCCESS && this.reasonCode == AckReasonCode.SUCCESS);
-        Preconditions.checkState(!switched, "Reason code must not switch from successful to unsuccessful or vice versa");
+        Preconditions.checkState(
+                !switched, "Reason code must not switch from successful to unsuccessful or vice versa");
         if (this.reasonCode == reasonCode) {
             return;
         }
-        this.modified = true;
         this.reasonCode = reasonCode;
+        modified = true;
     }
 
     @Override
     public void setReasonString(final @Nullable String reasonString) {
         if (reasonString != null) {
-            Preconditions.checkState(reasonCode != AckReasonCode.SUCCESS, "Reason string must not be set when reason code is successful");
+            Preconditions.checkState(
+                    reasonCode != AckReasonCode.SUCCESS,
+                    "Reason string must not be set when reason code is successful");
         }
         PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.reasonString, reasonString)) {
             return;
         }
-        this.modified = true;
         this.reasonString = reasonString;
+        modified = true;
     }
 
     @Override
@@ -86,19 +90,18 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         return this.packetIdentifier;
     }
 
+    @Override
     public @NotNull AckReasonCode getReasonCode() {
         return reasonCode;
     }
 
-    @NotNull
     @Override
-    public Optional<String> getReasonString() {
+    public @NotNull Optional<String> getReasonString() {
         return Optional.ofNullable(reasonString);
     }
 
-    @NotNull
     @Override
-    public ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserProperties getUserProperties() {
         return userProperties;
     }
 

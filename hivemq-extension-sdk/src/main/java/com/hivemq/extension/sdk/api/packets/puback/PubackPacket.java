@@ -1,5 +1,7 @@
 package com.hivemq.extension.sdk.api.packets.puback;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
@@ -13,13 +15,14 @@ import java.util.Optional;
  *
  * @author Yannick Weber
  */
+@Immutable
+@DoNotImplement
 public interface PubackPacket {
 
     /**
      * The packet identifier of the PUBACK.
      *
      * @return The packet identifier.
-     * @since 4.3.0
      */
     int getPacketIdentifier();
 
@@ -49,5 +52,4 @@ public interface PubackPacket {
      * @return The user properties.
      */
     @NotNull UserProperties getUserProperties();
-
 }

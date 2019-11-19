@@ -36,5 +36,4 @@ public interface PubackOutboundOutput extends SimpleAsyncOutput<PubackOutboundOu
      */
     @Override
     @NotNull Async<PubackOutboundOutput> async(@NotNull Duration timeout);
-
 }

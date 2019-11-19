@@ -14,23 +14,23 @@ import java.util.Optional;
  */
 public class PubackPacketImpl implements PubackPacket {
 
-    private final AckReasonCode ackReasonCode;
     private final int packetIdentifier;
+    private final @NotNull AckReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @NotNull UserProperties userProperties;
 
     public PubackPacketImpl(final @NotNull PUBACK puback) {
-        ackReasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
         packetIdentifier = puback.getPacketIdentifier();
+        reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
         reasonString = puback.getReasonString();
         userProperties = puback.getUserProperties().getPluginUserProperties();
     }
 
     public PubackPacketImpl(final @NotNull PubackPacket pubackPacket) {
-        this.ackReasonCode = pubackPacket.getReasonCode();
-        this.packetIdentifier = pubackPacket.getPacketIdentifier();
-        this.reasonString = pubackPacket.getReasonString().orElse(null);
-        this.userProperties = pubackPacket.getUserProperties();
+        packetIdentifier = pubackPacket.getPacketIdentifier();
+        reasonCode = pubackPacket.getReasonCode();
+        reasonString = pubackPacket.getReasonString().orElse(null);
+        userProperties = pubackPacket.getUserProperties();
     }
 
     @Override
@@ -40,7 +40,7 @@ public class PubackPacketImpl implements PubackPacket {
 
     @Override
     public @NotNull AckReasonCode getReasonCode() {
-        return ackReasonCode;
+        return reasonCode;
     }
 
     @Override

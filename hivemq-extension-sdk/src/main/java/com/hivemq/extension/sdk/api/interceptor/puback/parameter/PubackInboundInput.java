@@ -21,6 +21,5 @@ public interface PubackInboundInput extends ClientBasedInput {
      *
      * @return An unmodifiable {@link PubackPacket}.
      */
-    @NotNull @Immutable PubackPacket getPubackPacket();
-
+    @Immutable @NotNull PubackPacket getPubackPacket();
 }
