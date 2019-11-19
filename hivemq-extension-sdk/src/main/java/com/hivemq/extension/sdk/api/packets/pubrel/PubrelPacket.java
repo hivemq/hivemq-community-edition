@@ -23,7 +23,6 @@ public interface PubrelPacket {
      * The packet identifier of the PUBREL.
      *
      * @return The packet identifier.
-     * @since 4.3.0
      */
     int getPacketIdentifier();
 
