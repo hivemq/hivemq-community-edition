@@ -204,8 +204,8 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class PubackInboundInterceptorTask implements
-            PluginInOutTask<PubackInboundInputImpl, PubackInboundOutputImpl> {
+    private static class PubackInboundInterceptorTask
+            implements PluginInOutTask<PubackInboundInputImpl, PubackInboundOutputImpl> {
 
         private final @NotNull PubackInboundInterceptor interceptor;
         private final @NotNull String pluginId;
@@ -284,8 +284,8 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class PubackOutboundInterceptorTask implements
-            PluginInOutTask<PubackOutboundInputImpl, PubackOutboundOutputImpl> {
+    private static class PubackOutboundInterceptorTask
+            implements PluginInOutTask<PubackOutboundInputImpl, PubackOutboundOutputImpl> {
 
         private final @NotNull PubackOutboundInterceptor interceptor;
         private final @NotNull String pluginId;
