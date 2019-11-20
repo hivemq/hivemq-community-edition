@@ -1,10 +1,6 @@
 package com.hivemq.extensions.handler;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.Nullable;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingReqInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingresponse.PingRespOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
@@ -61,12 +57,10 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             final @NotNull ChannelPromise promise)
             throws Exception {
         if (!(msg instanceof PINGRESP)) {
-            super.write(ctx, msg, promise);
+            ctx.write(msg, promise);
             return;
         }
-        if (!handlePingResponse(ctx)) {
-            super.write(ctx, msg, promise);
-        }
+        handleOutboundPingResponse(ctx, (PINGRESP) msg, promise);
     }
 
     @Override
@@ -74,11 +68,12 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         if (!(msg instanceof PINGREQ)) {
             super.channelRead(ctx, msg);
         } else {
-            handlePingRequest(ctx, ((PINGREQ) msg));
+            handleInboundPingRequest(ctx, ((PINGREQ) msg));
         }
     }
 
-    private void handlePingRequest(final @NotNull ChannelHandlerContext ctx, final PINGREQ pingreq) throws Exception {
+    private void handleInboundPingRequest(final @NotNull ChannelHandlerContext ctx, final PINGREQ pingreq)
+            throws Exception {
 
         final Channel channel = ctx.channel();
         if (!channel.isActive()) {
@@ -99,13 +94,11 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         final List<PingReqInboundInterceptor> pingReqInboundInterceptors =
                 clientContext.getPingRequestInboundInterceptors();
         final PingReqInboundOutputImpl output = new PingReqInboundOutputImpl(asyncer);
-        final PingReqInboundInputImpl
-                input = new PingReqInboundInputImpl(clientId, channel);
-        final SettableFuture<Void> interceptorFuture = SettableFuture.create();
+        final PingReqInboundInputImpl input = new PingReqInboundInputImpl(clientId, channel);
         final PingRequestInboundInterceptorContext interceptorContext =
                 new PingRequestInboundInterceptorContext(
                         PingRequestInboundInterceptorTask.class,
-                        clientId, interceptorFuture, pingReqInboundInterceptors.size());
+                        clientId, input, ctx, pingReqInboundInterceptors.size());
 
         for (final PingReqInboundInterceptor interceptor : pingReqInboundInterceptors) {
 
@@ -123,61 +116,56 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
-
-        final PingRequestInterceptorFutureCallback
-                callback = new PingRequestInterceptorFutureCallback(ctx);
-        Futures.addCallback(interceptorFuture, callback, ctx.executor());
     }
 
-    private boolean handlePingResponse(
-            final @NotNull ChannelHandlerContext ctx) {
+    private void handleOutboundPingResponse(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull PINGRESP pingresp,
+            final @NotNull ChannelPromise promise) {
+
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return false;
-        }
 
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            return false;
+            return;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getPingResponseOutboundInterceptors().isEmpty()) {
-            return false;
+        if (clientContext == null) {
+            ctx.writeAndFlush(pingresp);
+            return;
         }
 
-        final List<PingRespOutboundInterceptor> pingRespOutboundInterceptors =
-                clientContext.getPingResponseOutboundInterceptors();
-        final PingRespOutboundInputImpl
-                input = new PingRespOutboundInputImpl(clientId, channel);
+        final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingResponseOutboundInterceptors();
+        if (interceptors.isEmpty()) {
+            ctx.write(pingresp);
+            return;
+        }
+
+        final PingRespOutboundInputImpl input = new PingRespOutboundInputImpl(clientId, channel);
+
         final PingRespOutboundOutputImpl output = new PingRespOutboundOutputImpl(asyncer);
-        final SettableFuture<Void> interceptorFuture = SettableFuture.create();
+
         final PingResponseOutboundInterceptorContext interceptorContext =
                 new PingResponseOutboundInterceptorContext(
-                        PingResponseOutboundInterceptorTask.class, clientId, interceptorFuture,
-                        pingRespOutboundInterceptors.size());
+                        PingResponseOutboundInterceptorTask.class, clientId, input, ctx, promise, interceptors.size());
 
-        for (final PingRespOutboundInterceptor interceptor : pingRespOutboundInterceptors) {
+        for (final PingRespOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+
             if (extension == null) {
                 interceptorContext.increment();
                 continue;
             }
 
             final PingResponseOutboundInterceptorTask interceptorTask =
-                    new PingResponseOutboundInterceptorTask(
-                            interceptor, extension.getId());
+                    new PingResponseOutboundInterceptorTask(interceptor, extension.getId());
 
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
-
-        final PingResponseInterceptorFutureCallback
-                callback = new PingResponseInterceptorFutureCallback(ctx);
-        Futures.addCallback(interceptorFuture, callback, ctx.executor());
-        return true;
     }
 
     private static class PingRequestInboundInterceptorTask implements
@@ -200,9 +188,10 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             try {
                 interceptor.onInboundPingReq(pingRequestInboundInput, pingRequestInboundOutput);
             } catch (final Throwable e) {
-                log.warn(
+                log.debug(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound ping request interception. Extensions are responsible for their own exception handling.",
                         pluginId);
+                log.debug("Original Exception: ", e);
             }
             return pingRequestInboundOutput;
         }
@@ -235,15 +224,16 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             try {
                 interceptor.onOutboundPingResp(pingResponseOutboundInput, pingResponseOutboundOutput);
             } catch (final Throwable e) {
-                log.warn(
+                log.debug(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound ping response interception. Extensions are responsible for their own exception handling.",
                         pluginId);
+                log.debug("Original Exception: ", e);
             }
             return pingResponseOutboundOutput;
         }
 
         @Override
-        public @NotNull ClassLoader getPluginClassLoader() {
+        public @com.hivemq.annotations.NotNull ClassLoader getPluginClassLoader() {
             return interceptor.getClass().getClassLoader();
         }
 
@@ -252,107 +242,67 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
     private static class PingRequestInboundInterceptorContext extends
             PluginInOutTaskContext<PingReqInboundOutputImpl> {
 
-        private final @NotNull SettableFuture<Void> interceptorFuture;
+        private final @com.hivemq.annotations.NotNull ChannelHandlerContext ctx;
         private final int interceptorCount;
-
-        private final @NotNull AtomicInteger counter;
+        private final @com.hivemq.annotations.NotNull AtomicInteger counter;
 
         protected PingRequestInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
-                final @NotNull String identifier,
-                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @com.hivemq.annotations.NotNull Class<?> taskClazz,
+                final @com.hivemq.annotations.NotNull String identifier,
+                final @com.hivemq.annotations.NotNull PingReqInboundInputImpl input,
+                final @com.hivemq.annotations.NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
             super(taskClazz, identifier);
-            this.interceptorFuture = interceptorFuture;
+            this.ctx = ctx;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
         }
 
         @Override
-        public void pluginPost(final @NotNull PingReqInboundOutputImpl pluginOutput) {
+        public void pluginPost(final @com.hivemq.annotations.NotNull PingReqInboundOutputImpl pluginOutput) {
             increment();
         }
 
         public void increment() {
-            //we must set the future when no more interceptors are registered
             if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+                ctx.fireChannelRead(new PINGREQ());
             }
         }
 
     }
 
-    private static class PingResponseOutboundInterceptorContext extends
-            PluginInOutTaskContext<PingRespOutboundOutputImpl> {
+    private static class PingResponseOutboundInterceptorContext
+            extends PluginInOutTaskContext<PingRespOutboundOutputImpl> {
 
-        final @NotNull SettableFuture<Void> interceptorFuture;
+        private final @com.hivemq.annotations.NotNull ChannelHandlerContext ctx;
+        private final @com.hivemq.annotations.NotNull ChannelPromise promise;
         private final int interceptorCount;
-        private final @NotNull AtomicInteger counter;
+        private final @com.hivemq.annotations.NotNull AtomicInteger counter;
 
         private PingResponseOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
-                final @NotNull String identifier,
-                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @com.hivemq.annotations.NotNull Class<?> taskClazz,
+                final @com.hivemq.annotations.NotNull String identifier,
+                final @com.hivemq.annotations.NotNull PingRespOutboundInputImpl input,
+                final @com.hivemq.annotations.NotNull ChannelHandlerContext ctx,
+                final @com.hivemq.annotations.NotNull ChannelPromise promise,
                 final int interceptorCount) {
+
             super(taskClazz, identifier);
-            this.interceptorFuture = interceptorFuture;
+            this.ctx = ctx;
+            this.promise = promise;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
         }
 
-        @Override
         public void pluginPost(final @NotNull PingRespOutboundOutputImpl pluginOutput) {
             increment();
         }
 
         public void increment() {
-            //we must set the future when no more interceptors are registered
             if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+                ctx.writeAndFlush(new PINGRESP(), promise);
             }
         }
-
-    }
-
-    private static class PingRequestInterceptorFutureCallback implements FutureCallback<Void> {
-
-        private final @NotNull ChannelHandlerContext ctx;
-
-        PingRequestInterceptorFutureCallback(final @NotNull ChannelHandlerContext ctx) {
-            this.ctx = ctx;
-        }
-
-        @Override
-        public void onSuccess(@Nullable final Void result) {
-            final PINGREQ pingreq = new PINGREQ();
-            ctx.fireChannelRead(pingreq);
-        }
-
-        @Override
-        public void onFailure(final @NotNull Throwable t) {
-            log.debug("Future of ping request interception has failed", t);
-        }
-    }
-
-    private static class PingResponseInterceptorFutureCallback implements FutureCallback<Void> {
-
-        private final @NotNull ChannelHandlerContext ctx;
-
-        private PingResponseInterceptorFutureCallback(@NotNull final ChannelHandlerContext ctx) {
-            this.ctx = ctx;
-        }
-
-        @Override
-        public void onSuccess(@Nullable final Void result) {
-            final PINGRESP pingresp = new PINGRESP();
-            ctx.writeAndFlush(pingresp);
-        }
-
-        @Override
-        public void onFailure(final @NotNull Throwable t) {
-            log.debug("Intercepting a ping response has failed", t);
-        }
-
     }
 }
 
