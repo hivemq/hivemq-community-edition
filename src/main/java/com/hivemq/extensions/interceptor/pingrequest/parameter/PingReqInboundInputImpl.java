@@ -37,7 +37,7 @@ public class PingReqInboundInputImpl implements Supplier<PingReqInboundInputImpl
     }
 
     @Override
-    public PingReqInboundInputImpl get() {
+    public @NotNull PingReqInboundInputImpl get() {
         return this;
     }
 

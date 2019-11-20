@@ -20,7 +20,7 @@ public class PingReqInboundOutputImpl extends AbstractSimpleAsyncOutput<PingReqI
     }
 
     @Override
-    public PingReqInboundOutputImpl get() {
+    public @NotNull PingReqInboundOutputImpl get() {
         return this;
     }
 

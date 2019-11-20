@@ -19,6 +19,7 @@ public class PingRespOutboundOutputImpl extends AbstractSimpleAsyncOutput<PingRe
         super(asyncer);
     }
 
+    @NotNull
     @Override
     public PingRespOutboundOutputImpl get() {
         return this;

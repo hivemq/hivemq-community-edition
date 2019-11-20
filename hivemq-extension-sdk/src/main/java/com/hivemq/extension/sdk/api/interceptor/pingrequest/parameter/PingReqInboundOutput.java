@@ -1,5 +1,6 @@
 package com.hivemq.extension.sdk.api.interceptor.pingrequest.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingReqInboundInterceptor;
 
@@ -8,6 +9,7 @@ import com.hivemq.extension.sdk.api.interceptor.pingrequest.PingReqInboundInterc
  *
  * @author Robin Atherton
  */
+@DoNotImplement
 public interface PingReqInboundOutput extends SimpleAsyncOutput<PingReqInboundOutput> {
 
 }
