@@ -72,8 +72,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         handleInboundPingRequest(ctx, ((PINGREQ) msg));
     }
 
-    private void handleInboundPingRequest(final @NotNull ChannelHandlerContext ctx, @NotNull final PINGREQ pingreq)
-            throws Exception {
+    private void handleInboundPingRequest(final @NotNull ChannelHandlerContext ctx, @NotNull final PINGREQ pingreq) {
 
         final Channel channel = ctx.channel();
 
@@ -84,7 +83,13 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null) {
-            super.channelRead(ctx, pingreq);
+            ctx.fireChannelRead(pingreq);
+            return;
+        }
+
+        final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingResponseOutboundInterceptors();
+        if (interceptors.isEmpty()) {
+            ctx.fireChannelRead(pingreq);
             return;
         }
 
@@ -129,13 +134,13 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
         if (clientContext == null) {
-            ctx.writeAndFlush(pingresp);
+            ctx.write(pingresp, promise);
             return;
         }
 
         final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingResponseOutboundInterceptors();
         if (interceptors.isEmpty()) {
-            ctx.write(pingresp);
+            ctx.write(pingresp, promise);
             return;
         }
 
