@@ -59,9 +59,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     @NotNull
     private final EventLog eventLog;
 
-    public AbstractChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
-                                      @NotNull final Listener listener,
-                                      @NotNull final EventLog eventLog) {
+    public AbstractChannelInitializer(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final Listener listener,
+            @NotNull final EventLog eventLog) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
         this.eventLog = eventLog;
@@ -114,6 +115,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 
         ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
+
+        ch.pipeline().addLast(DISCONNECT_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInterceptorHandler());
         ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
 
         ch.pipeline().addLast(MQTT_QOS_RECEIVER_HANDLER, channelDependencies.getQoSReceiverHandler());
@@ -123,6 +126,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(INCOMING_PUBLISH_HANDLER, channelDependencies.getIncomingPublishHandler());
         ch.pipeline().addLast(INCOMING_SUBSCRIBE_HANDLER, channelDependencies.getIncomingSubscribeHandler());
+
+
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
         ch.pipeline().addLast(MQTT_PUBLISH_USER_EVENT_HANDLER, channelDependencies.getPublishUserEventReceivedHandler());
@@ -153,11 +158,12 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     protected abstract void addSpecialHandlers(@NotNull final Channel ch) throws Exception;
 
-
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, @NotNull final Throwable cause) throws Exception {
         if (cause instanceof SslException) {
-            log.error("{}. Disconnecting client {} ", cause.getMessage(), ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
+            log.error(
+                    "{}. Disconnecting client {} ", cause.getMessage(),
+                    ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
             log.debug("Original exception:", cause);
             if (cause.getMessage() != null) {
                 eventLog.clientWasDisconnected(ctx.channel(), cause.getMessage());
@@ -172,6 +178,5 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
             super.exceptionCaught(ctx, cause);
         }
     }
-
 
 }

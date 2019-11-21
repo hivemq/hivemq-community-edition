@@ -52,7 +52,8 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
     @VisibleForTesting
     @Inject
-    public Mqtt5DisconnectDecoder(final Mqtt5ServerDisconnector errorHandler, final FullConfigurationService fullConfigurationService) {
+    public Mqtt5DisconnectDecoder(
+            final Mqtt5ServerDisconnector errorHandler, final FullConfigurationService fullConfigurationService) {
         super(errorHandler, fullConfigurationService);
         maxSessionExpiryInterval = fullConfigurationService.mqttConfiguration().maxSessionExpiryInterval();
     }
@@ -70,7 +71,8 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
         //nothing more to read => normal disconnect
         if (!buf.isReadable()) {
-            return new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+            return new DISCONNECT(
+                    Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                     null,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     null,
@@ -85,7 +87,8 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
         //nothing more to read => disconnect with reason code
         if (!buf.isReadable()) {
-            return new DISCONNECT(reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, SESSION_EXPIRY_NOT_SET);
+            return new DISCONNECT(
+                    reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, SESSION_EXPIRY_NOT_SET);
         }
 
         final int propertiesLength = decodePropertiesLengthNoPayload(buf, channel, MessageType.DISCONNECT);
@@ -104,22 +107,27 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
             switch (propertyIdentifier) {
                 case SESSION_EXPIRY_INTERVAL:
-                    final Long sessionExpiryIntervalFromChannel = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
-                    if (sessionExpiryIntervalFromChannel == 0) {
-                        disconnector.disconnect(channel,
+                    sessionExpiryInterval =
+                            decodeSessionExpiryInterval(channel, buf, sessionExpiryInterval, MessageType.DISCONNECT);
+                    if (sessionExpiryInterval == DISCONNECTED) {
+                        return null;
+                    }
+                    final Long sessionExpiryIntervalFromChannel =
+                            channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+                    if ((sessionExpiryInterval != 0) && (sessionExpiryIntervalFromChannel == 0)) {
+                        disconnector.disconnect(
+                                channel,
                                 "A client (IP: {}) sent a DISCONNECT with session expiry interval, but session expiry interval was set to zero at CONNECT. This is not allowed. Disconnecting client.",
                                 "DISCONNECT with session expiry interval, but session expiry interval was set to zero at CONNECT.",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                                 ReasonStrings.DISCONNECT_PROTOCOL_ERROR_SESSION_EXPIRY);
                         return null;
                     }
-                    sessionExpiryInterval = decodeSessionExpiryInterval(channel, buf, sessionExpiryInterval, MessageType.DISCONNECT);
-                    if (sessionExpiryInterval == DISCONNECTED) {
-                        return null;
-                    }
                     //it must not be greater than the configured maximum
-                    if(sessionExpiryInterval > maxSessionExpiryInterval){
-                        log.debug("A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'", getChannelIP(channel).or("UNKNOWN"), sessionExpiryInterval, maxSessionExpiryInterval);
+                    if (sessionExpiryInterval > maxSessionExpiryInterval) {
+                        log.debug(
+                                "A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'",
+                                getChannelIP(channel).or("UNKNOWN"), sessionExpiryInterval, maxSessionExpiryInterval);
                         sessionExpiryInterval = maxSessionExpiryInterval;
                     }
                     break;
@@ -139,7 +147,8 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(channel, buf, userPropertiesBuilder, MessageType.DISCONNECT);
+                    userPropertiesBuilder =
+                            readUserProperty(channel, buf, userPropertiesBuilder, MessageType.DISCONNECT);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
@@ -153,7 +162,7 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if(invalidUserPropertiesLength(channel, MessageType.DISCONNECT, userProperties)){
+        if (invalidUserPropertiesLength(channel, MessageType.DISCONNECT, userProperties)) {
             return null;
         }
 

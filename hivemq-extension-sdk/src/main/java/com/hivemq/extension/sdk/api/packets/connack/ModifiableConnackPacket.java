@@ -37,7 +37,7 @@ public interface ModifiableConnackPacket extends ConnackPacket {
      * Switching from successful to unsuccessful and vice versa is not supported.
      *
      * @param reasonCode The reason code to set.
-     * @throws NullPointerException  If reason code is <null>.
+     * @throws NullPointerException  If reason code is <b>null</b>.
      * @throws IllegalStateException If switching from successful reason code to unsuccessful reason code or vice versa.
      * @see ConnackReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      * @since 4.2.0

@@ -20,6 +20,8 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -70,15 +72,32 @@ public interface ClientContext {
     void addSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Adds an {@link DisconnectInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param disconnectInboundInterceptor The implementation of a DisconnectInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addDisconnectInboundInterceptor(@NotNull DisconnectInboundInterceptor disconnectInboundInterceptor);
+
+    /**
+     * Adds an {@link DisconnectInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param disconnectOutboundInterceptor The implementation of a DisconnectOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
+
+    /**
      * Removes an {@link PublishInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param publishInboundInterceptor The implementation of an PublishInboundInterceptor.
+     * @param publishInboundInterceptor The implementation of a PublishInboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.0.0
      */
     void removePublishInboundInterceptor(@NotNull PublishInboundInterceptor publishInboundInterceptor);
-
 
     /**
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
@@ -99,6 +118,22 @@ public interface ClientContext {
      * @since 4.2.0
      */
     void removeSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
+
+    /**
+     * Removes an {@link DisconnectInboundInterceptor} for this client <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param disconnectInboundInterceptor The implementation of an DisconnectInboundInterceptor.
+     */
+    void removeDisconnectInboundInterceptor(@NotNull DisconnectInboundInterceptor disconnectInboundInterceptor);
+
+    /**
+     * Removes an {@link DisconnectOutboundInterceptor} for this client <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param disconnectOutboundInterceptor The implementation of an DisconnectOutboundInterceptor.
+     */
+    void removeDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
 
     /**
      * Returns all {@link Interceptor} which are registered for this client.
@@ -137,8 +172,24 @@ public interface ClientContext {
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
 
     /**
-     * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every
-     * MQTT PUBLISH and SUBSCRIBE packet sent by this client.
+     * Returns all {@link DisconnectOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of DisconnectOutboundInterceptors for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors();
+
+    /**
+     * Returns all {@link DisconnectInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of DisconnectInboundInterceptors for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull DisconnectInboundInterceptor> getDisconnectInboundInterceptors();
+
+    /**
+     * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every MQTT
+     * PUBLISH and SUBSCRIBE packet sent by this client.
      *
      * @return The {@link ModifiableDefaultPermissions}.
      * @since 4.0.0
