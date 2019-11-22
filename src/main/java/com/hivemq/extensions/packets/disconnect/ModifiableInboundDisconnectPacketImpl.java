@@ -80,7 +80,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         Preconditions.checkArgument(
                 Mqtt5DisconnectReasonCode.canBeSentByClient(reasonCode),
-                "Reason code {} must not be used for inbound disconnect packets from a client to the server.",
+                "Reason code %s must not be used for inbound disconnect packets from a client to the server.",
                 reasonCode);
         if (Objects.equals(this.reasonCode, reasonCode)) {
             return;
