@@ -79,8 +79,6 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionXodusLocalPersistence.class, ClientSessionLocalProvider.class);
         bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class, ClientSessionSubscriptionXodusLocalPersistence.class, ClientSessionSubscriptionLocalProvider.class);
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);
-        bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class,
-                PublishPayloadLocalPersistenceProvider.class);
 
         /* Retained Message */
         bind(RetainedMessagePersistence.class).toProvider(RetainedMessagePersistenceProvider.class).in(LazySingleton.class);
