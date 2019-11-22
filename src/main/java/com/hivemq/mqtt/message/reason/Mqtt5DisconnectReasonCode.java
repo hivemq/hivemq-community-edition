@@ -76,7 +76,6 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
         return code;
     }
 
-
     private static final int ERROR_CODE_MIN = UNSPECIFIED_ERROR.code;
     private static final int ERROR_CODE_MAX = WILDCARD_SUBSCRIPTION_NOT_SUPPORTED.code;
     private static final Mqtt5DisconnectReasonCode[] ERROR_CODE_LOOKUP =
@@ -95,7 +94,7 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the DISCONNECT Reason Code belonging to the given byte code or null if the byte code is not a valid
-     * DISCONNECT Reason Code code.
+     *         DISCONNECT Reason Code code.
      */
     @Nullable
     public static Mqtt5DisconnectReasonCode fromCode(final int code) {
@@ -116,7 +115,7 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the DISCONNECT Reason Code belonging to the given byte code or null if the byte code is not a valid
-     * DISCONNECT Reason Code code.
+     *         DISCONNECT Reason Code code.
      */
     @NotNull
     public static DisconnectReasonCode toPluginCode(final @NotNull Mqtt5DisconnectReasonCode code) {
@@ -128,11 +127,10 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the DISCONNECT Reason Code belonging to the given byte code or null if the byte code is not a valid
-     * DISCONNECT Reason Code code.
+     *         DISCONNECT Reason Code code.
      */
     @NotNull
     public static DisconnectedReasonCode toPluginDisconnectedCode(final @NotNull Mqtt5DisconnectReasonCode code) {
         return DisconnectedReasonCode.valueOf(code.name());
     }
-
 }
