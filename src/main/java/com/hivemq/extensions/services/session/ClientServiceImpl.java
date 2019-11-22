@@ -130,22 +130,12 @@ public class ClientServiceImpl implements ClientService {
             final @Nullable String reasonString) {
 
         Preconditions.checkNotNull(clientId, "A client id must never be null");
-        Preconditions.checkArgument(
-                !DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.equals(reasonCode),
-                DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID.toString() +
-                        " is not a valid reason code for server side DISCONNECT messages. " +
-                        "It is only valid if used in the CONNACK message.");
-        Preconditions.checkArgument(
-                !DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE.equals(reasonCode),
-                DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE.toString() +
-                        " is not a valid reason code for server side DISCONNECT messages. " +
-                        "It is only valid if used by a DISCONNECT messages sent by a client.");
-        Preconditions.checkArgument(
-                !DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.equals(reasonCode),
-                DisconnectReasonCode.BAD_AUTHENTICATION_METHOD.toString() +
-                        " is not a valid reason code for server side DISCONNECT messages. " +
-                        "It is only valid if used in the CONNACK message.");
-
+        if (reasonCode != null) {
+            Preconditions.checkArgument(
+                    Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
+                    "Reason code {} must not be used for outbound disconnect packets from the server to a client.",
+                    reasonCode);
+        }
 
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
@@ -209,9 +199,9 @@ public class ClientServiceImpl implements ClientService {
 
         final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
                 new AllClientsFetchCallback(clientSessionPersistence);
-        final AsyncIterator<ChunkCursor, SessionInformation>
-                asyncIterator = asyncIteratorFactory.createIterator(fetchCallback,
-                new AllClientsItemCallback(callbackExecutor, callback));
+        final AsyncIterator<ChunkCursor, SessionInformation> asyncIterator =
+                asyncIteratorFactory.createIterator(fetchCallback,
+                        new AllClientsItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 

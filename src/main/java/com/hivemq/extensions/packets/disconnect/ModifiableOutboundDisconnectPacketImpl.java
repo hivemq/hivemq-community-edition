@@ -13,6 +13,7 @@ import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -69,6 +70,10 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     @Override
     public synchronized void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
+        Preconditions.checkArgument(
+                Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
+                "Reason code {} must not be used for outbound disconnect packets from the server to a client.",
+                reasonCode);
         if (this.reasonCode == reasonCode) {
             return;
         }

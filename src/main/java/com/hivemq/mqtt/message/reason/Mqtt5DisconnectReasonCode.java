@@ -21,6 +21,8 @@ import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 
+import java.util.EnumSet;
+
 /**
  * MQTT Reason Codes that can be used in DISCONNECT packets according to the MQTT 5 specification.
  *
@@ -108,6 +110,23 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
             return null;
         }
         return ERROR_CODE_LOOKUP[code - ERROR_CODE_MIN];
+    }
+
+    private static final @NotNull EnumSet<DisconnectReasonCode> BY_CLIENT =
+            EnumSet.of(DisconnectReasonCode.NORMAL_DISCONNECTION, DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE,
+                    DisconnectReasonCode.UNSPECIFIED_ERROR, DisconnectReasonCode.MALFORMED_PACKET,
+                    DisconnectReasonCode.PROTOCOL_ERROR, DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
+                    DisconnectReasonCode.TOPIC_FILTER_INVALID, DisconnectReasonCode.TOPIC_NAME_INVALID,
+                    DisconnectReasonCode.RECEIVE_MAXIMUM_EXCEEDED, DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                    DisconnectReasonCode.PACKET_TOO_LARGE, DisconnectReasonCode.MESSAGE_RATE_TOO_HIGH,
+                    DisconnectReasonCode.QUOTA_EXCEEDED, DisconnectReasonCode.ADMINISTRATIVE_ACTION);
+
+    public static boolean canBeSentByServer(final @NotNull DisconnectReasonCode reasonCode) {
+        return reasonCode != DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE;
+    }
+
+    public static boolean canBeSentByClient(final @NotNull DisconnectReasonCode reasonCode) {
+        return BY_CLIENT.contains(reasonCode);
     }
 
     /**

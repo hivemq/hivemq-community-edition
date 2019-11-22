@@ -129,13 +129,15 @@ public interface ClientService {
      * @param reasonString       The user defined reason string for disconnecting this client.
      * @return A {@link CompletableFuture} which contains a {@link Boolean} that is <b>true</b> when the client has been
      *         disconnected and <b>false</b> if no client with that id was found.
-     * @throws IllegalArgumentException if the disconnect reason code is {@link DisconnectReasonCode#CLIENT_IDENTIFIER_NOT_VALID}.
-     * @throws IllegalArgumentException if the disconnect reason code is {@link DisconnectReasonCode#DISCONNECT_WITH_WILL_MESSAGE}.
-     * @throws IllegalArgumentException if the disconnect reason code is {@link DisconnectReasonCode#BAD_AUTHENTICATION_METHOD}.
+     * @throws IllegalArgumentException If the disconnect reason code must not be used for outbound disconnect packets
+     *                                  from the server to a client.
+     * @see DisconnectReasonCode What reason codes exist for outbound disconnect packets from the server to a
+     *         client.
      * @since 4.3.0
      */
-    @NotNull CompletableFuture<Boolean> disconnectClient(@NotNull String clientId, boolean preventWillMessage,
-                                                         @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
+    @NotNull CompletableFuture<Boolean> disconnectClient(
+            @NotNull String clientId, boolean preventWillMessage,
+            @Nullable DisconnectReasonCode reasonCode, @Nullable String reasonString);
 
     /**
      * Invalidates the client session for a client with the given client identifier. If the client is currently
@@ -218,6 +220,7 @@ public interface ClientService {
      * @throws NullPointerException If the passed callback or callbackExecutor are null.
      * @since 4.2.0
      */
-    @NotNull CompletableFuture<Void> iterateAllClients(@NotNull IterationCallback<SessionInformation> callback, @NotNull Executor callbackExecutor);
+    @NotNull CompletableFuture<Void> iterateAllClients(
+            @NotNull IterationCallback<SessionInformation> callback, @NotNull Executor callbackExecutor);
 
 }
