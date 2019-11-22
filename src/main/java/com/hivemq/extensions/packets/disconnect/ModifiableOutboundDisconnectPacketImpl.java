@@ -71,6 +71,9 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     public synchronized void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         Preconditions.checkArgument(
+                reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                "Reason code %s must not be used for disconnect packets.", reasonCode);
+        Preconditions.checkArgument(
                 Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
                 "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                 reasonCode);

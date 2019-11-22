@@ -132,6 +132,9 @@ public class ClientServiceImpl implements ClientService {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (reasonCode != null) {
             Preconditions.checkArgument(
+                    reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                    "Reason code %s must not be used for disconnect packets.", reasonCode);
+            Preconditions.checkArgument(
                     Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
                     "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                     reasonCode);
@@ -200,7 +203,8 @@ public class ClientServiceImpl implements ClientService {
         final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
                 new AllClientsFetchCallback(clientSessionPersistence);
         final AsyncIterator<ChunkCursor, SessionInformation> asyncIterator =
-                asyncIteratorFactory.createIterator(fetchCallback,
+                asyncIteratorFactory.createIterator(
+                        fetchCallback,
                         new AllClientsItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();

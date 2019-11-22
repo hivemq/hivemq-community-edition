@@ -90,6 +90,7 @@ public enum DisconnectReasonCode {
     SESSION_TAKEN_OVER,
     /**
      * @since 4.0.0
+     * @deprecated Must not be used for disconnect packets.
      */
     @Deprecated
     CLIENT_IDENTIFIER_NOT_VALID,
