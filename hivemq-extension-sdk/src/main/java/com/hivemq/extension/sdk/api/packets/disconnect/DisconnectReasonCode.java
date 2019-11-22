@@ -32,7 +32,6 @@ public enum DisconnectReasonCode {
     /**
      * @since 4.0.0
      */
-    @Deprecated
     DISCONNECT_WITH_WILL_MESSAGE,
     /**
      * @since 4.0.0
@@ -65,7 +64,6 @@ public enum DisconnectReasonCode {
     /**
      * @since 4.0.0
      */
-    @Deprecated
     BAD_AUTHENTICATION_METHOD,
     /**
      * @since 4.0.0
