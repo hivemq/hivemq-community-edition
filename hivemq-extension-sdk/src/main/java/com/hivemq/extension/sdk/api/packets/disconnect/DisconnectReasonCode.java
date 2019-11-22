@@ -25,11 +25,14 @@ package com.hivemq.extension.sdk.api.packets.disconnect;
  * @since 4.0.0
  */
 public enum DisconnectReasonCode {
+
     /**
      * @since 4.0.0
      */
     NORMAL_DISCONNECTION,
     /**
+     * Must not be used for outbound disconnect packets from the server to clients.
+     *
      * @since 4.0.0
      */
     DISCONNECT_WITH_WILL_MESSAGE,
@@ -50,32 +53,46 @@ public enum DisconnectReasonCode {
      */
     IMPLEMENTATION_SPECIFIC_ERROR,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     NOT_AUTHORIZED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SERVER_BUSY,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SERVER_SHUTTING_DOWN,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     BAD_AUTHENTICATION_METHOD,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     KEEP_ALIVE_TIMEOUT,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SESSION_TAKEN_OVER,
     /**
      * @since 4.0.0
+     * @deprecated Must not be used for disconnect packets.
      */
+    @Deprecated
     CLIENT_IDENTIFIER_NOT_VALID,
     /**
      * @since 4.0.0
@@ -110,42 +127,62 @@ public enum DisconnectReasonCode {
      */
     ADMINISTRATIVE_ACTION,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     PAYLOAD_FORMAT_INVALID,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     RETAIN_NOT_SUPPORTED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     QOS_NOT_SUPPORTED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     USE_ANOTHER_SERVER,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SERVER_MOVED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SHARED_SUBSCRIPTION_NOT_SUPPORTED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     CONNECTION_RATE_EXCEEDED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     MAXIMUM_CONNECT_TIME,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
     /**
+     * Must not be used for inbound disconnect packets from a client to the server.
+     *
      * @since 4.0.0
      */
     WILDCARD_SUBSCRIPTION_NOT_SUPPORTED

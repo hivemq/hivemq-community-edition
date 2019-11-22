@@ -21,8 +21,11 @@ public interface ModifiableOutboundDisconnectPacket extends DisconnectPacket {
      * Set the {@link DisconnectReasonCode} of the DISCONNECT packet.
      *
      * @param reasonCode The reason code to set.
-     * @throws NullPointerException If the reason code is <code>null</code>.
-     * @see DisconnectReasonCode What reason codes exist for disconnecting.
+     * @throws NullPointerException     If the reason code is <code>null</code>.
+     * @throws IllegalArgumentException If the disconnect reason code must not be used for outbound disconnect packets
+     *                                  from the server to a client.
+     * @see DisconnectReasonCode What reason codes exist for outbound disconnect packets from the server to a
+     *         client.
      */
     void setReasonCode(@NotNull DisconnectReasonCode reasonCode);
 

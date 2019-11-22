@@ -166,6 +166,20 @@ public class ClientSessionPersistenceImplTest {
     }
 
     @Test
+    public void force_client_disconnect_connected_reason_code_string() throws ExecutionException, InterruptedException {
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        when(channelPersistence.get("client")).thenReturn(channel);
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
+        final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION, Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, "reason-string");
+        channel.disconnect();
+        final Boolean result = future.get();
+        assertTrue(result);
+        verify(pendingWillMessages).cancelWill("client");
+        verify(mqtt5ServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER), eq("reason-string"));
+    }
+
+    @Test
     public void test_cleanup_client_date() throws ExecutionException, InterruptedException {
         when(subscriptionPersistence.removeAll("client")).thenReturn(Futures.immediateFuture(null));
         when(clientQueuePersistence.clear("client", false)).thenReturn(Futures.immediateFuture(null));

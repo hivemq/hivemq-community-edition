@@ -45,7 +45,7 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void test_modify_packet() {
         packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
-        packet.setReasonCode(DisconnectReasonCode.BAD_AUTHENTICATION_METHOD);
+        packet.setReasonCode(DisconnectReasonCode.QUOTA_EXCEEDED);
         assertTrue(packet.isModified());
 
         packet = new ModifiableInboundDisconnectPacketImpl(configurationService, original, 5);
