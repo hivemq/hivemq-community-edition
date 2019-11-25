@@ -113,12 +113,12 @@ public class ChannelHandlerNames {
     public static final String CLIENT_LIFECYCLE_EVENT_HANDLER = "client_lifecycle_event_handler";
     public static final String PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER = "publish_outbound_interceptor_handler";
     public static final String PUBACK_INTERCEPTOR_HANDLER = "puback_interceptor_handler";
+    public static final String PUBREC_INTERCEPTOR_HANDLER = "pubrec_interceptor_handler";
     public static final String PUBREL_INTERCEPTOR_HANDLER = "pubrel_interceptor_handler";
     public static final String PUBCOMP_INTERCEPTOR_HANDLER = "pubcomp_interceptor_handler";
     public static final String CONNECT_INBOUND_INTERCEPTOR_HANDLER = "connect_inbound_interceptor_handler";
     public static final String CONNACK_OUTBOUND_INTERCEPTOR_HANDLER = "connack_outbound_interceptor_handler";
     public static final String DISCONNECT_INTERCEPTOR_HANDLER = "disconnect_interceptor_handler";
-    public static final String PUBREC_INTERCEPTOR_HANDLER = "pubrec_interceptor_handler";
 
     /* *************
      *     Misc    *
