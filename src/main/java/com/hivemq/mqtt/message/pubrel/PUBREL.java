@@ -16,11 +16,15 @@
 
 package com.hivemq.mqtt.message.pubrel;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extension.sdk.api.packets.pubrel.PubrelPacket;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 
 /**
@@ -89,5 +93,21 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
 
     public void setExpiryInterval(@Nullable final Long expiryInterval) {
         this.expiryInterval = expiryInterval;
+    }
+
+    public static @NotNull PUBREL createPubrelFrom(final @NotNull PubrelPacket packet) {
+
+        final int packetIdentifier = packet.getPacketIdentifier();
+        final Mqtt5PubRelReasonCode reasonCode = Mqtt5PubRelReasonCode.valueOf(packet.getReasonCode().name());
+
+        final String reasonString = packet.getReasonString().orElse(null);
+
+        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
+
+        return new PUBREL(packetIdentifier, reasonCode, reasonString, mqtt5UserProperties);
     }
 }
