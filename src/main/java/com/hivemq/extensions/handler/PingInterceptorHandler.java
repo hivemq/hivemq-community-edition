@@ -64,7 +64,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, @NotNull final Object msg) {
         if (!(msg instanceof PINGREQ)) {
             ctx.fireChannelRead(msg);
             return;
@@ -87,22 +87,20 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingResponseOutboundInterceptors();
+        final List<PingReqInboundInterceptor> interceptors = clientContext.getPingRequestInboundInterceptors();
         if (interceptors.isEmpty()) {
             ctx.fireChannelRead(pingreq);
             return;
         }
 
-        final List<PingReqInboundInterceptor> pingReqInboundInterceptors =
-                clientContext.getPingRequestInboundInterceptors();
         final PingReqInboundOutputImpl output = new PingReqInboundOutputImpl(asyncer);
         final PingReqInboundInputImpl input = new PingReqInboundInputImpl(clientId, channel);
         final PingRequestInboundInterceptorContext interceptorContext =
                 new PingRequestInboundInterceptorContext(
                         PingRequestInboundInterceptorTask.class,
-                        clientId, ctx, pingReqInboundInterceptors.size());
+                        clientId, ctx, interceptors.size());
 
-        for (final PingReqInboundInterceptor interceptor : pingReqInboundInterceptors) {
+        for (final PingReqInboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
