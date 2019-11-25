@@ -134,7 +134,7 @@ public class ClientContextImplTest {
 
     @Test
     public void test_add_remove_pubrec_interceptors() {
-        final PubrecOutboundInterceptor pubackOutboundInterceptor = (pubackOutboundInput, pubackOutboundOutput) -> { };
+        final PubrecOutboundInterceptor pubrecOutboundInterceptor = (pubackOutboundInput, pubackOutboundOutput) -> { };
 
         final PubrecInboundInterceptor pubrecInboundInterceptor = (pubrecInboundInput, pubrecInboundOutput) -> { };
 
