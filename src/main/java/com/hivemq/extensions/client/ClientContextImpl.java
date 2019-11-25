@@ -29,6 +29,10 @@ import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterc
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -85,6 +89,14 @@ public class ClientContextImpl {
     }
 
     public void addPubrecOutboundInterceptor(@NotNull final PubrecOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubrelOutboundInterceptor(final @NotNull PubrelOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
@@ -153,6 +165,50 @@ public class ClientContextImpl {
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
                 .filter(interceptor -> interceptor instanceof PublishInboundInterceptor)
                 .map(interceptor -> (PublishInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PubrelOutboundInterceptor> getPubrelOutboundInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubrelOutboundInterceptor)
+                .map(interceptor -> (PubrelOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubrelOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubrelOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PubrelInboundInterceptor> getPubrelInboundInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubrelInboundInterceptor)
+                .map(interceptor -> (PubrelInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @NotNull
+    @Immutable
+    public List<PubrelInboundInterceptor> getPubrelInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubrelInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubrelInboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 
