@@ -23,6 +23,8 @@ import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -32,6 +34,7 @@ import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterc
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
@@ -97,6 +100,14 @@ public class ClientContextImpl {
     }
 
     public void addPubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubcompOutboundInterceptor(final @NotNull PubcompOutboundInterceptor interceptor) {
+        addInterceptor(interceptor);
+    }
+
+    public void addPubcompInboundInterceptor(final @NotNull PubcompInboundInterceptor interceptor) {
         addInterceptor(interceptor);
     }
 
@@ -220,6 +231,50 @@ public class ClientContextImpl {
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
                 .filter(interceptor -> interceptor instanceof SubscribeInboundInterceptor)
                 .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull
+    @Immutable
+    List<PubcompOutboundInterceptor> getPubcompOutboundInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubcompOutboundInterceptor)
+                .map(interceptor -> (PubcompOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull
+    @Immutable
+    List<PubcompOutboundInterceptor> getPubcompOutboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubcompOutboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubcompOutboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull
+    @Immutable
+    List<PubcompInboundInterceptor> getPubcompInboundInterceptorsForPlugin(
+            final @NotNull IsolatedPluginClassloader pluginClassloader) {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
+                .filter(interceptor -> interceptor instanceof PubcompInboundInterceptor)
+                .map(interceptor -> (PubcompInboundInterceptor) interceptor)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public @NotNull
+    @Immutable
+    List<PubcompInboundInterceptor> getPubcompInboundInterceptors() {
+        return interceptorList.stream()
+                .filter(interceptor -> interceptor instanceof PubcompInboundInterceptor)
+                .filter(this::hasPluginForClassloader)
+                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
+                .map(interceptor -> (PubcompInboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }
 

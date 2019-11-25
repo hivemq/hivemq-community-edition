@@ -19,6 +19,8 @@ package com.hivemq.extensions.client;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
@@ -174,6 +176,29 @@ public class ClientContextImplTest {
 
         clientContext.removeInterceptor(pubrelInboundInterceptor);
         clientContext.removeInterceptor(pubrelOutboundInterceptor);
+
+        assertEquals(0, clientContext.getAllInterceptors().size());
+    }
+
+    @Test
+    public void test_add_remove_pubcomp_interceptors() {
+        final PubcompOutboundInterceptor pubcompOutboundInterceptor =
+                (pubcompOutboundInput, pubcompOutboundOutput) -> { };
+
+        final PubcompInboundInterceptor pubcompInboundInterceptor = (pubcompInboundInput, pubcompInboundOutput) -> { };
+
+        clientContext.addPubcompInboundInterceptor(pubcompInboundInterceptor);
+        assertEquals(1, clientContext.getPubcompInboundInterceptors().size());
+        assertSame(pubcompInboundInterceptor, clientContext.getPubcompInboundInterceptors().get(0));
+
+        clientContext.addPubcompOutboundInterceptor(pubcompOutboundInterceptor);
+        assertEquals(1, clientContext.getPubcompOutboundInterceptors().size());
+        assertSame(pubcompOutboundInterceptor, clientContext.getPubcompOutboundInterceptors().get(0));
+
+        assertEquals(2, clientContext.getAllInterceptors().size());
+
+        clientContext.removeInterceptor(pubcompInboundInterceptor);
+        clientContext.removeInterceptor(pubcompOutboundInterceptor);
 
         assertEquals(0, clientContext.getAllInterceptors().size());
     }
