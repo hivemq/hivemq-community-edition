@@ -21,6 +21,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -59,6 +61,24 @@ public interface ClientContext {
      * @since 4.2.0
      */
     void addPublishOutboundInterceptor(@NotNull PublishOutboundInterceptor publishOutboundInterceptor);
+
+    /**
+     * Adds an {@link PubackOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
+
+    /**
+     * Adds an {@link PubackInboundInterceptor} for this client. <br> Subsequent adding of the same interceptor will be
+     * ignored.
+     *
+     * @param pubackInboundInterceptor The implementation of an PubackInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);
 
     /**
      * Adds an {@link SubscribeInboundInterceptor} for this client. <br>
@@ -135,6 +155,24 @@ public interface ClientContext {
     void removeDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
 
     /**
+     * Removes an {@link PubackOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pubackOutboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubackOutboundInterceptor(@NotNull PubackOutboundInterceptor pubackOutboundInterceptor);
+
+    /**
+     * Removes an {@link PubackInboundInterceptor} for this client. <br> Nothing happens if the interceptor that should
+     * be removed, has not been added in the first place.
+     *
+     * @param pubackInboundInterceptor The implementation of an PubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePubackInboundInterceptor(@NotNull PubackInboundInterceptor pubackInboundInterceptor);
+
+    /**
      * Returns all {@link Interceptor} which are registered for this client.
      *
      * @return List of Interceptors for this client.
@@ -169,6 +207,22 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link PubackOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubackOutboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors();
+
+    /**
+     * Returns all {@link PubackInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PubackInboundInterceptor} for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PubackInboundInterceptor> getPubackInboundInterceptors();
 
     /**
      * Returns all {@link DisconnectOutboundInterceptor} which are registered for this client by this extension.

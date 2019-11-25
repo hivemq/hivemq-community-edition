@@ -16,19 +16,20 @@
 
 package com.hivemq.extensions.client;
 
-import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Florian Limpöck
@@ -105,5 +106,27 @@ public class ClientContextImplTest {
         assertEquals(0, clientContext.getSubscribeInboundInterceptors().size());
         assertEquals(1, clientContext.getPublishInboundInterceptors().size());
 
+    }
+
+    @Test
+    public void test_add_remove_puback_interceptors() {
+        final PubackOutboundInterceptor pubackOutboundInterceptor = (pubackOutboundInput, pubackOutboundOutput) -> { };
+
+        final PubackInboundInterceptor pubackInboundInterceptor = (pubackInboundInput, pubackInboundOutput) -> { };
+
+        clientContext.addPubackInboundInterceptor(pubackInboundInterceptor);
+        assertEquals(1, clientContext.getPubackInboundInterceptors().size());
+        assertSame(pubackInboundInterceptor, clientContext.getPubackInboundInterceptors().get(0));
+
+        clientContext.addPubackOutboundInterceptor(pubackOutboundInterceptor);
+        assertEquals(1, clientContext.getPubackOutboundInterceptors().size());
+        assertSame(pubackOutboundInterceptor, clientContext.getPubackOutboundInterceptors().get(0));
+
+        assertEquals(2, clientContext.getAllInterceptors().size());
+
+        clientContext.removeInterceptor(pubackInboundInterceptor);
+        clientContext.removeInterceptor(pubackOutboundInterceptor);
+
+        assertEquals(0, clientContext.getAllInterceptors().size());
     }
 }

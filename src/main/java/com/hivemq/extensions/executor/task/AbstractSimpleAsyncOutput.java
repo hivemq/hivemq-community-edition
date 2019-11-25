@@ -17,7 +17,6 @@ package com.hivemq.extensions.executor.task;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -82,7 +81,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
     }
 
     @Override
-    public @Nullable SettableFuture<Boolean> getAsyncFuture() {
+    public @NotNull SettableFuture<Boolean> getAsyncFuture() {
         return asyncFuture;
     }
 
