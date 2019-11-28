@@ -31,8 +31,10 @@ import com.hivemq.migration.meta.MetaFileService;
 import com.hivemq.migration.meta.MetaInformation;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
+import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
+import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -75,6 +77,10 @@ public class PublishPayloadTypeMigrationTest {
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
+        final File file = new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
+        file.mkdirs();
+        new File(file, RetainedMessageLocalPersistence.PERSISTENCE_NAME).mkdir();
+        new File(file, PublishPayloadLocalPersistence.PERSISTENCE_NAME).mkdir();
 
         configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
     }
@@ -91,7 +97,6 @@ public class PublishPayloadTypeMigrationTest {
     @Test
     public void test_payload_migration_xodus_to_rocks() throws Exception {
 
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
 
         final Map<MigrationUnit, PersistenceType>
                 migrations = Migrations.checkForTypeMigration(systemInformation);
@@ -129,7 +134,6 @@ public class PublishPayloadTypeMigrationTest {
     @Test
     public void test_payload_migration_rocks_to_xodus() throws Exception {
 
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
 
         MetaFileService.writeMetaFile(systemInformation, getMetaInformation());
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
@@ -170,7 +174,6 @@ public class PublishPayloadTypeMigrationTest {
     @Test
     public void test_payload_migration_stays_xodus() throws Exception {
 
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
 
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);

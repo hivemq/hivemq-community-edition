@@ -56,7 +56,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
     private static final Logger log = LoggerFactory.getLogger(
             PublishPayloadXodusLocalPersistence.class);
 
-    public static final String PERSISTENCE_NAME = "publish_payload_store";
     public static final String PERSISTENCE_VERSION = "040000";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
 

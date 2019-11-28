@@ -55,7 +55,6 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageRocksDBLocalPersistence.class);
 
-    public static final String PERSISTENCE_NAME = "retained_messages";
     public static final String PERSISTENCE_VERSION = "040000_R";
     @VisibleForTesting
     public final @NotNull PublishTopicTree[] topicTrees;

@@ -45,7 +45,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
 
-    public static final String PERSISTENCE_NAME = "publish_payload_store";
     public static final String PERSISTENCE_VERSION = "040000_R";
 
     private long maxId = 0;

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.File;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.hivemq.migration.meta.PersistenceType.FILE;
 import static com.hivemq.migration.meta.PersistenceType.FILE_NATIVE;
@@ -76,12 +75,12 @@ public class PublishPayloadTypeMigration implements TypeMigration {
 
     private void migrateToXodus() {
 
-        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_NAME, PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION);
+        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(PublishPayloadLocalPersistence.PERSISTENCE_NAME, PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION);
 
         final File publish_payload_store_0 = new File(persistenceFolder, "publish_payload_store_0");
         if (!publish_payload_store_0.exists()) {
-            migrationLog.info("no (old) persistence folder (publish_payload) present, skipping migration");
-            log.debug("no (old) persistence folder (publish_payload) present, skipping migration");
+            migrationLog.info("No (old) persistence folder (publish_payload) present, skipping migration.");
+            log.debug("No (old) persistence folder (publish_payload) present, skipping migration.");
             return;
         }
 
@@ -93,12 +92,12 @@ public class PublishPayloadTypeMigration implements TypeMigration {
 
     private void migrateToRocksDB() {
 
-        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(PublishPayloadXodusLocalPersistence.PERSISTENCE_NAME, PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
+        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(PublishPayloadLocalPersistence.PERSISTENCE_NAME, PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
 
         final File publish_payload_store_0 = new File(persistenceFolder, "publish_payload_store_0");
         if (!publish_payload_store_0.exists()) {
-            migrationLog.info("no (old) persistence folder (publish_payload) present, skipping migration");
-            log.debug("no (old) persistence folder (publish_payload) present, skipping migration");
+            migrationLog.info("No (old) persistence folder (publish_payload) present, skipping migration.");
+            log.debug("No (old) persistence folder (publish_payload) present, skipping migration.");
             return;
         }
 
@@ -109,18 +108,13 @@ public class PublishPayloadTypeMigration implements TypeMigration {
     }
 
     private void migrateFromTo(final @NotNull PublishPayloadLocalPersistence from, final @NotNull PublishPayloadLocalPersistence to, final @NotNull PersistenceType persistenceType) {
-        final AtomicLong counter = new AtomicLong(0);
 
         from.iterate((id, payload) -> {
             if (payload == null) {
                 return;
             }
             to.put(id, payload);
-            counter.incrementAndGet();
         });
-
-        migrationLog.info("Successfully migrated {} publish payloads", counter.get());
-        log.debug("Successfully migrated {} publish payloads", counter.get());
 
         savePersistenceType(persistenceType);
 

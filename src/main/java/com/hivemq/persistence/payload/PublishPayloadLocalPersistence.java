@@ -26,6 +26,8 @@ import com.hivemq.annotations.ReadOnly;
  */
 public interface PublishPayloadLocalPersistence {
 
+    String PERSISTENCE_NAME = "publish_payload_store";
+
     /**
      * initialize the publish payload local persistence to set the next payload id.
      */

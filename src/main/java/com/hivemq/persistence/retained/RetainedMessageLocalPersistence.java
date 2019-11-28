@@ -30,6 +30,8 @@ import java.util.Set;
  */
 public interface RetainedMessageLocalPersistence extends LocalPersistence {
 
+    String PERSISTENCE_NAME = "retained_messages";
+
     /**
      * @return The amount of all retained messages stored in the persistence.
      */

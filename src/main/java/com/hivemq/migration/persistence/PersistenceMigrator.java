@@ -53,8 +53,8 @@ public class PersistenceMigrator {
     public void migratePersistenceTypes(final Map<MigrationUnit, PersistenceType> migrations) {
 
         final long start = System.currentTimeMillis();
-        migrationlog.info("Start File Persistence migration");
-        log.info("Migrating File Persistences (this can take a few minutes) ...");
+        migrationlog.info("Start File Persistence migration.");
+        log.info("Migrating File Persistences (this can take a few minutes).");
 
         for (final Map.Entry<MigrationUnit, PersistenceType> migration : migrations.entrySet()) {
 
@@ -75,8 +75,8 @@ public class PersistenceMigrator {
             }
 
             final long startOne = System.currentTimeMillis();
-            migrationlog.info("Migrating {} to type {} ...", migrationUnit, persistenceType);
-            log.debug("Migrating {} to type {} ...", migrationUnit, persistenceType);
+            migrationlog.info("Migrating {} to type {}.", migrationUnit, persistenceType);
+            log.debug("Migrating {} to type {}.", migrationUnit, persistenceType);
 
             migrator.migrateToType(persistenceType);
 

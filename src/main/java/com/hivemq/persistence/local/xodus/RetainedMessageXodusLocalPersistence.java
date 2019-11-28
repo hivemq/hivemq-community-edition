@@ -62,7 +62,6 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     private static final Logger log = LoggerFactory.getLogger(
             RetainedMessageXodusLocalPersistence.class);
 
-    public static final String PERSISTENCE_NAME = "retained_messages";
     public static final String PERSISTENCE_VERSION = "040000";
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;

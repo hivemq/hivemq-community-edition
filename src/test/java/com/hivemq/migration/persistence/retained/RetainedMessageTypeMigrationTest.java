@@ -39,6 +39,7 @@ import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
+import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -81,7 +82,6 @@ public class RetainedMessageTypeMigrationTest {
     private FullConfigurationService configurationService;
 
     private RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback callback;
-    private AtomicLong counter;
 
     @Before
     public void setUp() throws Exception {
@@ -95,9 +95,14 @@ public class RetainedMessageTypeMigrationTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
 
-        counter = new AtomicLong();
-        callback = new RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback(4, payloadLocalPersistence,
-                rocksDBLocalPersistence, payloadExceptionLogging, counter);
+        final File file = new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
+        file.mkdirs();
+        new File(file, RetainedMessageLocalPersistence.PERSISTENCE_NAME).mkdir();
+        new File(file, PublishPayloadLocalPersistence.PERSISTENCE_NAME).mkdir();
+
+        callback = new RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback(4,
+                payloadLocalPersistence,
+                rocksDBLocalPersistence, payloadExceptionLogging);
 
     }
 
@@ -134,30 +139,35 @@ public class RetainedMessageTypeMigrationTest {
     @Test
     public void test_retained_xodus_to_rocksdb() throws Exception {
 
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
-
         final Map<MigrationUnit, PersistenceType>
                 migrations = Migrations.checkForTypeMigration(systemInformation);
 
         assertEquals(2, migrations.size());
         assertEquals(PersistenceType.FILE_NATIVE, migrations.get(MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+        final Injector persistenceInjector =
+                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(),
+                        configurationService);
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final RetainedMessageXodusLocalPersistence xodus = persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
-        final PublishPayloadLocalPersistence payload = persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
+        final RetainedMessageXodusLocalPersistence xodus =
+                persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
+        final PublishPayloadLocalPersistence payload =
+                persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
 
         for (int i = 0; i < 1000; i++) {
             payload.put(i, ("message" + i).getBytes());
-            xodus.put(new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i, BucketUtils
-                    .getBucket("topic" + i, xodus.getBucketCount()));
+            xodus.put(
+                    new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i,
+                    BucketUtils
+                            .getBucket("topic" + i, xodus.getBucketCount()));
         }
 
         Migrations.migrate(persistenceInjector, migrations);
 
-        final RetainedMessageRocksDBLocalPersistence persistence = persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class);
+        final RetainedMessageRocksDBLocalPersistence persistence =
+                persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class);
         assertEquals(1000, persistence.size());
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(persistence.get("topic" + i).getMessage()));
@@ -169,13 +179,13 @@ public class RetainedMessageTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION, metaInformation.getRetainedMessagesPersistenceVersion());
+        assertEquals(
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getRetainedMessagesPersistenceVersion());
     }
 
     @Test
     public void test_retained_rocksdb_to_xodus() throws Exception {
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
-
         MetaFileService.writeMetaFile(systemInformation, getMetaInformation());
 
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE);
@@ -185,21 +195,28 @@ public class RetainedMessageTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertEquals(PersistenceType.FILE, migrations.get(MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+        final Injector persistenceInjector =
+                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(),
+                        configurationService);
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final RetainedMessageRocksDBLocalPersistence rocks = persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class);
-        final PublishPayloadLocalPersistence payload = persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
+        final RetainedMessageRocksDBLocalPersistence rocks =
+                persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class);
+        final PublishPayloadLocalPersistence payload =
+                persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
 
         for (int i = 0; i < 1000; i++) {
             payload.put(i, ("message" + i).getBytes());
-            rocks.put(new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i, BucketUtils.getBucket("topic" + i, rocks.getBucketCount()));
+            rocks.put(
+                    new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i,
+                    BucketUtils.getBucket("topic" + i, rocks.getBucketCount()));
         }
 
         Migrations.migrate(persistenceInjector, migrations);
 
-        final RetainedMessageXodusLocalPersistence xodus = persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
+        final RetainedMessageXodusLocalPersistence xodus =
+                persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
         assertEquals(1000, xodus.size());
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(xodus.get("topic" + i).getMessage()));
@@ -211,7 +228,9 @@ public class RetainedMessageTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION, metaInformation.getRetainedMessagesPersistenceVersion());
+        assertEquals(
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getRetainedMessagesPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getRetainedMessagesPersistenceType());
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
 
@@ -220,8 +239,6 @@ public class RetainedMessageTypeMigrationTest {
     @Test
     public void test_retained_stays_xodus() throws Exception {
 
-        new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdirs();
-
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE);
 
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
@@ -229,16 +246,22 @@ public class RetainedMessageTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertFalse(migrations.containsKey(MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+        final Injector persistenceInjector =
+                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(),
+                        configurationService);
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final RetainedMessageXodusLocalPersistence xodus = persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
-        final PublishPayloadLocalPersistence payload = persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
+        final RetainedMessageXodusLocalPersistence xodus =
+                persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
+        final PublishPayloadLocalPersistence payload =
+                persistenceInjector.getInstance(PublishPayloadLocalPersistence.class);
 
         for (int i = 0; i < 10; i++) {
             payload.put(i, ("message" + i).getBytes());
-            xodus.put(new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i, BucketUtils.getBucket("topic" + i, xodus.getBucketCount()));
+            xodus.put(
+                    new RetainedMessage(("message" + i).getBytes(), QoS.AT_LEAST_ONCE, (long) i, i + 1000), "topic" + i,
+                    BucketUtils.getBucket("topic" + i, xodus.getBucketCount()));
         }
 
         Migrations.migrate(persistenceInjector, migrations);
@@ -248,7 +271,9 @@ public class RetainedMessageTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION, metaInformation.getRetainedMessagesPersistenceVersion());
+        assertEquals(
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getRetainedMessagesPersistenceVersion());
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
 
     }
