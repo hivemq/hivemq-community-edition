@@ -77,6 +77,30 @@ public class DisconnectHandlerTest {
     }
 
     @Test
+    public void test_disconnection_with_will() {
+        assertTrue(embeddedChannel.isOpen());
+
+        embeddedChannel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
+
+        assertEquals(true, embeddedChannel.attr(ChannelAttributes.SEND_WILL).get());
+
+        //verify that the client was disconnected
+        assertFalse(embeddedChannel.isOpen());
+    }
+
+    @Test
+    public void test_disconnection_without_will() {
+        assertTrue(embeddedChannel.isOpen());
+
+        embeddedChannel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
+
+        assertEquals(false, embeddedChannel.attr(ChannelAttributes.SEND_WILL).get());
+
+        //verify that the client was disconnected
+        assertFalse(embeddedChannel.isOpen());
+    }
+
+    @Test
     public void test_graceful_flag_set_on_message() {
 
         embeddedChannel.writeInbound(new DISCONNECT());
