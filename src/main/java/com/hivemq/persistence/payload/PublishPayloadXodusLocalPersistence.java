@@ -91,7 +91,7 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
     @NotNull
     @Override
     protected StoreConfig getStoreConfig() {
-        return StoreConfig.WITHOUT_DUPLICATES;
+        return StoreConfig.WITHOUT_DUPLICATES_WITH_PREFIXING;
     }
 
     @NotNull
@@ -234,14 +234,11 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
         }
         final Bucket bucket = getBucket(Long.toString(id));
         bucket.getEnvironment().executeInTransaction(txn -> {
-            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-                int chunkIndex = 0;
-                ByteIterable entry =
-                        cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, chunkIndex)));
-                while (entry != null) {
-                    cursor.deleteCurrent();
-                    entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, ++chunkIndex)));
-                }
+
+            int chunkIndex = 0;
+            boolean deleted = true;
+            while (deleted) {
+                deleted = bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(id, chunkIndex++)));
             }
         });
     }
