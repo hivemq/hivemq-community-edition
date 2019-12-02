@@ -21,6 +21,8 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.ChannelPersistence;
@@ -38,6 +40,7 @@ import com.hivemq.persistence.ioc.provider.local.RetainedMessageLocalPersistence
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
+import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionXodusLocalPersistence;
@@ -56,25 +59,26 @@ import javax.inject.Singleton;
 class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModule>> {
 
     private final @NotNull Injector persistenceInjector;
+    private final @NotNull PersistenceType payloadPersistenceType;
+    private final @NotNull PersistenceType retainedPersistenceType;
 
     public LocalPersistenceModule(@NotNull final Injector persistenceInjector) {
         super(LocalPersistenceModule.class);
         this.persistenceInjector = persistenceInjector;
+        this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
+        this.retainedPersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
 
     @Override
     protected void configure() {
 
         /* Local */
-        bindLocalPersistence(RetainedMessageLocalPersistence.class, RetainedMessageXodusLocalPersistence.class,
-                RetainedMessageLocalPersistenceProvider.class);
-        bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionXodusLocalPersistence.class,
-                ClientSessionLocalProvider.class);
-        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
-                ClientSessionSubscriptionXodusLocalPersistence.class, ClientSessionSubscriptionLocalProvider.class);
+        bindLocalPersistence(RetainedMessageLocalPersistence.class, retainedPersistenceType == PersistenceType.FILE_NATIVE ? RetainedMessageRocksDBLocalPersistence.class : RetainedMessageXodusLocalPersistence.class, RetainedMessageLocalPersistenceProvider.class);
+        bindLocalPersistence(PublishPayloadLocalPersistence.class, payloadPersistenceType == PersistenceType.FILE_NATIVE ? PublishPayloadRocksDBLocalPersistence.class : PublishPayloadXodusLocalPersistence.class, PublishPayloadLocalPersistenceProvider.class);
+
+        bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionXodusLocalPersistence.class, ClientSessionLocalProvider.class);
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class, ClientSessionSubscriptionXodusLocalPersistence.class, ClientSessionSubscriptionLocalProvider.class);
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);
-        bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class,
-                PublishPayloadLocalPersistenceProvider.class);
 
         /* Retained Message */
         bind(RetainedMessagePersistence.class).toProvider(RetainedMessagePersistenceProvider.class).in(LazySingleton.class);

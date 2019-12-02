@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package com.hivemq.persistence.payload;
+package com.hivemq.migration.meta;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import com.hivemq.annotations.NotNull;
 
 /**
  * @author Florian Limpöck
  */
-public class PublishPayloadXodusSerializerTest {
+public enum PersistenceType {
+    FILE, FILE_NATIVE;
 
-    private final PublishPayloadXodusSerializer serializer = new PublishPayloadXodusSerializer();
-
-    @Test
-    public void test_serialize_key() throws Exception {
-        final byte[] bytes = serializer.serializeKey(1234L, 5L);
-
-        assertEquals(16, bytes.length);
-
-        final PublishPayloadXodusLocalPersistence.KeyPair keyPair = serializer.deserializeKey(bytes);
-
-        assertEquals(1234L, keyPair.getId());
-        assertEquals(5L, keyPair.getChunkIndex());
+    @NotNull
+    public static PersistenceType forCode(final int code){
+        if (code < 0 || code >= values().length) {
+            throw new IllegalArgumentException("No persistence type found for code: " + code);
+        }
+        return values()[code];
     }
+
 }

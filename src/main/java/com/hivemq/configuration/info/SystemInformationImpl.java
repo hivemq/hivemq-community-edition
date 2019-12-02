@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 public class SystemInformationImpl implements SystemInformation {
 
     private static final Logger log = LoggerFactory.getLogger(SystemInformationImpl.class);
+    public static final String DEVELOPMENT_VERSION = "Development Snapshot";
 
     private File homeFolder;
     private File configFolder;
@@ -100,7 +101,7 @@ public class SystemInformationImpl implements SystemInformation {
         hivemqVersion = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 
         if (hivemqVersion == null || hivemqVersion.length() < 1) {
-            hivemqVersion = "Development Snapshot";
+            hivemqVersion = DEVELOPMENT_VERSION;
         }
 
         log.info("HiveMQ version: {}", hivemqVersion);

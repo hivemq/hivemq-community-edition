@@ -39,27 +39,26 @@ import org.mockito.MockitoAnnotations;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Christoph Schäbel
+ * @author Florian Limpöck
+ * @since 4.2.0
  */
-
-@SuppressWarnings("NullabilityAnnotations")
-public class RetainedMessageXodusLocalPersistenceTest {
+public class RetainedMessageRocksDBLocalPersistenceTest {
 
     private static final int BUCKETSIZE = 4;
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private RetainedMessageXodusLocalPersistence persistence;
+    private RetainedMessageRocksDBLocalPersistence persistence;
 
     @Mock
     private LocalPersistenceFileUtil localPersistenceFileUtil;
 
     @Mock
     private PublishPayloadPersistence payloadPersistence;
+
 
     @Before
     public void setUp() throws Exception {
@@ -82,9 +81,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
         when(payloadPersistence.getPayloadOrNull(4)).thenReturn("message4".getBytes());
         when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
 
-        persistence = new RetainedMessageXodusLocalPersistence(localPersistenceFileUtil,
-                payloadPersistence, new EnvironmentUtil(),
-                new PersistenceStartup());
+        persistence = new RetainedMessageRocksDBLocalPersistence(localPersistenceFileUtil, payloadPersistence, new PersistenceStartup());
         persistence.start();
     }
 
@@ -175,7 +172,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
         verify(payloadPersistence).decrementReferenceCounter(0);
         verify(payloadPersistence).decrementReferenceCounter(1);
 
-        final Set<String> topics = persistence.topicTrees.get(0).get("#");
+        final Set<String> topics = persistence.topicTrees[0].get("#");
         assertTrue(topics.isEmpty());
     }
 
@@ -198,7 +195,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
         verify(payloadPersistence).decrementReferenceCounter(0);
         verify(payloadPersistence).decrementReferenceCounter(1);
 
-        final Set<String> topics = persistence.topicTrees.get(0).get("#");
+        final Set<String> topics = persistence.topicTrees[0].get("#");
         assertEquals(2, topics.size());
         assertTrue(topics.contains("topic/0"));
         assertTrue(topics.contains("topic/1"));

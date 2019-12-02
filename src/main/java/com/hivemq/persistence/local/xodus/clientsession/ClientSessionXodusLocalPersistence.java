@@ -77,7 +77,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private static final Logger log = LoggerFactory.getLogger(ClientSessionXodusLocalPersistence.class);
 
     private static final String PERSISTENCE_NAME = "client_session_store";
-    private static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_VERSION = "040000";
 
     private final @NotNull ClientSessionPersistenceSerializer serializer;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
@@ -96,7 +96,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final @NotNull EventLog eventLog,
             final @NotNull PersistenceStartup persistenceStartup) {
 
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get());
+        super(environmentUtil, localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
 
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;

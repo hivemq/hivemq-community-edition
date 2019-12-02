@@ -20,7 +20,6 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.persistence.LocalPersistence;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.RetainedMessage;
 
 import java.util.Set;
@@ -30,6 +29,8 @@ import java.util.Set;
  * @author Lukas Brandl
  */
 public interface RetainedMessageLocalPersistence extends LocalPersistence {
+
+    String PERSISTENCE_NAME = "retained_messages";
 
     /**
      * @return The amount of all retained messages stored in the persistence.
@@ -50,6 +51,14 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param bucketIndex The index of the bucket in which the retained messages are stored.
      */
     void remove(@NotNull String topic, int bucketIndex);
+
+    /**
+     * Get a retained message for a given topic from a persistence bucket.
+     *
+     * @param topic       the topic of the retained message.
+     * @return the {@link RetainedMessage} or <null> if no retained message found.
+     */
+    @Nullable RetainedMessage get(@NotNull String topic);
 
     /**
      * Get a retained message for a given topic from a persistence bucket.
@@ -82,5 +91,11 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param bucketIdx the index of the bucket.
      */
     void cleanUp(int bucketIdx);
+
+    void iterate(@NotNull ItemCallback callback);
+
+    interface ItemCallback {
+        void onItem(@NotNull String topic, @NotNull RetainedMessage message);
+    }
 
 }

@@ -32,15 +32,20 @@ import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.metrics.MetricRegistryLogger;
+import com.hivemq.migration.MigrationUnit;
+import com.hivemq.migration.Migrations;
+import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.statistics.UsageStatistics;
 import com.hivemq.util.TemporaryFileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -115,6 +120,10 @@ public class HiveMQServer {
         log.trace("Cleaning up temporary folders");
         TemporaryFileUtils.deleteTmpFolder(systemInformation.getDataFolder());
 
+        //must happen before persistence injector bootstrap as it creates the persistence folder.
+        log.trace("Checking for migrations");
+        final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
+
         log.trace("Initializing file persistences");
         final Injector persistenceInjector =
                 GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hiveMQId, configService);
@@ -124,6 +133,16 @@ public class HiveMQServer {
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;
         }
+
+        if (migrations.size() > 0) {
+            log.info("Persistence types has been changed, migrating persistent data.");
+            for (final MigrationUnit migrationUnit : migrations.keySet()) {
+                log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
+            }
+            Migrations.migrate(persistenceInjector, migrations);
+        }
+
+        Migrations.afterMigration(systemInformation);
 
         log.trace("Initializing Guice");
         final Injector injector =

@@ -114,6 +114,11 @@ public class PersistenceStartupTest {
         }
 
         @Override
+        public void startExternal() {
+            start();
+        }
+
+        @Override
         public void start() {
             try {
                 Thread.sleep(5000);

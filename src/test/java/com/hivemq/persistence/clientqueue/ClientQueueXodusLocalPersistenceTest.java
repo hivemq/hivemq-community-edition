@@ -82,7 +82,6 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ThreadPreConditions.disable();
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
@@ -102,11 +101,6 @@ public class ClientQueueXodusLocalPersistenceTest {
                 messageDroppedService);
 
         persistence.start();
-    }
-
-    @After
-    public void tearDown() {
-        ThreadPreConditions.enable();
     }
 
     @Test

@@ -16,29 +16,40 @@
 
 package com.hivemq.persistence.payload;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.migration.meta.PersistenceType;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+/**
+ * @author Florian Limpöck
+ */
 @LazySingleton
 public class PublishPayloadLocalPersistenceProvider implements Provider<PublishPayloadLocalPersistence> {
 
-    private static final Logger log = LoggerFactory.getLogger(PublishPayloadLocalPersistenceProvider.class);
+    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider;
+    private final @NotNull Provider<PublishPayloadXodusLocalPersistence> xodusProvider;
+    private final @NotNull PersistenceType persistenceType;
 
-    private final Provider<PublishPayloadXodusLocalPersistence> persistence;
 
     @Inject
-    public PublishPayloadLocalPersistenceProvider(final Provider<PublishPayloadXodusLocalPersistence> persistence) {
-        this.persistence = persistence;
+    public PublishPayloadLocalPersistenceProvider(final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider,
+                                                   final @NotNull Provider<PublishPayloadXodusLocalPersistence> xodusProvider) {
+        this.rocksDBProvider = rocksDBProvider;
+        this.xodusProvider = xodusProvider;
+        this.persistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
     }
 
+    @NotNull
     @Override
     public PublishPayloadLocalPersistence get() {
-        log.debug("Using disk-based Publish Payload Persistence");
-        return persistence.get();
+        if(persistenceType == PersistenceType.FILE_NATIVE) {
+            return rocksDBProvider.get();
+        } else {
+            return xodusProvider.get();
+        }
     }
-
 }

@@ -226,7 +226,8 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_deserializeClientId_not_null() {
-        serializer.deserializeKeyId(null);
+        final ByteIterable iterable = null;
+        serializer.deserializeKeyId(iterable);
     }
 
     @Test(expected = NullPointerException.class)
@@ -236,6 +237,7 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_deserializeValue_null() {
-        serializer.deserializeValue(null);
+        final ByteIterable iterable = null;
+        serializer.deserializeValue(iterable);
     }
 }
