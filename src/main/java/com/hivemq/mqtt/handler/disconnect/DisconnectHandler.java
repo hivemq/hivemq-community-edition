@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE;
 import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
 import static com.hivemq.util.ChannelAttributes.*;
 

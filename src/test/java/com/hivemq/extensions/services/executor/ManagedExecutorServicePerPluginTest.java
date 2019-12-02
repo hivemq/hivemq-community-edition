@@ -664,8 +664,8 @@ public class ManagedExecutorServicePerPluginTest {
         final CountDownLatch calledLatch = new CountDownLatch(1);
 
         final List<Callable<String>> callableList = Stream.generate((Supplier<Callable<String>>) () -> () -> {
-            //wait 80 milliseconds to guarantee no timeout
-            Thread.sleep(80);
+            //wait 20 milliseconds to guarantee no timeout
+            Thread.sleep(20);
             calledLatch.countDown();
             return "test";
         }).limit(5).collect(Collectors.toList());
