@@ -19,17 +19,17 @@ package com.hivemq.extension.sdk.api.packets.publish;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * A {@link PublishPacket} that can be modified for onward delivery.
- * Most changes to the parameters will only alter the message that is sent to the subscriber but not the way HiveMQ is
- * handling the original publish message.
- * For example a message will not be stored as a retained message if it wasn't sent as such.
- * For behavioral changes to the message handling use the {@link com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor}
+ * A {@link PublishPacket} that can be modified for onward delivery. Most changes to the parameters will only alter the
+ * message that is sent to the subscriber but not the way HiveMQ is handling the original publish message. For example a
+ * message will not be stored as a retained message if it wasn't sent as such. For behavioral changes to the message
+ * handling use the {@link PublishInboundInterceptor}.
  *
  * @author Lukas Brandl
  * @since 4.2.0
@@ -38,9 +38,8 @@ import java.util.List;
 public interface ModifiableOutboundPublish extends PublishPacket {
 
     /**
-     * Sets the retain flag.
-     * This will not affect whether or not the message is stored as a retained message, it merely alters the retained
-     * flag sent to the subscriber.
+     * Sets the retain flag. This will not affect whether or not the message is stored as a retained message, it merely
+     * alters the retained flag sent to the subscriber.
      *
      * @param retain The new retain flag for the publish.
      * @since 4.2.0
@@ -48,10 +47,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setRetain(boolean retain);
 
     /**
-     * Sets the topic.
-     * This will not change whether the publish topic matches the subscription for which it is sent or not, it merely
-     * alters
-     * the publish topic that is sent to the subscriber.
+     * Sets the topic. This will not change whether the publish topic matches the subscription for which it is sent or
+     * not, it merely alters the publish topic that is sent to the subscriber.
      *
      * @param topic The new topic for the publish.
      * @throws NullPointerException     If the topic is null.
@@ -63,8 +60,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setTopic(@NotNull String topic);
 
     /**
-     * Sets the payload format indicator.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Sets the payload format indicator. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this
+     * setting is ignored.
      *
      * @param payloadFormatIndicator The new payload format indicator for the publish.
      * @since 4.2.0
@@ -72,9 +69,9 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setPayloadFormatIndicator(@Nullable PayloadFormatIndicator payloadFormatIndicator);
 
     /**
-     * Sets the message expiry interval.
-     * The original expire interval for this message will still be used, only the value sent to the client is changed.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Sets the message expiry interval. The original expire interval for this message will still be used, only the
+     * value sent to the client is changed. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this
+     * setting is ignored.
      *
      * @param messageExpiryInterval The new message expiry interval for the publish.
      * @throws IllegalArgumentException If the message expiry interval is less than zero or more than the configured
@@ -84,8 +81,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setMessageExpiryInterval(long messageExpiryInterval);
 
     /**
-     * Sets the response topic.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Sets the response topic. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is
+     * ignored.
      *
      * @param responseTopic The new response topic for the publish.
      * @throws IllegalArgumentException If the response topic is not a valid UTF-8 string.
@@ -95,8 +92,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setResponseTopic(@Nullable String responseTopic);
 
     /**
-     * Sets the correlation data.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Sets the correlation data. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting
+     * is ignored.
      *
      * @param correlationData The new correlation data for the publish.
      * @since 4.2.0
@@ -104,8 +101,8 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setCorrelationData(@Nullable ByteBuffer correlationData);
 
     /**
-     * Sets the content type.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Sets the content type. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is
+     * ignored.
      *
      * @param contentType The new content type for the publish.
      * @throws IllegalArgumentException If the content type is not a valid UTF-8 string.
@@ -124,9 +121,9 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setPayload(@NotNull ByteBuffer payload);
 
     /**
-     * Set the subscription identifier.
-     * This will not affect the identifiers of the original subscription, it merely alters the outgoing publish.
-     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     * Set the subscription identifier. This will not affect the identifiers of the original subscription, it merely
+     * alters the outgoing publish. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting
+     * is ignored.
      *
      * @param subscriptionIdentifiers The new subscription identifiers for the publish.
      * @throws NullPointerException If the subscription identifiers list is null.

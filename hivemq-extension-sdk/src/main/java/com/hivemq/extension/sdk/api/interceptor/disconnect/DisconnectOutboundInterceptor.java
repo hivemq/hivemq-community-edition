@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.interceptor.disconnect;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -27,7 +28,9 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectO
  * <p>
  * If the same instance is shared between multiple clients it can be called in different Threads and must therefore be
  * thread-safe.
- * </p>
+ * <p>
+ * This interceptor is only called for MQTT 5 clients. With MQTT 3 it is not possible to sent a DISCONNECT from server
+ * to client.
  *
  * @author Robin Atherton
  */
@@ -36,7 +39,7 @@ public interface DisconnectOutboundInterceptor extends Interceptor {
 
     /**
      * When a {@link DisconnectOutboundInterceptor} is set through any extension, this method gets called for every
-     * outbound DISCONNECT packet from any MQTT client.
+     * outbound DISCONNECT packet from any MQTT 5 client.
      *
      * @param disconnectOutboundInput  The {@link DisconnectOutboundInput} parameter.
      * @param disconnectOutboundOutput The {@link DisconnectOutboundOutput} parameter.

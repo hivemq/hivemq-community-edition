@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -22,8 +23,8 @@ import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthOutput;
 /**
  * Interface for the simple authentication without AUTH packets. Only CONNECT and CONNACK packets are used here.
  * <p>
- * If an implementation stores state, an object of the implementation can not be shared by different clients.<br/>
- * If no state is stored, it has to be thread safe that it can be shared.
+ * If an implementation stores state, an object of the implementation can not be shared by different clients.<br/> If no
+ * state is stored, it has to be thread safe that it can be shared.
  * <p>
  *
  * @author Christoph Schäbel
@@ -33,7 +34,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthOutput;
 public interface SimpleAuthenticator extends Authenticator {
 
     /**
-     * This method is called for CONNECT packet, that the {@link SimpleAuthenticator} is delegated to authenticate.
+     * This method is called for CONNECT packets, that the {@link SimpleAuthenticator} is delegated to authenticate.
      *
      * @param simpleAuthInput  The {@link SimpleAuthInput}.
      * @param simpleAuthOutput The {@link SimpleAuthOutput}.

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.auth.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -27,8 +28,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public interface ModifiableClientSettings {
 
     /**
-     * Set the receive maximum of the client to the given value.
-     * The new value overwrites the receive maximum that the client provided via the CONNECT message.
+     * Set the receive maximum of the client to the given value. The new value overwrites the receive maximum that the
+     * client provided via the CONNECT message.
      *
      * @param receiveMaximum To be used for this client.
      * @throws IllegalArgumentException If the value is less than 1 or more than 65535.
@@ -40,7 +41,7 @@ public interface ModifiableClientSettings {
      * Configure the way the client is affected by the overload protection.
      *
      * @param level used for handling the overload protection for this client.
-     * @throws NullPointerException if the level is null
+     * @throws NullPointerException If the level is <code>null</code>.
      * @since 4.2.0
      */
     void setOverloadProtectionThrottlingLevel(@NotNull OverloadProtectionThrottlingLevel level);

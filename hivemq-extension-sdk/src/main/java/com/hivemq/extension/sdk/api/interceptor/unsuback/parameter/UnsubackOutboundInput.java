@@ -13,29 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.extension.sdk.api.async;
+
+package com.hivemq.extension.sdk.api.interceptor.unsuback.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-
-import java.time.Duration;
+import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackPacket;
+import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * Enables an output object to be processed in a non-blocking way.
+ * This is the input parameter of any {@link UnsubackOutboundInterceptor} providing UNSUBACK, connection and client
+ * based information.
  *
- * @author Yannick Weber
+ * @author Robin Atherton
  */
 @DoNotImplement
-public interface SimpleAsyncOutput<T> {
+public interface UnsubackOutboundInput extends ClientBasedInput {
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     * The unmodifiable UNSUBACK packet that was intercepted.
      *
-     * @param timeout Timeout that HiveMQ waits for the result of the async operation.
-     * @throws UnsupportedOperationException If async is called more than once.
-     * @since 4.0.0
+     * @return An unmodifiable {@link UnsubackPacket}.
      */
-    @NotNull Async<T> async(@NotNull Duration timeout);
+    @NotNull
+    @Immutable
+    UnsubackPacket getUnsubackPacket();
 }
