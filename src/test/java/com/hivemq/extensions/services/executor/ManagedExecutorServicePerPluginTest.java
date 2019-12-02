@@ -602,18 +602,22 @@ public class ManagedExecutorServicePerPluginTest {
     @Test
     public void test_invokeAll_callable_timeouts() throws InterruptedException {
 
-        final CountDownLatch invokeAllLatch = new CountDownLatch(5);
+        final CountDownLatch canceledAllLatch = new CountDownLatch(5);
         final CountDownLatch calledLatch = new CountDownLatch(5);
+
+        final AtomicBoolean wait = new AtomicBoolean(true);
 
         final List<Callable<String>> callableList = Stream.generate((Supplier<Callable<String>>) () -> () -> {
             calledLatch.countDown();
-            //wait 150 milliseconds to guarantee a timeout
-            Thread.sleep(150);
+            //force timeout
+            while(wait.get()){
+                Thread.sleep(25);
+            }
             return "test";
         }).limit(5).collect(Collectors.toList());
 
         final List<Future<String>> futures =
-                managedExecutorServicePerPlugin.invokeAll(callableList, 100, TimeUnit.MILLISECONDS);
+                managedExecutorServicePerPlugin.invokeAll(callableList, 50, TimeUnit.MILLISECONDS);
 
         for (final Future<String> future : futures) {
 
@@ -626,18 +630,15 @@ public class ManagedExecutorServicePerPluginTest {
             });
 
             stringCompletableFuture.whenComplete((s, throwable) -> {
-                if (s.equals("test")) {
-                    invokeAllLatch.countDown();
+                if(throwable.getCause() instanceof CancellationException){
+                    canceledAllLatch.countDown();
                 }
             });
         }
 
-        assertFalse(invokeAllLatch.await(400, TimeUnit.MILLISECONDS));
-        //every task times out
-        assertEquals(5, invokeAllLatch.getCount());
+        assertTrue(canceledAllLatch.await(500, TimeUnit.MILLISECONDS));
 
-        //we have 4 threads executing tasks the one call will not be called.
-        assertEquals(1, calledLatch.getCount());
+        wait.set(false);
 
     }
 
@@ -664,8 +665,8 @@ public class ManagedExecutorServicePerPluginTest {
         final CountDownLatch calledLatch = new CountDownLatch(1);
 
         final List<Callable<String>> callableList = Stream.generate((Supplier<Callable<String>>) () -> () -> {
-            //wait 80 milliseconds to guarantee no timeout
-            Thread.sleep(80);
+            //wait 20 milliseconds to guarantee no timeout
+            Thread.sleep(20);
             calledLatch.countDown();
             return "test";
         }).limit(5).collect(Collectors.toList());

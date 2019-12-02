@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE;
+import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
 import static com.hivemq.util.ChannelAttributes.*;
 
 /**
@@ -81,7 +81,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             }
         }
         log.trace("The client [{}] sent a disconnect message. ", clientId);
-        if (msg.getReasonCode() == DISCONNECT_WITH_WILL_MESSAGE) {
+        if (msg.getReasonCode() != NORMAL_DISCONNECTION) {
             ctx.channel().attr(SEND_WILL).set(true);
         } else {
             ctx.channel().attr(SEND_WILL).set(false);
