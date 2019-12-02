@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.extension.sdk.api.parameter;
 
+package com.hivemq.extension.sdk.api.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
@@ -35,11 +35,10 @@ import java.util.Optional;
 public interface ExtensionStartInput {
 
     /**
-     * @return A {@link ExtensionInformation} containing detailed information about this extension.
+     * @return An {@link ExtensionInformation} containing detailed information about this extension.
      * @since 4.0.0
      */
     @NotNull ExtensionInformation getExtensionInformation();
-
 
     /**
      * Get information about the HiveMQ instance the extension is running in.
@@ -50,17 +49,17 @@ public interface ExtensionStartInput {
     @NotNull ServerInformation getServerInformation();
 
     /**
-     * @return A {@link Map} of all currently enabled extensions. <br/>
-     * The key is the ID of the extension. <br/>
-     * The value is a {@link ExtensionInformation} containing detailed information about each extension.
+     * @return A {@link Map} of all currently enabled extensions. <br/> The key is the ID of the extension. <br/> The
+     *         value is a {@link ExtensionInformation} containing detailed information about each extension.
      * @since 4.0.0
      */
     @NotNull Map<String, @NotNull ExtensionInformation> getEnabledExtensions();
 
     /**
-     * @return The previously enabled version of this extension or Optional.empty if this extension was not enabled before.
-     * An extension is identified by its ID. A previous version is only returned if this extension has been disabled at
-     * runtime. Information about previous extension versions is not retained across a server restart.
+     * @return The previously enabled version of this extension or Optional.empty if this extension was not enabled
+     *         before. An extension is identified by its ID. A previous version is only returned if this extension has
+     *         been disabled at runtime. Information about previous extension versions is not retained across a server
+     *         restart.
      * @since 4.0.0
      */
     @NotNull Optional<String> getPreviousVersion();

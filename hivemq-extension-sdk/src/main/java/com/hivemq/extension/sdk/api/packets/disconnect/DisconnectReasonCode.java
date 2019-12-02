@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.packets.disconnect;
 
 /**
@@ -26,161 +27,221 @@ package com.hivemq.extension.sdk.api.packets.disconnect;
 public enum DisconnectReasonCode {
 
     /**
+     * This is a success code.
+     *
      * @since 4.0.0
      */
     NORMAL_DISCONNECTION,
     /**
-     * Must not be used for outbound disconnect packets from the server to clients.
+     * Can only be used for the {@link ModifiableInboundDisconnectPacket}.
+     * <p>
+     * This is a success code.
      *
      * @since 4.0.0
      */
     DISCONNECT_WITH_WILL_MESSAGE,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     UNSPECIFIED_ERROR,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     MALFORMED_PACKET,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     PROTOCOL_ERROR,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     IMPLEMENTATION_SPECIFIC_ERROR,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     NOT_AUTHORIZED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_BUSY,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_SHUTTING_DOWN,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     BAD_AUTHENTICATION_METHOD,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     KEEP_ALIVE_TIMEOUT,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SESSION_TAKEN_OVER,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      * @deprecated Must not be used for disconnect packets.
      */
     @Deprecated
     CLIENT_IDENTIFIER_NOT_VALID,
     /**
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     TOPIC_FILTER_INVALID,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     TOPIC_NAME_INVALID,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     RECEIVE_MAXIMUM_EXCEEDED,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     TOPIC_ALIAS_INVALID,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     PACKET_TOO_LARGE,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     MESSAGE_RATE_TOO_HIGH,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     QUOTA_EXCEEDED,
     /**
+     * This is an unsuccessful code.
+     *
      * @since 4.0.0
      */
     ADMINISTRATIVE_ACTION,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     PAYLOAD_FORMAT_INVALID,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     RETAIN_NOT_SUPPORTED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     QOS_NOT_SUPPORTED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     USE_ANOTHER_SERVER,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_MOVED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SHARED_SUBSCRIPTION_NOT_SUPPORTED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     CONNECTION_RATE_EXCEEDED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     MAXIMUM_CONNECT_TIME,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
     /**
-     * Must not be used for inbound disconnect packets from a client to the server.
+     * Can only be used for the {@link ModifiableOutboundDisconnectPacket}.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */

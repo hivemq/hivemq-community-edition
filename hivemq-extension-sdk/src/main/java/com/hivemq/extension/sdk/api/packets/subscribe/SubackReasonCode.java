@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.packets.subscribe;
 
 /**
@@ -32,73 +33,91 @@ package com.hivemq.extension.sdk.api.packets.subscribe;
 public enum SubackReasonCode {
 
     /**
-     * This is not an error code.
+     * This is a success code.
      *
      * @since 4.0.0
      */
     GRANTED_QOS_0,
     /**
-     * This is not an error code.
+     * This is a success code.
      *
      * @since 4.0.0
      */
     GRANTED_QOS_1,
     /**
-     * This is not an error code.@
+     * This is a success code.
      *
      * @since 4.0.0
      */
     GRANTED_QOS_2,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     UNSPECIFIED_ERROR,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     IMPLEMENTATION_SPECIFIC_ERROR,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     NOT_AUTHORIZED,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     TOPIC_FILTER_INVALID,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     PACKET_IDENTIFIER_IN_USE,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     QUOTA_EXCEEDED,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SHARED_SUBSCRIPTION_NOT_SUPPORTED,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
     /**
      * For an MQTT 3 SUBACK this translates to the return code FAILURE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.interceptor.disconnect.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
@@ -41,8 +42,9 @@ public interface DisconnectInboundOutput extends SimpleAsyncOutput<DisconnectInb
     @NotNull ModifiableInboundDisconnectPacket getDisconnectPacket();
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * In that case an unmodified DISCONNECT is forwarded to the server and all changes made by this interceptor are discarded.
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. In that
+     * case an unmodified DISCONNECT is forwarded to the next interceptor or server, all changes made by this
+     * interceptor are not passed on.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

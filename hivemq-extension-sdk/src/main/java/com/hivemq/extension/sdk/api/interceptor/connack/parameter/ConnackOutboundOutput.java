@@ -27,8 +27,8 @@ import com.hivemq.extension.sdk.api.packets.connack.ModifiableConnackPacket;
 import java.time.Duration;
 
 /**
- * This is the output parameter of any {@link ConnackOutboundInterceptor}
- * providing methods to define the outcome of CONNACK interception.
+ * This is the output parameter of any {@link ConnackOutboundInterceptor} providing methods to define the outcome of
+ * CONNACK interception.
  * <p>
  * It can be used to Modify an outbound CONNACK packet.
  *
@@ -48,12 +48,12 @@ public interface ConnackOutboundOutput extends AsyncOutput<ConnackOutboundOutput
     ModifiableConnackPacket getConnackPacket();
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled either as failed or
+     * successful, depending on the specified fallback.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      * <p>
-     * {@link TimeoutFallback#FAILURE} results in closed connection without a CONNACK sent to the client.
+     * {@link TimeoutFallback#FAILURE} results in closing the connection without sending a CONNACK to the client.
      * <p>
      * {@link TimeoutFallback#SUCCESS} will proceed the CONNACK.
      *
@@ -66,8 +66,8 @@ public interface ConnackOutboundOutput extends AsyncOutput<ConnackOutboundOutput
     @NotNull Async<ConnackOutboundOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback fallback);
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed.
-     * This means that the outcome results in closed connection without a CONNACK sent to the client.
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. This
+     * means that the outcome results in closed connection without a CONNACK sent to the client.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *

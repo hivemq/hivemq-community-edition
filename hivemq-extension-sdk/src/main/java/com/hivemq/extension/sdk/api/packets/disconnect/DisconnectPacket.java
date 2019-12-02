@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.packets.disconnect;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 import java.util.Optional;
@@ -47,7 +50,8 @@ public interface DisconnectPacket {
     /**
      * The optional reason string of the DISCONNECT packet.
      * <p>
-     * It is absent for MQTT 3.x clients (if not modified by an interceptor).
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty (if not modified by a
+     * previous {@link DisconnectInboundInterceptor} or {@link DisconnectOutboundInterceptor}).
      *
      * @return A string containing the disconnect reason if present.
      */
@@ -59,7 +63,8 @@ public interface DisconnectPacket {
      * <p>
      * If absent, the session expiry interval of the CONNECT/CONNACK handshake will be used.
      * <p>
-     * It is absent for MQTT 3.x clients (if not modified by an interceptor).
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty (if not modified by a
+     * previous {@link DisconnectInboundInterceptor} or {@link DisconnectOutboundInterceptor}).
      *
      * @return A long representing the session expiry interval if present.
      */
@@ -70,7 +75,8 @@ public interface DisconnectPacket {
      * <p>
      * It is only present for outbound DISCONNECT packets from the server to a client.
      * <p>
-     * It is absent for MQTT 3.x clients (if not modified by an interceptor).
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty (if not modified by a
+     * previous {@link DisconnectInboundInterceptor} or {@link DisconnectOutboundInterceptor}).
      *
      * @return A string representing the server reference if present.
      */
@@ -79,7 +85,8 @@ public interface DisconnectPacket {
     /**
      * The user properties from the DISCONNECT packet.
      * <p>
-     * They are empty for MQTT 3.x clients (if not modified by an interceptor).
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty (if not modified by a
+     * previous {@link DisconnectInboundInterceptor} or {@link DisconnectOutboundInterceptor}).
      *
      * @return The {@link UserProperties} of the DISCONNECT packet.
      */

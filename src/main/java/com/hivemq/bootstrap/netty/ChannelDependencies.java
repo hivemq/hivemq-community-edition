@@ -162,10 +162,10 @@ public class ChannelDependencies {
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
 
     @NotNull
-    private final PubackInterceptorHandler pubackInterceptorHandler;
+    private final DisconnectInterceptorHandler disconnectInterceptorHandler;
 
     @NotNull
-    private final DisconnectInterceptorHandler disconnectInterceptorHandler;
+    private final PubackInterceptorHandler pubackInterceptorHandler;
 
     @NotNull
     private final PubrecInterceptorHandler pubrecInterceptorHandler;
@@ -175,6 +175,9 @@ public class ChannelDependencies {
 
     @NotNull
     private final PubcompInterceptorHandler pubcompInterceptorhandler;
+
+    @NotNull
+    private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -217,8 +220,8 @@ public class ChannelDependencies {
             @NotNull final PubackInterceptorHandler pubackInterceptorHandler,
             @NotNull final PubrecInterceptorHandler pubrecInterceptorHandler,
             @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler,
-            @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler) {
-
+            @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler,
+            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -255,11 +258,12 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
-        this.pubackInterceptorHandler = pubackInterceptorHandler;
         this.disconnectInterceptorHandler = disconnectInterceptorHandler;
+        this.pubackInterceptorHandler = pubackInterceptorHandler;
         this.pubrecInterceptorHandler = pubrecInterceptorHandler;
         this.pubrelInterceptorHandler = pubrelInterceptorHandler;
         this.pubcompInterceptorhandler = pubcompInterceptorHandler;
+        this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
     }
 
     @NotNull
@@ -460,5 +464,10 @@ public class ChannelDependencies {
     @NotNull
     public PubcompInterceptorHandler getPubcompInterceptorHandler() {
         return pubcompInterceptorhandler;
+    }
+
+    @NotNull
+    public UnsubackOutboundInterceptorHandler getUnsubackOutboundInterceptorHandler() {
+        return unsubackOutboundInterceptorHandler;
     }
 }
