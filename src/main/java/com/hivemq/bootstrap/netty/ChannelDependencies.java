@@ -36,7 +36,7 @@ import com.hivemq.mqtt.handler.connect.StopReadingAfterConnectHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
-import com.hivemq.mqtt.handler.publish.PublishMessageExpiryHandler;
+import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
 import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
@@ -144,7 +144,7 @@ public class ChannelDependencies {
     private final AuthInProgressMessageHandler authInProgressMessageHandler;
 
     @NotNull
-    private final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider;
+    private final Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
 
     @NotNull
     private final Provider<IncomingPublishHandler> incomingPublishHandlerProvider;
@@ -198,7 +198,7 @@ public class ChannelDependencies {
             @NotNull final Provider<ClientLifecycleEventHandler> clientLifecycleEventHandlerProvider,
             @NotNull final Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
-            @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
+            @NotNull final Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
@@ -354,7 +354,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PublishMessageExpiryHandler getPublishMessageExpiryHandler() {
+    public MessageExpiryHandler getPublishMessageExpiryHandler() {
         return publishMessageExpiryHandlerProvider.get();
     }
 

@@ -699,16 +699,25 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     final int packetId = message.getPacketIdentifier();
                     if (packetId == pubrel.getPacketIdentifier()) {
                         packetIdFound[0] = true;
-                        final ByteIterable serializedPubRel =
-                                serializer.serializePubRel(pubrel, serializer.deserializeRetained(cursor.getValue()));
+                        final boolean retained = serializer.deserializeRetained(cursor.getValue());
                         if (message instanceof PUBLISH) {
                             final PUBLISH publish = (PUBLISH) message;
                             payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                            pubrel.setExpiryInterval(publish.getMessageExpiryInterval());
+                            pubrel.setPublishTimestamp(publish.getTimestamp());
+                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
                             bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                             replacedId[0] = publish.getUniqueId();
                             return false;
+                        } else if (message instanceof PUBREL) {
+                            pubrel.setExpiryInterval(((PUBREL) message).getExpiryInterval());
+                            pubrel.setPublishTimestamp(((PUBREL) message).getPublishTimestamp());
+                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
+                            bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
+                        } else {
+                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
+                            bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                         }
-                        bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                         return false;
                     }
                     return packetId != ClientQueuePersistenceSerializer.NO_PACKET_ID;
@@ -989,18 +998,36 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                 iterateQueue(cursor, key, false, () -> {
                     final ByteIterable serializedValue = cursor.getValue();
                     final MessageWithID message = serializer.deserializeValue(serializedValue);
-                    if (!(message instanceof PUBLISH)) {
-                        return true;
-                    }
-                    final PUBLISH publish = (PUBLISH) message;
-                    if (PublishUtil.isExpired(publish) &&
-                            !(publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0)) {
-                        payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                    if (message instanceof PUBREL) {
+                        final PUBREL pubrel = (PUBREL) message;
+                        if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS) {
+                            return true;
+                        }
+                        if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
+                            return true;
+                        }
+                        if (!PublishUtil.isExpired(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
+                            return true;
+                        }
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                         if (serializer.deserializeRetained(serializedValue)) {
                             getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
                         }
                         cursor.deleteCurrent();
+
+                    } else if (message instanceof PUBLISH) {
+                        final PUBLISH publish = (PUBLISH) message;
+                        final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
+                        final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
+                        final boolean drop = PublishUtil.isExpired(publish) && (!isInflight || expireInflight);
+                        if (drop) {
+                            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                            getOrPutQueueSize(key, bucketIndex).decrementAndGet();
+                            if (serializer.deserializeRetained(serializedValue)) {
+                                getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
+                            }
+                            cursor.deleteCurrent();
+                        }
                     }
                     return true;
                 });

@@ -92,7 +92,7 @@ public class ChannelHandlerNames {
     public static final String MQTT_WEBSOCKET_ENCODER = "mqtt_websocket_encoder";
     public static final String DROP_OUTGOING_PUBLISHES_HANDLER = "drop_outgoing_publishes_handler";
     public static final String CHANNEL_INACTIVE_HANDLER = "channel_inactive_handler";
-    public static final String PUBLISH_MESSAGE_EXPIRY_HANDLER = "publish_message_expiry_handler";
+    public static final String MESSAGE_EXPIRY_HANDLER = "publish_message_expiry_handler";
 
     /* *************
      *     Both    *

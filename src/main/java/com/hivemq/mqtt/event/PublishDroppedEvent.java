@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.codec.encoder.mqtt5;
+package com.hivemq.mqtt.event;
 
 import com.hivemq.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.PUBLISH;
