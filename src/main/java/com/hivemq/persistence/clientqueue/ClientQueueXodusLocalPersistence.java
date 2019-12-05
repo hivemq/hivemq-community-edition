@@ -705,19 +705,13 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                             payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
                             pubrel.setExpiryInterval(publish.getMessageExpiryInterval());
                             pubrel.setPublishTimestamp(publish.getTimestamp());
-                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
-                            bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                             replacedId[0] = publish.getUniqueId();
-                            return false;
                         } else if (message instanceof PUBREL) {
                             pubrel.setExpiryInterval(((PUBREL) message).getExpiryInterval());
                             pubrel.setPublishTimestamp(((PUBREL) message).getPublishTimestamp());
-                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
-                            bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
-                        } else {
-                            final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
-                            bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                         }
+                        final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, retained);
+                        bucket.getStore().put(txn, cursor.getKey(), serializedPubRel);
                         return false;
                     }
                     return packetId != ClientQueuePersistenceSerializer.NO_PACKET_ID;
