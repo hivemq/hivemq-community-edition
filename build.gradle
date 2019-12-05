@@ -1,6 +1,6 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
-    id 'com.github.hierynomus.license' version '0.15.0' apply false
+    id 'com.github.hierynomus.license' version '0.14.0' apply false
     id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.owasp.dependencycheck' version '5.2.0' apply false
     id 'com.github.spotbugs' version '1.6.9' apply false
@@ -479,7 +479,9 @@ downloadLicenses {
 allprojects {
     license {
         header file("${rootDir}/HEADER")
-        exclude '*'
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
     }
 }
 

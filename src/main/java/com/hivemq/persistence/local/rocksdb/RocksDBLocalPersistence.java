@@ -82,7 +82,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             return;
         }
         RocksDB.loadLibrary();
-        if(enabled) {
+        if (enabled) {
             persistenceStartup.submitPersistenceStart(this);
         } else {
             startExternal();
@@ -107,7 +107,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             }
 
         } catch (final RocksDBException e) {
-            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error(
+                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
             logger.debug("Original Exception:", e);
             throw new UnrecoverableException();
         }
@@ -137,7 +138,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
                         buckets[finalI] = rocksDB;
                         counter.countDown();
                     } catch (final Exception e) {
-                        e.printStackTrace();
+                        logger.error(
+                                "An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+                                name);
+                        logger.debug("Original Exception:", e);
+                        throw new UnrecoverableException();
                     }
                 });
             }
@@ -145,7 +150,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             counter.await();
 
         } catch (final InterruptedException e) {
-            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error(
+                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
             logger.debug("Original Exception:", e);
             throw new UnrecoverableException();
         }
