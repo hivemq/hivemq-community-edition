@@ -479,7 +479,9 @@ downloadLicenses {
 allprojects {
     license {
         header file("${rootDir}/HEADER")
-        exclude '*'
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
     }
 }
 
