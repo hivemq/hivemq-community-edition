@@ -20,6 +20,8 @@ import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
+import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -151,6 +153,42 @@ public class MqttConnacker {
 
         connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
         connackSendUtil.connackMqtt3Error(channel, connackWithReasonCode, mqtt3ReasonCode, null);
+    }
+
+
+    /**
+     * Send a connack with optional reason code and reason string.
+     * <p>
+     * log a message to console, file and event log.
+     * <p>
+     * close the channel.
+     *
+     * @param channel                the Channel of the mqtt client
+     * @param logMessage             the message to log
+     * @param eventLogMessage        the event log message
+     * @param disconnectedReasonCode the disconnectReasonCode for failed authentication
+     * @param reasonString           the reason string
+     */
+    public void connackError(@NotNull final Channel channel,
+                             @Nullable final String logMessage,
+                             @Nullable final String eventLogMessage,
+                             @Nullable DisconnectedReasonCode disconnectedReasonCode,
+                             @Nullable final String reasonString) {
+
+        Preconditions.checkNotNull(channel, "Channel must never be null");
+
+        if (disconnectedReasonCode == null) {
+            disconnectedReasonCode = DisconnectedReasonCode.UNSPECIFIED_ERROR;
+        }
+
+        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
+        connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
+        if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
+            final Mqtt3ConnAckReturnCode mqtt3ReasonCode = ReasonCodeUtil.toMqtt3(ReasonCodeUtil.toConnackReasonCode(disconnectedReasonCode));
+            connackSendUtil.connackMqtt3Error(channel, connackWithReasonCode, mqtt3ReasonCode, null);
+        } else {
+            connackSendUtil.connackMqtt5Error(channel, connackWithReasonCode, connackWithReasonString, ReasonCodeUtil.toMqtt5ConnAckReasonCode(disconnectedReasonCode), reasonString, null);
+        }
     }
 
 }

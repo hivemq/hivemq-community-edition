@@ -17,7 +17,7 @@
 package com.hivemq.extensions.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -26,9 +26,7 @@ import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,19 +35,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-
-import static com.hivemq.extensions.services.auth.ConnectAuthTaskOutput.AuthenticationState.UNDECIDED;
 
 /**
  * @author Georg Held
+ * @author Florian Limpöck
  */
-public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTaskOutput>
-        implements Supplier<ConnectAuthTaskOutput> {
+public class ConnectSimpleAuthTaskContext extends PluginInOutTaskContext<ConnectSimpleAuthTaskOutput>
+        implements Supplier<ConnectSimpleAuthTaskOutput> {
 
-    private static final Logger log = LoggerFactory.getLogger(ConnectAuthTaskContext.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectSimpleAuthTaskContext.class);
 
     @NotNull
     private final ConnectHandler connectHandler;
@@ -61,15 +56,12 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
     private final CONNECT connect;
 
     private final int authenticatorsCount;
-
     @NotNull
-    private final AtomicInteger position;
+    private final AuthenticationContext authenticationContext;
     @NotNull
-    private ConnectAuthTaskOutput connectAuthTaskOutput;
+    private ConnectSimpleAuthTaskOutput connectSimpleAuthTaskOutput;
 
-    private final AtomicBoolean authTimedOut = new AtomicBoolean(false);
-
-    public ConnectAuthTaskContext(
+    public ConnectSimpleAuthTaskContext(
             @NotNull final String identifier,
             @NotNull final ConnectHandler connectHandler,
             @NotNull final MqttConnacker mqttConnacker,
@@ -78,38 +70,35 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
             @NotNull final PluginOutPutAsyncer asyncer,
             final int authenticatorsCount,
             final boolean validateUTF8,
-            @NotNull final ModifiableClientSettingsImpl clientSettings) {
+            @NotNull final ModifiableClientSettingsImpl clientSettings,
+            @NotNull final ModifiableDefaultPermissions permissions,
+            @NotNull final AuthenticationContext authenticationContext) {
 
-        super(SimpleAuthTask.class, identifier);
+        super(ConnectSimpleAuthTask.class, identifier);
         this.connectHandler = connectHandler;
         this.mqttConnacker = mqttConnacker;
         this.ctx = ctx;
         this.connect = connect;
         this.authenticatorsCount = authenticatorsCount;
-        this.position = new AtomicInteger(0);
-        this.connectAuthTaskOutput = new ConnectAuthTaskOutput(asyncer, validateUTF8, clientSettings);
+        this.authenticationContext = authenticationContext;
+        this.connectSimpleAuthTaskOutput = new ConnectSimpleAuthTaskOutput(asyncer, clientSettings, permissions, authenticationContext, validateUTF8);
     }
 
     @Override
-    public void pluginPost(@NotNull final ConnectAuthTaskOutput pluginOutput) {
+    public void pluginPost(@NotNull final ConnectSimpleAuthTaskOutput pluginOutput) {
 
-        if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
-                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-            authTimedOut.set(true);
-            pluginOutput.failByTimeout();
-        }
+        AuthContextUtil.checkTimeout(pluginOutput);
+        AuthContextUtil.checkUndecided(pluginOutput);
 
-        if (pluginOutput.getAuthenticationState() == UNDECIDED && connectAuthTaskOutput.isAuthenticatorPresent()) {
-            pluginOutput.failAuthentication();
-        }
-
-        if (position.incrementAndGet() != authenticatorsCount) {
-            this.connectAuthTaskOutput = new ConnectAuthTaskOutput(pluginOutput);
+        if (this.authenticationContext.getIndex().incrementAndGet() != authenticatorsCount) {
+            //CONTINUE
+            this.connectSimpleAuthTaskOutput = new ConnectSimpleAuthTaskOutput(pluginOutput);
             return;
         }
 
+        //DONE
         final InternalUserProperties changedUserProperties = pluginOutput.getChangedUserProperties();
-        if (changedUserProperties != null && !authTimedOut.get()) {
+        if (changedUserProperties != null) {
             ctx.channel()
                     .attr(ChannelAttributes.AUTH_USER_PROPERTIES)
                     .set(changedUserProperties.consolidate().toMqtt5UserProperties());
@@ -120,55 +109,30 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
             case SUCCESS:
                 succeed(pluginOutput);
                 break;
-
             case FAILED:
+            case CONTINUE:
+            case NEXT_EXTENSION_OR_DEFAULT:
                 fail(pluginOutput);
                 break;
-
-            case CONTINUE:
-                continuing(pluginOutput);
-                break;
             case UNDECIDED:
-                if (!connectAuthTaskOutput.isAuthenticatorPresent()) {
+                //may happen if all providers return null.
+                if (!connectSimpleAuthTaskOutput.isAuthenticatorPresent()) {
                     ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect, pluginOutput.getClientSettings()));
-                } else {
-                    //should never happen
-                    throw new IllegalStateException("Unsupported authentication state");
                 }
         }
 
     }
 
-    private void continuing(@NotNull final ConnectAuthTaskOutput pluginOutput) {
-        if (ctx.channel().hasAttr(ChannelAttributes.AUTH_METHOD)) {
-            // on to enhanced auth
-            try {
-                ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectAuthTaskOutput.getDefaultPermissions());
-                ctx.executor().execute(() -> connectHandler.connectSuccessfulUnauthenticated(ctx, connect, pluginOutput.getClientSettings()));
-            } catch (final RejectedExecutionException ex) {
-                if (!ctx.executor().isShutdown()) {
-                    log.error("Execution of successful unauthenticated connect was rejected for client with IP {}.",
-                            ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), ex);
-                }
-            }
-        } else {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, pluginOutput.getReasonString(), pluginOutput.getChangedUserProperties());
-            mqttConnacker.connackError(ctx.channel(), "Client with ip {} could not be authenticated",
-                    "Failed Authentication", Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
-                    Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, pluginOutput.getReasonString(), event);
-        }
-    }
-
-    private void fail(@NotNull final ConnectAuthTaskOutput pluginOutput) {
+    private void fail(@NotNull final ConnectSimpleAuthTaskOutput pluginOutput) {
         final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.valueOf(Objects.requireNonNull(pluginOutput.getConnackReasonCode()).name()), pluginOutput.getReasonString(), pluginOutput.getChangedUserProperties());
         mqttConnacker.connackError(ctx.channel(), "Client with ip {} could not be authenticated",
                 "Failed Authentication", ReasonCodeUtil.toMqtt5(pluginOutput.getConnackReasonCode()),
                 ReasonCodeUtil.toMqtt3(pluginOutput.getConnackReasonCode()), pluginOutput.getReasonString(), event);
     }
 
-    private void succeed(@NotNull final ConnectAuthTaskOutput pluginOutput) {
+    private void succeed(@NotNull final ConnectSimpleAuthTaskOutput pluginOutput) {
         try {
-            ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectAuthTaskOutput.getDefaultPermissions());
+            ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectSimpleAuthTaskOutput.getDefaultPermissions());
             ctx.executor().execute(() -> connectHandler.connectSuccessfulAuthenticated(ctx, connect, pluginOutput.getClientSettings()));
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
@@ -179,12 +143,12 @@ public class ConnectAuthTaskContext extends PluginInOutTaskContext<ConnectAuthTa
     }
 
     public void increment() {
-        position.incrementAndGet();
+        authenticationContext.getIndex().incrementAndGet();
     }
 
     @NotNull
     @Override
-    public ConnectAuthTaskOutput get() {
-        return this.connectAuthTaskOutput;
+    public ConnectSimpleAuthTaskOutput get() {
+        return this.connectSimpleAuthTaskOutput;
     }
 }

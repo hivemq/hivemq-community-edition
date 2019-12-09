@@ -24,11 +24,14 @@ import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.handler.PluginAuthenticatorService;
+import com.hivemq.persistence.ChannelPersistence;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -46,14 +49,26 @@ public class AuthenticatorsImpl implements Authenticators {
     @NotNull
     @GuardedBy("authenticatorsLock")
     private final TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
+    @NotNull
+    private final PluginAuthenticatorService pluginAuthenticatorService;
+    private final ChannelPersistence channelPersistence;
 
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
 
+    private final @NotNull AtomicInteger enhancedAuthenticatorCount;
+    private final @NotNull AtomicInteger simpleAuthenticatorCount;
+
     @Inject
-    public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions) {
+    public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions,
+                              final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
+                              final @NotNull ChannelPersistence channelPersistence) {
         this.hiveMQExtensions = hiveMQExtensions;
         this.authenticatorPluginMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.pluginAuthenticatorService = pluginAuthenticatorService;
+        this.channelPersistence = channelPersistence;
+        this.enhancedAuthenticatorCount = new AtomicInteger();
+        this.simpleAuthenticatorCount = new AtomicInteger();
     }
 
     @Override
@@ -82,6 +97,11 @@ public class AuthenticatorsImpl implements Authenticators {
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
             if (plugin != null) {
+                if(provider.isEnhanced()){
+                    enhancedAuthenticatorCount.incrementAndGet();
+                } else {
+                    simpleAuthenticatorCount.incrementAndGet();
+                }
                 authenticatorPluginMap.put(plugin.getId(), provider);
             }
 
@@ -99,5 +119,26 @@ public class AuthenticatorsImpl implements Authenticators {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean isEnhancedAvailable() {
+        final Lock lock = authenticatorsLock.readLock();
+        try {
+            lock.lock();
+            return enhancedAuthenticatorCount.get() > 0;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public int getEnhancedAuthenticatorCount(){
+        return enhancedAuthenticatorCount.get();
+    }
+
+    @Override
+    public int getSimpleAuthenticatorCount(){
+        return simpleAuthenticatorCount.get();
     }
 }

@@ -19,25 +19,24 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.util.concurrent.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
+import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
-import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
 import com.hivemq.extensions.events.OnAuthSuccessEvent;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
-import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.PluginTaskExecutorService;
+import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import com.hivemq.extensions.services.auth.*;
+import com.hivemq.extensions.services.auth.Authenticators;
+import com.hivemq.extensions.services.auth.Authorizers;
+import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.MessageHandler;
@@ -69,7 +68,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.util.Map;
+import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -91,8 +90,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
     private static final int MAX_TAKEOVER_RETRIES = 100;
-    private static final String CONNACK_NO_AUTHENTICATION_LOG_STATEMENT = "MQTT CONNECT packet for client with IP {} " +
-            "provided authentication information, but no authentication was registered with HiveMQ. Disconnecting client.";
 
     private final @NotNull DisconnectClientOnConnectMessageHandler onSecondConnectHandler;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
@@ -105,13 +102,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-    private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
-    private final @NotNull ChannelDependencies channelDependencies;
-    private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull ConnackSentListener connackSentListener = new ConnackSentListener();
     private final @NotNull Authenticators authenticators;
     private final @NotNull Authorizers authorizers;
-    private final @NotNull AuthenticatorProviderInputFactory authenticatorProviderInputFactory;
+    private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
 
     private int maxClientIdLength;
@@ -136,12 +130,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull MqttConnacker mqttConnacker,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
             final @NotNull Authenticators authenticators,
-            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-            final @NotNull ChannelDependencies channelDependencies,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull AuthenticatorProviderInputFactory authenticatorProviderInputFactory,
             final @NotNull PublishPollService publishPollService,
             final @NotNull SharedSubscriptionService sharedSubscriptionService,
+            final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
             final @NotNull Authorizers authorizers,
             final @NotNull PluginAuthorizerService pluginAuthorizerService) {
 
@@ -157,10 +148,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.publishPollService = publishPollService;
         this.sharedSubscriptionService = sharedSubscriptionService;
         this.authenticators = authenticators;
-        this.pluginTaskExecutorService = pluginTaskExecutorService;
-        this.channelDependencies = channelDependencies;
-        this.asyncer = asyncer;
-        this.authenticatorProviderInputFactory = authenticatorProviderInputFactory;
+        this.pluginAuthenticatorService = pluginAuthenticatorService;
         this.authorizers = authorizers;
         this.pluginAuthorizerService = pluginAuthorizerService;
     }
@@ -220,51 +208,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addOrderedTopicHandler(ctx, connect);
 
-        if (authenticators.areAuthenticatorsAvailable() || AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
-            authenticate(ctx, connect);
+        if (authenticators.areAuthenticatorsAvailable() || AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
+            pluginAuthenticatorService.authenticateConnect(this, ctx, connect, createClientSettings(connect));
             return;
         }
 
         connectSuccessfulUnauthenticated(ctx, connect, null);
-    }
-
-    private void authenticate(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT connect) {
-        final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap = authenticators.getAuthenticatorProviderMap();
-        if (authenticatorProviderMap.isEmpty() && AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", connect.getUserProperties().getPluginUserProperties());
-            mqttConnacker.connackError(
-                    ctx.channel(), CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
-                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
-                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR, event);
-            return;
-        }
-
-        if (authenticatorProviderMap.isEmpty()) {
-            connectSuccessfulUnauthenticated(ctx, connect, null);
-            return;
-        }
-
-        final String authMethod = connect.getAuthMethod();
-        if (authMethod != null) {
-            ctx.channel().attr(ChannelAttributes.AUTH_METHOD).set(authMethod);
-            ctx.pipeline()
-                    .addAfter(MQTT_MESSAGE_DECODER, AUTH_IN_PROGRESS_MESSAGE_HANDLER,
-                            channelDependencies.getAuthInProgressMessageHandler());
-        }
-
-
-        final ConnectAuthTaskInput input = new ConnectAuthTaskInput(connect, ctx);
-        final ConnectAuthTaskContext context =
-                new ConnectAuthTaskContext(connect.getClientIdentifier(), this, mqttConnacker, ctx, connect, asyncer,
-                        authenticatorProviderMap.size(), configurationService.securityConfiguration().validateUTF8(), createClientSettings(connect));
-
-        final AuthenticatorProviderInput authenticatorProviderInput = authenticatorProviderInputFactory.createInput(ctx, connect.getClientIdentifier());
-
-        for (final WrappedAuthenticatorProvider wrapped : authenticatorProviderMap.values()) {
-
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    context, input, context, new SimpleAuthTask(wrapped, authenticatorProviderInput));
-        }
     }
 
     private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
@@ -275,7 +224,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                                                  final @NotNull CONNECT connect,
                                                  final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        if (AUTH_DENY_UNAUTHENTICATED_CONNECTIONS) {
+        if (AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
             final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "authentication not successful", connect.getUserProperties().getPluginUserProperties());
             mqttConnacker.connackError(
                     ctx.channel(), "Client with ip {} could not be authenticated", "Authentication not successful",
@@ -305,6 +254,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         connectAuthenticated(ctx, connect, clientSettings);
+        ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(null);
     }
 
     @Override
@@ -441,8 +391,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx,
                                       final @NotNull CONNECT msg,
                                       final @Nullable ModifiableClientSettingsImpl clientSettings) {
-        ctx.pipeline().channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
-        ctx.pipeline().channel().attr(ChannelAttributes.PREVENT_LWT).set(true); //do not send will until it is authorized
+        ctx.channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        ctx.channel().attr(ChannelAttributes.AUTH_METHOD).set(msg.getAuthMethod()); //always save it for re-auth.
+        ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {
             applyClientSettings(clientSettings, msg, ctx.channel());
@@ -462,7 +413,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void applyClientSettings(final @NotNull ModifiableClientSettingsImpl clientSettings,
+    private void applyClientSettings(final @NotNull ModifiableClientSettings clientSettings,
                                      final @NotNull CONNECT msg,
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
@@ -681,6 +632,18 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 channel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).getAndSet(null);
         if (userPropertiesFromAuth != null) {
             builder.withUserProperties(userPropertiesFromAuth);
+        }
+
+        // set auth method if present
+        final String authMethod = channel.attr(ChannelAttributes.AUTH_METHOD).get();
+        if (authMethod != null) {
+            builder.withAuthMethod(authMethod);
+        }
+
+        // set auth data
+        final ByteBuffer authData = channel.attr(ChannelAttributes.AUTH_DATA).get();
+        if (authData != null) {
+            builder.withAuthData(Bytes.fromReadOnlyBuffer(authData));
         }
 
         return builder.build();

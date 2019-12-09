@@ -16,7 +16,6 @@
 
 package com.hivemq.mqtt.handler.connect;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
@@ -25,17 +24,17 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
+import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
-import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.PluginTaskExecutorService;
+import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
@@ -47,7 +46,6 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
-import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -80,11 +78,11 @@ import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.jodah.concurrentunit.Waiter;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.*;
 
@@ -127,7 +125,7 @@ public class ConnectHandlerTest {
     private Authorizers authorizers;
 
     @Mock
-    private PluginTaskExecutorService pluginTaskExecutorService;
+    private PluginAuthenticatorServiceImpl pluginAuthenticatorService;
 
     @Mock
     private IsolatedPluginClassloader isolatedPluginClassloader;
@@ -142,7 +140,7 @@ public class ConnectHandlerTest {
     private MqttConnacker mqttConnacker;
     private ChannelHandlerContext ctx;
     private ConnectHandler handler;
-    private MetricsHolder metricsHolder;
+
     private final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
     @Before
@@ -152,7 +150,6 @@ public class ConnectHandlerTest {
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
         when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any())).thenReturn(Futures.immediateFuture(null));
 
-        metricsHolder = new MetricsHolder(new MetricRegistry());
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -165,6 +162,11 @@ public class ConnectHandlerTest {
                 new AuthInProgressMessageHandler(mqttConnacker));
 
         buildPipeline();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
     }
 
     @Test
@@ -1004,23 +1006,6 @@ public class ConnectHandlerTest {
      ********/
 
     @Test(timeout = 5000)
-    public void test_auth_in_progress_message_handler_is_set() {
-        when(authenticators.getAuthenticatorProviderMap()).thenReturn(
-                ImmutableMap.of("extension1", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
-                }, isolatedPluginClassloader)));
-        when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
-
-        createHandler();
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
-
-
-        embeddedChannel.writeInbound(connect);
-
-        assertNotNull(embeddedChannel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
-    }
-
-    @Test(timeout = 5000)
     public void test_auth_in_progress_message_handler_is_removed() {
         createHandler();
         embeddedChannel.attr(ChannelAttributes.AUTH_METHOD).set("someMethod");
@@ -1041,11 +1026,11 @@ public class ConnectHandlerTest {
     public void test_auth_is_performed() {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(
                 ImmutableMap.of(
-                        "extension1", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
+                        "extension1", new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
                         }, isolatedPluginClassloader),
-                        "extension2", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
+                        "extension2", new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
                         }, isolatedPluginClassloader2),
-                        "extension3", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
+                        "extension3", new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
                         }, isolatedPluginClassloader3)));
         createHandler();
         when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
@@ -1054,7 +1039,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
         embeddedChannel.writeInbound(connect);
 
-        verify(pluginTaskExecutorService, times(3)).handlePluginInOutTaskExecution(any(), any(), any(), any());
+        verify(pluginAuthenticatorService, times(1)).authenticateConnect(any(), any(), any(), any());
     }
 
     @Test(timeout = 5000)
@@ -1073,11 +1058,28 @@ public class ConnectHandlerTest {
     }
 
     @Test(timeout = 5000)
+    public void test_connect_not_authorized_if_no_authenticator_registered_and_internal_config_deny() {
+
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
+
+        createHandler();
+
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
+        embeddedChannel.writeInbound(connect);
+
+        final CONNACK connack = embeddedChannel.readOutbound();
+        assertNull(connack);
+
+        verify(pluginAuthenticatorService).authenticateConnect(any(), any(), any(), any());
+    }
+
+    @Test(timeout = 5000)
     public void test_connect_unauthenticated_if_no_authenticator_registered_and_internal_config_allow() {
 
         createHandler();
 
-        when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
+        when(authenticators.areAuthenticatorsAvailable()).thenReturn(false);
 
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
@@ -1088,6 +1090,7 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
+        verify(pluginAuthenticatorService, never()).authenticateConnect(any(), any(), any(), any());
     }
 
     @Test(timeout = 5000)
@@ -1102,6 +1105,7 @@ public class ConnectHandlerTest {
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
         assertFalse(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
+        verify(pluginAuthenticatorService, never()).authenticateConnect(any(), any(), any(), any());
     }
 
     @Test(timeout = 5000)
@@ -1398,9 +1402,7 @@ public class ConnectHandlerTest {
                 channelPersistence, configurationService, eventLog,
                 orderedTopicHandlerProvider, flowControlHandlerProvider, mqttConnacker,
                 new TopicAliasLimiterImpl(), authenticators,
-                pluginTaskExecutorService, channelDependencies, mock(PluginOutPutAsyncer.class),
-                Mockito.mock(AuthenticatorProviderInputFactory.class),
-                mock(PublishPollService.class), mock(SharedSubscriptionService.class), authorizers, pluginAuthorizerService);
+                mock(PublishPollService.class), mock(SharedSubscriptionService.class), pluginAuthenticatorService, authorizers, pluginAuthorizerService);
 
         handler.postConstruct();
         embeddedChannel.pipeline()

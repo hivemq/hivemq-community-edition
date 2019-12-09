@@ -18,7 +18,10 @@ package com.hivemq.extensions.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
+import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
+import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Map;
@@ -47,4 +50,21 @@ public interface Authenticators {
      * registered, false otherwise.
      */
     boolean areAuthenticatorsAvailable();
+
+    /**
+     * checks if at least one {@link EnhancedAuthenticatorProvider} is registered.
+     *
+     * @return true if at least one is registered, false otherwise.
+     */
+    boolean isEnhancedAvailable();
+
+    /**
+     * @return the amount of registered {@link EnhancedAuthenticator}
+     */
+    int getEnhancedAuthenticatorCount();
+
+    /**
+     * @return the amount of registered {@link SimpleAuthenticator}
+     */
+    int getSimpleAuthenticatorCount();
 }

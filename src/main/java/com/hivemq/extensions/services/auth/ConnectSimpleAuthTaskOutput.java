@@ -29,7 +29,6 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.general.InternalUserProperties;
-import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,68 +42,49 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Georg Held
  */
-public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
-        implements PluginTaskOutput, SimpleAuthOutput {
+public class ConnectSimpleAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
+        implements PluginTaskOutput, SimpleAuthOutput, AuthOutput {
 
-    private static final Logger log = LoggerFactory.getLogger(ConnectAuthTaskOutput.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectSimpleAuthTaskOutput.class);
 
+    private final @NotNull ModifiableClientSettingsImpl modifiableClientSettings;
+    private final @NotNull ModifiableDefaultPermissions defaultPermissions;
+    private final @NotNull AuthenticationContext authenticationContext;
+    private final boolean validateUTF8;
     private final @NotNull AtomicBoolean decided = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean authenticatorPresent = new AtomicBoolean(false);
-    private final boolean validateUTF8;
-
     private @Nullable ModifiableUserPropertiesImpl modifiableUserProperties;
     private @Nullable InternalUserProperties legacyUserProperties;
-    private @NotNull AuthenticationState authenticationState;
-    private @Nullable ConnackReasonCode connackReasonCode;
+    private @NotNull ConnackReasonCode connackReasonCode;
     private @Nullable String reasonString;
-    private @NotNull ModifiableDefaultPermissions defaultPermissions;
-    private @NotNull
-    final ModifiableClientSettingsImpl clientSettings;
 
-    ConnectAuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8,
-                          @NotNull final ModifiableClientSettingsImpl clientSettings) {
+
+    ConnectSimpleAuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer,
+                                final @NotNull ModifiableClientSettingsImpl clientSettings,
+                                final @NotNull ModifiableDefaultPermissions defaultPermissions,
+                                final @NotNull AuthenticationContext authenticationContext,
+                                final boolean validateUTF8) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
-        this.clientSettings = clientSettings;
-        authenticationState = AuthenticationState.UNDECIDED;
-        defaultPermissions = new ModifiableDefaultPermissionsImpl();
+        this.modifiableClientSettings = clientSettings;
+        this.defaultPermissions = defaultPermissions;
+        this.authenticationContext = authenticationContext;
+        this.connackReasonCode = ConnackReasonCode.NOT_AUTHORIZED;
     }
 
-    ConnectAuthTaskOutput(final @NotNull ConnectAuthTaskOutput connectAuthTaskOutput) {
-        this(connectAuthTaskOutput.asyncer, connectAuthTaskOutput.validateUTF8, connectAuthTaskOutput.clientSettings);
-        if (connectAuthTaskOutput.getChangedUserProperties() != null) {
-            legacyUserProperties = connectAuthTaskOutput.getChangedUserProperties().consolidate();
+    ConnectSimpleAuthTaskOutput(final @NotNull ConnectSimpleAuthTaskOutput connectSimpleAuthTaskOutput) {
+        this(connectSimpleAuthTaskOutput.asyncer,
+                connectSimpleAuthTaskOutput.modifiableClientSettings,
+                connectSimpleAuthTaskOutput.defaultPermissions,
+                connectSimpleAuthTaskOutput.authenticationContext,
+                connectSimpleAuthTaskOutput.validateUTF8);
+
+        if (connectSimpleAuthTaskOutput.getChangedUserProperties() != null) {
+            legacyUserProperties = connectSimpleAuthTaskOutput.getChangedUserProperties().consolidate();
             modifiableUserProperties = new ModifiableUserPropertiesImpl(legacyUserProperties, validateUTF8);
         }
-        authenticationState = connectAuthTaskOutput.authenticationState;
-        reasonString = connectAuthTaskOutput.reasonString;
-        connackReasonCode = connectAuthTaskOutput.connackReasonCode;
-        defaultPermissions = connectAuthTaskOutput.defaultPermissions;
-    }
-
-    @Override
-    public void authenticateSuccessfully() {
-        checkDecided("authenticateSuccessfully");
-        authenticationState = AuthenticationState.SUCCESS;
-    }
-
-    @Override
-    public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull ConnackReasonCode connackReasonCode, final @NotNull String reasonString) {
-
-        Preconditions.checkNotNull(duration, "Duration must never be null");
-        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
-        Preconditions.checkNotNull(connackReasonCode, "Reason code must never be null");
-        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
-
-        checkArgument(
-                connackReasonCode != ConnackReasonCode.SUCCESS,
-                "CONNACK reason code must not be SUCCESS for timed out authentication");
-
-        this.connackReasonCode = connackReasonCode;
-        this.reasonString = reasonString;
-        return super.async(duration, timeoutFallback);
+        reasonString = connectSimpleAuthTaskOutput.reasonString;
+        connackReasonCode = connectSimpleAuthTaskOutput.connackReasonCode;
     }
 
     @Override
@@ -124,44 +104,67 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
     @Override
     public @NotNull Async<SimpleAuthOutput> async(
             final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback) {
+        Preconditions.checkNotNull(duration, "Duration must never be null");
+        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
         return async(duration, timeoutFallback, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
     }
 
     @Override
     public @NotNull Async<SimpleAuthOutput> async(final @NotNull Duration duration) {
-        return async(duration, TimeoutFallback.FAILURE, ConnackReasonCode.NOT_AUTHORIZED,
-                "Authentication failed by timeout");
+        Preconditions.checkNotNull(duration, "Duration must never be null");
+        return async(duration, TimeoutFallback.FAILURE, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
     }
 
-    @Override
+    public @NotNull Async<SimpleAuthOutput> async(
+            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull ConnackReasonCode connackReasonCode, final @NotNull String reasonString) {
+
+        Preconditions.checkNotNull(duration, "Duration must never be null");
+        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
+        Preconditions.checkNotNull(connackReasonCode, "Reason code must never be null");
+        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
+
+        checkArgument(
+                connackReasonCode != ConnackReasonCode.SUCCESS,
+                "CONNACK reason code must not be SUCCESS for timed out authentication");
+
+        this.connackReasonCode = connackReasonCode;
+        this.reasonString = reasonString;
+        return super.async(duration, timeoutFallback);
+    }
+
+    public void authenticateSuccessfully() {
+        checkDecided("authenticateSuccessfully");
+        this.authenticationContext.setAuthenticationState(AuthenticationState.SUCCESS);
+    }
+
     public void failAuthentication() {
         failAuthentication("Authentication failed by extension");
     }
 
-    @Override
     public void failAuthentication(final @NotNull String reasonString) {
         failAuthentication(ConnackReasonCode.NOT_AUTHORIZED, reasonString);
     }
 
-    @Override
     public void failAuthentication(
             final @NotNull ConnackReasonCode connackReasonCode, final @NotNull String reasonString) {
 
         checkDecided("failAuthentication");
         checkNotNull(connackReasonCode, "CONNACK reason code must not be null");
         checkNotNull(reasonString, "CONNACK reason string must not be null");
+
         checkArgument(
                 connackReasonCode != ConnackReasonCode.SUCCESS,
                 "CONNACK reason code must not be SUCCESS for failAuthentication");
-        authenticationState = AuthenticationState.FAILED;
+
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
         this.connackReasonCode = connackReasonCode;
         this.reasonString = reasonString;
     }
 
-    @Override
     public void nextExtensionOrDefault() {
         checkDecided("nextExtensionOrDefault");
-        authenticationState = AuthenticationState.CONTINUE;
+        this.authenticationContext.setAuthenticationState(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
     }
 
     private void checkDecided(final @NotNull String method) {
@@ -171,34 +174,37 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
         }
     }
 
-    @Override
     public @NotNull ModifiableUserProperties getOutboundUserProperties() {
         if (modifiableUserProperties == null) {
             modifiableUserProperties = new ModifiableUserPropertiesImpl(legacyUserProperties, validateUTF8);
         }
         return modifiableUserProperties;
+
     }
 
-    @Override
     public @NotNull ModifiableDefaultPermissions getDefaultPermissions() {
         return defaultPermissions;
     }
 
-    @Override
     public @NotNull ModifiableClientSettingsImpl getClientSettings() {
-        return clientSettings;
+        return modifiableClientSettings;
     }
 
-    @NotNull AuthenticationState getAuthenticationState() {
-        return this.authenticationState;
+    public @NotNull AuthenticationState getAuthenticationState() {
+        return this.authenticationContext.getAuthenticationState();
     }
 
-    void failByTimeout() {
+    public void failByTimeout() {
         this.decided.set(true);
-        this.authenticationState = AuthenticationState.FAILED;
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
     }
 
-    @Nullable ConnackReasonCode getConnackReasonCode() {
+    public void nextByTimeout() {
+        this.decided.set(true);
+        this.authenticationContext.setAuthenticationState(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
+    }
+
+    @NotNull ConnackReasonCode getConnackReasonCode() {
         return connackReasonCode;
     }
 
@@ -206,18 +212,9 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
         return reasonString;
     }
 
-    void setThrowable(final @NotNull Throwable throwable) {
-        decided.set(true);
-        authenticationState = AuthenticationState.FAILED;
-        connackReasonCode = ConnackReasonCode.UNSPECIFIED_ERROR;
-        reasonString = "Unhandled exception in authentication extension";
-        log.warn("Uncaught exception was thrown from an extension during authentication. Extensions are responsible on their own to handle exceptions.", throwable);
-    }
-
     @Nullable InternalUserProperties getChangedUserProperties() {
         return modifiableUserProperties;
     }
-
 
     public void authenticatorPresent() {
         authenticatorPresent.set(true);
@@ -227,7 +224,12 @@ public class ConnectAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthOutput>
         return authenticatorPresent.get();
     }
 
-    enum AuthenticationState {
-        SUCCESS, FAILED, CONTINUE, UNDECIDED
+    void setThrowable(final @NotNull Throwable throwable) {
+        decided.set(true);
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+        this.connackReasonCode = ConnackReasonCode.UNSPECIFIED_ERROR;
+        reasonString = "Unhandled exception in authentication extension";
+        log.warn("Uncaught exception was thrown from an extension during authentication. Extensions are responsible on their own to handle exceptions.", throwable);
     }
+
 }

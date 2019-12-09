@@ -44,17 +44,17 @@ import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.exception.PluginLoadingException;
+import com.hivemq.extensions.handler.PluginAuthenticatorService;
+import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
 import com.hivemq.extensions.services.auth.AuthorizersImpl;
 import com.hivemq.extensions.services.auth.SecurityRegistryImpl;
-import com.hivemq.extensions.services.builder.PublishBuilderImpl;
-import com.hivemq.extensions.services.builder.RetainedPublishBuilderImpl;
-import com.hivemq.extensions.services.builder.TopicSubscriptionBuilderImpl;
-import com.hivemq.extensions.services.builder.WillPublishBuilderImpl;
+import com.hivemq.extensions.services.builder.*;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 import com.hivemq.extensions.services.initializer.InitializerRegistryImpl;
 import com.hivemq.extensions.services.initializer.InitializersImpl;
+import com.hivemq.persistence.ChannelPersistence;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -99,8 +99,6 @@ public class PluginStaticInitializerImplTest {
     private PublishBuilder publishBuilder;
     private WillPublishBuilder willPublishBuilder;
 
-    private final MqttConfigurationService mqttConfigurationService = new MqttConfigurationServiceImpl();
-
     private FullConfigurationService fullConfigurationService;
 
     @Mock
@@ -122,7 +120,15 @@ public class PluginStaticInitializerImplTest {
     private PublishService publishService;
 
     @Mock
+    private ChannelPersistence channelPersistence;
+
+    @Mock
     private EventRegistry eventRegistry;
+
+    private PluginAuthorizerService pluginAuthorizerService;
+
+    @Mock
+    private PluginAuthenticatorService pluginAuthenticatorService;
 
     @Mock
     private ClusterService clusterService;
@@ -145,9 +151,10 @@ public class PluginStaticInitializerImplTest {
                 new InitializerRegistryImpl(new InitializersImpl(hiveMQExtensions));
         retainedPublishBuilder = new RetainedPublishBuilderImpl(fullConfigurationService);
         topicSubscriptionBuilder = new TopicSubscriptionBuilderImpl(fullConfigurationService);
+        topicPermissionBuilder = new TopicPermissionBuilderImpl(fullConfigurationService);
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
-        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions), new AuthorizersImpl(
+        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence), new AuthorizersImpl(
                 hiveMQExtensions), new HiveMQExtensions(serverInformation));
         servicesDependencies = Mockito.spy(
                 new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,

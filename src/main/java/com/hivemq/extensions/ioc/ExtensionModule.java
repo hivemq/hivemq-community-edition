@@ -41,6 +41,8 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
+import com.hivemq.extensions.handler.PluginAuthenticatorService;
+import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
@@ -122,6 +124,7 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
         bind(ClusterService.class).to(ClusterServiceNoopImpl.class).in(LazySingleton.class);
 
         bind(PluginAuthorizerService.class).to(PluginAuthorizerServiceImpl.class);
+        bind(PluginAuthenticatorService.class).to(PluginAuthenticatorServiceImpl.class);
 
         bind(GlobalInterceptorRegistry.class).to(GlobalInterceptorRegistryImpl.class).in(LazySingleton.class);
         bind(Interceptors.class).to(InterceptorsImpl.class).in(LazySingleton.class);

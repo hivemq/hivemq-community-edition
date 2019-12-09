@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
  */
 public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
+    @NotNull
     private Mqtt5UserProperties userProperties;
 
     public MqttMessageWithUserProperties(@NotNull final Mqtt5UserProperties userProperties) {
@@ -48,7 +49,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
         return userProperties;
     }
 
-    public void setUserProperties(final Mqtt5UserProperties userProperties) {
+    public void setUserProperties(final @NotNull Mqtt5UserProperties userProperties) {
         this.userProperties = userProperties;
     }
 
@@ -125,7 +126,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
     public abstract static class MqttMessageWithReasonCode<R extends Mqtt5ReasonCode>
             extends MqttMessageWithReasonString {
 
-        private final R reasonCode;
+        private final @NotNull R reasonCode;
 
         protected MqttMessageWithReasonCode(@NotNull final R reasonCode, @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
 

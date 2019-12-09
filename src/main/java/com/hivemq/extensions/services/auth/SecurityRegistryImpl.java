@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
+import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -67,6 +68,20 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider(authenticatorProvider, classLoader);
         authenticators.registerAuthenticatorProvider(wrapped);
 
+    }
+
+    @Override
+    public void setEnhancedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider) {
+        checkNotNull(enhancedAuthenticatorProvider, "enhancedAuthenticatorProvider must not be null");
+
+        final @NotNull IsolatedPluginClassloader classLoader =
+                (IsolatedPluginClassloader) enhancedAuthenticatorProvider.getClass().getClassLoader();
+        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(classLoader);
+
+        checkNotNull(plugin, "Extension classloader must be known, before an extension can add an EnhancedAuthenticatorProvider.");
+
+        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider, classLoader);
+        authenticators.registerAuthenticatorProvider(wrapped);
     }
 
     @Override
