@@ -306,7 +306,7 @@ public class ClientContextImpl {
             @NotNull final IsolatedPluginClassloader pluginClassloader) {
         return interceptorList.stream()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
-                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
+                .filter(interceptor -> interceptor instanceof PubrecOutboundInterceptor)
                 .map(interceptor -> (PubrecOutboundInterceptor) interceptor)
                 .collect(Collectors.toUnmodifiableList());
     }

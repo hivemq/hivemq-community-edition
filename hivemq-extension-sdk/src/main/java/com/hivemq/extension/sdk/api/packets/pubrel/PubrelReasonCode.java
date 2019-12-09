@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.hivemq.mqtt.message.reason;
+package com.hivemq.extension.sdk.api.packets.pubrel;
 
 /**
- * Reason Code according to the MQTT 5 specification.
+ * MQTT 5 Reason codes for PUBREL.
+ * <p>
+ * MQTT 3 does not support reason codes for the above mentioned MQTT packet.
  *
- * @author Silvio Giebl
+ * @author Yannick Weber
  */
-public interface Mqtt5ReasonCode {
+public enum PubrelReasonCode {
 
-    /**
-     * @return the byte code of this Reason Code.
-     */
-    int getCode();
+    SUCCESS,
 
-    /**
-     * @return whether this Reason Code is an Error Code.
-     */
-    default boolean isError() {
-        return getCode() >= 0x80;
-    }
+    PACKET_IDENTIFIER_NOT_FOUND
+
 }
