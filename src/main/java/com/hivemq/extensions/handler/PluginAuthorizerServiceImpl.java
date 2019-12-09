@@ -79,7 +79,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     @Inject
     public PluginAuthorizerServiceImpl(
-            final @NotNull Authorizers initializers,
+            final @NotNull Authorizers authorizers,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull ServerInformation serverInformation,
@@ -88,7 +88,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector,
             final @NotNull EventLog eventLog,
             final @NotNull IncomingPublishService incomingPublishService) {
-        this.authorizers = initializers;
+        this.authorizers = authorizers;
         this.asyncer = asyncer;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.serverInformation = serverInformation;

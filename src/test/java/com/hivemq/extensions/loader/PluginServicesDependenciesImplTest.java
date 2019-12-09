@@ -45,6 +45,7 @@ import java.net.URL;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christoph Schäbel
@@ -54,53 +55,13 @@ public class PluginServicesDependenciesImplTest {
 
     private PluginServicesDependenciesImpl pluginServicesDependencies;
 
-    @Mock
-    private RetainedMessageStore retainedMessageStore;
-
-    @Mock
-    private ClientService clientService;
-
-    @Mock
-    private InitializerRegistry initializerRegistry;
-
-    @Mock
-    private SubscriptionStore subscriptionStore;
-
-    @Mock
-    private GlobalManagedPluginExecutorService managedPluginExecutorService;
-
-    @Mock
-    private EventRegistry eventRegistry;
-
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
-
-    @Mock
-    private PublishService publishService;
-
-    @Mock
-    private ClusterService clusterService;
-
-    @Mock
-    private GlobalInterceptorRegistry interceptorRegistry;
-
-    @Mock
-    private ServerInformation serverInformation;
-
-    @Mock
-    private AdminService adminService;
-
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        final SecurityRegistry securityRegistry =
-                new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions), new AuthorizersImpl(
-                        hiveMQExtensions), new HiveMQExtensions(serverInformation));
-        pluginServicesDependencies =
-                new PluginServicesDependenciesImpl(new MetricRegistry(), initializerRegistry, retainedMessageStore,
-                        clientService, subscriptionStore, managedPluginExecutorService, publishService,
-                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry,
-                        adminService);
+        pluginServicesDependencies = new PluginServicesDependenciesImpl(new MetricRegistry(), mock(InitializerRegistry.class), mock(RetainedMessageStore.class),
+                mock(ClientService.class), mock(SubscriptionStore.class), mock(GlobalManagedPluginExecutorService.class), mock(PublishService.class),
+                mock(HiveMQExtensions.class), mock(SecurityRegistry.class), mock(EventRegistry.class), mock(ClusterService.class),
+                mock(GlobalInterceptorRegistry.class), mock(AdminService.class));
     }
 
     @Test

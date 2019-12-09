@@ -110,6 +110,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(LISTENER_ATTRIBUTE_ADDER, channelDependencies.getListenerAttributeAdderFactory().get(listener));
 
         ch.pipeline().addLast(STOP_READING_AFTER_CONNECT_HANDLER, channelDependencies.getStopReadingAfterConnectHandler());
+        ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
+
         ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(eventLog));
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_MESSAGE_BARRIER, new SubscribeMessageBarrier());
@@ -124,7 +126,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
         ch.pipeline().addLast(MQTT_CONNECT_HANDLER, channelDependencies.getConnectHandler());
-        ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 
         ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
         ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());

@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static com.hivemq.extensions.services.auth.AuthenticationState.NEXT_EXTENSION_OR_DEFAULT;
+import static com.hivemq.extensions.services.auth.AuthenticationState.SUCCESS;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
@@ -30,7 +32,7 @@ import static org.mockito.Mockito.*;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class SimpleAuthTaskTest {
+public class ConnectSimpleAuthTaskTest {
 
     @Mock
     private WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
@@ -39,55 +41,54 @@ public class SimpleAuthTaskTest {
     private SimpleAuthenticator simpleAuth;
 
     @Mock
-    private ConnectAuthTaskInput connectAuthTaskInput;
+    private ConnectSimpleAuthTaskInput connectSimpleAuthTaskInput;
 
     @Mock
     private AuthenticatorProviderInput authenticatorProviderInput;
 
     @Mock
-    private ConnectAuthTaskOutput connectAuthTaskOutput;
+    private ConnectSimpleAuthTaskOutput connectSimpleAuthTaskOutput;
 
-    private SimpleAuthTask simpleAuthTask;
+    private ConnectSimpleAuthTask connectSimpleAuthTask;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(connectAuthTaskOutput.getAuthenticationState()).thenReturn(
-                ConnectAuthTaskOutput.AuthenticationState.CONTINUE);
+        when(connectSimpleAuthTaskOutput.getAuthenticationState()).thenReturn(
+                NEXT_EXTENSION_OR_DEFAULT);
 
         when(wrappedAuthenticatorProvider.getAuthenticator(authenticatorProviderInput)).thenReturn(simpleAuth);
 
-        simpleAuthTask = new SimpleAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput);
+        connectSimpleAuthTask = new ConnectSimpleAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput);
     }
 
     @Test(timeout = 5000)
     public void test_task_is_performed_when_undecided() {
 
-        simpleAuthTask.apply(connectAuthTaskInput, connectAuthTaskOutput);
+        connectSimpleAuthTask.apply(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
 
-        verify(simpleAuth, times(1)).onConnect(same(connectAuthTaskInput), same(connectAuthTaskOutput));
+        verify(simpleAuth, times(1)).onConnect(same(connectSimpleAuthTaskInput), same(connectSimpleAuthTaskOutput));
     }
 
     @Test(timeout = 5000)
     public void test_task_is_performed_when_continuing() {
 
-        when(connectAuthTaskOutput.getAuthenticationState()).thenReturn(
-                ConnectAuthTaskOutput.AuthenticationState.CONTINUE);
+        when(connectSimpleAuthTaskOutput.getAuthenticationState()).thenReturn(
+                NEXT_EXTENSION_OR_DEFAULT);
 
-        simpleAuthTask.apply(connectAuthTaskInput, connectAuthTaskOutput);
+        connectSimpleAuthTask.apply(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
 
-        verify(simpleAuth, times(1)).onConnect(same(connectAuthTaskInput), same(connectAuthTaskOutput));
+        verify(simpleAuth, times(1)).onConnect(same(connectSimpleAuthTaskInput), same(connectSimpleAuthTaskOutput));
     }
 
     @Test(timeout = 5000)
     public void test_task_is_not_performed_when_decided() {
-        when(connectAuthTaskOutput.getAuthenticationState()).thenReturn(
-                ConnectAuthTaskOutput.AuthenticationState.SUCCESS);
+        when(connectSimpleAuthTaskOutput.getAuthenticationState()).thenReturn(SUCCESS);
 
-        simpleAuthTask.apply(connectAuthTaskInput, connectAuthTaskOutput);
+        connectSimpleAuthTask.apply(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
 
-        verify(simpleAuth, never()).onConnect(any(ConnectAuthTaskInput.class), any(ConnectAuthTaskOutput.class));
+        verify(simpleAuth, never()).onConnect(any(ConnectSimpleAuthTaskInput.class), any(ConnectSimpleAuthTaskOutput.class));
     }
 
     @Test(timeout = 5000)
@@ -95,9 +96,9 @@ public class SimpleAuthTaskTest {
         final RuntimeException toBeThrown = new RuntimeException();
         doThrow(toBeThrown).when(simpleAuth).onConnect(any(), any());
 
-        simpleAuthTask.apply(connectAuthTaskInput, connectAuthTaskOutput);
+        connectSimpleAuthTask.apply(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
 
-        verify(connectAuthTaskOutput, times(1)).setThrowable(same(toBeThrown));
+        verify(connectSimpleAuthTaskOutput, times(1)).setThrowable(same(toBeThrown));
     }
 
     @Test(timeout = 5000, expected = Error.class)
@@ -105,6 +106,6 @@ public class SimpleAuthTaskTest {
         final Error toBeThrown = new Error();
         doThrow(toBeThrown).when(simpleAuth).onConnect(any(), any());
 
-        simpleAuthTask.apply(connectAuthTaskInput, connectAuthTaskOutput);
+        connectSimpleAuthTask.apply(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
     }
 }

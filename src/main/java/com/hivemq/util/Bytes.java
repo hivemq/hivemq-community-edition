@@ -210,7 +210,6 @@ public class Bytes {
         bytes[prefix + 3] = (byte) anInt;
     }
 
-
     /**
      * Copies a long into an existing byte array.
      *
@@ -258,15 +257,17 @@ public class Bytes {
     @Nullable
     public static byte[] getBytesFromReadOnlyBuffer(@NotNull final Optional<ByteBuffer> optional) {
         Preconditions.checkNotNull(optional, "optional must never be null");
-        final byte[] byteArray;
+        return optional.map(Bytes::fromReadOnlyBuffer).orElse(null);
+    }
 
-        if (optional.isPresent()) {
-            final ByteBuffer byteBuffer = optional.get().asReadOnlyBuffer().rewind();
-            byteArray = new byte[byteBuffer.remaining()];
-            byteBuffer.get(byteArray);
-        } else {
-            byteArray = null;
+    @Nullable
+    public static byte[] fromReadOnlyBuffer(final @Nullable ByteBuffer byteBuffer){
+        if(byteBuffer == null){
+            return null;
         }
-        return byteArray;
+        final ByteBuffer rewind = byteBuffer.asReadOnlyBuffer().rewind();
+        final byte[] array = new byte[rewind.remaining()];
+        rewind.get(array);
+        return array;
     }
 }

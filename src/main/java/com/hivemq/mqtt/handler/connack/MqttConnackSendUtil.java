@@ -25,6 +25,7 @@ import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -95,6 +96,16 @@ public class MqttConnackSendUtil implements MqttConnackSender {
                 channel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).getAndSet(null);
         if (userPropertiesFromAuth != null) {
             connackBuilder.withUserProperties(userPropertiesFromAuth);
+        }
+
+        // set auth method if present
+        if (channel.attr(ChannelAttributes.AUTH_METHOD).get() != null) {
+            connackBuilder.withAuthMethod(channel.attr(ChannelAttributes.AUTH_METHOD).get());
+        }
+
+        // set auth data
+        if (channel.attr(ChannelAttributes.AUTH_DATA).get() != null) {
+            connackBuilder.withAuthData(Bytes.fromReadOnlyBuffer(channel.attr(ChannelAttributes.AUTH_DATA).get()));
         }
 
         if (withReasonCode) {

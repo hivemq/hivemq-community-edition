@@ -19,6 +19,7 @@ package com.hivemq.logging;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
@@ -43,6 +44,7 @@ public class EventLog {
     public static final String EVENT_CLIENT_DISCONNECTED = "event.client-disconnected";
     public static final String EVENT_MESSAGE_DROPPED = "event.message-dropped";
     public static final String EVENT_CLIENT_SESSION_EXPIRED = "event.client-session-expired";
+    public static final String EVENT_AUTHENTICATION = "event.authentication";
     /**
      * Events are logged to DEBUG, in case customers are using a custom logback.xml
      */
@@ -51,6 +53,7 @@ public class EventLog {
     private static final Logger logClientDisconnected = LoggerFactory.getLogger(EVENT_CLIENT_DISCONNECTED);
     private static final Logger logMessageDropped = LoggerFactory.getLogger(EVENT_MESSAGE_DROPPED);
     private static final Logger logClientSessionExpired = LoggerFactory.getLogger(EVENT_CLIENT_SESSION_EXPIRED);
+    private static final Logger logAuthentication = LoggerFactory.getLogger(EVENT_AUTHENTICATION);
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -149,10 +152,26 @@ public class EventLog {
     }
 
     /**
+     * Log that the an AUTH packet was received or sent.
+     *
+     * @param channel    of the client connection
+     * @param reasonCode of the AUTH packet.
+     */
+    public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String ip = ChannelUtils.getChannelIP(channel).orNull();
+        if(received) {
+            logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
+        } else {
+            logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
+        }
+    }
+
+    /**
      * Log that a client session expired and will be deleted.
      *
      * @param expiryTimestamp the {@link Long} timestamp of the client-session-expiration
-     * @param clientId          of the expired session
+     * @param clientId        of the expired session
      */
     public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
 

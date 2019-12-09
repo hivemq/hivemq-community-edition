@@ -16,7 +16,7 @@
 package com.hivemq.extensions.services.auth;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 
@@ -36,7 +36,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     @Override
     public void setClientReceiveMaximum(final int receiveMaximum) {
-        Preconditions.checkArgument(receiveMaximum > 1, "Receive maximum must NOT be less than 1 was " + receiveMaximum + ".");
+        Preconditions.checkArgument(receiveMaximum >= 1, "Receive maximum must NOT be less than 1 was " + receiveMaximum + ".");
         Preconditions.checkArgument(receiveMaximum <= 65535, "Receive maximum must NOT be more than 65535 was " + receiveMaximum + ".");
         if (this.receiveMaximum == receiveMaximum) {
             return;

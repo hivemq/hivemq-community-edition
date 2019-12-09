@@ -34,11 +34,10 @@ import static org.junit.Assert.assertEquals;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class ConnectAuthTaskInputTest {
-
+public class ConnectSimpleAuthTaskInputTest {
 
     private CONNECT connect;
-    private ConnectAuthTaskInput connectAuthTaskInput;
+    private ConnectSimpleAuthTaskInput taskInput;
 
     @Before
     public void setUp() {
@@ -48,17 +47,18 @@ public class ConnectAuthTaskInputTest {
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").withUsername("user").withPassword("password".getBytes(Charset.defaultCharset())).withAuthMethod("method").withAuthData(new byte[]{'a', 'b', 'c'}).build();
-        connectAuthTaskInput = new ConnectAuthTaskInput(connect, ctx);
+        taskInput = new ConnectSimpleAuthTaskInput(connect, ctx);
     }
 
     @Test(timeout = 5000)
     public void test_connect_packet_contains_auth_information() {
 
-        final ConnectPacket connectPacket = connectAuthTaskInput.getConnectPacket();
+        final ConnectPacket connectPacket = taskInput.getConnectPacket();
 
         assertEquals("method", connectPacket.getAuthenticationMethod().get());
         assertEquals("user", connectPacket.getUserName().get());
         assertEquals("password", new String(connectPacket.getPassword().get().array()));
         assertEquals("abc", new String(connectPacket.getAuthenticationData().get().array()));
+        assertEquals(taskInput, taskInput.get());
     }
 }

@@ -61,6 +61,7 @@ public class AUTH extends MqttMessageWithUserProperties.MqttMessageWithReasonCod
         this.authData = authData;
     }
 
+    @Nullable
     public byte[] getAuthData() {
         return authData;
     }
