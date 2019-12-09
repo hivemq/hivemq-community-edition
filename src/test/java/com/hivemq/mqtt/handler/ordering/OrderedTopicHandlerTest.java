@@ -17,7 +17,7 @@
 package com.hivemq.mqtt.handler.ordering;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.codec.encoder.mqtt5.PublishDroppedEvent;
+import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;

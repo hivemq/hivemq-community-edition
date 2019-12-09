@@ -34,7 +34,7 @@ import com.hivemq.mqtt.handler.connect.StopReadingAfterConnectHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
-import com.hivemq.mqtt.handler.publish.PublishMessageExpiryHandler;
+import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
 import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
@@ -148,7 +148,7 @@ public class ChannelDependenciesTest {
     private AuthInProgressMessageHandler authInProgressMessageHandler;
 
     @Mock
-    private PublishMessageExpiryHandler publishMessageExpiryHandler;
+    private MessageExpiryHandler messageExpiryHandler;
 
     @Mock
     private IncomingPublishHandler incomingPublishHandler;
@@ -206,7 +206,7 @@ public class ChannelDependenciesTest {
                 () -> clientLifecycleEventHandler,
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
-                () -> publishMessageExpiryHandler,
+                () -> messageExpiryHandler,
                 publishOutboundInterceptorHandler,
                 connectInterceptorHandler,
                 connackOutboundInterceptorHandler,

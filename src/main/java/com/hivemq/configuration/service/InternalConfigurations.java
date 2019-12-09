@@ -218,6 +218,16 @@ public class InternalConfigurations {
      */
     public static final int OUTGOING_BANDWIDTH_THROTTLING_DEFAULT = 0; // unlimited
 
+    /**
+     * publishes are removed after the message expiry even if they are already in-flight.
+     */
+    public static boolean EXPIRE_INFLIGHT_MESSAGES = false;
+
+    /**
+     *  pubrels are removed after the message expiry.
+     */
+    public static boolean EXPIRE_INFLIGHT_PUBRELS = false;
+
 
     /* *****************
      *      SSL       *

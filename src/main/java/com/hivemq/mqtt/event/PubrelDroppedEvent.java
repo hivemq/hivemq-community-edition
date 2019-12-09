@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.hivemq.codec.encoder.mqtt5;
+package com.hivemq.mqtt.event;
 
 import com.hivemq.annotations.NotNull;
-import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.pubrel.PUBREL;
 
 /**
  * @author Lukas Brandl
  */
-public class PublishDroppedEvent {
+public class PubrelDroppedEvent {
 
     @NotNull
-    private final PUBLISH message;
+    private final PUBREL message;
 
-    public PublishDroppedEvent(@NotNull final PUBLISH message) {
+    public PubrelDroppedEvent(@NotNull final PUBREL message) {
         this.message = message;
     }
 
     @NotNull
-    public PUBLISH getMessage() {
+    public PUBREL getMessage() {
         return message;
     }
 }

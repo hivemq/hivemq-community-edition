@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.message.Message;
-import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
@@ -90,16 +90,6 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> extends 
             if (message.getPropertyLength() < 0 && message.getEncodedLength() > maximumPacketSize) {
                 messageDroppedService.messageMaxPacketSizeExceeded(clientId, message.getType().name(), maximumPacketSize, message.getEncodedLength());
                 log.trace("Could not encode message of type {} for client {}: Packet to large", message.getType(), clientId);
-                return;
-            }
-        }
-
-        if (message instanceof PUBLISH) {
-            final PUBLISH publish = (PUBLISH) message;
-            //remaining expiry set in PublishMessageExpiryHandler
-            final boolean drop = publish.getMessageExpiryInterval() == 0 && !(publish.getQoS() == QoS.EXACTLY_ONCE && publish.isDuplicateDelivery());
-            if (drop) {
-                ctx.fireUserEventTriggered(new PublishDroppedEvent(publish));
                 return;
             }
         }
