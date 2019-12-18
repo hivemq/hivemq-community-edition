@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.packets.suback;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 
@@ -36,20 +38,6 @@ import java.util.Optional;
 public interface SubackPacket {
 
     /**
-     * The reason codes for each subscription in the corresponding SUBSCRIBE message.
-     *
-     * @return The reason codes for the subscriptions.
-     */
-    @Immutable @NotNull List<@NotNull SubackReasonCode> getReasonCodes();
-
-    /**
-     * The optional reason string of this SUBACK packet.
-     *
-     * @return The optional reason string.
-     */
-    @NotNull Optional<String> getReasonString();
-
-    /**
      * The packet identifier of this SUBACK packet.
      *
      * @return The packet identifier.
@@ -57,9 +45,31 @@ public interface SubackPacket {
     int getPacketIdentifier();
 
     /**
+     * The reason codes for each subscription in the corresponding SUBSCRIBE message.
+     *
+     * @return The reason codes for the subscriptions.
+     */
+    @Immutable
+    @NotNull List<@NotNull SubackReasonCode> getReasonCodes();
+
+    /**
+     * The reason string of the SUBACK packet.
+     * <p>
+     * For an MQTT 3 client this {@link Optional} for the MQTT 5 property will always be empty (if not modified by a
+     * previous {@link SubackOutboundInterceptor}).
+     *
+     * @return An {@link Optional} containing the suback reason string if present.
+     */
+    @NotNull Optional<String> getReasonString();
+
+    /**
      * The {@link UserProperties} of this SUBACK packet.
+     * <p>
+     * For an MQTT 3 client this MQTT 5 property will always be empty (if not modified by a previous {@link
+     * SubackOutboundInterceptor}).
      *
      * @return The user properties.
      */
-    @Immutable @NotNull UserProperties getUserProperties();
+    @Immutable
+    @NotNull UserProperties getUserProperties();
 }

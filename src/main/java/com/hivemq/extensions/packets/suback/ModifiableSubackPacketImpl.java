@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.packets.suback;
 
 import com.google.common.base.Preconditions;
@@ -92,7 +93,7 @@ public class ModifiableSubackPacketImpl implements ModifiableSubackPacket {
             throw new IllegalArgumentException("You cannot change the amount of reason codes.");
         }
         for (int i = 0; i < reasonCodes.size(); i++) {
-            Preconditions.checkNotNull(reasonCodes, "Reason code (at index %s) must never be null", i);
+            Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null", i);
             final Mqtt5SubAckReasonCode oldReasonCode = Mqtt5SubAckReasonCode.valueOf(this.reasonCodes.get(i).name());
             final Mqtt5SubAckReasonCode newReasonCode = Mqtt5SubAckReasonCode.valueOf(reasonCodes.get(i).name());
             Preconditions.checkState(newReasonCode.isError() == oldReasonCode.isError(),

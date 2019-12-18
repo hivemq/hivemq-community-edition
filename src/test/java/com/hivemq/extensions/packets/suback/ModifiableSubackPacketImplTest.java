@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.packets.suback;
 
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -96,6 +97,20 @@ public class ModifiableSubackPacketImplTest {
     @Test(expected = NullPointerException.class)
     public void test_set_reason_codes_null() {
         packet.setReasonCodes(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_set_reason_codes_element_null() {
+        final List<SubackReasonCode> reasonCodes = new ArrayList<>();
+        reasonCodes.add(SubackReasonCode.GRANTED_QOS_0);
+        reasonCodes.add(null);
+        reasonCodes.add(SubackReasonCode.UNSPECIFIED_ERROR);
+        try {
+            packet.setReasonCodes(reasonCodes);
+        } catch (final NullPointerException e) {
+            assertEquals("Reason code (at index 1) must never be null", e.getMessage());
+            throw e;
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)
