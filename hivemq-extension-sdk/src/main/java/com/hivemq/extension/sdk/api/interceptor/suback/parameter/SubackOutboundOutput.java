@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.interceptor.suback.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
@@ -25,10 +26,8 @@ import com.hivemq.extension.sdk.api.packets.suback.ModifiableSubackPacket;
 import java.time.Duration;
 
 /**
- * This is the output parameter of any {@link SubackOutboundInterceptor} providing methods to define the outcome of
- * SUBACK interception.
- * <p>
- * It can be used to modify an outbound SUBACK packet.
+ * This is the output parameter of any {@link SubackOutboundInterceptor} providing methods to modify a SUBACK packet
+ * before it is sent to the client.
  *
  * @author Robin Atherton
  **/
@@ -38,13 +37,14 @@ public interface SubackOutboundOutput extends SimpleAsyncOutput<SubackOutboundOu
     /**
      * Use this object to make any changes to the outbound SUBACK.
      *
-     * @return A {@link ModifiableSubackPacket}
+     * @return A modifiable SUBACK packet.
      */
     @NotNull ModifiableSubackPacket getSubackPacket();
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. This
-     * means that the outcome results an unmodified SUBACK is sent to the server.
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is handled as failed. In that
+     * case an unmodified SUBACK is forwarded to the next interceptor or client, all changes made by this interceptor
+     * are not passed on.
      * <p>
      * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
      *
