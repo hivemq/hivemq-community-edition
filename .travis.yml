@@ -9,7 +9,7 @@ jdk:
 stages:
   - test
   - name: docker
-    if: branch = master && type != pull_request
+    if: (branch = master && type != pull_request) || (tag IS present)
 
 jobs:
   include:

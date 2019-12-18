@@ -61,9 +61,6 @@ EXPOSE 1883
 #websockets
 EXPOSE 8000
 
-#HiveMQ Control Center
-EXPOSE 8080
-
 WORKDIR /opt/hivemq
 
 ENTRYPOINT ["/opt/docker-entrypoint.sh"]
