@@ -101,13 +101,11 @@ public class AbstractChannelInitializerTest {
 
         verify(pipeline).addLast(eq(FIRST_ABSTRACT_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
-        verify(pipeline).addLast(eq(REMOVE_CONNECT_IDLE_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_BARRIER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_SUBSCRIBE_MESSAGE_BARRIER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(CHANNEL_INACTIVE_HANDLER), any(ChannelHandler.class));
 
     }
-
 
     @Test
     public void test_no_connect_idle_handler_disabled() throws Exception {

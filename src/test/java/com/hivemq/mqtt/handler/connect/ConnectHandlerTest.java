@@ -1383,11 +1383,11 @@ public class ConnectHandlerTest {
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_CONNECT_HANDLER);
         }
+        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_BARRIER)) {
+            embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_BARRIER);
+        }
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER);
-        }
-        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER)) {
-            embeddedChannel.pipeline().remove(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER);
         }
 
         configurationService.mqttConfiguration().setServerReceiveMaximum(10);
@@ -1408,10 +1408,9 @@ public class ConnectHandlerTest {
         embeddedChannel.pipeline()
                 .addAfter(ChannelHandlerNames.MQTT_MESSAGE_DECODER, ChannelHandlerNames.MQTT_CONNECT_HANDLER, handler);
         embeddedChannel.pipeline()
-                .addBefore(ChannelHandlerNames.MQTT_CONNECT_HANDLER, ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER,
-                        new DummyHandler());
+                .addAfter(ChannelHandlerNames.MQTT_CONNECT_HANDLER, ChannelHandlerNames.MQTT_MESSAGE_BARRIER, new DummyHandler());
         embeddedChannel.pipeline()
-                .addBefore(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER, ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER,
+                .addBefore(ChannelHandlerNames.MQTT_MESSAGE_BARRIER, ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER,
                         new DummyHandler());
     }
 

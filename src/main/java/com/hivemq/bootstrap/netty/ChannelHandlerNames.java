@@ -37,7 +37,6 @@ public class ChannelHandlerNames {
 
     public static final String NEW_CONNECTION_IDLE_HANDLER = "new_connection_idle_handler";
     public static final String NO_CONNECT_IDLE_EVENT_HANDLER = "no_connect_idle_event_handler";
-    public static final String REMOVE_CONNECT_IDLE_HANDLER = "remove_connect_idle_handler";
     public static final String NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER = "no_tls_handshake_idle_event_handler";
 
     public static final String MQTT_5_FLOW_CONTROL_HANDLER = "mqtt_5_flow_control_handler";
@@ -103,7 +102,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_CONNECTION_COUNTER_HANDLER = "mqtt_connection_counter_handler";
     public static final String MQTT_MESSAGE_BARRIER = "mqtt_message_barrier";
     public static final String MQTT_SUBSCRIBE_MESSAGE_BARRIER = "mqtt_subscribe_message_barrier";
-    public static final String STOP_READING_AFTER_CONNECT_HANDLER = "stop_reading_after_connect_handler";
 
     /* *************
      *   Extensions   *

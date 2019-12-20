@@ -292,7 +292,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         if (ProtocolVersion.MQTTv5 == connect.getProtocolVersion()) {
             ctx.channel()
                     .pipeline()
-                    .addBefore(STOP_READING_AFTER_CONNECT_HANDLER, MQTT_5_FLOW_CONTROL_HANDLER,
+                    .addBefore(MQTT_MESSAGE_BARRIER, MQTT_5_FLOW_CONTROL_HANDLER,
                             flowControlHandlerProvider.get());
         }
     }
