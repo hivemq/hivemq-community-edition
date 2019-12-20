@@ -82,7 +82,7 @@ public class UnsubscribeInboundInputImplTest {
 
         final UnsubscribeInboundInputImpl input =
                 new UnsubscribeInboundInputImpl("client1", embeddedChannel, unsubscribePacket1);
-        input.updateUnsubscribe(new UnsubscribePacketImpl(unsubscribePacket2));
+        input.update(new UnsubscribePacketImpl(unsubscribePacket2));
 
         assertNotSame(unsubscribePacket1, input.getUnsubscribePacket());
         assertNotSame(unsubscribePacket2, input.getUnsubscribePacket());

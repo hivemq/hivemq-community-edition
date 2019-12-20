@@ -72,7 +72,10 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     public void setTopicFilters(final @NotNull List<@NotNull String> topicFilters) {
         Preconditions.checkNotNull(topicFilters, "Topic filters must never be null.");
         if (topicFilters.size() != this.topicFilters.size()) {
-            throw new IllegalArgumentException("You cannot change the amount of topic filters.");
+            throw new IllegalArgumentException("The amount of topic filters must not be changed.");
+        }
+        for (int i = 0; i < topicFilters.size(); i++) {
+            Preconditions.checkNotNull(topicFilters.get(i), "Topic filter (at index %s) must never be null.", i);
         }
         if (Objects.equals(this.topicFilters, topicFilters)) {
             return;

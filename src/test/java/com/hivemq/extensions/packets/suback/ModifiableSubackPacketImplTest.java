@@ -108,7 +108,7 @@ public class ModifiableSubackPacketImplTest {
         try {
             packet.setReasonCodes(reasonCodes);
         } catch (final NullPointerException e) {
-            assertEquals("Reason code (at index 1) must never be null", e.getMessage());
+            assertEquals("Reason code (at index 1) must never be null.", e.getMessage());
             throw e;
         }
     }

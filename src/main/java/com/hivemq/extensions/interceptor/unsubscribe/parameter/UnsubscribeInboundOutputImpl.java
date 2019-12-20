@@ -36,6 +36,8 @@ public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<Unsubscrib
     private final @NotNull FullConfigurationService configurationService;
     private @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket;
 
+    private boolean preventDelivery = false;
+
     public UnsubscribeInboundOutputImpl(
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull FullConfigurationService configurationService,
@@ -58,5 +60,13 @@ public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<Unsubscrib
 
     public void update(final @NotNull UnsubscribePacket unsubscribePacket) {
         this.unsubscribePacket = new ModifiableUnsubscribePacketImpl(configurationService, unsubscribePacket);
+    }
+
+    public void preventDelivery() {
+        preventDelivery = true;
+    }
+
+    public boolean isPreventDelivery() {
+        return preventDelivery;
     }
 }

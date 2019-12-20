@@ -90,11 +90,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         //Must be after decoder
         ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
-        ch.pipeline()
-                .addLast(
-                        UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER,
-                        channelDependencies.getUnsubscribeInboundInterceptorHandler());
-
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
         ch.pipeline().addLast(CONNACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnackOutboundInterceptorHandler());
 
@@ -106,6 +101,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(SUBACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getSubackOutboundInterceptorHandler());
         ch.pipeline().addLast(UNSUBACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getUnsubackOutboundInterceptorHandler());
+        ch.pipeline().addLast(UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getUnsubscribeInboundInterceptorHandler());
 
         ch.pipeline().addLast(DISCONNECT_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInterceptorHandler());
 

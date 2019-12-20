@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -28,8 +31,12 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.unsubscribe.parameter.UnsubscribeInboundInputImpl;
 import com.hivemq.extensions.interceptor.unsubscribe.parameter.UnsubscribeInboundOutputImpl;
+import com.hivemq.extensions.packets.unsubscribe.ModifiableUnsubscribePacketImpl;
+import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
+import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -152,17 +159,34 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
             if (output.isTimedOut()) {
                 log.debug("Async timeout on inbound UNSUBSCRIBE interception.");
                 output.update(input.getUnsubscribePacket());
+                if (output.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+                    output.preventDelivery();
+                }
             } else if (output.getUnsubscribePacket().isModified()) {
-                input.updateUnsubscribe(output.getUnsubscribePacket());
+                input.update(output.getUnsubscribePacket());
             }
             increment(output);
         }
 
         public void increment(final @NotNull UnsubscribeInboundOutputImpl output) {
             if (counter.incrementAndGet() == interceptorCount) {
-                final UNSUBSCRIBE finalDisconnect = UNSUBSCRIBE.createUnsubscribeFrom(output.getUnsubscribePacket());
-                ctx.fireChannelRead(finalDisconnect);
+                if (output.isPreventDelivery()) {
+                    prevent(output.getUnsubscribePacket());
+                } else {
+                    final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.createUnsubscribeFrom(output.getUnsubscribePacket());
+                    ctx.fireChannelRead(unsubscribe);
+                }
             }
+        }
+
+        private void prevent(final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket) {
+            final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodes = ImmutableList.builder();
+            for (int i = 0; i < unsubscribePacket.getTopicFilters().size(); i++) {
+                reasonCodes.add(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
+            }
+            final UNSUBACK unsuback = new UNSUBACK(unsubscribePacket.getPacketIdentifier(), reasonCodes.build(),
+                    ReasonStrings.UNSUBACK_EXTENSION_PREVENTED);
+            ctx.writeAndFlush(unsuback);
         }
     }
 
@@ -185,6 +209,9 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                 final @NotNull UnsubscribeInboundInputImpl input,
                 final @NotNull UnsubscribeInboundOutputImpl output) {
 
+            if (output.isPreventDelivery()) {
+                return output;
+            }
             try {
                 interceptor.onInboundUnsubscribe(input, output);
             } catch (final Throwable e) {
@@ -193,6 +220,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                                 "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original Exception:" + e);
                 output.update(input.getUnsubscribePacket());
+                output.preventDelivery();
             }
             return output;
         }
