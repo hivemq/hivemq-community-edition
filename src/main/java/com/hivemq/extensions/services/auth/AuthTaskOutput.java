@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> implements PluginTaskOutput, EnhancedAuthOutput, AuthOutput {
 
     private static final Logger log = LoggerFactory.getLogger(AuthTaskOutput.class);
@@ -288,13 +288,15 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
 
     private void checkReasonCode(final @NotNull DisconnectedReasonCode disconnectedReasonCode) {
         if (isReAuth) {
+            Preconditions.checkArgument(disconnectedReasonCode != DisconnectedReasonCode.NORMAL_DISCONNECTION,
+                    "DISCONNECT reason code must not be 'NORMAL_DISCONNECTION' for failed authentication");
             Preconditions.checkArgument(ReasonCodeUtil.toMqtt5DisconnectReasonCode(disconnectedReasonCode) != null,
-                    "The disconnected reason code '" + disconnectedReasonCode.name() + "'cannot be used for DISCONNECT messages");
+                    "The disconnected reason code '" + disconnectedReasonCode.name() + "' cannot be used for DISCONNECT messages.");
         } else {
             Preconditions.checkArgument(disconnectedReasonCode != DisconnectedReasonCode.SUCCESS,
                     "CONNACK reason code must not be 'SUCCESS' for failed authentication");
             Preconditions.checkArgument(ReasonCodeUtil.toMqtt5ConnAckReasonCode(disconnectedReasonCode) != null,
-                    "The disconnected reason code '" + disconnectedReasonCode.name() + "'cannot be used for CONNACK messages");
+                    "The disconnected reason code '" + disconnectedReasonCode.name() + "' cannot be used for CONNACK messages.");
         }
     }
 

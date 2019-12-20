@@ -16,9 +16,9 @@
 
 package com.hivemq.extensions.packets.general;
 
-import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -40,9 +40,9 @@ public class ReasonCodeUtil {
         }
         try {
             return Mqtt5ConnAckReasonCode.valueOf(connackReasonCode.name());
-        } catch (final IllegalArgumentException e){
+        } catch (final IllegalArgumentException e) {
             //should never happen
-            log.debug("No Mqtt5ConnAckReasonCode found for the given value: {}" , connackReasonCode.name());
+            log.debug("No Mqtt5ConnAckReasonCode found for the given value: {}", connackReasonCode.name());
             return null;
         }
     }
@@ -96,22 +96,30 @@ public class ReasonCodeUtil {
         switch (disconnectReasonCode) {
             case SUCCESS:
                 return ConnackReasonCode.SUCCESS;
-            case NOT_AUTHORIZED:
-                return ConnackReasonCode.NOT_AUTHORIZED;
             case UNSPECIFIED_ERROR:
                 return ConnackReasonCode.UNSPECIFIED_ERROR;
-            case BAD_AUTHENTICATION_METHOD:
-                return ConnackReasonCode.BAD_AUTHENTICATION_METHOD;
             case MALFORMED_PACKET:
                 return ConnackReasonCode.MALFORMED_PACKET;
             case PROTOCOL_ERROR:
                 return ConnackReasonCode.PROTOCOL_ERROR;
             case IMPLEMENTATION_SPECIFIC_ERROR:
                 return ConnackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR;
-            case SERVER_BUSY:
-                return ConnackReasonCode.SERVER_BUSY;
+            case UNSUPPORTED_PROTOCOL_VERSION:
+                return ConnackReasonCode.UNSUPPORTED_PROTOCOL_VERSION;
             case CLIENT_IDENTIFIER_NOT_VALID:
                 return ConnackReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
+            case BAD_USER_NAME_OR_PASSWORD:
+                return ConnackReasonCode.BAD_USER_NAME_OR_PASSWORD;
+            case NOT_AUTHORIZED:
+                return ConnackReasonCode.NOT_AUTHORIZED;
+            case SERVER_UNAVAILABLE:
+                return ConnackReasonCode.SERVER_UNAVAILABLE;
+            case SERVER_BUSY:
+                return ConnackReasonCode.SERVER_BUSY;
+            case BANNED:
+                return ConnackReasonCode.BANNED;
+            case BAD_AUTHENTICATION_METHOD:
+                return ConnackReasonCode.BAD_AUTHENTICATION_METHOD;
             case TOPIC_NAME_INVALID:
                 return ConnackReasonCode.TOPIC_NAME_INVALID;
             case PACKET_TOO_LARGE:
@@ -128,29 +136,9 @@ public class ReasonCodeUtil {
                 return ConnackReasonCode.USE_ANOTHER_SERVER;
             case SERVER_MOVED:
                 return ConnackReasonCode.SERVER_MOVED;
-            case UNSUPPORTED_PROTOCOL_VERSION:
-                return ConnackReasonCode.UNSUPPORTED_PROTOCOL_VERSION;
-            case BAD_USER_NAME_OR_PASSWORD:
-                return ConnackReasonCode.BAD_USER_NAME_OR_PASSWORD;
-            case SERVER_UNAVAILABLE:
-                return ConnackReasonCode.SERVER_UNAVAILABLE;
-            case BANNED:
-                return ConnackReasonCode.BANNED;
+            case CONNECTION_RATE_EXCEEDED:
+                return ConnackReasonCode.CONNECTION_RATE_EXCEEDED;
 
-            //No connack reason code available for this.
-            case MAXIMUM_CONNECT_TIME:
-            case SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED:
-            case NORMAL_DISCONNECTION:
-            case DISCONNECT_WITH_WILL_MESSAGE:
-            case SERVER_SHUTTING_DOWN:
-            case KEEP_ALIVE_TIMEOUT:
-            case SESSION_TAKEN_OVER:
-            case TOPIC_FILTER_INVALID:
-            case RECEIVE_MAXIMUM_EXCEEDED:
-            case TOPIC_ALIAS_INVALID:
-            case MESSAGE_RATE_TOO_HIGH:
-            case ADMINISTRATIVE_ACTION:
-            case SHARED_SUBSCRIPTION_NOT_SUPPORTED:
             default:
                 return ConnackReasonCode.UNSPECIFIED_ERROR;
         }
@@ -170,10 +158,20 @@ public class ReasonCodeUtil {
                 return Mqtt5ConnAckReasonCode.PROTOCOL_ERROR;
             case IMPLEMENTATION_SPECIFIC_ERROR:
                 return Mqtt5ConnAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR;
+            case UNSUPPORTED_PROTOCOL_VERSION:
+                return Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION;
+            case CLIENT_IDENTIFIER_NOT_VALID:
+                return Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
+            case BAD_USER_NAME_OR_PASSWORD:
+                return Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
             case NOT_AUTHORIZED:
                 return Mqtt5ConnAckReasonCode.NOT_AUTHORIZED;
+            case SERVER_UNAVAILABLE:
+                return Mqtt5ConnAckReasonCode.SERVER_UNAVAILABLE;
             case SERVER_BUSY:
                 return Mqtt5ConnAckReasonCode.SERVER_BUSY;
+            case BANNED:
+                return Mqtt5ConnAckReasonCode.BANNED;
             case BAD_AUTHENTICATION_METHOD:
                 return Mqtt5ConnAckReasonCode.BAD_AUTHENTICATION_METHOD;
             case TOPIC_NAME_INVALID:
@@ -192,16 +190,8 @@ public class ReasonCodeUtil {
                 return Mqtt5ConnAckReasonCode.USE_ANOTHER_SERVER;
             case SERVER_MOVED:
                 return Mqtt5ConnAckReasonCode.SERVER_MOVED;
-            case UNSUPPORTED_PROTOCOL_VERSION:
-                return Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION;
-            case CLIENT_IDENTIFIER_NOT_VALID:
-                return Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
-            case BAD_USER_NAME_OR_PASSWORD:
-                return Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
-            case SERVER_UNAVAILABLE:
-                return Mqtt5ConnAckReasonCode.SERVER_UNAVAILABLE;
-            case BANNED:
-                return Mqtt5ConnAckReasonCode.BANNED;
+            case CONNECTION_RATE_EXCEEDED:
+                return Mqtt5ConnAckReasonCode.CONNECTION_RATE_EXCEEDED;
             default:
                 return null;
         }
@@ -211,6 +201,10 @@ public class ReasonCodeUtil {
     public static Mqtt5DisconnectReasonCode toMqtt5DisconnectReasonCode(@NotNull final DisconnectedReasonCode disconnectedReasonCode) {
 
         switch (disconnectedReasonCode) {
+            case NORMAL_DISCONNECTION:
+                return Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
+            case DISCONNECT_WITH_WILL_MESSAGE:
+                return Mqtt5DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE;
             case UNSPECIFIED_ERROR:
                 return Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR;
             case MALFORMED_PACKET:
@@ -223,14 +217,30 @@ public class ReasonCodeUtil {
                 return Mqtt5DisconnectReasonCode.NOT_AUTHORIZED;
             case SERVER_BUSY:
                 return Mqtt5DisconnectReasonCode.SERVER_BUSY;
+            case SERVER_SHUTTING_DOWN:
+                return Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN;
             case BAD_AUTHENTICATION_METHOD:
                 return Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD;
+            case KEEP_ALIVE_TIMEOUT:
+                return Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT;
+            case SESSION_TAKEN_OVER:
+                return Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER;
+            case TOPIC_FILTER_INVALID:
+                return Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID;
             case TOPIC_NAME_INVALID:
                 return Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID;
+            case RECEIVE_MAXIMUM_EXCEEDED:
+                return Mqtt5DisconnectReasonCode.RECEIVE_MAXIMUM_EXCEEDED;
+            case TOPIC_ALIAS_INVALID:
+                return Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID;
             case PACKET_TOO_LARGE:
                 return Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE;
+            case MESSAGE_RATE_TOO_HIGH:
+                return Mqtt5DisconnectReasonCode.MESSAGE_RATE_TOO_HIGH;
             case QUOTA_EXCEEDED:
                 return Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED;
+            case ADMINISTRATIVE_ACTION:
+                return Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION;
             case PAYLOAD_FORMAT_INVALID:
                 return Mqtt5DisconnectReasonCode.PAYLOAD_FORMAT_INVALID;
             case RETAIN_NOT_SUPPORTED:
@@ -241,26 +251,6 @@ public class ReasonCodeUtil {
                 return Mqtt5DisconnectReasonCode.USE_ANOTHER_SERVER;
             case SERVER_MOVED:
                 return Mqtt5DisconnectReasonCode.SERVER_MOVED;
-            case NORMAL_DISCONNECTION:
-                return Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
-            case DISCONNECT_WITH_WILL_MESSAGE:
-                return Mqtt5DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE;
-            case SERVER_SHUTTING_DOWN:
-                return Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN;
-            case KEEP_ALIVE_TIMEOUT:
-                return Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT;
-            case SESSION_TAKEN_OVER:
-                return Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER;
-            case TOPIC_FILTER_INVALID:
-                return Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID;
-            case RECEIVE_MAXIMUM_EXCEEDED:
-                return Mqtt5DisconnectReasonCode.RECEIVE_MAXIMUM_EXCEEDED;
-            case TOPIC_ALIAS_INVALID:
-                return Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID;
-            case MESSAGE_RATE_TOO_HIGH:
-                return Mqtt5DisconnectReasonCode.MESSAGE_RATE_TOO_HIGH;
-            case ADMINISTRATIVE_ACTION:
-                return Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION;
             case SHARED_SUBSCRIPTION_NOT_SUPPORTED:
                 return Mqtt5DisconnectReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED;
             case CONNECTION_RATE_EXCEEDED:
