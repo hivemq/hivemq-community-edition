@@ -69,7 +69,7 @@ public class UnsubscribeInboundInputImpl
         return this;
     }
 
-    public void updateUnsubscribe(final @NotNull UnsubscribePacket unsubscribePacket) {
+    public void update(final @NotNull UnsubscribePacket unsubscribePacket) {
         this.unsubscribePacket = new UnsubscribePacketImpl(unsubscribePacket);
     }
 }

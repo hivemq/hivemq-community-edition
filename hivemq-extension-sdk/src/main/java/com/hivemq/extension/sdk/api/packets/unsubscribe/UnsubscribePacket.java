@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.packets.unsubscribe;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
 import java.util.List;
@@ -34,23 +36,29 @@ import java.util.List;
 public interface UnsubscribePacket {
 
     /**
-     * Gets the list of topics to be unsubscribed from.
+     * The packet identifier of the UNSUBSCRIBE packet.
      *
-     * @return the list of topics to be unsubscribed from.
-     */
-    @Immutable @NotNull List<@NotNull String> getTopicFilters();
-
-    /**
-     * Get the unmodifiable {@link UserProperties} of the UNSUBSCRIBE packet.
-     *
-     * @return user properties.
-     */
-    @Immutable @NotNull UserProperties getUserProperties();
-
-    /**
-     * Gets the packet identifier.
-     *
-     * @return the packet identifier.
+     * @return The packet identifier.
      */
     int getPacketIdentifier();
+
+    /**
+     * Gets the list of topics to be unsubscribed from.
+     *
+     * @return The list of topics to be unsubscribed from.
+     */
+    @Immutable
+    @NotNull List<@NotNull String> getTopicFilters();
+
+    /**
+     * The user properties from the UNSUBSCRIBE packet.
+     * <p>
+     * For an MQTT 3 client this MQTT 5 property will always be empty (if not modified by a previous {@link
+     * UnsubscribeInboundInterceptor}).
+     *
+     * @return The {@link UserProperties} of the UNSUBSCRIBE packet.
+     */
+    @Immutable
+    @NotNull UserProperties getUserProperties();
+
 }

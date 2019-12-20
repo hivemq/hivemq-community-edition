@@ -128,6 +128,7 @@ public class ReasonStrings {
     public static final String DISCONNECT_SESSION_TAKEN_OVER = "Another client connected with the same client id.";
 
     public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
+    public static final String UNSUBACK_EXTENSION_PREVENTED = "UNSUBSCRIBE prevented by an extension.";
 
     private ReasonStrings() {
         //Don't instantiate

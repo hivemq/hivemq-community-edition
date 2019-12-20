@@ -36,5 +36,6 @@ public interface UnsubscribeInboundInput extends ClientBasedInput {
      *
      * @return An unmodifiable {@link UnsubscribePacket}.
      */
-    @Immutable @NotNull UnsubscribePacket getUnsubscribePacket();
+    @Immutable
+    @NotNull UnsubscribePacket getUnsubscribePacket();
 }
