@@ -60,7 +60,7 @@ public class ReasonCodeUtilTest {
     public void test_to_connack_from_disconnected() {
 
         for (final DisconnectedReasonCode value : DisconnectedReasonCode.values()) {
-            if (isDisconnectOnly(value)) {
+            if(isDisconnectOnly(value)){
                 assertEquals(ConnackReasonCode.UNSPECIFIED_ERROR, ReasonCodeUtil.toConnackReasonCode(value));
                 continue;
             }
@@ -74,7 +74,7 @@ public class ReasonCodeUtilTest {
 
         for (final DisconnectedReasonCode value : DisconnectedReasonCode.values()) {
             final Mqtt5ConnAckReasonCode mqtt5ConnAckReasonCode = ReasonCodeUtil.toMqtt5ConnAckReasonCode(value);
-            if (isDisconnectOnly(value)) {
+            if(isDisconnectOnly(value)){
                 assertNull(mqtt5ConnAckReasonCode);
                 continue;
             }
@@ -87,9 +87,8 @@ public class ReasonCodeUtilTest {
     public void test_to_mqtt_5_disconnect_from_disconnected() {
 
         for (final DisconnectedReasonCode value : DisconnectedReasonCode.values()) {
-            final Mqtt5DisconnectReasonCode mqtt5DisconnectReasonCode =
-                    ReasonCodeUtil.toMqtt5DisconnectReasonCode(value);
-            if (isConnackOnly(value)) {
+            final Mqtt5DisconnectReasonCode mqtt5DisconnectReasonCode = ReasonCodeUtil.toMqtt5DisconnectReasonCode(value);
+            if(isConnackOnly(value)){
                 assertNull(mqtt5DisconnectReasonCode);
                 continue;
             }
@@ -110,7 +109,6 @@ public class ReasonCodeUtilTest {
                 value.equals(DisconnectedReasonCode.MESSAGE_RATE_TOO_HIGH) ||
                 value.equals(DisconnectedReasonCode.ADMINISTRATIVE_ACTION) ||
                 value.equals(DisconnectedReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED) ||
-                value.equals(DisconnectedReasonCode.CONNECTION_RATE_EXCEEDED) ||
                 value.equals(DisconnectedReasonCode.MAXIMUM_CONNECT_TIME) ||
                 value.equals(DisconnectedReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED) ||
                 value.equals(DisconnectedReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);

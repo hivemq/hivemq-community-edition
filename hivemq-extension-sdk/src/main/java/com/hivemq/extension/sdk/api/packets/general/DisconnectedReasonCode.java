@@ -87,6 +87,10 @@ public enum DisconnectedReasonCode {
      * @since 4.0.0
      */
     SERVER_MOVED,
+    /**
+     * @since 4.0.0
+     */
+    CONNECTION_RATE_EXCEEDED,
 
     /* ***********
      *  CONNACK  *
@@ -168,10 +172,6 @@ public enum DisconnectedReasonCode {
      * @since 4.0.0
      */
     SHARED_SUBSCRIPTION_NOT_SUPPORTED,
-    /**
-     * @since 4.0.0
-     */
-    CONNECTION_RATE_EXCEEDED,
     /**
      * @since 4.0.0
      */
