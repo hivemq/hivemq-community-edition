@@ -54,19 +54,19 @@ public class MessageBarrierTest {
     }
 
     @Test
-    public void test_default() throws Exception {
-        assertEquals(false, messageBarrier.getConnectAlreadySent());
+    public void test_default() {
+        assertEquals(false, messageBarrier.getConnectReceived());
     }
 
     @Test
-    public void test_connect_sent() throws Exception {
+    public void test_connect_sent() {
 
         embeddedChannel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
-        assertEquals(true, messageBarrier.getConnectAlreadySent());
+        assertEquals(true, messageBarrier.getConnectReceived());
     }
 
     @Test
-    public void test_message_sent_before_connect() throws Exception {
+    public void test_message_sent_before_connect() {
 
         embeddedChannel.writeInbound(TestMessageUtil.createMqtt3Publish());
         assertEquals(false, embeddedChannel.isActive());
@@ -74,7 +74,7 @@ public class MessageBarrierTest {
     }
 
     @Test
-    public void test_queue_messages_after_connect() throws Exception {
+    public void test_queue_messages_after_connect() {
 
         embeddedChannel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
 
@@ -90,7 +90,7 @@ public class MessageBarrierTest {
     }
 
     @Test
-    public void test_messages_not_sent_on_connack_fail() throws Exception {
+    public void test_messages_not_sent_on_connack_fail() {
 
         embeddedChannel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
 
@@ -104,7 +104,7 @@ public class MessageBarrierTest {
         embeddedChannel.pipeline().addFirst(new ChannelDuplexHandler() {
 
             @Override
-            public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
+            public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
                 counter.incrementAndGet();
             }
         });
@@ -115,7 +115,7 @@ public class MessageBarrierTest {
     }
 
     @Test
-    public void test_messages_sent_on_connack_success() throws Exception {
+    public void test_messages_sent_on_connack_success() {
 
         embeddedChannel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
 
@@ -129,7 +129,7 @@ public class MessageBarrierTest {
         embeddedChannel.pipeline().addAfter(MQTT_MESSAGE_BARRIER, "test", new ChannelDuplexHandler() {
 
             @Override
-            public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
+            public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
 
                 if (msg instanceof PUBLISH || msg instanceof SUBSCRIBE) {
                     counter.incrementAndGet();

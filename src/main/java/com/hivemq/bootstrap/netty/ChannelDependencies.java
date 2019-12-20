@@ -32,7 +32,7 @@ import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
-import com.hivemq.mqtt.handler.connect.StopReadingAfterConnectHandler;
+import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
@@ -56,141 +56,55 @@ import javax.inject.Provider;
  */
 public class ChannelDependencies {
 
-    @NotNull
-    private final Provider<MetricsInitializer> statisticsInitializer;
-
-    @NotNull
-    private final Provider<ConnectHandler> connectHandlerProvider;
-
-    @NotNull
-    private final ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler;
-
-    @NotNull
-    private final DisconnectHandler disconnectHandler;
-
-    @NotNull
-    private final Provider<SubscribeHandler> subscribeHandlerProvider;
-
-    @NotNull
-    private final Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider;
-
-    @NotNull
-    private final Provider<UnsubscribeHandler> unsubscribeHandlerProvider;
-
-    @NotNull
-    private final Provider<QoSReceiverHandler> qoSReceiverHandlerProvider;
-
-    @NotNull
-    private final Provider<QoSSenderHandler> qoSSenderHandlerProvider;
-
-    @NotNull
-    private final ChannelGroup channelGroup;
-
-    @NotNull
-    private final FullConfigurationService fullConfigurationService;
-
-    @NotNull
-    private final GlobalTrafficShapingHandler globalTrafficShapingHandler;
-
-    @NotNull
-    private final MetricsHolder metricsHolder;
-
-    @NotNull
-    private final ExceptionHandler exceptionHandler;
-
-    @NotNull
-    private final PingRequestHandler pingRequestHandler;
-
-    @NotNull
-    private final RestrictionsConfigurationService restrictionsConfigurationService;
-
-    @NotNull
-    private final MqttConnectDecoder mqttConnectDecoder;
-
-    @NotNull
-    private final ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler;
-
-    @NotNull
-    private final MQTTMessageEncoder mqttMessageEncoder;
-
-    @NotNull
-    private final ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @NotNull
-    private final StopReadingAfterConnectHandler stopReadingAfterConnectHandler;
-
-    @NotNull
-    private final Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
-
-    @NotNull
-    private final EventLog eventLog;
-
-    @NotNull
-    private final SslParameterHandler sslParameterHandler;
-
-    @NotNull
-    private final MqttDecoders mqttDecoders;
-
-    @NotNull
-    private final Provider<AuthHandler> authHandlerProvider;
-
-    @NotNull
-    private final Provider<PluginInitializerHandler> pluginInitializerHandlerProvider;
-
-    @NotNull
-    private final Provider<ClientLifecycleEventHandler> clientLifecycleEventHandlerProvider;
-
-    @NotNull
-    private final AuthInProgressMessageHandler authInProgressMessageHandler;
-
-    @NotNull
-    private final Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
-
-    @NotNull
-    private final Provider<IncomingPublishHandler> incomingPublishHandlerProvider;
-
-    @NotNull
-    private final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
-
-    @NotNull
-    private final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
-
-    @NotNull
-    private final ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
-
-    @NotNull
-    private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-
-    @NotNull
-    private final DisconnectInterceptorHandler disconnectInterceptorHandler;
-
-    @NotNull
-    private final PubackInterceptorHandler pubackInterceptorHandler;
-
-    @NotNull
-    private final PubrecInterceptorHandler pubrecInterceptorHandler;
-
-    @NotNull
-    private final PubrelInterceptorHandler pubrelInterceptorHandler;
-
-    @NotNull
-    private final PubcompInterceptorHandler pubcompInterceptorhandler;
-
-    @NotNull
-    private final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
-
-    @NotNull
-    private final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
-
-    @NotNull
-    private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
-
-    @NotNull
-    private final PingInterceptorHandler pingInterceptorHandler;
+    private final @NotNull Provider<MetricsInitializer> statisticsInitializer;
+    private final @NotNull NoConnectIdleHandler noConnectIdleHandler;
+    private final @NotNull Provider<ConnectHandler> connectHandlerProvider;
+    private final @NotNull ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler;
+    private final @NotNull DisconnectHandler disconnectHandler;
+    private final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider;
+    private final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider;
+    private final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider;
+    private final @NotNull Provider<QoSReceiverHandler> qoSReceiverHandlerProvider;
+    private final @NotNull Provider<QoSSenderHandler> qoSSenderHandlerProvider;
+    private final @NotNull ChannelGroup channelGroup;
+    private final @NotNull FullConfigurationService fullConfigurationService;
+    private final @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler;
+    private final @NotNull MetricsHolder metricsHolder;
+    private final @NotNull ExceptionHandler exceptionHandler;
+    private final @NotNull PingRequestHandler pingRequestHandler;
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
+    private final @NotNull MqttConnectDecoder mqttConnectDecoder;
+    private final @NotNull ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler;
+    private final @NotNull MQTTMessageEncoder mqttMessageEncoder;
+    private final @NotNull ListenerAttributeAdderFactory listenerAttributeAdderFactory;
+    private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
+    private final @NotNull EventLog eventLog;
+    private final @NotNull SslParameterHandler sslParameterHandler;
+    private final @NotNull MqttDecoders mqttDecoders;
+    private final @NotNull Provider<AuthHandler> authHandlerProvider;
+    private final @NotNull Provider<PluginInitializerHandler> pluginInitializerHandlerProvider;
+    private final @NotNull Provider<ClientLifecycleEventHandler> clientLifecycleEventHandlerProvider;
+    private final @NotNull AuthInProgressMessageHandler authInProgressMessageHandler;
+    private final @NotNull Provider<IncomingPublishHandler> incomingPublishHandlerProvider;
+    private final @NotNull Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
+    private final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
+    private final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
+    private final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
+    private final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
+    private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
+    private final @NotNull PubackInterceptorHandler pubackInterceptorHandler;
+    private final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler;
+    private final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler;
+    private final @NotNull PubcompInterceptorHandler pubcompInterceptorhandler;
+    private final @NotNull SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
+    private final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+    private final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
+    private final @NotNull PingInterceptorHandler pingInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
             @NotNull final Provider<MetricsInitializer> statisticsInitializer,
+            @NotNull final NoConnectIdleHandler noConnectIdleHandler,
             @NotNull final Provider<ConnectHandler> connectHandlerProvider,
             @NotNull final ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler,
             @NotNull final DisconnectHandler disconnectHandler,
@@ -208,7 +122,6 @@ public class ChannelDependencies {
             @NotNull final RestrictionsConfigurationService restrictionsConfigurationService,
             @NotNull final MqttConnectDecoder mqttConnectDecoder,
             @NotNull final ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler,
-            @NotNull final StopReadingAfterConnectHandler stopReadingAfterConnectHandler,
             @NotNull final ListenerAttributeAdderFactory listenerAttributeAdderFactory,
             @NotNull final Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider,
             @NotNull final EventLog eventLog,
@@ -236,6 +149,7 @@ public class ChannelDependencies {
             @NotNull final PingInterceptorHandler pingInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
+        this.noConnectIdleHandler = noConnectIdleHandler;
         this.connectHandlerProvider = connectHandlerProvider;
         this.connectPersistenceUpdateHandler = connectPersistenceUpdateHandler;
         this.disconnectHandler = disconnectHandler;
@@ -253,7 +167,6 @@ public class ChannelDependencies {
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqttConnectDecoder = mqttConnectDecoder;
         this.returnMessageIdToPoolHandler = returnMessageIdToPoolHandler;
-        this.stopReadingAfterConnectHandler = stopReadingAfterConnectHandler;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory);
         this.listenerAttributeAdderFactory = listenerAttributeAdderFactory;
         this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
@@ -284,6 +197,11 @@ public class ChannelDependencies {
     @NotNull
     public MetricsInitializer getStatisticsInitializer() {
         return statisticsInitializer.get();
+    }
+
+    @NotNull
+    public NoConnectIdleHandler getNoConnectIdleHandler() {
+        return noConnectIdleHandler;
     }
 
     @NotNull
@@ -374,11 +292,6 @@ public class ChannelDependencies {
     @NotNull
     public MQTTMessageEncoder getMqttMessageEncoder() {
         return mqttMessageEncoder;
-    }
-
-    @NotNull
-    public StopReadingAfterConnectHandler getStopReadingAfterConnectHandler() {
-        return stopReadingAfterConnectHandler;
     }
 
     @NotNull
