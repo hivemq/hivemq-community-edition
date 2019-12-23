@@ -40,6 +40,8 @@ import java.time.format.DateTimeFormatter;
 @LazySingleton
 public class EventLog {
 
+    private static final Logger log = LoggerFactory.getLogger(EventLog.class);
+
     public static final String EVENT_CLIENT_CONNECTED = "event.client-connected";
     public static final String EVENT_CLIENT_DISCONNECTED = "event.client-disconnected";
     public static final String EVENT_MESSAGE_DROPPED = "event.message-dropped";
@@ -117,25 +119,22 @@ public class EventLog {
      * @param reasonString reason specified by the client for the DISCONNECT
      */
     public void clientDisconnected(@NotNull final Channel channel, @Nullable final String reasonString) {
-        if (!logClientDisconnected.isDebugEnabled()) {
-            return;
-        }
-
+        channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED).set(true);
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         final boolean graceful = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
 
-        if (graceful && reasonString != null) {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reasonString);
-        } else if (graceful) {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+        if (graceful) {
+            log.trace("Client {} disconnected gracefully.", clientId);
+            if (reasonString != null) {
+                logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reasonString);
+            } else {
+                logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+            }
         } else {
+            log.trace("Client {} disconnected ungracefully.", clientId);
             logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
         }
-    }
-
-    public void clientDisconnected(final Channel channel) {
-        clientDisconnected(channel, null);
     }
 
     /**
@@ -148,6 +147,7 @@ public class EventLog {
         channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED).set(true);
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
+        log.trace("Client {} was disconnected.", clientId);
         logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
     }
 
@@ -160,7 +160,7 @@ public class EventLog {
     public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
-        if(received) {
+        if (received) {
             logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
         } else {
             logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
