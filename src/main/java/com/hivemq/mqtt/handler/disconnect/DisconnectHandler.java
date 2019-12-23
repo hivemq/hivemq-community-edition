@@ -16,13 +16,11 @@
 
 package com.hivemq.mqtt.handler.disconnect;
 
-
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnClientDisconnectEvent;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
-import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -73,14 +71,11 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             ctx.channel().attr(CLIENT_SESSION_EXPIRY_INTERVAL).set(msg.getSessionExpiryInterval());
         }
 
-        if (ProtocolVersion.MQTTv5 == ctx.channel().attr(MQTT_VERSION).get()) {
-            final String reasonString = msg.getReasonString();
-            if (logClientReasonString && reasonString != null) {
-                eventLog.clientDisconnected(ctx.channel(), reasonString);
-                ctx.channel().attr(DISCONNECT_EVENT_LOGGED).set(true);
-            }
+        if (log.isTraceEnabled()) {
+            log.trace("The client [{}] sent a disconnect message.", clientId);
         }
-        log.trace("The client [{}] sent a disconnect message. ", clientId);
+        eventLog.clientDisconnected(ctx.channel(), logClientReasonString ? msg.getReasonString() : null);
+
         if (msg.getReasonCode() != NORMAL_DISCONNECTION) {
             ctx.channel().attr(SEND_WILL).set(true);
         } else {
@@ -96,20 +91,17 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
 
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(CLIENT_ID).get();
         final String[] topicAliasMapping = channel.attr(TOPIC_ALIAS_MAPPING).get();
         final boolean gracefulDisconnect = channel.attr(GRACEFUL_DISCONNECT).get() != null;
         final boolean preventLwt = channel.attr(PREVENT_LWT).get() != null ? channel.attr(PREVENT_LWT).get() : false;
         final boolean takenOver = channel.attr(TAKEN_OVER).get() != null ? channel.attr(TAKEN_OVER).get() : false;
         final boolean authenticated = channel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).get() != null ? channel.attr(AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).get() : false;
         final boolean logged = channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED).get() != null ? channel.attr(DISCONNECT_EVENT_LOGGED).get() : false;
+
         if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
             channel.attr(SEND_WILL).set(true);
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("Client {} disconnected {}", clientId, gracefulDisconnect ? "gracefully" : "ungracefully");
-        }
         if (!logged) {
             eventLog.clientDisconnected(channel, null);
         }

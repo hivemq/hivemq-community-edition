@@ -148,7 +148,7 @@ public class EventLogTest {
         when(channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT)).thenReturn(attributeDisconnect);
         when(attributeDisconnect.get()).thenReturn(true);
 
-        eventLog.clientDisconnected(channel);
+        eventLog.clientDisconnected(channel, null);
 
         logMessageBuffer.append("Client ID: ").append(clientId)
                 .append(", IP: ").append("UNKNOWN").append(" disconnected gracefully.");
@@ -162,7 +162,7 @@ public class EventLogTest {
         when(channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT)).thenReturn(attributeDisconnect);
         when(attributeDisconnect.get()).thenReturn(null);
 
-        eventLog.clientDisconnected(channel);
+        eventLog.clientDisconnected(channel, null);
 
         logMessageBuffer.append("Client ID: ").append(clientId)
                 .append(", IP: ").append("UNKNOWN").append(" disconnected ungracefully.");
