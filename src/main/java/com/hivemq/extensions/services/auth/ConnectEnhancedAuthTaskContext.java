@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 
 /**
  * @author Florian Limpöck
-*/
+ */
 public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthTaskOutput>
         implements Supplier<AuthTaskOutput> {
 
@@ -94,7 +94,7 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
         this.authenticatorsCount = authenticatorsCount;
         this.clientSettings = clientSettings;
         this.authenticationContext = authenticationContext;
-        this.connectEnhancedAuthTaskOutput = new AuthTaskOutput(asyncer, clientSettings, permissions, authenticationContext, validateUTF8, false, timeout);
+        this.connectEnhancedAuthTaskOutput = new AuthTaskOutput(asyncer, clientSettings, permissions, authenticationContext, validateUTF8, false, timeout, connect.getAuthMethod() != null);
     }
 
     @Override

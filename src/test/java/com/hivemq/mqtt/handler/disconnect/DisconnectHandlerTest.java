@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -44,7 +45,6 @@ public class DisconnectHandlerTest {
 
     private EmbeddedChannel embeddedChannel;
 
-    @Mock
     EventLog eventLog;
 
     @Mock
@@ -55,6 +55,8 @@ public class DisconnectHandlerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        eventLog = spy(new EventLog());
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
 
