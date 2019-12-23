@@ -29,6 +29,8 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,6 +61,9 @@ public class AbstractChannelInitializerTest {
     ChannelPipeline pipeline;
 
     @Mock
+    Attribute<Listener> attribute;
+
+    @Mock
     FullConfigurationService configurationService;
 
     @Mock
@@ -75,7 +80,9 @@ public class AbstractChannelInitializerTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+
         when(socketChannel.pipeline()).thenReturn(pipeline);
+        when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
 
         when(channelDependencies.getGlobalTrafficShapingHandler())
                 .thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 1000L));
@@ -141,7 +148,8 @@ public class AbstractChannelInitializerTest {
 
     @Test
     public void test_embedded_channel_closed_after_sslException_in_initializer() throws Exception {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
+        final EmbeddedChannel embeddedChannel =
+                new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
 
         final CountDownLatch latch = new CountDownLatch(1);
         embeddedChannel.closeFuture().addListener(new ChannelFutureListener() {
