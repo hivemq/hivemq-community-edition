@@ -27,6 +27,7 @@ import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.security.exception.SslException;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,6 +44,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSA
 /**
  * @author Dominik Obermaier
  * @author Christoph Schäbel
+ * @author Silvio Giebl
  */
 public abstract class AbstractChannelInitializer extends ChannelInitializer<Channel> {
 
@@ -71,6 +73,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
 
+        ch.attr(ChannelAttributes.LISTENER).set(listener);
+
         ch.pipeline().addLast(FIRST_ABSTRACT_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
 
         ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
@@ -80,33 +84,28 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         addNoConnectIdleHandler(ch);
 
-        //Must be before encoder
+        ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(eventLog));
+        ch.pipeline().addLast(MQTT_SUBSCRIBE_MESSAGE_BARRIER, new SubscribeMessageBarrier());
+
+        // before connack outbound interceptor as it initializes the client context after the connack
         ch.pipeline().addLast(PLUGIN_INITIALIZER_HANDLER, channelDependencies.getPluginInitializerHandler());
 
-        //Must be after decoder
         ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
-        ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
         ch.pipeline().addLast(CONNACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnackOutboundInterceptorHandler());
-
         ch.pipeline().addLast(PING_INTERCEPTOR_HANDLER, channelDependencies.getPingInterceptorHandler());
-
         ch.pipeline().addLast(PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPublishOutboundInterceptorHandler());
         ch.pipeline().addLast(PUBACK_INTERCEPTOR_HANDLER, channelDependencies.getPubackInterceptorHandler());
         ch.pipeline().addLast(PUBREC_INTERCEPTOR_HANDLER, channelDependencies.getPubrecInterceptorHandler());
         ch.pipeline().addLast(PUBREL_INTERCEPTOR_HANDLER, channelDependencies.getPubrelInterceptorHandler());
         ch.pipeline().addLast(PUBCOMP_INTERCEPTOR_HANDLER, channelDependencies.getPubcompInterceptorHandler());
-
         ch.pipeline().addLast(SUBACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getSubackOutboundInterceptorHandler());
         ch.pipeline().addLast(UNSUBACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getUnsubackOutboundInterceptorHandler());
+        // after unsuback outbound interceptor as a unsubscribe can be rejected and then a unsuback is sent
         ch.pipeline().addLast(UNSUBSCRIBE_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getUnsubscribeInboundInterceptorHandler());
-
         ch.pipeline().addLast(DISCONNECT_INTERCEPTOR_HANDLER, channelDependencies.getDisconnectInterceptorHandler());
 
-        ch.pipeline().addLast(LISTENER_ATTRIBUTE_ADDER, channelDependencies.getListenerAttributeAdderFactory().get(listener));
-
-        ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(eventLog));
-
-        ch.pipeline().addLast(MQTT_SUBSCRIBE_MESSAGE_BARRIER, new SubscribeMessageBarrier());
+        // after connect inbound interceptor as it intercepts the connect
+        ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 

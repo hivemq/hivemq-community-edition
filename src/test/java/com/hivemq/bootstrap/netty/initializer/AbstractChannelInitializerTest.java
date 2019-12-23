@@ -68,9 +68,6 @@ public class AbstractChannelInitializerTest {
     RestrictionsConfigurationService restrictionsConfigurationService;
 
     @Mock
-    ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @Mock
     EventLog eventLog;
 
     private AbstractChannelInitializer abstractChannelInitializer;
@@ -80,7 +77,6 @@ public class AbstractChannelInitializerTest {
         MockitoAnnotations.initMocks(this);
         when(socketChannel.pipeline()).thenReturn(pipeline);
 
-        when(channelDependencies.getListenerAttributeAdderFactory()).thenReturn(listenerAttributeAdderFactory);
         when(channelDependencies.getGlobalTrafficShapingHandler())
                 .thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 1000L));
 

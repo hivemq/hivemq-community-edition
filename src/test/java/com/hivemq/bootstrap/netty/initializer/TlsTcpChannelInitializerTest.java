@@ -68,9 +68,6 @@ public class TlsTcpChannelInitializerTest {
     @Mock
     private FullConfigurationService fullConfigurationService;
 
-    @Mock
-    private ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
     private ChannelPipeline pipeline;
 
     private TlsTcpChannelInitializer tlstcpChannelInitializer;
@@ -86,7 +83,6 @@ public class TlsTcpChannelInitializerTest {
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
-        when(channelDependencies.getListenerAttributeAdderFactory()).thenReturn(listenerAttributeAdderFactory);
 
         tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, ssl, eventLog);
 
