@@ -47,7 +47,7 @@ public class AuthTaskOutputTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        authTaskOutput = new AuthTaskOutput(asyncer, new ModifiableClientSettingsImpl(10), new ModifiableDefaultPermissionsImpl(), new AuthenticationContext(), true, false, 30);
+        authTaskOutput = new AuthTaskOutput(asyncer, new ModifiableClientSettingsImpl(10), new ModifiableDefaultPermissionsImpl(), new AuthenticationContext(), true, false, 30, true);
     }
 
     @Test(timeout = 5000)

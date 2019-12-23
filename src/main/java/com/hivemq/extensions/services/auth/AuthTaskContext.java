@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -54,7 +53,7 @@ import java.util.function.Supplier;
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 public class AuthTaskContext extends PluginInOutTaskContext<AuthTaskOutput> implements Supplier<AuthTaskOutput> {
 
     private static final Logger log = LoggerFactory.getLogger(AuthTaskContext.class);
@@ -112,7 +111,7 @@ public class AuthTaskContext extends PluginInOutTaskContext<AuthTaskOutput> impl
         this.disconnector = disconnector;
         this.metricsHolder = metricsHolder;
         this.position = new AtomicInteger(0);
-        this.authTaskOutput = new AuthTaskOutput(asyncer, modifiableClientSettings, defaultPermissions, new AuthenticationContext(), validateUTF8, isReAuth, timeout);
+        this.authTaskOutput = new AuthTaskOutput(asyncer, modifiableClientSettings, defaultPermissions, new AuthenticationContext(), validateUTF8, isReAuth, timeout, true);
     }
 
     @Override

@@ -60,6 +60,7 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     private @Nullable ByteBuffer authenticationData;
     private @Nullable String reasonString;
     private int timeout;
+    private final boolean supportsEnhancedAuth;
 
     AuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer,
                    final @NotNull ModifiableClientSettingsImpl clientSettings,
@@ -67,7 +68,8 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
                    final @NotNull AuthenticationContext authenticationContext,
                    final boolean validateUTF8,
                    final boolean isReAuth,
-                   final int timeout) {
+                   final int timeout,
+                   final boolean supportsEnhancedAuth) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
         this.authenticationContext = authenticationContext;
@@ -75,6 +77,7 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
         this.timeout = timeout;
         this.modifiableClientSettings = clientSettings;
         this.isReAuth = isReAuth;
+        this.supportsEnhancedAuth = supportsEnhancedAuth;
     }
 
     AuthTaskOutput(final @NotNull AuthTaskOutput authTaskOutput) {
@@ -84,7 +87,8 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
                 authTaskOutput.authenticationContext,
                 authTaskOutput.validateUTF8,
                 authTaskOutput.isReAuth,
-                authTaskOutput.timeout);
+                authTaskOutput.timeout,
+                authTaskOutput.supportsEnhancedAuth);
         if (authTaskOutput.getChangedUserProperties() != null) {
             this.legacyUserProperties = authTaskOutput.getChangedUserProperties().consolidate();
             this.modifiableUserProperties = new ModifiableUserPropertiesImpl(legacyUserProperties, validateUTF8);
@@ -138,22 +142,31 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
 
     @Override
     public void continueAuthentication() {
-        checkDecided("continueAuthentication");
+        checkContinueAuthentication();
         this.authenticationContext.setAuthenticationState(AuthenticationState.CONTINUE);
     }
 
     @Override
     public void continueAuthentication(final @NotNull ByteBuffer authenticationData) {
-        checkDecided("continueAuthentication");
+        checkContinueAuthentication();
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
         this.authenticationContext.setAuthenticationState(AuthenticationState.CONTINUE);
         this.authenticationData = authenticationData.asReadOnlyBuffer();
     }
 
     @Override
     public void continueAuthentication(final @NotNull byte[] authenticationData) {
-        checkDecided("continueAuthentication");
+        checkContinueAuthentication();
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
         this.authenticationContext.setAuthenticationState(AuthenticationState.CONTINUE);
         this.authenticationData = ByteBuffer.wrap(authenticationData).asReadOnlyBuffer();
+    }
+
+    public void checkContinueAuthentication() {
+        checkDecided("continueAuthentication");
+        if (!supportsEnhancedAuth) {
+            throw new UnsupportedOperationException("Continue authentication is not supported as the client does not support enhanced authentication.");
+        }
     }
 
 
@@ -166,6 +179,7 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     @Override
     public void authenticateSuccessfully(final @NotNull ByteBuffer authenticationData) {
         checkDecided("authenticateSuccessfully");
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
         this.authenticationContext.setAuthenticationState(AuthenticationState.SUCCESS);
         this.authenticationData = authenticationData.asReadOnlyBuffer();
     }
@@ -173,19 +187,11 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     @Override
     public void authenticateSuccessfully(final @NotNull byte[] authenticationData) {
         checkDecided("authenticateSuccessfully");
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
         this.authenticationContext.setAuthenticationState(AuthenticationState.SUCCESS);
         this.authenticationData = ByteBuffer.wrap(authenticationData).asReadOnlyBuffer();
     }
 
-    @Override
-    public void failAuthentication(final @NotNull DisconnectedReasonCode disconnectedReasonCode, final @NotNull String reasonString) {
-        checkDecided("failAuthentication");
-        checkReasonCode(disconnectedReasonCode);
-
-        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
-        this.disconnectedReasonCode = disconnectedReasonCode;
-        this.reasonString = reasonString;
-    }
 
     @Override
     public void failAuthentication() {
@@ -195,9 +201,22 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     @Override
     public void failAuthentication(final @NotNull String reasonString) {
         checkDecided("failAuthentication");
+        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
         this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
         this.reasonString = reasonString;
     }
+
+    @Override
+    public void failAuthentication(final @NotNull DisconnectedReasonCode disconnectedReasonCode, final @NotNull String reasonString) {
+        checkDecided("failAuthentication");
+        checkReasonCode(disconnectedReasonCode);
+        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
+
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+        this.disconnectedReasonCode = disconnectedReasonCode;
+        this.reasonString = reasonString;
+    }
+
 
     @Override
     public void nextExtensionOrDefault() {
@@ -287,6 +306,7 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     }
 
     private void checkReasonCode(final @NotNull DisconnectedReasonCode disconnectedReasonCode) {
+        Preconditions.checkNotNull(disconnectedReasonCode, "Reason code must never be null");
         if (isReAuth) {
             Preconditions.checkArgument(disconnectedReasonCode != DisconnectedReasonCode.NORMAL_DISCONNECTION,
                     "DISCONNECT reason code must not be 'NORMAL_DISCONNECTION' for failed authentication");
