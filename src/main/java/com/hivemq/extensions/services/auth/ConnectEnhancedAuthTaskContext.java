@@ -169,7 +169,7 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
                 if(!future.isSuccess()){
                     return;
                 }
-                final ScheduledFuture authFuture = ctx.executor().schedule(() -> mqttConnacker.connackError(channel, "Client with ip {} could not be authenticated",
+                final ScheduledFuture<?> authFuture = ctx.executor().schedule(() -> mqttConnacker.connackError(channel, "Client with ip {} could not be authenticated",
                             "Failed Authentication", DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout"),
                             pluginOutput.getTimeout(), TimeUnit.SECONDS);
                 channel.attr(ChannelAttributes.AUTH_FUTURE).set(authFuture);

@@ -26,12 +26,10 @@ import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthenticatorsImpl;
 import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
@@ -48,7 +46,6 @@ import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
@@ -58,8 +55,6 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER;
@@ -69,7 +64,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_
 /**
  * @author Florian Limpöck
  * @author Daniel Krüger
-*/
+ */
 @Singleton
 public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorService {
 
@@ -113,8 +108,6 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     private final boolean validateUTF8;
 
     @NotNull
-    private final Set<String> usedExtensionsSet;
-    @NotNull
     private final PluginPriorityComparator priorityComparator;
     private final int timeout;
     private final boolean denyUnAuthed;
@@ -145,7 +138,6 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT.get();
         this.denyUnAuthed = AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get();
         this.priorityComparator = new PluginPriorityComparator(extensions);
-        this.usedExtensionsSet = ConcurrentHashMap.newKeySet();
     }
 
     @Override
@@ -176,8 +168,6 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     .addAfter(MQTT_MESSAGE_DECODER, AUTH_IN_PROGRESS_MESSAGE_HANDLER,
                             channelDependencies.getAuthInProgressMessageHandler());
         }
-
-        usedExtensionsSet.addAll(authenticatorProviderMap.keySet());
 
         final AuthenticatorProviderInput authenticatorProviderInput = authenticatorProviderInputFactory.createInput(ctx, connect.getClientIdentifier());
 
@@ -220,34 +210,19 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @Override
     public void authenticateAuth(final @Nullable ConnectHandler connectHandler, final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
 
-        final boolean enhancedAvailable = authenticators.isEnhancedAvailable();
-
-        final ScheduledFuture authFuture = ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).get();
-        if(authFuture != null){
-            authFuture.cancel(true);
-            ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(null);
-        }
-
-        //DENY
-        if (!enhancedAvailable && denyUnAuthed) {
-            noAuthAvailableDisconnect(ctx, auth, reAuth);
-            return;
-        }
-
-        //ALLOW EMPTY
-        if (!enhancedAvailable) {
-            mqttAuthSender.sendAuth(ctx.channel(), null, Mqtt5AuthReasonCode.SUCCESS, auth.getUserProperties(), null);
-            return;
-        }
-
         final String authMethod = auth.getAuthMethod();
         if (!authMethod.equals(ctx.channel().attr(ChannelAttributes.AUTH_METHOD).get())) {
             badAuthMethodDisconnect(ctx, auth, reAuth);
             return;
         }
 
+        final ScheduledFuture<?> authFuture = ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).get();
+        if (authFuture != null) {
+            authFuture.cancel(true);
+            ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(null);
+        }
+
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap = authenticators.getAuthenticatorProviderMap();
-        usedExtensionsSet.addAll(authenticatorProviderMap.keySet());
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
         final ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
@@ -261,12 +236,16 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final ClientAuthenticators clientAuthenticators = getClientAuthenticators(ctx);
 
+        boolean enhancedAuthenticatorPresent = false;
         for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
             //AUTH packets are enhanced only
-            if (!entry.getValue().isEnhanced()) {
-                continue;
+            if (entry.getValue().isEnhanced()) {
+                enhancedAuthenticatorPresent = true;
+                pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, new AuthTask(entry.getValue(), authenticatorProviderInput, entry.getKey(), clientAuthenticators));
             }
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, new AuthTask(entry.getValue(), authenticatorProviderInput, entry.getKey(), clientAuthenticators));
+        }
+        if (!enhancedAuthenticatorPresent) {
+            noAuthAvailableDisconnect(ctx, auth, reAuth);
         }
     }
 

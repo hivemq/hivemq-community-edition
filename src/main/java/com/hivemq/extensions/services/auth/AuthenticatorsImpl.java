@@ -43,18 +43,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @VisibleForTesting
 public class AuthenticatorsImpl implements Authenticators {
 
-    @NotNull
-    private final ReadWriteLock authenticatorsLock = new ReentrantReadWriteLock();
-
-    @NotNull
+    private final @NotNull ReadWriteLock authenticatorsLock = new ReentrantReadWriteLock();
     @GuardedBy("authenticatorsLock")
-    private final TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
-    @NotNull
-    private final PluginAuthenticatorService pluginAuthenticatorService;
-    private final ChannelPersistence channelPersistence;
+    private final @NotNull TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
+    private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
+    private final @NotNull ChannelPersistence channelPersistence;
 
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
 
     private final @NotNull AtomicInteger enhancedAuthenticatorCount;
     private final @NotNull AtomicInteger simpleAuthenticatorCount;
