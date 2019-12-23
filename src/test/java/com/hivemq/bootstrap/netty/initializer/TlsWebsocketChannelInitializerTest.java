@@ -19,6 +19,7 @@ package com.hivemq.bootstrap.netty.initializer;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
 import com.hivemq.logging.EventLog;
@@ -27,6 +28,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +47,9 @@ public class TlsWebsocketChannelInitializerTest {
 
     @Mock
     private SocketChannel socketChannel;
+
+    @Mock
+    private Attribute<Listener> attribute;
 
     @Mock
     private ChannelDependencies channelDependencies;
@@ -78,6 +84,7 @@ public class TlsWebsocketChannelInitializerTest {
         pipeline = new FakeChannelPipeline();
 
         when(socketChannel.pipeline()).thenReturn(pipeline);
+        when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(mockListener.getTls()).thenReturn(tls);
