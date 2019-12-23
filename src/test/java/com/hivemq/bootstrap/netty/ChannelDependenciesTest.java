@@ -16,7 +16,6 @@
 
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.bootstrap.netty.initializer.ListenerAttributeAdderFactory;
 import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;
 import com.hivemq.codec.encoder.EncoderFactory;
@@ -121,9 +120,6 @@ public class ChannelDependenciesTest {
     private EncoderFactory encoderFactory;
 
     @Mock
-    private ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @Mock
     private DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
     @Mock
@@ -217,7 +213,6 @@ public class ChannelDependenciesTest {
                 restrictionsConfigurationService,
                 mqttConnectDecoder,
                 returnMessageIdToPoolHandler,
-                listenerAttributeAdderFactory,
                 () -> dropOutgoingPublishesHandler,
                 eventLog,
                 sslParameterHandler,
@@ -269,7 +264,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getMqttConnectDecoder());
         assertNotNull(channelDependencies.getReturnMessageIdToPoolHandler());
         assertNotNull(channelDependencies.getMqttMessageEncoder());
-        assertNotNull(channelDependencies.getListenerAttributeAdderFactory());
         assertNotNull(channelDependencies.getDropOutgoingPublishesHandler());
         assertNotNull(channelDependencies.getPublishMessageExpiryHandler());
         assertNotNull(channelDependencies.getEventLog());

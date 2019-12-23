@@ -17,7 +17,6 @@
 package com.hivemq.bootstrap.netty;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.bootstrap.netty.initializer.ListenerAttributeAdderFactory;
 import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;
 import com.hivemq.codec.encoder.EncoderFactory;
@@ -76,7 +75,6 @@ public class ChannelDependencies {
     private final @NotNull MqttConnectDecoder mqttConnectDecoder;
     private final @NotNull ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler;
     private final @NotNull MQTTMessageEncoder mqttMessageEncoder;
-    private final @NotNull ListenerAttributeAdderFactory listenerAttributeAdderFactory;
     private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
     private final @NotNull EventLog eventLog;
     private final @NotNull SslParameterHandler sslParameterHandler;
@@ -122,7 +120,6 @@ public class ChannelDependencies {
             @NotNull final RestrictionsConfigurationService restrictionsConfigurationService,
             @NotNull final MqttConnectDecoder mqttConnectDecoder,
             @NotNull final ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler,
-            @NotNull final ListenerAttributeAdderFactory listenerAttributeAdderFactory,
             @NotNull final Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider,
             @NotNull final EventLog eventLog,
             @NotNull final SslParameterHandler sslParameterHandler,
@@ -168,7 +165,6 @@ public class ChannelDependencies {
         this.mqttConnectDecoder = mqttConnectDecoder;
         this.returnMessageIdToPoolHandler = returnMessageIdToPoolHandler;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory);
-        this.listenerAttributeAdderFactory = listenerAttributeAdderFactory;
         this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
         this.eventLog = eventLog;
         this.sslParameterHandler = sslParameterHandler;
@@ -292,11 +288,6 @@ public class ChannelDependencies {
     @NotNull
     public MQTTMessageEncoder getMqttMessageEncoder() {
         return mqttMessageEncoder;
-    }
-
-    @NotNull
-    public ListenerAttributeAdderFactory getListenerAttributeAdderFactory() {
-        return listenerAttributeAdderFactory;
     }
 
     @NotNull

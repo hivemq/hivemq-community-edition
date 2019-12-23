@@ -64,9 +64,6 @@ public class TlsWebsocketChannelInitializerTest {
     private FullConfigurationService fullConfigurationService;
 
     @Mock
-    private ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @Mock
     private TlsWebsocketListener mockListener;
 
     @Mock
@@ -83,7 +80,6 @@ public class TlsWebsocketChannelInitializerTest {
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
-        when(channelDependencies.getListenerAttributeAdderFactory()).thenReturn(listenerAttributeAdderFactory);
         when(mockListener.getTls()).thenReturn(tls);
         when(ssl.getSslHandler(any(SocketChannel.class), any(Tls.class))).thenReturn(sslHandler);
     }
