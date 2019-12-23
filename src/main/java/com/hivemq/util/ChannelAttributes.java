@@ -89,7 +89,7 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Boolean> AUTH_AUTHENTICATED = AttributeKey.valueOf("Auth.Authenticated");
     public static final AttributeKey<Boolean> AUTHENTICATED_OR_AUTHENTICATION_BYPASSED = AttributeKey.valueOf("AuthenticatedOrAuthenticationBypassed");
-    public static final AttributeKey<ScheduledFuture> AUTH_FUTURE = AttributeKey.valueOf("Auth.Future");
+    public static final AttributeKey<ScheduledFuture<?>> AUTH_FUTURE = AttributeKey.valueOf("Auth.Future");
 
     public static final AttributeKey<Long> MAX_PACKET_SIZE_SEND = AttributeKey.valueOf("Restriction.MaxPacketSize.Send");
 

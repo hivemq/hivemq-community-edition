@@ -216,7 +216,7 @@ public class AuthTaskContext extends PluginInOutTaskContext<AuthTaskOutput> impl
             if(!future.isSuccess()){
                 return;
             }
-            final ScheduledFuture authFuture;
+            final ScheduledFuture<?> authFuture;
             if(isReAuth){
                 authFuture = ctx.executor().schedule(() -> disconnector.disconnect(channel, "Client with ip {} could not be authenticated",
                         "Failed Authentication", Mqtt5DisconnectReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout"),
