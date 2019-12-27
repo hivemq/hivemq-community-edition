@@ -18,17 +18,13 @@ package com.hivemq.extensions.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
-import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
-import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
-import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Map;
 
 /**
- * Internal interface for holding the {@link AuthenticatorProvider}s from
- * the extension system.
+ * Internal interface for holding the {@link AuthenticatorProvider}s from the extension system.
  *
  * @author Georg Held
  */
@@ -44,27 +40,4 @@ public interface Authenticators {
      * @param provider a wrapped {@link AuthenticatorProvider}
      */
     void registerAuthenticatorProvider(@NotNull WrappedAuthenticatorProvider provider);
-
-    /**
-     * @return true if any {@link AuthenticatorProvider} have been
-     * registered, false otherwise.
-     */
-    boolean areAuthenticatorsAvailable();
-
-    /**
-     * checks if at least one {@link EnhancedAuthenticatorProvider} is registered.
-     *
-     * @return true if at least one is registered, false otherwise.
-     */
-    boolean isEnhancedAvailable();
-
-    /**
-     * @return the amount of registered {@link EnhancedAuthenticator}
-     */
-    int getEnhancedAuthenticatorCount();
-
-    /**
-     * @return the amount of registered {@link SimpleAuthenticator}
-     */
-    int getSimpleAuthenticatorCount();
 }
