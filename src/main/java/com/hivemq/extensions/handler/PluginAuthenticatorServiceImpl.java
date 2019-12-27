@@ -110,7 +110,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @NotNull
     private final PluginPriorityComparator priorityComparator;
     private final int timeout;
-    private final boolean denyUnAuthed;
+//    private final boolean denyUnAuthed;
 
     @Inject
     public PluginAuthenticatorServiceImpl(final @NotNull MqttConnacker mqttConnacker,
@@ -136,7 +136,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         this.mqttAuthSender = mqttAuthSender;
         this.validateUTF8 = configurationService.securityConfiguration().validateUTF8();
         this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT.get();
-        this.denyUnAuthed = AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get();
+//        this.denyUnAuthed = AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get();
         this.priorityComparator = new PluginPriorityComparator(extensions);
     }
 
@@ -149,14 +149,14 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             ctx.channel().attr(ChannelAttributes.AUTH_METHOD).set(authMethod);
         }
 
-        if (authenticatorProviderMap.isEmpty() && denyUnAuthed) {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", connect.getUserProperties().getPluginUserProperties());
-            mqttConnacker.connackError(
-                    ctx.channel(), PluginAuthenticatorServiceImpl.CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
-                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
-                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR, event);
-            return;
-        }
+//        if (authenticatorProviderMap.isEmpty() && denyUnAuthed) {
+//            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", connect.getUserProperties().getPluginUserProperties());
+//            mqttConnacker.connackError(
+//                    ctx.channel(), PluginAuthenticatorServiceImpl.CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
+//                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
+//                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR, event);
+//            return;
+//        }
 
         if (authenticatorProviderMap.isEmpty()) {
             connectHandler.connectSuccessfulUnauthenticated(ctx, connect, clientSettings);

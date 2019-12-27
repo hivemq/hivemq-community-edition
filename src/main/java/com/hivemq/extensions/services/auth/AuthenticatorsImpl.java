@@ -104,36 +104,4 @@ public class AuthenticatorsImpl implements Authenticators {
             writeLock.unlock();
         }
     }
-
-    @Override
-    public boolean areAuthenticatorsAvailable() {
-        final Lock lock = authenticatorsLock.readLock();
-        try {
-            lock.lock();
-            return !authenticatorPluginMap.isEmpty();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean isEnhancedAvailable() {
-        final Lock lock = authenticatorsLock.readLock();
-        try {
-            lock.lock();
-            return enhancedAuthenticatorCount.get() > 0;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public int getEnhancedAuthenticatorCount(){
-        return enhancedAuthenticatorCount.get();
-    }
-
-    @Override
-    public int getSimpleAuthenticatorCount(){
-        return simpleAuthenticatorCount.get();
-    }
 }

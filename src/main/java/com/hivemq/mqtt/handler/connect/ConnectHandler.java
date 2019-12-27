@@ -208,12 +208,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addOrderedTopicHandler(ctx, connect);
 
-        if (authenticators.areAuthenticatorsAvailable() || AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
-            pluginAuthenticatorService.authenticateConnect(this, ctx, connect, createClientSettings(connect));
-            return;
-        }
-
-        connectSuccessfulUnauthenticated(ctx, connect, null);
+        pluginAuthenticatorService.authenticateConnect(this, ctx, connect, createClientSettings(connect));
     }
 
     private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
@@ -241,9 +236,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     public void connectSuccessfulAuthenticated(final @NotNull ChannelHandlerContext ctx,
                                                final @NotNull CONNECT connect,
                                                final @Nullable ModifiableClientSettingsImpl clientSettings) {
-        final ClientToken clientCredentialsData = ChannelUtils.tokenFromChannel(ctx.channel());
+
         ctx.pipeline().channel().attr(ChannelAttributes.AUTH_AUTHENTICATED).set(true);
-        clientCredentialsData.setAuthenticated(true);
 
         if (ctx.channel().hasAttr(ChannelAttributes.AUTH_METHOD)) {
             try {
