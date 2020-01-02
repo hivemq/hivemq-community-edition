@@ -123,17 +123,17 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrecOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             // disabled extension would be null
-            if (plugin == null) {
+            if (extension == null) {
                 interceptorContext.increment(output);
                 continue;
             }
 
             final PubrecOutboundInterceptorTask
-                    interceptorTask = new PubrecOutboundInterceptorTask(interceptor, plugin.getId());
+                    interceptorTask = new PubrecOutboundInterceptorTask(interceptor, extension.getId());
 
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
@@ -168,17 +168,17 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrecInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             // disabled extension would be null
-            if (plugin == null) {
+            if (extension == null) {
                 interceptorContext.increment(output);
                 continue;
             }
 
             final PubrecInboundInterceptorTask interceptorTask =
-                    new PubrecInboundInterceptorTask(interceptor, plugin.getId());
+                    new PubrecInboundInterceptorTask(interceptor, extension.getId());
 
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);

@@ -125,7 +125,7 @@ public class PingInterceptorHandlerTest {
                 = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final PingReqInboundInterceptor interceptor = getIsolatedInboundInterceptor("SimplePingReqTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -152,7 +152,7 @@ public class PingInterceptorHandlerTest {
 
         final PingReqInboundInterceptor interceptor =
                 getIsolatedInboundInterceptor("AdvancedPingReqTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -178,7 +178,7 @@ public class PingInterceptorHandlerTest {
 
         final PingRespOutboundInterceptor interceptor =
                 getIsolatedOutboundInterceptor("SimplePingRespTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -204,7 +204,7 @@ public class PingInterceptorHandlerTest {
 
         final PingRespOutboundInterceptor interceptor =
                 getIsolatedOutboundInterceptor("AdvancedPingRespTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -224,7 +224,7 @@ public class PingInterceptorHandlerTest {
     }
 
 
-    private PingReqInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
+    private @NotNull PingReqInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
 
@@ -244,7 +244,8 @@ public class PingInterceptorHandlerTest {
         return interceptor;
     }
 
-    private PingRespOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name)
+
+    private @NotNull PingRespOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name)
             throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);

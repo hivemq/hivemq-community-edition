@@ -16,7 +16,6 @@
 
 package com.hivemq.extensions.handler;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
@@ -47,7 +46,6 @@ import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -381,7 +379,7 @@ public class IncomingSubscribeHandlerTest {
             }
         });
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin, plugin, null);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(null);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 

@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.parameter.UnsubscribeInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.parameter.UnsubscribeInboundOutput;
@@ -44,6 +43,7 @@ import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 public class UnsubscribeInboundInterceptorHandlerTest {
@@ -129,12 +128,12 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
         final UnsubscribeInboundInterceptor interceptor =
                 getIsolatedInboundInterceptor("SimpleUnsubscribeTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(extensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedPluginClassloader.class))).thenReturn(extension);
 
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();
@@ -154,12 +153,12 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
         final UnsubscribeInboundInterceptor interceptor =
                 getIsolatedInboundInterceptor("ModifyUnsubscribeTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(extensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(extension);
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedPluginClassloader.class))).thenReturn(extension);
 
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();

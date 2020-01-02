@@ -55,19 +55,19 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-    private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
+    private final @NotNull PluginTaskExecutorService executorService;
 
     @Inject
     public PubrelInterceptorHandler(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginTaskExecutorService pluginTaskExecutorService) {
+            final @NotNull PluginTaskExecutorService executorService) {
 
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
-        this.pluginTaskExecutorService = pluginTaskExecutorService;
+        this.executorService = executorService;
     }
 
     @Override
@@ -124,18 +124,18 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrelOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             // disabled extension would be null
-            if (plugin == null) {
+            if (extension == null) {
                 interceptorContext.increment(output);
                 continue;
             }
             final PubrelOutboundInterceptorTask interceptorTask =
-                    new PubrelOutboundInterceptorTask(interceptor, plugin.getId());
+                    new PubrelOutboundInterceptorTask(interceptor, extension.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+            executorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
     }
@@ -168,18 +168,18 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrelInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             // disabled extension would be null
-            if (plugin == null) {
+            if (extension == null) {
                 interceptorContext.increment(output);
                 continue;
             }
             final PubrelInboundInterceptorTask interceptorTask =
-                    new PubrelInboundInterceptorTask(interceptor, plugin.getId());
+                    new PubrelInboundInterceptorTask(interceptor, extension.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+            executorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
     }

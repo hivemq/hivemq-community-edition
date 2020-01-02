@@ -61,19 +61,19 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-    private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
+    private final @NotNull PluginTaskExecutorService executorService;
 
     @Inject
     public UnsubscribeInboundInterceptorHandler(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginTaskExecutorService pluginTaskExecutorService) {
+            final @NotNull PluginTaskExecutorService executorService) {
 
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
-        this.pluginTaskExecutorService = pluginTaskExecutorService;
+        this.executorService = executorService;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
 
             final UnsubscribeInboundInterceptorTask interceptorTask =
                     new UnsubscribeInboundInterceptorTask(interceptor, extension.getId());
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+            executorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
         }
     }
