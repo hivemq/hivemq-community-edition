@@ -117,7 +117,7 @@ public class SubackOutboundInterceptorHandlerTest {
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final SubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("SimpleSubackTestInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -141,7 +141,7 @@ public class SubackOutboundInterceptorHandlerTest {
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final SubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestModifySubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -167,7 +167,7 @@ public class SubackOutboundInterceptorHandlerTest {
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final SubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestExceptionSubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -191,7 +191,7 @@ public class SubackOutboundInterceptorHandlerTest {
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
         final SubackOutboundInterceptor interceptor =
                 getIsolatedOutboundInterceptor("TestIndexOutofBoundsSubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);

@@ -102,7 +102,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<PingReqInboundInterceptor> interceptors = clientContext.getPingRequestInboundInterceptors();
+        final List<PingReqInboundInterceptor> interceptors = clientContext.getPingReqInboundInterceptors();
         if (interceptors.isEmpty()) {
             ctx.fireChannelRead(pingreq);
             return;
@@ -116,16 +116,16 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PingReqInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
-            if (plugin == null) {
+            if (extension == null) {
                 interceptorContext.increment();
                 continue;
             }
 
             final PingRequestInboundInterceptorTask interceptorTask =
-                    new PingRequestInboundInterceptorTask(interceptor, plugin.getId());
+                    new PingRequestInboundInterceptorTask(interceptor, extension.getId());
 
             extensionTaskExecutorService.handlePluginInOutTaskExecution(
                     interceptorContext, input, output, interceptorTask);
@@ -150,7 +150,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingResponseOutboundInterceptors();
+        final List<PingRespOutboundInterceptor> interceptors = clientContext.getPingRespOutboundInterceptors();
         if (interceptors.isEmpty()) {
             ctx.write(pingresp, promise);
             return;
@@ -224,10 +224,10 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
 
         PingResponseOutboundInterceptorTask(
                 final @NotNull PingRespOutboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.extensionId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
@@ -252,7 +252,8 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class PingRequestInboundInterceptorContext extends PluginInOutTaskContext<PingReqInboundOutputImpl> {
+    private static class PingRequestInboundInterceptorContext
+            extends PluginInOutTaskContext<PingReqInboundOutputImpl> {
 
         private final @NotNull ChannelHandlerContext ctx;
         private final int interceptorCount;
@@ -271,7 +272,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         }
 
         @Override
-        public void pluginPost(final @NotNull PingReqInboundOutputImpl pluginOutput) {
+        public void pluginPost(final @NotNull PingReqInboundOutputImpl output) {
             increment();
         }
 
@@ -304,7 +305,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
             this.counter = new AtomicInteger(0);
         }
 
-        public void pluginPost(final @NotNull PingRespOutboundOutputImpl pluginOutput) {
+        public void pluginPost(final @NotNull PingRespOutboundOutputImpl output) {
             increment();
         }
 

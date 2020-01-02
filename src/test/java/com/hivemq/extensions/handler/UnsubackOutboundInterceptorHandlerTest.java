@@ -117,7 +117,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
         final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestSimpleUnsubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -140,7 +140,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
         final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestModifyUnsubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -165,7 +165,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
 
         final UnsubackOutboundInterceptor interceptor =
                 getIsolatedOutboundInterceptor("TestExceptionUnsubackInterceptor");
-        clientContext.addInterceptor(interceptor);
+        clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
