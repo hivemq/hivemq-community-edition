@@ -34,7 +34,6 @@ import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
@@ -57,7 +56,6 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
-import com.hivemq.security.auth.ClientToken;
 import com.hivemq.util.*;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -103,7 +101,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
     private final @NotNull ConnackSentListener connackSentListener = new ConnackSentListener();
-    private final @NotNull Authenticators authenticators;
     private final @NotNull Authorizers authorizers;
     private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
@@ -129,7 +126,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
             final @NotNull MqttConnacker mqttConnacker,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
-            final @NotNull Authenticators authenticators,
             final @NotNull PublishPollService publishPollService,
             final @NotNull SharedSubscriptionService sharedSubscriptionService,
             final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
@@ -147,7 +143,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.topicAliasLimiter = topicAliasLimiter;
         this.publishPollService = publishPollService;
         this.sharedSubscriptionService = sharedSubscriptionService;
-        this.authenticators = authenticators;
         this.pluginAuthenticatorService = pluginAuthenticatorService;
         this.authorizers = authorizers;
         this.pluginAuthorizerService = pluginAuthorizerService;
@@ -248,6 +243,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         connectAuthenticated(ctx, connect, clientSettings);
+        cleanChannelAttributesAfterAuth(ctx);
+    }
+
+    private void cleanChannelAttributesAfterAuth(final @NotNull ChannelHandlerContext ctx) {
         ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(null);
     }
 

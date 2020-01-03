@@ -142,10 +142,6 @@ public class ConnectSimpleAuthTaskContext extends PluginInOutTaskContext<Connect
         }
     }
 
-    public void increment() {
-        authenticationContext.getIndex().incrementAndGet();
-    }
-
     @NotNull
     @Override
     public ConnectSimpleAuthTaskOutput get() {

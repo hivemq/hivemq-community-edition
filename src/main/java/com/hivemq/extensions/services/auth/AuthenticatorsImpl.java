@@ -26,49 +26,48 @@ import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.persistence.ChannelPersistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Georg Held
+ * @author Silvio Giebl
  */
 @Singleton
 @VisibleForTesting
 public class AuthenticatorsImpl implements Authenticators {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticatorsImpl.class);
+
     private final @NotNull ReadWriteLock authenticatorsLock = new ReentrantReadWriteLock();
     @GuardedBy("authenticatorsLock")
     private final @NotNull TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull ChannelPersistence channelPersistence;
 
-    private final @NotNull HiveMQExtensions hiveMQExtensions;
-
-    private final @NotNull AtomicInteger enhancedAuthenticatorCount;
-    private final @NotNull AtomicInteger simpleAuthenticatorCount;
-
     @Inject
-    public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions,
-                              final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
-                              final @NotNull ChannelPersistence channelPersistence) {
-        this.hiveMQExtensions = hiveMQExtensions;
+    public AuthenticatorsImpl(
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
+            final @NotNull ChannelPersistence channelPersistence) {
+
         this.authenticatorPluginMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.hiveMQExtensions = hiveMQExtensions;
         this.pluginAuthenticatorService = pluginAuthenticatorService;
         this.channelPersistence = channelPersistence;
-        this.enhancedAuthenticatorCount = new AtomicInteger();
-        this.simpleAuthenticatorCount = new AtomicInteger();
     }
 
     @Override
-    @NotNull
-    public Map<@NotNull String, @NotNull WrappedAuthenticatorProvider> getAuthenticatorProviderMap() {
+    public @NotNull Map<@NotNull String, @NotNull WrappedAuthenticatorProvider> getAuthenticatorProviderMap() {
 
         final Lock readLock = authenticatorsLock.readLock();
         readLock.lock();
@@ -80,26 +79,22 @@ public class AuthenticatorsImpl implements Authenticators {
     }
 
     @Override
-    public void registerAuthenticatorProvider(@NotNull final WrappedAuthenticatorProvider provider) {
+    public void registerAuthenticatorProvider(final @NotNull WrappedAuthenticatorProvider provider) {
 
         final Lock writeLock = authenticatorsLock.writeLock();
-
         writeLock.lock();
-
         try {
+            final IsolatedPluginClassloader extensionClassLoader = provider.getClassLoader();
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(extensionClassLoader);
 
-            final IsolatedPluginClassloader pluginClassloader = provider.getClassLoader();
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
-
-            if (plugin != null) {
-                if(provider.isEnhanced()){
-                    enhancedAuthenticatorCount.incrementAndGet();
+            if (extension != null) {
+                authenticatorPluginMap.put(extension.getId(), provider);
+                if (provider.isEnhanced()) {
+                    log.debug("Enhanced authenticator added by extension '{}'.", extension.getId());
                 } else {
-                    simpleAuthenticatorCount.incrementAndGet();
+                    log.debug("Simple authenticator added by extension '{}'.", extension.getId());
                 }
-                authenticatorPluginMap.put(plugin.getId(), provider);
             }
-
         } finally {
             writeLock.unlock();
         }

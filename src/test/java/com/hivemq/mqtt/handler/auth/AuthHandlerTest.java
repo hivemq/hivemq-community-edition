@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Florian Limpöck
-*/
+ */
 public class AuthHandlerTest {
 
     @Mock
@@ -84,7 +84,7 @@ public class AuthHandlerTest {
         verify(connacker).connackError(
                 any(Channel.class), anyString(), anyString(),
                 eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), isNull(),
-                eq(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE), any());
+                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")), any());
 
     }
 
@@ -98,7 +98,7 @@ public class AuthHandlerTest {
         verify(disconnector).disconnect(
                 channel, SUCCESS_AUTH_RECEIVED_FROM_CLIENT, "Success reason code set in AUTH",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE);
+                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"));
 
     }
 
@@ -110,9 +110,9 @@ public class AuthHandlerTest {
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
         verify(disconnector).disconnect(
-                channel, RE_AUTH_DURING_RE_AUTH_RECEIVED_FROM_CLIENT, "ReAuthenticate reason code set in AUTH during ongoing re-auth",
+                channel, REAUTHENTICATE_DURING_RE_AUTH, "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE);
+                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"));
 
         verify(pluginAuthenticatorService, never()).authenticateReAuth(any(), any());
 
@@ -126,9 +126,9 @@ public class AuthHandlerTest {
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
         verify(connacker).connackError(
-                any(Channel.class), eq(RE_AUTH_DURING_AUTH_RECEIVED_FROM_CLIENT), eq("ReAuthenticate reason code set in AUTH during ongoing auth"),
+                any(Channel.class), eq(REAUTHENTICATE_DURING_AUTH), eq("REAUTHENTICATE reason code set in AUTH during ongoing auth"),
                 eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), isNull(),
-                eq(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE), any());
+                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")), any());
 
         verify(pluginAuthenticatorService, never()).authenticateReAuth(any(), any());
 
