@@ -17,7 +17,6 @@
 package com.hivemq.extensions.services.auth;
 
 import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -65,7 +64,6 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
     private final CONNECT connect;
 
     private final int authenticatorsCount;
-    private final @NotNull ModifiableClientSettingsImpl clientSettings;
     private final @NotNull AuthenticationContext authenticationContext;
     @NotNull
     private AuthTaskOutput connectEnhancedAuthTaskOutput;
@@ -92,7 +90,6 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
         this.authSender = authSender;
         this.connect = connect;
         this.authenticatorsCount = authenticatorsCount;
-        this.clientSettings = clientSettings;
         this.authenticationContext = authenticationContext;
         this.connectEnhancedAuthTaskOutput = new AuthTaskOutput(asyncer, clientSettings, permissions, authenticationContext, validateUTF8, false, timeout, connect.getAuthMethod() != null);
     }
@@ -130,7 +127,7 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
             ctx.executor().execute(() -> {
                         switch (pluginOutput.getAuthenticationState()) {
                             case SUCCESS:
-                                succeedAuthentication(pluginOutput.getAuthenticationData());
+                                succeedAuthentication(pluginOutput);
                                 break;
                             case CONTINUE:
                                 continueAuthentication(pluginOutput, connect);
@@ -170,8 +167,8 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
                     return;
                 }
                 final ScheduledFuture<?> authFuture = ctx.executor().schedule(() -> mqttConnacker.connackError(channel, "Client with ip {} could not be authenticated",
-                            "Failed Authentication", DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout"),
-                            pluginOutput.getTimeout(), TimeUnit.SECONDS);
+                        "Failed Authentication", DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout"),
+                        pluginOutput.getTimeout(), TimeUnit.SECONDS);
                 channel.attr(ChannelAttributes.AUTH_FUTURE).set(authFuture);
             });
 
@@ -187,12 +184,13 @@ public class ConnectEnhancedAuthTaskContext extends PluginInOutTaskContext<AuthT
                 "Failed Authentication", pluginOutput.getDisconnectedReasonCode(), pluginOutput.getReasonString());
     }
 
-    private void succeedAuthentication(final @Nullable ByteBuffer authData) {
-        ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(connectEnhancedAuthTaskOutput.getDefaultPermissions());
+    private void succeedAuthentication(final @NotNull AuthTaskOutput output) {
+        ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(output.getDefaultPermissions());
+        final ByteBuffer authData = output.getAuthenticationData();
         if (authData != null) {
             ctx.channel().attr(ChannelAttributes.AUTH_DATA).set(authData);
         }
-        connectHandler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
+        connectHandler.connectSuccessfulAuthenticated(ctx, connect, output.getClientSettings());
     }
 
     @NotNull

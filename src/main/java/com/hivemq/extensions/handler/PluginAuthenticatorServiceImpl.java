@@ -59,7 +59,6 @@ import java.util.concurrent.ScheduledFuture;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_DECODER;
-import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
 
 /**
  * @author Florian Limpöck
@@ -69,20 +68,20 @@ import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_
 public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorService {
 
     @VisibleForTesting
-    static final String CONNACK_NO_AUTHENTICATION_LOG_STATEMENT = "MQTT CONNECT packet from client with IP {} " +
-            "provided authentication information, but no authentication was registered with HiveMQ. Disconnecting client.";
+    static final String CONNACK_NO_AUTHENTICATION_LOG_STATEMENT = "Client with IP {} sent CONNECT packet, " +
+            "but no authenticator was registered with HiveMQ. Disconnecting client.";
 
     @VisibleForTesting
-    static final String DISCONNECT_NO_AUTHENTICATION_LOG_STATEMENT = "MQTT AUTH packet from client with IP {} " +
-            "provided authentication information, but no authentication was registered with HiveMQ. Disconnecting client.";
+    static final String DISCONNECT_NO_AUTHENTICATION_LOG_STATEMENT = "Client with IP {} sent AUTH packet, " +
+            "but no authenticator was registered with HiveMQ. Disconnecting client.";
 
     @VisibleForTesting
-    static final String CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT = "MQTT AUTH packet from client with IP {} " +
-            "provided authentication information, but the authentication method is different from the CONNECT packet. Disconnecting client.";
+    static final String CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT = "Client with IP {} sent AUTH packet " +
+            "with a different authentication method than in the CONNECT packet. Disconnecting client.";
 
     @VisibleForTesting
-    static final String DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT = "MQTT AUTH packet from client with IP {} " +
-            "provided authentication information, but the authentication method is different from the CONNECT packet. Disconnecting client.";
+    static final String DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT = "Client with IP {} sent AUTH packet " +
+            "with a different authentication method than in the CONNECT packet. Disconnecting client.";
 
     @NotNull
     private final MqttConnacker mqttConnacker;
@@ -110,20 +109,19 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @NotNull
     private final PluginPriorityComparator priorityComparator;
     private final int timeout;
-//    private final boolean denyUnAuthed;
 
     @Inject
     public PluginAuthenticatorServiceImpl(final @NotNull MqttConnacker mqttConnacker,
-                                          final @NotNull Mqtt5ServerDisconnector mqttDisconnectUtil,
-                                          final @NotNull FullConfigurationService configurationService,
-                                          final @NotNull Authenticators authenticators,
-                                          final @NotNull ChannelDependencies channelDependencies,
-                                          final @NotNull PluginOutPutAsyncer asyncer,
-                                          final @NotNull MetricsHolder metricsHolder,
-                                          final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-                                          final @NotNull AuthenticatorProviderInputFactory authenticatorProviderInputFactory,
-                                          final @NotNull MqttAuthSender mqttAuthSender,
-                                          final @NotNull HiveMQExtensions extensions) {
+            final @NotNull Mqtt5ServerDisconnector mqttDisconnectUtil,
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull Authenticators authenticators,
+            final @NotNull ChannelDependencies channelDependencies,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull MetricsHolder metricsHolder,
+            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull AuthenticatorProviderInputFactory authenticatorProviderInputFactory,
+            final @NotNull MqttAuthSender mqttAuthSender,
+            final @NotNull HiveMQExtensions extensions) {
         this.mqttConnacker = mqttConnacker;
         this.mqttDisconnectUtil = mqttDisconnectUtil;
         this.configurationService = configurationService;
@@ -136,30 +134,30 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         this.mqttAuthSender = mqttAuthSender;
         this.validateUTF8 = configurationService.securityConfiguration().validateUTF8();
         this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT.get();
-//        this.denyUnAuthed = AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get();
         this.priorityComparator = new PluginPriorityComparator(extensions);
     }
 
     @Override
     public void authenticateConnect(final @NotNull ConnectHandler connectHandler, final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect, final @NotNull ModifiableClientSettingsImpl clientSettings) {
-        final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap = authenticators.getAuthenticatorProviderMap();
 
         final String authMethod = connect.getAuthMethod();
         if (authMethod != null) {
             ctx.channel().attr(ChannelAttributes.AUTH_METHOD).set(authMethod);
         }
 
-//        if (authenticatorProviderMap.isEmpty() && denyUnAuthed) {
-//            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", connect.getUserProperties().getPluginUserProperties());
-//            mqttConnacker.connackError(
-//                    ctx.channel(), PluginAuthenticatorServiceImpl.CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
-//                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
-//                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR, event);
-//            return;
-//        }
-
+        final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap = authenticators.getAuthenticatorProviderMap();
         if (authenticatorProviderMap.isEmpty()) {
-            connectHandler.connectSuccessfulUnauthenticated(ctx, connect, clientSettings);
+            if (InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
+                final String reasonString = ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR;
+                mqttConnacker.connackError(
+                        ctx.channel(), PluginAuthenticatorServiceImpl.CONNACK_NO_AUTHENTICATION_LOG_STATEMENT,
+                        "No authenticator registered",
+                        Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
+                        reasonString,
+                        new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, reasonString, null));
+            } else {
+                connectHandler.connectSuccessfulUnauthenticated(ctx, connect, clientSettings);
+            }
             return;
         }
 
@@ -222,7 +220,17 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(null);
         }
 
+        int enhancedAuthenticatorCount = 0;
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap = authenticators.getAuthenticatorProviderMap();
+        for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
+            if (entry.getValue().isEnhanced()) {
+                enhancedAuthenticatorCount++;
+            }
+        }
+        if (enhancedAuthenticatorCount == 0) {
+            noAuthAvailableDisconnect(ctx, reAuth);
+            return;
+        }
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
         final ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
@@ -232,20 +240,15 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final AuthTaskContext context =
                 new AuthTaskContext(clientId, clientSettings, Objects.requireNonNullElse(defaultPermissions, new ModifiableDefaultPermissionsImpl()), ctx, mqttAuthSender, connectHandler, asyncer,
-                        authenticators.getEnhancedAuthenticatorCount(), mqttConnacker, reAuth, validateUTF8, timeout, mqttDisconnectUtil, metricsHolder);
+                        enhancedAuthenticatorCount, mqttConnacker, reAuth, validateUTF8, timeout, mqttDisconnectUtil, metricsHolder);
 
         final ClientAuthenticators clientAuthenticators = getClientAuthenticators(ctx);
 
-        boolean enhancedAuthenticatorPresent = false;
         for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
             //AUTH packets are enhanced only
             if (entry.getValue().isEnhanced()) {
-                enhancedAuthenticatorPresent = true;
                 pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, new AuthTask(entry.getValue(), authenticatorProviderInput, entry.getKey(), clientAuthenticators));
             }
-        }
-        if (!enhancedAuthenticatorPresent) {
-            noAuthAvailableDisconnect(ctx, auth, reAuth);
         }
     }
 
@@ -257,32 +260,34 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private void badAuthMethodDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
+        final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name());
         if (reAuth) {
             mqttDisconnectUtil.disconnect(
-                    ctx.channel(), DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Disconnected not authorized",
+                    ctx.channel(), DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Different auth method",
                     Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
-                    String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name()));
+                    reasonString);
         } else {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", auth.getUserProperties().getPluginUserProperties());
             mqttConnacker.connackError(
-                    ctx.channel(), CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Disconnected not authorized",
+                    ctx.channel(), CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Different auth method",
                     Mqtt5ConnAckReasonCode.BAD_AUTHENTICATION_METHOD, null,
-                    String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name()), event);
+                    reasonString,
+                    new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, reasonString, null));
         }
     }
 
-    private void noAuthAvailableDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
+    private void noAuthAvailableDisconnect(final @NotNull ChannelHandlerContext ctx, final boolean reAuth) {
+        final String reasonString = ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR;
         if (reAuth) {
             mqttDisconnectUtil.disconnect(
-                    ctx.channel(), DISCONNECT_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
+                    ctx.channel(), DISCONNECT_NO_AUTHENTICATION_LOG_STATEMENT, "No authenticator registered",
                     Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
-                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR);
+                    reasonString);
         } else {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "no authenticator registered", auth.getUserProperties().getPluginUserProperties());
             mqttConnacker.connackError(
-                    ctx.channel(), CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "Disconnected not authorized",
+                    ctx.channel(), CONNACK_NO_AUTHENTICATION_LOG_STATEMENT, "No authenticator registered",
                     Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED,
-                    ReasonStrings.CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR, event);
+                    reasonString,
+                    new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, reasonString, null));
         }
     }
 
@@ -295,5 +300,4 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         }
         return clientAuthenticators;
     }
-
 }

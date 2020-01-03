@@ -109,10 +109,4 @@ public class AuthenticatorsImplTest {
         assertSame(simpleAuthenticator1, iterator.next().getAuthenticator(null));
         assertSame(simpleAuthenticator2, iterator.next().getAuthenticator(null));
     }
-
-    @Test(timeout = 5000)
-    public void test_are_authenticators_available_shows_correct_state() {
-        assertTrue(authenticators.areAuthenticatorsAvailable());
-    }
-
 }

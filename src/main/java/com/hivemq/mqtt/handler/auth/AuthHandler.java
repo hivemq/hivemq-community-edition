@@ -39,20 +39,20 @@ import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
-*/
+ */
 @Singleton
 @ChannelHandler.Sharable
 public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
 
     @VisibleForTesting
     static final String SUCCESS_AUTH_RECEIVED_FROM_CLIENT = "MQTT AUTH packet from client with IP {} " +
-            "provided success reason code. Disconnecting client.";
+            "provided SUCCESS reason code. Disconnecting client.";
     @VisibleForTesting
-    static final String RE_AUTH_DURING_AUTH_RECEIVED_FROM_CLIENT = "MQTT AUTH packet from client with IP {} " +
-            "provided re-authenticate reason code during auth. Disconnecting client.";
+    static final String REAUTHENTICATE_DURING_AUTH = "MQTT AUTH packet from client with IP {} " +
+            "provided REAUTHENTICATE reason code during ongoing auth. Disconnecting client.";
     @VisibleForTesting
-    static final String RE_AUTH_DURING_RE_AUTH_RECEIVED_FROM_CLIENT = "MQTT AUTH packet from client with IP {} " +
-            "provided re-authenticate reason code during re-auth. Disconnecting client.";
+    static final String REAUTHENTICATE_DURING_RE_AUTH = "MQTT AUTH packet from client with IP {} " +
+            "provided REAUTHENTICATE reason code during ongoing re-auth. Disconnecting client.";
 
     private final @NotNull ConnectHandler connectHandler;
     private final @NotNull MqttConnacker connacker;
@@ -60,13 +60,12 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
     private final @NotNull Mqtt5ServerDisconnector disconnector;
     private final @NotNull PluginAuthenticatorService authService;
 
-
     @Inject
     public AuthHandler(final @NotNull ConnectHandler connectHandler,
-                       final @NotNull MqttConnacker connacker,
-                       final @NotNull MqttAuthSender authSender,
-                       final @NotNull Mqtt5ServerDisconnector disconnector,
-                       final @NotNull PluginAuthenticatorService authService) {
+            final @NotNull MqttConnacker connacker,
+            final @NotNull MqttAuthSender authSender,
+            final @NotNull Mqtt5ServerDisconnector disconnector,
+            final @NotNull PluginAuthenticatorService authService) {
         this.connectHandler = connectHandler;
         this.connacker = connacker;
         this.authSender = authSender;
@@ -74,65 +73,65 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
         this.authService = authService;
     }
 
-
     @Override
-    protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final AUTH msg) throws Exception {
+    protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg) {
 
         final Channel channel = ctx.channel();
         final Boolean reAuth = channel.attr(ChannelAttributes.RE_AUTH_ONGOING).get();
-        final boolean isReAuth = reAuth != null && reAuth;
+        final boolean reAuthOngoing = reAuth != null && reAuth;
         final Boolean auth = channel.attr(ChannelAttributes.AUTH_ONGOING).get();
-        final boolean isAuthOngoing = auth != null && auth;
+        final boolean authOngoing = auth != null && auth;
 
         authSender.logAuth(channel, msg.getReasonCode(), true);
 
         switch (msg.getReasonCode()) {
             case SUCCESS:
-                onReceivedSuccess(ctx, msg, isReAuth);
+                onReceivedSuccess(ctx, msg, reAuthOngoing);
                 break;
             case CONTINUE_AUTHENTICATION:
-                onReceivedContinue(ctx, msg, isReAuth);
+                onReceivedContinue(ctx, msg, reAuthOngoing);
                 break;
             case REAUTHENTICATE:
-                onReceivedReAuthenticate(ctx, msg, isReAuth, isAuthOngoing);
+                onReceivedReAuthenticate(ctx, msg, authOngoing, reAuthOngoing);
                 break;
         }
     }
 
-    private void onReceivedSuccess(@NotNull final ChannelHandlerContext ctx, @NotNull final AUTH msg, final boolean isReAuth) {
-        if (isReAuth) {
+    private void onReceivedSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean reAuthOngoing) {
+        final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
+        if (reAuthOngoing) {
             disconnector.disconnect(
                     ctx.channel(), SUCCESS_AUTH_RECEIVED_FROM_CLIENT, "Success reason code set in AUTH",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE);
+                    reasonString);
         } else {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.PROTOCOL_ERROR, String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name()), msg.getUserProperties().getPluginUserProperties());
             connacker.connackError(
                     ctx.channel(), SUCCESS_AUTH_RECEIVED_FROM_CLIENT, "Success reason code set in AUTH",
                     Mqtt5ConnAckReasonCode.PROTOCOL_ERROR, null,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, event);
+                    reasonString,
+                    new OnAuthFailedEvent(DisconnectedReasonCode.PROTOCOL_ERROR, reasonString, null));
         }
     }
 
-    private void onReceivedContinue(@NotNull final ChannelHandlerContext ctx, @NotNull final AUTH msg, final boolean isReAuth) {
-        authService.authenticateAuth(connectHandler, ctx, msg, isReAuth);
+    private void onReceivedContinue(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean reAuthOngoing) {
+        authService.authenticateAuth(connectHandler, ctx, msg, reAuthOngoing);
     }
 
-    private void onReceivedReAuthenticate(@NotNull final ChannelHandlerContext ctx, @NotNull final AUTH msg, final boolean isReAuth, final boolean auth) {
-        if (isReAuth) {
-            disconnector.disconnect(
-                    ctx.channel(), RE_AUTH_DURING_RE_AUTH_RECEIVED_FROM_CLIENT, "ReAuthenticate reason code set in AUTH during ongoing re-auth",
-                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE);
-            return;
-        }
-
-        if (auth) {
-            final OnAuthFailedEvent event = new OnAuthFailedEvent(DisconnectedReasonCode.PROTOCOL_ERROR, String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name()), msg.getUserProperties().getPluginUserProperties());
-            connacker.connackError(
-                    ctx.channel(), RE_AUTH_DURING_AUTH_RECEIVED_FROM_CLIENT, "ReAuthenticate reason code set in AUTH during ongoing auth",
-                    Mqtt5ConnAckReasonCode.PROTOCOL_ERROR, null,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, event);
+    private void onReceivedReAuthenticate(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean authOngoing, final boolean reAuthOngoing) {
+        if (reAuthOngoing || authOngoing) {
+            final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
+            if (reAuthOngoing) {
+                disconnector.disconnect(
+                        ctx.channel(), REAUTHENTICATE_DURING_RE_AUTH, "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
+                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        reasonString);
+            } else {
+                connacker.connackError(
+                        ctx.channel(), REAUTHENTICATE_DURING_AUTH, "REAUTHENTICATE reason code set in AUTH during ongoing auth",
+                        Mqtt5ConnAckReasonCode.PROTOCOL_ERROR, null,
+                        reasonString,
+                        new OnAuthFailedEvent(DisconnectedReasonCode.PROTOCOL_ERROR, reasonString, null));
+            }
             return;
         }
 
