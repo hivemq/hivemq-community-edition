@@ -22,6 +22,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingreq.PingReqInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresp.PingRespOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
@@ -32,8 +34,10 @@ import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 
 import java.util.List;
@@ -153,6 +157,24 @@ public interface ClientContext {
     void addSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Adds a {@link SubackOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param subAckOutboundInterceptor The implementation of a SubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addSubackOutboundInterceptor(@NotNull SubackOutboundInterceptor subAckOutboundInterceptor);
+
+    /**
+     * Adds an {@link UnsubscribeInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param unsubscribeInboundInterceptor The implementation of an UnsubscribeInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addUnsubscribeInboundInterceptor(@NotNull UnsubscribeInboundInterceptor unsubscribeInboundInterceptor);
+
+    /**
      * Adds an {@link UnsubackOutboundInterceptor} for this client. <br>
      * Subsequent adding of the same interceptor will be ignored.
      *
@@ -180,6 +202,24 @@ public interface ClientContext {
     void addDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
 
     /**
+     * Adds an {@link PingReqInboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pingReqInboundInterceptor The implementation of a PingReqInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+
+    /**
+     * Adds an {@link PingRespOutboundInterceptor} for this client. <br>
+     * Subsequent adding of the same interceptor will be ignored.
+     *
+     * @param pingRespOutboundInterceptor The implementation of a PingRespOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void addPingRespOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
+
+    /**
      * Removes an {@link PublishInboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
@@ -193,7 +233,7 @@ public interface ClientContext {
      * Removes an {@link PublishOutboundInterceptor} for this client. <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
-     * @param publishOutboundInterceptor The implementation of a PublishOutboundInterceptor.
+     * @param publishOutboundInterceptor The implementation of an PublishOutboundInterceptor.
      * @throws NullPointerException If the interceptor is null.
      * @since 4.2.0
      */
@@ -282,6 +322,24 @@ public interface ClientContext {
     void removeSubscribeInboundInterceptor(@NotNull SubscribeInboundInterceptor subscribeInboundInterceptor);
 
     /**
+     * Removes a {@link SubackOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param subackOutboundInterceptor The implementation of a SubackOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removeSubackOutboundInterceptor(@NotNull SubackOutboundInterceptor subackOutboundInterceptor);
+
+    /**
+     * Removes an {@link UnsubscribeInboundInterceptor} for this client. <br> Nothing happens if the interceptor that
+     * should be removed, has not been added in the first place.
+     *
+     * @param unsubscribeInboundInterceptor The implementation of an UnsubscribeInboundInterceptor.
+     * @throws NullPointerException If the interceptors is null.
+     */
+    void removeUnsubscribeInboundInterceptor(@NotNull UnsubscribeInboundInterceptor unsubscribeInboundInterceptor);
+
+    /**
      * Removes an {@link UnsubackOutboundInterceptor} for this client <br>
      * Nothing happens if the interceptor that should be removed, has not been added in the first place.
      *
@@ -307,6 +365,24 @@ public interface ClientContext {
      * @throws NullPointerException If the interceptor is null.
      */
     void removeDisconnectOutboundInterceptor(@NotNull DisconnectOutboundInterceptor disconnectOutboundInterceptor);
+
+    /**
+     * Removes a {@link PingReqInboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pingReqInboundInterceptor The implementation of a PingReqInboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePingReqInboundInterceptor(@NotNull PingReqInboundInterceptor pingReqInboundInterceptor);
+
+    /**
+     * Removes a {@link PingRespOutboundInterceptor} for this client. <br>
+     * Nothing happens if the interceptor that should be removed, has not been added in the first place.
+     *
+     * @param pingRespOutboundInterceptor The implementation of a PingRespOutboundInterceptor.
+     * @throws NullPointerException If the interceptor is null.
+     */
+    void removePingRespOutboundInterceptor(@NotNull PingRespOutboundInterceptor pingRespOutboundInterceptor);
 
     /**
      * Returns all {@link Interceptor} which are registered for this client.
@@ -403,9 +479,27 @@ public interface ClientContext {
      * Returns all {@link SubscribeInboundInterceptor} which are registered for this client by this extension.
      *
      * @return List of SubscribeInboundInterceptors for this client.
+     * @since 4.2.0
      */
     @Immutable
     @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors();
+
+    /**
+     * Returns all {@link SubackOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of SubackOutboundInterceptor for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptors();
+
+    /**
+     * Returns all {@link UnsubscribeInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of UnsubscribeInboundInterceptors for this client.
+     * @since 4.3.0
+     */
+    @Immutable
+    @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptors();
 
     /**
      * Returns all {@link UnsubackOutboundInterceptor} which are registered for this client by this extension.
@@ -430,6 +524,22 @@ public interface ClientContext {
      */
     @Immutable
     @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors();
+
+    /**
+     * Returns all {@link PingReqInboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingReqInboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptors();
+
+    /**
+     * Returns all {@link PingRespOutboundInterceptor} which are registered for this client by this extension.
+     *
+     * @return List of {@link PingRespOutboundInterceptor}s for this client.
+     */
+    @Immutable
+    @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptors();
 
     /**
      * The default permissions for this client. Default permissions are automatically applied by HiveMQ for every

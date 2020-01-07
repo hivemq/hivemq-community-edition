@@ -177,7 +177,16 @@ public class ChannelDependencies {
     private final PubcompInterceptorHandler pubcompInterceptorhandler;
 
     @NotNull
+    private final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
+
+    @NotNull
+    private final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+
+    @NotNull
     private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
+
+    @NotNull
+    private final PingInterceptorHandler pingInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -221,7 +230,10 @@ public class ChannelDependencies {
             @NotNull final PubrecInterceptorHandler pubrecInterceptorHandler,
             @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler,
             @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler,
-            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler) {
+            @NotNull final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler,
+            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
+            @NotNull final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
+            @NotNull final PingInterceptorHandler pingInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -263,7 +275,10 @@ public class ChannelDependencies {
         this.pubrecInterceptorHandler = pubrecInterceptorHandler;
         this.pubrelInterceptorHandler = pubrelInterceptorHandler;
         this.pubcompInterceptorhandler = pubcompInterceptorHandler;
+        this.subAckOutboundInterceptorHandler = subAckOutboundInterceptorHandler;
         this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
+        this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
+        this.pingInterceptorHandler = pingInterceptorHandler;
     }
 
     @NotNull
@@ -467,7 +482,22 @@ public class ChannelDependencies {
     }
 
     @NotNull
+    public SubackOutboundInterceptorHandler getSubackOutboundInterceptorHandler() {
+        return subAckOutboundInterceptorHandler;
+    }
+
+    @NotNull
     public UnsubackOutboundInterceptorHandler getUnsubackOutboundInterceptorHandler() {
         return unsubackOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public UnsubscribeInboundInterceptorHandler getUnsubscribeInboundInterceptorHandler() {
+        return unsubscribeInboundInterceptorHandler;
+    }
+
+    @NotNull
+    public PingInterceptorHandler getPingInterceptorHandler() {
+        return pingInterceptorHandler;
     }
 }

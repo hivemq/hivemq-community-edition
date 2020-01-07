@@ -26,6 +26,8 @@ import com.hivemq.annotations.NotNull;
  */
 public class PINGREQ implements Message {
 
+    public static final PINGREQ INSTANCE = new PINGREQ();
+
     @NotNull
     @Override
     public MessageType getType() {

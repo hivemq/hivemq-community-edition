@@ -88,12 +88,12 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
 
     @Override
     public void setReasonCodes(final @NotNull List<@NotNull UnsubackReasonCode> reasonCodes) {
-        Preconditions.checkNotNull(reasonCodes, "Reason codes must never be null");
+        Preconditions.checkNotNull(reasonCodes, "Reason codes must never be null.");
         if (reasonCodes.size() != this.reasonCodes.size()) {
-            throw new IllegalArgumentException("The amount of UNSUBACK reason codes cannot be changed.");
+            throw new IllegalArgumentException("The amount of reason codes must not be changed.");
         }
         for (int i = 0; i < reasonCodes.size(); i++) {
-            Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null", i);
+            Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null.", i);
             final Mqtt5UnsubAckReasonCode oldReasonCode =
                     Mqtt5UnsubAckReasonCode.valueOf(this.reasonCodes.get(i).name());
             final Mqtt5UnsubAckReasonCode newReasonCode = Mqtt5UnsubAckReasonCode.valueOf(reasonCodes.get(i).name());

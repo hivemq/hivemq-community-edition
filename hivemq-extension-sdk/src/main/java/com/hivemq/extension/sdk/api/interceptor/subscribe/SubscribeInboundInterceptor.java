@@ -39,9 +39,6 @@ public interface SubscribeInboundInterceptor extends Interceptor {
     /**
      * When a {@link SubscribeInboundInterceptor} is set through any extension,
      * this method gets called for every inbound SUBSCRIBE packet from any MQTT client.
-     * <p>
-     * When the extension is enabled after HiveMQ is already running, this method will also be called for future
-     * SUBSCRIBE messages of clients that are already connected.
      *
      * @param subscribeInboundInput  The {@link SubscribeInboundInput} parameter.
      * @param subscribeInboundOutput The {@link SubscribeInboundOutput} parameter.

@@ -181,7 +181,16 @@ public class ChannelDependenciesTest {
     private PubcompInterceptorHandler pubcompInterceptorHandler;
 
     @Mock
+    private SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
+
+    @Mock
     private UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
+
+    @Mock
+    private UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+
+    @Mock
+    private PingInterceptorHandler pingInterceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -229,7 +238,10 @@ public class ChannelDependenciesTest {
                 pubrecInterceptorHandler,
                 pubrelInterceptorHandler,
                 pubcompInterceptorHandler,
-                unsubackOutboundInterceptorHandler
+                subAckOutboundInterceptorHandler,
+                unsubackOutboundInterceptorHandler,
+                unsubscribeInboundInterceptorHandler,
+                pingInterceptorHandler
         );
 
     }
@@ -276,6 +288,9 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getPubrecInterceptorHandler());
         assertNotNull(channelDependencies.getPubrelInterceptorHandler());
         assertNotNull(channelDependencies.getPubcompInterceptorHandler());
+        assertNotNull(channelDependencies.getSubackOutboundInterceptorHandler());
         assertNotNull(channelDependencies.getUnsubackOutboundInterceptorHandler());
+        assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
+        assertNotNull(channelDependencies.getPingInterceptorHandler());
     }
 }

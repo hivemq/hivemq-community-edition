@@ -37,10 +37,6 @@ public interface SubscriptionAuthorizer extends Authorizer {
     /**
      * Called for each Subscription (Topic) in a SUBSCRIBE packet, that the {@link SubscriptionAuthorizer} is delegated
      * to authorize.
-     * <p>
-     * When the extension is enabled after HiveMQ is already running, this method will also be called for future
-     * SUBSCRIBEs
-     * of clients that are already connected.
      *
      * @param subscriptionAuthorizerInput  The {@link SubscriptionAuthorizerInput}.
      * @param subscriptionAuthorizerOutput The {@link SubscriptionAuthorizerOutput}.

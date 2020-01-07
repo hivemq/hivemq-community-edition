@@ -36,9 +36,6 @@ public interface PublishAuthorizer extends Authorizer {
     /**
      * This method is called for every PUBLISH packet and Will Publish, that the {@link PublishAuthorizer} is delegated
      * to authorize.
-     * <p>
-     * When the extension is enabled after HiveMQ is already running, this method will also be called for future PUBLISHes
-     * of clients that are already connected.
      *
      * @param publishAuthorizerInput  The {@link PublishAuthorizerInput}.
      * @param publishAuthorizerOutput The {@link PublishAuthorizerOutput}.
