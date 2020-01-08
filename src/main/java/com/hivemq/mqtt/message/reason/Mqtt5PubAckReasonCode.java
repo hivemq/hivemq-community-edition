@@ -37,19 +37,19 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
     QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
     PAYLOAD_FORMAT_INVALID(MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID);
 
+    private static final @NotNull Mqtt5PubAckReasonCode[] VALUES = values();
+
     private final int code;
 
     Mqtt5PubAckReasonCode(final int code) {
         this.code = code;
     }
 
-    Mqtt5PubAckReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5PubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
-    /**
-     * @return the byte code of this PUBACK Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
     }
@@ -58,12 +58,11 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
      * Returns the PUBACK Reason Code belonging to the given byte code.
      *
      * @param code the byte code.
-     * @return the PUBACK Reason Code belonging to the given byte code or null if the byte code is not a valid PUBACK
-     * Reason Code code.
+     * @return the PUBACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid PUBACK Reason Code.
      */
-    @Nullable
-    public static Mqtt5PubAckReasonCode fromCode(final int code) {
-        for (final Mqtt5PubAckReasonCode reasonCode : values()) {
+    public static @Nullable Mqtt5PubAckReasonCode fromCode(final int code) {
+        for (final Mqtt5PubAckReasonCode reasonCode : VALUES) {
             if (reasonCode.code == code) {
                 return reasonCode;
             }
@@ -71,6 +70,10 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
         return null;
     }
 
+    @Override
+    public boolean canBeSentByClient() {
+        return this != NO_MATCHING_SUBSCRIBERS;
+    }
 
     @NotNull
     public static Mqtt5PubAckReasonCode fromAckReasonCode(@NotNull final AckReasonCode reasonCode) {

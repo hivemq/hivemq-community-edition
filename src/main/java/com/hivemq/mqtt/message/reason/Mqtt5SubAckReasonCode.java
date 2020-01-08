@@ -40,13 +40,15 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED),
     WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
 
+    private static final @NotNull Mqtt5SubAckReasonCode[] VALUES = values();
+
     private final int code;
 
     Mqtt5SubAckReasonCode(final int code) {
         this.code = code;
     }
 
-    Mqtt5SubAckReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5SubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
@@ -54,9 +56,7 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
         this(reasonCode.getCode());
     }
 
-    /**
-     * @return the byte code of this SUBACK Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
     }
@@ -65,17 +65,15 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
      * Returns the SUBACK Reason Code belonging to the given byte code.
      *
      * @param code the byte code.
-     * @return the SUBACK Reason Code belonging to the given byte code or null if the byte code is not a valid SUBACK
-     * Reason Code code.
+     * @return the SUBACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid SUBACK Reason Code.
      */
-    @Nullable
-    public static Mqtt5SubAckReasonCode fromCode(final int code) {
-        for (final Mqtt5SubAckReasonCode reasonCode : values()) {
+    public static @Nullable Mqtt5SubAckReasonCode fromCode(final int code) {
+        for (final Mqtt5SubAckReasonCode reasonCode : VALUES) {
             if (reasonCode.code == code) {
                 return reasonCode;
             }
         }
         return null;
     }
-
 }

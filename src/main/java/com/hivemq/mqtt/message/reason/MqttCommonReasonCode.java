@@ -54,11 +54,8 @@ public enum MqttCommonReasonCode implements Mqtt5ReasonCode {
         this.code = code;
     }
 
-    /**
-     * @return the byte code of this Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
     }
-
 }
