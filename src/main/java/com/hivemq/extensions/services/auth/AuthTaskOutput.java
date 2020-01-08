@@ -17,8 +17,8 @@
 package com.hivemq.extensions.services.auth;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
@@ -58,7 +58,7 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     private @Nullable ModifiableUserPropertiesImpl modifiableUserProperties;
     private @Nullable InternalUserProperties legacyUserProperties;
     private @Nullable ByteBuffer authenticationData;
-    private @Nullable String reasonString;
+    private @Nullable String reasonString = "Authentication failed by extension";
     private int timeout;
     private final boolean supportsEnhancedAuth;
 
@@ -195,25 +195,31 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
 
     @Override
     public void failAuthentication() {
-        failAuthentication("Authentication failed by extension");
+        checkDecided("failAuthentication");
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
     }
 
     @Override
-    public void failAuthentication(final @NotNull String reasonString) {
+    public void failAuthentication(final @NotNull DisconnectedReasonCode reasonCode) {
         checkDecided("failAuthentication");
-        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
+        checkReasonCode(reasonCode);
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+        this.disconnectedReasonCode = reasonCode;
+    }
+
+    @Override
+    public void failAuthentication(final @Nullable String reasonString) {
+        checkDecided("failAuthentication");
         this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
         this.reasonString = reasonString;
     }
 
     @Override
-    public void failAuthentication(final @NotNull DisconnectedReasonCode disconnectedReasonCode, final @NotNull String reasonString) {
+    public void failAuthentication(final @NotNull DisconnectedReasonCode reasonCode, final @Nullable String reasonString) {
         checkDecided("failAuthentication");
-        checkReasonCode(disconnectedReasonCode);
-        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
-
+        checkReasonCode(reasonCode);
         this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
-        this.disconnectedReasonCode = disconnectedReasonCode;
+        this.disconnectedReasonCode = reasonCode;
         this.reasonString = reasonString;
     }
 

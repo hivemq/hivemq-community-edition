@@ -18,6 +18,7 @@ package com.hivemq.extension.sdk.api.auth.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -136,13 +137,29 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
     /**
      * Fails the authentication for the client.
      * <p>
-     * During authentication a CONNACK packet with reason code NOT_AUTHORIZED is sent to the client.
-     * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED is sent to the client.
+     * During authentication a CONNACK packet with reason code NOT_AUTHORIZED and reason string <code>Authentication
+     * failed by extension</code> is sent to the client.
+     * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and reason string
+     * <code>Authentication failed by extension</code> is sent to the client.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
      */
     void failAuthentication();
+
+    /**
+     * Fails the authentication for the client.
+     * <p>
+     * During authentication a CONNACK packet with the specified reason code and reason string <code>Authentication
+     * failed by extension</code> is sent to the client.
+     * During re-authentication a DISCONNECT packet with the specified reason code and reason string
+     * <code>Authentication failed by extension</code> is sent to the client.
+     *
+     * @param reasonCode The reason code of the CONNACK or DISCONNECT packet.
+     * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
+     *                                       or nextExtensionOrDefault has already been called.
+     */
+    void failAuthentication(@NotNull DisconnectedReasonCode reasonCode);
 
     /**
      * Fails the authentication for the client.
@@ -156,18 +173,18 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
      */
-    void failAuthentication(@NotNull String reasonString);
+    void failAuthentication(@Nullable String reasonString);
 
     /**
      * Fails the authentication for the client.
      * <p>
-     * During authentication a CONNACK packet with the specified reason code and the reason string is sent to the
+     * During authentication a CONNACK packet with the specified reason code and reason string is sent to the
      * client.
-     * During re-authentication a DISCONNECT packet with the specified reason code and the reason string is sent to the
+     * During re-authentication a DISCONNECT packet with the specified reason code and reason string is sent to the
      * client.
      *
-     * @param disconnectedReasonCode The reason code of the CONNACK or DISCONNECT packet.
-     * @param reasonString           The reason string of the CONNACK or DISCONNECT packet.
+     * @param reasonCode   The reason code of the CONNACK or DISCONNECT packet.
+     * @param reasonString The reason string of the CONNACK or DISCONNECT packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
      * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a CONNACK only reason code
@@ -175,17 +192,16 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a DISCONNECT only reason code
      *                                       and the client is currently connecting.
      */
-    void failAuthentication(@NotNull DisconnectedReasonCode disconnectedReasonCode, @NotNull String reasonString);
+    void failAuthentication(@NotNull DisconnectedReasonCode reasonCode, @Nullable String reasonString);
 
     /**
      * The outcome of the authentication is determined by the next extension with an {@link Authenticator}.
      * <p>
      * If no extension with an Authenticator is left the authentication is failed.
-     * During authentication a CONNACK packet with reason code NOT_AUTHORIZED and the reason string
-     * <code>authentication
+     * During authentication a CONNACK packet with reason code NOT_AUTHORIZED and reason string <code>Authentication
      * failed by extension</code> is sent to the client.
-     * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and the reason string
-     * <code>authentication failed by extension</code> is sent to the client.
+     * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and reason string
+     * <code>Authentication failed by extension</code> is sent to the client.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
