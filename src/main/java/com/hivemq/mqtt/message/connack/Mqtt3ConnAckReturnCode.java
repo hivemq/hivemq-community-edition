@@ -18,7 +18,6 @@ package com.hivemq.mqtt.message.connack;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.mqtt.message.reason.MqttConnAckCode;
 
 /**
  * The return code of a MQTT 3.1.1 {@link CONNACK} message.
@@ -29,7 +28,7 @@ import com.hivemq.mqtt.message.reason.MqttConnAckCode;
  *
  * @since 1.4
  */
-public enum Mqtt3ConnAckReturnCode implements MqttConnAckCode {
+public enum Mqtt3ConnAckReturnCode {
     ACCEPTED(0),
     REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1),
     REFUSED_IDENTIFIER_REJECTED(2),

@@ -31,6 +31,7 @@ import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.packets.general.ReasonCodeUtil;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -326,8 +327,12 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
         if (isReAuth) {
             Preconditions.checkArgument(disconnectedReasonCode != DisconnectedReasonCode.NORMAL_DISCONNECTION,
                     "DISCONNECT reason code must not be 'NORMAL_DISCONNECTION' for failed authentication");
-            Preconditions.checkArgument(ReasonCodeUtil.toMqtt5DisconnectReasonCode(disconnectedReasonCode) != null,
+            final Mqtt5DisconnectReasonCode disconnectReasonCode =
+                    ReasonCodeUtil.toMqtt5DisconnectReasonCode(disconnectedReasonCode);
+            Preconditions.checkArgument(disconnectReasonCode != null,
                     "The disconnected reason code '" + disconnectedReasonCode.name() + "' cannot be used for DISCONNECT messages.");
+            Preconditions.checkArgument(disconnectReasonCode.canBeSentByServer(),
+                    "The disconnected reason code '" + disconnectedReasonCode.name() + "' cannot be sent by the server.");
         } else {
             Preconditions.checkArgument(disconnectedReasonCode != DisconnectedReasonCode.SUCCESS,
                     "CONNACK reason code must not be 'SUCCESS' for failed authentication");

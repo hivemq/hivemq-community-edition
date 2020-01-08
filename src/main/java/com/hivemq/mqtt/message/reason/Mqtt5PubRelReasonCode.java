@@ -35,13 +35,11 @@ public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
         this.code = code;
     }
 
-    Mqtt5PubRelReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5PubRelReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
-    /**
-     * @return the byte code of this PUBREL Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
     }
@@ -50,17 +48,20 @@ public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
      * Returns the PUBREL Reason Code belonging to the given byte code.
      *
      * @param code the byte code.
-     * @return the PUBREL Reason Code belonging to the given byte code or null if the byte code is not a valid PUBREL
-     * Reason Code code.
+     * @return the PUBREL Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid PUBREL Reason Code.
      */
-    @Nullable
-    public static Mqtt5PubRelReasonCode fromCode(final int code) {
-        for (final Mqtt5PubRelReasonCode reasonCode : values()) {
-            if (reasonCode.code == code) {
-                return reasonCode;
-            }
+    public static @Nullable Mqtt5PubRelReasonCode fromCode(final int code) {
+        if (code == SUCCESS.code) {
+            return SUCCESS;
+        } else if (code == PACKET_IDENTIFIER_NOT_FOUND.code) {
+            return PACKET_IDENTIFIER_NOT_FOUND;
         }
         return null;
     }
 
+    @Override
+    public boolean canBeSentByClient() {
+        return true;
+    }
 }

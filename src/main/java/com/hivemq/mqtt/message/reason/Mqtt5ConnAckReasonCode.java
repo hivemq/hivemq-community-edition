@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
@@ -26,7 +27,7 @@ import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
  *
  * @author Silvio Giebl
  */
-public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode, MqttConnAckCode {
+public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
 
     SUCCESS(MqttCommonReasonCode.SUCCESS),
     UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
@@ -57,21 +58,18 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode, MqttConnAckCode {
         this.code = code;
     }
 
-    Mqtt5ConnAckReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5ConnAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
-    /**
-     * @return the byte code of this CONNACK Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
     }
 
-
     private static final int ERROR_CODE_MIN = UNSPECIFIED_ERROR.code;
     private static final int ERROR_CODE_MAX = CONNECTION_RATE_EXCEEDED.code;
-    private static final Mqtt5ConnAckReasonCode[] ERROR_CODE_LOOKUP =
+    private static final @NotNull Mqtt5ConnAckReasonCode[] ERROR_CODE_LOOKUP =
             new Mqtt5ConnAckReasonCode[ERROR_CODE_MAX - ERROR_CODE_MIN + 1];
 
     static {
@@ -80,6 +78,23 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode, MqttConnAckCode {
                 ERROR_CODE_LOOKUP[reasonCode.code - ERROR_CODE_MIN] = reasonCode;
             }
         }
+    }
+
+    /**
+     * Returns the CONNACK Reason Code belonging to the given byte code.
+     *
+     * @param code the byte code.
+     * @return the CONNACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid CONNACK Reason Code code.
+     */
+    public static @Nullable Mqtt5ConnAckReasonCode fromCode(final int code) {
+        if (code == SUCCESS.code) {
+            return SUCCESS;
+        }
+        if (code < ERROR_CODE_MIN || code > ERROR_CODE_MAX) {
+            return null;
+        }
+        return ERROR_CODE_LOOKUP[code - ERROR_CODE_MIN];
     }
 
     @NotNull
