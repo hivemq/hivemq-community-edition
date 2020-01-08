@@ -222,7 +222,10 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     }
 
     @Override
-    public void failAuthentication(final @NotNull DisconnectedReasonCode reasonCode, final @Nullable String reasonString) {
+    public void failAuthentication(
+            final @NotNull DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString) {
+
         checkDecided("failAuthentication");
         checkReasonCode(reasonCode);
         this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);

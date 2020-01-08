@@ -57,12 +57,15 @@ import java.time.Duration;
  * @author Christoph Schäbel
  * @author Daniel Krüger
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
 @DoNotImplement
 public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
 
     /**
      * Sends an AUTH packet with reason code CONTINUE and no authentication data.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
@@ -71,6 +74,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
 
     /**
      * Sends an AUTH packet with reason code CONTINUE and the specified authentication data.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param authenticationData The authentication data of the AUTH packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -79,7 +84,9 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
     void continueAuthentication(@NotNull ByteBuffer authenticationData);
 
     /**
-     * Sends AUTH packet with reason code CONTINUE and specified authentication data
+     * Sends AUTH packet with reason code CONTINUE and specified authentication data.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param authenticationData The authentication data of the AUTH packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -95,7 +102,7 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * During re-authentication an AUTH packet with reason code SUCCESS and no authentication data is sent to the
      * client.
      * <p>
-     * This is a final decision, other extensions are ignored.
+     * This is a final decision, the next extensions are ignored.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
@@ -110,7 +117,7 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * During re-authentication an AUTH packet with the specified reason code and no authentication data is sent to the
      * client.
      * <p>
-     * This is a final decision, other extensions are ignored.
+     * This is a final decision, the next extensions are ignored.
      *
      * @param authenticationData The authentication data of the CONNACK or AUTH packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -126,7 +133,7 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * During re-authentication an AUTH packet with the specified reason code and no authentication data is sent to the
      * client.
      * <p>
-     * This is a final decision, other extensions are ignored.
+     * This is a final decision, the next extensions are ignored.
      *
      * @param authenticationData The authentication data that of the CONNACK or AUTH packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -141,6 +148,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * failed by extension</code> is sent to the client.
      * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and reason string
      * <code>Authentication failed by extension</code> is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
@@ -154,6 +163,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * failed by extension</code> is sent to the client.
      * During re-authentication a DISCONNECT packet with the specified reason code and reason string
      * <code>Authentication failed by extension</code> is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param reasonCode The reason code of the CONNACK or DISCONNECT packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -172,6 +183,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * the client.
      * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and the specified reason string is
      * sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param reasonString The reason string of the CONNACK or DISCONNECT packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
@@ -186,6 +199,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * client.
      * During re-authentication a DISCONNECT packet with the specified reason code and reason string is sent to the
      * client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param reasonCode   The reason code of the CONNACK or DISCONNECT packet.
      * @param reasonString The reason string of the CONNACK or DISCONNECT packet.
@@ -201,11 +216,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
     /**
      * The outcome of the authentication is determined by the next extension with an {@link Authenticator}.
      * <p>
-     * If no extension with an Authenticator is left the authentication is failed.
-     * During authentication a CONNACK packet with reason code NOT_AUTHORIZED and reason string <code>Authentication
-     * failed by extension</code> is sent to the client.
-     * During re-authentication a DISCONNECT packet with reason code NOT_AUTHORIZED and reason string
-     * <code>Authentication failed by extension</code> is sent to the client.
+     * If no extension with an Authenticator is left the default behaviour is used.
+     * The default behaviour is the same as {@link #failAuthentication()}.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
@@ -223,34 +235,34 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * Provides {@link ModifiableUserProperties} to add or remove user properties to or from the outgoing CONNACK, AUTH
      * or DISCONNECT packet.
      *
-     * @return The {@link ModifiableUserProperties}.
+     * @return The {@link ModifiableUserProperties} of the CONNACK, AUTH or DISCONNECT packet.
      */
     @NotNull ModifiableUserProperties getOutboundUserProperties();
 
     /**
-     * Provides {@link ModifiableClientSettings} to configure client specific parameters and restrictions.
-     *
-     * @return The {@link ModifiableClientSettings}.
-     */
-    @NotNull ModifiableClientSettings getClientSettings();
-
-    /**
-     * Provides the default permissions for the client.
+     * Provides {@link ModifiableDefaultPermissions} to configure client specific default permissions.
      * <p>
-     * Default permissions are automatically applied by HiveMQ for every MQTT PUBLISH and SUBSCRIBE packet sent by the
+     * Default permissions are automatically applied by HiveMQ for every PUBLISH and SUBSCRIBE packet sent by the
      * client.
      *
-     * @return The {@link ModifiableDefaultPermissions} object for the client.
+     * @return The {@link ModifiableDefaultPermissions} for the client.
      */
     @NotNull ModifiableDefaultPermissions getDefaultPermissions();
+
+    /**
+     * Provides {@link ModifiableClientSettings} to configure client specific parameters and restrictions.
+     *
+     * @return The {@link ModifiableClientSettings} for the client.
+     */
+    @NotNull ModifiableClientSettings getClientSettings();
 
     /**
      * {@inheritDoc}
      *
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
      *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
-     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
-     *                        String)} with reason code NOT_AUTHORIZED and reason string <code>Authentication failed by
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode, String)}
+     *                        with reason code NOT_AUTHORIZED and reason string <code>Authentication failed by
      *                        timeout</code>.
      */
     @Override
@@ -265,8 +277,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
      *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
-     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
-     *                        String)} with the specified reason code and reason string <code>Authentication failed by
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode, String)}
+     *                        with the specified reason code and reason string <code>Authentication failed by
      *                        timeout</code>.
      * @param reasonCode      The reason code sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
@@ -289,8 +301,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
      *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
-     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
-     *                        String)} with reason code NOT_AUTHORIZED and the specified reason string.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode, String)}
+     *                        with reason code NOT_AUTHORIZED and the specified reason string.
      * @param reasonString    The reason string sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
      */
@@ -308,8 +320,8 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
      *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
-     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
-     *                        String)} with the specified reason code and reason string.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode, String)}
+     *                        with the specified reason code and reason string.
      * @param reasonCode      The reason code sent in CONNACK or DISCONNECT when timeout occurs.
      * @param reasonString    The reason string sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
