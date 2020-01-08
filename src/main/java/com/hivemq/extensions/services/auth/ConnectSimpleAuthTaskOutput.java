@@ -55,21 +55,20 @@ public class ConnectSimpleAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthO
     private final @NotNull AtomicBoolean authenticatorPresent = new AtomicBoolean(false);
     private @Nullable ModifiableUserPropertiesImpl modifiableUserProperties;
     private @Nullable InternalUserProperties legacyUserProperties;
-    private @NotNull ConnackReasonCode connackReasonCode;
-    private @Nullable String reasonString;
+    private @NotNull ConnackReasonCode connackReasonCode = ConnackReasonCode.NOT_AUTHORIZED;
+    private @Nullable String reasonString = "Authentication failed by extension";
 
 
     ConnectSimpleAuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer,
-                                final @NotNull ModifiableClientSettingsImpl clientSettings,
-                                final @NotNull ModifiableDefaultPermissions defaultPermissions,
-                                final @NotNull AuthenticationContext authenticationContext,
-                                final boolean validateUTF8) {
+            final @NotNull ModifiableClientSettingsImpl clientSettings,
+            final @NotNull ModifiableDefaultPermissions defaultPermissions,
+            final @NotNull AuthenticationContext authenticationContext,
+            final boolean validateUTF8) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
         this.modifiableClientSettings = clientSettings;
         this.defaultPermissions = defaultPermissions;
         this.authenticationContext = authenticationContext;
-        this.connackReasonCode = ConnackReasonCode.NOT_AUTHORIZED;
     }
 
     ConnectSimpleAuthTaskOutput(final @NotNull ConnectSimpleAuthTaskOutput connectSimpleAuthTaskOutput) {
@@ -88,49 +87,52 @@ public class ConnectSimpleAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthO
     }
 
     @Override
-    public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull ConnackReasonCode connackReasonCode) {
-        return async(duration, timeoutFallback, connackReasonCode, "Authentication failed by timeout");
+    public @NotNull Async<SimpleAuthOutput> async(final @NotNull Duration timeout) {
+        return async(timeout, TimeoutFallback.FAILURE, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
     }
 
     @Override
     public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull String reasonString) {
-        return async(duration, timeoutFallback, ConnackReasonCode.NOT_AUTHORIZED, reasonString);
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback) {
+
+        return async(timeout, timeoutFallback, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
     }
 
     @Override
     public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback) {
-        Preconditions.checkNotNull(duration, "Duration must never be null");
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull ConnackReasonCode reasonCode) {
+
+        return async(timeout, timeoutFallback, reasonCode, "Authentication failed by timeout");
+    }
+
+    @Override
+    public @NotNull Async<SimpleAuthOutput> async(
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @Nullable String reasonString) {
+
+        return async(timeout, timeoutFallback, ConnackReasonCode.NOT_AUTHORIZED, reasonString);
+    }
+
+    public @NotNull Async<SimpleAuthOutput> async(
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull ConnackReasonCode reasonCode,
+            final @Nullable String reasonString) {
+
+        Preconditions.checkNotNull(timeout, "Duration must never be null");
         Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
-        return async(duration, timeoutFallback, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
-    }
-
-    @Override
-    public @NotNull Async<SimpleAuthOutput> async(final @NotNull Duration duration) {
-        Preconditions.checkNotNull(duration, "Duration must never be null");
-        return async(duration, TimeoutFallback.FAILURE, ConnackReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
-    }
-
-    public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull ConnackReasonCode connackReasonCode, final @NotNull String reasonString) {
-
-        Preconditions.checkNotNull(duration, "Duration must never be null");
-        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
-        Preconditions.checkNotNull(connackReasonCode, "Reason code must never be null");
-        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
-
+        Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         checkArgument(
-                connackReasonCode != ConnackReasonCode.SUCCESS,
+                reasonCode != ConnackReasonCode.SUCCESS,
                 "CONNACK reason code must not be SUCCESS for timed out authentication");
 
-        this.connackReasonCode = connackReasonCode;
+        this.connackReasonCode = reasonCode;
         this.reasonString = reasonString;
-        return super.async(duration, timeoutFallback);
+        return super.async(timeout, timeoutFallback);
     }
 
     public void authenticateSuccessfully() {
@@ -139,26 +141,33 @@ public class ConnectSimpleAuthTaskOutput extends AbstractAsyncOutput<SimpleAuthO
     }
 
     public void failAuthentication() {
-        failAuthentication("Authentication failed by extension");
-    }
-
-    public void failAuthentication(final @NotNull String reasonString) {
-        failAuthentication(ConnackReasonCode.NOT_AUTHORIZED, reasonString);
-    }
-
-    public void failAuthentication(
-            final @NotNull ConnackReasonCode connackReasonCode, final @NotNull String reasonString) {
-
         checkDecided("failAuthentication");
-        checkNotNull(connackReasonCode, "CONNACK reason code must not be null");
-        checkNotNull(reasonString, "CONNACK reason string must not be null");
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+    }
 
+    @Override
+    public void failAuthentication(final @NotNull ConnackReasonCode reasonCode) {
+        checkDecided("failAuthentication");
+        checkNotNull(reasonCode, "CONNACK reason code must never be null");
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+        this.connackReasonCode = reasonCode;
+    }
+
+    public void failAuthentication(final @Nullable String reasonString) {
+        checkDecided("failAuthentication");
+        this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
+        this.reasonString = reasonString;
+    }
+
+    public void failAuthentication(final @NotNull ConnackReasonCode reasonCode, final @Nullable String reasonString) {
+        checkDecided("failAuthentication");
+        checkNotNull(reasonCode, "CONNACK reason code must never be null");
         checkArgument(
-                connackReasonCode != ConnackReasonCode.SUCCESS,
+                reasonCode != ConnackReasonCode.SUCCESS,
                 "CONNACK reason code must not be SUCCESS for failAuthentication");
 
         this.authenticationContext.setAuthenticationState(AuthenticationState.FAILED);
-        this.connackReasonCode = connackReasonCode;
+        this.connackReasonCode = reasonCode;
         this.reasonString = reasonString;
     }
 

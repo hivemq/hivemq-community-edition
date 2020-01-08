@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.auth.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.AsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -39,13 +41,13 @@ import java.time.Duration;
  * <li>Configure client specific parameters and restrictions</li>
  * </ul>
  * <p>
- * Only one of the methods {@link #authenticateSuccessfully()}, {@link #failAuthentication()}, {@link
- * #failAuthentication(String)}, {@link #failAuthentication(ConnackReasonCode, String)} or {@link
- * #nextExtensionOrDefault()} may be called.
- * <p>
+ * Only one of the methods {@link #authenticateSuccessfully()}, {@link #failAuthentication()},
+ * {@link #failAuthentication(ConnackReasonCode)}, {@link #failAuthentication(String)},
+ * {@link #failAuthentication(ConnackReasonCode, String)} or {@link #nextExtensionOrDefault()} must be called.
  * Subsequent calls will fail with an {@link UnsupportedOperationException}.
  *
  * @author Christoph Schäbel
+ * @author Silvio Giebl
  * @since 4.0.0
  */
 @DoNotImplement
@@ -54,7 +56,9 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
     /**
      * Successfully authenticates the client.
      * <p>
-     * This is a final decision, other extensions or default permissions are ignored.
+     * A CONNACK packet with reason code SUCCESS is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication or nextExtensionOrDefault
      *                                       has already been called.
@@ -63,62 +67,14 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
     void authenticateSuccessfully();
 
     /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
-     *
-     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
-     * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then the client is successfully authenticated.
-     *                        If the fallback is FAILURE then the client is disconnected.
-     * @param reasonCode      The reason code sent in CONNACK when timeout occurs.
-     * @param reasonString    The reason string sent in CONNACK when timeout occurs.
-     * @throws UnsupportedOperationException If async is called more than once.
-     * @since 4.0.0
-     */
-    @NotNull Async<SimpleAuthOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback,
-                                           @NotNull ConnackReasonCode reasonCode, @NotNull String reasonString);
-
-    /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
-     *
-     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
-     * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then the client is successfully authenticated.
-     *                        If the fallback is FAILURE then the client is disconnected.
-     * @param reasonCode      The reason code sent in CONNACK when timeout occurs.
-     * @throws UnsupportedOperationException If async is called more than once.
-     * @since 4.0.0
-     */
-    @NotNull Async<SimpleAuthOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback,
-                                           @NotNull ConnackReasonCode reasonCode);
-
-    /**
-     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
-     * handled either as failed or successful, depending on the specified fallback.
-     * <p>
-     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
-     *
-     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
-     * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then the client is successfully authenticated.
-     *                        If the fallback is FAILURE then the client is disconnected.
-     * @param reasonString    The reason string sent in CONNACK when timeout occurs.
-     * @throws UnsupportedOperationException If async is called more than once.
-     * @since 4.0.0
-     */
-    @NotNull Async<SimpleAuthOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback,
-                                           @NotNull String reasonString);
-
-    /**
      * Fails the authentication for the client.
      * <p>
-     * For an MQTT 3 client a CONNACK with connect return code <b>'Connection Refused, not authorized'</b> is sent.
-     * For an MQTT 5 client a CONNACK with reason code NOT_AUTHORIZED is sent.
+     * For an MQTT 3 client a CONNACK packet with return code <code>Connection Refused, not authorized</code> is sent to
+     * the client.
+     * For an MQTT 5 client a CONNACK packet with reason code NOT_AUTHORIZED and reason string <code>Authentication
+     * failed by extension</code> is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication or nextExtensionOrDefault
      *                                       has already been called.
@@ -129,23 +85,44 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
     /**
      * Fails the authentication for the client.
      * <p>
-     * For an MQTT 3 client a CONNACK with connect return code <b>'Connection Refused, not authorized'</b> is sent.
-     * For an MQTT 5 client a CONNACK with reason code NOT_AUTHORIZED and reason string given with
-     * <code>reasonString</code> is sent.
+     * For an MQTT 3 client a CONNACK packet with connect return code <code>Connection Refused, not authorized</code> is
+     * sent to the client.
+     * For an MQTT 5 client a CONNACK packet with the specified reason code and reason string <code>Authentication
+     * failed by extension</code> is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
+     *
+     * @param reasonCode The reason code of the CONNACK packet.
+     * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication or nextExtensionOrDefault
+     *                                       has already been called.
+     */
+    void failAuthentication(@NotNull ConnackReasonCode reasonCode);
+
+    /**
+     * Fails the authentication for the client.
+     * <p>
+     * For an MQTT 3 client a CONNACK packet with connect return code <code>Connection Refused, not authorized</code> is
+     * sent to the client.
+     * For an MQTT 5 client a CONNACK packet with reason code NOT_AUTHORIZED and the specified reason string is sent to
+     * the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param reasonString Used as the reason string in the CONNACK packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication or nextExtensionOrDefault
      *                                       has already been called.
      * @since 4.0.0
      */
-    void failAuthentication(@NotNull String reasonString);
+    void failAuthentication(@Nullable String reasonString);
 
     /**
      * Fails the authentication for the client.
      * <p>
-     * For an MQTT 3 client a CONNACK with connect return code <b>'Connection Refused, not authorized'</b> is sent.
-     * For an MQTT 5 client a CONNACK containing the reason code and reason string given with <code>reasonCode</code>
-     * and <code>reasonString</code> respectively.
+     * For an MQTT 3 client a CONNACK packet with connect return code <code>Connection Refused, not authorized</code> is
+     * sent to the client.
+     * For an MQTT 5 client a CONNACK packet with the specified reason code and reason string is sent to the client.
+     * <p>
+     * This is a final decision, the next extensions are ignored.
      *
      * @param reasonCode   Used as the reason code in the CONNACK packet.
      * @param reasonString Used as the reason string in the CONNACK packet.
@@ -154,16 +131,13 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
      *                                       has already been called.
      * @since 4.0.0
      */
-    void failAuthentication(@NotNull ConnackReasonCode reasonCode, @NotNull String reasonString);
+    void failAuthentication(@NotNull ConnackReasonCode reasonCode, @Nullable String reasonString);
 
     /**
-     * The outcome of the authentication is determined by the next extension with an {@link
-     * Authenticator}.
-     * If no extension with an Authenticator is left the default behaviour is used. <p>
+     * The outcome of the authentication is determined by the next extension with an {@link Authenticator}.
      * <p>
-     * The default behaviour for an MQTT 3 client is to sent a CONNACK with connect return code <b>'Connection Refused,
-     * not authorized'</b>. For an MQTT 5 client a CONNACK with reason code NOT_AUTHORIZED and reason string
-     * <b>'authentication failed by extension'</b> is sent.
+     * If no extension with an Authenticator is left the default behaviour is used.
+     * The default behaviour is the same as {@link #failAuthentication()}.
      *
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication or nextExtensionOrDefault
      *                                       has already been called.
@@ -172,27 +146,105 @@ public interface SimpleAuthOutput extends AsyncOutput<SimpleAuthOutput> {
     void nextExtensionOrDefault();
 
     /**
-     * A {@link ModifiableUserProperties} to add or remove user properties to or from the outgoing CONNACK packet.
+     * Provides {@link ModifiableUserProperties} to add or remove user properties to or from the outgoing CONNACK
+     * packet.
      *
-     * @return The {@link ModifiableUserProperties} object.
+     * @return The {@link ModifiableUserProperties} of the CONNACK packet.
      * @since 4.0.0
      */
     @NotNull ModifiableUserProperties getOutboundUserProperties();
 
     /**
-     * The default permissions for the client. Default permissions are automatically applied by HiveMQ for every
-     * MQTT PUBLISH and SUBSCRIBE packet sent by the client.
+     * Provides {@link ModifiableDefaultPermissions} to configure client specific default permissions.
+     * <p>
+     * Default permissions are automatically applied by HiveMQ for every PUBLISH and SUBSCRIBE packet sent by the
+     * client.
      *
-     * @return The {@link ModifiableDefaultPermissions} object for the client.
+     * @return The {@link ModifiableDefaultPermissions} for the client.
      * @since 4.0.0
      */
     @NotNull ModifiableDefaultPermissions getDefaultPermissions();
 
     /**
-     * Provides a {@link ModifiableClientSettings} object, that is used to configure client specific parameters and restrictions.
+     * Provides {@link ModifiableClientSettings} to configure client specific parameters and restrictions.
      *
-     * @return A {@link ModifiableClientSettings} object.
+     * @return The {@link ModifiableClientSettings} for the client.
      * @since 4.2.0
      */
     @NotNull ModifiableClientSettings getClientSettings();
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param timeoutFallback Fallback behaviour if a timeout occurs.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(ConnackReasonCode, String)} with
+     *                        reason code NOT_AUTHORIZED and reason string <code>Authentication failed by
+     *                        timeout</code>.
+     * @since 4.0.0
+     */
+    @Override
+    @NotNull Async<SimpleAuthOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback);
+
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
+     * handled either as failed or successful, depending on the specified fallback.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     *
+     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
+     * @param timeoutFallback Fallback behaviour if a timeout occurs.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(ConnackReasonCode, String)} with
+     *                        the specified reason code and reason string <code>Authentication failed by timeout</code>.
+     * @param reasonCode      The reason code sent in CONNACK when timeout occurs.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.0.0
+     */
+    @NotNull Async<SimpleAuthOutput> async(
+            @NotNull Duration timeout,
+            @NotNull TimeoutFallback timeoutFallback,
+            @NotNull ConnackReasonCode reasonCode);
+
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
+     * handled either as failed or successful, depending on the specified fallback.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     *
+     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
+     * @param timeoutFallback Fallback behaviour if a timeout occurs.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(ConnackReasonCode, String)}
+     *                        with reason code NOT_AUTHORIZED and the specified reason string.
+     * @param reasonString    The reason string sent in CONNACK when timeout occurs.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.0.0
+     */
+    @NotNull Async<SimpleAuthOutput> async(
+            @NotNull Duration timeout,
+            @NotNull TimeoutFallback timeoutFallback,
+            @Nullable String reasonString);
+
+    /**
+     * If the timeout is expired before {@link Async#resume()} is called then the outcome is
+     * handled either as failed or successful, depending on the specified fallback.
+     * <p>
+     * Do not call this method more than once. If an async method is called multiple times an exception is thrown.
+     *
+     * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
+     * @param timeoutFallback Fallback behaviour if a timeout occurs.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(ConnackReasonCode, String)}
+     *                        with the specified reason code and reason string.
+     * @param reasonCode      The reason code sent in CONNACK when timeout occurs.
+     * @param reasonString    The reason string sent in CONNACK when timeout occurs.
+     * @throws UnsupportedOperationException If async is called more than once.
+     * @since 4.0.0
+     */
+    @NotNull Async<SimpleAuthOutput> async(
+            @NotNull Duration timeout,
+            @NotNull TimeoutFallback timeoutFallback,
+            @NotNull ConnackReasonCode reasonCode,
+            @Nullable String reasonString);
 }
