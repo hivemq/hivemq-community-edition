@@ -63,13 +63,13 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
     private final boolean supportsEnhancedAuth;
 
     AuthTaskOutput(final @NotNull PluginOutPutAsyncer asyncer,
-                   final @NotNull ModifiableClientSettingsImpl clientSettings,
-                   final @NotNull ModifiableDefaultPermissions defaultPermissions,
-                   final @NotNull AuthenticationContext authenticationContext,
-                   final boolean validateUTF8,
-                   final boolean isReAuth,
-                   final int timeout,
-                   final boolean supportsEnhancedAuth) {
+            final @NotNull ModifiableClientSettingsImpl clientSettings,
+            final @NotNull ModifiableDefaultPermissions defaultPermissions,
+            final @NotNull AuthenticationContext authenticationContext,
+            final boolean validateUTF8,
+            final boolean isReAuth,
+            final int timeout,
+            final boolean supportsEnhancedAuth) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
         this.authenticationContext = authenticationContext;
@@ -99,44 +99,51 @@ public class AuthTaskOutput extends AbstractAsyncOutput<EnhancedAuthOutput> impl
         this.timeout = authTaskOutput.timeout;
     }
 
-    public @NotNull Async<EnhancedAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull DisconnectedReasonCode disconnectedReasonCode, final @NotNull String reasonString) {
-
-        Preconditions.checkNotNull(duration, "Duration must never be null");
-        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
-        Preconditions.checkNotNull(disconnectedReasonCode, "Reason code must never be null");
-        Preconditions.checkNotNull(reasonString, "Reason string must never be null");
-
-        checkReasonCode(disconnectedReasonCode);
-
-        this.disconnectedReasonCode = disconnectedReasonCode;
-        this.reasonString = reasonString;
-        return super.async(duration, timeoutFallback);
+    @Override
+    public @NotNull Async<EnhancedAuthOutput> async(final @NotNull Duration timeout) {
+        return async(timeout, TimeoutFallback.FAILURE, DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
     }
 
     @Override
-    public @NotNull Async<EnhancedAuthOutput> async(final @NotNull Duration timeout, final @NotNull TimeoutFallback timeoutFallback, final @NotNull DisconnectedReasonCode reasonCode) {
+    public @NotNull Async<EnhancedAuthOutput> async(
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback) {
+
+        return async(timeout, timeoutFallback, DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
+    }
+
+    @Override
+    public @NotNull Async<EnhancedAuthOutput> async(
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull DisconnectedReasonCode reasonCode) {
+
         return async(timeout, timeoutFallback, reasonCode, "Authentication failed by timeout");
     }
 
     @Override
     public @NotNull Async<EnhancedAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull String reasonString) {
-        return async(duration, timeoutFallback, DisconnectedReasonCode.NOT_AUTHORIZED, reasonString);
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @Nullable String reasonString) {
+
+        return async(timeout, timeoutFallback, DisconnectedReasonCode.NOT_AUTHORIZED, reasonString);
     }
 
-    @Override
     public @NotNull Async<EnhancedAuthOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback) {
-        return async(duration, timeoutFallback, DisconnectedReasonCode.NOT_AUTHORIZED, "Authentication failed by timeout");
-    }
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString) {
 
-    @Override
-    public @NotNull Async<EnhancedAuthOutput> async(final @NotNull Duration duration) {
-        return async(duration, TimeoutFallback.FAILURE, DisconnectedReasonCode.NOT_AUTHORIZED,
-                "Authentication failed by timeout");
+        Preconditions.checkNotNull(timeout, "Duration must never be null");
+        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
+        Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
+        checkReasonCode(reasonCode);
+
+        this.disconnectedReasonCode = reasonCode;
+        this.reasonString = reasonString;
+        return super.async(timeout, timeoutFallback);
     }
 
 

@@ -158,6 +158,10 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      * @param reasonCode The reason code of the CONNACK or DISCONNECT packet.
      * @throws UnsupportedOperationException When authenticateSuccessfully, failAuthentication, continueAuthentication
      *                                       or nextExtensionOrDefault has already been called.
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a CONNACK only reason code
+     *                                       and the client is already connected.
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a DISCONNECT only reason code
+     *                                       and the client is currently connecting.
      */
     void failAuthentication(@NotNull DisconnectedReasonCode reasonCode);
 
@@ -241,6 +245,18 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
     @NotNull ModifiableDefaultPermissions getDefaultPermissions();
 
     /**
+     * {@inheritDoc}
+     *
+     * @param timeoutFallback Fallback behaviour if a timeout occurs.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
+     *                        String)} with reason code NOT_AUTHORIZED and reason string <code>Authentication failed by
+     *                        timeout</code>.
+     */
+    @Override
+    @NotNull Async<EnhancedAuthOutput> async(@NotNull Duration timeout, @NotNull TimeoutFallback timeoutFallback);
+
+    /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is
      * handled either as failed or successful, depending on the specified fallback.
      * <p>
@@ -248,13 +264,15 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      *
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then next extension or default is called.
-     *                        If the fallback is FAILURE then the client is disconnected.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
+     *                        String)} with the specified reason code and reason string <code>Authentication failed by
+     *                        timeout</code>.
      * @param reasonCode      The reason code sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
-     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to CONNACK only reason code and
-     *                                       the client is already connected.
-     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to DISCONNECT only reason code
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a CONNACK only reason code
+     *                                       and the client is already connected.
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a DISCONNECT only reason code
      *                                       and the client is currently connecting.
      */
     @NotNull Async<EnhancedAuthOutput> async(
@@ -270,15 +288,16 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      *
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then next extension or default is called.
-     *                        If the fallback is FAILURE then the client is disconnected.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
+     *                        String)} with reason code NOT_AUTHORIZED and the specified reason string.
      * @param reasonString    The reason string sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
      */
     @NotNull Async<EnhancedAuthOutput> async(
             @NotNull Duration timeout,
             @NotNull TimeoutFallback timeoutFallback,
-            @NotNull String reasonString);
+            @Nullable String reasonString);
 
     /**
      * If the timeout is expired before {@link Async#resume()} is called then the outcome is
@@ -288,19 +307,20 @@ public interface EnhancedAuthOutput extends AsyncOutput<EnhancedAuthOutput> {
      *
      * @param timeout         Timeout that HiveMQ waits for the result of the async operation.
      * @param timeoutFallback Fallback behaviour if a timeout occurs.
-     *                        If the fallback is SUCCESS then next extension or default is called.
-     *                        If the fallback is FAILURE then the client is disconnected.
+     *                        SUCCESS has the same effect as {@link #nextExtensionOrDefault()}.
+     *                        FAILURE has the same effect as {@link #failAuthentication(DisconnectedReasonCode,
+     *                        String)} with the specified reason code and reason string.
      * @param reasonCode      The reason code sent in CONNACK or DISCONNECT when timeout occurs.
      * @param reasonString    The reason string sent in CONNACK or DISCONNECT when timeout occurs.
      * @throws UnsupportedOperationException If async is called more than once.
-     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to CONNACK only reason code and
-     *                                       the client is already connected.
-     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to DISCONNECT only reason code
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a CONNACK only reason code
+     *                                       and the client is already connected.
+     * @throws IllegalArgumentException      when {@link DisconnectedReasonCode} is set to a DISCONNECT only reason code
      *                                       and the client is currently connecting.
      */
     @NotNull Async<EnhancedAuthOutput> async(
             @NotNull Duration timeout,
             @NotNull TimeoutFallback timeoutFallback,
             @NotNull DisconnectedReasonCode reasonCode,
-            @NotNull String reasonString);
+            @Nullable String reasonString);
 }
