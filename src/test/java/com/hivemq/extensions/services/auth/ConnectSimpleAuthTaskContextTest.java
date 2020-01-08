@@ -219,7 +219,7 @@ public class ConnectSimpleAuthTaskContextTest {
 
         context.pluginPost(output);
 
-        verify(connacker, times(1)).connackError(same(channel), anyString(), anyString(), same(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), same(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED), isNull(String.class), any(Object.class));
+        verify(connacker, times(1)).connackError(same(channel), anyString(), anyString(), same(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), same(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED), anyString(), any(Object.class));
     }
 
     @Test(timeout = 5000)
