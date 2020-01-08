@@ -25,61 +25,53 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 
 /**
+ * Represents an AUTH packet.
+ *
  * @author Florian Limpöck
-*/
+ */
 @Immutable
 @DoNotImplement
 public interface AuthPacket {
 
     /**
-     * @return the authentication method from the AUTH packet.
-    */
-    @NotNull
-    String getAuthenticationMethod();
+     * The authentication method of the AUTH packet.
+     *
+     * @return The authentication method of the AUTH packet.
+     */
+    @NotNull String getAuthenticationMethod();
 
     /**
-     * The authentication data from the AUTH packet.
-     * <p>
+     * The optional authentication data of the AUTH packet.
      *
      * @return An {@link Optional} containing the authentication data if present.
-    */
-    @NotNull
-    Optional<ByteBuffer> getAuthenticationData();
+     */
+    @NotNull Optional<ByteBuffer> getAuthenticationData();
 
     /**
-     * The authentication data from the AUTH packet.
-     * <p>
+     * The optional authentication data of the AUTH packet as a byte array.
      *
      * @return An {@link Optional} containing the authentication data if present.
-    */
-    @NotNull
-    Optional<byte[]> getAuthenticationDataAsBytes();
+     */
+    @NotNull Optional<byte[]> getAuthenticationDataAsBytes();
 
     /**
-     * The reason code from the AUTH packet.
-     * <p>
+     * The reason code of the AUTH packet.
      *
-     * @return The AUTH reason code.
-    */
-    @NotNull
-    AuthReasonCode getReasonCode();
+     * @return The reason code of the AUTH packet.
+     */
+    @NotNull AuthReasonCode getReasonCode();
 
     /**
-     * The reason string of the AUTH packet.
-     * <p>
+     * The optional reason string of the AUTH packet.
      *
-     * @return An {@link Optional} containing the AUTH reason string if present.
-    */
-    @NotNull
-    Optional<String> getReasonString();
+     * @return An {@link Optional} containing the reason string if present.
+     */
+    @NotNull Optional<String> getReasonString();
 
     /**
-     * The user properties from the AUTH packet.
-     * <p>
+     * The user properties of the AUTH packet.
      *
-     * @return The user properties.
-    */
-    @NotNull
-    UserProperties getUserProperties();
-
+     * @return The user properties of the AUTH packet.
+     */
+    @NotNull UserProperties getUserProperties();
 }
