@@ -20,26 +20,24 @@ import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
-import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * The input object of any {@link EnhancedAuthenticator}
- * providing an unmodifiable {@link ConnectPacket}, {@link ClientBasedInput} and further information on the connection as {@link ConnectionInformation}.
+ * Input object provided to {@link EnhancedAuthenticator#onConnect(ConnectEnhancedAuthInput, EnhancedAuthOutput)}.
+ * <p>
+ * Provides an unmodifiable {@link ConnectPacket} and {@link ClientBasedInput}.
  *
  * @author Daniel Krüger
  * @author Florian Limpöck
- *
-*/
+ */
 @DoNotImplement
 public interface ConnectEnhancedAuthInput extends ClientBasedInput {
 
     /**
-     * Get the unmodifiable CONNECT packet for the MQTT client that has to be authenticated.
+     * Provides the unmodifiable CONNECT packet sent by the MQTT client that has to be authenticated.
      *
-     * @return The {@link ConnectPacket} of the input.
-    */
-    @Immutable
-    @NotNull ConnectPacket getConnectPacket();
+     * @return The {@link ConnectPacket} sent by the client.
+     */
+    @Immutable @NotNull ConnectPacket getConnectPacket();
 }

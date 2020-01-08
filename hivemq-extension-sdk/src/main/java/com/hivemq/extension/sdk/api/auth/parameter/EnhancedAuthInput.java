@@ -24,27 +24,25 @@ import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- *
- * The input object of any {@link EnhancedAuthenticator}
- * providing an unmodifiable {@link AuthPacket} and {@link ClientBasedInput}.
+ * Input object provided to the methods of an {@link EnhancedAuthenticator}.
+ * <p>
+ * Provides an unmodifiable {@link AuthPacket} and {@link ClientBasedInput}.
  *
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 @DoNotImplement
 public interface EnhancedAuthInput extends ClientBasedInput {
 
     /**
-     * Get the unmodifiable AUTH packet for the MQTT client that has to be authenticated.
+     * Provides the unmodifiable AUTH packet sent by the MQTT client that has to be authenticated.
      *
-     * @return The {@link AuthPacket} of the input.
-    */
-    @Immutable
-    @NotNull
-    AuthPacket getAuthPacket();
+     * @return The {@link AuthPacket} sent by the client.
+     */
+    @Immutable @NotNull AuthPacket getAuthPacket();
 
     /**
-     * @return True if this is an input of a re-authentication, else false.
-    */
+     * @return <code>true</code> if this is an input of a re-authentication, else <code>false</code>.
+     */
     boolean isReAuthentication();
 }

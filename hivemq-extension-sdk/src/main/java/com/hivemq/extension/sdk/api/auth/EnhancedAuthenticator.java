@@ -23,44 +23,67 @@ import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
 
 /**
- * Interface for the enhanced authentication with AUTH packets introduced in MQTT 5. CONNECT, CONNACK and AUTH packets
- * are used here.
+ * Interface for the enhanced authentication with AUTH packets introduced in MQTT 5.
  * <p>
- * If an implementation stores state, an object of the implementation can not be shared by different clients.<br/>
+ * Enhanced authentication has two life cycles:
+ * <ul>
+ *   <li>When a client connects
+ *     <ol>
+ *       <li>{@link #onConnect(ConnectEnhancedAuthInput, EnhancedAuthOutput)}</li>
+ *       <li>({@link #onAuth(EnhancedAuthInput, EnhancedAuthOutput)})*</li>
+ *     </ol>
+ *   </li>
+ *   <li>When a client triggers re-authentication
+ *     <ol>
+ *       <li>{@link #onReAuth(EnhancedAuthInput, EnhancedAuthOutput)}</li>
+ *       <li>({@link #onAuth(EnhancedAuthInput, EnhancedAuthOutput)})*</li>
+ *     </ol>
+ *   </li>
+ * </ul>
+ * <p>
+ * If an implementation stores state, an object of the implementation can not be shared by different clients.
  * If no state is stored, it has to be thread safe that it can be shared.
- * <p>
  *
  * @author Christoph Schäbel
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 public interface EnhancedAuthenticator {
 
     /**
-     * This method is called for CONNECT packet, that the {@link EnhancedAuthenticator} is delegated to authenticate.
+     * This method is called when the client sent the CONNECT packet, that the {@link EnhancedAuthenticator} is
+     * delegated to authenticate.
      *
      * @param connectEnhancedAuthInput The {@link ConnectEnhancedAuthInput}.
      * @param enhancedAuthOutput       The {@link EnhancedAuthOutput}.
-    */
-    void onConnect(@NotNull ConnectEnhancedAuthInput connectEnhancedAuthInput, @NotNull EnhancedAuthOutput enhancedAuthOutput);
+     * @since 4.3.0
+     */
+    void onConnect(
+            @NotNull ConnectEnhancedAuthInput connectEnhancedAuthInput,
+            @NotNull EnhancedAuthOutput enhancedAuthOutput);
 
     /**
-     * This method is called for AUTH packet, that the {@link EnhancedAuthenticator} is delegated to authenticate.
+     * This method is called when the client sent an AUTH packet for re-authentication, that the {@link
+     * EnhancedAuthenticator} is delegated to authenticate.
      *
      * @param enhancedAuthInput  The {@link EnhancedAuthInput}.
      * @param enhancedAuthOutput The {@link EnhancedAuthOutput}.
-    */
-    void onAuth(@NotNull EnhancedAuthInput enhancedAuthInput, @NotNull EnhancedAuthOutput enhancedAuthOutput);
+     * @since 4.3.0
+     */
+    default void onReAuth(
+            final @NotNull EnhancedAuthInput enhancedAuthInput,
+            final @NotNull EnhancedAuthOutput enhancedAuthOutput) {
 
-    /**
-     * This method is called for AUTH packet, that the {@link EnhancedAuthenticator} is delegated to authenticate in
-     * case of a re-authentication.
-     *
-     * @param enhancedAuthInput  The {@link EnhancedAuthInput}.
-     * @param enhancedAuthOutput The {@link EnhancedAuthOutput}.
-    */
-    default void onReAuth(final @NotNull EnhancedAuthInput enhancedAuthInput, final @NotNull EnhancedAuthOutput enhancedAuthOutput) {
         onAuth(enhancedAuthInput, enhancedAuthOutput);
     }
 
+    /**
+     * This method is called when the client sent an AUTH packet, that the {@link EnhancedAuthenticator} is delegated to
+     * authenticate.
+     *
+     * @param enhancedAuthInput  The {@link EnhancedAuthInput}.
+     * @param enhancedAuthOutput The {@link EnhancedAuthOutput}.
+     * @since 4.3.0
+     */
+    void onAuth(@NotNull EnhancedAuthInput enhancedAuthInput, @NotNull EnhancedAuthOutput enhancedAuthOutput);
 }
