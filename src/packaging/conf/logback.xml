@@ -82,7 +82,7 @@
         <appender-ref ref="MIGRATIONS-FILE"/>
     </logger>
 
-    <root level="INFO">
+    <root level="${HIVEMQ_LOG_LEVEL:-INFO}">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>
