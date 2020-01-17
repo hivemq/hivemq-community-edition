@@ -112,7 +112,7 @@ dependencies {
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion],
 
             /* rocksdb */
-            [group: 'org.rocksdb', name: 'rocksdbjni', version: '6.3.6'],
+            [group: 'org.rocksdb', name: 'rocksdbjni', version: '6.5.2'],
 
             /* apache commons */
             [group: 'commons-io', name: 'commons-io', version: '2.6'],
