@@ -25,9 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -50,6 +55,16 @@ public class HiveMQPluginXMLReader {
         try {
             final JAXBContext context = JAXBContext.newInstance(HiveMQPluginEntity.class);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
+
+
+            final FileInputStream validateStream = new FileInputStream(pluginXMLPath.toFile());
+            final StreamSource validationStreamSource = new StreamSource(validateStream);
+
+            final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final Schema schema = schemaFactory.newSchema(HiveMQPluginXMLReader.class.getResource("/hivemq-extension.xsd"));
+            final Validator validator = schema.newValidator();
+            validator.validate(validationStreamSource);
+
             final HiveMQPluginEntity unmarshal = (HiveMQPluginEntity) unmarshaller.unmarshal(pluginXMLPath.toFile());
 
             final Optional<ValidationError> validationError = validateHiveMQPluginEntity(unmarshal);
@@ -62,7 +77,7 @@ public class HiveMQPluginXMLReader {
             }
 
             return Optional.of(unmarshal);
-        } catch (final JAXBException e) {
+        } catch (final Exception e) {
             if (logging) {
                 log.warn("Could not parse \"{}\" in {}. Not loading extension.", HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE, pluginFolder.toString(), e);
             }

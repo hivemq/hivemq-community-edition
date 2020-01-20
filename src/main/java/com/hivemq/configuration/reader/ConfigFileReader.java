@@ -28,9 +28,13 @@ import com.hivemq.util.EnvVarUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -107,11 +111,20 @@ public class ConfigFileReader {
                 //replace environment variable placeholders
                 String configFileContent = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
                 configFileContent = envVarUtil.replaceEnvironmentVariablePlaceholders(configFileContent);
-                final ByteArrayInputStream is =
-                        new ByteArrayInputStream(configFileContent.getBytes(StandardCharsets.UTF_8));
-                final StreamSource streamSource = new StreamSource(is);
 
-                setConfiguration(unmarshaller.unmarshal(streamSource, getConfigEntityClass()).getValue());
+                final ByteArrayInputStream validateStream =
+                        new ByteArrayInputStream(configFileContent.getBytes(StandardCharsets.UTF_8));
+                final StreamSource validationStreamSource = new StreamSource(validateStream);
+
+                final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                final Schema schema = schemaFactory.newSchema(getClass().getResource("/config.xsd"));
+                final Validator validator = schema.newValidator();
+                validator.validate(validationStreamSource);
+
+                final ByteArrayInputStream parsingStream =
+                        new ByteArrayInputStream(configFileContent.getBytes(StandardCharsets.UTF_8));
+                final StreamSource parsingStreamSource = new StreamSource(parsingStream);
+                setConfiguration(unmarshaller.unmarshal(parsingStreamSource, getConfigEntityClass()).getValue());
 
             } catch (final Exception e) {
                 if (e.getCause() instanceof UnrecoverableException) {
