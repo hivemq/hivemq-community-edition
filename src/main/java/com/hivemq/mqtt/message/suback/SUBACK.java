@@ -56,6 +56,7 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
             final int packetIdentifier,
             final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
             final @Nullable String reasonString) {
+
         this(packetIdentifier, grantedQos, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
@@ -65,6 +66,7 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
             final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties) {
+
         super(packetIdentifier, ImmutableList.copyOf(grantedQos), reasonString, userProperties);
     }
 
@@ -74,6 +76,7 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
             final @NotNull Mqtt5SubAckReasonCode... grantedQos) {
+
         super(packetIdentifier, ImmutableList.copyOf(grantedQos), reasonString, userProperties);
     }
 
@@ -85,7 +88,7 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
     public static @NotNull SUBACK createSubAckFrom(final @NotNull SubackPacket packet) {
         final ImmutableList.Builder<Mqtt5SubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
         for (final SubackReasonCode code : packet.getReasonCodes()) {
-            reasonCodesBuilder.add(Mqtt5SubAckReasonCode.valueOf(code.name()));
+            reasonCodesBuilder.add(Mqtt5SubAckReasonCode.from(code));
         }
         final String reasonString = packet.getReasonString().orElse(null);
         final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();

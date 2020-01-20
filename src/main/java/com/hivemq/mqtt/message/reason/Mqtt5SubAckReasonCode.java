@@ -18,6 +18,7 @@ package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 
 /**
  * MQTT Reason Codes that can be used in SUBACK packets according to the MQTT 5 specification.
@@ -42,9 +43,11 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     private static final @NotNull Mqtt5SubAckReasonCode[] VALUES = values();
 
     private final int code;
+    private final @NotNull SubackReasonCode subackReasonCode;
 
     Mqtt5SubAckReasonCode(final int code) {
         this.code = code;
+        subackReasonCode = SubackReasonCode.valueOf(name());
     }
 
     Mqtt5SubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
@@ -54,6 +57,19 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull SubackReasonCode toSubackReasonCode() {
+        return subackReasonCode;
+    }
+
+    private static final @NotNull Mqtt5SubAckReasonCode @NotNull [] SUBACK_LOOKUP =
+            new Mqtt5SubAckReasonCode[SubackReasonCode.values().length];
+
+    static {
+        for (final Mqtt5SubAckReasonCode reasonCode : values()) {
+            SUBACK_LOOKUP[reasonCode.subackReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
@@ -70,5 +86,9 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
             }
         }
         return null;
+    }
+
+    public static @NotNull Mqtt5SubAckReasonCode from(final @NotNull SubackReasonCode reasonCode) {
+        return SUBACK_LOOKUP[reasonCode.ordinal()];
     }
 }

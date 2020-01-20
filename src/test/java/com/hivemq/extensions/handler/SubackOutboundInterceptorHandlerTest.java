@@ -156,8 +156,7 @@ public class SubackOutboundInterceptorHandlerTest {
             subAck = channel.readOutbound();
         }
         Assert.assertTrue(isTriggered.get());
-        Assert.assertEquals(
-                SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.valueOf(subAck.getReasonCodes().get(0).name()));
+        Assert.assertEquals(SubackReasonCode.GRANTED_QOS_1, subAck.getReasonCodes().get(0).toSubackReasonCode());
         Assert.assertNotNull(subAck);
     }
 

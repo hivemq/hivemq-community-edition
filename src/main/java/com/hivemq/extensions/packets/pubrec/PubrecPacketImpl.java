@@ -28,6 +28,7 @@ import java.util.Optional;
 /**
  * @author Yannick Weber
  * @author Silvio Giebl
+ * @since 4.3.0y
  */
 @Immutable
 public class PubrecPacketImpl implements PubrecPacket {
@@ -39,7 +40,7 @@ public class PubrecPacketImpl implements PubrecPacket {
 
     public PubrecPacketImpl(final @NotNull PUBREC pubrec) {
         packetIdentifier = pubrec.getPacketIdentifier();
-        reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
+        reasonCode = pubrec.getReasonCode().toAckReasonCode();
         reasonString = pubrec.getReasonString();
         userProperties = pubrec.getUserProperties().getPluginUserProperties();
     }

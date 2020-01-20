@@ -40,9 +40,11 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
     private static final @NotNull Mqtt5PubAckReasonCode[] VALUES = values();
 
     private final int code;
+    private final @NotNull AckReasonCode ackReasonCode;
 
     Mqtt5PubAckReasonCode(final int code) {
         this.code = code;
+        ackReasonCode = AckReasonCode.valueOf(name());
     }
 
     Mqtt5PubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
@@ -52,6 +54,19 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
     @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull AckReasonCode toAckReasonCode() {
+        return ackReasonCode;
+    }
+
+    private static final @NotNull Mqtt5PubAckReasonCode @NotNull [] ACK_LOOKUP =
+            new Mqtt5PubAckReasonCode[AckReasonCode.values().length];
+
+    static {
+        for (final Mqtt5PubAckReasonCode reasonCode : VALUES) {
+            ACK_LOOKUP[reasonCode.ackReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
@@ -70,34 +85,12 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
         return null;
     }
 
+    public static @NotNull Mqtt5PubAckReasonCode from(final @NotNull AckReasonCode reasonCode) {
+        return ACK_LOOKUP[reasonCode.ordinal()];
+    }
+
     @Override
     public boolean canBeSentByClient() {
         return this != NO_MATCHING_SUBSCRIBERS;
-    }
-
-    @NotNull
-    public static Mqtt5PubAckReasonCode fromAckReasonCode(@NotNull final AckReasonCode reasonCode) {
-        switch (reasonCode) {
-            case SUCCESS:
-                return Mqtt5PubAckReasonCode.SUCCESS;
-            case NO_MATCHING_SUBSCRIBERS:
-                return Mqtt5PubAckReasonCode.NO_MATCHING_SUBSCRIBERS;
-            case UNSPECIFIED_ERROR:
-                return Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR;
-            case IMPLEMENTATION_SPECIFIC_ERROR:
-                return Mqtt5PubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR;
-            case NOT_AUTHORIZED:
-                return Mqtt5PubAckReasonCode.NOT_AUTHORIZED;
-            case TOPIC_NAME_INVALID:
-                return Mqtt5PubAckReasonCode.TOPIC_NAME_INVALID;
-            case PACKET_IDENTIFIER_IN_USE:
-                return Mqtt5PubAckReasonCode.PACKET_IDENTIFIER_IN_USE;
-            case QUOTA_EXCEEDED:
-                return Mqtt5PubAckReasonCode.QUOTA_EXCEEDED;
-            case PAYLOAD_FORMAT_INVALID:
-                return Mqtt5PubAckReasonCode.PAYLOAD_FORMAT_INVALID;
-            default:
-                throw new IllegalArgumentException("Unknown AckReason code");
-        }
     }
 }

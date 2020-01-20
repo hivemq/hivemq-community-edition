@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.interceptor.suback.parameter;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.suback.ModifiableSubackPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
@@ -34,14 +35,16 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Robin Atherton
+ * @since 4.3.0
  */
 public class SubackOutboundOutputImplTest {
 
-    private SUBACK subAck;
+
+    private @NotNull SUBACK subAck;
 
     @Mock
-    private PluginOutPutAsyncer asyncer;
-    private SubackOutboundOutputImpl output;
+    private @NotNull PluginOutPutAsyncer asyncer;
+    private @NotNull SubackOutboundOutputImpl output;
 
     @Before
     public void setUp() throws Exception {
@@ -49,7 +52,7 @@ public class SubackOutboundOutputImplTest {
         final FullConfigurationService configurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
         subAck = TestMessageUtil.createFullMqtt5Suback();
-        output = new SubackOutboundOutputImpl(configurationService, asyncer, subAck);
+        output = new com.hivemq.extensions.interceptor.suback.parameter.SubackOutboundOutputImpl(configurationService, asyncer, subAck);
     }
 
     @Test
@@ -61,7 +64,7 @@ public class SubackOutboundOutputImplTest {
         assertEquals(subAck.getReasonString(), modifiableSubAckPacket.getReasonString().get());
         final List<SubackReasonCode> reasonCodes = modifiableSubAckPacket.getReasonCodes();
         for (int i = 0; i < reasonCodes.size(); i++) {
-            assertEquals(subAck.getReasonCodes().get(i), Mqtt5SubAckReasonCode.valueOf(reasonCodes.get(i).name()));
+            assertEquals(subAck.getReasonCodes().get(i), Mqtt5SubAckReasonCode.from(reasonCodes.get(i)));
         }
     }
 

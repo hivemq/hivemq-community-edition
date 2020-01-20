@@ -39,7 +39,7 @@ public class PubcompPacketImpl implements PubcompPacket {
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
         packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
+        reasonCode = pubcomp.getReasonCode().toPubcompReasonCode();
         reasonString = pubcomp.getReasonString();
         userProperties = pubcomp.getUserProperties().getPluginUserProperties();
     }

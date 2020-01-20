@@ -51,7 +51,7 @@ public class ModifiablePubrelPacketImpl implements ModifiablePubrelPacket {
 
         this.configurationService = configurationService;
         packetIdentifier = pubrel.getPacketIdentifier();
-        reasonCode = PubrelReasonCode.valueOf(pubrel.getReasonCode().name());
+        reasonCode = pubrel.getReasonCode().toPubrelReasonCode();
         reasonString = pubrel.getReasonString();
         userProperties = new ModifiableUserPropertiesImpl(
                 pubrel.getUserProperties().getPluginUserProperties(),

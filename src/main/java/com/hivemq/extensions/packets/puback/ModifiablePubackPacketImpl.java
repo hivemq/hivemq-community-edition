@@ -53,7 +53,7 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
 
         this.configurationService = configurationService;
         packetIdentifier = puback.getPacketIdentifier();
-        reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
+        reasonCode = puback.getReasonCode().toAckReasonCode();
         reasonString = puback.getReasonString();
         userProperties = new ModifiableUserPropertiesImpl(
                 puback.getUserProperties().getPluginUserProperties(),
@@ -66,7 +66,7 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
 
         this.configurationService = configurationService;
         packetIdentifier = pubackPacket.getPacketIdentifier();
-        reasonCode = AckReasonCode.valueOf(pubackPacket.getReasonCode().name());
+        reasonCode = pubackPacket.getReasonCode();
         reasonString = pubackPacket.getReasonString().orElse(null);
         userProperties = new ModifiableUserPropertiesImpl(
                 (InternalUserProperties) pubackPacket.getUserProperties(),
@@ -89,8 +89,8 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         if (this.reasonCode == reasonCode) {
             return;
         }
-        final Mqtt5PubAckReasonCode newReasonCode = Mqtt5PubAckReasonCode.valueOf(reasonCode.name());
-        final Mqtt5PubAckReasonCode oldReasonCode = Mqtt5PubAckReasonCode.valueOf(this.reasonCode.name());
+        final Mqtt5PubAckReasonCode newReasonCode = Mqtt5PubAckReasonCode.from(reasonCode);
+        final Mqtt5PubAckReasonCode oldReasonCode = Mqtt5PubAckReasonCode.from(this.reasonCode);
         final boolean switched = newReasonCode.isError() != oldReasonCode.isError();
         Preconditions.checkState(
                 !switched, "Reason code must not switch from successful to unsuccessful or vice versa");

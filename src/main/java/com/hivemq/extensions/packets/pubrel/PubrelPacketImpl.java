@@ -39,7 +39,7 @@ public class PubrelPacketImpl implements PubrelPacket {
 
     public PubrelPacketImpl(final @NotNull PUBREL pubrel) {
         packetIdentifier = pubrel.getPacketIdentifier();
-        reasonCode = PubrelReasonCode.valueOf(pubrel.getReasonCode().name());
+        reasonCode = pubrel.getReasonCode().toPubrelReasonCode();
         reasonString = pubrel.getReasonString();
         userProperties = pubrel.getUserProperties().getPluginUserProperties();
     }

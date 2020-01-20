@@ -39,7 +39,7 @@ public class PubackPacketImpl implements PubackPacket {
 
     public PubackPacketImpl(final @NotNull PUBACK puback) {
         packetIdentifier = puback.getPacketIdentifier();
-        reasonCode = AckReasonCode.valueOf(puback.getReasonCode().name());
+        reasonCode = puback.getReasonCode().toAckReasonCode();
         reasonString = puback.getReasonString();
         userProperties = puback.getUserProperties().getPluginUserProperties();
     }

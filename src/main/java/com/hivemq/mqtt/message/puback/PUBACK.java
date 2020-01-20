@@ -34,7 +34,8 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
  * @author Waldemar Ruck
  * @since 1.4
  */
-public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubAckReasonCode> implements Mqtt3PUBACK, Mqtt5PUBACK {
+public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubAckReasonCode>
+        implements Mqtt3PUBACK, Mqtt5PUBACK {
 
     //MQTT 3
     public PUBACK(final int packetIdentifier) {
@@ -42,23 +43,24 @@ public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     }
 
     //MQTT 5
-    public PUBACK(final int packetIdentifier,
-                  @NotNull final Mqtt5PubAckReasonCode reasonCode,
-                  @Nullable final String reasonString,
-                  @NotNull final Mqtt5UserProperties userProperties) {
+    public PUBACK(
+            final int packetIdentifier,
+            final @NotNull Mqtt5PubAckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties) {
+
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
-    @NotNull
     @Override
-    public MessageType getType() {
+    public @NotNull MessageType getType() {
         return MessageType.PUBACK;
     }
 
     public static @NotNull PUBACK createPubackFrom(final @NotNull PubackPacket packet) {
 
         final int packetIdentifier = packet.getPacketIdentifier();
-        final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.valueOf(packet.getReasonCode().name());
+        final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.from(packet.getReasonCode());
 
         final String reasonString = packet.getReasonString().orElse(null);
 

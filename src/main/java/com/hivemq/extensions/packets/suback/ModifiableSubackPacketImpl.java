@@ -57,7 +57,7 @@ public class ModifiableSubackPacketImpl implements ModifiableSubackPacket {
         this.configurationService = fullConfigurationService;
         final ImmutableList.Builder<SubackReasonCode> builder = ImmutableList.builder();
         for (final Mqtt5SubAckReasonCode code : suback.getReasonCodes()) {
-            builder.add(SubackReasonCode.valueOf(code.name()));
+            builder.add(code.toSubackReasonCode());
         }
         reasonCodes = builder.build();
         reasonString = suback.getReasonString();
@@ -93,8 +93,8 @@ public class ModifiableSubackPacketImpl implements ModifiableSubackPacket {
         }
         for (int i = 0; i < reasonCodes.size(); i++) {
             Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null.", i);
-            final Mqtt5SubAckReasonCode oldReasonCode = Mqtt5SubAckReasonCode.valueOf(this.reasonCodes.get(i).name());
-            final Mqtt5SubAckReasonCode newReasonCode = Mqtt5SubAckReasonCode.valueOf(reasonCodes.get(i).name());
+            final Mqtt5SubAckReasonCode oldReasonCode = Mqtt5SubAckReasonCode.from(this.reasonCodes.get(i));
+            final Mqtt5SubAckReasonCode newReasonCode = Mqtt5SubAckReasonCode.from(reasonCodes.get(i));
             Preconditions.checkState(newReasonCode.isError() == oldReasonCode.isError(),
                     "Reason code (at index %s) must not switch from successful to unsuccessful or vice versa.", i);
         }
