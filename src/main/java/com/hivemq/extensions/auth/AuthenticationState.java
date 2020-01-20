@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 /**
  * State of the authentication set by any extension for CONNECT and AUTH.

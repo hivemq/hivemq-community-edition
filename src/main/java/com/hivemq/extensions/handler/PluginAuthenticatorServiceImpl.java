@@ -29,7 +29,9 @@ import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
+import com.hivemq.extensions.auth.*;
 import com.hivemq.extensions.auth.parameter.AuthenticatorProviderInputImpl;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthenticatorsImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -62,14 +64,6 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_DECODE
  */
 @Singleton
 public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorService {
-
-    @VisibleForTesting
-    static final String CONNACK_NO_AUTHENTICATION_LOG_STATEMENT = "Client with IP {} sent CONNECT packet, " +
-            "but no authenticator was registered with HiveMQ. Disconnecting client.";
-
-    @VisibleForTesting
-    static final String DISCONNECT_NO_AUTHENTICATION_LOG_STATEMENT = "Client with IP {} sent AUTH packet, " +
-            "but no authenticator was registered with HiveMQ. Disconnecting client.";
 
     @VisibleForTesting
     static final String CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT = "Client with IP {} sent AUTH packet " +

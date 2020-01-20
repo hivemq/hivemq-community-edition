@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extensions.auth.AuthConnectInput;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.ChannelAttributes;

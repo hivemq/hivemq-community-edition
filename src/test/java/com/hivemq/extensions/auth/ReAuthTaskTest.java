@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
@@ -24,9 +24,14 @@ import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
+import com.hivemq.extensions.auth.AuthInput;
+import com.hivemq.extensions.auth.AuthenticationState;
+import com.hivemq.extensions.auth.ReAuthOutput;
+import com.hivemq.extensions.auth.ReAuthTask;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientAuthenticatorsImpl;
 import com.hivemq.extensions.packets.auth.AuthPacketImpl;
+import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;

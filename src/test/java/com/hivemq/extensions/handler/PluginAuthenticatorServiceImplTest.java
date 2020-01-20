@@ -37,7 +37,7 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.services.auth.Authenticators;
-import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;

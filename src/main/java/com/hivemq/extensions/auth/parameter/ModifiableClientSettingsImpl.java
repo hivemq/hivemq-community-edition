@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth.parameter;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;

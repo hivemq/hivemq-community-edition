@@ -34,7 +34,7 @@ import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillRe
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
-import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.MessageHandler;

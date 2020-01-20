@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extensions.client.ClientAuthenticators;
+import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 
 /**
  * @author Silvio Giebl
  * @since 4.3.0
  */
-public class ConnectAuthTask extends AbstractEnhancedAuthTask<AuthInput, ConnectAuthOutput> {
+public class ConnectAuthConnectTask extends AbstractEnhancedAuthTask<AuthConnectInput, ConnectAuthOutput> {
 
-    public ConnectAuthTask(
+    public ConnectAuthConnectTask(
             final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
             final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
             final @NotNull String extensionId,
@@ -39,9 +40,9 @@ public class ConnectAuthTask extends AbstractEnhancedAuthTask<AuthInput, Connect
     @Override
     void call(
             final @NotNull EnhancedAuthenticator authenticator,
-            final @NotNull AuthInput input,
+            final @NotNull AuthConnectInput input,
             final @NotNull ConnectAuthOutput output) {
 
-        authenticator.onAuth(input, output);
+        authenticator.onConnect(input, output);
     }
 }

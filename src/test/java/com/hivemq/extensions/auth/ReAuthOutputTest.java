@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
+import com.hivemq.extensions.auth.ReAuthOutput;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -32,7 +34,7 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
 
-import static com.hivemq.extensions.services.auth.AuthenticationState.*;
+import static com.hivemq.extensions.auth.AuthenticationState.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 

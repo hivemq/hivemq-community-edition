@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
-import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;

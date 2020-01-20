@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -25,6 +25,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ReasonStrings;
