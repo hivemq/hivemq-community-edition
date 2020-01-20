@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
 
@@ -80,7 +79,6 @@ public class MqttAuthSenderTest {
         final ChannelFuture future = mqttAuthSender.sendAuth(embeddedChannel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
 
         assertNotNull(future);
-        assertFalse(embeddedChannel.attr(ChannelAttributes.RE_AUTH_ONGOING).get());
         verify(eventLog).clientAuthentication(embeddedChannel, Mqtt5AuthReasonCode.SUCCESS, false);
 
     }

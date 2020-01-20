@@ -15,8 +15,9 @@
  */
 package com.hivemq.extensions.executor.task;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.SimpleAsyncOutput;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -27,15 +28,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yannick Weber
+ * @since 4.3.0
  */
 public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsyncOutput<T> {
 
     protected final @NotNull PluginOutPutAsyncer asyncer;
 
-    private final @NotNull AtomicBoolean async = new AtomicBoolean(false);
+    private final @NotNull AtomicBoolean async = new AtomicBoolean(false); // TODO does not need to be atomic?
     private final @NotNull AtomicBoolean called = new AtomicBoolean(false);
-    private final @NotNull AtomicBoolean timedOut = new AtomicBoolean(false);
-    private final @NotNull SettableFuture<Boolean> asyncFuture = SettableFuture.create();
+    private final @NotNull AtomicBoolean timedOut = new AtomicBoolean(false); // TODO does not need to be atomic?
+    private final @NotNull SettableFuture<Boolean> asyncFuture = SettableFuture.create(); // TODO lazy, fuse with async
 
     public AbstractSimpleAsyncOutput(final @NotNull PluginOutPutAsyncer asyncer) {
         this.asyncer = asyncer;
@@ -43,6 +45,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
 
     @Override
     public @NotNull Async<T> async(final @NotNull Duration timeout) {
+        Preconditions.checkNotNull(timeout, "Timeout duration must never be null");
         checkCalled();
         //noinspection unchecked: this cast is safe since this implements AsyncOutput and PluginTaskOutput
         return (Async<T>) asyncer.asyncify(this, timeout);
@@ -74,6 +77,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
         timedOut.set(true);
     }
 
+    @Override
     public void resetAsyncStatus() {
         timedOut.set(false);
         async.set(false);

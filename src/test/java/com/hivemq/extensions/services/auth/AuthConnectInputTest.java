@@ -20,11 +20,9 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import util.DummyHandler;
 
 import java.nio.charset.Charset;
 
@@ -34,20 +32,19 @@ import static org.junit.Assert.assertEquals;
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class ConnectSimpleAuthTaskInputTest {
+public class AuthConnectInputTest {
 
     private CONNECT connect;
-    private ConnectSimpleAuthTaskInput taskInput;
+    private AuthConnectInput taskInput;
 
     @Before
     public void setUp() {
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new DummyHandler());
-        final ChannelHandlerContext ctx = embeddedChannel.pipeline().context(DummyHandler.class);
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").withUsername("user").withPassword("password".getBytes(Charset.defaultCharset())).withAuthMethod("method").withAuthData(new byte[]{'a', 'b', 'c'}).build();
-        taskInput = new ConnectSimpleAuthTaskInput(connect, ctx);
+        taskInput = new AuthConnectInput(connect, embeddedChannel);
     }
 
     @Test(timeout = 5000)

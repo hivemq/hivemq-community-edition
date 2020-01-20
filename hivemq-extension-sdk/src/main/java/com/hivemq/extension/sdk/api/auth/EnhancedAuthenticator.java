@@ -18,7 +18,7 @@ package com.hivemq.extension.sdk.api.auth;
 
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.auth.parameter.ConnectEnhancedAuthInput;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
 
@@ -29,7 +29,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
  * <ul>
  *   <li>When a client connects
  *     <ol>
- *       <li>{@link #onConnect(ConnectEnhancedAuthInput, EnhancedAuthOutput)}</li>
+ *       <li>{@link #onConnect(EnhancedAuthConnectInput, EnhancedAuthOutput)}</li>
  *       <li>({@link #onAuth(EnhancedAuthInput, EnhancedAuthOutput)})*</li>
  *     </ol>
  *   </li>
@@ -54,12 +54,11 @@ public interface EnhancedAuthenticator {
      * This method is called when the client sent the CONNECT packet, that the {@link EnhancedAuthenticator} is
      * delegated to authenticate.
      *
-     * @param connectEnhancedAuthInput The {@link ConnectEnhancedAuthInput}.
+     * @param enhancedAuthConnectInput The {@link EnhancedAuthConnectInput}.
      * @param enhancedAuthOutput       The {@link EnhancedAuthOutput}.
-     * @since 4.3.0
      */
     void onConnect(
-            @NotNull ConnectEnhancedAuthInput connectEnhancedAuthInput,
+            @NotNull EnhancedAuthConnectInput enhancedAuthConnectInput,
             @NotNull EnhancedAuthOutput enhancedAuthOutput);
 
     /**
@@ -68,7 +67,6 @@ public interface EnhancedAuthenticator {
      *
      * @param enhancedAuthInput  The {@link EnhancedAuthInput}.
      * @param enhancedAuthOutput The {@link EnhancedAuthOutput}.
-     * @since 4.3.0
      */
     default void onReAuth(
             final @NotNull EnhancedAuthInput enhancedAuthInput,
@@ -83,7 +81,6 @@ public interface EnhancedAuthenticator {
      *
      * @param enhancedAuthInput  The {@link EnhancedAuthInput}.
      * @param enhancedAuthOutput The {@link EnhancedAuthOutput}.
-     * @since 4.3.0
      */
     void onAuth(@NotNull EnhancedAuthInput enhancedAuthInput, @NotNull EnhancedAuthOutput enhancedAuthOutput);
 }

@@ -17,18 +17,14 @@
 package com.hivemq.extensions.handler;
 
 import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
-import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Florian Limpöck
-*/
+ */
 public interface PluginAuthenticatorService {
 
     /**
@@ -36,20 +32,22 @@ public interface PluginAuthenticatorService {
      * <p>
      * May cause CONNACK or AUTH sent to the client.
      *
-     * @param connectHandler the connect handler to proceed the CONNECT.
      * @param ctx            the context of the channel handler
      * @param connect        the original CONNECT message
      * @param clientSettings the client settings.
      */
-    void authenticateConnect(@NotNull ConnectHandler connectHandler, @NotNull ChannelHandlerContext ctx, @NotNull CONNECT connect, @NotNull ModifiableClientSettingsImpl clientSettings);
+    void authenticateConnect(
+            @NotNull ChannelHandlerContext ctx,
+            @NotNull CONNECT connect,
+            @NotNull ModifiableClientSettingsImpl clientSettings);
 
     /**
      * Re-Authenticate a client.
      * <p>
      * May cause DISCONNECT or AUTH sent to the client.
      *
-     * @param ctx            the context of the channel handler
-     * @param auth           the original AUTH message
+     * @param ctx  the context of the channel handler
+     * @param auth the original AUTH message
      */
     void authenticateReAuth(@NotNull ChannelHandlerContext ctx, @NotNull AUTH auth);
 
@@ -58,11 +56,9 @@ public interface PluginAuthenticatorService {
      * <p>
      * May cause DISCONNECT or AUTH sent to the client.
      *
-     * @param connectHandler the connect handler to proceed the CONNECT.
-     * @param ctx            the context of the channel handler
-     * @param auth           the original AUTH message
-     * @param reAuth         is re-authentication?
+     * @param ctx    the context of the channel handler
+     * @param auth   the original AUTH message
+     * @param reAuth is re-authentication?
      */
-    void authenticateAuth(@Nullable ConnectHandler connectHandler, @NotNull ChannelHandlerContext ctx, @NotNull AUTH auth, boolean reAuth);
-
+    void authenticateAuth(@NotNull ChannelHandlerContext ctx, @NotNull AUTH auth, boolean reAuth);
 }

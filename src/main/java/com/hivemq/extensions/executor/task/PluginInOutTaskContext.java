@@ -21,9 +21,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 /**
  * @author Georg Held
  */
-public abstract class PluginInOutTaskContext<O extends PluginTaskOutput> extends AbstractPluginTaskContext implements PluginTaskPost<O> {
+public abstract class PluginInOutTaskContext<O extends PluginTaskOutput> extends AbstractPluginTaskContext
+        implements PluginTaskPost<O> {
 
-    protected PluginInOutTaskContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-        super(taskClazz, identifier);
+    protected PluginInOutTaskContext(final @NotNull String identifier) {
+        super(identifier);
     }
 }

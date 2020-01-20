@@ -16,34 +16,39 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
-import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.auth.AuthPacketImpl;
+import com.hivemq.extensions.parameter.ClientBasedInputImpl;
 import com.hivemq.mqtt.message.auth.AUTH;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
+
+import java.util.function.Supplier;
 
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
-public class AuthTaskInput extends AbstractAuthTaskInput<AuthTaskInput> implements PluginTaskInput, EnhancedAuthInput {
+ */
+public class AuthInput extends ClientBasedInputImpl implements EnhancedAuthInput, Supplier<AuthInput> {
 
     private final @NotNull AUTH auth;
     private final boolean isReAuth;
     private @Nullable AuthPacketImpl authPacket;
 
-    public AuthTaskInput(@NotNull final AUTH auth,
-                         @NotNull final String clientId,
-                         final boolean isReAuth,
-                         @NotNull final ChannelHandlerContext ctx) {
-        super(clientId, ctx);
+    public AuthInput(
+            final @NotNull String clientId,
+            final @NotNull Channel channel,
+            final @NotNull AUTH auth,
+            final boolean isReAuth) {
+
+        super(clientId, channel);
         this.auth = auth;
         this.isReAuth = isReAuth;
     }
 
+    @Override
     public @NotNull AuthPacket getAuthPacket() {
         if (authPacket == null) {
             authPacket = new AuthPacketImpl(auth);
@@ -56,9 +61,8 @@ public class AuthTaskInput extends AbstractAuthTaskInput<AuthTaskInput> implemen
         return isReAuth;
     }
 
-    @NotNull
     @Override
-    public AuthTaskInput get() {
+    public @NotNull AuthInput get() {
         return this;
     }
 }

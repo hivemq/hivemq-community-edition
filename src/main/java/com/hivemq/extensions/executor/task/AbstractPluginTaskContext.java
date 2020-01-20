@@ -16,7 +16,6 @@
 
 package com.hivemq.extensions.executor.task;
 
-
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
@@ -26,26 +25,14 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  */
 public abstract class AbstractPluginTaskContext implements PluginTaskContext {
 
+    private final @NotNull String identifier;
 
-    @NotNull
-    private final Class<?> taskClazz;
-    @NotNull
-    private final String identifier;
-
-    protected AbstractPluginTaskContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-        this.taskClazz = taskClazz;
+    protected AbstractPluginTaskContext(@NotNull final String identifier) {
         this.identifier = identifier;
     }
 
     @Override
-    @NotNull
-    public ClassLoader getPluginClassLoader() {
-        return taskClazz.getClassLoader();
-    }
-
-    @Override
-    @NotNull
-    public String getIdentifier() {
+    public @NotNull String getIdentifier() {
         return identifier;
     }
 }

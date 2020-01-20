@@ -22,9 +22,9 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
@@ -66,6 +66,7 @@ public abstract class AbstractMqttConnectDecoder extends AbstractMqttDecoder<CON
      * @param buf          the ByteBuf of the encoded will message
      * @param willQoS      the quality of service of the will message
      * @param isWillRetain the retain flag of the will message
+     * @param log          the static logger
      * @param eventLog     the event log
      * @return a {@link MqttWillPublish} if valid, else {@code null}.
      */
@@ -80,20 +81,24 @@ public abstract class AbstractMqttConnectDecoder extends AbstractMqttDecoder<CON
         final int utf8StringLengthWill;
 
         if (buf.readableBytes() < 2 || buf.readableBytes() < (utf8StringLengthWill = buf.readUnsignedShort())) {
-            mqttConnacker.connackErrorMqtt3(channel,
+            mqttConnacker.connackError(
+                    channel,
                     "A client (IP: {}) sent a CONNECT with an incorrect will-topic length. Disconnecting client.",
                     "Incorrect CONNECT will-topic length",
-                    Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED);
+                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                    "Incorrect CONNECT will-topic length");
             return null;
         }
 
         if (validateUTF8) {
             willTopic = Strings.getValidatedPrefixedString(buf, utf8StringLengthWill, true);
             if (willTopic == null) {
-                mqttConnacker.connackErrorMqtt3(channel,
+                mqttConnacker.connackError(
+                        channel,
                         "The will-topic of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with bad UTF-8 character",
-                        Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED);
+                        Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                        "Sent CONNECT with bad UTF-8 character");
                 return null;
             }
         } else {

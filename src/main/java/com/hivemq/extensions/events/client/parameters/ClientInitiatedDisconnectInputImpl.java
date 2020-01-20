@@ -36,7 +36,9 @@ import java.util.function.Supplier;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class ClientInitiatedDisconnectInputImpl implements ClientInitiatedDisconnectInput, ConnectionLostInput, PluginTaskInput, Supplier<ClientInitiatedDisconnectInputImpl> {
+public class ClientInitiatedDisconnectInputImpl
+        implements ClientInitiatedDisconnectInput, ConnectionLostInput, PluginTaskInput,
+        Supplier<ClientInitiatedDisconnectInputImpl> {
 
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
@@ -45,12 +47,14 @@ public class ClientInitiatedDisconnectInputImpl implements ClientInitiatedDiscon
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
 
-    public ClientInitiatedDisconnectInputImpl(final @NotNull String clientId,
-                                              final @NotNull Channel channel,
-                                              final @Nullable DisconnectedReasonCode reasonCode,
-                                              final @Nullable String reasonString,
-                                              final @Nullable UserProperties userProperties,
-                                              final boolean graceful) {
+    public ClientInitiatedDisconnectInputImpl(
+            final @NotNull String clientId,
+            final @NotNull Channel channel,
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable UserProperties userProperties,
+            final boolean graceful) {
+
         Preconditions.checkNotNull(clientId, "client id must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.reasonCode = reasonCode;

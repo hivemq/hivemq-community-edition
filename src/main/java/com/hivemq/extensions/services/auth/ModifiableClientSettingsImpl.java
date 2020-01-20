@@ -16,7 +16,7 @@
 package com.hivemq.extensions.services.auth;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 
@@ -26,8 +26,8 @@ import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingL
 public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     private int receiveMaximum;
-    @NotNull
-    private OverloadProtectionThrottlingLevel overloadProtectionThrottlingLevel = OverloadProtectionThrottlingLevel.DEFAULT;
+    private @NotNull OverloadProtectionThrottlingLevel overloadProtectionThrottlingLevel =
+            OverloadProtectionThrottlingLevel.DEFAULT;
     private boolean modified = false;
 
     public ModifiableClientSettingsImpl(final int receiveMaximum) {
@@ -46,7 +46,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     }
 
     @Override
-    public void setOverloadProtectionThrottlingLevel(@NotNull final OverloadProtectionThrottlingLevel level) {
+    public void setOverloadProtectionThrottlingLevel(final @NotNull OverloadProtectionThrottlingLevel level) {
         Preconditions.checkNotNull(level,"Overload protection throttling level must not be null");
         if (this.overloadProtectionThrottlingLevel == level) {
             return;

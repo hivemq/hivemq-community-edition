@@ -18,7 +18,6 @@ package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.message.suback.SubackReturnCode;
 
 /**
  * MQTT Reason Codes that can be used in SUBACK packets according to the MQTT 5 specification.
@@ -27,9 +26,9 @@ import com.hivemq.mqtt.message.suback.SubackReturnCode;
  */
 public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
 
-    GRANTED_QOS_0(SubackReturnCode.GRANTED_QOS_0),
-    GRANTED_QOS_1(SubackReturnCode.GRANTED_QOS_1),
-    GRANTED_QOS_2(SubackReturnCode.GRANTED_QOS_2),
+    GRANTED_QOS_0(0x00),
+    GRANTED_QOS_1(0x01),
+    GRANTED_QOS_2(0x02),
     UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
     IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
     NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
@@ -49,10 +48,6 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     }
 
     Mqtt5SubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
-        this(reasonCode.getCode());
-    }
-
-    Mqtt5SubAckReasonCode(@NotNull final SubackReturnCode reasonCode) {
         this(reasonCode.getCode());
     }
 

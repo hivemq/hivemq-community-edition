@@ -18,7 +18,6 @@ package com.hivemq.extensions.packets.connack;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
-import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -165,7 +164,7 @@ public class ModifiableConnackPacketImplTest {
         assertEquals(fullMqtt5Connack.getTopicAliasMaximum(), connackPacket.getTopicAliasMaximum());
         assertEquals(fullMqtt5Connack.getMaximumQoS().getQosNumber(), connackPacket.getMaximumQoS().get().getQosNumber());
         assertEquals(fullMqtt5Connack.getUserProperties().size(), connackPacket.getUserProperties().asList().size());
-        assertEquals(fullMqtt5Connack.getReasonCode(), ReasonCodeUtil.toMqtt5(connackPacket.getReasonCode()));
+        assertEquals(fullMqtt5Connack.getReasonCode(), Mqtt5ConnAckReasonCode.from(connackPacket.getReasonCode()));
         assertEquals(fullMqtt5Connack.isSessionPresent(), connackPacket.getSessionPresent());
         assertEquals(fullMqtt5Connack.isRetainAvailable(), connackPacket.getRetainAvailable());
         assertEquals(fullMqtt5Connack.getAssignedClientIdentifier(), connackPacket.getAssignedClientIdentifier().orElse(null));

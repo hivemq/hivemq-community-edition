@@ -18,8 +18,6 @@ package com.hivemq.codec.decoder.mqtt311;
 
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -43,7 +41,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-
 @RunWith(Parameterized.class)
 public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
@@ -52,12 +49,6 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
     @Mock
     EventLog eventLog;
-
-    @Mock
-    private FullConfigurationService fullConfig;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
 
     private Mqtt311ConnectDecoder decoder;
 
@@ -79,14 +70,12 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
         MockitoAnnotations.initMocks(this);
         when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
-        when(fullConfig.mqttConfiguration()).thenReturn(mqttConfigurationService);
 
-        decoder = new Mqtt311ConnectDecoder(new MqttConnacker(new MqttConnackSendUtil(eventLog, mqttConfigurationService)),
+        decoder = new Mqtt311ConnectDecoder(new MqttConnacker(new MqttConnackSendUtil(eventLog)),
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
-
     }
 
     @Test

@@ -70,6 +70,7 @@ public class SecurityRegistryImplTest {
     @Mock
     private PluginAuthenticatorService pluginAuthenticatorService;
 
+
     private Authenticator authenticator1;
     private Authenticator authenticator2;
     private AuthenticatorProvider provider1;
@@ -90,10 +91,9 @@ public class SecurityRegistryImplTest {
 
         authenticators = new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence);
         authorizers = new AuthorizersImpl(hiveMQExtensions);
-        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQExtensions);
+        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class)))
-                .thenReturn(hiveMQExtension);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(hiveMQExtension);
         when(hiveMQExtensions.getExtension(anyString())).thenReturn(hiveMQExtension);
 
         when(hiveMQExtension.getId()).thenReturn("extension1");
@@ -252,7 +252,7 @@ public class SecurityRegistryImplTest {
     public static class TestEnhancedAuthenticator implements EnhancedAuthenticator {
 
         @Override
-        public void onConnect(@NotNull final ConnectEnhancedAuthInput input, @NotNull final EnhancedAuthOutput output) {
+        public void onConnect(@NotNull final EnhancedAuthConnectInput input, @NotNull final EnhancedAuthOutput output) {
 
         }
 

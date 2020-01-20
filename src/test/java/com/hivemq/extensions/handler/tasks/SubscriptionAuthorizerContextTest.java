@@ -50,8 +50,7 @@ public class SubscriptionAuthorizerContextTest {
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();
         output = new SubscriptionAuthorizerOutputImpl(asyncer);
-        context = new SubscriptionAuthorizerContext(PublishAuthorizerTask.class, "clientid",
-                output, resultFuture, 1);
+        context = new SubscriptionAuthorizerContext("clientid", output, resultFuture, 1);
     }
 
     @Test(timeout = 5000)

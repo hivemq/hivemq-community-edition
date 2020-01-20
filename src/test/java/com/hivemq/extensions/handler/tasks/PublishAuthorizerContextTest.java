@@ -63,8 +63,7 @@ public class PublishAuthorizerContextTest {
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();
         output = new PublishAuthorizerOutputImpl(asyncer);
-        context = new PublishAuthorizerContext(PublishAuthorizerTask.class, "clientid",
-                output, resultFuture, 1, ctx);
+        context = new PublishAuthorizerContext("clientid", output, resultFuture, 1, ctx);
     }
 
     @Test(timeout = 5000)

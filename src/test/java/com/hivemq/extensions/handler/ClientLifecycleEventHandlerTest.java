@@ -133,7 +133,7 @@ public class ClientLifecycleEventHandlerTest {
 
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
 
-        final Map<String, ClientLifecycleEventListenerProvider> map = Maps.newHashMap();
+        Map<String, ClientLifecycleEventListenerProvider> map = Maps.newHashMap();
         map.put("extension", new TestBadProvider());
 
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(map);
@@ -149,7 +149,7 @@ public class ClientLifecycleEventHandlerTest {
 
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
 
-        final Map<String, ClientLifecycleEventListenerProvider> map = Maps.newHashMap();
+        Map<String, ClientLifecycleEventListenerProvider> map = Maps.newHashMap();
         map.put("extension", new TestBadListenerProvider());
 
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(map);
@@ -232,7 +232,7 @@ public class ClientLifecycleEventHandlerTest {
 
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1, latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnServerDisconnectEvent());
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnServerDisconnectEvent(null, null, null));
 
 
         assertTrue(latch1.await(3, TimeUnit.SECONDS));
@@ -330,7 +330,7 @@ public class ClientLifecycleEventHandlerTest {
 
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1, latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnServerDisconnectEvent());
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnServerDisconnectEvent(null, null, null));
 
         assertEquals(null, clientLifecycleEventHandler.providerInput);
 
@@ -363,7 +363,7 @@ public class ClientLifecycleEventHandlerTest {
     private class TestBadProvider implements ClientLifecycleEventListenerProvider {
 
         @Override
-        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull final ClientLifecycleEventListenerProviderInput input) {
+        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull ClientLifecycleEventListenerProviderInput input) {
             throw new NullPointerException();
         }
     }
@@ -371,20 +371,20 @@ public class ClientLifecycleEventHandlerTest {
     private class TestBadListenerProvider implements ClientLifecycleEventListenerProvider {
 
         @Override
-        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull final ClientLifecycleEventListenerProviderInput input) {
+        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull ClientLifecycleEventListenerProviderInput input) {
             return new ClientLifecycleEventListener() {
                 @Override
-                public void onMqttConnectionStart(@NotNull final ConnectionStartInput input) {
+                public void onMqttConnectionStart(@NotNull ConnectionStartInput input) {
                     throw new NullPointerException();
                 }
 
                 @Override
-                public void onAuthenticationSuccessful(@NotNull final AuthenticationSuccessfulInput input) {
+                public void onAuthenticationSuccessful(@NotNull AuthenticationSuccessfulInput input) {
                     throw new NullPointerException();
                 }
 
                 @Override
-                public void onDisconnect(@NotNull final DisconnectEventInput input) {
+                public void onDisconnect(@NotNull DisconnectEventInput input) {
                     throw new NullPointerException();
                 }
             };
@@ -430,47 +430,47 @@ public class ClientLifecycleEventHandlerTest {
         }
 
         @Override
-        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull final ClientLifecycleEventListenerProviderInput input) {
+        public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull ClientLifecycleEventListenerProviderInput input) {
 
             return new ClientLifecycleEventListener() {
                 @Override
-                public void onMqttConnectionStart(@NotNull final ConnectionStartInput input) {
+                public void onMqttConnectionStart(@NotNull ConnectionStartInput input) {
                     onMqttConnectionStartLatch.countDown();
                     System.out.println("connect");
                 }
 
                 @Override
-                public void onAuthenticationFailedDisconnect(@NotNull final AuthenticationFailedInput input) {
+                public void onAuthenticationFailedDisconnect(@NotNull AuthenticationFailedInput input) {
                     onAuthenticationFailedDisconnectLatch.countDown();
                     System.out.println("auth failed");
                 }
 
                 @Override
-                public void onConnectionLost(@NotNull final ConnectionLostInput input) {
+                public void onConnectionLost(@NotNull ConnectionLostInput input) {
                     onConnectionLostLatch.countDown();
                     System.out.println("connection lost");
                 }
 
                 @Override
-                public void onClientInitiatedDisconnect(@NotNull final ClientInitiatedDisconnectInput input) {
+                public void onClientInitiatedDisconnect(@NotNull ClientInitiatedDisconnectInput input) {
                     onClientInitiatedDisconnectLatch.countDown();
                     System.out.println("client disconnect");
                 }
 
                 @Override
-                public void onServerInitiatedDisconnect(@NotNull final ServerInitiatedDisconnectInput input) {
+                public void onServerInitiatedDisconnect(@NotNull ServerInitiatedDisconnectInput input) {
                     onServerInitiatedDisconnectLatch.countDown();
                     System.out.println("server disconnect");
                 }
 
                 @Override
-                public void onAuthenticationSuccessful(@NotNull final AuthenticationSuccessfulInput input) {
+                public void onAuthenticationSuccessful(@NotNull AuthenticationSuccessfulInput input) {
                     onAuthenticationSuccessfulLatch.countDown();
                     System.out.println("auth success");
                 }
 
                 @Override
-                public void onDisconnect(@NotNull final DisconnectEventInput input) {
+                public void onDisconnect(@NotNull DisconnectEventInput input) {
                     onDisconnectLatch.countDown();
                     System.out.println("disconnect");
                 }

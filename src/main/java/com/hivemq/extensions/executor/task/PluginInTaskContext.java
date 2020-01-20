@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  */
 public abstract class PluginInTaskContext extends AbstractPluginTaskContext {
 
-    protected PluginInTaskContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-        super(taskClazz, identifier);
+    protected PluginInTaskContext(final @NotNull String identifier) {
+        super(identifier);
     }
 }

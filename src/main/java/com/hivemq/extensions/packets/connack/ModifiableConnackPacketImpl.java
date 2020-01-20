@@ -54,7 +54,7 @@ public class ModifiableConnackPacketImpl extends ConnackPacketImpl implements Mo
         this.requestResponseInformation = requestResponseInformation;
         this.userProperties = new ModifiableUserPropertiesImpl(connack.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
-        this.reasonCode = ConnackReasonCode.valueOf(connack.getReasonCode().name());
+        this.reasonCode = connack.getReasonCode().toConnackReasonCode();
         this.reasonString = connack.getReasonString();
         this.responseInformation = connack.getResponseInformation();
         this.serverReference = connack.getServerReference();

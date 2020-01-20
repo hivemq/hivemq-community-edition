@@ -23,7 +23,6 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -82,7 +81,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             ctx.channel().attr(SEND_WILL).set(false);
         }
         if (ctx.channel().attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
-            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(Mqtt5DisconnectReasonCode.toPluginDisconnectedCode(msg.getReasonCode()), msg.getReasonString(), msg.getUserProperties().getPluginUserProperties(), true));
+            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(), msg.getReasonString(), msg.getUserProperties().getPluginUserProperties(), true));
         }
         ctx.channel().close();
     }

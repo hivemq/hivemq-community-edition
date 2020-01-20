@@ -25,11 +25,9 @@ import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import util.DummyHandler;
 
 import static org.junit.Assert.*;
 
@@ -38,7 +36,7 @@ import static org.junit.Assert.*;
  * @since 4.2.0
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class AuthTaskInputTest {
+public class AuthInputTest {
 
     private final String method = "test";
     private final byte[] authData = "test".getBytes();
@@ -46,33 +44,32 @@ public class AuthTaskInputTest {
     private final Mqtt5UserProperties userProperties = Mqtt5UserProperties.builder().add(new MqttUserProperty("test", "1")).build();
     private final String reasonString = "testString";
     private AUTH auth;
-    private AuthTaskInput authTaskInput;
+    private AuthInput authInput;
 
     @Before
     public void setUp() {
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new DummyHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        final ChannelHandlerContext ctx = embeddedChannel.pipeline().context(DummyHandler.class);
 
         auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);
 
-        authTaskInput = new AuthTaskInput(auth, "client", false, ctx);
+        authInput = new AuthInput("client", embeddedChannel, auth, false);
     }
 
     @Test(timeout = 5000)
     public void test_connect_packet_contains_auth_information() {
-        final AuthPacket authPacket = authTaskInput.getAuthPacket();
+        final AuthPacket authPacket = authInput.getAuthPacket();
         assertEquals(method, authPacket.getAuthenticationMethod());
         assertArrayEquals(authData, Bytes.getBytesFromReadOnlyBuffer(authPacket.getAuthenticationData()));
         assertEquals(AuthReasonCode.CONTINUE_AUTHENTICATION, authPacket.getReasonCode());
         assertEquals(reasonString, authPacket.getReasonString().get());
         assertEquals("1", authPacket.getUserProperties().getFirst("test").get());
 
-        assertNotNull(authTaskInput.getClientInformation());
-        assertNotNull(authTaskInput.getConnectionInformation());
-        assertFalse(authTaskInput.isReAuthentication());
-        assertEquals(authTaskInput, authTaskInput.get());
+        assertNotNull(authInput.getClientInformation());
+        assertNotNull(authInput.getConnectionInformation());
+        assertFalse(authInput.isReAuthentication());
+        assertEquals(authInput, authInput.get());
     }
 
 }

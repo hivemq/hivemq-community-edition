@@ -26,6 +26,7 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
@@ -123,6 +124,7 @@ public class ConnectHandlerTest {
     private MqttConnacker mqttConnacker;
     private ChannelHandlerContext ctx;
     private ConnectHandler handler;
+    private ModifiableDefaultPermissions defaultPermissions;
 
     private final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
@@ -136,13 +138,15 @@ public class ConnectHandlerTest {
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog, configurationService.mqttConfiguration());
+        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog);
         mqttConnacker = new MqttConnacker(connackSendUtil);
 
         when(channelPersistence.get(anyString())).thenReturn(null);
 
         when(channelDependencies.getAuthInProgressMessageHandler()).thenReturn(
                 new AuthInProgressMessageHandler(mqttConnacker));
+
+        defaultPermissions = new ModifiableDefaultPermissionsImpl();
 
         buildPipeline();
     }
@@ -1013,7 +1017,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
         embeddedChannel.writeInbound(connect);
 
-        verify(internalAuthServiceImpl, times(1)).authenticateConnect(any(), any(), any(), any());
+        verify(internalAuthServiceImpl, times(1)).authenticateConnect(any(), any(), any());
     }
 
     @Test(timeout = 5000)
@@ -1058,10 +1062,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
-
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
 
         embeddedChannel.writeInbound(connect);
 
@@ -1228,9 +1229,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1254,9 +1253,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1280,10 +1277,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
-
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
 
         embeddedChannel.writeInbound(connect);
 
@@ -1313,7 +1307,6 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
         assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get().intValue());
         assertEquals(123, connect.getReceiveMaximum());
-        assertEquals(NONE, embeddedChannel.attr(ChannelAttributes.OVERLOAD_PROTECTION_THROTTLING_LEVEL).get());
     }
 
     private void createHandler() {
@@ -1351,9 +1344,10 @@ public class ConnectHandlerTest {
                         new DummyHandler());
 
         doAnswer(invocation -> {
-            handler.connectSuccessfulUnauthenticated(invocation.getArgument(1), invocation.getArgument(2), invocation.getArgument(3));
+            ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(defaultPermissions);
+            handler.connectSuccessfulUnauthenticated(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2));
             return null;
-        }).when(internalAuthServiceImpl).authenticateConnect(any(), any(), any(), any());
+        }).when(internalAuthServiceImpl).authenticateConnect(any(), any(), any());
 
     }
 

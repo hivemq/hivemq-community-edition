@@ -33,11 +33,11 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SE
 /**
  * @author Dominik Obermaier
  * @author Florian Limpöck
- *
  * @since 1.4
  */
 @Immutable
-public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithReasonCode<Mqtt5DisconnectReasonCode> implements Mqtt3DISCONNECT, Mqtt5DISCONNECT{
+public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithReasonCode<Mqtt5DisconnectReasonCode>
+        implements Mqtt3DISCONNECT, Mqtt5DISCONNECT {
 
     private final @Nullable String serverReference;
     private final long sessionExpiryInterval;
@@ -49,27 +49,16 @@ public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithRea
         serverReference = null;
     }
 
-    public DISCONNECT(@NotNull final Mqtt5DisconnectReasonCode reasonCode,
-                      @Nullable final String reasonString,
-                      @NotNull final Mqtt5UserProperties userProperties,
-                      @Nullable final String serverReference,
-                      final long sessionExpiryInterval) {
+    public DISCONNECT(
+            final @NotNull Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final @Nullable String serverReference,
+            final long sessionExpiryInterval) {
+
         super(reasonCode, reasonString, userProperties);
         this.serverReference = serverReference;
         this.sessionExpiryInterval = sessionExpiryInterval;
-    }
-
-    public static DISCONNECT createDisconnectFrom(final @NotNull DisconnectPacket packet) {
-        final Mqtt5DisconnectReasonCode reasonCode = Mqtt5DisconnectReasonCode.valueOf(packet.getReasonCode().name());
-        final String reasonString = packet.getReasonString().orElse(null);
-        final String serverReference = packet.getServerReference().orElse(null);
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final long sessionExpiryInterval = packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET);
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-        return new DISCONNECT(reasonCode, reasonString, mqtt5UserProperties, serverReference, sessionExpiryInterval);
     }
 
     @Override
@@ -85,5 +74,18 @@ public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithRea
     @Override
     public @NotNull MessageType getType() {
         return MessageType.DISCONNECT;
+    }
+
+    public static @NotNull DISCONNECT createDisconnectFrom(final @NotNull DisconnectPacket packet) {
+        final Mqtt5DisconnectReasonCode reasonCode = Mqtt5DisconnectReasonCode.from(packet.getReasonCode());
+        final String reasonString = packet.getReasonString().orElse(null);
+        final String serverReference = packet.getServerReference().orElse(null);
+        final long sessionExpiryInterval = packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET);
+        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
+        return new DISCONNECT(reasonCode, reasonString, mqtt5UserProperties, serverReference, sessionExpiryInterval);
     }
 }

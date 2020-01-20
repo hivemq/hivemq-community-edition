@@ -15,20 +15,15 @@
  */
 package com.hivemq.extensions.interceptor.publish.parameter;
 
-import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.async.Async;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
-import com.hivemq.extension.sdk.api.packets.publish.ModifiableOutboundPublish;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -62,16 +57,6 @@ public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutbou
     public void forciblyPreventPublishDelivery() {
         this.preventDelivery.set(true);
     }
-
-    @Override
-    public @NotNull Async<PublishOutboundOutput> async(final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback) {
-
-        Preconditions.checkNotNull(duration, "Duration must never be null");
-        Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
-
-        return super.async(duration, timeoutFallback);
-    }
-
 
     @Override
     public @NotNull PublishOutboundOutputImpl get() {

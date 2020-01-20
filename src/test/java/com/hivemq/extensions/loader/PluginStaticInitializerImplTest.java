@@ -20,8 +20,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.configuration.service.MqttConfigurationService;
-import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
@@ -154,8 +152,8 @@ public class PluginStaticInitializerImplTest {
         topicPermissionBuilder = new TopicPermissionBuilderImpl(fullConfigurationService);
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
-        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence), new AuthorizersImpl(
-                hiveMQExtensions), new HiveMQExtensions(serverInformation));
+        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence),
+                new AuthorizersImpl(hiveMQExtensions));
         servicesDependencies = Mockito.spy(
                 new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
                         clientService, subscriptionStore, managedPluginExecutorService, publishService,
