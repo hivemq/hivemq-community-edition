@@ -18,6 +18,7 @@ package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompReasonCode;
 
 /**
  * MQTT Reason Codes that can be used in PUBCOMP packets according to the MQTT 5 specification.
@@ -30,9 +31,11 @@ public enum Mqtt5PubCompReasonCode implements Mqtt5ReasonCode {
     PACKET_IDENTIFIER_NOT_FOUND(MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
 
     private final int code;
+    private final @NotNull PubcompReasonCode pubcompReasonCode;
 
     Mqtt5PubCompReasonCode(final int code) {
         this.code = code;
+        pubcompReasonCode = PubcompReasonCode.valueOf(name());
     }
 
     Mqtt5PubCompReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
@@ -42,6 +45,19 @@ public enum Mqtt5PubCompReasonCode implements Mqtt5ReasonCode {
     @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull PubcompReasonCode toPubcompReasonCode() {
+        return pubcompReasonCode;
+    }
+
+    private static final @NotNull Mqtt5PubCompReasonCode @NotNull [] PUBCOMP_LOOKUP =
+            new Mqtt5PubCompReasonCode[PubcompReasonCode.values().length];
+
+    static {
+        for (final Mqtt5PubCompReasonCode reasonCode : values()) {
+            PUBCOMP_LOOKUP[reasonCode.pubcompReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
@@ -58,6 +74,10 @@ public enum Mqtt5PubCompReasonCode implements Mqtt5ReasonCode {
             return PACKET_IDENTIFIER_NOT_FOUND;
         }
         return null;
+    }
+
+    public static @NotNull Mqtt5PubCompReasonCode from(final @NotNull PubcompReasonCode reasonCode) {
+        return PUBCOMP_LOOKUP[reasonCode.ordinal()];
     }
 
     @Override

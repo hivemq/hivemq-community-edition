@@ -58,7 +58,7 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
         this.configurationService = fullConfigurationService;
         final ImmutableList.Builder<UnsubackReasonCode> builder = ImmutableList.builder();
         for (final Mqtt5UnsubAckReasonCode code : unsuback.getReasonCodes()) {
-            builder.add(UnsubackReasonCode.valueOf(code.name()));
+            builder.add(code.toUnsubackReasonCode());
         }
         reasonCodes = builder.build();
         reasonString = unsuback.getReasonString();
@@ -94,9 +94,8 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
         }
         for (int i = 0; i < reasonCodes.size(); i++) {
             Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null.", i);
-            final Mqtt5UnsubAckReasonCode oldReasonCode =
-                    Mqtt5UnsubAckReasonCode.valueOf(this.reasonCodes.get(i).name());
-            final Mqtt5UnsubAckReasonCode newReasonCode = Mqtt5UnsubAckReasonCode.valueOf(reasonCodes.get(i).name());
+            final Mqtt5UnsubAckReasonCode oldReasonCode = Mqtt5UnsubAckReasonCode.from(this.reasonCodes.get(i));
+            final Mqtt5UnsubAckReasonCode newReasonCode = Mqtt5UnsubAckReasonCode.from(reasonCodes.get(i));
             Preconditions.checkState(newReasonCode.isError() == oldReasonCode.isError(),
                     "Reason code (at index %s) must not switch from successful to unsuccessful or vice versa.", i);
         }

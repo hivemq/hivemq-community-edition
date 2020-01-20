@@ -87,7 +87,7 @@ public class AllTopicsProcessedTask implements Runnable {
                         return;
                     case FAIL:
                         if (output.getSubackReasonCode() != null) {
-                            answerCodes[i] = Mqtt5SubAckReasonCode.valueOf(output.getSubackReasonCode().name());
+                            answerCodes[i] = Mqtt5SubAckReasonCode.from(output.getSubackReasonCode());
                             reasonStrings[i] = output.getReasonString();
                         } else {
                             answerCodes[i] = Mqtt5SubAckReasonCode.NOT_AUTHORIZED;

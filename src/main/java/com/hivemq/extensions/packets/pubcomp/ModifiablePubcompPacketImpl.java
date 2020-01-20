@@ -51,7 +51,7 @@ public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
 
         this.configurationService = configurationService;
         packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
+        reasonCode = pubcomp.getReasonCode().toPubcompReasonCode();
         reasonString = pubcomp.getReasonString();
         userProperties = new ModifiableUserPropertiesImpl(
                 pubcomp.getUserProperties().getPluginUserProperties(),

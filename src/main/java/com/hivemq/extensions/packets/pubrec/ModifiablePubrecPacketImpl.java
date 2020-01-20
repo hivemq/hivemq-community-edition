@@ -35,6 +35,7 @@ import java.util.Optional;
 /**
  * @author Yannick Weber
  * @author Silvio Giebl
+ * @since 4.3.0
  */
 public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
 
@@ -53,7 +54,7 @@ public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
 
         this.configurationService = configurationService;
         packetIdentifier = pubrec.getPacketIdentifier();
-        reasonCode = AckReasonCode.valueOf(pubrec.getReasonCode().name());
+        reasonCode = pubrec.getReasonCode().toAckReasonCode();
         reasonString = pubrec.getReasonString();
         userProperties = new ModifiableUserPropertiesImpl(
                 pubrec.getUserProperties().getPluginUserProperties(),
@@ -89,8 +90,8 @@ public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
         if (this.reasonCode == reasonCode) {
             return;
         }
-        final Mqtt5PubRecReasonCode newReasonCode = Mqtt5PubRecReasonCode.valueOf(reasonCode.name());
-        final Mqtt5PubRecReasonCode oldReasonCode = Mqtt5PubRecReasonCode.valueOf(this.reasonCode.name());
+        final Mqtt5PubRecReasonCode newReasonCode = Mqtt5PubRecReasonCode.from(reasonCode);
+        final Mqtt5PubRecReasonCode oldReasonCode = Mqtt5PubRecReasonCode.from(this.reasonCode);
         final boolean switched = newReasonCode.isError() != oldReasonCode.isError();
         Preconditions.checkState(
                 !switched, "Reason code must not switch from successful to unsuccessful or vice versa");

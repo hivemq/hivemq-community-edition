@@ -18,6 +18,7 @@ package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
 
 /**
  * MQTT Reason Codes that can be used in AUTH packets according to the MQTT 5 specification.
@@ -31,9 +32,11 @@ public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
     REAUTHENTICATE(0x19);
 
     private final int code;
+    private final @NotNull AuthReasonCode authReasonCode;
 
     Mqtt5AuthReasonCode(final int code) {
         this.code = code;
+        authReasonCode = AuthReasonCode.valueOf(name());
     }
 
     Mqtt5AuthReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
@@ -43,6 +46,19 @@ public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
     @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull AuthReasonCode toAuthReasonCode() {
+        return authReasonCode;
+    }
+
+    private static final @NotNull Mqtt5AuthReasonCode @NotNull [] AUTH_LOOKUP =
+            new Mqtt5AuthReasonCode[AuthReasonCode.values().length];
+
+    static {
+        for (final Mqtt5AuthReasonCode reasonCode : values()) {
+            AUTH_LOOKUP[reasonCode.authReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
@@ -61,6 +77,10 @@ public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
             return REAUTHENTICATE;
         }
         return null;
+    }
+
+    public static @NotNull Mqtt5AuthReasonCode from(final @NotNull AuthReasonCode reasonCode) {
+        return AUTH_LOOKUP[reasonCode.ordinal()];
     }
 
     @Override

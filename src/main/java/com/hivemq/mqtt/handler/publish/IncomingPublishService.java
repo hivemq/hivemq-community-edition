@@ -195,13 +195,13 @@ public class IncomingPublishService {
                 break;
             case AT_LEAST_ONCE:
                 final PUBACK puback = new PUBACK(publish.getPacketIdentifier(),
-                        reasonCode != null ? Mqtt5PubAckReasonCode.fromAckReasonCode(reasonCode) : Mqtt5PubAckReasonCode.NOT_AUTHORIZED,
+                        reasonCode != null ? Mqtt5PubAckReasonCode.from(reasonCode) : Mqtt5PubAckReasonCode.NOT_AUTHORIZED,
                         reasonString != null ? reasonString : reason, Mqtt5UserProperties.NO_USER_PROPERTIES);
                 ctx.writeAndFlush(puback);
                 break;
             case EXACTLY_ONCE:
                 final PUBREC pubrec = new PUBREC(publish.getPacketIdentifier(),
-                        reasonCode != null ? Mqtt5PubRecReasonCode.fromAckReasonCode(reasonCode) : Mqtt5PubRecReasonCode.NOT_AUTHORIZED,
+                        reasonCode != null ? Mqtt5PubRecReasonCode.from(reasonCode) : Mqtt5PubRecReasonCode.NOT_AUTHORIZED,
                         reasonString != null ? reasonString : reason, Mqtt5UserProperties.NO_USER_PROPERTIES);
                 ctx.writeAndFlush(pubrec);
                 break;

@@ -358,13 +358,13 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                         break;
                     case AT_LEAST_ONCE:
                         final Mqtt5PubAckReasonCode ackReasonCode =
-                                Mqtt5PubAckReasonCode.valueOf(inboundOutput.getReasonCode().name());
+                                Mqtt5PubAckReasonCode.from(inboundOutput.getReasonCode());
                         ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier(), ackReasonCode,
                                 inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
                     case EXACTLY_ONCE:
                         final Mqtt5PubRecReasonCode recReasonCode =
-                                Mqtt5PubRecReasonCode.valueOf(inboundOutput.getReasonCode().name());
+                                Mqtt5PubRecReasonCode.from(inboundOutput.getReasonCode());
                         ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier(), recReasonCode,
                                 inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
