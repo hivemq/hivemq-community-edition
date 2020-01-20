@@ -16,56 +16,58 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
-import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
-import com.hivemq.extensions.client.ClientAuthenticators;
+import com.hivemq.extensions.executor.task.PluginInOutTask;
+import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Florian Limpöck
-*/
-public abstract class AbstractAuthTask {
+ * @author Silvio Giebl
+ */
+abstract class AbstractAuthTask<I extends PluginTaskInput, O extends AuthOutput<?>> implements PluginInOutTask<I, O> {
 
-    static final String LOG_STATEMENT = "Uncaught exception was thrown in EnhancedAuthenticator from extension." +
-            " Extensions are responsible on their own to handle exceptions.";
+    private static final Logger log = LoggerFactory.getLogger(AbstractAuthTask.class);
 
-    private final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
-    private final @NotNull AuthenticatorProviderInput authenticatorProviderInput;
-    private final @NotNull String extensionId;
-    private final @NotNull ClientAuthenticators clientAuthenticators;
+    final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
+    final @NotNull AuthenticatorProviderInput authenticatorProviderInput;
+    final @NotNull String extensionId;
 
-    AbstractAuthTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-                     final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
-                     final @NotNull String extensionId,
-                     final @NotNull ClientAuthenticators clientAuthenticators) {
+    AbstractAuthTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId) {
+
         this.wrappedAuthenticatorProvider = wrappedAuthenticatorProvider;
         this.authenticatorProviderInput = authenticatorProviderInput;
         this.extensionId = extensionId;
-        this.clientAuthenticators = clientAuthenticators;
     }
 
-    boolean decided(final @NotNull AuthenticationState currentState) {
-        return currentState != AuthenticationState.NEXT_EXTENSION_OR_DEFAULT &&
-                currentState != AuthenticationState.UNDECIDED;
-    }
-
-    @Nullable EnhancedAuthenticator updateAndGetAuthenticator() {
-
-        final EnhancedAuthenticator authenticatorFromClient = clientAuthenticators.getAuthenticatorMap().get(extensionId);
-        if (authenticatorFromClient != null && authenticatorFromClient.getClass().getClassLoader().equals(wrappedAuthenticatorProvider.getClassLoader())) {
-            return authenticatorFromClient;
+    @Override
+    public @NotNull O apply(final @NotNull I input, final @NotNull O output) {
+        if (output.getAuthenticationState().isFinal()) {
+            return output;
         }
-        final EnhancedAuthenticator authenticatorProvided = wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput);
-        if (authenticatorProvided != null) {
-            clientAuthenticators.put(extensionId, authenticatorProvided);
-            return authenticatorProvided;
+        try {
+            call(input, output);
+        } catch (final Throwable throwable) {
+            output.failByThrowable(throwable);
+            Exceptions.rethrowError(throwable);
+            log.warn(
+                    "Uncaught exception was thrown from extension with id \"{}\" in authenticator. " +
+                            "Extensions are responsible for their own exception handling.", extensionId);
+            log.debug("Original exception: ", throwable);
         }
-        return null;
+        return output;
     }
 
+    abstract void call(@NotNull I input, @NotNull O output);
+
+    @Override
     public @NotNull ClassLoader getPluginClassLoader() {
         return wrappedAuthenticatorProvider.getClassLoader();
     }
-
 }

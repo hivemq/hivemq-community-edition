@@ -19,7 +19,7 @@ package com.hivemq.extensions.services.auth;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
-import com.hivemq.extension.sdk.api.auth.parameter.ConnectEnhancedAuthInput;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -46,9 +46,10 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author Florian Limpöck
-*/
+ * @since 4.3.0
+ */
 @SuppressWarnings("NullabilityAnnotations")
-public class AuthTaskTest {
+public class ReAuthTaskTest {
 
     public static AtomicBoolean connect;
 
@@ -61,7 +62,7 @@ public class AuthTaskTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private AuthTask authTask;
+    private ReAuthTask authTask;
     @Mock
     private AuthenticatorProviderInput authenticatorProviderInput;
     private IsolatedPluginClassloader classloader;
@@ -81,7 +82,7 @@ public class AuthTaskTest {
         enhancedAuthenticator = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestAuthenticator.class);
 
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(enhancedAuthenticator);
-        authTask = new AuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new PluginPriorityComparator(extensions)));
+        authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new PluginPriorityComparator(extensions)));
     }
 
     @Test(timeout = 5000)
@@ -96,9 +97,9 @@ public class AuthTaskTest {
     }
 
     @Test(timeout = 5000)
-    public void test_next_or_default_reauth() throws InterruptedException {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+    public void test_next_or_default_reauth() {
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
 
@@ -107,9 +108,9 @@ public class AuthTaskTest {
     }
 
     @Test(timeout = 5000)
-    public void test_next_or_default_continue() throws InterruptedException {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+    public void test_next_or_default_continue() {
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
 
@@ -119,8 +120,8 @@ public class AuthTaskTest {
 
     @Test(timeout = 5000)
     public void test_next_or_default_no_auth_found() {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(null);
@@ -131,9 +132,9 @@ public class AuthTaskTest {
     }
 
     @Test(timeout = 5000)
-    public void test_undecided_reauth() throws InterruptedException {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+    public void test_undecided_reauth() {
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
 
@@ -143,8 +144,8 @@ public class AuthTaskTest {
 
     @Test(timeout = 5000)
     public void test_undecided_continue() {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
 
@@ -154,8 +155,8 @@ public class AuthTaskTest {
 
     @Test(timeout = 5000)
     public void test_undecided_no_auth_found() {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
         when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(null);
@@ -167,8 +168,8 @@ public class AuthTaskTest {
 
     @Test(timeout = 5000)
     public void test_decided() {
-        final AuthTaskOutput output = Mockito.mock(AuthTaskOutput.class);
-        final AuthTaskInput input = Mockito.mock(AuthTaskInput.class);
+        final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
+        final AuthInput input = Mockito.mock(AuthInput.class);
 
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.SUCCESS);
         authTask.apply(input, output);
@@ -185,7 +186,7 @@ public class AuthTaskTest {
     public static class TestAuthenticator implements EnhancedAuthenticator {
 
         @Override
-        public void onConnect(@NotNull final ConnectEnhancedAuthInput input, @NotNull final EnhancedAuthOutput output) {
+        public void onConnect(@NotNull final EnhancedAuthConnectInput input, @NotNull final EnhancedAuthOutput output) {
             connect.set(true);
         }
 

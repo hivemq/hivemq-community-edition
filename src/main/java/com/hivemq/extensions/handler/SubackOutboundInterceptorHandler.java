@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -106,8 +107,7 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(configurationService, asyncer, suback);
 
         final SubAckOutboundInterceptorContext interceptorContext =
-                new SubAckOutboundInterceptorContext(
-                        SubackOutboundInterceptorTask.class, clientId, input, ctx, promise, interceptors.size());
+                new SubAckOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final SubackOutboundInterceptor interceptor : interceptors) {
 
@@ -135,14 +135,13 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         private final @NotNull AtomicInteger counter;
 
         SubAckOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull SubackOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;

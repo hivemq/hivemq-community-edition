@@ -54,7 +54,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
             final @NotNull DISCONNECT originalDisconnect) {
 
         configurationService = fullConfigurationService;
-        reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
+        reasonCode = originalDisconnect.getReasonCode().toDisconnectReasonCode();
         reasonString = originalDisconnect.getReasonString();
         sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         serverReference = originalDisconnect.getServerReference();

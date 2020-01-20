@@ -16,30 +16,35 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
-import com.hivemq.extension.sdk.api.auth.parameter.ConnectEnhancedAuthInput;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
+import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
+import com.hivemq.extensions.parameter.ClientBasedInputImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
+
+import java.util.function.Supplier;
 
 /**
- * @author Daniel Krüger
+ * @author Georg Held
  * @author Florian Limpöck
-*/
-public class ConnectEnhancedAuthTaskInput extends AbstractAuthTaskInput<ConnectEnhancedAuthTaskInput> implements PluginTaskInput, ConnectEnhancedAuthInput {
+ * @author Silvio Giebl
+ */
+public class AuthConnectInput extends ClientBasedInputImpl
+        implements SimpleAuthInput, EnhancedAuthConnectInput, Supplier<AuthConnectInput> {
 
     private final @NotNull CONNECT connect;
     private @Nullable ConnectPacketImpl connectPacket;
 
-    public ConnectEnhancedAuthTaskInput(@NotNull final CONNECT connect,
-                                        @NotNull final ChannelHandlerContext ctx) {
-        super(connect.getClientIdentifier(), ctx);
+    public AuthConnectInput(final @NotNull CONNECT connect, final @NotNull Channel channel) {
+        super(connect.getClientIdentifier(), channel);
         this.connect = connect;
     }
 
+    @Override
     public @NotNull ConnectPacket getConnectPacket() {
         if (connectPacket == null) {
             connectPacket = new ConnectPacketImpl(connect);
@@ -47,10 +52,8 @@ public class ConnectEnhancedAuthTaskInput extends AbstractAuthTaskInput<ConnectE
         return connectPacket;
     }
 
-    @NotNull
     @Override
-    public ConnectEnhancedAuthTaskInput get() {
+    public @NotNull AuthConnectInput get() {
         return this;
     }
-
 }

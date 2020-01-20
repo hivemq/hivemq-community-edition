@@ -53,12 +53,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> PREVENT_LWT = AttributeKey.valueOf("MQTT.PreventLWT");
 
     /**
-     * The define the way the client should be affected by the overload protection.
-     * <code>null</code> is interpreted as {@link OverloadProtectionThrottlingLevel#DEFAULT}.
-     */
-    public static final AttributeKey<OverloadProtectionThrottlingLevel> OVERLOAD_PROTECTION_THROTTLING_LEVEL = AttributeKey.valueOf("Restriction.OverloadProtectionThrottlingLevel");
-
-    /**
      * This reveres to the in-flight messages in the client queue, not the ones in the ordered topic queue
      */
     public static final AttributeKey<Boolean> IN_FLIGHT_MESSAGES_SENT = AttributeKey.valueOf("MQTT.inflight-messages.sent");
@@ -84,6 +78,7 @@ public class ChannelAttributes {
     public static final AttributeKey<String> AUTH_METHOD = AttributeKey.valueOf("Auth.AuthenticationMethod");
 
     public static final AttributeKey<ByteBuffer> AUTH_DATA = AttributeKey.valueOf("Auth.Data");
+    public static final AttributeKey<Mqtt5UserProperties> AUTH_USER_PROPERTIES = AttributeKey.valueOf("Auth.User.Properties");
     public static final AttributeKey<Boolean> AUTH_ONGOING = AttributeKey.valueOf("Auth.Ongoing");
     public static final AttributeKey<Boolean> RE_AUTH_ONGOING = AttributeKey.valueOf("ReAuth.Ongoing");
 
@@ -140,7 +135,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Boolean> REQUEST_PROBLEM_INFORMATION = AttributeKey.valueOf("Request.Problem.Information");
 
-    public static final AttributeKey<Mqtt5UserProperties> AUTH_USER_PROPERTIES = AttributeKey.valueOf("Auth.User.Properties");
     public static final AttributeKey<ModifiableDefaultPermissions> AUTH_PERMISSIONS = AttributeKey.valueOf("Auth.User.Permissions");
 
     public static final AttributeKey<CONNECT> CONNECT_MESSAGE = AttributeKey.valueOf("Connect.Message");

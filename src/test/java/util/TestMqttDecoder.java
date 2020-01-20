@@ -24,7 +24,6 @@ import com.hivemq.codec.decoder.mqtt3.*;
 import com.hivemq.codec.decoder.mqtt5.*;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
@@ -61,9 +60,8 @@ public class TestMqttDecoder {
     public static MQTTMessageDecoder create(final boolean strict, final FullConfigurationService fullConfigurationService) {
 
         final EventLog eventLog = new EventLog();
-        final MqttConfigurationServiceImpl mqttConfigurationService = new MqttConfigurationServiceImpl();
         final MqttDisconnectUtil mqttDisconnectUtil = new MqttDisconnectUtil(eventLog);
-        final MqttConnackSendUtil mqttConnackSendUtil = new MqttConnackSendUtil(eventLog, mqttConfigurationService);
+        final MqttConnackSendUtil mqttConnackSendUtil = new MqttConnackSendUtil(eventLog);
         final Mqtt5ServerDisconnector mqtt5ServerDisconnector = new Mqtt5ServerDisconnector(mqttDisconnectUtil);
         final Mqtt3ServerDisconnector mqtt3ServerDisconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
         final MqttConnacker mqttConnacker = new MqttConnacker(mqttConnackSendUtil);

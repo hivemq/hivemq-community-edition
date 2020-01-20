@@ -113,8 +113,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
                 new UnsubscribeInboundOutputImpl(asyncer, configurationService, unsubscribe);
 
         final UnsubscribeInboundInterceptorContext interceptorContext =
-                new UnsubscribeInboundInterceptorContext(UnsubscribeInboundInterceptorTask.class, clientId, input, ctx,
-                        interceptors.size());
+                new UnsubscribeInboundInterceptorContext(clientId, input, ctx, interceptors.size());
 
         for (final UnsubscribeInboundInterceptor interceptor : interceptors) {
 
@@ -127,8 +126,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
 
             final UnsubscribeInboundInterceptorTask interceptorTask =
                     new UnsubscribeInboundInterceptorTask(interceptor, extension.getId());
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
     }
 
@@ -141,13 +139,12 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
         private final @NotNull AtomicInteger counter;
 
         UnsubscribeInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull UnsubscribeInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.input = input;
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;

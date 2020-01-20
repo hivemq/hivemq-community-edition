@@ -17,13 +17,12 @@
 package com.hivemq.extensions.services.auth;
 
 /**
+ * State of the authentication set by any extension for CONNECT and AUTH.
+ *
  * @author Daniel Krüger
  * @author Florian Limpöck
- *
- *
- * State of the authentication set by any extension for CONNECT and AUTH.
  */
-public enum AuthenticationState {
+enum AuthenticationState {
     /**
      * No extension has set any outcome.
      */
@@ -47,5 +46,9 @@ public enum AuthenticationState {
     /**
      * An extension has set the outcome to next extension or default.
      */
-    NEXT_EXTENSION_OR_DEFAULT
+    NEXT_EXTENSION_OR_DEFAULT;
+
+    boolean isFinal() {
+        return (this != UNDECIDED) && (this != NEXT_EXTENSION_OR_DEFAULT);
+    }
 }

@@ -64,8 +64,8 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
 
     private boolean modified;
 
-    public ModifiableUserPropertiesImpl() {
-        this(null, true);
+    public ModifiableUserPropertiesImpl(final boolean validateUTF8) {
+        this(null, validateUTF8);
     }
 
     public ModifiableUserPropertiesImpl(@Nullable final InternalUserProperties legacy, final boolean validateUTF8) {

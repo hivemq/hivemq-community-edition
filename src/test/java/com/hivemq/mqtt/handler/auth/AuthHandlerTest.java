@@ -18,7 +18,6 @@ package com.hivemq.mqtt.handler.auth;
 
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -43,13 +42,12 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Florian Limpöck
+ * @since 4.3.0
  */
 public class AuthHandlerTest {
 
     @Mock
     private PluginAuthenticatorService pluginAuthenticatorService;
-    @Mock
-    private ConnectHandler connectHandler;
     @Mock
     private MqttConnacker connacker;
     @Mock
@@ -66,7 +64,7 @@ public class AuthHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
-        authHandler = new AuthHandler(connectHandler, connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
+        authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
 
         channel.pipeline().addLast(authHandler);
     }
@@ -83,8 +81,10 @@ public class AuthHandlerTest {
 
         verify(connacker).connackError(
                 any(Channel.class), anyString(), anyString(),
-                eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), isNull(),
-                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")), any());
+                eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR),
+                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")),
+                eq(Mqtt5UserProperties.NO_USER_PROPERTIES),
+                eq(true));
 
     }
 
@@ -98,7 +98,8 @@ public class AuthHandlerTest {
         verify(disconnector).disconnect(
                 channel, SUCCESS_AUTH_RECEIVED_FROM_CLIENT, "Success reason code set in AUTH",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"));
+                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"),
+                Mqtt5UserProperties.NO_USER_PROPERTIES, true);
 
     }
 
@@ -112,7 +113,8 @@ public class AuthHandlerTest {
         verify(disconnector).disconnect(
                 channel, REAUTHENTICATE_DURING_RE_AUTH, "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"));
+                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"),
+                Mqtt5UserProperties.NO_USER_PROPERTIES, true);
 
         verify(pluginAuthenticatorService, never()).authenticateReAuth(any(), any());
 
@@ -127,8 +129,10 @@ public class AuthHandlerTest {
 
         verify(connacker).connackError(
                 any(Channel.class), eq(REAUTHENTICATE_DURING_AUTH), eq("REAUTHENTICATE reason code set in AUTH during ongoing auth"),
-                eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), isNull(),
-                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")), any());
+                eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR),
+                eq(String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH")),
+                eq(Mqtt5UserProperties.NO_USER_PROPERTIES),
+                eq(true));
 
         verify(pluginAuthenticatorService, never()).authenticateReAuth(any(), any());
 
@@ -138,7 +142,7 @@ public class AuthHandlerTest {
     public void test_read_connect_continue() {
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(pluginAuthenticatorService).authenticateAuth(any(), any(), any(), eq(false));
+        verify(pluginAuthenticatorService).authenticateAuth(any(), any(), eq(false));
 
     }
 
@@ -147,7 +151,7 @@ public class AuthHandlerTest {
 
         channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(true);
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(pluginAuthenticatorService).authenticateAuth(any(), any(), any(), eq(true));
+        verify(pluginAuthenticatorService).authenticateAuth(any(), any(), eq(true));
 
     }
 

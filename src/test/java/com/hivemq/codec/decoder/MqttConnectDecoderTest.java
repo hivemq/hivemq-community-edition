@@ -17,7 +17,6 @@
 package com.hivemq.codec.decoder;
 
 import com.hivemq.configuration.HivemqId;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -49,9 +48,6 @@ public class MqttConnectDecoderTest {
     EventLog eventLog;
 
     @Mock
-    MqttConfigurationService mqttConfigurationService;
-
-    @Mock
     Attribute<ProtocolVersion> protocolVersionAttribute;
 
     private MqttConnectDecoder decoder;
@@ -65,7 +61,7 @@ public class MqttConnectDecoderTest {
         final HivemqId hiveMQId = new HivemqId();
 
         final MqttDisconnectUtil mqttDisconnectUtil = new MqttDisconnectUtil(eventLog);
-        final MqttConnackSendUtil mqttConnackSendUtil = new MqttConnackSendUtil(eventLog, mqttConfigurationService);
+        final MqttConnackSendUtil mqttConnackSendUtil = new MqttConnackSendUtil(eventLog);
         final Mqtt5ServerDisconnector mqtt5ServerDisconnector = new Mqtt5ServerDisconnector(mqttDisconnectUtil);
         final Mqtt3ServerDisconnector mqtt3ServerDisconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
         final MqttConnacker mqttConnacker = new MqttConnacker(mqttConnackSendUtil);

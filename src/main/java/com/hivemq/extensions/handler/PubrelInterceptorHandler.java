@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -119,8 +120,7 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(clientId, channel, pubrel);
 
         final PubrelOutboundInterceptorContext interceptorContext =
-                new PubrelOutboundInterceptorContext(PubrelOutboundInterceptorTask.class, clientId, input, ctx, promise,
-                        interceptors.size());
+                new PubrelOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final PubrelOutboundInterceptor interceptor : interceptors) {
 
@@ -163,8 +163,7 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         final PubrelInboundInputImpl input = new PubrelInboundInputImpl(clientId, channel, pubrel);
 
         final PubrelInboundInterceptorContext interceptorContext =
-                new PubrelInboundInterceptorContext(PubrelInboundInterceptorTask.class, clientId, input, ctx,
-                        interceptors.size());
+                new PubrelInboundInterceptorContext(clientId, input, ctx, interceptors.size());
 
         for (final PubrelInboundInterceptor interceptor : interceptors) {
 
@@ -192,13 +191,12 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubrelInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubrelInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;
@@ -270,14 +268,13 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubrelOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubrelOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;

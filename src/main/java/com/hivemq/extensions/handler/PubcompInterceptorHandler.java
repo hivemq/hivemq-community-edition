@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -119,8 +120,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(clientId, channel, pubcomp);
 
         final PubcompOutboundInterceptorContext interceptorContext =
-                new PubcompOutboundInterceptorContext(PubcompOutboundInterceptorTask.class, clientId, input, ctx,
-                        promise, interceptors.size());
+                new PubcompOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final PubcompOutboundInterceptor interceptor : interceptors) {
 
@@ -136,8 +136,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             final PubcompOutboundInterceptorTask interceptorTask =
                     new PubcompOutboundInterceptorTask(interceptor, extension.getId());
 
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
     }
 
@@ -163,8 +162,8 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         final PubcompInboundOutputImpl output = new PubcompInboundOutputImpl(configurationService, asyncer, pubcomp);
         final PubcompInboundInputImpl input = new PubcompInboundInputImpl(clientId, channel, pubcomp);
 
-        final PubcompInboundInterceptorContext interceptorContext = new PubcompInboundInterceptorContext(
-                PubcompInboundInterceptorTask.class, clientId, input, ctx, interceptors.size());
+        final PubcompInboundInterceptorContext interceptorContext =
+                new PubcompInboundInterceptorContext(clientId, input, ctx, interceptors.size());
 
         for (final PubcompInboundInterceptor interceptor : interceptors) {
 
@@ -180,8 +179,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             final PubcompInboundInterceptorTask interceptorTask =
                     new PubcompInboundInterceptorTask(interceptor, extension.getId());
 
-            executorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
         }
     }
 
@@ -193,13 +191,12 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubcompInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubcompInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;
@@ -271,14 +268,13 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubcompOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubcompOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;

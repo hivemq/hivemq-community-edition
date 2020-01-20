@@ -18,7 +18,9 @@ package com.hivemq.mqtt.message.reason;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
+import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 
@@ -53,9 +55,13 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
     CONNECTION_RATE_EXCEEDED(MqttCommonReasonCode.CONNECTION_RATE_EXCEEDED);
 
     private final int code;
+    private final @NotNull ConnackReasonCode connackReasonCode;
+    private final @NotNull DisconnectedReasonCode disconnectedReasonCode;
 
     Mqtt5ConnAckReasonCode(final int code) {
         this.code = code;
+        connackReasonCode = ConnackReasonCode.valueOf(name());
+        disconnectedReasonCode = DisconnectedReasonCode.valueOf(name());
     }
 
     Mqtt5ConnAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
@@ -67,16 +73,31 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
         return code;
     }
 
+    public @NotNull ConnackReasonCode toConnackReasonCode() {
+        return connackReasonCode;
+    }
+
+    public @NotNull DisconnectedReasonCode toDisconnectedReasonCode() {
+        return disconnectedReasonCode;
+    }
+
     private static final int ERROR_CODE_MIN = UNSPECIFIED_ERROR.code;
     private static final int ERROR_CODE_MAX = CONNECTION_RATE_EXCEEDED.code;
-    private static final @NotNull Mqtt5ConnAckReasonCode[] ERROR_CODE_LOOKUP =
+    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] ERROR_CODE_LOOKUP =
             new Mqtt5ConnAckReasonCode[ERROR_CODE_MAX - ERROR_CODE_MIN + 1];
+
+    private static final @NotNull Mqtt5ConnAckReasonCode @NotNull [] CONNACK_LOOKUP =
+            new Mqtt5ConnAckReasonCode[ConnackReasonCode.values().length];
+    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] DISCONNECTED_LOOKUP =
+            new Mqtt5ConnAckReasonCode[DisconnectedReasonCode.values().length];
 
     static {
         for (final Mqtt5ConnAckReasonCode reasonCode : values()) {
             if (reasonCode != SUCCESS) {
                 ERROR_CODE_LOOKUP[reasonCode.code - ERROR_CODE_MIN] = reasonCode;
             }
+            CONNACK_LOOKUP[reasonCode.connackReasonCode.ordinal()] = reasonCode;
+            DISCONNECTED_LOOKUP[reasonCode.disconnectedReasonCode.ordinal()] = reasonCode;
         }
     }
 
@@ -95,6 +116,14 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
             return null;
         }
         return ERROR_CODE_LOOKUP[code - ERROR_CODE_MIN];
+    }
+
+    public static @NotNull Mqtt5ConnAckReasonCode from(final @NotNull ConnackReasonCode reasonCode) {
+        return CONNACK_LOOKUP[reasonCode.ordinal()];
+    }
+
+    public static @Nullable Mqtt5ConnAckReasonCode from(final @NotNull DisconnectedReasonCode reasonCode) {
+        return DISCONNECTED_LOOKUP[reasonCode.ordinal()];
     }
 
     @NotNull

@@ -73,7 +73,7 @@ public class ConnackPacketImpl implements ConnackPacket {
             authenticationData = ByteBuffer.wrap(authData);
         }
         this.userProperties = connack.getUserProperties().getPluginUserProperties();
-        this.connackReasonCode = ConnackReasonCode.valueOf(connack.getReasonCode().name());
+        this.connackReasonCode = connack.getReasonCode().toConnackReasonCode();
         this.sessionPresent = connack.isSessionPresent();
         this.retainAvailable = connack.isRetainAvailable();
         this.assignedClientId = connack.getAssignedClientIdentifier();

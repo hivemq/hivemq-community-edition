@@ -123,8 +123,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientId, channel, disconnect);
 
         final DisconnectInboundInterceptorContext interceptorContext =
-                new DisconnectInboundInterceptorContext(DisconnectInboundInterceptorTask.class, clientId, input, ctx,
-                        interceptors.size());
+                new DisconnectInboundInterceptorContext(clientId, input, ctx, interceptors.size());
 
         for (final DisconnectInboundInterceptor interceptor : interceptors) {
 
@@ -172,8 +171,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
                 new DisconnectOutboundOutputImpl(configurationService, asyncer, disconnect);
 
         final DisconnectOutboundInterceptorContext interceptorContext =
-                new DisconnectOutboundInterceptorContext(DisconnectOutboundInterceptorTask.class, clientId, input, ctx,
-                        promise, interceptors.size());
+                new DisconnectOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final DisconnectOutboundInterceptor interceptor : interceptors) {
 
@@ -201,14 +199,13 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         DisconnectOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull DisconnectOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;
@@ -281,13 +278,12 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         DisconnectInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull DisconnectInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.input = input;
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;

@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * Input object provided to {@link EnhancedAuthenticator#onConnect(ConnectEnhancedAuthInput, EnhancedAuthOutput)}.
+ * Input object provided to {@link EnhancedAuthenticator#onConnect(EnhancedAuthConnectInput, EnhancedAuthOutput)}.
  * <p>
  * Provides an unmodifiable {@link ConnectPacket} and {@link ClientBasedInput}.
  *
@@ -32,7 +32,7 @@ import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
  * @author Florian Limpöck
  */
 @DoNotImplement
-public interface ConnectEnhancedAuthInput extends ClientBasedInput {
+public interface EnhancedAuthConnectInput extends ClientBasedInput {
 
     /**
      * Provides the unmodifiable CONNECT packet sent by the MQTT client that has to be authenticated.

@@ -41,7 +41,7 @@ public class ModifiableUserPropertiesImplTest {
 
     @Before
     public void setUp() throws Exception {
-        intermediateProps = new ModifiableUserPropertiesImpl();
+        intermediateProps = new ModifiableUserPropertiesImpl(true);
         intermediateProps.addUserProperty("one", "one");
         intermediateProps.addUserProperty("one", "two");
         intermediateProps.addUserProperty("two", "two");

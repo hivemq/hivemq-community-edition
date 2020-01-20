@@ -16,54 +16,200 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
+import com.google.common.base.Preconditions;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
+import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
+import com.hivemq.extensions.executor.PluginOutPutAsyncer;
+import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
+import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Florian Limpöck
-*/
-public interface AuthOutput {
+ * @author Silvio Giebl
+ * @since 4.3.0
+ */
+abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
 
-    /**
-     * @return is the output timed out.
-     */
-    boolean isTimedOut();
+    private final @NotNull AtomicBoolean decided = new AtomicBoolean(false);
+    private boolean authenticatorPresent = false;
+    private @NotNull AuthenticationState authenticationState = AuthenticationState.UNDECIDED;
 
-    /**
-     * @return is the output object async.
-     */
-    boolean isAsync();
+    private @Nullable ByteBuffer authenticationData;
+    @Nullable String reasonString;
+    @Nullable String timeoutReasonString;
+    private final boolean validateUTF8;
+    private final @NotNull ModifiableUserPropertiesImpl userProperties;
+    private final @NotNull ModifiableDefaultPermissions defaultPermissions;
+    private final @NotNull ModifiableClientSettingsImpl clientSettings;
+    private int timeout;
 
-    /**
-     * @return the fallback for timeouts.
-     */
-    @NotNull
-    TimeoutFallback getTimeoutFallback();
+    AuthOutput(
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final boolean validateUTF8,
+            final @NotNull ModifiableDefaultPermissions defaultPermissions,
+            final @NotNull ModifiableClientSettingsImpl clientSettings,
+            final int timeout) {
 
-    /**
-     * @return the current state of the output.
-     */
-    @NotNull
-    AuthenticationState getAuthenticationState();
+        super(asyncer);
+        this.validateUTF8 = validateUTF8;
+        this.userProperties = new ModifiableUserPropertiesImpl(null, validateUTF8);
+        this.defaultPermissions = defaultPermissions;
+        this.clientSettings = clientSettings;
+        this.timeout = timeout;
+    }
 
-    /**
-     * @return is an authenticator present and used?
-     */
-    boolean isAuthenticatorPresent();
+    @SuppressWarnings({"CopyConstructorMissesField"})
+    AuthOutput(final @NotNull AuthOutput<T> prevOutput) {
+        super(prevOutput.asyncer);
+        // decided, authenticatorPresent, authenticationState are reset as the state is isolated per output object
+        // authenticationData, reasonString are reset as they are set by decision methods
+        validateUTF8 = prevOutput.validateUTF8;
+        userProperties = new ModifiableUserPropertiesImpl(prevOutput.userProperties.consolidate(), validateUTF8);
+        defaultPermissions = prevOutput.defaultPermissions; // TODO copy
+        clientSettings = prevOutput.clientSettings; // TODO copy
+        timeout = prevOutput.timeout;
+    }
 
-    /**
-     * let the authentication fail.
-     */
-    void failAuthentication();
+    public void authenticateSuccessfully() {
+        checkDecided("authenticateSuccessfully");
+        authenticationState = AuthenticationState.SUCCESS;
+    }
 
-    /**
-     * let the authentication fail by timeout.
-     */
-    void failByTimeout();
+    public void authenticateSuccessfully(final @NotNull ByteBuffer authenticationData) {
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
+        authenticateSuccessfully();
+        this.authenticationData = authenticationData.asReadOnlyBuffer();
+    }
 
-    /**
-     * let the authentication be decided by next extension or default config.
-     */
-    void nextByTimeout();
+    public void authenticateSuccessfully(final @NotNull byte[] authenticationData) {
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
+        authenticateSuccessfully();
+        this.authenticationData = ByteBuffer.wrap(authenticationData).asReadOnlyBuffer();
+    }
 
+    public void continueAuthentication() {
+        checkDecided("continueAuthentication");
+        authenticationState = AuthenticationState.CONTINUE;
+    }
+
+    public void continueAuthentication(final @NotNull ByteBuffer authenticationData) {
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
+        continueAuthentication();
+        this.authenticationData = authenticationData.asReadOnlyBuffer();
+    }
+
+    public void continueAuthentication(final @NotNull byte[] authenticationData) {
+        Preconditions.checkNotNull(authenticationData, "Authentication data must never be null");
+        continueAuthentication();
+        this.authenticationData = ByteBuffer.wrap(authenticationData).asReadOnlyBuffer();
+    }
+
+    public void failAuthentication() {
+        checkDecided("failAuthentication");
+        authenticationState = AuthenticationState.FAILED;
+    }
+
+    public void failAuthentication(final @Nullable String reasonString) {
+        failAuthentication();
+        this.reasonString = reasonString;
+    }
+
+    public void nextExtensionOrDefault() {
+        checkDecided("nextExtensionOrDefault");
+        authenticationState = AuthenticationState.NEXT_EXTENSION_OR_DEFAULT;
+    }
+
+    public @NotNull Async<T> async(
+            final @NotNull Duration timeout,
+            final @NotNull TimeoutFallback fallback,
+            final @Nullable String reasonString) {
+
+        final Async<T> async = async(timeout, fallback);
+        timeoutReasonString = reasonString;
+        return async;
+    }
+
+    void failByTimeout() {
+        decided.set(true);
+        authenticationState = AuthenticationState.FAILED;
+        reasonString = timeoutReasonString;
+    }
+
+    void nextByTimeout() {
+        decided.set(true);
+        authenticationState = AuthenticationState.NEXT_EXTENSION_OR_DEFAULT;
+    }
+
+    void failByUndecided() {
+        decided.set(true);
+        authenticationState = AuthenticationState.FAILED;
+    }
+
+    void failByThrowable(final @NotNull Throwable throwable) {
+        decided.set(true);
+        authenticationState = AuthenticationState.FAILED;
+    }
+
+    @Nullable ByteBuffer getAuthenticationData() {
+        return authenticationData;
+    }
+
+    @Nullable String getReasonString() {
+        return reasonString;
+    }
+
+    public @NotNull ModifiableUserProperties getOutboundUserProperties() {
+        return userProperties;
+    }
+
+    @NotNull Mqtt5UserProperties getUserProperties() {
+        return userProperties.consolidate().toMqtt5UserProperties();
+    }
+
+    public @NotNull ModifiableDefaultPermissions getDefaultPermissions() {
+        return defaultPermissions;
+    }
+
+    public @NotNull ModifiableClientSettingsImpl getClientSettings() {
+        return clientSettings;
+    }
+
+    public void setTimeout(final int timeout) {
+        this.timeout = timeout;
+    }
+
+    int getTimeout() {
+        return timeout;
+    }
+
+    void setAuthenticatorPresent() {
+        authenticatorPresent = true;
+    }
+
+    boolean isAuthenticatorPresent() {
+        return authenticatorPresent;
+    }
+
+    @NotNull AuthenticationState getAuthenticationState() {
+        return authenticationState;
+    }
+
+    private void checkDecided(final @NotNull String method) {
+        if (!decided.compareAndSet(false, true)) {
+            if (isTimedOut()) {
+                throw new UnsupportedOperationException(method + " has no effect as the async operation timed out.");
+            }
+            throw new UnsupportedOperationException(method + " must not be called if authenticateSuccessfully, " +
+                    "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
+        }
+    }
 }

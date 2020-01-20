@@ -59,7 +59,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             final long originalSessionExpiryInterval) {
 
         configurationService = fullConfigurationService;
-        reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
+        reasonCode = originalDisconnect.getReasonCode().toDisconnectReasonCode();
         reasonString = originalDisconnect.getReasonString();
         sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         this.originalSessionExpiryInterval = originalSessionExpiryInterval;

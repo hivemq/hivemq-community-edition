@@ -16,7 +16,6 @@
 
 package com.hivemq.mqtt.handler.auth;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
@@ -31,12 +30,11 @@ import io.netty.channel.ChannelFuture;
 
 import javax.inject.Singleton;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 @Singleton
 public class MqttAuthSender {
 
@@ -47,31 +45,29 @@ public class MqttAuthSender {
         this.eventLog = eventLog;
     }
 
-    @NotNull
-    public ChannelFuture sendAuth(@NotNull final Channel channel,
-                           @Nullable final ByteBuffer authData,
-                           @NotNull final Mqtt5AuthReasonCode reasonCode,
-                           @Nullable final Mqtt5UserProperties userProperties,
-                           @Nullable final String reasonString) {
+    public @NotNull ChannelFuture sendAuth(
+            final @NotNull Channel channel,
+            final @Nullable ByteBuffer authData,
+            final @NotNull Mqtt5AuthReasonCode reasonCode,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final @Nullable String reasonString) {
 
-        Preconditions.checkNotNull(channel, "Channel must never be null");
-        Preconditions.checkNotNull(reasonCode, "ReasonCode must never be null");
-
-        if(reasonCode == Mqtt5AuthReasonCode.SUCCESS){
-            channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(false);
-        }
-
-        final AUTH auth = new AUTH(channel.attr(ChannelAttributes.AUTH_METHOD).get(),
+        final AUTH auth = new AUTH(
+                channel.attr(ChannelAttributes.AUTH_METHOD).get(),
                 Bytes.fromReadOnlyBuffer(authData),
                 reasonCode,
-                Objects.requireNonNullElse(userProperties, Mqtt5UserProperties.NO_USER_PROPERTIES),
+                userProperties,
                 reasonString);
 
         logAuth(channel, reasonCode, false);
         return channel.writeAndFlush(auth);
     }
 
-    public void logAuth(@NotNull final Channel channel, final @NotNull Mqtt5AuthReasonCode reasonCode, final boolean received) {
+    public void logAuth(
+            final @NotNull Channel channel,
+            final @NotNull Mqtt5AuthReasonCode reasonCode,
+            final boolean received) {
+
         eventLog.clientAuthentication(channel, reasonCode, received);
     }
 }

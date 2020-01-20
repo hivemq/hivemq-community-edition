@@ -19,50 +19,29 @@ package com.hivemq.extensions.services.auth;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
-import com.hivemq.extensions.executor.task.PluginInOutTask;
-import com.hivemq.util.Exceptions;
 
 /**
  * @author Georg Held
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
-public class ConnectSimpleAuthTask implements PluginInOutTask<ConnectSimpleAuthTaskInput, ConnectSimpleAuthTaskOutput> {
+public class ConnectSimpleAuthTask extends AbstractAuthTask<AuthConnectInput, ConnectAuthOutput> {
 
-    private static final String LOG_STATEMENT = "Uncaught exception was thrown in SimpleAuthenticator from extension." +
-            " Extensions are responsible on their own to handle exceptions.";
+    public ConnectSimpleAuthTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId) {
 
-    private final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
-    private final @NotNull AuthenticatorProviderInput authenticatorProviderInput;
-
-    public ConnectSimpleAuthTask(final @NotNull WrappedAuthenticatorProvider provider, final @NotNull AuthenticatorProviderInput authenticatorProviderInput) {
-        this.wrappedAuthenticatorProvider = provider;
-        this.authenticatorProviderInput = authenticatorProviderInput;
+        super(wrappedAuthenticatorProvider, authenticatorProviderInput, extensionId);
     }
 
     @Override
-    public @NotNull ConnectSimpleAuthTaskOutput apply(
-            final @NotNull ConnectSimpleAuthTaskInput connectSimpleAuthTaskInput,
-            final @NotNull ConnectSimpleAuthTaskOutput connectSimpleAuthTaskOutput) {
-
-        if (connectSimpleAuthTaskOutput.getAuthenticationState() != AuthenticationState.UNDECIDED &&
-                connectSimpleAuthTaskOutput.getAuthenticationState() != AuthenticationState.NEXT_EXTENSION_OR_DEFAULT) {
-            return connectSimpleAuthTaskOutput;
+    void call(final @NotNull AuthConnectInput input, final @NotNull ConnectAuthOutput output) {
+        final SimpleAuthenticator authenticator =
+                wrappedAuthenticatorProvider.getAuthenticator(authenticatorProviderInput);
+        if (authenticator != null) {
+            output.setAuthenticatorPresent();
+            authenticator.onConnect(input, new ConnectSimpleAuthOutput(output));
         }
-        try {
-            final SimpleAuthenticator authenticator = wrappedAuthenticatorProvider.getAuthenticator(authenticatorProviderInput);
-            if (authenticator != null) {
-                authenticator.onConnect(connectSimpleAuthTaskInput, connectSimpleAuthTaskOutput);
-                connectSimpleAuthTaskOutput.authenticatorPresent();
-            }
-        } catch (final Throwable throwable) {
-            Exceptions.rethrowError(LOG_STATEMENT, throwable);
-            connectSimpleAuthTaskOutput.setThrowable(throwable);
-        }
-        return connectSimpleAuthTaskOutput;
-    }
-
-    @Override
-    public @NotNull ClassLoader getPluginClassLoader() {
-        return wrappedAuthenticatorProvider.getClassLoader();
     }
 }
