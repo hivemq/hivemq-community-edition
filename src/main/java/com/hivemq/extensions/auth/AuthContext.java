@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
@@ -33,8 +33,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static com.hivemq.extensions.services.auth.AuthenticationState.UNDECIDED;
-
 /**
  * @author Silvio Giebl
  */
@@ -46,7 +44,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     final @NotNull MqttAuthSender authSender;
     private final int authenticatorsCount;
     private int counter;
-    private @NotNull AuthenticationState state = UNDECIDED;
+    private @NotNull AuthenticationState state = AuthenticationState.UNDECIDED;
     @NotNull T output;
 
     AuthContext(
@@ -74,11 +72,12 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
                     output.nextByTimeout();
                     break;
             }
-        } else if ((output.getAuthenticationState() == UNDECIDED) && output.isAuthenticatorPresent()) {
+        } else if ((output.getAuthenticationState() == AuthenticationState.UNDECIDED) &&
+                output.isAuthenticatorPresent()) {
             output.failByUndecided();
         }
 
-        if (!state.isFinal() && (output.getAuthenticationState() != UNDECIDED)) {
+        if (!state.isFinal() && (output.getAuthenticationState() != AuthenticationState.UNDECIDED)) {
             state = output.getAuthenticationState();
         }
 

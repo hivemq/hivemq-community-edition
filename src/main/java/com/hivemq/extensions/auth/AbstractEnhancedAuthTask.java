@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.services.auth;
+package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 
 /**
  * @author Silvio Giebl

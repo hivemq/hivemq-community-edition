@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler;
 
 import com.hivemq.annotations.NotNull;
-import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import io.netty.channel.ChannelHandlerContext;
