@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.parameters.stop;
+package com.hivemq.extensions.parameter;
 
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-
-import java.util.Optional;
 
 /**
  * @author Georg Held
  */
 public class ExtensionStopOutputImpl implements ExtensionStopOutput {
-
-    private Throwable throwable = null;
-
-    @NotNull
-    public Optional<Throwable> getThrowable() {
-        return Optional.ofNullable(this.throwable);
-    }
-
-    public void setThrowable(@Nullable final Throwable throwable) {
-        this.throwable = throwable;
-    }
 }

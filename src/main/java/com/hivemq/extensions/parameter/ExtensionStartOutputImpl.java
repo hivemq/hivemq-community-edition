@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.parameters.start;
+package com.hivemq.extensions.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -29,8 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ExtensionStartOutputImpl implements ExtensionStartOutput {
 
-    private String reason = null;
-    private Throwable throwable = null;
+    private @Nullable String reason = null;
 
     @Override
     public void preventExtensionStartup(@NotNull final String reason) {
@@ -38,17 +37,7 @@ public class ExtensionStartOutputImpl implements ExtensionStartOutput {
         this.reason = reason;
     }
 
-    @NotNull
-    public Optional<String> getReason() {
-        return Optional.ofNullable(this.reason);
-    }
-
-    @NotNull
-    public Optional<Throwable> getThrowable() {
-        return Optional.ofNullable(this.throwable);
-    }
-
-    public void setThrowable(@Nullable final Throwable throwable) {
-        this.throwable = throwable;
+    public @NotNull Optional<String> getReason() {
+        return Optional.ofNullable(reason);
     }
 }

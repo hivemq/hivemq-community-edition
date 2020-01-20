@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.hivemq.extensions.parameters;
+package com.hivemq.extensions.parameter;
 
+import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
-import com.hivemq.extensions.HiveMQExtension;
 
 import java.io.File;
 import java.util.Optional;
@@ -28,40 +28,34 @@ import java.util.Optional;
  */
 public class ExtensionInformationImpl implements ExtensionInformation {
 
-    @NotNull
-    private final HiveMQExtension hiveMQExtension;
+    private final @NotNull HiveMQExtension hiveMQExtension;
 
-    public ExtensionInformationImpl(@NotNull final HiveMQExtension hiveMQExtension) {
+    public ExtensionInformationImpl(final @NotNull HiveMQExtension hiveMQExtension) {
         this.hiveMQExtension = hiveMQExtension;
     }
 
-    @NotNull
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return this.hiveMQExtension.getId();
     }
 
-    @NotNull
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return this.hiveMQExtension.getName();
     }
 
-    @NotNull
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return this.hiveMQExtension.getVersion();
     }
 
-    @NotNull
     @Override
-    public Optional<String> getAuthor() {
+    public @NotNull Optional<String> getAuthor() {
         return Optional.ofNullable(this.hiveMQExtension.getAuthor());
     }
 
-    @NotNull
     @Override
-    public File getExtensionHomeFolder() {
+    public @NotNull File getExtensionHomeFolder() {
         return this.hiveMQExtension.getPluginFolderPath().toFile();
     }
 }
