@@ -274,7 +274,7 @@ public class Bytes {
      * @param optional of a byte array
      * @return the bytes of an {@link Optional} of a {@link ByteBuffer} as optional byte array
      */
-    @Nullable
+    @NotNull
     public static Optional<byte[]> getBytesFromReadOnlyBufferAsOptional(@NotNull final Optional<ByteBuffer> optional) {
         return Optional.ofNullable(getBytesFromReadOnlyBuffer(optional));
     }
