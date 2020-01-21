@@ -33,6 +33,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.Utf8Utils;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -65,7 +66,8 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     private @Nullable String userName;
     private @Nullable ByteBuffer password;
 
-    public ModifiableConnectPacketImpl(@NotNull final FullConfigurationService configurationService, @NotNull final CONNECT originalConnect) {
+    public ModifiableConnectPacketImpl(
+            @NotNull final FullConfigurationService configurationService, @NotNull final CONNECT originalConnect) {
         this.configurationService = configurationService;
         this.protocolVersion = originalConnect.getProtocolVersion();
 
@@ -80,17 +82,21 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         this.requestProblemInformation = originalConnect.isProblemInformationRequested();
         this.authMethod = originalConnect.getAuthMethod();
         this.authData = originalConnect.getAuthData() == null ? null : ByteBuffer.wrap(originalConnect.getAuthData());
-        this.userProperties = new ModifiableUserPropertiesImpl(originalConnect.getUserProperties().getPluginUserProperties(),
+        this.userProperties = new ModifiableUserPropertiesImpl(
+                originalConnect.getUserProperties().getPluginUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
         this.userName = originalConnect.getUsername();
         this.password = originalConnect.getPassword() == null ? null : ByteBuffer.wrap(originalConnect.getPassword());
         if (originalConnect.isWill() && originalConnect.getWillPublish() != null) {
-            this.modifiableWillPublish = new ModifiableWillPublishImpl(configurationService,
+            this.modifiableWillPublish = new ModifiableWillPublishImpl(
+                    configurationService,
                     WillPublishPacketImpl.fromMqttWillPublish(originalConnect.getWillPublish()));
         }
     }
 
-    public ModifiableConnectPacketImpl(@NotNull final FullConfigurationService configurationService, @NotNull final ConnectPacket originalConnect) {
+    public ModifiableConnectPacketImpl(
+            @NotNull final FullConfigurationService configurationService,
+            @NotNull final ConnectPacket originalConnect) {
         this.configurationService = configurationService;
         this.protocolVersion = MqttVersionUtil.toProtocolVersion(originalConnect.getMqttVersion());
 
@@ -105,12 +111,14 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         this.requestProblemInformation = originalConnect.getRequestProblemInformation();
         this.authMethod = originalConnect.getAuthenticationMethod().orElse(null);
         this.authData = originalConnect.getAuthenticationData().orElse(null);
-        this.userProperties = new ModifiableUserPropertiesImpl((InternalUserProperties) originalConnect.getUserProperties(),
+        this.userProperties = new ModifiableUserPropertiesImpl(
+                (InternalUserProperties) originalConnect.getUserProperties(),
                 configurationService.securityConfiguration().validateUTF8());
         this.userName = originalConnect.getUserName().orElse(null);
         this.password = originalConnect.getPassword().orElse(null);
         if (originalConnect.getWillPublish().isPresent()) {
-            this.modifiableWillPublish = new ModifiableWillPublishImpl(configurationService, originalConnect.getWillPublish().get());
+            this.modifiableWillPublish =
+                    new ModifiableWillPublishImpl(configurationService, originalConnect.getWillPublish().get());
         }
     }
 
@@ -152,7 +160,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
 
         checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must NOT be less than 0");
-        checkArgument(sessionExpiryInterval < configuredMaximum, "Expiry interval must be less than the configured maximum of" + configuredMaximum);
+        checkArgument(
+                sessionExpiryInterval < configuredMaximum,
+                "Expiry interval must be less than the configured maximum of" + configuredMaximum);
         if (this.sessionExpiryInterval == sessionExpiryInterval) {
             return;
         }
@@ -164,7 +174,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public synchronized void setKeepAlive(final int keepAlive) {
         final int configuredMaximum = configurationService.mqttConfiguration().keepAliveMax();
         checkArgument(keepAlive >= 0, "Keep alive must NOT be less than 0");
-        checkArgument(keepAlive < configuredMaximum, "Keep alive must be less than the configured maximum of " + configuredMaximum);
+        checkArgument(
+                keepAlive < configuredMaximum,
+                "Keep alive must be less than the configured maximum of " + configuredMaximum);
         if (this.keepAlive == keepAlive) {
             return;
         }
@@ -175,7 +187,8 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     @Override
     public synchronized void setReceiveMaximum(final int receiveMaximum) {
         checkArgument(receiveMaximum > 0, "Receive maximum must be bigger than 0");
-        checkArgument(receiveMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "Receive maximum must be less than 65535");
+        checkArgument(
+                receiveMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "Receive maximum must be less than 65535");
         if (this.receiveMaximum == receiveMaximum) {
             return;
         }
@@ -187,7 +200,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public synchronized void setMaximumPacketSize(final int maximumPacketSize) {
         final int configuredMaximum = configurationService.mqttConfiguration().maxPacketSize();
         checkArgument(maximumPacketSize > 0, "Maximum packet size must be bigger than 0");
-        checkArgument(maximumPacketSize < configuredMaximum, "Maximum packet must be less than the configured maximum of " + configuredMaximum);
+        checkArgument(
+                maximumPacketSize < configuredMaximum,
+                "Maximum packet must be less than the configured maximum of " + configuredMaximum);
         if (this.maximumPacketSize == maximumPacketSize) {
             return;
         }
@@ -198,7 +213,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     @Override
     public synchronized void setTopicAliasMaximum(final int topicAliasMaximum) {
         checkArgument(topicAliasMaximum >= 0, "Topic alias must NOT be less than 0");
-        checkArgument(topicAliasMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "Maximum packet must be less than 65535");
+        checkArgument(
+                topicAliasMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+                "Maximum packet must be less than 65535");
         if (getMqttVersion() != MqttVersion.V_5) {
             return;
         }
@@ -240,8 +257,12 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
             modified = true;
             return;
         }
-        checkArgument(!Utf8Utils.containsMustNotCharacters(authenticationMethod), authenticationMethod + " is not a valid authentication method");
-        checkArgument(!Utf8Utils.hasControlOrNonCharacter(authenticationMethod), authenticationMethod + " is not a valid authentication method");
+        checkArgument(
+                !Utf8Utils.containsMustNotCharacters(authenticationMethod),
+                authenticationMethod + " is not a valid authentication method");
+        checkArgument(
+                !Utf8Utils.hasControlOrNonCharacter(authenticationMethod),
+                authenticationMethod + " is not a valid authentication method");
 
         if (Objects.equals(this.authMethod, authenticationMethod)) {
             return;
@@ -263,6 +284,16 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
+    public synchronized void setAuthenticationData(final @Nullable byte[] authenticationData) {
+        if (authenticationData == null) {
+            setAuthenticationData((ByteBuffer) null);
+            return;
+        }
+        final byte[] copy = Arrays.copyOf(authenticationData, authenticationData.length);
+        setAuthenticationData(ByteBuffer.wrap(copy));
+    }
+
+    @Override
     public synchronized void setUserName(final @Nullable String userName) {
         if (Objects.equals(this.userName, userName)) {
             return;
@@ -281,6 +312,15 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         }
         this.password = password;
         modified = true;
+    }
+
+    @Override
+    public synchronized void setPassword(final @Nullable byte[] password) {
+        if (password == null) {
+            setPassword((ByteBuffer) null);
+        }
+        final byte[] copy = Arrays.copyOf(password, password.length);
+        setPassword(ByteBuffer.wrap(copy));
     }
 
     public boolean isModified() {

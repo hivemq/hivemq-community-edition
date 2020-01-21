@@ -126,7 +126,7 @@ public interface PublishPacket {
      *
      * @return An {@link Optional} that contains the correlation data as an array if present.
      */
-    @NotNull Optional<byte[]> getCorrelationDataAsByteArray();
+    @NotNull Optional<byte[]> getCorrelationDataAsArray();
 
     /**
      * The list of subscription identifiers for PUBLISH.
@@ -156,6 +156,13 @@ public interface PublishPacket {
      * @since 4.0.0
      */
     @NotNull Optional<@Immutable ByteBuffer> getPayload();
+
+    /**
+     * If the payload is present, this returns a copy as a byte array.
+     *
+     * @return An {@link Optional} that contains a copy of the payload as an array if present.
+     */
+    @NotNull Optional<byte[]> getPayloadAsArray();
 
     /**
      * The {@link UserProperties} of the PUBLISH.

@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -99,12 +100,8 @@ public class WillPublishPacketImpl implements PublishPacket {
     }
 
     @Override
-    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-        final byte[] correlationData = publish.getCorrelationData();
-        if (correlationData == null) {
-            return Optional.empty();
-        }
-        return Optional.of(correlationData);
+    public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getCorrelationData());
     }
 
     @Override
@@ -124,6 +121,11 @@ public class WillPublishPacketImpl implements PublishPacket {
             return Optional.empty();
         }
         return Optional.of(ByteBuffer.wrap(payload).asReadOnlyBuffer());
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getPayloadAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getPayload());
     }
 
     @Override

@@ -340,4 +340,11 @@ public class ConnectionAttributesTest {
         }
     }
 
+    static void assertAllArrayEquals(final Map<String, byte[]> expected, final Map<String, byte[]> actual) {
+        assertEquals(expected.keySet(), actual.keySet());
+        for (final String key : expected.keySet()) {
+            assertEquals(expected.get(key), expected.get(key));
+        }
+    }
+
 }

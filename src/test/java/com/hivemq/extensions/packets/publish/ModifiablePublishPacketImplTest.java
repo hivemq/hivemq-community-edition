@@ -100,6 +100,7 @@ public class ModifiablePublishPacketImplTest {
 
         modifiablePublishPacket.setContentType(origin.getContentType());
         modifiablePublishPacket.setCorrelationData(ByteBuffer.wrap(origin.getCorrelationData()));
+        modifiablePublishPacket.setCorrelationData(origin.getCorrelationData());
         modifiablePublishPacket.setMessageExpiryInterval(origin.getMessageExpiryInterval());
         modifiablePublishPacket.setPayload(ByteBuffer.wrap(origin.getPayload()));
         modifiablePublishPacket.setPayloadFormatIndicator(PayloadFormatIndicator.valueOf(origin.getPayloadFormatIndicator().name()));
@@ -135,6 +136,19 @@ public class ModifiablePublishPacketImplTest {
         assertArrayEquals("modified correlation data".getBytes(), mergePublishPacket.getCorrelationData());
 
         assertTrue(modifiablePublishPacket.isModified());
+
+    }
+
+    @Test
+    public void test_change_CorrelationDataArray_modifies_packet() {
+
+        modifiablePublishPacket.setCorrelationData("modified correlation data".getBytes());
+
+        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
+
+        assertTrue(modifiablePublishPacket.isModified());
+
+        assertArrayEquals("modified correlation data".getBytes(), mergePublishPacket.getCorrelationData());
 
     }
 

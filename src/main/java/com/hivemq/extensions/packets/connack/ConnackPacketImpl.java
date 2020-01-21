@@ -24,6 +24,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
+import com.hivemq.util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -158,12 +159,8 @@ public class ConnackPacketImpl implements ConnackPacket {
     }
 
     @Override
-    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
-        if (authenticationData != null) {
-            return Optional.of(authenticationData.array());
-        } else {
-            return Optional.empty();
-        }
+    public @NotNull Optional<byte[]> getAuthenticationDataAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getAuthenticationData());
     }
 
     @NotNull

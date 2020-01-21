@@ -67,6 +67,16 @@ public interface ConnectionAttributeStore {
     void put(@NotNull String key, @NotNull ByteBuffer value);
 
     /**
+     * Sets the given connection attribute for the connected client.
+     *
+     * @param key   The key of the connection attribute.
+     * @param value The value of the connection attribute.
+     * @throws LimitExceededException A {@link LimitExceededException} is thrown when the size of the passed value
+     *                                exceeds the maximum allowed size of 10 kilobytes for the value.
+     */
+    void putAsArray(@NotNull String key, @NotNull byte[] value);
+
+    /**
      * Sets the given connection attribute as UTF-8 String representation for the connected client.
      *
      * @param key   The key of the connection attribute.
@@ -99,6 +109,15 @@ public interface ConnectionAttributeStore {
     @NotNull Optional<ByteBuffer> get(@NotNull String key);
 
     /**
+     * Retrieves the value of the connection attribute with the given key for the connected client.
+     *
+     * @param key The key of the connection attribute.
+     * @return An {@link Optional} containing the value of the connection attribute if present.
+     * @since 4.0.0
+     */
+    @NotNull Optional<byte[]> getAsArray(@NotNull String key);
+
+    /**
      * Retrieves the value of the connection attribute with the given key for the connected client as UTF-8 string.
      *
      * @param key The key of the connection attribute.
@@ -128,6 +147,14 @@ public interface ConnectionAttributeStore {
     @NotNull Optional<Map<String, ByteBuffer>> getAll();
 
     /**
+     * Retrieves all connection attributes for the connected client.
+     *
+     * @return An {@link Optional} containing all connection attributes as a map of key and value pairs if present.
+     * @since 4.0.0
+     */
+    @NotNull Optional<Map<String, byte[]>> getAllAsArray();
+
+    /**
      * Removes the connection attribute with the given key for the connected client.
      *
      * @param key The key of the connection attribute.
@@ -135,6 +162,15 @@ public interface ConnectionAttributeStore {
      * @since 4.0.0
      */
     @NotNull Optional<ByteBuffer> remove(@NotNull String key);
+
+    /**
+     * Removes the connection attribute with the given key for the connected client.
+     *
+     * @param key The key of the connection attribute.
+     * @return An {@link Optional} containing the value of the removed connection attribute if it was present.
+     * @since 4.0.0
+     */
+    @NotNull Optional<byte[]> removeAsArray(@NotNull String key);
 
     /**
      * Clears all connection attributes for the connected client.

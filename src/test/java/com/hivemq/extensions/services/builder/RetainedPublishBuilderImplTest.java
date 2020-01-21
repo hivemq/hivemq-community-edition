@@ -39,6 +39,7 @@ import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -311,6 +312,9 @@ public class RetainedPublishBuilderImplTest {
 
     class TestPublishPacket implements PublishPacket {
 
+        private final @NotNull byte[] correlation_data = "correlation_data".getBytes(StandardCharsets.UTF_8);
+        private final @NotNull byte[] payload = "test3".getBytes(StandardCharsets.UTF_8);
+
         @Override
         public boolean getDupFlag() {
             return false;
@@ -359,13 +363,12 @@ public class RetainedPublishBuilderImplTest {
         @NotNull
         @Override
         public Optional<ByteBuffer> getCorrelationData() {
-            return Optional.of(ByteBuffer.wrap("correlation_data".getBytes()));
+            return Optional.of(ByteBuffer.wrap(correlation_data));
         }
 
         @Override
-        public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-            final byte[] correlationBytes = "correlation_data".getBytes();
-            return Optional.of(correlationBytes);
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.of(correlation_data);
         }
 
         @Override
@@ -382,7 +385,12 @@ public class RetainedPublishBuilderImplTest {
         @NotNull
         @Override
         public Optional<ByteBuffer> getPayload() {
-            return Optional.of(ByteBuffer.wrap("test3".getBytes()));
+            return Optional.of(ByteBuffer.wrap(payload));
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
+            return Optional.of(payload);
         }
 
         @NotNull

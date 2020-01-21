@@ -44,6 +44,7 @@ import com.hivemq.util.Topics;
 
 import javax.inject.Inject;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -247,6 +248,14 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
     public @NotNull WillPublishBuilder payload(final @NotNull ByteBuffer payload) {
         checkNotNull(payload, "Payload must not be null");
         this.payload = payload;
+        return this;
+    }
+
+    @Override
+    public @NotNull WillPublishBuilder payload(final @NotNull byte[] payload) {
+        checkNotNull(payload, "Payload must not be null");
+        final byte[] copy = Arrays.copyOf(payload, payload.length);
+        this.payload = ByteBuffer.wrap(copy);
         return this;
     }
 

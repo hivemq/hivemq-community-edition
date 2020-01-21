@@ -192,6 +192,17 @@ public interface WillPublishBuilder {
     @NotNull WillPublishBuilder payload(@NotNull ByteBuffer payload);
 
     /**
+     * Sets the payload.
+     * <p>
+     * This value has no default and must be set.
+     *
+     * @param payload The payload to set.
+     * @return The {@link WillPublishBuilder}.
+     * @throws NullPointerException If the payload is null.
+     */
+    @NotNull WillPublishBuilder payload(@NotNull byte[] payload);
+
+    /**
      * Adds a user property.
      * <p>
      * DEFAULT: <code>empty list</code>.

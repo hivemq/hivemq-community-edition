@@ -249,6 +249,6 @@ public interface ConnackPacket {
      *
      * @return the authentication data as a an optional byte array.
      */
-    @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
+    @NotNull Optional<byte[]> getAuthenticationDataAsArray();
 
 }

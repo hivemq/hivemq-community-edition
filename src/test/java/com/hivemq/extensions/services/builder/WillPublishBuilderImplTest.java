@@ -335,6 +335,9 @@ public class WillPublishBuilderImplTest {
 
     class TestPublishPacket implements PublishPacket {
 
+        private final @NotNull byte[] correlationData = "correlation_data".getBytes();
+        private final @NotNull byte[] payload = "test3".getBytes();
+
         @Override
         public boolean getDupFlag() {
             return false;
@@ -383,13 +386,12 @@ public class WillPublishBuilderImplTest {
         @NotNull
         @Override
         public Optional<ByteBuffer> getCorrelationData() {
-            return Optional.of(ByteBuffer.wrap("correlation_data".getBytes()));
+            return Optional.of(ByteBuffer.wrap(correlationData));
         }
 
         @Override
-        public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-            final byte[] correlationBytes = "correlation_data".getBytes();
-            return Optional.of(correlationBytes);
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.of(correlationData);
         }
 
         @Override
@@ -406,7 +408,12 @@ public class WillPublishBuilderImplTest {
         @NotNull
         @Override
         public Optional<ByteBuffer> getPayload() {
-            return Optional.of(ByteBuffer.wrap("test3".getBytes()));
+            return Optional.of(ByteBuffer.wrap(payload));
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
+            return Optional.of(payload);
         }
 
         @NotNull
@@ -472,9 +479,8 @@ public class WillPublishBuilderImplTest {
         }
 
         @Override
-        public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-            final byte[] correlationBytes = "correlation_data".getBytes();
-            return Optional.of(correlationBytes);
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.empty();
         }
 
         @Override
@@ -489,6 +495,11 @@ public class WillPublishBuilderImplTest {
 
         @Override
         public Optional<ByteBuffer> getPayload() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
             return Optional.empty();
         }
 

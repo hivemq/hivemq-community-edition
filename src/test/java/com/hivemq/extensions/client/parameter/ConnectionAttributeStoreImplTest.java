@@ -410,10 +410,37 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test
+    public void test_getAllAsArray() {
+        final ImmutableMap<String, byte[]> values = ImmutableMap.of(
+                "test.key1", "test.value1".getBytes(),
+                "test.key2", "test.value2".getBytes());
+
+        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+
+        for (final Map.Entry<String, byte[]> entry : values.entrySet()) {
+            connectionAttributeStore.putAsArray(entry.getKey(), entry.getValue());
+        }
+
+        final Optional<Map<String, byte[]>> allAsArray = connectionAttributeStore.getAllAsArray();
+
+        assertTrue(allAsArray.isPresent());
+        ConnectionAttributesTest.assertAllArrayEquals(values, allAsArray.get());
+    }
+
+    @Test
     public void test_getAll_attribute_not_present() {
         when(connectionAttributesAttribute.get()).thenReturn(null);
 
         final Optional<Map<String, ByteBuffer>> returnValues = connectionAttributeStore.getAll();
+
+        assertFalse(returnValues.isPresent());
+    }
+
+    @Test
+    public void test_getAllAsArray_attribute_not_present() {
+        when(connectionAttributesAttribute.get()).thenReturn(null);
+
+        final Optional<Map<String, byte[]>> returnValues = connectionAttributeStore.getAllAsArray();
 
         assertFalse(returnValues.isPresent());
     }
@@ -493,6 +520,7 @@ public class ConnectionAttributeStoreImplTest {
         connectionAttributeStore.clear();
 
         assertFalse(connectionAttributeStore.getAll().isPresent());
+        assertFalse(connectionAttributeStore.getAllAsArray().isPresent());
     }
 
     @Test

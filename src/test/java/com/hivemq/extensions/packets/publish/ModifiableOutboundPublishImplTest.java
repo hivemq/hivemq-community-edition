@@ -313,7 +313,7 @@ public class ModifiableOutboundPublishImplTest {
     @Test
     public void test_change_CorrelationData_null() {
 
-        modifiableOutboundPublish.setCorrelationData(null);
+        modifiableOutboundPublish.setCorrelationData((ByteBuffer) null);
         final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiableOutboundPublish, origin);
 
         assertEquals(null, mergePublishPacket.getCorrelationData());
@@ -325,12 +325,35 @@ public class ModifiableOutboundPublishImplTest {
 
         origin = TestMessageUtil.createMqtt5Publish();
         modifiableOutboundPublish = new ModifiableOutboundPublishImpl(configurationService, TestMessageUtil.createMqtt5Publish());
-        modifiableOutboundPublish.setCorrelationData(null);
+        modifiableOutboundPublish.setCorrelationData((ByteBuffer) null);
         final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiableOutboundPublish, origin);
 
         assertEquals(null, mergePublishPacket.getCorrelationData());
         assertFalse(modifiableOutboundPublish.isModified());
     }
+
+    @Test
+    public void test_change_CorrelationData_as_Array_null() {
+
+        modifiableOutboundPublish.setCorrelationData((byte[]) null);
+        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiableOutboundPublish, origin);
+
+        assertEquals(null, mergePublishPacket.getCorrelationData());
+        assertTrue(modifiableOutboundPublish.isModified());
+    }
+
+    @Test
+    public void test_change_CorrelationData_as_Array_null_was_null() {
+
+        origin = TestMessageUtil.createMqtt5Publish();
+        modifiableOutboundPublish = new ModifiableOutboundPublishImpl(configurationService, TestMessageUtil.createMqtt5Publish());
+        modifiableOutboundPublish.setCorrelationData((byte[]) null);
+        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiableOutboundPublish, origin);
+
+        assertEquals(null, mergePublishPacket.getCorrelationData());
+        assertFalse(modifiableOutboundPublish.isModified());
+    }
+
 
     @Test
     public void test_change_PayloadFormatIndicator_null() {

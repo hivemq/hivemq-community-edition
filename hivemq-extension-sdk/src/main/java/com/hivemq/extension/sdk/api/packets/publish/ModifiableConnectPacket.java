@@ -167,6 +167,13 @@ public interface ModifiableConnectPacket extends ConnectPacket {
     void setAuthenticationData(@Nullable ByteBuffer authenticationData);
 
     /**
+     * Set the authentication data.
+     *
+     * @param authenticationData The new authentication data of the CONNECT.
+     */
+    void setAuthenticationData(@Nullable byte[] authenticationData);
+
+    /**
      * Set the username.
      *
      * @param userName The new username for the CONNECT.
@@ -181,6 +188,13 @@ public interface ModifiableConnectPacket extends ConnectPacket {
      * @since 4.2.0
      */
     void setPassword(@Nullable ByteBuffer password);
+
+    /**
+     * Set the password.
+     *
+     * @param password The new password for the CONNECT.
+     */
+    void setPassword(@Nullable byte[] password);
 
     /**
      * Get the modifiable {@link UserProperties} of the CONNECT packet.

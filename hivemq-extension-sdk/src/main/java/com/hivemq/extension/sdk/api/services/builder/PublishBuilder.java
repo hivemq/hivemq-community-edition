@@ -178,6 +178,17 @@ public interface PublishBuilder {
     @NotNull PublishBuilder payload(@NotNull ByteBuffer payload);
 
     /**
+     * Sets the payload.
+     * <p>
+     * This value has no default and must be set.
+     *
+     * @param payload The payload to set.
+     * @return The {@link PublishBuilder}.
+     * @throws NullPointerException If the payload is null.
+     */
+    @NotNull PublishBuilder payload(@NotNull byte[] payload);
+
+    /**
      * Adds a user property.
      * <p>
      * DEFAULT: <code>empty list</code>.

@@ -30,6 +30,7 @@ import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.Bytes;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
@@ -175,6 +176,15 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
+    public synchronized void setCorrelationData(final @Nullable byte[] correlationData) {
+        if (correlationData == null) {
+            setCorrelationData((ByteBuffer) null);
+            return;
+        }
+        setCorrelationData(ByteBuffer.wrap(correlationData));
+    }
+
+    @Override
     public synchronized void setContentType(final @Nullable String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
 
@@ -198,6 +208,12 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         }
         this.payload = payload;
         this.modified = true;
+    }
+
+    @Override
+    public synchronized void setPayload(final @NotNull byte[] payload) {
+        Preconditions.checkNotNull(payload, "Payload must never be null");
+        setPayload(ByteBuffer.wrap(payload));
     }
 
     @Override
@@ -259,14 +275,8 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-        if (correlationData == null) {
-            return Optional.empty();
-        } else {
-            final byte[] bytesArray = new byte[correlationData.remaining()];
-            correlationData.asReadOnlyBuffer().clear().get(bytesArray);
-            return Optional.of(bytesArray);
-        }
+    public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getCorrelationData());
     }
 
     @Override
@@ -282,6 +292,11 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     @Override
     public @NotNull Optional<ByteBuffer> getPayload() {
         return Optional.ofNullable(payload);
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getPayloadAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getPayload());
     }
 
     @Override

@@ -101,6 +101,14 @@ public interface ModifiableOutboundPublish extends PublishPacket {
     void setCorrelationData(@Nullable ByteBuffer correlationData);
 
     /**
+     * Sets the correlation data.
+     * This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is ignored.
+     *
+     * @param correlationData The new correlation data for the publish.
+     */
+    void setCorrelationData(@Nullable byte[] correlationData);
+
+    /**
      * Sets the content type. This setting is only respected for MQTT 5 clients. For MQTT 3.x clients this setting is
      * ignored.
      *
@@ -119,6 +127,14 @@ public interface ModifiableOutboundPublish extends PublishPacket {
      * @since 4.2.0
      */
     void setPayload(@NotNull ByteBuffer payload);
+
+    /**
+     * Sets the payload.
+     *
+     * @param payload The new payload for the publish.
+     * @throws NullPointerException If payload is null.
+     */
+    void setPayload(@NotNull byte[] payload);
 
     /**
      * Set the subscription identifier. This will not affect the identifiers of the original subscription, it merely

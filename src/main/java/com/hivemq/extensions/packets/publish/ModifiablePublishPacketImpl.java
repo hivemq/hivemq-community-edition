@@ -31,6 +31,7 @@ import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.Bytes;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
@@ -223,16 +224,12 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public void setCorrelationData(final @Nullable byte[] correlationData) {
-        //ignore unnecessary change
-        if (correlationData != null && Arrays.equals(correlationData, Objects.requireNonNull(this.correlationData).array())) {
+    public synchronized void setCorrelationData(final @Nullable byte[] correlationData) {
+        if (correlationData == null) {
+            setCorrelationData((ByteBuffer) null);
             return;
         }
-        if (correlationData == null && this.correlationData == null) {
-            return;
-        }
-        this.correlationData = ByteBuffer.wrap(Objects.requireNonNull(correlationData));
-        this.modified = true;
+        setCorrelationData(ByteBuffer.wrap(correlationData));
     }
 
     @Override
@@ -321,12 +318,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public @NotNull Optional<byte[]> getCorrelationDataAsByteArray() {
-        if (correlationData == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(correlationData.array());
-        }
+    public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(Optional.ofNullable(correlationData));
     }
 
     @Override
@@ -345,6 +338,11 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
             return Optional.empty();
         }
         return Optional.of(payload.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getPayloadAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(Optional.ofNullable(payload));
     }
 
     @Override

@@ -25,6 +25,8 @@ import io.netty.channel.Channel;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,6 +51,15 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         Preconditions.checkNotNull(value, "Value of connection attribute must not be null.");
 
         ConnectionAttributes.getInstance(channel).put(key, value);
+    }
+
+    @Override
+    public void putAsArray(final @NotNull String key, final @NotNull byte[] value) {
+        Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
+        Preconditions.checkNotNull(value, "Value of connection attribute must not be null.");
+
+        final byte[] copy = Arrays.copyOf(value, value.length);
+        ConnectionAttributes.getInstance(channel).put(key, ByteBuffer.wrap(copy));
     }
 
     @Override
@@ -78,6 +89,11 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
             return Optional.empty();
         }
         return connectionAttributes.get(key);
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getAsArray(final @NotNull String key) {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(get(key));
     }
 
     @NotNull
@@ -112,6 +128,19 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         return connectionAttributes.getAll();
     }
 
+    @Override
+    public @NotNull Optional<Map<String, byte[]>> getAllAsArray() {
+        final Optional<Map<String, ByteBuffer>> all = getAll();
+        if (!all.isPresent()) {
+            return Optional.empty();
+        }
+        final HashMap<String, byte[]> map = new HashMap<>();
+        for (final Map.Entry<String, ByteBuffer> entry : all.get().entrySet()) {
+            map.put(entry.getKey(), Bytes.getBytesFromReadOnlyBuffer(Optional.of(entry.getValue())));
+        }
+        return Optional.of(map);
+    }
+
     @NotNull
     @Override
     public Optional<ByteBuffer> remove(@NotNull final String key) {
@@ -122,6 +151,11 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
             return Optional.empty();
         }
         return connectionAttributes.remove(key);
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> removeAsArray(final @NotNull String key) {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(remove(key));
     }
 
     @Override
