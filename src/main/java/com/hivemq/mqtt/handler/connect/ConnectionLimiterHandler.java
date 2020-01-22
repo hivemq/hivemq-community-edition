@@ -67,14 +67,8 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
             // If we use the max connections configured in the config file, we set the Threshold to 90% of the maximum allowed connections.
             this.warnThreshold = 90 * configuredCount / 100;
             this.maxConnections = configuredCount;
-            if (log.isDebugEnabled()) {
-                log.debug("The connection limit is set to ({}), the warn threshold is set to ({}).", this.maxConnections, this.warnThreshold);
-            }
         } else {
             //This means we are dealing with unlimited connections so we can remove this handler from the pipeline
-            if (log.isDebugEnabled()) {
-                log.debug("An unlimited amount of connections (-1) is configured.");
-            }
             ctx.pipeline().remove(this);
         }
 
