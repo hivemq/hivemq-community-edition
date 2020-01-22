@@ -17,8 +17,8 @@
 package com.hivemq.util;
 
 import com.google.common.base.Optional;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.security.auth.ClientToken;

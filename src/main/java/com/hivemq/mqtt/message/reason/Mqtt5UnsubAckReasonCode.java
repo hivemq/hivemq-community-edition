@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.reason;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * MQTT Reason Codes that can be used in UNSUBACK packets according to the MQTT 5 specification.

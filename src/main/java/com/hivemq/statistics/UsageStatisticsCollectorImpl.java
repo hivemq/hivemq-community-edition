@@ -18,8 +18,8 @@ package com.hivemq.statistics;
 
 import com.codahale.metrics.Gauge;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;

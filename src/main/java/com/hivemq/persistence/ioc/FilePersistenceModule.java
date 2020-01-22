@@ -18,7 +18,7 @@ package com.hivemq.persistence.ioc;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.common.shutdown.ShutdownHooks;

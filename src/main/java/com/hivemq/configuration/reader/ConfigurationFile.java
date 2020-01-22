@@ -17,7 +17,7 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.base.Optional;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.io.File;
 

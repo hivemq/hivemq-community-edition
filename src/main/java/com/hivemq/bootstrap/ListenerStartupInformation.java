@@ -17,9 +17,9 @@
 package com.hivemq.bootstrap;
 
 import com.google.common.base.Optional;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.entity.Listener;
 
 import static com.google.common.base.Preconditions.checkNotNull;

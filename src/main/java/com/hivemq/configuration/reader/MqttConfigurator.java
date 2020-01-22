@@ -17,7 +17,7 @@
 package com.hivemq.configuration.reader;
 
 import com.google.inject.Inject;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.MqttConfigEntity;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.message.QoS;

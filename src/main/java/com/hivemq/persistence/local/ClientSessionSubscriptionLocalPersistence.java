@@ -17,8 +17,8 @@
 package com.hivemq.persistence.local;
 
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.LocalPersistence;

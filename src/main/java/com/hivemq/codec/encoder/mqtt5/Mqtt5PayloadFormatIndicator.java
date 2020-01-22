@@ -16,7 +16,7 @@
 
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * Payload Format Indicator according to the MQTT 5 specification.

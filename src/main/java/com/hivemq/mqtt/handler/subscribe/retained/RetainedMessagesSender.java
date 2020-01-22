@@ -18,8 +18,8 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.*;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
 import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
@@ -291,7 +291,7 @@ public class RetainedMessagesSender {
             if (publish.getQoS() != QoS.AT_MOST_ONCE) {
                 try {
                     publish.setPacketIdentifier(messageIDPools.forClient(clientId).takeNextId());
-                } catch (NoMessageIdAvailableException e) {
+                } catch (final NoMessageIdAvailableException e) {
                     resultFuture.setException(e);
                 }
             }

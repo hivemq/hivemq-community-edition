@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.client.parameter;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extensions.auth.parameter.AuthenticatorProviderInputImpl;

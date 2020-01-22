@@ -17,8 +17,8 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.entity.listener.*;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
 import com.hivemq.configuration.service.entity.*;

@@ -18,7 +18,7 @@ package com.hivemq.mqtt.ioc;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Injector;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;

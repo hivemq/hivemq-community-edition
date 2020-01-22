@@ -16,8 +16,8 @@
 package com.hivemq.extensions.iteration;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Christoph Schäbel

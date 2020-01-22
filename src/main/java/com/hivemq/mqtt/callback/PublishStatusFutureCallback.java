@@ -18,7 +18,7 @@ package com.hivemq.mqtt.callback;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.publish.PUBLISH;

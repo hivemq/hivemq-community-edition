@@ -17,7 +17,7 @@
 package com.hivemq.mqtt.topic.tree;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriptionFlags;
 import com.hivemq.persistence.clientsession.ClientSession;

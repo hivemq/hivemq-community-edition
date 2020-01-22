@@ -16,7 +16,7 @@
 
 package com.hivemq.codec.encoder;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

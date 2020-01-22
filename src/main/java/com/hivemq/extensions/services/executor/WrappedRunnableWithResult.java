@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.services.executor;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.concurrent.CompletableFuture;

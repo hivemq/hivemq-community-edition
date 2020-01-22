@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
 
 import java.util.Map;

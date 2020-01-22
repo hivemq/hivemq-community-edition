@@ -240,7 +240,7 @@ public class InitializersImplTest {
         }
     }
 
-    @com.hivemq.annotations.NotNull
+    @NotNull
     private HiveMQExtension getHiveMQPlugin(final int priority) {
         final HiveMQExtension plugin = mock(HiveMQExtension.class);
         when(plugin.getPriority()).thenReturn(priority);

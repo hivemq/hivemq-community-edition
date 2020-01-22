@@ -17,7 +17,7 @@
 package com.hivemq.statistics.collectors;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.sun.jna.Platform;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

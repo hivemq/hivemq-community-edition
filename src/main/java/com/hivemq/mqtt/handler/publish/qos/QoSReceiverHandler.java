@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.handler.publish.qos;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;

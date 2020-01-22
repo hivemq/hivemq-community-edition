@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.exception;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * Exception which is thrown if an extension can not be loaded or initialized

@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.handler;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * implement this Handler to overwrite any values which are not set in their decoders.

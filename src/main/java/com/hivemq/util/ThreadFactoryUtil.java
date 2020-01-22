@@ -17,7 +17,7 @@
 package com.hivemq.util;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.concurrent.ThreadFactory;
 

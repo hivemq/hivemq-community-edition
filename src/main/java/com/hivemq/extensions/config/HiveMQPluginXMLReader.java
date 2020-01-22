@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.config;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.exception.ValidationError;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.HiveMQExtension;

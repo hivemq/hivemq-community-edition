@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.handler.publish;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * @author Florian Limpöck

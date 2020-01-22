@@ -16,7 +16,7 @@
 
 package com.hivemq.configuration.info;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.io.File;
 

@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.iteration;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.util.ThreadFactoryUtil;
 

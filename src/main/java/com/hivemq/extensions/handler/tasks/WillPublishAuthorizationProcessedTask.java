@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
@@ -25,7 +25,7 @@ import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Christoph Schäbel

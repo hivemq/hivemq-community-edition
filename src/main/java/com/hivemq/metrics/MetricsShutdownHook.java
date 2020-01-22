@@ -16,7 +16,7 @@
 
 package com.hivemq.metrics;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.metrics.jmx.JmxReporterBootstrap;

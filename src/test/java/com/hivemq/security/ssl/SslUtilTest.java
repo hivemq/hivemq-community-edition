@@ -17,7 +17,7 @@
 package com.hivemq.security.ssl;
 
 import com.google.common.collect.Lists;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.handler.ssl.JdkSslContext;

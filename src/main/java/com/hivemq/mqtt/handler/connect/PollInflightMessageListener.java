@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.handler.connect;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.services.PublishPollService;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;

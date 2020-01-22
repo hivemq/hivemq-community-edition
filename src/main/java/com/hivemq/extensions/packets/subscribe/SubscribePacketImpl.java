@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.packets.subscribe;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;

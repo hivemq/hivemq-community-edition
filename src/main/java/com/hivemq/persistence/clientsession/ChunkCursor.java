@@ -17,7 +17,7 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Set;

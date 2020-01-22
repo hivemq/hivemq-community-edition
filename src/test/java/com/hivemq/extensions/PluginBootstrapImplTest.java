@@ -18,7 +18,7 @@ package com.hivemq.extensions;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformationImpl;

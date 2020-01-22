@@ -16,8 +16,8 @@
 
 package com.hivemq.logging;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;

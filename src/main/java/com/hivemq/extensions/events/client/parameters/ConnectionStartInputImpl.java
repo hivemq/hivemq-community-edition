@@ -18,8 +18,8 @@ package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;

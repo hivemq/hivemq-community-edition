@@ -18,8 +18,8 @@ package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt3.*;
 import com.hivemq.codec.encoder.mqtt5.*;
 import com.hivemq.configuration.service.SecurityConfigurationService;
