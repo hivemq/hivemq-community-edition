@@ -56,7 +56,7 @@ project.ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.60'
     jacksonVersion = '2.9.8'
-    nettyVersion = '4.1.38.Final'
+    nettyVersion = '4.1.45.Final'
     xodusVersion = '1.2.3'
     guiceVersion = '4.2.2'
     metricsVersion = '4.0.3'
