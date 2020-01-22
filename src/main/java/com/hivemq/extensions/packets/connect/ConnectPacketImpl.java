@@ -119,7 +119,7 @@ public class ConnectPacketImpl implements ConnectPacket {
 
     @NotNull
     @Override
-    public Optional<byte[]> getAuthenticationDataAsByteArray() {
+    public Optional<byte[]> getAuthenticationDataAsArray() {
         final byte[] authData = connect.getAuthData();
         if (authData == null) {
             return Optional.empty();
@@ -151,7 +151,7 @@ public class ConnectPacketImpl implements ConnectPacket {
 
     @NotNull
     @Override
-    public Optional<byte[]> getPasswordAsByteArray() {
+    public Optional<byte[]> getPasswordAsArray() {
         final byte[] password = connect.getPassword();
         if (password == null) {
             return Optional.empty();

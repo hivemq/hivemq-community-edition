@@ -187,7 +187,7 @@ public interface ConnectPacket {
      *
      * @return An {@link Optional} that contains the authentication data if as an array if present.
      */
-    @NotNull Optional<byte[]> getAuthenticationDataAsByteArray();
+    @NotNull Optional<byte[]> getAuthenticationDataAsArray();
 
     /**
      * The user properties from the CONNECT packet.
@@ -220,5 +220,5 @@ public interface ConnectPacket {
      *
      * @return An {@link Optional} that contains the password as a byte array if present.
      */
-    @NotNull Optional<byte[]> getPasswordAsByteArray();
+    @NotNull Optional<byte[]> getPasswordAsArray();
 }

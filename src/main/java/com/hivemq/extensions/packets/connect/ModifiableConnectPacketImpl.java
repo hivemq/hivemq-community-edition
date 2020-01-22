@@ -30,6 +30,7 @@ import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.packets.general.MqttVersionUtil;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.util.Bytes;
 import com.hivemq.util.Utf8Utils;
 
 import java.nio.ByteBuffer;
@@ -407,7 +408,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
-    public @NotNull Optional<byte[]> getAuthenticationDataAsByteArray() {
+    public @NotNull Optional<byte[]> getAuthenticationDataAsArray() {
         if (authData == null) {
             return Optional.empty();
         }
@@ -433,10 +434,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     @Override
-    public @NotNull Optional<byte[]> getPasswordAsByteArray() {
-        if (password == null) {
-            return Optional.empty();
-        }
-        return Optional.of(password.array());
+    public @NotNull Optional<byte[]> getPasswordAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(Optional.ofNullable(password));
     }
 }
