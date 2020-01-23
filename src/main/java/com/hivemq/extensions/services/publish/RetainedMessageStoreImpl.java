@@ -25,6 +25,7 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
 import com.hivemq.extensions.ListenableFutureConverter;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 
@@ -44,12 +45,17 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     private final RetainedMessagePersistence retainedMessagePersistence;
 
     @NotNull
+    private final GlobalManagedPluginExecutorService globalManagedPluginExecutorService;
+
+    @NotNull
     private final PluginServiceRateLimitService pluginServiceRateLimitService;
 
     @Inject
     public RetainedMessageStoreImpl(@NotNull final RetainedMessagePersistence retainedMessagePersistence,
+                                    @NotNull final GlobalManagedPluginExecutorService globalManagedPluginExecutorService,
                                     @NotNull final PluginServiceRateLimitService pluginServiceRateLimitService) {
         this.retainedMessagePersistence = retainedMessagePersistence;
+        this.globalManagedPluginExecutorService = globalManagedPluginExecutorService;
         this.pluginServiceRateLimitService = pluginServiceRateLimitService;
     }
 
@@ -64,7 +70,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
         final ListenableFuture<RetainedMessage> retainedMessageFuture = retainedMessagePersistence.get(topic);
-        return ListenableFutureConverter.toCompletable(retainedMessageFuture, (r) -> r == null ? Optional.empty() : Optional.of(new RetainedPublishImpl(topic, r)), false);
+        return ListenableFutureConverter.toCompletable(retainedMessageFuture, (r) -> r == null ? Optional.empty() : Optional.of(new RetainedPublishImpl(topic, r)), false, globalManagedPluginExecutorService);
     }
 
     /**
@@ -77,7 +83,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(retainedMessagePersistence.remove(topic));
+        return ListenableFutureConverter.toCompletable(retainedMessagePersistence.remove(topic), globalManagedPluginExecutorService);
     }
 
     /**
@@ -89,7 +95,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(retainedMessagePersistence.clear());
+        return ListenableFutureConverter.toCompletable(retainedMessagePersistence.clear(), globalManagedPluginExecutorService);
     }
 
     /**
@@ -107,7 +113,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
         }
         final ListenableFuture<Void> persist = retainedMessagePersistence.persist(retainedPublish.getTopic(), RetainedPublishImpl.convert(retainedPublish));
 
-        return ListenableFutureConverter.toCompletable(persist);
+        return ListenableFutureConverter.toCompletable(persist, globalManagedPluginExecutorService);
     }
 
 }

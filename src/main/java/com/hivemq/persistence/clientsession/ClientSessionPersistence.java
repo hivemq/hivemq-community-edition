@@ -21,6 +21,7 @@ import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
 import java.util.Map;
@@ -93,6 +94,21 @@ public interface ClientSessionPersistence {
      */
     @NotNull
     ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
+
+    /**
+     * Enforce a client disconnect from a specific source, preventing or delivering the will message.
+     *
+     * @param clientId          The client id of the client to disconnect.
+     * @param preventLwtMessage The flag if the will message should be prevented or delivered.
+     * @param source            The source of the enforce call.
+     * @param reasonCode        The reason code for the enforced disconnect.
+     * @param reasonString      The reason string for the enforced disconnect.
+     * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
+     * connected (false).
+     */
+    @NotNull
+    ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source,
+                                                    @Nullable Mqtt5DisconnectReasonCode reasonCode, @Nullable String reasonString);
 
     /**
      * Sets the session expiry interval for a client in seconds.

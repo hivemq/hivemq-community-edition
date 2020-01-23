@@ -65,6 +65,17 @@ public class PublishBuilderImplTest {
         new PublishBuilderImpl(configurationService).messageExpiryInterval(11);
     }
 
+    @Test
+    public void test_custom_max_message_expiry_value_validation() {
+        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(10);
+        new PublishBuilderImpl(configurationService).messageExpiryInterval(10);
+    }
+
+    @Test
+    public void test_max_message_expiry_value_validation() {
+        new PublishBuilderImpl(configurationService).messageExpiryInterval(4_294_967_296L);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void test_message_expiry_less_than_zero() {
         new PublishBuilderImpl(configurationService).messageExpiryInterval(-1);

@@ -25,10 +25,6 @@ import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
-import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
-import com.hivemq.extensions.handler.IncomingPublishHandler;
-import com.hivemq.extensions.handler.IncomingSubscribeHandler;
-import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
@@ -40,7 +36,7 @@ import com.hivemq.mqtt.handler.connect.StopReadingAfterConnectHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
-import com.hivemq.mqtt.handler.publish.PublishMessageExpiryHandler;
+import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
 import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
@@ -148,7 +144,7 @@ public class ChannelDependencies {
     private final AuthInProgressMessageHandler authInProgressMessageHandler;
 
     @NotNull
-    private final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider;
+    private final Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
 
     @NotNull
     private final Provider<IncomingPublishHandler> incomingPublishHandlerProvider;
@@ -164,6 +160,33 @@ public class ChannelDependencies {
 
     @NotNull
     private final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
+
+    @NotNull
+    private final DisconnectInterceptorHandler disconnectInterceptorHandler;
+
+    @NotNull
+    private final PubackInterceptorHandler pubackInterceptorHandler;
+
+    @NotNull
+    private final PubrecInterceptorHandler pubrecInterceptorHandler;
+
+    @NotNull
+    private final PubrelInterceptorHandler pubrelInterceptorHandler;
+
+    @NotNull
+    private final PubcompInterceptorHandler pubcompInterceptorhandler;
+
+    @NotNull
+    private final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
+
+    @NotNull
+    private final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
+
+    @NotNull
+    private final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
+
+    @NotNull
+    private final PingInterceptorHandler pingInterceptorHandler;
 
     @Inject
     public ChannelDependencies(
@@ -198,11 +221,19 @@ public class ChannelDependencies {
             @NotNull final Provider<ClientLifecycleEventHandler> clientLifecycleEventHandlerProvider,
             @NotNull final Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             @NotNull final Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
-            @NotNull final Provider<PublishMessageExpiryHandler> publishMessageExpiryHandlerProvider,
+            @NotNull final Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider,
             @NotNull final PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             @NotNull final ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
-            @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler) {
-
+            @NotNull final ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
+            @NotNull final DisconnectInterceptorHandler disconnectInterceptorHandler,
+            @NotNull final PubackInterceptorHandler pubackInterceptorHandler,
+            @NotNull final PubrecInterceptorHandler pubrecInterceptorHandler,
+            @NotNull final PubrelInterceptorHandler pubrelInterceptorHandler,
+            @NotNull final PubcompInterceptorHandler pubcompInterceptorHandler,
+            @NotNull final SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler,
+            @NotNull final UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
+            @NotNull final UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
+            @NotNull final PingInterceptorHandler pingInterceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -239,6 +270,15 @@ public class ChannelDependencies {
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
+        this.disconnectInterceptorHandler = disconnectInterceptorHandler;
+        this.pubackInterceptorHandler = pubackInterceptorHandler;
+        this.pubrecInterceptorHandler = pubrecInterceptorHandler;
+        this.pubrelInterceptorHandler = pubrelInterceptorHandler;
+        this.pubcompInterceptorhandler = pubcompInterceptorHandler;
+        this.subAckOutboundInterceptorHandler = subAckOutboundInterceptorHandler;
+        this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
+        this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
+        this.pingInterceptorHandler = pingInterceptorHandler;
     }
 
     @NotNull
@@ -352,7 +392,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PublishMessageExpiryHandler getPublishMessageExpiryHandler() {
+    public MessageExpiryHandler getPublishMessageExpiryHandler() {
         return publishMessageExpiryHandlerProvider.get();
     }
 
@@ -414,5 +454,50 @@ public class ChannelDependencies {
     @NotNull
     public ConnackOutboundInterceptorHandler getConnackOutboundInterceptorHandler() {
         return connackOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public DisconnectInterceptorHandler getDisconnectInterceptorHandler() {
+        return disconnectInterceptorHandler;
+    }
+
+    @NotNull
+    public PubackInterceptorHandler getPubackInterceptorHandler() {
+        return pubackInterceptorHandler;
+    }
+
+    @NotNull
+    public PubrecInterceptorHandler getPubrecInterceptorHandler() {
+        return pubrecInterceptorHandler;
+    }
+
+    @NotNull
+    public PubrelInterceptorHandler getPubrelInterceptorHandler() {
+        return pubrelInterceptorHandler;
+    }
+
+    @NotNull
+    public PubcompInterceptorHandler getPubcompInterceptorHandler() {
+        return pubcompInterceptorhandler;
+    }
+
+    @NotNull
+    public SubackOutboundInterceptorHandler getSubackOutboundInterceptorHandler() {
+        return subAckOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public UnsubackOutboundInterceptorHandler getUnsubackOutboundInterceptorHandler() {
+        return unsubackOutboundInterceptorHandler;
+    }
+
+    @NotNull
+    public UnsubscribeInboundInterceptorHandler getUnsubscribeInboundInterceptorHandler() {
+        return unsubscribeInboundInterceptorHandler;
+    }
+
+    @NotNull
+    public PingInterceptorHandler getPingInterceptorHandler() {
+        return pingInterceptorHandler;
     }
 }

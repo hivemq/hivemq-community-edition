@@ -21,7 +21,8 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.annotations.Immutable;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.PublishDroppedEvent;
+import com.hivemq.mqtt.event.PublishDroppedEvent;
+import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -119,13 +120,17 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
 
     @Override
     public void userEventTriggered(@NotNull final ChannelHandlerContext ctx, @NotNull final Object evt) throws Exception {
-        if (!(evt instanceof PublishDroppedEvent)) {
-            super.userEventTriggered(ctx, evt);
+        if (evt instanceof PublishDroppedEvent) {
+            final PublishDroppedEvent publishDroppedEvent = (PublishDroppedEvent) evt;
+            // Already logged, just proceeded with with the next message
+            messageFlowComplete(ctx, publishDroppedEvent.getMessage().getPacketIdentifier());
+            return;
+        } else if (evt instanceof PubrelDroppedEvent) {
+            final PubrelDroppedEvent pubrelDroppedEvent = (PubrelDroppedEvent) evt;
+            messageFlowComplete(ctx, pubrelDroppedEvent.getMessage().getPacketIdentifier());
             return;
         }
-        final PublishDroppedEvent publishDroppedEvent = (PublishDroppedEvent) evt;
-        // Already logged, just proceeded with with the next message
-        messageFlowComplete(ctx, publishDroppedEvent.getMessage().getPacketIdentifier());
+        super.userEventTriggered(ctx, evt);
     }
 
     @Override
@@ -134,7 +139,7 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
             messageIdToFutureMap.put(pubrelWithFuture.getPacketIdentifier(), pubrelWithFuture.getFuture());
-            super.write(ctx, pubrelWithFuture.getPubrel(), promise);
+            super.write(ctx, pubrelWithFuture, promise);
             return;
         }
 

@@ -16,7 +16,6 @@
 
 package com.hivemq.extension.sdk.api.packets.connack;
 
-
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
@@ -37,8 +36,10 @@ public interface ModifiableConnackPacket extends ConnackPacket {
      * Switching from successful to unsuccessful and vice versa is not supported.
      *
      * @param reasonCode The reason code to set.
-     * @throws NullPointerException  If reason code is <null>.
+     * @throws NullPointerException  If reason code is <b>null</b>.
      * @throws IllegalStateException If switching from successful reason code to unsuccessful reason code or vice versa.
+     *                               Check out {@link ConnackReasonCode} to see what reason code counts as a success or
+     *                               unsuccessful code.
      * @see ConnackReasonCode How reason codes are translated from MQTT 5 to MQTT 3.
      * @since 4.2.0
      */

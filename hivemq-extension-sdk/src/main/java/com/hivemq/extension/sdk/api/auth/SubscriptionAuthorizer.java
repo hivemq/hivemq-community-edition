@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extension.sdk.api.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -38,10 +37,6 @@ public interface SubscriptionAuthorizer extends Authorizer {
     /**
      * Called for each Subscription (Topic) in a SUBSCRIBE packet, that the {@link SubscriptionAuthorizer} is delegated
      * to authorize.
-     * <p>
-     * When the extension is enabled after HiveMQ is already running, this method will also be called for future
-     * SUBSCRIBEs
-     * of clients that are already connected.
      *
      * @param subscriptionAuthorizerInput  The {@link SubscriptionAuthorizerInput}.
      * @param subscriptionAuthorizerOutput The {@link SubscriptionAuthorizerOutput}.

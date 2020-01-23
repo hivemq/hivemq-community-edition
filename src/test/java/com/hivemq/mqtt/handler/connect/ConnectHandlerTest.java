@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -28,6 +29,7 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
+import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
@@ -61,9 +63,11 @@ import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
+import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
@@ -72,8 +76,10 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
+import net.jodah.concurrentunit.Waiter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -88,7 +94,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.*;
+import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.NONE;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -144,7 +150,7 @@ public class ConnectHandlerTest {
 
         MockitoAnnotations.initMocks(this);
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyInt(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any())).thenReturn(Futures.immediateFuture(null));
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
@@ -606,10 +612,15 @@ public class ConnectHandlerTest {
                 true, embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_DISALLOW_SECOND_CONNECT));
     }
 
-    @Test
-    public void test_client_takeover() {
+    @Test(timeout = 5_000)
+    public void test_client_takeover_mqtt3() throws Exception {
 
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(new DummyHandler());
+        final CountDownLatch disconnectEventLatch = new CountDownLatch(1);
+        final Waiter disconnectMessageWaiter = new Waiter();
+        final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, false);
+
+        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
 
         when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
 
@@ -625,22 +636,115 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
         assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+
+        assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
+        disconnectMessageWaiter.await();
+
+        final DISCONNECT disconnectMessage = testDisconnectHandler.getDisconnectMessage();
+        assertNull(disconnectMessage);
     }
 
-    @Test
-    public void test_client_takeover_retry() {
+    @Test(timeout = 5_000)
+    public void test_client_takeover_mqtt5() throws Exception {
 
-        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(new DummyHandler());
-        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
-        oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+        final CountDownLatch disconnectEventLatch = new CountDownLatch(1);
+        final Waiter disconnectMessageWaiter = new Waiter();
+        final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, true);
+
+        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
 
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        final CONNECT connect1 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+        final CONNECT connect1 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv5)
+                .withClientIdentifier("sameClientId")
+                .build();
+
+        embeddedChannel.writeInbound(connect1);
+
+        assertTrue(embeddedChannel.isOpen());
+        assertFalse(oldChannel.isOpen());
+        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+
+        assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
+        disconnectMessageWaiter.await();
+
+        final DISCONNECT disconnectMessage = testDisconnectHandler.getDisconnectMessage();
+        assertNotNull(disconnectMessage);
+        assertEquals(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, disconnectMessage.getReasonCode());
+        assertEquals(ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER, disconnectMessage.getReasonString());
+    }
+
+    @Test
+    public void test_client_takeover_retry_mqtt5() throws Exception {
+
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+
+        final CountDownLatch disconnectEventLatch = new CountDownLatch(1);
+        final Waiter disconnectMessageWaiter = new Waiter();
+        final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, true);
+
+        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
+        oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+
+        assertTrue(oldChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
+
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
+                .withClientIdentifier("sameClientId")
+                .withMqtt5UserProperties(Mqtt5UserProperties.of(new MqttUserProperty("test", "test")))
+                .build();
+
+        embeddedChannel.writeInbound(connect1);
+
+        assertTrue(oldChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
+
+        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(false);
+        disconnectFuture.set(null);
+
+        embeddedChannel.runPendingTasks();
+
+        assertTrue(embeddedChannel.isOpen());
+        assertFalse(oldChannel.isOpen());
+        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+
+        assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
+        disconnectMessageWaiter.await();
+
+        final DISCONNECT disconnectMessage = testDisconnectHandler.getDisconnectMessage();
+        assertNotNull(disconnectMessage);
+        assertEquals(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, disconnectMessage.getReasonCode());
+        assertEquals(ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER, disconnectMessage.getReasonString());
+    }
+
+    @Test
+    public void test_client_takeover_retry_mqtt3() throws Exception {
+
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+
+        final CountDownLatch disconnectEventLatch = new CountDownLatch(1);
+        final Waiter disconnectMessageWaiter = new Waiter();
+        final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, false);
+
+        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
+        oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+
+        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+
+        assertTrue(oldChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
+
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("sameClientId")
                 .build();
 
@@ -657,7 +761,14 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
         assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+
+        assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
+        disconnectMessageWaiter.await();
+
+        final DISCONNECT disconnectMessage = testDisconnectHandler.getDisconnectMessage();
+        assertNull(disconnectMessage);
     }
+
 
     @Test
     public void test_too_long_clientid() throws Exception {
@@ -996,6 +1107,8 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_will_authorization_success() {
         createHandler();
+
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
 
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
                 .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
@@ -1340,8 +1453,48 @@ public class ConnectHandlerTest {
         @Override
         public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
             if (evt instanceof OnServerDisconnectEvent) {
-                eventLatch.countDown();
+                final UserProperties userProperties = ((OnServerDisconnectEvent) evt).getUserProperties();
+                if (userProperties == null || userProperties.isEmpty()) {
+                    eventLatch.countDown();
+                }
             }
+        }
+    }
+
+    private static class TestDisconnectHandler extends ChannelDuplexHandler {
+        private final Waiter waiter;
+        private final boolean disconnectExpected;
+        private DISCONNECT disconnectMessage = null;
+
+        public TestDisconnectHandler(final Waiter waiter, final boolean disconnectExpected) {
+            this.waiter = waiter;
+            this.disconnectExpected = disconnectExpected;
+        }
+
+        @Override
+        public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+            super.channelInactive(ctx);
+            if (!disconnectExpected) {
+                waiter.resume();
+            }
+        }
+
+        @Override
+        public void write(final ChannelHandlerContext channelHandlerContext, final Object o, final ChannelPromise channelPromise) throws Exception {
+            if (o instanceof DISCONNECT) {
+                disconnectMessage = (DISCONNECT) o;
+                if (disconnectExpected) {
+                    waiter.resume();
+                } else {
+                    waiter.fail();
+                }
+            }
+            super.write(channelHandlerContext, o, channelPromise);
+        }
+
+        @Nullable
+        public DISCONNECT getDisconnectMessage() {
+            return disconnectMessage;
         }
     }
 }

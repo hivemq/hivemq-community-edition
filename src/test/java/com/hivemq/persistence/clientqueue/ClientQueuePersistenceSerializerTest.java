@@ -98,6 +98,19 @@ public class ClientQueuePersistenceSerializerTest {
     }
 
     @Test
+    public void test_serialize_pubrel_with_expiry() {
+        final PUBREL pubrel = new PUBREL(10);
+        pubrel.setExpiryInterval(1L);
+        pubrel.setPublishTimestamp(2L);
+        final ByteIterable bytes = serializer.serializePubRel(pubrel, true);
+        final PUBREL deserializedPubrel = (PUBREL) serializer.deserializeValue(bytes);
+        assertEquals(10, deserializedPubrel.getPacketIdentifier());
+        assertTrue(serializer.deserializeRetained(bytes));
+        assertEquals(1L, deserializedPubrel.getExpiryInterval().longValue());
+        assertEquals(2L, deserializedPubrel.getPublishTimestamp().longValue());
+    }
+
+    @Test
     public void test_serialize_minimal_publish() {
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withPacketIdentifier(10)
                 .withQoS(QoS.AT_LEAST_ONCE)
@@ -226,7 +239,8 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_deserializeClientId_not_null() {
-        serializer.deserializeKeyId(null);
+        final ByteIterable iterable = null;
+        serializer.deserializeKeyId(iterable);
     }
 
     @Test(expected = NullPointerException.class)
@@ -236,6 +250,7 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_deserializeValue_null() {
-        serializer.deserializeValue(null);
+        final ByteIterable iterable = null;
+        serializer.deserializeValue(iterable);
     }
 }

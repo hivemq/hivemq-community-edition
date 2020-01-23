@@ -42,6 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -96,26 +97,14 @@ public class AbstractChannelInitializerTest {
     @Test
     public void test_init_channel() throws Exception {
 
-        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-
         abstractChannelInitializer.initChannel(socketChannel);
 
-        verify(pipeline, atLeastOnce()).addLast(captor.capture(), any(ChannelHandler.class));
-
-        assertTrue(captor.getAllValues().contains(ALL_CHANNELS_GROUP_HANDLER));
-        assertTrue(captor.getAllValues().contains(NEW_CONNECTION_IDLE_HANDLER));
-        assertTrue(captor.getAllValues().contains(NO_CONNECT_IDLE_EVENT_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_MESSAGE_DECODER));
-        assertTrue(captor.getAllValues().contains(MQTT_MESSAGE_DECODER));
-        assertTrue(captor.getAllValues().contains(MQTT_MESSAGE_ENCODER));
-        assertTrue(captor.getAllValues().contains(MQTT_CONNECT_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_DISCONNECT_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_DISCONNECT_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_SUBSCRIBE_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_PUBLISH_USER_EVENT_HANDLER));
-        assertTrue(captor.getAllValues().contains(INCOMING_PUBLISH_HANDLER));
-        assertTrue(captor.getAllValues().contains(MQTT_UNSUBSCRIBE_HANDLER));
-        assertTrue(captor.getAllValues().contains(STATISTICS_INITIALIZER));
+        verify(pipeline).addLast(eq(FIRST_ABSTRACT_HANDLER), any(ChannelHandler.class));
+        verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
+        verify(pipeline).addLast(eq(REMOVE_CONNECT_IDLE_HANDLER), any(ChannelHandler.class));
+        verify(pipeline).addLast(eq(MQTT_MESSAGE_BARRIER), any(ChannelHandler.class));
+        verify(pipeline).addLast(eq(MQTT_SUBSCRIBE_MESSAGE_BARRIER), any(ChannelHandler.class));
+        verify(pipeline).addLast(eq(CHANNEL_INACTIVE_HANDLER), any(ChannelHandler.class));
 
     }
 

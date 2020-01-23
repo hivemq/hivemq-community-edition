@@ -8,14 +8,17 @@ jdk:
 
 stages:
   - test
-  - build
+  - name: docker
+    if: ((branch = master) || (tag IS present)) && type != pull_request
 
 jobs:
   include:
     - stage: test
-      script: ./gradlew test
-    - stage: build
-      script: ./gradlew packaging
+      install: skip
+      script: ./gradlew test license forbiddenApis javadoc packaging
+    - stage: docker
+      install: skip
+      script: PUSH_IMAGE=true docker/build.sh
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

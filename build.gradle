@@ -39,8 +39,9 @@ allprojects {
     sourceCompatibility = 10
     targetCompatibility = 10
 
-    compileJava.options.encoding = 'UTF-8'
-    compileTestJava.options.encoding = 'UTF-8'
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
     javadoc.options.encoding = 'UTF-8'
 
     group 'com.hivemq'
@@ -55,7 +56,7 @@ project.ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.60'
     jacksonVersion = '2.9.8'
-    nettyVersion = '4.1.38.Final'
+    nettyVersion = '4.1.45.Final'
     xodusVersion = '1.2.3'
     guiceVersion = '4.2.2'
     metricsVersion = '4.0.3'
@@ -109,6 +110,9 @@ dependencies {
             /* jackson */
             [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion],
+
+            /* rocksdb */
+            [group: 'org.rocksdb', name: 'rocksdbjni', version: '6.3.6'],
 
             /* apache commons */
             [group: 'commons-io', name: 'commons-io', version: '2.6'],
@@ -200,8 +204,7 @@ dependencies {
 
     testCompile(
             [group: 'junit', name: 'junit', version: '4.12'],
-            [group: 'org.mockito', name: 'mockito-core', version: '1.+'],
-            [group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.9.0'],
+            [group: 'org.mockito', name: 'mockito-core', version: '2.28.2'],
             [group: 'net.jodah', name: 'concurrentunit', version: '0.4.2'],
 
             /*
@@ -220,6 +223,10 @@ dependencies {
             // wiremock
             [group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0'],
     )
+
+    testCompile([group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0']) {
+        exclude group: 'junit', module: 'junit-dep'
+    }
 
     /* We need some HotSpot methods to generate heapdumps from code */
     testCompile files(
@@ -472,7 +479,9 @@ downloadLicenses {
 allprojects {
     license {
         header file("${rootDir}/HEADER")
-        exclude '*'
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
     }
 }
 

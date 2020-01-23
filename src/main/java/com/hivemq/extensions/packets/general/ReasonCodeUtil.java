@@ -48,7 +48,7 @@ public class ReasonCodeUtil {
             case CLIENT_IDENTIFIER_NOT_VALID:
                 return Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID;
             case BAD_USER_NAME_OR_PASSWORD:
-                return Mqtt5ConnAckReasonCode.BAD_AUTHENTICATION_METHOD;
+                return Mqtt5ConnAckReasonCode.BAD_USER_NAME_OR_PASSWORD;
             case SERVER_UNAVAILABLE:
                 return Mqtt5ConnAckReasonCode.SERVER_UNAVAILABLE;
             case SERVER_BUSY:

@@ -33,6 +33,10 @@ HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Pa
 
 The documentation for the HiveMQ CE can be found https://github.com/hivemq/hivemq-community-edition/wiki[here].
 
+* MQTT Resources
+** https://www.hivemq.com/mqtt-essentials/[MQTT Essentials]
+** https://www.hivemq.com/mqtt-5/[MQTT 5 Essentials]
+
 = HiveMQ Community Forum
 
 The ideal place for questions or discussions about the HiveMQ Community Edition is our brand new https://community.hivemq.com/[HiveMQ Community Forum].
@@ -61,6 +65,16 @@ If you want to connect devices on external networks to HiveMQ CE, please make su
 
 Just in time builds for current branches on this repository and for specific commits are available https://hivemq.github.io/nightly-builds/[here].
 
+== Run with Docker
+
+All releases as well as the current state of the  `master` are available in the https://hub.docker.com/r/hivemq/hivemq-ce[hivemq/hivemq-ce] repository on DockerHub.
+To execute this image, simply run the following command:
+
+[source,bash]
+----
+docker run --name hivemq-ce -d -p 1883:1883 hivemq/hivemq-ce
+----
+
 == Building from source
 
 === Prerequisites
@@ -82,6 +96,26 @@ cd hivemq-community-edition
 
 The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
 
+=== Building the Docker image
+
+Check out the git repository and build the Docker image.
+
+[source,bash]
+----
+git clone https://github.com/hivemq/hivemq-community-edition.git
+
+cd hivemq-community-edition
+
+docker/build.sh
+
+docker run hivemq/hivemq-ce
+----
+
+The Docker image `hivemq/hivemq-ce` is created locally.
+
+You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
+
+To change the default log level you can set the environment variable `HIVEMQ_LOG_LEVEL` when running the container.
 
 == Start
 Unzip the created binary package 

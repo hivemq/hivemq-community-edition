@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extension.sdk.api.packets.publish;
 
 /**
- * MQTT 5 Reason codes for PUBACK, PUBREC, PUBREL and PUBCOMP.
+ * MQTT 5 Reason codes for PUBACK, PUBREC, and PUBCOMP.
  * <p>
  * MQTT 3 does not support reason codes for the above mentioned MQTT packets.
  *

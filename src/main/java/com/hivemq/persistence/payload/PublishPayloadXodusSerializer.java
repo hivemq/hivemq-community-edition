@@ -16,15 +16,17 @@
 
 package com.hivemq.persistence.payload;
 
+import com.hivemq.annotations.NotNull;
 import com.hivemq.util.Bytes;
 
-import static com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence.KeyPair;
+import static com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence.*;
 
 /**
  * @author Lukas Brandl
  */
 public class PublishPayloadXodusSerializer {
 
+    @NotNull
     public byte[] serializeKey(final long id, final long chunkIndex) {
 
         final byte[] bytes = new byte[16];
@@ -35,7 +37,8 @@ public class PublishPayloadXodusSerializer {
         return bytes;
     }
 
-    public KeyPair deserializeKey(final byte[] bytes) {
+    @NotNull
+    public KeyPair deserializeKey(final @NotNull byte[] bytes) {
 
         final long id = Bytes.readLong(bytes, 0);
         final long chunkIndex = Bytes.readLong(bytes, 8);

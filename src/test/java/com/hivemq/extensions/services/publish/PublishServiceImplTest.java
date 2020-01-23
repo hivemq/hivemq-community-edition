@@ -17,6 +17,7 @@
 package com.hivemq.extensions.services.publish;
 
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -28,6 +29,7 @@ import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishToClientResult;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.builder.PublishBuilderImpl;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -47,6 +49,7 @@ import util.TestConfigurationBootstrap;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
@@ -69,20 +72,27 @@ public class PublishServiceImplTest {
     InternalPublishService internalPublishService;
 
     @Mock
+    ShutdownHooks shutdownHooks;
+
+    @Mock
     PublishDistributor publishDistributor;
 
     @Mock
     TopicTreeImpl topicTree;
 
+    private GlobalManagedPluginExecutorService managedPluginExecutorService;
+
     private final HivemqId hiveMQId = new HivemqId();
     private final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-    PublishServiceImpl publishService;
+    private PublishServiceImpl publishService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
-        publishService = new PublishServiceImpl(rateLimitService, internalPublishService, publishDistributor, hiveMQId, topicTree);
+        managedPluginExecutorService = new GlobalManagedPluginExecutorService(shutdownHooks);
+        managedPluginExecutorService.postConstruct();
+        publishService = new PublishServiceImpl(rateLimitService, managedPluginExecutorService, internalPublishService, publishDistributor, hiveMQId, topicTree);
     }
 
     @Test(expected = DoNotImplementException.class)
@@ -125,7 +135,7 @@ public class PublishServiceImplTest {
         }
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void test_publish() throws Throwable {
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
         when(internalPublishService.publish(any(PUBLISH.class), any(ExecutorService.class), isNull(String.class)))
@@ -135,7 +145,7 @@ public class PublishServiceImplTest {
         verify(internalPublishService).publish(any(PUBLISH.class), any(ExecutorService.class), isNull(String.class));
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void test_publish_to_client() throws Exception {
         final byte subscriptionFlags = SubscriptionFlags.getDefaultFlags(false, false, false);
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
@@ -147,7 +157,7 @@ public class PublishServiceImplTest {
         assertEquals(PublishToClientResult.SUCCESSFUL, result);
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void test_publish_to_client_not_subscribed() throws Exception {
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
         when(topicTree.getSubscriber("client", "topic")).thenReturn(null);

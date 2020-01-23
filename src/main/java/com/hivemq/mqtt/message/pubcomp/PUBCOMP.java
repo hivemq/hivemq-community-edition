@@ -16,11 +16,15 @@
 
 package com.hivemq.mqtt.message.pubcomp;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.general.UserProperty;
+import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubCompReasonCode;
 
 /**
@@ -49,5 +53,21 @@ public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndR
     @Override
     public MessageType getType() {
         return MessageType.PUBCOMP;
+    }
+
+    public static @NotNull PUBCOMP createPubcompFrom(final @NotNull PubcompPacket packet) {
+
+        final int packetIdentifier = packet.getPacketIdentifier();
+        final Mqtt5PubCompReasonCode reasonCode = Mqtt5PubCompReasonCode.valueOf(packet.getReasonCode().name());
+
+        final String reasonString = packet.getReasonString().orElse(null);
+
+        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
+            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
+        }
+        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
+
+        return new PUBCOMP(packetIdentifier, reasonCode, reasonString, mqtt5UserProperties);
     }
 }

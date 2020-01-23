@@ -16,7 +16,6 @@
 
 package com.hivemq.persistence.clientsession;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -209,15 +208,19 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @NotNull
     @Override
-    public ListenableFuture<Boolean> forceDisconnectClient(@NotNull final String clientId, final boolean preventLwtMessage, final @NotNull DisconnectSource source) {
+    public ListenableFuture<Boolean> forceDisconnectClient(
+            final @NotNull String clientId,
+            final boolean preventLwtMessage,
+            final @NotNull DisconnectSource source,
+            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString) {
 
         Preconditions.checkNotNull(clientId, "Parameter clientId cannot be null");
         Preconditions.checkNotNull(source, "Disconnect source cannot be null");
 
         final ClientSession session = getSession(clientId, false);
-
         if (session == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.");
+            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
             return Futures.immediateFuture(false);
         }
         if (preventLwtMessage) {
@@ -225,12 +228,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         }
 
         log.debug("Request forced client disconnect for client {}.", clientId);
-
-
         final Channel channel = channelPersistence.get(clientId);
 
         if (channel == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.");
+            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
             return Futures.immediateFuture(false);
         }
 
@@ -243,24 +244,26 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);
         final String eventLogMessage = "Disconnected via extension system";
 
+        final Mqtt5DisconnectReasonCode usedReasonCode =
+                reasonCode == null ? Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION : Mqtt5DisconnectReasonCode.valueOf(reasonCode.name());
+
         if (version == ProtocolVersion.MQTTv5) {
-            mqtt5ServerDisconnector.disconnect(channel,
-                    logMessage,
-                    eventLogMessage,
-                    Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                    null);
+            mqtt5ServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
         } else {
-            mqtt3ServerDisconnector.disconnect(channel,
-                    logMessage,
-                    eventLogMessage,
-                    null,
-                    null);
+            mqtt3ServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
         }
+
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
         channel.closeFuture().addListener((ChannelFutureListener) future -> {
             resultFuture.set(true);
         });
         return resultFuture;
+    }
+
+    @Override
+    public @NotNull ListenableFuture<Boolean> forceDisconnectClient(
+            final @NotNull String clientId, final boolean preventLwtMessage, final @NotNull DisconnectSource source) {
+        return forceDisconnectClient(clientId, preventLwtMessage, source, null, null);
     }
 
     @NotNull
@@ -398,7 +401,6 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 } else {
                     resultFuture.set(null);
                 }
-
             }
 
             @Override

@@ -16,10 +16,7 @@
 
 package com.hivemq.extensions.services.publish;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -32,6 +29,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.PublishToClientResult;
 import com.hivemq.extensions.ListenableFutureConverter;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
+import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
@@ -66,6 +64,9 @@ public class PublishServiceImpl implements PublishService {
     private final PluginServiceRateLimitService rateLimitService;
 
     @NotNull
+    private final GlobalManagedPluginExecutorService globalManagedPluginExecutorService;
+
+    @NotNull
     private final InternalPublishService internalPublishService;
 
     @NotNull
@@ -79,11 +80,13 @@ public class PublishServiceImpl implements PublishService {
 
     @Inject
     public PublishServiceImpl(@NotNull final PluginServiceRateLimitService rateLimitService,
+                              @NotNull final GlobalManagedPluginExecutorService globalManagedPluginExecutorService,
                               @NotNull final InternalPublishService internalPublishService,
                               @NotNull final PublishDistributor publishDistributor,
                               @NotNull final HivemqId hiveMQId,
                               @NotNull final LocalTopicTree topicTree) {
         this.rateLimitService = rateLimitService;
+        this.globalManagedPluginExecutorService = globalManagedPluginExecutorService;
         this.internalPublishService = internalPublishService;
         this.publishDistributor = publishDistributor;
         this.hiveMQId = hiveMQId;
@@ -102,9 +105,8 @@ public class PublishServiceImpl implements PublishService {
         }
 
         final PUBLISH internalPublish = publishToPUBLISH(publish);
-        final ListenableFuture<PublishReturnCode> publishFuture =
-                internalPublishService.publish(internalPublish, MoreExecutors.newDirectExecutorService(), null);
-        return ListenableFutureConverter.toCompletable(FutureUtils.voidFutureFromAnyFuture(publishFuture));
+        final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService.publish(internalPublish, globalManagedPluginExecutorService, null);
+        return ListenableFutureConverter.toCompletable(FutureUtils.voidFutureFromAnyFuture(publishFuture), globalManagedPluginExecutorService);
     }
 
     @Override
@@ -121,12 +123,12 @@ public class PublishServiceImpl implements PublishService {
         }
         final PUBLISH internalPublish = publishToPUBLISH(publish);
 
-        final CompletableFuture<PublishToClientResult> completableFuture = new CompletableFuture<>();
+        final SettableFuture<PublishToClientResult> sendPublishFuture = SettableFuture.create();
         final SubscriberWithIdentifiers subscriber = topicTree.getSubscriber(clientId, publish.getTopic());
 
         if (subscriber == null) {
-            completableFuture.complete(PublishToClientResult.NOT_SUBSCRIBED);
-            return completableFuture;
+            sendPublishFuture.set(PublishToClientResult.NOT_SUBSCRIBED);
+            return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedPluginExecutorService);
         }
 
         final ListenableFuture<PublishStatus> publishSendFuture = publishDistributor.sendMessageToSubscriber(internalPublish, clientId, subscriber.getQos(), false,
@@ -134,17 +136,17 @@ public class PublishServiceImpl implements PublishService {
         Futures.addCallback(publishSendFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final PublishStatus result) {
-                completableFuture.complete(PublishToClientResult.SUCCESSFUL);
+                sendPublishFuture.set(PublishToClientResult.SUCCESSFUL);
             }
 
             @Override
             public void onFailure(@NotNull final Throwable t) {
-                completableFuture.completeExceptionally(t);
+                sendPublishFuture.setException(t);
             }
         }, MoreExecutors.directExecutor());
 
 
-        return completableFuture;
+        return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedPluginExecutorService);
     }
 
     @NotNull

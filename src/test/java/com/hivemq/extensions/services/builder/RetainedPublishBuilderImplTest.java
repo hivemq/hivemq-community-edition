@@ -87,6 +87,17 @@ public class RetainedPublishBuilderImplTest {
         new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(11);
     }
 
+    @Test
+    public void test_custom_max_message_expiry_value_validation() {
+        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(10);
+        new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(10);
+    }
+
+    @Test
+    public void test_max_message_expiry_value_validation() {
+        new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(4_294_967_296L);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void test_message_expiry_less_than_zero() {
         retainedPublishBuilder.messageExpiryInterval(-1);
@@ -281,14 +292,17 @@ public class RetainedPublishBuilderImplTest {
 
     @Test
     public void test_minimum() {
-        final RetainedPublish retainedPublish = retainedPublishBuilder.topic("topic").payload(ByteBuffer.wrap("payload".getBytes())).build();
+        final RetainedPublish retainedPublish =
+                retainedPublishBuilder.topic("topic").payload(ByteBuffer.wrap("payload".getBytes())).build();
 
         assertEquals(Qos.AT_MOST_ONCE, retainedPublish.getQos());
         assertEquals("topic", retainedPublish.getTopic());
         assertArrayEquals("payload".getBytes(), retainedPublish.getPayload().get().array());
         assertEquals(Optional.empty(), retainedPublish.getPayloadFormatIndicator());
         assertTrue(retainedPublish.getMessageExpiryInterval().isPresent());
-        assertEquals(configurationService.mqttConfiguration().maxMessageExpiryInterval(), retainedPublish.getMessageExpiryInterval().get().longValue());
+        assertEquals(
+                configurationService.mqttConfiguration().maxMessageExpiryInterval(),
+                retainedPublish.getMessageExpiryInterval().get().longValue());
         assertEquals(Optional.empty(), retainedPublish.getResponseTopic());
         assertEquals(Optional.empty(), retainedPublish.getCorrelationData());
         assertEquals(Optional.empty(), retainedPublish.getContentType());
@@ -374,7 +388,6 @@ public class RetainedPublishBuilderImplTest {
                     new MqttUserProperty("name2", "val")));
         }
     }
-
 
     private class TestPublish implements Publish {
 

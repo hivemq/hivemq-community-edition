@@ -29,8 +29,12 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.mqtt.message.puback.PUBACK;
+import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
+import com.hivemq.mqtt.message.pubrec.PUBREC;
+import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.*;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -48,7 +52,9 @@ import java.util.List;
  */
 public class TestMessageUtil {
 
-    public static final Mqtt5UserProperties TEST_USER_PROPERTIES = Mqtt5UserProperties.of(new MqttUserProperty("user1", "property1"), new MqttUserProperty("user2", "property2"));
+    public static final Mqtt5UserProperties TEST_USER_PROPERTIES =
+            Mqtt5UserProperties.of(new MqttUserProperty("user1", "property1"),
+                    new MqttUserProperty("user2", "property2"));
     public static final List<String> topics = Lists.newArrayList("topic1", "topic2", "topic3");
 
     public static PUBLISH createMqtt3Publish() {
@@ -61,7 +67,8 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBLISH createMqtt3Publish(final String hivemqId, final String topic, final QoS qoS, final byte[] payload, final boolean retain) {
+    public static PUBLISH createMqtt3Publish(
+            final String hivemqId, final String topic, final QoS qoS, final byte[] payload, final boolean retain) {
         return new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(qoS)
                 .withTopic(topic)
@@ -81,7 +88,8 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBLISH createMqtt3Publish(final String hivemqId, final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
+    public static PUBLISH createMqtt3Publish(
+            final String hivemqId, final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withTopic("topic")
@@ -91,7 +99,8 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBLISH createMqtt3Publish(final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
+    public static PUBLISH createMqtt3Publish(
+            final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
@@ -108,7 +117,9 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBLISH createMqtt3Publish(final String hivemqId, final PUBLISH publish, final long timestamp, final long payloadId, final PublishPayloadPersistence persistence) {
+    public static PUBLISH createMqtt3Publish(
+            final String hivemqId, final PUBLISH publish, final long timestamp, final long payloadId,
+            final PublishPayloadPersistence persistence) {
         return new PUBLISHFactory.Mqtt3Builder()
                 .fromPublish(publish)
                 .withHivemqId(hivemqId)
@@ -165,7 +176,8 @@ public class TestMessageUtil {
                 .build();
     }
 
-    public static PUBLISHFactory.Mqtt5Builder getDefaultPublishBuilder(final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
+    public static PUBLISHFactory.Mqtt5Builder getDefaultPublishBuilder(
+            final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
@@ -190,21 +202,22 @@ public class TestMessageUtil {
         return createMqtt5Publish("topic");
     }
 
-    public static PUBLISH createMqtt5Publish(@NotNull final String hivemqId,
-                                             @NotNull final String topic,
-                                             @NotNull final byte[] payload,
-                                             @NotNull final QoS qos,
-                                             final boolean isRetain,
-                                             final long messageExpiryInterval,
-                                             @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
-                                             @Nullable final String contentType,
-                                             @Nullable final String responseTopic,
-                                             @Nullable final byte[] correlationData,
-                                             @NotNull final Mqtt5UserProperties userProperties,
-                                             final int packetIdentifier,
-                                             final boolean isDup,
-                                             final boolean isNewTopicAlias,
-                                             @Nullable final ImmutableList<Integer> subscriptionIdentifiers) {
+    public static PUBLISH createMqtt5Publish(
+            @NotNull final String hivemqId,
+            @NotNull final String topic,
+            @NotNull final byte[] payload,
+            @NotNull final QoS qos,
+            final boolean isRetain,
+            final long messageExpiryInterval,
+            @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+            @Nullable final String contentType,
+            @Nullable final String responseTopic,
+            @Nullable final byte[] correlationData,
+            @NotNull final Mqtt5UserProperties userProperties,
+            final int packetIdentifier,
+            final boolean isDup,
+            final boolean isNewTopicAlias,
+            @Nullable final ImmutableList<Integer> subscriptionIdentifiers) {
 
         return new PUBLISHFactory.Mqtt5Builder()
                 .withHivemqId(hivemqId)
@@ -301,13 +314,15 @@ public class TestMessageUtil {
         final ImmutableList.Builder<Topic> topicBuilder = new ImmutableList.Builder<>();
         topicBuilder.add(new Topic(topics.get(0), QoS.AT_MOST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
         topicBuilder.add(new Topic(topics.get(1), QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1));
-        topicBuilder.add(new Topic(topics.get(2), QoS.EXACTLY_ONCE, true, false, Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1));
+        topicBuilder.add(new Topic(topics.get(2), QoS.EXACTLY_ONCE, true, false,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1));
         return createFullMqtt5Subscribe(topicBuilder.build());
     }
 
     public static SUBSCRIBE createFullMqtt5Subscribe(final ImmutableList<Topic> topics) {
 
-        return new SUBSCRIBE(TEST_USER_PROPERTIES,
+        return new SUBSCRIBE(
+                TEST_USER_PROPERTIES,
                 topics,
                 1,
                 1);
@@ -354,13 +369,15 @@ public class TestMessageUtil {
     }
 
     public static DISCONNECT createFullMqtt5Disconnect() {
-        return new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, "reason", TEST_USER_PROPERTIES, "server reference", 360);
+        return new DISCONNECT(
+                Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, "reason", TEST_USER_PROPERTIES, "server reference",
+                360);
     }
 
     public static AUTH createFullMqtt5Auth() {
-        return new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS, TEST_USER_PROPERTIES, "reason");
+        return new AUTH(
+                "auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS, TEST_USER_PROPERTIES, "reason");
     }
-
 
     @NotNull
     public static CONNECT createMqtt5ConnectWithWill() {
@@ -377,5 +394,25 @@ public class TestMessageUtil {
                 .withCleanStart(false)
                 .withSessionExpiryInterval(100)
                 .build();
+    }
+
+    public static PUBACK createSuccessMqtt5Puback() {
+        return new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    }
+
+    public static PUBREC createSuccessPubrec() {
+        return new PUBREC(1);
+    }
+
+    public static PUBREL createSuccessPubrel() {
+        return new PUBREL(1);
+    }
+
+    public static PUBCOMP createFullMqtt5Pubcomp() {
+        return new PUBCOMP(1, Mqtt5PubCompReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    }
+
+    public static PUBCOMP createSuccessPupcomp() {
+        return new PUBCOMP(1);
     }
 }

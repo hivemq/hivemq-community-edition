@@ -18,15 +18,14 @@ package com.hivemq.persistence.payload;
 
 import org.junit.Test;
 
-import static com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence.KeyPair;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Lukas Brandl
+ * @author Florian Limpöck
  */
 public class PublishPayloadXodusSerializerTest {
 
-    final PublishPayloadXodusSerializer serializer = new PublishPayloadXodusSerializer();
+    private final PublishPayloadXodusSerializer serializer = new PublishPayloadXodusSerializer();
 
     @Test
     public void test_serialize_key() throws Exception {
@@ -34,7 +33,7 @@ public class PublishPayloadXodusSerializerTest {
 
         assertEquals(16, bytes.length);
 
-        final KeyPair keyPair = serializer.deserializeKey(bytes);
+        final PublishPayloadXodusLocalPersistence.KeyPair keyPair = serializer.deserializeKey(bytes);
 
         assertEquals(1234L, keyPair.getId());
         assertEquals(5L, keyPair.getChunkIndex());

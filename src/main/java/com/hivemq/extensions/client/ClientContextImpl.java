@@ -13,15 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.client;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.Interceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingreq.PingReqInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pingresp.PingRespOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
-import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
@@ -29,8 +45,7 @@ import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Florian Limpöck
@@ -38,159 +53,509 @@ import java.util.stream.Collectors;
  */
 public class ClientContextImpl {
 
-    @NotNull
-    private final List<Interceptor> interceptorList;
-
-    @NotNull
-    private final ModifiableDefaultPermissions defaultPermissions;
-
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull ModifiableDefaultPermissions defaultPermissions;
+    private volatile @NotNull ImmutableList<PublishInboundInterceptor> publishInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PublishOutboundInterceptor> publishOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubackInboundInterceptor> pubackInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubackOutboundInterceptor> pubackOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubrecInboundInterceptor> pubrecInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubrecOutboundInterceptor> pubrecOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubrelInboundInterceptor> pubrelInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubrelOutboundInterceptor> pubrelOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubcompInboundInterceptor> pubcompInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PubcompOutboundInterceptor> pubcompOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<SubscribeInboundInterceptor> subscribeInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<SubackOutboundInterceptor> subackOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<UnsubscribeInboundInterceptor> unsubscribeInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<UnsubackOutboundInterceptor> unsubackOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<DisconnectInboundInterceptor> disconnectInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<DisconnectOutboundInterceptor> disconnectOutbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PingReqInboundInterceptor> pingReqInbounds = ImmutableList.of();
+    private volatile @NotNull ImmutableList<PingRespOutboundInterceptor> pingRespOutbounds = ImmutableList.of();
 
     public ClientContextImpl(
-            @NotNull final HiveMQExtensions hiveMQExtensions,
-            @NotNull final ModifiableDefaultPermissions defaultPermissions) {
-        this.interceptorList = new CopyOnWriteArrayList<>();
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull ModifiableDefaultPermissions defaultPermissions) {
+
         this.hiveMQExtensions = hiveMQExtensions;
         this.defaultPermissions = defaultPermissions;
     }
 
-    public void addInterceptor(@NotNull final Interceptor interceptor) {
-        if (!interceptorList.contains(interceptor)) {
-            interceptorList.add(interceptor);
-        }
+    public synchronized void addPublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
+        publishInbounds = addInterceptor(publishInbounds, interceptor);
     }
 
-    public void addPublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
-        addInterceptor(interceptor);
+    public synchronized void addPublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
+        publishOutbounds = addInterceptor(publishOutbounds, interceptor);
     }
 
-    public void addSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
-        addInterceptor(interceptor);
+    public synchronized void addPubackInboundInterceptor(final @NotNull PubackInboundInterceptor interceptor) {
+        pubackInbounds = addInterceptor(pubackInbounds, interceptor);
     }
 
-    public void removePublishInboundInterceptor(@NotNull final PublishInboundInterceptor interceptor) {
-        removeInterceptor(interceptor);
+    public synchronized void addPubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor interceptor) {
+        pubackOutbounds = addInterceptor(pubackOutbounds, interceptor);
     }
 
-    public void addPublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        addInterceptor(interceptor);
+    public synchronized void addPubrecInboundInterceptor(final @NotNull PubrecInboundInterceptor interceptor) {
+        pubrecInbounds = addInterceptor(pubrecInbounds, interceptor);
     }
 
-    public void removePublishOutboundInterceptor(@NotNull final PublishOutboundInterceptor interceptor) {
-        removeInterceptor(interceptor);
+    public synchronized void addPubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor interceptor) {
+        pubrecOutbounds = addInterceptor(pubrecOutbounds, interceptor);
     }
 
-    public void removeSubscribeInboundInterceptor(@NotNull final SubscribeInboundInterceptor interceptor) {
-        removeInterceptor(interceptor);
+    public synchronized void addPubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor interceptor) {
+        pubrelInbounds = addInterceptor(pubrelInbounds, interceptor);
     }
 
-    public void removeInterceptor(@NotNull final Interceptor interceptor) {
-        interceptorList.remove(interceptor);
+    public synchronized void addPubrelOutboundInterceptor(final @NotNull PubrelOutboundInterceptor interceptor) {
+        pubrelOutbounds = addInterceptor(pubrelOutbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<Interceptor> getAllInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addPubcompInboundInterceptor(final @NotNull PubcompInboundInterceptor interceptor) {
+        pubcompInbounds = addInterceptor(pubcompInbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<Interceptor> getAllInterceptors() {
-        return interceptorList.stream()
-                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addPubcompOutboundInterceptor(final @NotNull PubcompOutboundInterceptor interceptor) {
+        pubcompOutbounds = addInterceptor(pubcompOutbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<PublishInboundInterceptor> getPublishInboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
-                .filter(interceptor -> interceptor instanceof PublishInboundInterceptor)
-                .map(interceptor -> (PublishInboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
+        subscribeInbounds = addInterceptor(subscribeInbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
-                .filter(interceptor -> interceptor instanceof SubscribeInboundInterceptor)
-                .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addSubackOutboundInterceptor(final @NotNull SubackOutboundInterceptor interceptor) {
+        subackOutbounds = addInterceptor(subackOutbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<PublishInboundInterceptor> getPublishInboundInterceptors() {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor instanceof PublishInboundInterceptor)
-                .filter(this::hasPluginForClassloader)
-                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
-                .map(interceptor -> (PublishInboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addUnsubscribeInboundInterceptor(
+            final @NotNull UnsubscribeInboundInterceptor interceptor) {
+
+        unsubscribeInbounds = addInterceptor(unsubscribeInbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<PublishOutboundInterceptor> getPublishOutboundInterceptorsForPlugin(@NotNull final IsolatedPluginClassloader pluginClassloader) {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(pluginClassloader))
-                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
-                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addUnsubackOutboundInterceptor(final @NotNull UnsubackOutboundInterceptor interceptor) {
+        unsubackOutbounds = addInterceptor(unsubackOutbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<PublishOutboundInterceptor> getPublishOutboundInterceptors() {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor instanceof PublishOutboundInterceptor)
-                .filter(this::hasPluginForClassloader)
-                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
-                .map(interceptor -> (PublishOutboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addDisconnectInboundInterceptor(final @NotNull DisconnectInboundInterceptor interceptor) {
+        disconnectInbounds = addInterceptor(disconnectInbounds, interceptor);
     }
 
-    @NotNull
-    @Immutable
-    public List<SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
-        return interceptorList.stream()
-                .filter(interceptor -> interceptor instanceof SubscribeInboundInterceptor)
-                .filter(this::hasPluginForClassloader)
-                .sorted(Comparator.comparingInt(this::comparePluginPriority).reversed())
-                .map(interceptor -> (SubscribeInboundInterceptor) interceptor)
-                .collect(Collectors.toUnmodifiableList());
+    public synchronized void addDisconnectOutboundInterceptor(
+            final @NotNull DisconnectOutboundInterceptor interceptor) {
+
+        disconnectOutbounds = addInterceptor(disconnectOutbounds, interceptor);
     }
 
-    @NotNull
-    public ModifiableDefaultPermissions getDefaultPermissions() {
+    public synchronized void addPingReqInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
+        pingReqInbounds = addInterceptor(pingReqInbounds, interceptor);
+    }
+
+    public synchronized void addPingRespOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
+        pingRespOutbounds = addInterceptor(pingRespOutbounds, interceptor);
+    }
+
+    public synchronized void removePublishInboundInterceptor(final @NotNull PublishInboundInterceptor interceptor) {
+        publishInbounds = removeInterceptor(publishInbounds, interceptor);
+    }
+
+    public synchronized void removePublishOutboundInterceptor(final @NotNull PublishOutboundInterceptor interceptor) {
+        publishOutbounds = removeInterceptor(publishOutbounds, interceptor);
+    }
+
+    public synchronized void removePubackInboundInterceptor(final @NotNull PubackInboundInterceptor interceptor) {
+        pubackInbounds = removeInterceptor(pubackInbounds, interceptor);
+    }
+
+    public synchronized void removePubackOutboundInterceptor(final @NotNull PubackOutboundInterceptor interceptor) {
+        pubackOutbounds = removeInterceptor(pubackOutbounds, interceptor);
+    }
+
+    public synchronized void removePubrecInboundInterceptor(final @NotNull PubrecInboundInterceptor interceptor) {
+        pubrecInbounds = removeInterceptor(pubrecInbounds, interceptor);
+    }
+
+    public synchronized void removePubrecOutboundInterceptor(final @NotNull PubrecOutboundInterceptor interceptor) {
+        pubrecOutbounds = removeInterceptor(pubrecOutbounds, interceptor);
+    }
+
+    public synchronized void removePubrelInboundInterceptor(final @NotNull PubrelInboundInterceptor interceptor) {
+        pubrelInbounds = removeInterceptor(pubrelInbounds, interceptor);
+    }
+
+    public synchronized void removePubrelOutboundInterceptor(final @NotNull PubrelOutboundInterceptor interceptor) {
+        pubrelOutbounds = removeInterceptor(pubrelOutbounds, interceptor);
+    }
+
+    public synchronized void removePubcompInboundInterceptor(final @NotNull PubcompInboundInterceptor interceptor) {
+        pubcompInbounds = removeInterceptor(pubcompInbounds, interceptor);
+    }
+
+    public synchronized void removePubcompOutboundInterceptor(final @NotNull PubcompOutboundInterceptor interceptor) {
+        pubcompOutbounds = removeInterceptor(pubcompOutbounds, interceptor);
+    }
+
+    public synchronized void removeSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
+        subscribeInbounds = removeInterceptor(subscribeInbounds, interceptor);
+    }
+
+    public synchronized void removeSubackOutboundInterceptor(final @NotNull SubackOutboundInterceptor interceptor) {
+        subackOutbounds = removeInterceptor(subackOutbounds, interceptor);
+    }
+
+    public synchronized void removeUnsubscribeInboundInterceptor(
+            final @NotNull UnsubscribeInboundInterceptor interceptor) {
+
+        unsubscribeInbounds = removeInterceptor(unsubscribeInbounds, interceptor);
+    }
+
+    public synchronized void removeUnsubackOutboundInterceptor(final @NotNull UnsubackOutboundInterceptor interceptor) {
+        unsubackOutbounds = removeInterceptor(unsubackOutbounds, interceptor);
+    }
+
+    public synchronized void removeDisconnectInboundInterceptor(
+            final @NotNull DisconnectInboundInterceptor interceptor) {
+
+        disconnectInbounds = removeInterceptor(disconnectInbounds, interceptor);
+    }
+
+    public synchronized void removeDisconnectOutboundInterceptor(
+            final @NotNull DisconnectOutboundInterceptor interceptor) {
+
+        disconnectOutbounds = removeInterceptor(disconnectOutbounds, interceptor);
+    }
+
+    public synchronized void removePingReqInboundInterceptor(final @NotNull PingReqInboundInterceptor interceptor) {
+        pingReqInbounds = removeInterceptor(pingReqInbounds, interceptor);
+    }
+
+    public synchronized void removePingRespOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
+        pingRespOutbounds = removeInterceptor(pingRespOutbounds, interceptor);
+    }
+
+    public @Immutable @NotNull List<@NotNull Interceptor> getAllInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return streamAllInterceptors()
+                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(extensionClassLoader))
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    public @Immutable @NotNull List<@NotNull Interceptor> getAllInterceptors() {
+        return streamAllInterceptors()
+                .sorted(Comparator.comparingInt(this::getExtensionPriority).reversed())
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    private @NotNull Stream<Interceptor> streamAllInterceptors() {
+        return Streams.concat(
+                publishInbounds.stream(), publishOutbounds.stream(),
+                pubackInbounds.stream(), pubackOutbounds.stream(),
+                pubrecInbounds.stream(), pubrecOutbounds.stream(),
+                pubrelInbounds.stream(), pubrelOutbounds.stream(),
+                pubcompInbounds.stream(), pubcompOutbounds.stream(),
+                subscribeInbounds.stream(), subackOutbounds.stream(),
+                unsubscribeInbounds.stream(), unsubackOutbounds.stream(),
+                disconnectInbounds.stream(), disconnectOutbounds.stream(),
+                pingReqInbounds.stream(), pingRespOutbounds.stream());
+    }
+
+    public @Immutable @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(publishInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptors() {
+        return publishInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(publishOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptors() {
+        return publishOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubackInboundInterceptor> getPubackInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubackInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubackInboundInterceptor> getPubackInboundInterceptors() {
+        return pubackInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubackOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptors() {
+        return pubackOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrecInboundInterceptor> getPubrecInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubrecInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrecInboundInterceptor> getPubrecInboundInterceptors() {
+        return pubrecInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrecOutboundInterceptor> getPubrecOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubrecOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrecOutboundInterceptor> getPubrecOutboundInterceptors() {
+        return pubrecOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrelInboundInterceptor> getPubrelInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubrelInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrelInboundInterceptor> getPubrelInboundInterceptors() {
+        return pubrelInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrelOutboundInterceptor> getPubrelOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubrelOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubrelOutboundInterceptor> getPubrelOutboundInterceptors() {
+        return pubrelOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubcompInboundInterceptor> getPubcompInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubcompInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubcompInboundInterceptor> getPubcompInboundInterceptors() {
+        return pubcompInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PubcompOutboundInterceptor> getPubcompOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pubcompOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PubcompOutboundInterceptor> getPubcompOutboundInterceptors() {
+        return pubcompOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(subscribeInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptors() {
+        return subscribeInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(subackOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptors() {
+        return subackOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(unsubscribeInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptors() {
+        return unsubscribeInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubackOutboundInterceptor> getUnsubackOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(unsubackOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull UnsubackOutboundInterceptor> getUnsubackOutboundInterceptors() {
+        return unsubackOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull DisconnectInboundInterceptor> getDisconnectInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(disconnectInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull DisconnectInboundInterceptor> getDisconnectInboundInterceptors() {
+        return disconnectInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(disconnectOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptors() {
+        return disconnectOutbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pingReqInbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptors() {
+        return pingReqInbounds;
+    }
+
+    public @Immutable @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptorsOfExtension(
+            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+
+        return filterInterceptorsOfExtension(pingRespOutbounds, extensionClassLoader);
+    }
+
+    public @Immutable @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptors() {
+        return pingRespOutbounds;
+    }
+
+    public @NotNull ModifiableDefaultPermissions getDefaultPermissions() {
         return defaultPermissions;
     }
 
-    private int comparePluginPriority(final Object object) {
+    private <T extends Interceptor> @NotNull ImmutableList<T> addInterceptor(
+            final @NotNull ImmutableList<T> interceptors, final @NotNull T interceptor) {
+
+        if (interceptors.isEmpty()) {
+            return ImmutableList.of(interceptor);
+        }
+        final int priority = getExtensionPriority(interceptor);
+        int low = 0;
+        int high = interceptors.size() - 1;
+        while (low <= high) {
+            final int mid = low + high >>> 1;
+            final T midInterceptor = interceptors.get(mid);
+            final int midPriority = getExtensionPriority(midInterceptor);
+
+            if (midPriority >= priority) {
+                if (midPriority == priority && midInterceptor == interceptor) {
+                    return interceptors;
+                }
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        final ImmutableList.Builder<T> builder = ImmutableList.builderWithExpectedSize(interceptors.size() + 1);
+        for (int i = 0; i < low; i++) {
+            builder.add(interceptors.get(i));
+        }
+        builder.add(interceptor);
+        for (int i = low; i < interceptors.size(); i++) {
+            builder.add(interceptors.get(i));
+        }
+        return builder.build();
+    }
+
+    private <T extends Interceptor> @NotNull ImmutableList<T> removeInterceptor(
+            final @NotNull ImmutableList<T> interceptors, final @NotNull T interceptor) {
+
+        if (interceptors.isEmpty()) {
+            return interceptors;
+        }
+        if (interceptors.size() == 1 && interceptors.get(0) == interceptor) {
+            return ImmutableList.of();
+        }
+        final int priority = getExtensionPriority(interceptor);
+        int low = 0;
+        int high = interceptors.size() - 1;
+        while (low <= high) {
+            final int mid = low + high >>> 1;
+            final T midInterceptor = interceptors.get(mid);
+            final int midPriority = getExtensionPriority(midInterceptor);
+
+            if (midPriority >= priority) {
+                if (midPriority == priority && midInterceptor == interceptor) {
+                    final ImmutableList.Builder<T> builder =
+                            ImmutableList.builderWithExpectedSize(interceptors.size() - 1);
+                    for (int i = 0; i < mid; i++) {
+                        builder.add(interceptors.get(i));
+                    }
+                    for (int i = mid + 1; i < interceptors.size(); i++) {
+                        builder.add(interceptors.get(i));
+                    }
+                    return builder.build();
+                }
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return interceptors;
+    }
+
+    private <T extends Interceptor> @NotNull ImmutableList<T> filterInterceptorsOfExtension(
+            final @NotNull ImmutableList<T> interceptors,
+            final @NotNull IsolatedPluginClassloader extensionClassloader) {
+
+        final ImmutableList.Builder<T> builder = ImmutableList.builder();
+        for (int i = 0; i < interceptors.size(); i++) {
+            final T interceptor = interceptors.get(i);
+            if (interceptor.getClass().getClassLoader().equals(extensionClassloader)) {
+                builder.add(interceptor);
+            }
+        }
+        return builder.build();
+    }
+
+    private <T extends Interceptor> @NotNull ImmutableList<T> removeInterceptorsOfExtension(
+            final @NotNull ImmutableList<T> interceptors,
+            final @NotNull IsolatedPluginClassloader extensionClassloader) {
+
+        final ImmutableList.Builder<T> builder = ImmutableList.builder();
+        for (int i = 0; i < interceptors.size(); i++) {
+            final T interceptor = interceptors.get(i);
+            if (!interceptor.getClass().getClassLoader().equals(extensionClassloader)) {
+                builder.add(interceptor);
+            }
+        }
+        return builder.build();
+    }
+
+    private int getExtensionPriority(final @NotNull Object object) {
         if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
             return -1;
         }
-        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+        final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                 (IsolatedPluginClassloader) object.getClass().getClassLoader());
-        if (plugin != null) {
-            return plugin.getPriority();
+        if (extension != null) {
+            return extension.getPriority();
         } else {
             return -1;
         }
-    }
-
-    private boolean hasPluginForClassloader(final Object object) {
-        if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
-            return true;
-        }
-        return hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedPluginClassloader) object.getClass().getClassLoader()) != null;
     }
 }

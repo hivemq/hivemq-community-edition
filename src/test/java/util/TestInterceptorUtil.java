@@ -32,7 +32,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -42,49 +42,59 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class TestInterceptorUtil {
 
+    public static <T extends Interceptor> @NotNull T getIsolatedInterceptor(
+            final @NotNull Class<T> type,
+            final @NotNull TemporaryFolder temporaryFolder) throws Exception {
 
-    @NotNull
-    public static List<Interceptor> getIsolatedInterceptors(final TemporaryFolder temporaryFolder, @NotNull final ClassLoader classLoader) throws Exception {
+        return getIsolatedInterceptors(List.of(type), temporaryFolder).get(0);
+    }
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("util.TestInterceptorUtil$TestPublishInboundInterceptor")
-                .addClass("util.TestInterceptorUtil$TestSubscriberInboundInterceptor");
+    public static <T extends Interceptor> @NotNull List<T> getIsolatedInterceptors(
+            final @NotNull List<Class<? extends T>> types,
+            final @NotNull TemporaryFolder temporaryFolder) throws Exception {
+
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class);
+        for (final Class<? extends T> type : types) {
+            javaArchive.addClass(type.getName());
+        }
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, classLoader);
+        final IsolatedPluginClassloader cl =
+                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, types.get(0).getClassLoader());
 
-        final List<Interceptor> interceptors = new ArrayList<>();
+        final LinkedList<T> list = new LinkedList<>();
+        for (final Class<? extends T> type : types) {
+            final Class<?> clazz = cl.loadClass(type.getName());
+            //noinspection unchecked
+            list.add((T) clazz.newInstance());
+        }
+        return list;
+    }
 
-        final Class<?> publishInboundInterceptorClass = cl.loadClass("util.TestInterceptorUtil$TestPublishInboundInterceptor");
-        final Class<?> subscribeInboundInteceptorClass = cl.loadClass("util.TestInterceptorUtil$TestSubscriberInboundInterceptor");
+    // legacy
+    public static @NotNull List<Interceptor> getIsolatedInterceptors(
+            final @NotNull TemporaryFolder temporaryFolder,
+            final @NotNull ClassLoader classLoader) throws Exception {
 
-        final PublishInboundInterceptor publishInboundInterceptor = (PublishInboundInterceptor) publishInboundInterceptorClass.newInstance();
-        final SubscribeInboundInterceptor subscribeInboundInterceptor = (SubscribeInboundInterceptor) subscribeInboundInteceptorClass.newInstance();
-        interceptors.add(publishInboundInterceptor);
-        interceptors.add(subscribeInboundInterceptor);
-
-        return interceptors;
-
-
+        return getIsolatedInterceptors(
+                List.of(TestPublishInboundInterceptor.class, TestSubscriberInboundInterceptor.class), temporaryFolder);
     }
 
     public static class TestPublishInboundInterceptor implements PublishInboundInterceptor {
-
         @Override
-        public void onInboundPublish(@NotNull final PublishInboundInput input, @NotNull final PublishInboundOutput output) {
-
+        public void onInboundPublish(
+                final @NotNull PublishInboundInput input,
+                final @NotNull PublishInboundOutput output) {
         }
     }
 
     public static class TestSubscriberInboundInterceptor implements SubscribeInboundInterceptor {
-
         @Override
-        public void onInboundSubscribe(final @NotNull SubscribeInboundInput subscribeInboundInput, final @NotNull SubscribeInboundOutput subscribeInboundOutput) {
-
+        public void onInboundSubscribe(
+                final @NotNull SubscribeInboundInput subscribeInboundInput,
+                final @NotNull SubscribeInboundOutput subscribeInboundOutput) {
         }
     }
-
 }

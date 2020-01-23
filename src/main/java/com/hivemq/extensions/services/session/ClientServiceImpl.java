@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.*;
 import com.hivemq.annotations.NotNull;
 import com.hivemq.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.general.IterationCallback;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
@@ -36,6 +37,7 @@ import com.hivemq.extensions.iteration.FetchCallback;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
 import com.hivemq.extensions.services.general.IterationContextImpl;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -116,12 +118,40 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public CompletableFuture<Boolean> disconnectClient(
             @NotNull final String clientId, final boolean preventWillMessage) {
+        return disconnectClient(clientId, preventWillMessage, null, null);
+    }
+
+    @NotNull
+    @Override
+    public CompletableFuture<Boolean> disconnectClient(
+            final @NotNull String clientId,
+            final boolean preventWillMessage,
+            final @Nullable DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString) {
+
         Preconditions.checkNotNull(clientId, "A client id must never be null");
+        if (reasonCode != null) {
+            Preconditions.checkArgument(
+                    reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                    "Reason code %s must not be used for disconnect packets.", reasonCode);
+            Preconditions.checkArgument(
+                    Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
+                    "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
+                    reasonCode);
+        }
+
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return ListenableFutureConverter.toCompletable(
-                clientSessionPersistence.forceDisconnectClient(clientId, preventWillMessage, EXTENSION));
+
+        final Mqtt5DisconnectReasonCode disconnectReasonCode =
+                reasonCode != null ? Mqtt5DisconnectReasonCode.valueOf(reasonCode.name()) : null;
+
+        final ListenableFuture<Boolean> disconnectFuture =
+                clientSessionPersistence.forceDisconnectClient(
+                        clientId, preventWillMessage, EXTENSION, disconnectReasonCode, reasonString);
+
+        return ListenableFutureConverter.toCompletable(disconnectFuture, managedExtensionExecutorService);
     }
 
     @NotNull
@@ -149,9 +179,9 @@ public class ClientServiceImpl implements ClientService {
                 Exceptions.rethrowError(t);
                 setSessionSettableFuture.setException(t);
             }
-        }, MoreExecutors.directExecutor());
+        }, managedExtensionExecutorService);
 
-        return ListenableFutureConverter.toCompletable(setSessionSettableFuture);
+        return ListenableFutureConverter.toCompletable(setSessionSettableFuture, managedExtensionExecutorService);
     }
 
     @Override
@@ -172,12 +202,23 @@ public class ClientServiceImpl implements ClientService {
 
         final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
                 new AllClientsFetchCallback(clientSessionPersistence);
-        final AsyncIterator<ChunkCursor, SessionInformation>
-                asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllClientsItemCallback(callbackExecutor, callback));
+        final AsyncIterator<ChunkCursor, SessionInformation> asyncIterator =
+                asyncIteratorFactory.createIterator(
+                        fetchCallback,
+                        new AllClientsItemCallback(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 
-        return asyncIterator.getFinishedFuture();
+        final SettableFuture<Void> settableFuture = SettableFuture.create();
+        asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
+            if (throwable != null) {
+                settableFuture.setException(throwable);
+            } else {
+                settableFuture.set(null);
+            }
+        });
+
+        return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
     static class AllClientsItemCallback implements AsyncIterator.ItemCallback<SessionInformation> {
@@ -201,29 +242,26 @@ public class ClientServiceImpl implements ClientService {
             final SettableFuture<Boolean> resultFuture = SettableFuture.create();
 
             //this is not a lambda because we want it to be identifiable in a heap-dump
-            callbackExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
+            callbackExecutor.execute(() -> {
 
-                    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                    try {
-                        Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
-                        for (final SessionInformation sessionInformation : items) {
+                final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
+                    for (final SessionInformation sessionInformation : items) {
 
-                            callback.iterate(iterationContext, sessionInformation);
+                        callback.iterate(iterationContext, sessionInformation);
 
-                            if (iterationContext.isAborted()) {
-                                resultFuture.set(false);
-                                break;
-                            }
+                        if (iterationContext.isAborted()) {
+                            resultFuture.set(false);
+                            break;
                         }
-                    } catch (final Exception e) {
-                        resultFuture.setException(e);
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(contextClassLoader);
                     }
-                    resultFuture.set(true);
+                } catch (final Exception e) {
+                    resultFuture.setException(e);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(contextClassLoader);
                 }
+                resultFuture.set(true);
             });
 
             return resultFuture;
@@ -240,7 +278,8 @@ public class ClientServiceImpl implements ClientService {
         }
 
         @Override
-        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SessionInformation>> fetchNextResults(@Nullable final ChunkCursor cursor) {
+        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SessionInformation>> fetchNextResults(
+                @Nullable final ChunkCursor cursor) {
 
             final ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> persistenceFuture =
                     clientSessionPersistence.getAllLocalClientsChunk(cursor != null ? cursor : new ChunkCursor());

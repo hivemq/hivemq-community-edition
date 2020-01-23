@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,132 +45,176 @@ package com.hivemq.extension.sdk.api.packets.connect;
 public enum ConnackReasonCode {
     /**
      * For an MQTT 3 client this will be translated to the return code ACCEPTED.
+     * <p>
+     * This is a success code.
      *
      * @since 4.0.0
      */
     SUCCESS,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     UNSPECIFIED_ERROR,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     MALFORMED_PACKET,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     PROTOCOL_ERROR,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     IMPLEMENTATION_SPECIFIC_ERROR,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_UNACCEPTABLE_PROTOCOL_VERSION.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     UNSUPPORTED_PROTOCOL_VERSION,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_IDENTIFIER_REJECTED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     CLIENT_IDENTIFIER_NOT_VALID,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_BAD_USERNAME_OR_PASSWORD.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     BAD_USER_NAME_OR_PASSWORD,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     NOT_AUTHORIZED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_SERVER_UNAVAILABLE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_UNAVAILABLE,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_SERVER_UNAVAILABLE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_BUSY,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     BANNED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_BAD_USERNAME_OR_PASSWORD.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     BAD_AUTHENTICATION_METHOD,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     TOPIC_NAME_INVALID,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     PACKET_TOO_LARGE,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     QUOTA_EXCEEDED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     PAYLOAD_FORMAT_INVALID,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     RETAIN_NOT_SUPPORTED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     QOS_NOT_SUPPORTED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_SERVER_UNAVAILABLE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     USE_ANOTHER_SERVER,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_SERVER_UNAVAILABLE.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */
     SERVER_MOVED,
     /**
      * For an MQTT 3 client this will be translated to the return code REFUSED_NOT_AUTHORIZED.
+     * <p>
+     * This is an unsuccessful code.
      *
      * @since 4.0.0
      */

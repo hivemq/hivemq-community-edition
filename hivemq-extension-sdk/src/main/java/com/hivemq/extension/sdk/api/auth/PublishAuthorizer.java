@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extension.sdk.api.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -37,9 +36,6 @@ public interface PublishAuthorizer extends Authorizer {
     /**
      * This method is called for every PUBLISH packet and Will Publish, that the {@link PublishAuthorizer} is delegated
      * to authorize.
-     * <p>
-     * When the extension is enabled after HiveMQ is already running, this method will also be called for future PUBLISHes
-     * of clients that are already connected.
      *
      * @param publishAuthorizerInput  The {@link PublishAuthorizerInput}.
      * @param publishAuthorizerOutput The {@link PublishAuthorizerOutput}.
