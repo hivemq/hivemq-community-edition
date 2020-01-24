@@ -31,11 +31,14 @@ public class TestSingleWriterFactory {
         InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(1);
         InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.set(100);
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(1000);
+        InternalConfigurations.SINGLE_WRITER_CHECK_SCHEDULE.set(100);
 
         final SingleWriterService singleWriterService = new SingleWriterService();
         for (int i = 0; i < singleWriterService.callbackExecutors.length; i++) {
             singleWriterService.callbackExecutors[i] = MoreExecutors.newDirectExecutorService();
         }
+
+        singleWriterService.postConstruct();
 
         return singleWriterService;
     }

@@ -110,7 +110,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
 
             final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
-            final LRUCache cache = new LRUCache(physicalMemory() / blockCacheSizePortion / bucketCount);
+            final LRUCache cache = new LRUCache(physicalMemory() / blockCacheSizePortion);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
             tableConfig.setBlockSize(blockSize);
@@ -144,7 +144,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         try {
 
             final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
-            final long blockCacheMaxSize = physicalMemory() / blockCacheSizePortion / bucketCount;
+            final long blockCacheMaxSize = physicalMemory() / blockCacheSizePortion;
             final LRUCache cache = new LRUCache(blockCacheMaxSize);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);

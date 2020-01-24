@@ -120,10 +120,10 @@ public class InternalConfigurations {
     public static final AtomicReference<PersistenceType> RETAINED_MESSAGE_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final int RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION = 16;
+    public static final int RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION = 32;
 
     //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final int RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION = 32;
+    public static final int RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION = 64;
 
     //The block size used by rocksdb for the retained message persistence in bytes
     public static final int RETAINED_MESSAGE_BLOCK_SIZE = 32 * 1024;
@@ -193,10 +193,10 @@ public class InternalConfigurations {
     public static final int SHARED_SUBSCRIPTION_CACHE_SIZE = 10000;
 
     //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final int PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = 16;
+    public static final int PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = 32;
 
     //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final int PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = 32;
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = 64;
 
     //The block size used by rocksdb for the retained message persistence in bytes
     public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE = 32 * 1024;
