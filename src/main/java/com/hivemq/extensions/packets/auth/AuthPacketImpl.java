@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.auth.AUTH;
-import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -69,21 +68,7 @@ public class AuthPacketImpl implements AuthPacket {
     @NotNull
     @Override
     public AuthReasonCode getReasonCode() {
-        final Mqtt5AuthReasonCode reasonCode = auth.getReasonCode();
-        return toAuthReasonCode(reasonCode);
-    }
-
-    @NotNull
-    private AuthReasonCode toAuthReasonCode(final @NotNull Mqtt5AuthReasonCode reasonCode) {
-        switch(reasonCode){
-            case SUCCESS:
-                return AuthReasonCode.SUCCESS;
-            case CONTINUE_AUTHENTICATION:
-                return AuthReasonCode.CONTINUE_AUTHENTICATION;
-            case REAUTHENTICATE:
-            default:
-                return AuthReasonCode.REAUTHENTICATE;
-        }
+        return auth.getReasonCode().toAuthReasonCode();
     }
 
     @NotNull
