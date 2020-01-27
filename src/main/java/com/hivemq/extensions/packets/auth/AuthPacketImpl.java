@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.packets.auth;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
-*/
+ */
 public class AuthPacketImpl implements AuthPacket {
 
     private final @NotNull AUTH auth;
