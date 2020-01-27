@@ -496,7 +496,6 @@ public interface ClientContext {
      * Returns all {@link UnsubscribeInboundInterceptor} which are registered for this client by this extension.
      *
      * @return List of UnsubscribeInboundInterceptors for this client.
-     * @since 4.3.0
      */
     @Immutable
     @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptors();

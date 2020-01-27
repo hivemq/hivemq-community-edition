@@ -51,7 +51,6 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author Florian Limpöck
- * @since 4.3.0
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class ReAuthTaskTest {

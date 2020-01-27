@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Robin Atherton
- * @since 4.3.0
  */
 public class SubackOutboundOutputImplTest {
 

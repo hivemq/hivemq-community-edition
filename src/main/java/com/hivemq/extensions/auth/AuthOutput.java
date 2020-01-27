@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.3.0
  */
 abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
 

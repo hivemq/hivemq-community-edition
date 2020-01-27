@@ -38,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Silvio Giebl
- * @since 4.3.0
  */
 public class ConnectAuthOutput extends AuthOutput<EnhancedAuthOutput> implements EnhancedAuthOutput {
 

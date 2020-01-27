@@ -42,7 +42,6 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Florian Limpöck
- * @since 4.3.0
  */
 public class AuthHandlerTest {
 

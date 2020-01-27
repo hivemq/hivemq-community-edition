@@ -35,7 +35,6 @@ import java.util.Optional;
 /**
  * @author Yannick Weber
  * @author Silvio Giebl
- * @since 4.3.0
  */
 public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
 

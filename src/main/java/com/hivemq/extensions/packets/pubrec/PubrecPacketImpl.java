@@ -28,7 +28,6 @@ import java.util.Optional;
 /**
  * @author Yannick Weber
  * @author Silvio Giebl
- * @since 4.3.0y
  */
 @Immutable
 public class PubrecPacketImpl implements PubrecPacket {
