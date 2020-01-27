@@ -16,8 +16,8 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.annotations.NotNull;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
 import com.hivemq.mqtt.message.connect.CONNECT;
