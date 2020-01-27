@@ -16,7 +16,7 @@
 
 package com.hivemq.persistence;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

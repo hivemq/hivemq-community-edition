@@ -18,7 +18,7 @@ package com.hivemq.persistence.retained;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.persistence.RetainedMessage;
 

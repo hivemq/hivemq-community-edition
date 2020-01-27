@@ -18,8 +18,8 @@ package com.hivemq.configuration.info;
 
 import com.google.common.io.Files;
 import com.hivemq.HiveMQServer;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.EnvironmentVariables;
 import com.hivemq.configuration.SystemProperties;
 import com.hivemq.util.ManifestUtils;
@@ -201,11 +201,7 @@ public class SystemInformationImpl implements SystemInformation {
         }
 
         final String environmentVariable = System.getenv().get(variableName);
-        if (environmentVariable != null) {
-            return environmentVariable;
-        }
-
-        return null;
+        return environmentVariable;
     }
 
     private void setHomeFolder() {

@@ -17,9 +17,9 @@
 package com.hivemq.mqtt.message.suback;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.packets.suback.SubackPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;

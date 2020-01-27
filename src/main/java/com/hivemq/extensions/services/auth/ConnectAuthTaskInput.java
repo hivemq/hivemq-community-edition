@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthInput;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;

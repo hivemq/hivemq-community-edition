@@ -18,8 +18,8 @@ package com.hivemq.extensions.packets.subscribe;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;

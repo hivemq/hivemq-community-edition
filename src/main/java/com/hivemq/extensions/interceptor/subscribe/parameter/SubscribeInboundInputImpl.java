@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.interceptor.subscribe.parameter;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundInput;

@@ -16,8 +16,8 @@
 
 package com.hivemq.mqtt.message.reason;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 

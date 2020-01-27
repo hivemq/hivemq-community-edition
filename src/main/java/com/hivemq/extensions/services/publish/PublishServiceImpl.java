@@ -17,7 +17,7 @@
 package com.hivemq.extensions.services.publish;
 
 import com.google.common.util.concurrent.*;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.HivemqId;
@@ -44,7 +44,7 @@ import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Bytes;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;

@@ -16,7 +16,7 @@
 
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.initializer.ListenerAttributeAdderFactory;
 import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;

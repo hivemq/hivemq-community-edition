@@ -17,7 +17,7 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.Lists;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.logging.EventLog;

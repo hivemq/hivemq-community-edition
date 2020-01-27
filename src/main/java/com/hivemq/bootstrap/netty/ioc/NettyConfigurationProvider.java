@@ -17,7 +17,7 @@
 package com.hivemq.bootstrap.netty.ioc;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.NettyConfiguration;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;

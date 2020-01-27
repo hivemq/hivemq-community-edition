@@ -18,8 +18,8 @@ package com.hivemq.extensions.executor;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
@@ -244,7 +244,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         private final IsolatedPluginClassloader classloader;
 
-        public TestPluginInOutTask(IsolatedPluginClassloader classloader) {
+        public TestPluginInOutTask(final IsolatedPluginClassloader classloader) {
             this.classloader = classloader;
         }
 
@@ -266,7 +266,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         private final IsolatedPluginClassloader classloader;
 
-        public TestPluginOutTask(IsolatedPluginClassloader classloader) {
+        public TestPluginOutTask(final IsolatedPluginClassloader classloader) {
             this.classloader = classloader;
         }
 
@@ -286,7 +286,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         private final IsolatedPluginClassloader classloader;
 
-        public TestPluginInTask(IsolatedPluginClassloader classloader) {
+        public TestPluginInTask(final IsolatedPluginClassloader classloader) {
             this.classloader = classloader;
         }
 

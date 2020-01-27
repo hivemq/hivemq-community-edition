@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.topic.tree;
 
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;

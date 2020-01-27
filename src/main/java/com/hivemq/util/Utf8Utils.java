@@ -18,7 +18,7 @@ package com.hivemq.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Utf8;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.buffer.ByteBuf;
 
 /**

@@ -17,7 +17,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import io.netty.channel.ChannelHandlerContext;

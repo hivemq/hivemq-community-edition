@@ -18,7 +18,7 @@ package com.hivemq.common.shutdown;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.*;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.info.SystemInformationImpl;

@@ -18,8 +18,8 @@ package com.hivemq.mqtt.message.connect;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;

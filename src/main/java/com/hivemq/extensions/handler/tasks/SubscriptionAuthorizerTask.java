@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.handler.tasks;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;

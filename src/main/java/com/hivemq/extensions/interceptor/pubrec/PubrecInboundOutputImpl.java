@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.interceptor.pubrec;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.pubrec.parameter.PubrecInboundOutput;
 import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;

@@ -18,7 +18,7 @@ package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;

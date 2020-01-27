@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence.local;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.PersistenceFilter;

@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.executor.task;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * Class containing the necessary callback, for the processing of an extension result in form of a {@link PluginTaskOutput}.

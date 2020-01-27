@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.packets.subscribe;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;

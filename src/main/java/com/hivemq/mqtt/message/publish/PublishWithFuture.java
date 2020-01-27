@@ -17,7 +17,7 @@
 package com.hivemq.mqtt.message.publish;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;

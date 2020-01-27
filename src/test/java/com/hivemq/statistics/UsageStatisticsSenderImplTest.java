@@ -19,7 +19,7 @@ package com.hivemq.statistics;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

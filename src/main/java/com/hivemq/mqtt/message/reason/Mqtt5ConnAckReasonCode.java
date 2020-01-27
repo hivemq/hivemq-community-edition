@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.reason;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;

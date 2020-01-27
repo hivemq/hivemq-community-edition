@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.interceptor.connack;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.connack.parameter.ConnackOutboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;

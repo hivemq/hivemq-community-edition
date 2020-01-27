@@ -20,7 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;

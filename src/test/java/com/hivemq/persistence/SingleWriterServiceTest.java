@@ -17,7 +17,7 @@
 package com.hivemq.persistence;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
 import org.junit.Before;
 import org.junit.Test;

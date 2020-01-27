@@ -18,8 +18,8 @@ package com.hivemq.mqtt.message;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Striped;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;

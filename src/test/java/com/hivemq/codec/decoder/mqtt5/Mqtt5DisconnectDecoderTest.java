@@ -17,7 +17,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.mqtt.message.ProtocolVersion;

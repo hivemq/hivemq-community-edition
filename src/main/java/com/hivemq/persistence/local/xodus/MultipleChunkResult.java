@@ -15,7 +15,7 @@
  */
 package com.hivemq.persistence.local.xodus;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.Map;
 

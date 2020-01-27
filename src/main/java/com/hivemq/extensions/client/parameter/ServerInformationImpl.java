@@ -17,7 +17,7 @@
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;

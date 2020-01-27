@@ -16,7 +16,7 @@
 
 package com.hivemq.configuration.service.entity;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 
 /**
  * Allows the customization of write buffer behaviour.

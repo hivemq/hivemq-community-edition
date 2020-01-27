@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.services.builder;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.util.Utf8Utils;
 

@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Nullable;

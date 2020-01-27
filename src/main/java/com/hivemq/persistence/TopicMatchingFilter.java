@@ -16,7 +16,7 @@
 
 package com.hivemq.persistence;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.topic.TopicMatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;

@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.events;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 
 import java.util.Map;

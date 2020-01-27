@@ -16,7 +16,7 @@
 
 package com.hivemq.util;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;

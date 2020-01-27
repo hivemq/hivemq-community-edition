@@ -16,7 +16,7 @@
 
 package com.hivemq.persistence.payload;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 
 /**
  * @author Lukas Brandl

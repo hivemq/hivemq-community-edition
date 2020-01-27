@@ -19,7 +19,7 @@ package com.hivemq.util;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SystemInformationModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;

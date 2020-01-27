@@ -16,7 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -103,7 +103,7 @@ public class ConnectInboundInterceptorHandlerTest {
 
     private ConnectInboundInterceptorHandler handler;
 
-    private HivemqId hivemqId = new HivemqId();
+    private final HivemqId hivemqId = new HivemqId();
 
     @Before
     public void setUp() throws Exception {

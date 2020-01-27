@@ -17,7 +17,7 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
 
 import javax.inject.Singleton;

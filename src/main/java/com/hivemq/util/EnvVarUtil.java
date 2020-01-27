@@ -17,7 +17,7 @@
 package com.hivemq.util;
 
 import com.google.inject.Singleton;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.exceptions.UnrecoverableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

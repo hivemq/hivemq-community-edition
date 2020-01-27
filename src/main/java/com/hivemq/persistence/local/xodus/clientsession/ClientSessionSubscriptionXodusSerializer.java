@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence.local.xodus.clientsession;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE;

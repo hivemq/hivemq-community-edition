@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.io.Serializable;
 

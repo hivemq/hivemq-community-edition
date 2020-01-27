@@ -17,9 +17,9 @@
 package com.hivemq.mqtt.message.connack;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;

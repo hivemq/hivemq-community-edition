@@ -17,7 +17,7 @@
 package com.hivemq.extensions.events;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 

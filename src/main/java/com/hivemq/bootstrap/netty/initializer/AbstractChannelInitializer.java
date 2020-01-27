@@ -17,7 +17,7 @@
 package com.hivemq.bootstrap.netty.initializer;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;

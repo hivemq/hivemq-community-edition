@@ -19,8 +19,8 @@ package com.hivemq.persistence;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.*;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.ThreadFactoryUtil;
 

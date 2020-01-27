@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 
 import java.util.Map;

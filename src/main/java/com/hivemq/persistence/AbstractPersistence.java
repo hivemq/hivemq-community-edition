@@ -17,7 +17,7 @@
 package com.hivemq.persistence;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

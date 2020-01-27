@@ -16,7 +16,7 @@
 
 package util;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
@@ -138,7 +138,8 @@ public class TestKeyStoreGenerator {
         final List<GeneralName> altNames = new ArrayList<GeneralName>();
         altNames.add(new GeneralName(GeneralName.dNSName, "localhost"));
         altNames.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
-        final GeneralNames subjectAltNames = GeneralNames.getInstance(new DERSequence((GeneralName[]) altNames.toArray(new GeneralName[]{})));
+        final GeneralNames subjectAltNames = GeneralNames.getInstance(new DERSequence(
+                altNames.toArray(new GeneralName[]{})));
         builder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
 
         final X509CertificateHolder holder = builder.build(eclipticCurve ? createECContentSigner(keyPair) : createRSAContentSigner(keyPair));

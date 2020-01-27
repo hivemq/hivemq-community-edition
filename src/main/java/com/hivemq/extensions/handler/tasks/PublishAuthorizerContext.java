@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;

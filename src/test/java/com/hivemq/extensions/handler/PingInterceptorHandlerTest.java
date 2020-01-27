@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.handler;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.PingReqInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.parameter.PingReqInboundInput;

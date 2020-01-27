@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence.qos;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageWithID;
 
 /**

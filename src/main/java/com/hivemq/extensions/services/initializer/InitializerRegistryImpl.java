@@ -17,7 +17,7 @@
 package com.hivemq.extensions.services.initializer;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
 

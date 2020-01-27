@@ -18,8 +18,8 @@ package com.hivemq.mqtt.message.mqtt5;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.reason.Mqtt5ReasonCode;

@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.connack;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.MqttConnAckCode;
 

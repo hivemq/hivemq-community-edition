@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.nio.file.Path;
 

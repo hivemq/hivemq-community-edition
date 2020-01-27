@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.topic;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.lang3.StringUtils;
 
 import static java.lang.Math.min;

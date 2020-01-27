@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence.clientsession;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Lukas Brandl

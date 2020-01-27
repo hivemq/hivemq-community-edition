@@ -16,7 +16,7 @@
 package com.hivemq.extensions.interceptor.publish.parameter;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;

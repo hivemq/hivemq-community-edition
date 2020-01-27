@@ -17,7 +17,7 @@
 package com.hivemq.persistence;
 
 import com.google.inject.Inject;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 
 import javax.annotation.PostConstruct;

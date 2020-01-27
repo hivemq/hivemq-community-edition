@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 

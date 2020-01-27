@@ -18,7 +18,7 @@ package com.hivemq.migration.persistence.retained;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.migration.Migrations;

@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;

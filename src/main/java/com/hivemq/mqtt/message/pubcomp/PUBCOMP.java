@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.message.pubcomp;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.mqtt.message.MessageType;

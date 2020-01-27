@@ -18,8 +18,8 @@ package com.hivemq.mqtt.message.unsubscribe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
 import com.hivemq.mqtt.message.MessageType;

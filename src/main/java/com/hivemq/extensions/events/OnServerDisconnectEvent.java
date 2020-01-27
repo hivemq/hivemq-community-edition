@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.events;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;

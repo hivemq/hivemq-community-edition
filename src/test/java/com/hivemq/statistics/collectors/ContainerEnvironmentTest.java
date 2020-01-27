@@ -16,7 +16,7 @@
 
 package com.hivemq.statistics.collectors;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.sun.jna.Platform;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;

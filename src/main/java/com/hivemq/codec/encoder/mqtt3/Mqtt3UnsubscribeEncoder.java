@@ -16,7 +16,7 @@
 
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.Strings;

@@ -16,8 +16,8 @@
 
 package com.hivemq.mqtt.message.connect;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.ProtocolVersion;
 
