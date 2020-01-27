@@ -129,29 +129,33 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     private void continueAuthentication(final @NotNull T output) {
-        final ChannelFuture channelFuture = authSender.sendAuth(
+        final ChannelFuture authFuture = authSender.sendAuth(
                 ctx.channel(),
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
                 output.getUserProperties(),
                 output.getReasonString());
 
-        channelFuture.addListener((ChannelFutureListener) future -> {
+        authFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
-                final ScheduledFuture<?> authFuture =
+                final ScheduledFuture<?> timeoutFuture =
                         ctx.executor().schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
-                ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(authFuture);
+                ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(timeoutFuture);
+            } else if (future.channel().isActive()) {
+                onSendException(future.cause());
             }
         });
     }
-
-    abstract void onTimeout();
 
     void succeedAuthentication(final @NotNull T output) {
         ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(output.getDefaultPermissions()); // TODO copy
     }
 
-    abstract void failAuthentication(final @NotNull T output);
+    abstract void failAuthentication(@NotNull T output);
 
-    abstract void undecidedAuthentication(final @NotNull T output);
+    abstract void undecidedAuthentication(@NotNull T output);
+
+    abstract void onTimeout();
+
+    abstract void onSendException(@NotNull Throwable cause);
 }
