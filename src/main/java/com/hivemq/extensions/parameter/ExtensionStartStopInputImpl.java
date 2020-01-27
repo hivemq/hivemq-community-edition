@@ -17,7 +17,7 @@
 package com.hivemq.extensions.parameter;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
