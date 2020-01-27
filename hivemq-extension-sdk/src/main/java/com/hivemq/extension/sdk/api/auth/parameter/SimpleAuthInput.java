@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.auth.parameter;
 
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * The input object of any {@link SimpleAuthenticator}
- * providing an unmodifiable {@link ConnectPacket} and {@link ClientBasedInput}.
+ * Input parameter provided to {@link SimpleAuthenticator#onConnect(SimpleAuthInput, SimpleAuthOutput)}.
+ * <p>
+ * Provides an unmodifiable {@link ConnectPacket} and {@link ClientBasedInput}.
  *
  * @author Christoph Schäbel
  * @since 4.0.0
@@ -33,9 +35,9 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 public interface SimpleAuthInput extends ClientBasedInput {
 
     /**
-     * Get the unmodifiable CONNECT packet for the MQTT client that has to be authenticated.
+     * Provides the unmodifiable CONNECT packet sent by the MQTT client that has to be authenticated.
      *
-     * @return The {@link ConnectPacket} of the input.
+     * @return The {@link ConnectPacket} sent by the client.
      * @since 4.0.0
      */
     @Immutable
