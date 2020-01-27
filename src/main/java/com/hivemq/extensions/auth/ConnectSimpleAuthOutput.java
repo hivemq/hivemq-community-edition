@@ -30,7 +30,6 @@ import java.time.Duration;
 
 /**
  * @author Silvio Giebl
- * @since 4.3.0
  */
 class ConnectSimpleAuthOutput implements SimpleAuthOutput {
 

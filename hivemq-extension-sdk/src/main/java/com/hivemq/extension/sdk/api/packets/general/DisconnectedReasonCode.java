@@ -97,9 +97,8 @@ public enum DisconnectedReasonCode {
      *********** */
 
     /**
-     * Deprecated since 4.3.0, because SUCCESS is never a reason code for a disconnect.
-     *
      * @since 4.0.0
+     * @deprecated since 4.3.0, because SUCCESS is never a reason code for a disconnect.
      */
     @Deprecated
     SUCCESS,

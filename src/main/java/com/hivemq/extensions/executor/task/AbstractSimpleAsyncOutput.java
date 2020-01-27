@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yannick Weber
- * @since 4.3.0
  */
 public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsyncOutput<T> {
 

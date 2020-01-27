@@ -21,6 +21,7 @@ package com.hivemq.extensions.auth;
  *
  * @author Daniel Krüger
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
 enum AuthenticationState {
     /**

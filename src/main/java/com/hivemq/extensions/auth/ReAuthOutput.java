@@ -33,7 +33,6 @@ import java.time.Duration;
 
 /**
  * @author Silvio Giebl
- * @since 4.3.0
  */
 public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements EnhancedAuthOutput {
 
