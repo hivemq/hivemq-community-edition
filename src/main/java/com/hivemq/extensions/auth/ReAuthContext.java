@@ -18,6 +18,7 @@ package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
+import com.hivemq.extensions.events.OnAuthSuccessEvent;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
@@ -27,11 +28,12 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Silvio Giebl
- * @since 4.3.0
  */
 public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
@@ -55,30 +57,26 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
     }
 
     @Override
-    void onTimeout() {
-        disconnector.disconnect(
-                ctx.channel(),
-                PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
-                ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
-                Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
-                ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
-    }
-
-    @Override
     void succeedAuthentication(final @NotNull ReAuthOutput output) {
         super.succeedAuthentication(output);
         final Channel channel = ctx.channel();
         channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(false);
         applyClientSettings(output.getClientSettings(), channel);
 
-        authSender.sendAuth(
+        final ChannelFuture authFuture = authSender.sendAuth(
                 channel,
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.SUCCESS,
                 output.getUserProperties(),
                 output.getReasonString());
+
+        authFuture.addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                ctx.pipeline().fireUserEventTriggered(new OnAuthSuccessEvent());
+            } else if (future.channel().isActive()) {
+                onSendException(future.cause());
+            }
+        });
     }
 
     @Override
@@ -101,6 +99,30 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                true);
+    }
+
+    @Override
+    void onTimeout() {
+        disconnector.disconnect(
+                ctx.channel(),
+                PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
+                ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
+                Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                true);
+    }
+
+    @Override
+    void onSendException(final @NotNull Throwable cause) {
+        disconnector.disconnect(
+                ctx.channel(),
+                PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
+                ReasonStrings.RE_AUTH_FAILED_SEND_EXCEPTION,
+                Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                ReasonStrings.RE_AUTH_FAILED_SEND_EXCEPTION,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
                 true);
     }

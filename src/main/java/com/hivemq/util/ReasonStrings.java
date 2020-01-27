@@ -142,6 +142,8 @@ public class ReasonStrings {
     public static final String RE_AUTH_FAILED_UNDECIDED = "Re-authentication failed, authenticator did not decide authenticity";
     public static final String AUTH_FAILED_EXCEPTION = "Authentication failed, exception in authenticator";
     public static final String RE_AUTH_FAILED_EXCEPTION = "Re-authentication failed, exception in authenticator";
+    public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client";
+    public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client";
 
     private ReasonStrings() {
         //Don't instantiate

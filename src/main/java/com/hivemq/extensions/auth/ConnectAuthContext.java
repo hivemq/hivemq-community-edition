@@ -30,7 +30,6 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Silvio Giebl
- * @since 4.3.0
  */
 public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
 
@@ -59,18 +58,6 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     @NotNull ConnectAuthOutput createNextOutput(final @NotNull ConnectAuthOutput prevOutput) {
         return new ConnectAuthOutput(prevOutput);
-    }
-
-    @Override
-    void onTimeout() {
-        connacker.connackError(
-                ctx.channel(),
-                PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
-                ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
-                Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
-                ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
     }
 
     @Override
@@ -109,5 +96,29 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     true);
         }
+    }
+
+    @Override
+    void onTimeout() {
+        connacker.connackError(
+                ctx.channel(),
+                PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
+                ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
+                Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                true);
+    }
+
+    @Override
+    void onSendException(final @NotNull Throwable cause) {
+        connacker.connackError(
+                ctx.channel(),
+                PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
+                ReasonStrings.AUTH_FAILED_SEND_EXCEPTION,
+                Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                ReasonStrings.AUTH_FAILED_SEND_EXCEPTION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                true);
     }
 }
