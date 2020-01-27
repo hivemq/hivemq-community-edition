@@ -9,10 +9,7 @@ plugins {
 
 allprojects {
     repositories {
-        mavenLocal()
         mavenCentral()
-        jcenter()
-        maven { url 'https://oss.sonatype.org/content/groups/public' } // for snapshot artifacts
     }
 }
 
