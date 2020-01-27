@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * Input object provided to {@link EnhancedAuthenticator#onConnect(EnhancedAuthConnectInput, EnhancedAuthOutput)}.
+ * Input parameter provided to {@link EnhancedAuthenticator#onConnect(EnhancedAuthConnectInput, EnhancedAuthOutput)}.
  * <p>
  * Provides an unmodifiable {@link ConnectPacket} and {@link ClientBasedInput}.
  *

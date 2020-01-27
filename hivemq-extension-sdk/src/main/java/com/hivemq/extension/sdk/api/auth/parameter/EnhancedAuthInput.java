@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
 
 /**
- * Input object provided to the methods of an {@link EnhancedAuthenticator}.
+ * Input parameter provided to the methods of an {@link EnhancedAuthenticator}.
  * <p>
  * Provides an unmodifiable {@link AuthPacket} and {@link ClientBasedInput}.
  *
