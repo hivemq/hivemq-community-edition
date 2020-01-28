@@ -103,6 +103,15 @@ public interface Publish {
     @NotNull Optional<@Immutable ByteBuffer> getCorrelationData();
 
     /**
+     * If this property is present, this is the correlation data.
+     * <p>
+     * For an MQTT 3 PUBLISH this MQTT 5 property will always be empty.
+     *
+     * @return An {@link Optional} that contains the correlation data as an array if present.
+     */
+    @NotNull Optional<byte[]> getCorrelationDataAsArray();
+
+    /**
      * If this property is present, this is the content type.
      *
      * @return An {@link Optional} that contains the content type if present.
@@ -117,6 +126,13 @@ public interface Publish {
      * @since 4.0.0
      */
     @NotNull Optional<@Immutable ByteBuffer> getPayload();
+
+    /**
+     * If the payload is present, this returns a copy as a byte array.
+     *
+     * @return An {@link Optional} that contains a copy of the payload as an array if present.
+     */
+    @NotNull Optional<byte[]> getPayloadAsArray();
 
     /**
      * The {@link UserProperties} of the PUBLISH.

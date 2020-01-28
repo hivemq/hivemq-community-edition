@@ -31,24 +31,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Georg Held
  */
+@SuppressWarnings("NullabilityAnnotations")
 public class ConnectPacketImplTest {
 
 
     private ConnectPacketImpl connectPacket;
     private ConnectPacketImpl emptyPacket;
+    private final byte[] authData = "data".getBytes();
+    private final byte[] password = "password".getBytes();
 
     @Before
     public void setUp() {
         final CONNECT connect = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("client")
                 .withUsername("user")
-                .withPassword("password".getBytes())
+                .withPassword(password)
                 .withAuthMethod("method")
-                .withAuthData("data".getBytes())
+                .withAuthData(authData)
                 .withSessionExpiryInterval(Long.MAX_VALUE)
                 .withCleanStart(true)
                 .withKeepAlive(Integer.MAX_VALUE)
@@ -159,5 +163,41 @@ public class ConnectPacketImplTest {
     @Test(timeout = 5000)
     public void test_mqtt_version() {
         assertEquals(MqttVersion.V_5, connectPacket.getMqttVersion());
+    }
+
+
+    @Test
+    public void change_auth_data_array_from_packet_does_not_change_copies() {
+        final Optional<byte[]> authData1 = connectPacket.getAuthenticationDataAsArray();
+        assertTrue(authData1.isPresent());
+        assertArrayEquals(authData, authData1.get());
+
+        authData1.get()[0] = (byte) 0xAF;
+        authData1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(authData, authData1.get());
+
+        final Optional<byte[]> authData2 = connectPacket.getAuthenticationDataAsArray();
+        assertTrue(authData2.isPresent());
+        assertNotEquals(authData1, authData2.get());
+        assertNotEquals(authData, authData1.get());
+    }
+
+    @Test
+    public void change_password_array_from_packet_does_not_change_copies() {
+
+        final Optional<byte[]> password1 = connectPacket.getPasswordAsArray();
+        assertTrue(password1.isPresent());
+        assertArrayEquals(password, password1.get());
+
+        password1.get()[0] = (byte) 0xAF;
+        password1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(password, password1.get());
+
+        final Optional<byte[]> password2 = connectPacket.getPasswordAsArray();
+        assertTrue(password2.isPresent());
+        assertNotEquals(password1, password2.get());
+        assertNotEquals(password, password1.get());
     }
 }

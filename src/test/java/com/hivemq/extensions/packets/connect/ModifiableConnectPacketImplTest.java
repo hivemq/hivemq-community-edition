@@ -23,8 +23,11 @@ import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Lukas Brandl
@@ -204,4 +207,83 @@ public class ModifiableConnectPacketImplTest {
     public void test_client_id_empty() {
         modifiablePacket.setClientId("");
     }
+
+    @Test
+    public void change_original_auth_data_array_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setAuthenticationData(originalBytes);
+
+        final Optional<byte[]> authData1 = modifiablePacket.getAuthenticationDataAsArray();
+        assertTrue(authData1.isPresent());
+        assertArrayEquals(originalBytes, authData1.get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, authData1.get());
+
+        final Optional<byte[]> authData2 = modifiablePacket.getAuthenticationDataAsArray();
+        assertTrue(authData2.isPresent());
+        assertNotEquals(originalBytes, authData2.get());
+    }
+
+    @Test
+    public void change_original_password_data_array_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setPassword(originalBytes);
+
+        final Optional<byte[]> password1 = modifiablePacket.getPasswordAsArray();
+        assertTrue(password1.isPresent());
+        assertArrayEquals(originalBytes, password1.get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, password1.get());
+
+        final Optional<byte[]> password2 = modifiablePacket.getPasswordAsArray();
+        assertTrue(password2.isPresent());
+        assertNotEquals(originalBytes, password2.get());
+    }
+
+    @Test
+    public void change_auth_data_array_from_packet_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setAuthenticationData(originalBytes);
+
+        final Optional<byte[]> authData1 = modifiablePacket.getAuthenticationDataAsArray();
+        assertTrue(authData1.isPresent());
+        assertArrayEquals(originalBytes, authData1.get());
+
+        authData1.get()[0] = (byte) 0xAF;
+        authData1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, authData1.get());
+
+        final Optional<byte[]> authData2 = modifiablePacket.getAuthenticationDataAsArray();
+        assertTrue(authData2.isPresent());
+        assertNotEquals(authData1, authData2.get());
+        assertNotEquals(originalBytes, authData1.get());
+    }
+
+    @Test
+    public void change_password_array_from_packet_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiablePacket.setPassword(originalBytes);
+
+        final Optional<byte[]> password1 = modifiablePacket.getPasswordAsArray();
+        assertTrue(password1.isPresent());
+        assertArrayEquals(originalBytes, password1.get());
+
+        password1.get()[0] = (byte) 0xAF;
+        password1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, password1.get());
+
+        final Optional<byte[]> password2 = modifiablePacket.getPasswordAsArray();
+        assertTrue(password2.isPresent());
+        assertNotEquals(password1, password2.get());
+        assertNotEquals(originalBytes, password1.get());
+    }
+
 }

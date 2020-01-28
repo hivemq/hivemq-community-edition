@@ -29,12 +29,14 @@ import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.byteThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +56,7 @@ public class ConnectionAttributeStoreImplTest {
     private ConnectionAttributes connectionAttributes;
 
     private ConnectionAttributeStore connectionAttributeStore;
+    private byte[] fromStoreArray;
 
     @Before
     public void setUp() {
@@ -191,7 +194,7 @@ public class ConnectionAttributeStoreImplTest {
     public void test_putAsString_charset() {
         final String key = "test.key";
         final String value = "test.value";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
 
@@ -207,7 +210,7 @@ public class ConnectionAttributeStoreImplTest {
         final String key = "test.key";
         final String value1 = "test.value1";
         final String value2 = "test.value2";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
 
@@ -223,7 +226,7 @@ public class ConnectionAttributeStoreImplTest {
     public void test_putAsString_charset_attribute_not_present() {
         final String key = "test.key";
         final String value = "test.value";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(null);
         when(connectionAttributesAttribute.setIfAbsent(any(ConnectionAttributes.class))).thenReturn(connectionAttributes);
@@ -239,7 +242,7 @@ public class ConnectionAttributeStoreImplTest {
     public void test_putAsString_charset_null_key() {
         final String key = null;
         final String value = "test.value";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         connectionAttributeStore.putAsString(key, value, charset);
     }
@@ -248,7 +251,7 @@ public class ConnectionAttributeStoreImplTest {
     public void test_putAsString_charset_null_value() {
         final String key = "test.key";
         final String value = null;
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         connectionAttributeStore.putAsString(key, value, charset);
     }
@@ -339,7 +342,7 @@ public class ConnectionAttributeStoreImplTest {
     public void test_getAsString_charset() {
         final String key = "test.key";
         final String value = "test.value";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
 
@@ -354,7 +357,7 @@ public class ConnectionAttributeStoreImplTest {
     @Test
     public void test_getAsString_charset_not_present() {
         final String key = "test.key";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
 
@@ -366,7 +369,7 @@ public class ConnectionAttributeStoreImplTest {
     @Test
     public void test_getAsString_charset_attribute_not_present() {
         final String key = "test.key";
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         when(connectionAttributesAttribute.get()).thenReturn(null);
 
@@ -378,7 +381,7 @@ public class ConnectionAttributeStoreImplTest {
     @Test(expected = NullPointerException.class)
     public void test_getAsString_charset_null_key() {
         final String key = null;
-        final Charset charset = Charset.forName("iso-8859-1");
+        final Charset charset = StandardCharsets.ISO_8859_1;
 
         connectionAttributeStore.getAsString(key, charset);
     }
@@ -459,6 +462,22 @@ public class ConnectionAttributeStoreImplTest {
 
         assertTrue(returnValue.isPresent());
         assertEquals(value, returnValue.get());
+    }
+
+    @Test
+    public void test_remove_as_array() {
+        final String key = "test.key";
+        final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
+
+        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+
+        connectionAttributes.put(key, value);
+        connectionAttributes.put("test.key2", ByteBuffer.wrap("test.value2".getBytes()));
+
+        final Optional<byte[]> returnValue = connectionAttributeStore.removeAsArray(key);
+
+        assertTrue(returnValue.isPresent());
+        assertArrayEquals("test.value".getBytes(), returnValue.get());
     }
 
     @Test
@@ -640,6 +659,49 @@ public class ConnectionAttributeStoreImplTest {
                 ConnectionAttributesTest.assertAllEquals(expected.get(), actual.get());
             }
         }
+    }
+
+    @Test
+    public void change_original_array_does_not_change_copies() {
+        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        connectionAttributeStore.putAsArray("original", originalBytes);
+
+        final Optional<byte[]> fromStore1 = connectionAttributeStore.getAsArray("original");
+        assertTrue(fromStore1.isPresent());
+        assertArrayEquals(originalBytes, fromStore1.get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, fromStore1.get());
+
+        final Optional<byte[]> fromStore2 = connectionAttributeStore.getAsArray("original");
+        assertTrue(fromStore2.isPresent());
+        assertNotEquals(originalBytes, fromStore2.get());
+    }
+
+    @Test
+    public void change_array_from_store_does_not_change_copies() {
+        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        connectionAttributeStore.putAsArray("original", originalBytes);
+
+        final Optional<byte[]> fromStore1 = connectionAttributeStore.getAsArray("original");
+        assertTrue(fromStore1.isPresent());
+        assertArrayEquals(originalBytes, fromStore1.get());
+
+        fromStore1.get()[0] = (byte) 0xAF;
+        fromStore1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, fromStore1.get());
+
+        final Optional<byte[]> fromStore2 = connectionAttributeStore.getAsArray("original");
+        assertTrue(fromStore2.isPresent());
+        assertNotEquals(fromStore1, fromStore2.get());
+        assertNotEquals(originalBytes, fromStore1.get());
     }
 
     private static abstract class ExceptionCountRunnable implements Runnable {

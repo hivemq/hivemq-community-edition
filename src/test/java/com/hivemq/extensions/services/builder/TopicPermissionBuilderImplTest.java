@@ -18,11 +18,14 @@ package com.hivemq.extensions.services.builder;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
 import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
-import static org.junit.Assert.assertEquals;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Christoph Schäbel
@@ -198,4 +201,6 @@ public class TopicPermissionBuilderImplTest {
     public void test_shared_group_root_wildcard_allowed() {
         topicPermissionBuilder.sharedGroup("#");
     }
+
+
 }

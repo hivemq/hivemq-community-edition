@@ -215,6 +215,17 @@ public class PublishBuilderImpl implements PublishBuilder {
         return this;
     }
 
+    @Override
+    public @NotNull PublishBuilder correlationData(@Nullable final byte[] correlationData) {
+        if (correlationData == null) {
+            this.correlationData = null;
+            return this;
+        }
+        final byte[] copy = Arrays.copyOf(correlationData, correlationData.length);
+        this.correlationData = ByteBuffer.wrap(copy);
+        return this;
+    }
+
     @NotNull
     @Override
     public PublishBuilder contentType(@Nullable final String contentType) {

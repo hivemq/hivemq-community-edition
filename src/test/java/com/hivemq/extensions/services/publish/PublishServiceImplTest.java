@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -203,12 +204,22 @@ public class PublishServiceImplTest {
         }
 
         @Override
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<String> getContentType() {
             return Optional.empty();
         }
 
         @Override
         public Optional<ByteBuffer> getPayload() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
             return Optional.empty();
         }
 

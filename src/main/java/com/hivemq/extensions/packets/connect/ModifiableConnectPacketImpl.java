@@ -409,10 +409,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
 
     @Override
     public @NotNull Optional<byte[]> getAuthenticationDataAsArray() {
-        if (authData == null) {
-            return Optional.empty();
-        }
-        return Optional.of(authData.array());
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getAuthenticationData());
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extensions.packets.general.MqttVersionUtil;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -120,11 +121,7 @@ public class ConnectPacketImpl implements ConnectPacket {
     @NotNull
     @Override
     public Optional<byte[]> getAuthenticationDataAsArray() {
-        final byte[] authData = connect.getAuthData();
-        if (authData == null) {
-            return Optional.empty();
-        }
-        return Optional.of(authData);
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getAuthenticationData());
     }
 
     @NotNull
@@ -152,10 +149,6 @@ public class ConnectPacketImpl implements ConnectPacket {
     @NotNull
     @Override
     public Optional<byte[]> getPasswordAsArray() {
-        final byte[] password = connect.getPassword();
-        if (password == null) {
-            return Optional.empty();
-        }
-        return Optional.of(password);
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getPassword());
     }
 }

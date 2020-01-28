@@ -17,9 +17,11 @@
 package com.hivemq.extensions.services.builder;
 
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.services.builder.PublishBuilder;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.mqtt.message.QoS;
@@ -29,10 +31,10 @@ import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Lukas Brandl
@@ -192,6 +194,38 @@ public class PublishBuilderImplTest {
         new PublishBuilderImpl(configurationService).contentType(RandomStringUtils.randomAlphanumeric(65536));
     }
 
+    @Test
+    public void change_original_payload_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final Publish publish = new PublishBuilderImpl(configurationService)
+                .topic("myTopic")
+                .payload(originalBytes).build();
+
+        assertTrue(publish.getPayloadAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getPayloadAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getPayloadAsArray().get());
+    }
+
+    @Test
+    public void change_original_correlation_data_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final Publish publish = new PublishBuilderImpl(configurationService)
+                .topic("myTopic")
+                .payload("payload".getBytes(StandardCharsets.UTF_8))
+                .correlationData(originalBytes).build();
+
+        assertTrue(publish.getCorrelationDataAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+    }
 
     @Test
     public void test_all_values_set() {
@@ -296,12 +330,22 @@ public class PublishBuilderImplTest {
         }
 
         @Override
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<String> getContentType() {
             return Optional.empty();
         }
 
         @Override
         public Optional<ByteBuffer> getPayload() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
             return Optional.empty();
         }
 

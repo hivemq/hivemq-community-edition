@@ -403,6 +403,39 @@ public class RetainedPublishBuilderImplTest {
         }
     }
 
+    @Test
+    public void change_original_payload_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final Publish publish = new RetainedPublishBuilderImpl(configurationService)
+                .topic("myTopic")
+                .payload(originalBytes).build();
+
+        assertTrue(publish.getPayloadAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getPayloadAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getPayloadAsArray().get());
+    }
+
+    @Test
+    public void change_original_correlation_data_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final Publish publish = new RetainedPublishBuilderImpl(configurationService)
+                .topic("myTopic")
+                .payload("payload".getBytes(StandardCharsets.UTF_8))
+                .correlationData(originalBytes).build();
+
+        assertTrue(publish.getCorrelationDataAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+    }
+
     private class TestPublish implements Publish {
 
         @Override
@@ -441,12 +474,22 @@ public class RetainedPublishBuilderImplTest {
         }
 
         @Override
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<String> getContentType() {
             return Optional.empty();
         }
 
         @Override
         public Optional<ByteBuffer> getPayload() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
             return Optional.empty();
         }
 

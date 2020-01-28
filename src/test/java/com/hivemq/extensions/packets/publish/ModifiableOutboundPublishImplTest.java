@@ -29,6 +29,8 @@ import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -412,5 +414,83 @@ public class ModifiableOutboundPublishImplTest {
 
         assertEquals(ImmutableList.of(123), mergePublishPacket.getSubscriptionIdentifiers());
         assertTrue(modifiableOutboundPublish.isModified());
+    }
+
+    @Test
+    public void change_original_correlation_data_array_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiableOutboundPublish.setCorrelationData(originalBytes);
+
+        final Optional<byte[]> data = modifiableOutboundPublish.getCorrelationDataAsArray();
+        assertTrue(data.isPresent());
+        assertArrayEquals(originalBytes, data.get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, data.get());
+
+        final Optional<byte[]> data2 = modifiableOutboundPublish.getCorrelationDataAsArray();
+        assertTrue(data2.isPresent());
+        assertNotEquals(originalBytes, data2.get());
+    }
+
+    @Test
+    public void change_correlation_array_from_packet_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiableOutboundPublish.setCorrelationData(originalBytes);
+
+        final Optional<byte[]> data = modifiableOutboundPublish.getCorrelationDataAsArray();
+        assertTrue(data.isPresent());
+        assertArrayEquals(originalBytes, data.get());
+
+        data.get()[0] = (byte) 0xAF;
+        data.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, data.get());
+
+        final Optional<byte[]> data2 = modifiableOutboundPublish.getCorrelationDataAsArray();
+        assertTrue(data2.isPresent());
+        assertNotEquals(data, data2.get());
+        assertNotEquals(originalBytes, data.get());
+    }
+
+    @Test
+    public void change_original_payload_array_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiableOutboundPublish.setPayload(originalBytes);
+
+        final Optional<byte[]> payload = modifiableOutboundPublish.getPayloadAsArray();
+        assertTrue(payload.isPresent());
+        assertArrayEquals(originalBytes, payload.get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, payload.get());
+
+        final Optional<byte[]> data2 = modifiableOutboundPublish.getPayloadAsArray();
+        assertTrue(data2.isPresent());
+        assertNotEquals(originalBytes, data2.get());
+    }
+
+    @Test
+    public void change_payload_from_packet_does_not_change_copies() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        modifiableOutboundPublish.setPayload(originalBytes);
+
+        final Optional<byte[]> payload1 = modifiableOutboundPublish.getPayloadAsArray();
+        assertTrue(payload1.isPresent());
+        assertArrayEquals(originalBytes, payload1.get());
+
+        payload1.get()[0] = (byte) 0xAF;
+        payload1.get()[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, payload1.get());
+
+        final Optional<byte[]> payload2 = modifiableOutboundPublish.getPayloadAsArray();
+        assertTrue(payload2.isPresent());
+        assertNotEquals(payload1, payload2.get());
+        assertNotEquals(originalBytes, payload1.get());
     }
 }

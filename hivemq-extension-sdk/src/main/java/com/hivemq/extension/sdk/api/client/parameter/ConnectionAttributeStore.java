@@ -141,7 +141,7 @@ public interface ConnectionAttributeStore {
     /**
      * Retrieves all connection attributes for the connected client.
      *
-     * @return An {@link Optional} containing all connection attributes as a map of key and value pairs if present.
+     * @return An {@link Optional} containing all connection attributes as a map of key and value pairs if present.#
      * @since 4.0.0
      */
     @NotNull Optional<Map<String, ByteBuffer>> getAll();

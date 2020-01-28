@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -130,6 +131,11 @@ public class PublishImpl implements Publish {
         return Optional.ofNullable(correlationData);
     }
 
+    @Override
+    public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getCorrelationData());
+    }
+
     @NotNull
     @Override
     public Optional<String> getContentType() {
@@ -140,6 +146,11 @@ public class PublishImpl implements Publish {
     @Override
     public Optional<ByteBuffer> getPayload() {
         return Optional.ofNullable(payload);
+    }
+
+    @Override
+    public @NotNull Optional<byte[]> getPayloadAsArray() {
+        return Bytes.getBytesFromReadOnlyBufferAsOptional(getPayload());
     }
 
     @NotNull

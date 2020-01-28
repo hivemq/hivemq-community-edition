@@ -44,6 +44,7 @@ import com.hivemq.util.Topics;
 
 import javax.inject.Inject;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -208,6 +209,18 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
         return this;
     }
 
+    @Override
+    public @NotNull RetainedPublishBuilder correlationData(
+            @Nullable final byte[] correlationData) {
+        if (correlationData == null) {
+            this.correlationData = null;
+            return this;
+        }
+        final byte[] copy = Arrays.copyOf(correlationData, correlationData.length);
+        this.correlationData = ByteBuffer.wrap(copy);
+        return this;
+    }
+
     @NotNull
     @Override
     public RetainedPublishBuilder contentType(@Nullable final String contentType) {
@@ -221,6 +234,14 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     public RetainedPublishBuilder payload(@NotNull final ByteBuffer payload) {
         checkNotNull(payload, "Payload must not be null");
         this.payload = payload;
+        return this;
+    }
+
+    @Override
+    public @NotNull RetainedPublishBuilder payload(@NotNull final byte[] payload) {
+        checkNotNull(payload, "Payload must not be null");
+        final byte[] copy = Arrays.copyOf(payload, payload.length);
+        this.payload = ByteBuffer.wrap(copy);
         return this;
     }
 

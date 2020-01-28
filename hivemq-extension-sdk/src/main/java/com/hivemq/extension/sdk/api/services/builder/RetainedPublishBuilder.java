@@ -144,6 +144,17 @@ public interface RetainedPublishBuilder {
     @NotNull RetainedPublishBuilder correlationData(@Nullable ByteBuffer correlationData);
 
     /**
+     * Sets the correlation data.
+     * <p>
+     * DEFAULT: <code>null</code>.
+     *
+     * @param correlationData The correlation data to set.
+     * @return The {@link RetainedPublishBuilder}.
+     * @since 4.0.0
+     */
+    @NotNull RetainedPublishBuilder correlationData(@Nullable byte[] correlationData);
+
+    /**
      * Sets the content type.
      * <p>
      * DEFAULT: <code>null</code>.
@@ -167,6 +178,17 @@ public interface RetainedPublishBuilder {
      * @since 4.0.0
      */
     @NotNull RetainedPublishBuilder payload(@NotNull ByteBuffer payload);
+
+    /**
+     * Sets the payload.
+     * <p>
+     * This value has no default and must be set.
+     *
+     * @param payload The payload to set.
+     * @return The {@link RetainedPublishBuilder}.
+     * @throws NullPointerException If the payload is null.
+     */
+    @NotNull RetainedPublishBuilder payload(@NotNull byte[] payload);
 
     /**
      * Adds a user property.

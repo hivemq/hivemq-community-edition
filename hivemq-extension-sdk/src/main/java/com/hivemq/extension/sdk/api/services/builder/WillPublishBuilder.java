@@ -167,6 +167,17 @@ public interface WillPublishBuilder {
     @NotNull WillPublishBuilder correlationData(@Nullable ByteBuffer correlationData);
 
     /**
+     * Sets the correlation data.
+     * <p>
+     * DEFAULT: <code>null</code>.
+     *
+     * @param correlationData The correlation data to set.
+     * @return The {@link WillPublishBuilder}.
+     * @since 4.0.0
+     */
+    @NotNull WillPublishBuilder correlationData(@Nullable byte[] correlationData);
+
+    /**
      * Sets the content type.
      * <p>
      * DEFAULT: <code>null</code>.

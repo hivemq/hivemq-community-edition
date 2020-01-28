@@ -238,6 +238,18 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
     }
 
     @Override
+    public @NotNull WillPublishBuilder correlationData(
+            @Nullable final byte[] correlationData) {
+        if (correlationData == null) {
+            this.correlationData = null;
+            return this;
+        }
+        final byte[] copy = Arrays.copyOf(correlationData, correlationData.length);
+        this.correlationData = ByteBuffer.wrap(copy);
+        return this;
+    }
+
+    @Override
     public @NotNull WillPublishBuilder contentType(@Nullable final String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
         this.contentType = contentType;

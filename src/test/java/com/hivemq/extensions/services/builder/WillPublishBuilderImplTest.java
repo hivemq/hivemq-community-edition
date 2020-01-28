@@ -38,11 +38,12 @@ import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Florian Limpöck
@@ -52,10 +53,11 @@ import static org.junit.Assert.assertEquals;
 public class WillPublishBuilderImplTest {
 
     private WillPublishBuilderImpl willPublishBuilder;
+    private FullConfigurationService service;
 
     @Before
     public void setUp() throws Exception {
-        final FullConfigurationService service = new TestConfigurationBootstrap().getFullConfigurationService();
+        service = new TestConfigurationBootstrap().getFullConfigurationService();
         willPublishBuilder = new WillPublishBuilderImpl(service);
     }
 
@@ -333,6 +335,39 @@ public class WillPublishBuilderImplTest {
         willPublishBuilder.contentType(RandomStringUtils.randomAlphanumeric(65536));
     }
 
+    @Test
+    public void change_original_payload_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final WillPublishPacket publish = new WillPublishBuilderImpl(service)
+                .topic("myTopic")
+                .payload(originalBytes).build();
+
+        assertTrue(publish.getPayloadAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getPayloadAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getPayloadAsArray().get());
+    }
+
+    @Test
+    public void change_original_correlation_data_does_not_change_internal_payload() {
+        final byte[] originalBytes = "original".getBytes(StandardCharsets.UTF_8);
+        final WillPublishPacket publish = new WillPublishBuilderImpl(service)
+                .topic("myTopic")
+                .payload("payload".getBytes(StandardCharsets.UTF_8))
+                .correlationData(originalBytes).build();
+
+        assertTrue(publish.getCorrelationDataAsArray().isPresent());
+        assertArrayEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+
+        originalBytes[0] = (byte) 0xAF;
+        originalBytes[1] = (byte) 0XFE;
+
+        assertNotEquals(originalBytes, publish.getCorrelationDataAsArray().get());
+    }
+
     class TestPublishPacket implements PublishPacket {
 
         private final @NotNull byte[] correlationData = "correlation_data".getBytes();
@@ -547,12 +582,22 @@ public class WillPublishBuilderImplTest {
         }
 
         @Override
+        public @NotNull Optional<byte[]> getCorrelationDataAsArray() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<String> getContentType() {
             return Optional.empty();
         }
 
         @Override
         public Optional<ByteBuffer> getPayload() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<byte[]> getPayloadAsArray() {
             return Optional.empty();
         }
 
