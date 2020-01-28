@@ -250,6 +250,8 @@ public class ProducerQueues {
             // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
             if (finalTask != null) {
                 submitToAllQueuesAsList(finalTask, true).get();
+            } else {
+                submitToAllQueuesAsList((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true).get();
             }
             return null;
         }, singleWriterService.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
