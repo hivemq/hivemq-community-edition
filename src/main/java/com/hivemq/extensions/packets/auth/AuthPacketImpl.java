@@ -18,69 +18,72 @@ package com.hivemq.extensions.packets.auth;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.auth.AUTH;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
  * @author Daniel Krüger
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
 public class AuthPacketImpl implements AuthPacket {
 
-    private final @NotNull AUTH auth;
+    private final @NotNull Mqtt5AuthReasonCode reasonCode;
+    private final @NotNull String method;
+    private final @Nullable byte[] data;
+    private final @Nullable String reasonString;
+    private final @NotNull Mqtt5UserProperties userProperties;
 
     public AuthPacketImpl(final @NotNull AUTH auth) {
-        this.auth = auth;
+        reasonCode = auth.getReasonCode();
+        method = auth.getAuthMethod();
+        data = auth.getAuthData();
+        reasonString = auth.getReasonString();
+        userProperties = auth.getUserProperties();
     }
 
-    @NotNull
     @Override
-    public String getAuthenticationMethod() {
-        return auth.getAuthMethod();
+    public @NotNull AuthReasonCode getReasonCode() {
+        return reasonCode.toAuthReasonCode();
     }
 
-    @NotNull
     @Override
-    @Immutable
-    public Optional<ByteBuffer> getAuthenticationData() {
-        final byte[] authData = auth.getAuthData();
-        if (authData == null) {
+    public @NotNull String getAuthenticationMethod() {
+        return method;
+    }
+
+    @Override
+    public @NotNull Optional<ByteBuffer> getAuthenticationData() {
+        if (data == null) {
             return Optional.empty();
         }
-        return Optional.of(ByteBuffer.wrap(authData).asReadOnlyBuffer());
+        return Optional.of(ByteBuffer.wrap(data).asReadOnlyBuffer());
     }
 
-    @NotNull
     @Override
-    public Optional<byte[]> getAuthenticationDataAsBytes() {
-        final byte[] authData = auth.getAuthData();
-        if (authData == null) {
+    public @NotNull Optional<byte[]> getAuthenticationDataAsArray() {
+        if (data == null) {
             return Optional.empty();
         }
-        return Optional.of(authData);
+        return Optional.of(Arrays.copyOf(data, data.length));
     }
 
-    @NotNull
     @Override
-    public AuthReasonCode getReasonCode() {
-        return auth.getReasonCode().toAuthReasonCode();
+    public @NotNull Optional<String> getReasonString() {
+        return Optional.ofNullable(reasonString);
     }
 
-    @NotNull
     @Override
-    public Optional<String> getReasonString() {
-        return Optional.ofNullable(auth.getReasonString());
-    }
-
-    @NotNull
-    @Override
-    @Immutable
-    public UserProperties getUserProperties() {
-        return auth.getUserProperties().getPluginUserProperties();
+    public @Immutable @NotNull UserProperties getUserProperties() {
+        return userProperties.getPluginUserProperties();
     }
 }

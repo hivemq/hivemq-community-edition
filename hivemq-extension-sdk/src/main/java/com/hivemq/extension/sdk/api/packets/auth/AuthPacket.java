@@ -52,7 +52,7 @@ public interface AuthPacket {
      *
      * @return An {@link Optional} containing the authentication data if present.
      */
-    @NotNull Optional<byte[]> getAuthenticationDataAsBytes();
+    @NotNull Optional<byte[]> getAuthenticationDataAsArray();
 
     /**
      * The reason code of the AUTH packet.
