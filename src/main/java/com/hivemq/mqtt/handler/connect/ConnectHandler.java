@@ -195,6 +195,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.TAKEN_OVER).set(false);
         ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
         ctx.channel().attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(connect.getReceiveMaximum());
+        //Set max packet size to send to channel
+        if (connect.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
+            ctx.channel().attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(connect.getMaximumPacketSize());
+        }
 
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
@@ -593,11 +597,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         final Boolean clientIdAssigned = channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).get();
         if (clientIdAssigned != null && clientIdAssigned) {
             builder.withAssignedClientIdentifier(msg.getClientIdentifier());
-        }
-
-        //Set max packet size to send to channel
-        if (msg.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
-            channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(msg.getMaximumPacketSize());
         }
 
         //send server keep alive max when connect keep alive is zero and zero is not allowed or keep alive > server keep alive maximum
