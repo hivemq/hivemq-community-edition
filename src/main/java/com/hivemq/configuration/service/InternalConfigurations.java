@@ -362,7 +362,7 @@ public class InternalConfigurations {
     /**
      * Denies the bypassing of authentication if no authenticator is registered
      */
-    public static final AtomicBoolean AUTH_DENY_UNAUTHENTICATED_CONNECTIONS = new AtomicBoolean(false);
+    public static final AtomicBoolean AUTH_DENY_UNAUTHENTICATED_CONNECTIONS = new AtomicBoolean(true);
 
     /**
      * The timeout in seconds between two auth steps

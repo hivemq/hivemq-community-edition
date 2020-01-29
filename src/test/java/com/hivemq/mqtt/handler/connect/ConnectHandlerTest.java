@@ -138,6 +138,7 @@ public class ConnectHandlerTest {
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog);
         mqttConnacker = new MqttConnacker(connackSendUtil);
 
@@ -152,8 +153,8 @@ public class ConnectHandlerTest {
     }
 
     @After
-    public void tearDown() throws Exception {
-        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
+    public void tearDown() {
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
     }
 
     @Test
