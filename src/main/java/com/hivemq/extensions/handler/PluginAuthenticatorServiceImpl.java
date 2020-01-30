@@ -216,7 +216,6 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final AuthInput input = new AuthInput(clientId, ctx.channel(), auth, reAuth);
 
-        // TODO same defaultpermissions, create modifiable wrapper for extension call isolation
         final ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
         final ModifiableClientSettingsImpl clientSettings = getSettingsFromChannel(ctx.channel());
 
@@ -260,7 +259,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     private void badAuthMethodDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
         final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name());
         if (reAuth) {
-            disconnector.disconnect( // TODO reason strings and logs
+            disconnector.disconnect(
                     ctx.channel(),
                     DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT,
                     "Different auth method",
@@ -269,7 +268,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     true);
         } else {
-            connacker.connackError( // TODO reason strings and logs
+            connacker.connackError(
                     ctx.channel(),
                     CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT,
                     "Different auth method",

@@ -74,8 +74,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         // authenticationData, reasonString are reset as they are set by decision methods
         validateUTF8 = prevOutput.validateUTF8;
         userProperties = new ModifiableUserPropertiesImpl(prevOutput.userProperties.consolidate(), validateUTF8);
-        defaultPermissions = prevOutput.defaultPermissions; // TODO copy
-        clientSettings = prevOutput.clientSettings; // TODO copy
+        defaultPermissions = prevOutput.defaultPermissions;
+        clientSettings = prevOutput.clientSettings;
         timeout = prevOutput.timeout;
     }
 
