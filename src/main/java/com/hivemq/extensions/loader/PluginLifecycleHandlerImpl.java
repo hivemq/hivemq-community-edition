@@ -62,7 +62,7 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
         }
         pluginStartStopExecutor.execute(() -> {
             if (authenticators.getAuthenticatorProviderMap().isEmpty()) {
-                log.warn("\n##############################################################################" +
+                log.warn("\n###############################################################################" +
                         "\n# No security extension present, MQTT clients can not connect to this broker. #" +
                         "\n###############################################################################");
             }
