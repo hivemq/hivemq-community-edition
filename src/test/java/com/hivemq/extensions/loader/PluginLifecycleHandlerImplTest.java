@@ -17,8 +17,10 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.HiveMQPluginEvent;
+import com.hivemq.extensions.services.auth.Authenticators;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +32,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Christoph Schäbel
@@ -47,13 +48,17 @@ public class PluginLifecycleHandlerImplTest {
     @Mock
     HiveMQExtensions hiveMQExtensions;
 
+    @Mock
+    Authenticators authenticators;
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor);
+        when(authenticators.getAuthenticatorProviderMap()).thenReturn(ImmutableMap.of());
+        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor, authenticators);
     }
 
     @Test
@@ -66,10 +71,13 @@ public class PluginLifecycleHandlerImplTest {
         pluginLifecycleHandler.handlePluginEvents(events);
 
         final ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(pluginStartStopExecutor, times(1)).execute(runnableArgumentCaptor.capture());
-        runnableArgumentCaptor.getValue().run();
+        verify(pluginStartStopExecutor, times(2)).execute(runnableArgumentCaptor.capture());
 
+        runnableArgumentCaptor.getAllValues().get(0).run();
         verify(hiveMQExtensions).extensionStart(eq("test-extension"));
+
+        runnableArgumentCaptor.getAllValues().get(1).run();
+        verify(authenticators).getAuthenticatorProviderMap();
     }
 
     @Test
@@ -82,10 +90,13 @@ public class PluginLifecycleHandlerImplTest {
         pluginLifecycleHandler.handlePluginEvents(events);
 
         final ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(pluginStartStopExecutor, times(1)).execute(runnableArgumentCaptor.capture());
-        runnableArgumentCaptor.getValue().run();
+        verify(pluginStartStopExecutor, times(2)).execute(runnableArgumentCaptor.capture());
 
+        runnableArgumentCaptor.getAllValues().get(0).run();
         verify(hiveMQExtensions).extensionStop(eq("test-extension"), eq(true));
+
+        runnableArgumentCaptor.getAllValues().get(1).run();
+        verify(authenticators).getAuthenticatorProviderMap();
     }
 
     @Test
