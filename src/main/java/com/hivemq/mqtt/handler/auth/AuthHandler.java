@@ -97,7 +97,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
     private void onReceivedSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean reAuthOngoing) {
         final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
         if (reAuthOngoing) {
-            disconnector.disconnect( // TODO reason strings and logs
+            disconnector.disconnect(
                     ctx.channel(),
                     SUCCESS_AUTH_RECEIVED_FROM_CLIENT,
                     "Success reason code set in AUTH",
@@ -106,7 +106,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     true);
         } else {
-            connacker.connackError( // TODO reason strings and logs
+            connacker.connackError(
                     ctx.channel(),
                     SUCCESS_AUTH_RECEIVED_FROM_CLIENT,
                     "Success reason code set in AUTH",
@@ -125,7 +125,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
         if (reAuthOngoing || authOngoing) {
             final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
             if (reAuthOngoing) {
-                disconnector.disconnect( // TODO reason strings and logs
+                disconnector.disconnect(
                         ctx.channel(),
                         REAUTHENTICATE_DURING_RE_AUTH,
                         "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
@@ -134,7 +134,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
                         true);
             } else {
-                connacker.connackError( // TODO reason strings and logs
+                connacker.connackError(
                         ctx.channel(),
                         REAUTHENTICATE_DURING_AUTH,
                         "REAUTHENTICATE reason code set in AUTH during ongoing auth",

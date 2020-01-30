@@ -34,10 +34,10 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
 
     protected final @NotNull PluginOutPutAsyncer asyncer;
 
-    private final @NotNull AtomicBoolean async = new AtomicBoolean(false); // TODO does not need to be atomic?
+    private final @NotNull AtomicBoolean async = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean called = new AtomicBoolean(false);
-    private final @NotNull AtomicBoolean timedOut = new AtomicBoolean(false); // TODO does not need to be atomic?
-    private final @NotNull SettableFuture<Boolean> asyncFuture = SettableFuture.create(); // TODO lazy, fuse with async
+    private final @NotNull AtomicBoolean timedOut = new AtomicBoolean(false);
+    private final @NotNull SettableFuture<Boolean> asyncFuture = SettableFuture.create();
 
     public AbstractSimpleAsyncOutput(final @NotNull PluginOutPutAsyncer asyncer) {
         this.asyncer = asyncer;
