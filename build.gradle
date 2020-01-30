@@ -369,7 +369,6 @@ task copyPackaging(type: Copy) {
 
     doLast {
         new File("${project.packagingProjectDir}/data").mkdirs()
-        new File("${project.packagingProjectDir}/extensions").mkdirs()
         new File("${project.packagingProjectDir}/log").mkdirs()
     }
 }
