@@ -1,8 +1,6 @@
+# Gradle
 .gradle
 build/
-.java-version
-.DS_Store
-.gradletasknamecache
 
 # IntelliJ
 out/
@@ -11,3 +9,6 @@ out/
 !.idea/codeStyles
 !.idea/inspectionProfiles
 !.idea/runConfigurations
+
+.java-version
+.DS_Store
