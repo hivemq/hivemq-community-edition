@@ -47,6 +47,7 @@ public class EventLog {
     public static final String EVENT_MESSAGE_DROPPED = "event.message-dropped";
     public static final String EVENT_CLIENT_SESSION_EXPIRED = "event.client-session-expired";
     public static final String EVENT_AUTHENTICATION = "event.authentication";
+    public static final String ZONE_ID = "UTC";
     /**
      * Events are logged to DEBUG, in case customers are using a custom logback.xml
      */
@@ -175,7 +176,8 @@ public class EventLog {
      */
     public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
 
-        final LocalDateTime disconnectedSinceDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZoneId.of("UTC"));
+        final LocalDateTime disconnectedSinceDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZoneId.of(
+                ZONE_ID));
         logClientSessionExpired.debug("Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
                 valueOrUnknown(clientId), disconnectedSinceDateTime.format(dateTimeFormatter));
     }
