@@ -7,6 +7,17 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
+# Build the allow-all-extension in a separate build container as well
+FROM maven:3-jdk-11 AS allow-all-builder
+
+ARG ALLOW_ALL_VERSION=1.0.0
+
+RUN mkdir build && cd build && git clone https://github.com/hivemq/hivemq-allow-all-extension.git && cd hivemq-allow-all-extension \
+    git checkout ${ALLOW_ALL_VERSION} && \
+    mvn package && \
+    ls -la && \
+    unzip target/hivemq-allow-all-extension-${ALLOW_ALL_VERSION}-distribution.zip
+
 FROM openjdk:11-jre-slim
 
 ARG HIVEMQ_VERSION=2019.1
@@ -48,6 +59,8 @@ RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
     && chmod -R 775 /opt \
     && chmod +x /opt/hivemq/bin/run.sh /opt/docker-entrypoint.sh
+
+COPY --from=allow-all-builder /build/hivemq-allow-all-extension/hivemq-allow-all-extension /opt/hivemq/extensions/
 
 # Make broker data persistent throughout stop/start cycles
 VOLUME /opt/hivemq/data
