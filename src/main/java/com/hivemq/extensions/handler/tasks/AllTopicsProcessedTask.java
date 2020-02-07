@@ -18,9 +18,8 @@ package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
-import com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
@@ -28,6 +27,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
+import com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
@@ -48,11 +48,13 @@ public class AllTopicsProcessedTask implements Runnable {
     private final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector;
     private final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector;
 
-    public AllTopicsProcessedTask(final @NotNull SUBSCRIBE msg,
-                                  final @NotNull List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures,
-                                  final @NotNull ChannelHandlerContext ctx,
-                                  final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector,
-                                  final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector) {
+    public AllTopicsProcessedTask(
+            final @NotNull SUBSCRIBE msg,
+            final @NotNull List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector,
+            final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector) {
+
         this.msg = msg;
         this.listenableFutures = listenableFutures;
         this.ctx = ctx;
@@ -85,7 +87,7 @@ public class AllTopicsProcessedTask implements Runnable {
                         return;
                     case FAIL:
                         if (output.getSubackReasonCode() != null) {
-                            answerCodes[i] = Mqtt5SubAckReasonCode.valueOf(output.getSubackReasonCode().name());
+                            answerCodes[i] = Mqtt5SubAckReasonCode.from(output.getSubackReasonCode());
                             reasonStrings[i] = output.getReasonString();
                         } else {
                             answerCodes[i] = Mqtt5SubAckReasonCode.NOT_AUTHORIZED;
@@ -127,7 +129,7 @@ public class AllTopicsProcessedTask implements Runnable {
             mqtt5ServerDisconnector.disconnect(ctx.channel(),
                     logMessage,
                     eventLogMessage,
-                    Mqtt5DisconnectReasonCode.valueOf(output.getDisconnectReasonCode().name()),
+                    Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()),
                     output.getReasonString());
         } else {
             mqtt3ServerDisconnector.disconnect(ctx.channel(),

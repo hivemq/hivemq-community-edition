@@ -16,12 +16,11 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
-import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
@@ -35,42 +34,43 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 public class SecurityRegistryImpl implements SecurityRegistry {
 
-    @NotNull
-    private final Authenticators authenticators;
-
-    @NotNull
-    private final Authorizers authorizers;
-
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    private final @NotNull Authenticators authenticators;
+    private final @NotNull Authorizers authorizers;
 
     @Inject
-    public SecurityRegistryImpl(
-            @NotNull final Authenticators authenticators,
-            @NotNull final Authorizers authorizers,
-            @NotNull final HiveMQExtensions hiveMQExtensions) {
+    public SecurityRegistryImpl(final @NotNull Authenticators authenticators, final @NotNull Authorizers authorizers) {
         this.authenticators = authenticators;
         this.authorizers = authorizers;
-        this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
-    public void setAuthenticatorProvider(@NotNull final AuthenticatorProvider authenticatorProvider) {
+    public void setAuthenticatorProvider(final @NotNull AuthenticatorProvider authenticatorProvider) {
         checkNotNull(authenticatorProvider, "authenticatorProvider must not be null");
 
-        final @NotNull IsolatedPluginClassloader classLoader =
+        final IsolatedPluginClassloader classLoader =
                 (IsolatedPluginClassloader) authenticatorProvider.getClass().getClassLoader();
-        final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(classLoader);
 
-        checkNotNull(plugin, "Extension classloader must be known, before an extension can add an AuthenticatorProvider.");
-
-        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider(authenticatorProvider, classLoader);
+        final WrappedAuthenticatorProvider wrapped =
+                new WrappedAuthenticatorProvider(authenticatorProvider, classLoader);
         authenticators.registerAuthenticatorProvider(wrapped);
-
     }
 
     @Override
-    public void setAuthorizerProvider(@NotNull final AuthorizerProvider authorizerProvider) {
+    public void setEnhancedAuthenticatorProvider(
+            final @NotNull EnhancedAuthenticatorProvider enhancedAuthenticatorProvider) {
+
+        checkNotNull(enhancedAuthenticatorProvider, "enhancedAuthenticatorProvider must not be null");
+
+        final IsolatedPluginClassloader classLoader =
+                (IsolatedPluginClassloader) enhancedAuthenticatorProvider.getClass().getClassLoader();
+
+        final WrappedAuthenticatorProvider wrapped =
+                new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider, classLoader);
+        authenticators.registerAuthenticatorProvider(wrapped);
+    }
+
+    @Override
+    public void setAuthorizerProvider(final @NotNull AuthorizerProvider authorizerProvider) {
         checkNotNull(authorizerProvider, "authorizerProvider must not be null");
         authorizers.addAuthorizerProvider(authorizerProvider);
     }

@@ -19,10 +19,11 @@ package com.hivemq.extensions.loader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.HiveMQPluginEvent;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
+import com.hivemq.extensions.services.auth.Authenticators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +42,17 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
 
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull ExecutorService pluginStartStopExecutor;
+    private final @NotNull Authenticators authenticators;
 
     @Inject
     PluginLifecycleHandlerImpl(
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor) {
+            final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor,
+            final @NotNull Authenticators authenticators) {
 
         this.hiveMQExtensions = hiveMQExtensions;
         this.pluginStartStopExecutor = pluginStartStopExecutor;
+        this.authenticators = authenticators;
     }
 
     @Override
@@ -56,6 +60,13 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
         for (final HiveMQPluginEvent hiveMQPluginEvent : hiveMQPluginEvents) {
             handlePluginEvent(hiveMQPluginEvent);
         }
+        pluginStartStopExecutor.execute(() -> {
+            if (authenticators.getAuthenticatorProviderMap().isEmpty()) {
+                log.warn("\n###############################################################################" +
+                        "\n# No security extension present, MQTT clients can not connect to this broker. #" +
+                        "\n###############################################################################");
+            }
+        });
     }
 
     @Override

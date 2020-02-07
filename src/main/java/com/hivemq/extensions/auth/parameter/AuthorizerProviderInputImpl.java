@@ -16,50 +16,30 @@
 
 package com.hivemq.extensions.auth.parameter;
 
-import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
-import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
-import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.parameter.ClientBasedInputImpl;
 import io.netty.channel.Channel;
 
 /**
  * @author Florian Limpöck
  */
-public class AuthorizerProviderInputImpl implements AuthorizerProviderInput {
+public class AuthorizerProviderInputImpl extends ClientBasedInputImpl implements AuthorizerProviderInput {
 
-
-    private final @NotNull ClientInformation clientInformation;
-    private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ServerInformation serverInformation;
 
-    public AuthorizerProviderInputImpl(final @NotNull Channel channel, @NotNull final ServerInformation serverInformation, @NotNull final String clientId) {
-        Preconditions.checkNotNull(channel, "channel must never be null");
-        Preconditions.checkNotNull(clientId, "client id must never be null");
-        Preconditions.checkNotNull(serverInformation, "server information must never be null");
+    public AuthorizerProviderInputImpl(
+            final @NotNull Channel channel,
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull String clientId) {
 
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        super(clientId, channel);
         this.serverInformation = serverInformation;
     }
 
-    @NotNull
     @Override
-    public ServerInformation getServerInformation() {
+    public @NotNull ServerInformation getServerInformation() {
         return serverInformation;
-    }
-
-    @NotNull
-    @Override
-    public ConnectionInformation getConnectionInformation() {
-        return connectionInformation;
-    }
-
-    @NotNull
-    @Override
-    public ClientInformation getClientInformation() {
-        return clientInformation;
     }
 }

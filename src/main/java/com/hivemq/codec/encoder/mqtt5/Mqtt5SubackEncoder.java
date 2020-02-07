@@ -16,7 +16,7 @@
 
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;

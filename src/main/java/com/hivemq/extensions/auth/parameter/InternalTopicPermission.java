@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.auth.parameter;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 
 /**

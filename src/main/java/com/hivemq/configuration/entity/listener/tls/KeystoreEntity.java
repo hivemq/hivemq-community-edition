@@ -17,7 +17,7 @@
 package com.hivemq.configuration.entity.listener.tls;
 
 import com.google.common.io.Files;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.SystemProperties;
 
 import javax.xml.bind.Unmarshaller;

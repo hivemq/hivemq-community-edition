@@ -16,8 +16,8 @@
 
 package com.hivemq.configuration.service.entity;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

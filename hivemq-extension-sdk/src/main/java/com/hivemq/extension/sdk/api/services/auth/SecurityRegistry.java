@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
@@ -22,32 +23,58 @@ import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
+import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 
 /**
- * The SecurityRegistry allows extensions to define the authentication and authorization of MQTT clients.
+ * The Security Registry allows extensions to define the authentication and authorization of MQTT clients.
  * <p>
  * It can be accessed by {@link Services#securityRegistry()}.
  * <p>
- * An extension can only set one {@link AuthenticatorProvider} and one {@link AuthorizerProvider}.
+ * An extension can only set at most one {@link AuthenticatorProvider} OR one {@link EnhancedAuthenticatorProvider}.
  * <p>
+ * An extension can also only set at most one {@link AuthorizerProvider}.
  * That means for authorizing PUBLISH and SUBSCRIBE packets the {@link AuthorizerProvider} must implement {@link
  * PublishAuthorizer} and {@link SubscriptionAuthorizer}.
  * <p>
- * The providers are removed at extension stop automatically.
+ * The providers are automatically removed at extension stop.
  *
  * @author Christoph Schäbel
+ * @author Florian Limpöck
  * @since 4.0.0
  */
 @DoNotImplement
 public interface SecurityRegistry {
 
     /**
+     * Sets the {@link AuthenticatorProvider} of this extension.
+     * <p>
+     * At most one {@link AuthenticatorProvider} OR one {@link EnhancedAuthenticatorProvider} can be set.
+     * <p>
+     * A previously set {@link AuthenticatorProvider} or {@link EnhancedAuthenticatorProvider} is replaced.
+     *
      * @param authenticatorProvider The {@link AuthenticatorProvider} to set.
      * @since 4.0.0
      */
     void setAuthenticatorProvider(@NotNull AuthenticatorProvider authenticatorProvider);
 
     /**
+     * Sets the {@link EnhancedAuthenticatorProvider} of this extension.
+     * <p>
+     * At most one {@link AuthenticatorProvider} OR one {@link EnhancedAuthenticatorProvider} can be set.
+     * <p>
+     * A previously set {@link AuthenticatorProvider} or {@link EnhancedAuthenticatorProvider} is replaced.
+     *
+     * @param authenticatorProvider The {@link EnhancedAuthenticatorProvider} to set.
+     */
+    void setEnhancedAuthenticatorProvider(@NotNull EnhancedAuthenticatorProvider authenticatorProvider);
+
+    /**
+     * Sets the {@link AuthorizerProvider} of this extension.
+     * <p>
+     * At most one {@link AuthorizerProvider} can be set.
+     * <p>
+     * A previously set {@link AuthorizerProvider} is replaced.
+     *
      * @param authorizerProvider The {@link AuthorizerProvider} to set.
      * @since 4.0.0
      */

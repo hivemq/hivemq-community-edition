@@ -18,10 +18,11 @@ package com.hivemq.mqtt.handler.disconnect;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import io.netty.channel.Channel;
 
@@ -44,18 +45,20 @@ public class Mqtt5ServerDisconnector implements MqttServerDisconnector {
     }
 
     @Override
-    public void disconnect(@NotNull final Channel channel,
-                           @Nullable final String logMessage,
-                           @Nullable final String eventLogMessage,
-                           @Nullable final Mqtt5DisconnectReasonCode reasonCode,
-                           @Nullable final String reasonString) {
+    public void disconnect(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final boolean isAuthentication) {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
 
         if (channel.isActive()) {
             disconnectUtil.logDisconnect(channel, logMessage, eventLogMessage);
-            disconnectUtil.disconnect(channel, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString);
+            disconnectUtil.disconnect(channel, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, isAuthentication);
         }
-
     }
 }

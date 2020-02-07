@@ -43,7 +43,7 @@ public class SubackPacketImpl implements SubackPacket {
     public SubackPacketImpl(final @NotNull SUBACK subAck) {
         final ImmutableList.Builder<SubackReasonCode> builder = ImmutableList.builder();
         for (final Mqtt5SubAckReasonCode code : subAck.getReasonCodes()) {
-            builder.add(SubackReasonCode.valueOf(code.name()));
+            builder.add(code.toSubackReasonCode());
         }
         reasonCodes = builder.build();
         reasonString = subAck.getReasonString();

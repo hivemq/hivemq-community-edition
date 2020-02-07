@@ -16,7 +16,7 @@
 
 package com.hivemq.persistence.clientsession;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.mqtt.message.subscribe.Topic;
 
 /**

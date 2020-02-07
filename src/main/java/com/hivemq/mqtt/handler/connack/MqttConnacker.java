@@ -17,11 +17,11 @@
 package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
@@ -35,7 +35,6 @@ public class MqttConnacker {
 
     private final boolean connackWithReasonCode;
     private final boolean connackWithReasonString;
-
     private final @NotNull MqttConnackSendUtil connackSendUtil;
 
     @Inject
@@ -55,102 +54,37 @@ public class MqttConnacker {
      * @param channel         the Channel of the mqtt client
      * @param logMessage      the message to log
      * @param eventLogMessage the event log message
-     * @param mqtt5ReasonCode the reason code which is used for MQTT 5 clients
-     * @param mqtt3ReasonCode the reason code which is used for MQTT 3 clients
+     * @param reasonCode      the reason code
      * @param reasonString    the reason string
      */
-    public void connackError(@NotNull final Channel channel,
-                             @Nullable final String logMessage,
-                             @Nullable final String eventLogMessage,
-                             @Nullable final Mqtt5ConnAckReasonCode mqtt5ReasonCode,
-                             @Nullable final Mqtt3ConnAckReturnCode mqtt3ReasonCode,
-                             @Nullable final String reasonString) {
+    public void connackError(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable String reasonString) {
 
-        connackError(channel, logMessage, eventLogMessage, mqtt5ReasonCode, mqtt3ReasonCode, reasonString, null);
+        connackError(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
     }
 
-    /**
-     * Send a connack with optional reason code and reason string.
-     * <p>
-     * log a message to console, file and event log.
-     * <p>
-     * close the channel.
-     *
-     * @param channel         the Channel of the mqtt client
-     * @param logMessage      the message to log
-     * @param eventLogMessage the event log message
-     * @param mqtt5ReasonCode the reason code which is used for MQTT 5 clients
-     * @param mqtt3ReasonCode the reason code which is used for MQTT 3 clients
-     * @param reasonString    the reason string
-     * @param event           the event to fire
-     */
-    public void connackError(@NotNull final Channel channel,
-                             @Nullable final String logMessage,
-                             @Nullable final String eventLogMessage,
-                             @Nullable final Mqtt5ConnAckReasonCode mqtt5ReasonCode,
-                             @Nullable final Mqtt3ConnAckReturnCode mqtt3ReasonCode,
-                             @Nullable final String reasonString,
-                             @Nullable final Object event) {
+    public void connackError(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final boolean isAuthentication) {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
-        Preconditions.checkArgument(mqtt5ReasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
+        Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
 
         final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
         connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
         if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
-            connackSendUtil.connackMqtt3Error(channel, connackWithReasonCode, mqtt3ReasonCode, event);
+            connackSendUtil.connackError(channel, connackWithReasonCode, false, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES, isAuthentication);
         } else {
-            connackSendUtil.connackMqtt5Error(channel, connackWithReasonCode, connackWithReasonString, mqtt5ReasonCode, reasonString, event);
+            connackSendUtil.connackError(channel, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties, isAuthentication);
         }
     }
-
-    /**
-     * Send a connack with optional reason code and reason string.
-     * <p>
-     * log a message to console, file and event log.
-     * <p>
-     * close the channel.
-     *
-     * @param channel         the Channel of the mqtt client
-     * @param logMessage      the message to log
-     * @param eventLogMessage the event log message
-     * @param mqtt5ReasonCode the reason code which is used for MQTT 5 clients
-     * @param reasonString    the reason string
-     */
-    public void connackErrorMqtt5(@NotNull final Channel channel,
-                                  @Nullable final String logMessage,
-                                  @Nullable final String eventLogMessage,
-                                  @Nullable final Mqtt5ConnAckReasonCode mqtt5ReasonCode,
-                                  @Nullable final String reasonString) {
-
-        Preconditions.checkNotNull(channel, "Channel must never be null");
-        Preconditions.checkArgument(mqtt5ReasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
-
-        connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
-        connackSendUtil.connackMqtt5Error(channel, connackWithReasonCode, connackWithReasonString, mqtt5ReasonCode, reasonString, null);
-    }
-
-    /**
-     * Send a connack with reason code.
-     * <p>
-     * log a message to console, file and event log.
-     * <p>
-     * close the channel.
-     *
-     * @param channel         the Channel of the mqtt client
-     * @param logMessage      the message to log
-     * @param eventLogMessage the event log message
-     * @param mqtt3ReasonCode the reason code which is used for MQTT 3 clients
-     */
-    public void connackErrorMqtt3(@NotNull final Channel channel,
-                                  @Nullable final String logMessage,
-                                  @Nullable final String eventLogMessage,
-                                  @Nullable final Mqtt3ConnAckReturnCode mqtt3ReasonCode) {
-
-        Preconditions.checkNotNull(channel, "Channel must never be null");
-
-        connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
-        connackSendUtil.connackMqtt3Error(channel, connackWithReasonCode, mqtt3ReasonCode, null);
-    }
-
 }

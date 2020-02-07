@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
@@ -37,13 +37,14 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull AtomicInteger counter;
 
-    public PublishAuthorizerContext(final @NotNull Class<?> taskClazz,
-                                    final @NotNull String identifier,
-                                    final @NotNull PublishAuthorizerOutputImpl output,
-                                    final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture,
-                                    final int authorizerCount,
-                                    final @NotNull ChannelHandlerContext ctx) {
-        super(taskClazz, identifier);
+    public PublishAuthorizerContext(
+            final @NotNull String identifier,
+            final @NotNull PublishAuthorizerOutputImpl output,
+            final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture,
+            final int authorizerCount,
+            final @NotNull ChannelHandlerContext ctx) {
+
+        super(identifier);
         this.output = output;
         this.authorizeFuture = authorizeFuture;
         this.authorizerCount = authorizerCount;
@@ -63,6 +64,7 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
                 || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
             ctx.channel().attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
         }
+
 
         //the publish is done if any authorizer sets the outcome
         if (pluginOutput.isCompleted()) {

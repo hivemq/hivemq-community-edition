@@ -17,9 +17,9 @@
 package com.hivemq.mqtt.topic.tree;
 
 import com.codahale.metrics.Counter;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 import java.util.HashMap;

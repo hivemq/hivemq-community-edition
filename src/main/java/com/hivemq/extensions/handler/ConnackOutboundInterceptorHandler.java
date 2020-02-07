@@ -20,8 +20,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -83,15 +83,16 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
     @NotNull
     private final EventLog eventLog;
 
-
     @Inject
-    public ConnackOutboundInterceptorHandler(@NotNull final FullConfigurationService configurationService,
-                                             @NotNull final PluginOutPutAsyncer asyncer,
-                                             @NotNull final HiveMQExtensions hiveMQExtensions,
-                                             @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
-                                             @NotNull final Interceptors interceptors,
-                                             @NotNull final ServerInformation serverInformation,
-                                             @NotNull final EventLog eventLog) {
+    public ConnackOutboundInterceptorHandler(
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull Interceptors interceptors,
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull EventLog eventLog) {
+
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -102,7 +103,11 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
     }
 
     @Override
-    public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+    public void write(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise)
+            throws Exception {
 
         if (!(msg instanceof CONNACK)) {
             super.write(ctx, msg, promise);
@@ -121,19 +126,23 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             return;
         }
 
-        final ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders = interceptors.connackOutboundInterceptorProviders();
+        final ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders =
+                interceptors.connackOutboundInterceptorProviders();
         if (connackOutboundInterceptorProviders.isEmpty()) {
             super.write(ctx, msg, promise);
             return;
         }
 
-        final ConnackOutboundProviderInputImpl providerInput = new ConnackOutboundProviderInputImpl(serverInformation, channel, clientId);
+        final ConnackOutboundProviderInputImpl providerInput =
+                new ConnackOutboundProviderInputImpl(serverInformation, channel, clientId);
 
         final Boolean requestResponseInformation = channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).get();
-        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(configurationService, asyncer, connack, Objects.requireNonNullElse(requestResponseInformation, false));
-        final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(new ConnackPacketImpl(connack), clientId, channel);
+        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(configurationService, asyncer, connack,
+                Objects.requireNonNullElse(requestResponseInformation, false));
+        final ConnackOutboundInputImpl input =
+                new ConnackOutboundInputImpl(new ConnackPacketImpl(connack), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
-        final ConnackInterceptorContext interceptorContext = new ConnackInterceptorContext(ConnackInterceptorTask.class,
+        final ConnackInterceptorContext interceptorContext = new ConnackInterceptorContext(
                 clientId, input, interceptorFuture, connackOutboundInterceptorProviders.size());
 
         for (final Map.Entry<String, ConnackOutboundInterceptorProvider> entry : connackOutboundInterceptorProviders.entrySet()) {
@@ -149,12 +158,15 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
                 interceptorContext.increment(output.connackPrevented());
                 continue;
             }
-            final ConnackInterceptorTask interceptorTask = new ConnackInterceptorTask(interceptorProvider, providerInput, interceptorFuture, plugin.getId());
+            final ConnackInterceptorTask interceptorTask =
+                    new ConnackInterceptorTask(interceptorProvider, providerInput, interceptorFuture, plugin.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    interceptorContext, input, output, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(output, connack, ctx, promise, eventLog);
+        final InterceptorFutureCallback callback =
+                new InterceptorFutureCallback(output, connack, ctx, promise, eventLog);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
 
     }
@@ -167,11 +179,13 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         private final @NotNull ChannelPromise promise;
         private final @NotNull EventLog eventLog;
 
-        InterceptorFutureCallback(final @NotNull ConnackOutboundOutputImpl output,
-                                  final @NotNull CONNACK connack,
-                                  final @NotNull ChannelHandlerContext ctx,
-                                  final @NotNull ChannelPromise promise,
-                                  final @NotNull EventLog eventLog) {
+        InterceptorFutureCallback(
+                final @NotNull ConnackOutboundOutputImpl output,
+                final @NotNull CONNACK connack,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise,
+                final @NotNull EventLog eventLog) {
+
             this.output = output;
             this.connack = connack;
             this.ctx = ctx;
@@ -183,7 +197,8 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         public void onSuccess(final @Nullable Void result) {
             try {
                 if (output.connackPrevented()) {
-                    eventLog.clientWasDisconnected(ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
+                    eventLog.clientWasDisconnected(
+                            ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
                     ctx.channel().close();
                     return;
                 }
@@ -209,13 +224,13 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
+        ConnackInterceptorContext(
+                final @NotNull String clientId,
+                final @NotNull ConnackOutboundInputImpl input,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final int interceptorCount) {
 
-        ConnackInterceptorContext(final @NotNull Class<?> taskClazz,
-                                  final @NotNull String clientId,
-                                  final @NotNull ConnackOutboundInputImpl input,
-                                  final @NotNull SettableFuture<Void> interceptorFuture,
-                                  final int interceptorCount) {
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
@@ -223,9 +238,10 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         }
 
         @Override
-        public void pluginPost(@NotNull final ConnackOutboundOutputImpl pluginOutput) {
+        public void pluginPost(final @NotNull ConnackOutboundOutputImpl pluginOutput) {
 
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
+                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
                 pluginOutput.forciblyDisconnect();
                 increment(pluginOutput.connackPrevented());
                 return;
@@ -245,17 +261,20 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         }
     }
 
-    private class ConnackInterceptorTask implements PluginInOutTask<ConnackOutboundInputImpl, ConnackOutboundOutputImpl> {
+    private class ConnackInterceptorTask
+            implements PluginInOutTask<ConnackOutboundInputImpl, ConnackOutboundOutputImpl> {
 
         private final @NotNull ConnackOutboundInterceptorProvider interceptorProvider;
         private final @NotNull ConnackOutboundProviderInputImpl connackOutboundProviderInput;
         private final @NotNull SettableFuture<Void> interceptorFuture;
         private final @NotNull String pluginId;
 
-        private ConnackInterceptorTask(final @NotNull ConnackOutboundInterceptorProvider interceptorProvider,
-                                       final @NotNull ConnackOutboundProviderInputImpl connackOutboundProviderInput,
-                                       final @NotNull SettableFuture<Void> interceptorFuture,
-                                       final @NotNull String pluginId) {
+        private ConnackInterceptorTask(
+                final @NotNull ConnackOutboundInterceptorProvider interceptorProvider,
+                final @NotNull ConnackOutboundProviderInputImpl connackOutboundProviderInput,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final @NotNull String pluginId) {
+
             this.interceptorProvider = interceptorProvider;
             this.connackOutboundProviderInput = connackOutboundProviderInput;
             this.interceptorFuture = interceptorFuture;
@@ -263,9 +282,13 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         }
 
         @Override
-        public @NotNull ConnackOutboundOutputImpl apply(final @NotNull ConnackOutboundInputImpl input, final @NotNull ConnackOutboundOutputImpl output) {
+        public @NotNull ConnackOutboundOutputImpl apply(
+                final @NotNull ConnackOutboundInputImpl input,
+                final @NotNull ConnackOutboundOutputImpl output) {
+
             try {
-                final ConnackOutboundInterceptor interceptor = interceptorProvider.getConnackOutboundInterceptor(connackOutboundProviderInput);
+                final ConnackOutboundInterceptor interceptor =
+                        interceptorProvider.getConnackOutboundInterceptor(connackOutboundProviderInput);
                 if (interceptor != null && !interceptorFuture.isDone()) {
                     interceptor.onOutboundConnack(input, output);
                 }

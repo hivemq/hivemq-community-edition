@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingL
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
+import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.client.parameter.ConnectionAttributes;
@@ -32,6 +33,8 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.util.AttributeKey;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -48,12 +51,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> CONNACK_SENT = AttributeKey.valueOf("MQTT.ConnackSent");
     public static final AttributeKey<Boolean> TAKEN_OVER = AttributeKey.valueOf("MQTT.TakenOver");
     public static final AttributeKey<Boolean> PREVENT_LWT = AttributeKey.valueOf("MQTT.PreventLWT");
-
-    /**
-     * The define the way the client should be affected by the overload protection.
-     * <code>null</code> is interpreted as {@link OverloadProtectionThrottlingLevel#DEFAULT}.
-     */
-    public static final AttributeKey<OverloadProtectionThrottlingLevel> OVERLOAD_PROTECTION_THROTTLING_LEVEL = AttributeKey.valueOf("Restriction.OverloadProtectionThrottlingLevel");
 
     /**
      * This reveres to the in-flight messages in the client queue, not the ones in the ordered topic queue
@@ -77,10 +74,17 @@ public class ChannelAttributes {
     public static final AttributeKey<String> AUTH_PROTOCOL = AttributeKey.valueOf("Auth.Protocol");
     public static final AttributeKey<String> AUTH_USERNAME = AttributeKey.valueOf("Auth.Username");
     public static final AttributeKey<byte[]> AUTH_PASSWORD = AttributeKey.valueOf("Auth.Password");
+    public static final AttributeKey<CONNECT> AUTH_CONNECT = AttributeKey.valueOf("Auth.Connect");
     public static final AttributeKey<String> AUTH_METHOD = AttributeKey.valueOf("Auth.AuthenticationMethod");
+
+    public static final AttributeKey<ByteBuffer> AUTH_DATA = AttributeKey.valueOf("Auth.Data");
+    public static final AttributeKey<Mqtt5UserProperties> AUTH_USER_PROPERTIES = AttributeKey.valueOf("Auth.User.Properties");
+    public static final AttributeKey<Boolean> AUTH_ONGOING = AttributeKey.valueOf("Auth.Ongoing");
+    public static final AttributeKey<Boolean> RE_AUTH_ONGOING = AttributeKey.valueOf("ReAuth.Ongoing");
 
     public static final AttributeKey<Boolean> AUTH_AUTHENTICATED = AttributeKey.valueOf("Auth.Authenticated");
     public static final AttributeKey<Boolean> AUTHENTICATED_OR_AUTHENTICATION_BYPASSED = AttributeKey.valueOf("AuthenticatedOrAuthenticationBypassed");
+    public static final AttributeKey<ScheduledFuture<?>> AUTH_FUTURE = AttributeKey.valueOf("Auth.Future");
 
     public static final AttributeKey<Long> MAX_PACKET_SIZE_SEND = AttributeKey.valueOf("Restriction.MaxPacketSize.Send");
 
@@ -88,6 +92,7 @@ public class ChannelAttributes {
     public static final AttributeKey<ClientEventListeners> PLUGIN_CLIENT_EVENT_LISTENERS = AttributeKey.valueOf("Extension.Client.Event.Listeners");
     public static final AttributeKey<Boolean> PLUGIN_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
     public static final AttributeKey<Boolean> PLUGIN_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
+    public static final AttributeKey<ClientAuthenticators> PLUGIN_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
     public static final AttributeKey<ClientAuthorizers> PLUGIN_CLIENT_AUTHORIZERS = AttributeKey.valueOf("Extension.Client.Authorizers");
     public static final AttributeKey<ClientInformation> PLUGIN_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
     public static final AttributeKey<ConnectionInformation> PLUGIN_CONNECTION_INFORMATION = AttributeKey.valueOf("Extension.Connection.Information");
@@ -130,7 +135,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Boolean> REQUEST_PROBLEM_INFORMATION = AttributeKey.valueOf("Request.Problem.Information");
 
-    public static final AttributeKey<Mqtt5UserProperties> AUTH_USER_PROPERTIES = AttributeKey.valueOf("Auth.User.Properties");
     public static final AttributeKey<ModifiableDefaultPermissions> AUTH_PERMISSIONS = AttributeKey.valueOf("Auth.User.Permissions");
 
     public static final AttributeKey<CONNECT> CONNECT_MESSAGE = AttributeKey.valueOf("Connect.Message");

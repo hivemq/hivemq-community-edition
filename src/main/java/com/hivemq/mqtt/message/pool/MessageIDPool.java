@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.pool;
 
-import com.hivemq.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 
 /**

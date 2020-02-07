@@ -18,8 +18,8 @@ package com.hivemq.extensions.packets.general;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
@@ -64,8 +64,8 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
 
     private boolean modified;
 
-    public ModifiableUserPropertiesImpl() {
-        this(null, true);
+    public ModifiableUserPropertiesImpl(final boolean validateUTF8) {
+        this(null, validateUTF8);
     }
 
     public ModifiableUserPropertiesImpl(@Nullable final InternalUserProperties legacy, final boolean validateUTF8) {

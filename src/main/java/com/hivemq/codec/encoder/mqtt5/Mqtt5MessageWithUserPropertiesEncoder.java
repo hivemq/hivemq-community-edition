@@ -17,7 +17,7 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
@@ -34,6 +34,7 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +91,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> extends 
             if (message.getPropertyLength() < 0 && message.getEncodedLength() > maximumPacketSize) {
                 messageDroppedService.messageMaxPacketSizeExceeded(clientId, message.getType().name(), maximumPacketSize, message.getEncodedLength());
                 log.trace("Could not encode message of type {} for client {}: Packet to large", message.getType(), clientId);
-                return;
+                throw new EncoderException("Maximum packet size exceeded");
             }
         }
 

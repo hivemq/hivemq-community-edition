@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.message.pubrel;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.packets.pubrel.PubrelPacket;
 import com.hivemq.mqtt.message.MessageType;
@@ -34,7 +34,8 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
  * @author Waldemar Ruck
  * @since 1.4
  */
-public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubRelReasonCode> implements Mqtt3PUBREL, Mqtt5PUBREL {
+public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubRelReasonCode>
+        implements Mqtt3PUBREL, Mqtt5PUBREL {
 
     @Nullable
     private Long publishTimestamp;
@@ -53,32 +54,34 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     }
 
     //MQTT 5
-    public PUBREL(final int packetIdentifier,
-                  @NotNull final Mqtt5PubRelReasonCode reasonCode,
-                  @Nullable final String reasonString,
-                  @NotNull final Mqtt5UserProperties userProperties) {
+    public PUBREL(
+            final int packetIdentifier,
+            final @NotNull Mqtt5PubRelReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties) {
+
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
-    public PUBREL(final int packetIdentifier,
-            @NotNull final Mqtt5PubRelReasonCode reasonCode,
-            @Nullable final String reasonString,
-            @NotNull final Mqtt5UserProperties userProperties,
-            @Nullable final Long publishTimestamp,
-            @Nullable final Long expiryInterval) {
+    public PUBREL(
+            final int packetIdentifier,
+            final @NotNull Mqtt5PubRelReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final @Nullable Long publishTimestamp,
+            final @Nullable Long expiryInterval) {
+
         super(packetIdentifier, reasonCode, reasonString, userProperties);
         this.publishTimestamp = publishTimestamp;
         this.expiryInterval = expiryInterval;
     }
 
-    @NotNull
     @Override
-    public MessageType getType() {
+    public @NotNull MessageType getType() {
         return MessageType.PUBREL;
     }
 
-    @Nullable
-    public Long getPublishTimestamp() {
+    public @Nullable Long getPublishTimestamp() {
         return publishTimestamp;
     }
 
@@ -86,8 +89,7 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         this.publishTimestamp = publishTimestamp;
     }
 
-    @Nullable
-    public Long getExpiryInterval() {
+    public @Nullable Long getExpiryInterval() {
         return expiryInterval;
     }
 
@@ -98,7 +100,7 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     public static @NotNull PUBREL createPubrelFrom(final @NotNull PubrelPacket packet) {
 
         final int packetIdentifier = packet.getPacketIdentifier();
-        final Mqtt5PubRelReasonCode reasonCode = Mqtt5PubRelReasonCode.valueOf(packet.getReasonCode().name());
+        final Mqtt5PubRelReasonCode reasonCode = Mqtt5PubRelReasonCode.from(packet.getReasonCode());
 
         final String reasonString = packet.getReasonString().orElse(null);
 

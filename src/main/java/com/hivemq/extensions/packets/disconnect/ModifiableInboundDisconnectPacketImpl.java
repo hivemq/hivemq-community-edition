@@ -59,7 +59,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             final long originalSessionExpiryInterval) {
 
         configurationService = fullConfigurationService;
-        reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
+        reasonCode = originalDisconnect.getReasonCode().toDisconnectReasonCode();
         reasonString = originalDisconnect.getReasonString();
         sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         this.originalSessionExpiryInterval = originalSessionExpiryInterval;
@@ -97,7 +97,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
                 reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                 "Reason code %s must not be used for disconnect packets.", reasonCode);
         Preconditions.checkArgument(
-                Mqtt5DisconnectReasonCode.canBeSentByClient(reasonCode),
+                Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByClient(),
                 "Reason code %s must not be used for inbound disconnect packets from a client to the server.",
                 reasonCode);
         if (Objects.equals(this.reasonCode, reasonCode)) {

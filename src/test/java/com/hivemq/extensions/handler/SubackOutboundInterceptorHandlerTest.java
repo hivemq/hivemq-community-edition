@@ -16,7 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
@@ -156,8 +156,7 @@ public class SubackOutboundInterceptorHandlerTest {
             subAck = channel.readOutbound();
         }
         Assert.assertTrue(isTriggered.get());
-        Assert.assertEquals(
-                SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.valueOf(subAck.getReasonCodes().get(0).name()));
+        Assert.assertEquals(SubackReasonCode.GRANTED_QOS_1, subAck.getReasonCodes().get(0).toSubackReasonCode());
         Assert.assertNotNull(subAck);
     }
 

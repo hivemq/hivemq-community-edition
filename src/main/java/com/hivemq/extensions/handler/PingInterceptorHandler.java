@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -111,8 +112,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         final PingReqInboundOutputImpl output = new PingReqInboundOutputImpl(asyncer);
         final PingReqInboundInputImpl input = new PingReqInboundInputImpl(clientId, channel);
         final PingRequestInboundInterceptorContext interceptorContext =
-                new PingRequestInboundInterceptorContext(PingRequestInboundInterceptorTask.class, clientId, ctx,
-                        interceptors.size());
+                new PingRequestInboundInterceptorContext(clientId, ctx, interceptors.size());
 
         for (final PingReqInboundInterceptor interceptor : interceptors) {
 
@@ -159,8 +159,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         final PingRespOutboundInputImpl input = new PingRespOutboundInputImpl(clientId, channel);
         final PingRespOutboundOutputImpl output = new PingRespOutboundOutputImpl(asyncer);
         final PingResponseOutboundInterceptorContext interceptorContext =
-                new PingResponseOutboundInterceptorContext(PingResponseOutboundInterceptorTask.class, clientId, ctx,
-                        promise, interceptors.size());
+                new PingResponseOutboundInterceptorContext(clientId, ctx, promise, interceptors.size());
 
         for (final PingRespOutboundInterceptor interceptor : interceptors) {
 
@@ -260,12 +259,11 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PingRequestInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -292,13 +290,12 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PingResponseOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.ctx = ctx;
             this.promise = promise;
             this.interceptorCount = interceptorCount;

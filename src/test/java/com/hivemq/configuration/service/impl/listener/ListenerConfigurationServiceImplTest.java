@@ -17,7 +17,7 @@
 package com.hivemq.configuration.service.impl.listener;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.entity.*;
 import org.junit.Before;
 import org.junit.Test;

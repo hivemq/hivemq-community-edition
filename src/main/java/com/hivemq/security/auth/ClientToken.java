@@ -18,8 +18,8 @@ package com.hivemq.security.auth;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.entity.Listener;
 
 import java.net.InetAddress;

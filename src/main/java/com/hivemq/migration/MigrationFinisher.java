@@ -16,7 +16,7 @@
 
 package com.hivemq.migration;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.migration.meta.MetaFileService;

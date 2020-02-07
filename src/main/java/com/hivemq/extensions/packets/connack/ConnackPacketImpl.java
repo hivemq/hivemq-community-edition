@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.packets.connack;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connack.ConnackPacket;
 import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -73,7 +73,7 @@ public class ConnackPacketImpl implements ConnackPacket {
             authenticationData = ByteBuffer.wrap(authData);
         }
         this.userProperties = connack.getUserProperties().getPluginUserProperties();
-        this.connackReasonCode = ConnackReasonCode.valueOf(connack.getReasonCode().name());
+        this.connackReasonCode = connack.getReasonCode().toConnackReasonCode();
         this.sessionPresent = connack.isSessionPresent();
         this.retainAvailable = connack.isRetainAvailable();
         this.assignedClientId = connack.getAssignedClientIdentifier();

@@ -16,7 +16,7 @@
 package com.hivemq.mqtt.message.suback;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extensions.packets.suback.ModifiableSubackPacketImpl;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;

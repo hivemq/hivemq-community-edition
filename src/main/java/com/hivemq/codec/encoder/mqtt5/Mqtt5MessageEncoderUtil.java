@@ -17,8 +17,8 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.base.Charsets;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.QoS;
 import io.netty.buffer.ByteBuf;
 

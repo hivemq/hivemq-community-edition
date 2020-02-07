@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -116,14 +116,13 @@ public class PersistenceShutdownHook extends HiveMQShutdownHook {
         builder.add(retainedMessagePersistence.closeDB());
         builder.add(clientQueuePersistence.closeDB());
 
-        payloadPersistence.closeDB();
-
         //We have to use a direct executor service here because the usual persistence executor might already be shut down
         final ListenableFuture<Void> combinedFuture = FutureUtils.voidFutureFromList(builder.build());
 
         final int shutdownTimeout = PERSISTENCE_SHUTDOWN_TIMEOUT.get();
 
         try {
+            payloadPersistenceExecutor.awaitTermination(shutdownTimeout, TimeUnit.SECONDS);
             combinedFuture.get(shutdownTimeout, TimeUnit.SECONDS);
             if (log.isTraceEnabled()) {
                 log.trace("Finished persistence shutdown in {} ms", (System.currentTimeMillis() - start));
@@ -134,6 +133,7 @@ public class PersistenceShutdownHook extends HiveMQShutdownHook {
             log.error("Persistences were not closed properly: {}", e.getMessage());
             log.debug("Original Exception: ", e);
         }
+        payloadPersistence.closeDB();
 
         if (log.isTraceEnabled()) {
             start = System.currentTimeMillis();

@@ -17,7 +17,7 @@
 package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import jetbrains.exodus.ExodusException;
 import jetbrains.exodus.env.Environment;
 import org.slf4j.Logger;

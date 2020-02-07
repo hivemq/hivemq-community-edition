@@ -20,7 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
@@ -63,7 +63,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.MQTT_ALLOW
 @Singleton
 public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginAuthorizerServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PluginAuthorizerService.class);
 
     private final @NotNull Authorizers authorizers;
     private final @NotNull PluginOutPutAsyncer asyncer;
@@ -79,7 +79,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     @Inject
     public PluginAuthorizerServiceImpl(
-            final @NotNull Authorizers initializers,
+            final @NotNull Authorizers authorizers,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull ServerInformation serverInformation,
@@ -88,7 +88,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector,
             final @NotNull EventLog eventLog,
             final @NotNull IncomingPublishService incomingPublishService) {
-        this.authorizers = initializers;
+
+        this.authorizers = authorizers;
         this.asyncer = asyncer;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.serverInformation = serverInformation;
@@ -100,7 +101,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
     }
 
-    public void authorizePublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH msg) {
+    public void authorizePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) {
 
         //We first check if the topic is allowed to be published
         if (!Topics.isValidTopicToPublish(msg.getTopic())) {
@@ -154,7 +155,6 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         final AuthorizerProviderInput authorizerProviderInput =
                 new AuthorizerProviderInputImpl(ctx.channel(), serverInformation, clientId);
 
-
         final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(msg, ctx.channel(), clientId);
         final PublishAuthorizerOutputImpl output = new PublishAuthorizerOutputImpl(asyncer);
 
@@ -168,7 +168,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                         incomingPublishService), MoreExecutors.directExecutor());
     }
 
-    public void authorizeWillPublish(final @NotNull ChannelHandlerContext ctx, @NotNull final CONNECT connect) {
+    public void authorizeWillPublish(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null || !ctx.channel().isActive()) {
@@ -209,23 +209,24 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                 MoreExecutors.directExecutor());
     }
 
-    @NotNull
-    private SettableFuture<PublishAuthorizerOutputImpl> executePublishAuthorizer(
-            @NotNull final String clientId,
-            @NotNull final Map<String, AuthorizerProvider> providerMap,
-            @NotNull final ClientAuthorizers clientAuthorizers,
-            @NotNull final AuthorizerProviderInput authorizerProviderInput,
-            @NotNull final PublishAuthorizerInputImpl input,
-            @NotNull final PublishAuthorizerOutputImpl output,
-            @NotNull final ChannelHandlerContext ctx) {
+    private @NotNull SettableFuture<PublishAuthorizerOutputImpl> executePublishAuthorizer(
+            final @NotNull String clientId,
+            final @NotNull Map<String, AuthorizerProvider> providerMap,
+            final @NotNull ClientAuthorizers clientAuthorizers,
+            final @NotNull AuthorizerProviderInput authorizerProviderInput,
+            final @NotNull PublishAuthorizerInputImpl input,
+            final @NotNull PublishAuthorizerOutputImpl output,
+            final @NotNull ChannelHandlerContext ctx) {
+
         final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = SettableFuture.create();
 
         final PublishAuthorizerContext context =
-                new PublishAuthorizerContext(PublishAuthorizerTask.class, clientId, output, publishProcessedFuture,
-                        providerMap.size(), ctx);
+                new PublishAuthorizerContext(clientId, output, publishProcessedFuture, providerMap.size(), ctx);
 
         for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-            final PublishAuthorizerTask task = new PublishAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput, clientAuthorizers, ctx);
+            final PublishAuthorizerTask task =
+                    new PublishAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput,
+                            clientAuthorizers, ctx);
             pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
         }
         return publishProcessedFuture;
@@ -269,21 +270,20 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             listenableFutures.add(topicProcessedFuture);
 
             final SubscriptionAuthorizerContext context =
-                    new SubscriptionAuthorizerContext(SubscriptionAuthorizerTask.class, clientId, output,
-                            topicProcessedFuture, providerMap.size());
+                    new SubscriptionAuthorizerContext(clientId, output, topicProcessedFuture, providerMap.size());
 
             for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-                final SubscriptionAuthorizerTask task = new SubscriptionAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput, clientAuthorizers);
+                final SubscriptionAuthorizerTask task =
+                        new SubscriptionAuthorizerTask(entry.getValue(), entry.getKey(), authorizerProviderInput,
+                                clientAuthorizers);
                 pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
             }
-
         }
 
         Futures.whenAllComplete(listenableFutures)
                 .run(
                         new AllTopicsProcessedTask(msg, listenableFutures, ctx, mqtt5Disconnector, mqtt3Disconnector),
                         MoreExecutors.directExecutor());
-
     }
 
     @NotNull
@@ -297,7 +297,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         return clientAuthorizers;
     }
 
-    private void disconnectByClose(final ChannelHandlerContext ctx, @NotNull final String reason) {
+    private void disconnectByClose(final ChannelHandlerContext ctx, final @NotNull String reason) {
         if (ctx.channel().isActive()) {
             eventLog.clientWasDisconnected(ctx.channel(), reason);
             ctx.close();
@@ -310,7 +310,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
         private final @NotNull PublishAuthorizerResult result;
 
-        public AuthorizeWillResultEvent(@NotNull final CONNECT connect, @NotNull final PublishAuthorizerResult result) {
+        public AuthorizeWillResultEvent(final @NotNull CONNECT connect, final @NotNull PublishAuthorizerResult result) {
             this.connect = connect;
             this.result = result;
         }
@@ -325,5 +325,4 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             return result;
         }
     }
-
 }

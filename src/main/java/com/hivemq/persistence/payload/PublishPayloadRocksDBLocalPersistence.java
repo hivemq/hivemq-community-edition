@@ -18,8 +18,8 @@ package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
@@ -55,6 +55,9 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
+                InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION,
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION,
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
     }
 

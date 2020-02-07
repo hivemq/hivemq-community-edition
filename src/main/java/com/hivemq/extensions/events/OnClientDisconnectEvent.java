@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.events;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 
@@ -33,10 +33,12 @@ public class OnClientDisconnectEvent {
     private final @Nullable UserProperties userProperties;
     private final boolean graceful;
 
-    public OnClientDisconnectEvent(final @Nullable DisconnectedReasonCode reasonCode,
-                                   final @Nullable String reasonString,
-                                   final @Nullable UserProperties userProperties,
-                                   final boolean graceful) {
+    public OnClientDisconnectEvent(
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable UserProperties userProperties,
+            final boolean graceful) {
+
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
         this.userProperties = userProperties;

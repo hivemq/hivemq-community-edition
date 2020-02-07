@@ -16,16 +16,15 @@
 
 package com.hivemq.extensions.services.auth;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.ThreadSafe;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.Map;
 
 /**
- * Internal interface for holding the {@link AuthenticatorProvider}s from
- * the extension system.
+ * Internal interface for holding the {@link AuthenticatorProvider}s from the extension system.
  *
  * @author Georg Held
  */
@@ -41,10 +40,4 @@ public interface Authenticators {
      * @param provider a wrapped {@link AuthenticatorProvider}
      */
     void registerAuthenticatorProvider(@NotNull WrappedAuthenticatorProvider provider);
-
-    /**
-     * @return true if any {@link AuthenticatorProvider} have been
-     * registered, false otherwise.
-     */
-    boolean areAuthenticatorsAvailable();
 }

@@ -16,7 +16,7 @@
 
 package com.hivemq.migration.meta;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.migration.Migrations;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -67,7 +67,7 @@ public class MetaFileService {
             final MetaInformation metaInfo = serializer.deserialize(bytes);
             migrationlog.info("Read metadata file: {}", metaInfo);
             return metaInfo;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             migrationlog.error("Not able to read metadata file", e);
             log.trace("Not able to read meta file", e);
             metaInformation.setMetaFilePresent(false);

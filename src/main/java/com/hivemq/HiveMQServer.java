@@ -19,7 +19,7 @@ package com.hivemq;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Injector;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.*;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
 import com.hivemq.common.shutdown.ShutdownHooks;

@@ -19,8 +19,8 @@ package com.hivemq.extensions.handler;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
@@ -61,13 +61,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This handler intercepts every inbound PUBLISH message and delegates it to all registered
- * {@link PublishInboundInterceptor}s for a specific client.
+ * This handler intercepts every inbound PUBLISH message and delegates it to all registered {@link
+ * PublishInboundInterceptor}s for a specific client.
  * <p>
  * When delivery of the PUBLISH is prevented, the message will be dropped.
  * <p>
- * When the {@link AckReasonCode} for the PUBACK or PUBREC is not SUCCESS a MQTT 3 client will be disconnected,
- * but an MQTT 5 client receives the PUBACK or PUBREC with the reason code.
+ * When the {@link AckReasonCode} for the PUBACK or PUBREC is not SUCCESS a MQTT 3 client will be disconnected, but an
+ * MQTT 5 client receives the PUBACK or PUBREC with the reason code.
  * <p>
  * When the {@link AckReasonCode} is SUCCESS an Acknowledgement will be sent (PUBACK or PUBREC) dependent on the QoS.
  * <p>
@@ -95,13 +95,15 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
     private final @NotNull FullConfigurationService configurationService;
 
     @Inject
-    public IncomingPublishHandler(final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-                                  final @NotNull PluginOutPutAsyncer asyncer,
-                                  final @NotNull HiveMQExtensions hiveMQExtensions,
-                                  final @NotNull MessageDroppedService messageDroppedService,
-                                  final @NotNull PluginAuthorizerService pluginAuthorizerService,
-                                  final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
-                                  final @NotNull FullConfigurationService configurationService) {
+    public IncomingPublishHandler(
+            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull PluginAuthorizerService pluginAuthorizerService,
+            final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
+            final @NotNull FullConfigurationService configurationService) {
+
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -112,7 +114,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
     }
 
     @Override
-    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) throws Exception {
+    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) {
         interceptOrDelegate(ctx, msg);
     }
 
@@ -141,14 +143,16 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
             return;
         }
 
-        final List<PublishInboundInterceptor> publishInboundInterceptors = clientContext.getPublishInboundInterceptors();
+        final List<PublishInboundInterceptor> publishInboundInterceptors =
+                clientContext.getPublishInboundInterceptors();
 
-        final PublishInboundOutputImpl inboundOutput = new PublishInboundOutputImpl(configurationService, asyncer, publish);
-        final PublishInboundInputImpl inboundInput = new PublishInboundInputImpl(new PublishPacketImpl(publish), clientId, channel);
+        final PublishInboundOutputImpl inboundOutput =
+                new PublishInboundOutputImpl(configurationService, asyncer, publish);
+        final PublishInboundInputImpl inboundInput =
+                new PublishInboundInputImpl(new PublishPacketImpl(publish), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final PublishInboundInterceptorContext interceptorContext = new PublishInboundInterceptorContext(
-                PublishInboundInterceptorTask.class, clientId, inboundOutput, inboundInput, interceptorFuture, publishInboundInterceptors.size()
-        );
+                clientId, inboundOutput, inboundInput, interceptorFuture, publishInboundInterceptors.size());
 
         for (final PublishInboundInterceptor interceptor : publishInboundInterceptors) {
 
@@ -170,14 +174,17 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 continue;
             }
 
-            final PublishInboundInterceptorTask interceptorTask = new PublishInboundInterceptorTask(interceptor, plugin.getId());
+            final PublishInboundInterceptorTask interceptorTask =
+                    new PublishInboundInterceptorTask(interceptor, plugin.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, inboundInput, inboundOutput, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    interceptorContext, inboundInput, inboundOutput, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(inboundOutput, channel, clientId, publish, ctx, mqttDisconnector, messageDroppedService, pluginAuthorizerService);
+        final InterceptorFutureCallback callback =
+                new InterceptorFutureCallback(inboundOutput, channel, clientId, publish, ctx, mqttDisconnector,
+                        messageDroppedService, pluginAuthorizerService);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
-
     }
 
     private class PublishInboundInterceptorContext extends PluginInOutTaskContext<PublishInboundOutputImpl> {
@@ -188,13 +195,14 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-        PublishInboundInterceptorContext(final @NotNull Class<?> taskClazz,
-                                         final @NotNull String identifier,
-                                         final @NotNull PublishInboundOutputImpl output,
-                                         final @NotNull PublishInboundInputImpl input,
-                                         final @NotNull SettableFuture<Void> interceptorFuture,
-                                         final int interceptorCount) {
-            super(taskClazz, identifier);
+        PublishInboundInterceptorContext(
+                final @NotNull String identifier,
+                final @NotNull PublishInboundOutputImpl output,
+                final @NotNull PublishInboundInputImpl input,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final int interceptorCount) {
+
+            super(identifier);
             this.output = output;
             this.input = input;
             this.interceptorFuture = interceptorFuture;
@@ -205,9 +213,11 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
         @Override
         public void pluginPost(@NotNull final PublishInboundOutputImpl pluginOutput) {
 
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
+                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
                 //Timeout fallback failure means publish delivery prevention
-                pluginOutput.forciblyPreventPublishDelivery(pluginOutput.getReasonCode(), pluginOutput.getReasonString());
+                pluginOutput.forciblyPreventPublishDelivery(
+                        pluginOutput.getReasonCode(), pluginOutput.getReasonString());
             }
 
             if (output.getPublishPacket().isModified()) {
@@ -227,19 +237,25 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
         }
     }
 
-    private class PublishInboundInterceptorTask implements PluginInOutTask<PublishInboundInputImpl, PublishInboundOutputImpl> {
+    private class PublishInboundInterceptorTask
+            implements PluginInOutTask<PublishInboundInputImpl, PublishInboundOutputImpl> {
 
         private final @NotNull PublishInboundInterceptor interceptor;
         private final @NotNull String pluginId;
 
-        private PublishInboundInterceptorTask(final @NotNull PublishInboundInterceptor interceptor,
-                                              final @NotNull String pluginId) {
+        private PublishInboundInterceptorTask(
+                final @NotNull PublishInboundInterceptor interceptor,
+                final @NotNull String pluginId) {
+
             this.interceptor = interceptor;
             this.pluginId = pluginId;
         }
 
         @Override
-        public @NotNull PublishInboundOutputImpl apply(final @NotNull PublishInboundInputImpl publishInboundInput, final @NotNull PublishInboundOutputImpl publishInboundOutput) {
+        public @NotNull PublishInboundOutputImpl apply(
+                final @NotNull PublishInboundInputImpl publishInboundInput,
+                final @NotNull PublishInboundOutputImpl publishInboundOutput) {
+
             if (publishInboundOutput.isPreventDelivery()) {
                 //it's already prevented so no further interceptors must be called.
                 return publishInboundOutput;
@@ -250,7 +266,8 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound publish interception. Extensions are responsible on their own to handle exceptions.",
                         pluginId);
-                publishInboundOutput.forciblyPreventPublishDelivery(publishInboundOutput.getReasonCode(), publishInboundOutput.getReasonString());
+                publishInboundOutput.forciblyPreventPublishDelivery(
+                        publishInboundOutput.getReasonCode(), publishInboundOutput.getReasonString());
                 Exceptions.rethrowError(e);
             }
             return publishInboundOutput;
@@ -273,14 +290,16 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
         private final @NotNull MessageDroppedService messageDroppedService;
         private final @NotNull PluginAuthorizerService pluginAuthorizerService;
 
-        InterceptorFutureCallback(final @NotNull PublishInboundOutputImpl inboundOutput,
-                                  final @NotNull Channel channel,
-                                  final @NotNull String clientId,
-                                  final @NotNull PUBLISH publish,
-                                  final @NotNull ChannelHandlerContext ctx,
-                                  final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
-                                  final @NotNull MessageDroppedService messageDroppedService,
-                                  final @NotNull PluginAuthorizerService pluginAuthorizerService) {
+        InterceptorFutureCallback(
+                final @NotNull PublishInboundOutputImpl inboundOutput,
+                final @NotNull Channel channel,
+                final @NotNull String clientId,
+                final @NotNull PUBLISH publish,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
+                final @NotNull MessageDroppedService messageDroppedService,
+                final @NotNull PluginAuthorizerService pluginAuthorizerService) {
+
             this.inboundOutput = inboundOutput;
             this.channel = channel;
             this.clientId = clientId;
@@ -296,7 +315,8 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
             if (inboundOutput.isPreventDelivery()) {
                 dropMessage();
             } else {
-                final PUBLISH finalPublish = PUBLISHFactory.mergePublishPacket(inboundOutput.getPublishPacket(), publish);
+                final PUBLISH finalPublish =
+                        PUBLISHFactory.mergePublishPacket(inboundOutput.getPublishPacket(), publish);
                 ctx.executor().execute(() -> pluginAuthorizerService.authorizePublish(ctx, finalPublish));
             }
         }
@@ -307,8 +327,10 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
             //MQTT 3
             if (protocolVersion != ProtocolVersion.MQTTv5) {
                 if (inboundOutput.getReasonCode() != AckReasonCode.SUCCESS) {
-                    mqttDisconnector.disconnect(channel,
-                            "Client '" + clientId + "' (IP: {}) sent a PUBLISH, but its onward delivery was prevented by a publish inbound interceptor. Disconnecting client.",
+                    mqttDisconnector.disconnect(
+                            channel,
+                            "Client '" + clientId +
+                                    "' (IP: {}) sent a PUBLISH, but its onward delivery was prevented by a publish inbound interceptor. Disconnecting client.",
                             "Sent PUBLISH, but its onward delivery was prevented by a publish inbound interceptor",
                             null,
                             null);
@@ -335,12 +357,16 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                         //no ack for qos 0
                         break;
                     case AT_LEAST_ONCE:
-                        final Mqtt5PubAckReasonCode ackReasonCode = Mqtt5PubAckReasonCode.valueOf(inboundOutput.getReasonCode().name());
-                        ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier(), ackReasonCode, inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
+                        final Mqtt5PubAckReasonCode ackReasonCode =
+                                Mqtt5PubAckReasonCode.from(inboundOutput.getReasonCode());
+                        ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier(), ackReasonCode,
+                                inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
                     case EXACTLY_ONCE:
-                        final Mqtt5PubRecReasonCode recReasonCode = Mqtt5PubRecReasonCode.valueOf(inboundOutput.getReasonCode().name());
-                        ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier(), recReasonCode, inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
+                        final Mqtt5PubRecReasonCode recReasonCode =
+                                Mqtt5PubRecReasonCode.from(inboundOutput.getReasonCode());
+                        ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier(), recReasonCode,
+                                inboundOutput.getReasonString(), Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
                 }
             }

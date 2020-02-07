@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.packets.general;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 

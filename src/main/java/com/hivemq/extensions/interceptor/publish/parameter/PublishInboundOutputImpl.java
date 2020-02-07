@@ -17,8 +17,8 @@
 package com.hivemq.extensions.interceptor.publish.parameter;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -38,7 +38,8 @@ import java.util.function.Supplier;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInboundOutput> implements PublishInboundOutput, PluginTaskOutput, Supplier<PublishInboundOutputImpl> {
+public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInboundOutput>
+        implements PublishInboundOutput, PluginTaskOutput, Supplier<PublishInboundOutputImpl> {
 
     private final @NotNull AtomicBoolean preventDelivery;
     private @NotNull AckReasonCode reasonCode = AckReasonCode.SUCCESS;
@@ -46,7 +47,11 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
 
     private final @NotNull ModifiablePublishPacketImpl publishPacket;
 
-    public PublishInboundOutputImpl(final @NotNull FullConfigurationService configurationService, final @NotNull PluginOutPutAsyncer asyncer, final @NotNull PUBLISH publish) {
+    public PublishInboundOutputImpl(
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull PUBLISH publish) {
+
         super(asyncer);
         this.publishPacket = new ModifiablePublishPacketImpl(configurationService, publish);
         this.preventDelivery = new AtomicBoolean(false);
@@ -87,8 +92,19 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
 
     @Override
     public @NotNull Async<PublishInboundOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull AckReasonCode ackReasonCode, final @Nullable String reasonString) {
+            final @NotNull Duration duration,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull AckReasonCode ackReasonCode) {
+
+        return async(duration, timeoutFallback, ackReasonCode, null);
+    }
+
+    @Override
+    public @NotNull Async<PublishInboundOutput> async(
+            final @NotNull Duration duration,
+            final @NotNull TimeoutFallback timeoutFallback,
+            final @NotNull AckReasonCode ackReasonCode,
+            final @Nullable String reasonString) {
 
         Preconditions.checkNotNull(duration, "Duration must never be null");
         Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
@@ -104,24 +120,6 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
         this.reasonCode = ackReasonCode;
         this.reasonString = reasonString;
         return async;
-    }
-
-    @Override
-    public @NotNull Async<PublishInboundOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback,
-            final @NotNull AckReasonCode ackReasonCode) {
-        return async(duration, timeoutFallback, ackReasonCode, null);
-    }
-
-    @Override
-    public @NotNull Async<PublishInboundOutput> async(
-            final @NotNull Duration duration, final @NotNull TimeoutFallback timeoutFallback) {
-        return async(duration, timeoutFallback, AckReasonCode.SUCCESS, null);
-    }
-
-    @Override
-    public @NotNull Async<PublishInboundOutput> async(final @NotNull Duration duration) {
-        return async(duration, TimeoutFallback.FAILURE, AckReasonCode.SUCCESS, null);
     }
 
     @Override

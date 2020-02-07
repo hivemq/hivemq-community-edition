@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions.auth.parameter;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.lang3.StringUtils;
 
 /**

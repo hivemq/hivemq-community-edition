@@ -16,8 +16,8 @@
 
 package com.hivemq.bootstrap;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.entity.Listener;
 import io.netty.channel.ChannelFuture;
 

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.puback.PubackOutboundInterceptor;
@@ -114,8 +115,8 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         final PubackInboundOutputImpl output = new PubackInboundOutputImpl(configurationService, asyncer, puback);
         final PubackInboundInputImpl input = new PubackInboundInputImpl(clientId, channel, puback);
 
-        final PubackInboundInterceptorContext interceptorContext = new PubackInboundInterceptorContext(
-                PubackInboundInterceptorTask.class, clientId, input, ctx, interceptors.size());
+        final PubackInboundInterceptorContext interceptorContext =
+                new PubackInboundInterceptorContext(clientId, input, ctx, interceptors.size());
 
         for (final PubackInboundInterceptor interceptor : interceptors) {
 
@@ -161,8 +162,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(clientId, channel, puback);
 
         final PubackOutboundInterceptorContext interceptorContext =
-                new PubackOutboundInterceptorContext(PubackOutboundInterceptorTask.class, clientId, input, ctx, promise,
-                        interceptors.size());
+                new PubackOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final PubackOutboundInterceptor interceptor : interceptors) {
 
@@ -189,13 +189,12 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubackInboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubackInboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.interceptorCount = interceptorCount;
@@ -267,14 +266,13 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull AtomicInteger counter;
 
         PubackOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String clientId,
                 final @NotNull PubackOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, clientId);
+            super(clientId);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;

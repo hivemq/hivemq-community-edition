@@ -72,6 +72,7 @@ Library                                                            | License    
  org.jetbrains.xodus:xodus-openAPI                                 | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
  org.jetbrains.xodus:xodus-utils                                   | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
  org.jetbrains.xodus:xodus-vfs                                     | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
+ org.rocksdb:rocksdbjni                                            | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
  org.slf4j:jul-to-slf4j                                            | MIT License                                | http://www.opensource.org/licenses/mit-license.php                | 
  org.slf4j:slf4j-api                                               | MIT License                                | http://www.opensource.org/licenses/mit-license.php                | 
  org.threeten:threetenbp                                           | BSD 3-clause                               | https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt | 

@@ -16,8 +16,9 @@
 
 package com.hivemq.mqtt.message.reason;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.pubrel.PubrelReasonCode;
 
 /**
  * MQTT Reason Codes that can be used in PUBREL packets according to the MQTT 5 specification.
@@ -30,37 +31,57 @@ public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
     PACKET_IDENTIFIER_NOT_FOUND(MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
 
     private final int code;
+    private final @NotNull PubrelReasonCode pubrelReasonCode;
 
     Mqtt5PubRelReasonCode(final int code) {
         this.code = code;
+        pubrelReasonCode = PubrelReasonCode.valueOf(name());
     }
 
-    Mqtt5PubRelReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5PubRelReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
-    /**
-     * @return the byte code of this PUBREL Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull PubrelReasonCode toPubrelReasonCode() {
+        return pubrelReasonCode;
+    }
+
+    private static final @NotNull Mqtt5PubRelReasonCode @NotNull [] PUBREL_LOOKUP =
+            new Mqtt5PubRelReasonCode[PubrelReasonCode.values().length];
+
+    static {
+        for (final Mqtt5PubRelReasonCode reasonCode : values()) {
+            PUBREL_LOOKUP[reasonCode.pubrelReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
      * Returns the PUBREL Reason Code belonging to the given byte code.
      *
      * @param code the byte code.
-     * @return the PUBREL Reason Code belonging to the given byte code or null if the byte code is not a valid PUBREL
-     * Reason Code code.
+     * @return the PUBREL Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid PUBREL Reason Code.
      */
-    @Nullable
-    public static Mqtt5PubRelReasonCode fromCode(final int code) {
-        for (final Mqtt5PubRelReasonCode reasonCode : values()) {
-            if (reasonCode.code == code) {
-                return reasonCode;
-            }
+    public static @Nullable Mqtt5PubRelReasonCode fromCode(final int code) {
+        if (code == SUCCESS.code) {
+            return SUCCESS;
+        } else if (code == PACKET_IDENTIFIER_NOT_FOUND.code) {
+            return PACKET_IDENTIFIER_NOT_FOUND;
         }
         return null;
     }
 
+    public static @NotNull Mqtt5PubRelReasonCode from(final @NotNull PubrelReasonCode reasonCode) {
+        return PUBREL_LOOKUP[reasonCode.ordinal()];
+    }
+
+    @Override
+    public boolean canBeSentByClient() {
+        return true;
+    }
 }

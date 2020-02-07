@@ -19,7 +19,9 @@ package com.hivemq.mqtt.handler.disconnect;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -60,12 +62,13 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
         assertTrue(channel.isActive());
 
-        mqttDisconnectUtil.disconnect(channel);
+        mqttDisconnectUtil.disconnect(channel, false, false, null, null, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
 
         assertFalse(channel.isActive());
         assertTrue(eventLatch.await(10, TimeUnit.SECONDS));
@@ -75,12 +78,13 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel_with_reason_code() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
         assertTrue(channel.isActive());
 
-        mqttDisconnectUtil.disconnect(channel, true, Mqtt5DisconnectReasonCode.MALFORMED_PACKET);
+        mqttDisconnectUtil.disconnect(channel, true, false, Mqtt5DisconnectReasonCode.MALFORMED_PACKET, null, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
 
         assertFalse(channel.isActive());
         assertTrue(eventLatch.await(10, TimeUnit.SECONDS));
@@ -90,12 +94,13 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel_with_reason_code_and_reason_string() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
         assertTrue(channel.isActive());
 
-        mqttDisconnectUtil.disconnect(channel, true, true, Mqtt5DisconnectReasonCode.MALFORMED_PACKET, "reason");
+        mqttDisconnectUtil.disconnect(channel, true, true, Mqtt5DisconnectReasonCode.MALFORMED_PACKET, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES, false);
 
         assertFalse(channel.isActive());
         assertTrue(eventLatch.await(10, TimeUnit.SECONDS));
@@ -104,17 +109,7 @@ public class MqttDisconnectUtilTest {
     @Test(expected = NullPointerException.class)
     public void test_disconnect_channel_with_reason_code_null() throws InterruptedException {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        mqttDisconnectUtil.disconnect(channel, true, null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_disconnect_channel_null() throws InterruptedException {
-        mqttDisconnectUtil.disconnect(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_log_disconnect_channel_null() {
-        mqttDisconnectUtil.logDisconnect(null, null, null);
+        mqttDisconnectUtil.disconnect(channel, true, false, null, null, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
     }
 
     @Test

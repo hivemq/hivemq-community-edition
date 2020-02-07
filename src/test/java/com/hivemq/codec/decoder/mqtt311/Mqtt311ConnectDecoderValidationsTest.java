@@ -24,6 +24,7 @@ import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -230,7 +231,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(connacker).connackErrorMqtt3(any(Channel.class), anyString(), anyString(), eq(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED));
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), anyString());
     }
 
     @Test

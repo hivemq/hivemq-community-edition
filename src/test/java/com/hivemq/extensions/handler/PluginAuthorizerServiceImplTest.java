@@ -17,8 +17,8 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -574,7 +574,7 @@ public class PluginAuthorizerServiceImplTest {
         final Class<?> providerClass =
                 cl.loadClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name);
 
-        AuthorizerProvider testProvider =
+        final AuthorizerProvider testProvider =
                 (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
                         .newInstance(countDownLatch);
         return testProvider;

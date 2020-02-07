@@ -16,7 +16,6 @@
 
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.bootstrap.netty.initializer.ListenerAttributeAdderFactory;
 import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;
 import com.hivemq.codec.encoder.EncoderFactory;
@@ -30,7 +29,7 @@ import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
-import com.hivemq.mqtt.handler.connect.StopReadingAfterConnectHandler;
+import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
@@ -62,6 +61,9 @@ public class ChannelDependenciesTest {
 
     @Mock
     private MetricsInitializer statisticsInitializer;
+
+    @Mock
+    private NoConnectIdleHandler noConnectIdleHandler;
 
     @Mock
     private ConnectHandler connectHandler;
@@ -116,12 +118,6 @@ public class ChannelDependenciesTest {
 
     @Mock
     private EncoderFactory encoderFactory;
-
-    @Mock
-    private ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @Mock
-    private StopReadingAfterConnectHandler stopReadingAfterConnectHandler;
 
     @Mock
     private DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
@@ -199,6 +195,7 @@ public class ChannelDependenciesTest {
 
         channelDependencies = new ChannelDependencies(
                 () -> statisticsInitializer,
+                noConnectIdleHandler,
                 () -> connectHandler,
                 connectPersistenceUpdateHandler,
                 disconnectHandler,
@@ -216,14 +213,12 @@ public class ChannelDependenciesTest {
                 restrictionsConfigurationService,
                 mqttConnectDecoder,
                 returnMessageIdToPoolHandler,
-                stopReadingAfterConnectHandler,
-                listenerAttributeAdderFactory,
                 () -> dropOutgoingPublishesHandler,
                 eventLog,
                 sslParameterHandler,
                 mqttDecoders,
                 encoderFactory,
-                authHandler,
+                () -> authHandler,
                 authInProgressMessageHandler,
                 () -> pluginInitializerHandler,
                 () -> clientLifecycleEventHandler,
@@ -250,6 +245,7 @@ public class ChannelDependenciesTest {
     public void test_all_provided() {
 
         assertNotNull(channelDependencies.getStatisticsInitializer());
+        assertNotNull(channelDependencies.getNoConnectIdleHandler());
         assertNotNull(channelDependencies.getConnectHandler());
         assertNotNull(channelDependencies.getDisconnectHandler());
         assertNotNull(channelDependencies.getSubscribeHandler());
@@ -268,8 +264,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getMqttConnectDecoder());
         assertNotNull(channelDependencies.getReturnMessageIdToPoolHandler());
         assertNotNull(channelDependencies.getMqttMessageEncoder());
-        assertNotNull(channelDependencies.getStopReadingAfterConnectHandler());
-        assertNotNull(channelDependencies.getListenerAttributeAdderFactory());
         assertNotNull(channelDependencies.getDropOutgoingPublishesHandler());
         assertNotNull(channelDependencies.getPublishMessageExpiryHandler());
         assertNotNull(channelDependencies.getEventLog());

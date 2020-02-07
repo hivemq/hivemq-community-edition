@@ -16,8 +16,8 @@
 
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;

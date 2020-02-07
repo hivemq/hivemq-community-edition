@@ -16,7 +16,7 @@
 
 package com.hivemq.configuration.service.impl;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.message.QoS;
 import org.slf4j.Logger;

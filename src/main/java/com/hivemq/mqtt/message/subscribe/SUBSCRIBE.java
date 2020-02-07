@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.message.subscribe;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;
 import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.mqtt.message.MessageType;

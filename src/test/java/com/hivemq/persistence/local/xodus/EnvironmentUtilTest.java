@@ -53,6 +53,7 @@ public class EnvironmentUtilTest {
         assertEquals(2, envConfig.getGcFileMinAge());
         assertEquals(1000, envConfig.getLogSyncPeriod());
         assertEquals(false, envConfig.getLogDurableWrite());
+        assertEquals(25, envConfig.getMemoryUsagePercentage());
         assertEquals(InternalConfigurations.XODUS_LOG_CACHE_USE_NIO, envConfig.getLogCacheUseNio());
     }
 

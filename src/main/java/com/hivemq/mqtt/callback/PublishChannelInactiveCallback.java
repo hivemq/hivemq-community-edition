@@ -17,7 +17,7 @@
 package com.hivemq.mqtt.callback;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 

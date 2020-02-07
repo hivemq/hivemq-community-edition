@@ -54,7 +54,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
             final @NotNull DISCONNECT originalDisconnect) {
 
         configurationService = fullConfigurationService;
-        reasonCode = DisconnectReasonCode.valueOf(originalDisconnect.getReasonCode().name());
+        reasonCode = originalDisconnect.getReasonCode().toDisconnectReasonCode();
         reasonString = originalDisconnect.getReasonString();
         sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
         serverReference = originalDisconnect.getServerReference();
@@ -89,7 +89,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
                 reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                 "Reason code %s must not be used for disconnect packets.", reasonCode);
         Preconditions.checkArgument(
-                Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
+                Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
                 "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                 reasonCode);
         if (this.reasonCode == reasonCode) {

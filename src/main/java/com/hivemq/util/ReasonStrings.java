@@ -130,6 +130,21 @@ public class ReasonStrings {
     public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
     public static final String UNSUBACK_EXTENSION_PREVENTED = "UNSUBSCRIBE prevented by an extension.";
 
+    public static final String AUTH_FAILED = "Authentication failed";
+    public static final String RE_AUTH_FAILED = "Re-authentication failed";
+    public static final String AUTH_FAILED_NO_AUTHENTICATOR = "Authentication failed, no authenticator registered";
+    public static final String RE_AUTH_FAILED_NO_AUTHENTICATOR = "Re-authentication failed, no authenticator registered";
+    public static final String AUTH_FAILED_CLIENT_TIMEOUT = "Authentication failed, timeout before the client provided required authentication data";
+    public static final String RE_AUTH_FAILED_CLIENT_TIMEOUT = "Re-authentication failed, timeout before the client provided required authentication data";
+    public static final String AUTH_FAILED_EXTENSION_TIMEOUT = "Authentication failed, authenticator timed out";
+    public static final String RE_AUTH_FAILED_EXTENSION_TIMEOUT = "Re-authentication failed, authenticator timed out";
+    public static final String AUTH_FAILED_UNDECIDED = "Authentication failed, authenticator did not decide authenticity";
+    public static final String RE_AUTH_FAILED_UNDECIDED = "Re-authentication failed, authenticator did not decide authenticity";
+    public static final String AUTH_FAILED_EXCEPTION = "Authentication failed, exception in authenticator";
+    public static final String RE_AUTH_FAILED_EXCEPTION = "Re-authentication failed, exception in authenticator";
+    public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client";
+    public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client";
+
     private ReasonStrings() {
         //Don't instantiate
     }

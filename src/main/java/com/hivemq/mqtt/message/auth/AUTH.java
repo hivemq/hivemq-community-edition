@@ -17,8 +17,8 @@
 package com.hivemq.mqtt.message.auth;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
@@ -61,6 +61,7 @@ public class AUTH extends MqttMessageWithUserProperties.MqttMessageWithReasonCod
         this.authData = authData;
     }
 
+    @Nullable
     public byte[] getAuthData() {
         return authData;
     }

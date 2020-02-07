@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.packets.pubcomp;
 
-import com.hivemq.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -39,7 +39,7 @@ public class PubcompPacketImpl implements PubcompPacket {
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
         packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = PubcompReasonCode.valueOf(pubcomp.getReasonCode().name());
+        reasonCode = pubcomp.getReasonCode().toPubcompReasonCode();
         reasonString = pubcomp.getReasonString();
         userProperties = pubcomp.getUserProperties().getPluginUserProperties();
     }

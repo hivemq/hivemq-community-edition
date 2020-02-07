@@ -18,7 +18,7 @@ package com.hivemq.migration.persistence.payload;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
 import com.hivemq.configuration.ConfigurationBootstrap;
 import com.hivemq.configuration.HivemqId;

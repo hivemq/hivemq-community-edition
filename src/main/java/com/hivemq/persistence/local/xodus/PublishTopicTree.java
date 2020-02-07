@@ -16,8 +16,8 @@
 package com.hivemq.persistence.local.xodus;
 
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;

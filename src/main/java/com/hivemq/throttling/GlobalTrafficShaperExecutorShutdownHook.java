@@ -16,7 +16,7 @@
 
 package com.hivemq.throttling;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 
 import java.util.concurrent.ScheduledExecutorService;

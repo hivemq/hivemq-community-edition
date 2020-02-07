@@ -102,6 +102,9 @@ public class InternalConfigurations {
     public static final int XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD = 1000;
     // The configuration for xodus persistence environment durable writes
     public static final boolean XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES = false;
+    // The the memory limit used by the xodus environments in percentage of the JVM heap (Xmx).
+    public static final int XODUS_PERSISTENCE_LOG_MEMORY_PERCENTAGE = 25;
+
 
 
     // The amount of publishes that are polled per batch
@@ -115,6 +118,15 @@ public class InternalConfigurations {
 
     //The configuration if rocks db is used instead of xodus for retained messages.
     public static final AtomicReference<PersistenceType> RETAINED_MESSAGE_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
+
+    //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final int RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION = 32;
+
+    //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final int RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION = 64;
+
+    //The block size used by rocksdb for the retained message persistence in bytes
+    public static final int RETAINED_MESSAGE_BLOCK_SIZE = 32 * 1024;
 
     /* ************************
      *   Payload Persistence  *
@@ -179,6 +191,15 @@ public class InternalConfigurations {
      * The maximum of entries in the shared subscription cache
      */
     public static final int SHARED_SUBSCRIPTION_CACHE_SIZE = 10000;
+
+    //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final int PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = 32;
+
+    //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = 64;
+
+    //The block size used by rocksdb for the retained message persistence in bytes
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE = 32 * 1024;
 
 
     /**
@@ -341,6 +362,11 @@ public class InternalConfigurations {
     /**
      * Denies the bypassing of authentication if no authenticator is registered
      */
-    public static final boolean AUTH_DENY_UNAUTHENTICATED_CONNECTIONS = false;
+    public static final AtomicBoolean AUTH_DENY_UNAUTHENTICATED_CONNECTIONS = new AtomicBoolean(true);
+
+    /**
+     * The timeout in seconds between two auth steps
+     */
+    public static final AtomicInteger AUTH_PROCESS_TIMEOUT = new AtomicInteger(30);
 
 }

@@ -16,8 +16,8 @@
 
 package com.hivemq.persistence.local.xodus.bucket;
 
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 

@@ -17,14 +17,13 @@
 package com.hivemq.mqtt.message.connack;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extensions.packets.connack.ModifiableConnackPacketImpl;
-import com.hivemq.extensions.packets.general.ReasonCodeUtil;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -174,7 +173,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
                 .withAuthMethod(connackPacket.getAuthenticationMethod().orElse(null))
                 .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connackPacket.getAuthenticationData()))
                 .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
-                .withReasonCode(ReasonCodeUtil.toMqtt5(connackPacket.getReasonCode()))
+                .withReasonCode(Mqtt5ConnAckReasonCode.from(connackPacket.getReasonCode()))
                 .withReasonString(connackPacket.getReasonString().orElse(null))
                 .withMaximumQoS(qoS)
                 .withSharedSubscriptionAvailable(connackPacket.getSharedSubscriptionsAvailable())

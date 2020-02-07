@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.mqtt5;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * Retain Handling according to the MQTT 5 specification.

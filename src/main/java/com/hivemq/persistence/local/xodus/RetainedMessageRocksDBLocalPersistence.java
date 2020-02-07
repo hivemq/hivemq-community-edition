@@ -18,8 +18,8 @@ package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
@@ -70,6 +70,9 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
         super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                InternalConfigurations.RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION,
+                InternalConfigurations.RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION,
+                InternalConfigurations.RETAINED_MESSAGE_BLOCK_SIZE,
                 InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
 
         this.payloadPersistence = payloadPersistence;

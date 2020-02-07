@@ -16,9 +16,9 @@
 
 package com.hivemq.mqtt.message.reason;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
-import com.hivemq.mqtt.message.suback.SubackReturnCode;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 
 /**
  * MQTT Reason Codes that can be used in SUBACK packets according to the MQTT 5 specification.
@@ -27,9 +27,9 @@ import com.hivemq.mqtt.message.suback.SubackReturnCode;
  */
 public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
 
-    GRANTED_QOS_0(SubackReturnCode.GRANTED_QOS_0),
-    GRANTED_QOS_1(SubackReturnCode.GRANTED_QOS_1),
-    GRANTED_QOS_2(SubackReturnCode.GRANTED_QOS_2),
+    GRANTED_QOS_0(0x00),
+    GRANTED_QOS_1(0x01),
+    GRANTED_QOS_2(0x02),
     UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
     IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
     NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
@@ -40,37 +40,47 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED),
     WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
 
+    private static final @NotNull Mqtt5SubAckReasonCode[] VALUES = values();
+
     private final int code;
+    private final @NotNull SubackReasonCode subackReasonCode;
 
     Mqtt5SubAckReasonCode(final int code) {
         this.code = code;
+        subackReasonCode = SubackReasonCode.valueOf(name());
     }
 
-    Mqtt5SubAckReasonCode(@NotNull final MqttCommonReasonCode reasonCode) {
+    Mqtt5SubAckReasonCode(final @NotNull MqttCommonReasonCode reasonCode) {
         this(reasonCode.getCode());
     }
 
-    Mqtt5SubAckReasonCode(@NotNull final SubackReturnCode reasonCode) {
-        this(reasonCode.getCode());
-    }
-
-    /**
-     * @return the byte code of this SUBACK Reason Code.
-     */
+    @Override
     public int getCode() {
         return code;
+    }
+
+    public @NotNull SubackReasonCode toSubackReasonCode() {
+        return subackReasonCode;
+    }
+
+    private static final @NotNull Mqtt5SubAckReasonCode @NotNull [] SUBACK_LOOKUP =
+            new Mqtt5SubAckReasonCode[SubackReasonCode.values().length];
+
+    static {
+        for (final Mqtt5SubAckReasonCode reasonCode : values()) {
+            SUBACK_LOOKUP[reasonCode.subackReasonCode.ordinal()] = reasonCode;
+        }
     }
 
     /**
      * Returns the SUBACK Reason Code belonging to the given byte code.
      *
      * @param code the byte code.
-     * @return the SUBACK Reason Code belonging to the given byte code or null if the byte code is not a valid SUBACK
-     * Reason Code code.
+     * @return the SUBACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
+     * valid SUBACK Reason Code.
      */
-    @Nullable
-    public static Mqtt5SubAckReasonCode fromCode(final int code) {
-        for (final Mqtt5SubAckReasonCode reasonCode : values()) {
+    public static @Nullable Mqtt5SubAckReasonCode fromCode(final int code) {
+        for (final Mqtt5SubAckReasonCode reasonCode : VALUES) {
             if (reasonCode.code == code) {
                 return reasonCode;
             }
@@ -78,4 +88,7 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
         return null;
     }
 
+    public static @NotNull Mqtt5SubAckReasonCode from(final @NotNull SubackReasonCode reasonCode) {
+        return SUBACK_LOOKUP[reasonCode.ordinal()];
+    }
 }

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
@@ -107,8 +108,7 @@ public class UnsubackOutboundInterceptorHandler extends ChannelOutboundHandlerAd
                 new UnsubackOutboundOutputImpl(configurationService, asyncer, unsuback);
 
         final UnsubackOutboundInterceptorContext interceptorContext =
-                new UnsubackOutboundInterceptorContext(
-                        UnsubackOutboundInterceptorTask.class, clientId, input, ctx, promise, interceptors.size());
+                new UnsubackOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
 
         for (final UnsubackOutboundInterceptor interceptor : interceptors) {
 
@@ -136,14 +136,13 @@ public class UnsubackOutboundInterceptorHandler extends ChannelOutboundHandlerAd
         private final @NotNull AtomicInteger counter;
 
         UnsubackOutboundInterceptorContext(
-                final @NotNull Class<?> taskClazz,
                 final @NotNull String identifier,
                 final @NotNull UnsubackOutboundInputImpl input,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
                 final int interceptorCount) {
 
-            super(taskClazz, identifier);
+            super(identifier);
             this.input = input;
             this.ctx = ctx;
             this.promise = promise;

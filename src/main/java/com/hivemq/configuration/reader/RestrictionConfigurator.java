@@ -16,7 +16,7 @@
 
 package com.hivemq.configuration.reader;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.RestrictionsEntity;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import org.slf4j.Logger;

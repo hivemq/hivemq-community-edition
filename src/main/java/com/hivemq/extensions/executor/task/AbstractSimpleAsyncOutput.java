@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.executor.task;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
@@ -43,6 +45,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
 
     @Override
     public @NotNull Async<T> async(final @NotNull Duration timeout) {
+        Preconditions.checkNotNull(timeout, "Timeout duration must never be null");
         checkCalled();
         //noinspection unchecked: this cast is safe since this implements AsyncOutput and PluginTaskOutput
         return (Async<T>) asyncer.asyncify(this, timeout);
@@ -74,6 +77,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
         timedOut.set(true);
     }
 
+    @Override
     public void resetAsyncStatus() {
         timedOut.set(false);
         async.set(false);

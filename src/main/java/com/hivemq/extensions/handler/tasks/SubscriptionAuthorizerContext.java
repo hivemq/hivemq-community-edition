@@ -17,7 +17,7 @@
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
@@ -34,12 +34,13 @@ public class SubscriptionAuthorizerContext extends PluginInOutTaskContext<Subscr
     private final int authorizerCount;
     private final @NotNull AtomicInteger counter;
 
-    public SubscriptionAuthorizerContext(final @NotNull Class<?> taskClazz,
-                                         final @NotNull String identifier,
-                                         final @NotNull SubscriptionAuthorizerOutputImpl output,
-                                         final @NotNull SettableFuture<SubscriptionAuthorizerOutputImpl> authorizeFuture,
-                                         final int authorizerCount) {
-        super(taskClazz, identifier);
+    public SubscriptionAuthorizerContext(
+            final @NotNull String identifier,
+            final @NotNull SubscriptionAuthorizerOutputImpl output,
+            final @NotNull SettableFuture<SubscriptionAuthorizerOutputImpl> authorizeFuture,
+            final int authorizerCount) {
+
+        super(identifier);
         this.output = output;
         this.authorizeFuture = authorizeFuture;
         this.authorizerCount = authorizerCount;

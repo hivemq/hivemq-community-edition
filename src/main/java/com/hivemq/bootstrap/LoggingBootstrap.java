@@ -25,7 +25,7 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.read.ListAppender;
 import ch.qos.logback.core.util.StatusPrinter;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.NettyLogLevelModifier;
 import com.hivemq.logging.XodusEnvironmentImplLogLevelModificator;
 import com.hivemq.logging.XodusFileDataWriterLogLevelModificator;

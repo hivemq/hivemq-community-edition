@@ -16,7 +16,7 @@
 
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -29,6 +29,8 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,6 +61,9 @@ public class AbstractChannelInitializerTest {
     ChannelPipeline pipeline;
 
     @Mock
+    Attribute<Listener> attribute;
+
+    @Mock
     FullConfigurationService configurationService;
 
     @Mock
@@ -68,9 +73,6 @@ public class AbstractChannelInitializerTest {
     RestrictionsConfigurationService restrictionsConfigurationService;
 
     @Mock
-    ListenerAttributeAdderFactory listenerAttributeAdderFactory;
-
-    @Mock
     EventLog eventLog;
 
     private AbstractChannelInitializer abstractChannelInitializer;
@@ -78,9 +80,10 @@ public class AbstractChannelInitializerTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        when(socketChannel.pipeline()).thenReturn(pipeline);
 
-        when(channelDependencies.getListenerAttributeAdderFactory()).thenReturn(listenerAttributeAdderFactory);
+        when(socketChannel.pipeline()).thenReturn(pipeline);
+        when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
+
         when(channelDependencies.getGlobalTrafficShapingHandler())
                 .thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 1000L));
 
@@ -101,13 +104,11 @@ public class AbstractChannelInitializerTest {
 
         verify(pipeline).addLast(eq(FIRST_ABSTRACT_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
-        verify(pipeline).addLast(eq(REMOVE_CONNECT_IDLE_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_BARRIER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_SUBSCRIBE_MESSAGE_BARRIER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(CHANNEL_INACTIVE_HANDLER), any(ChannelHandler.class));
 
     }
-
 
     @Test
     public void test_no_connect_idle_handler_disabled() throws Exception {
@@ -147,7 +148,8 @@ public class AbstractChannelInitializerTest {
 
     @Test
     public void test_embedded_channel_closed_after_sslException_in_initializer() throws Exception {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
+        final EmbeddedChannel embeddedChannel =
+                new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
 
         final CountDownLatch latch = new CountDownLatch(1);
         embeddedChannel.closeFuture().addListener(new ChannelFutureListener() {

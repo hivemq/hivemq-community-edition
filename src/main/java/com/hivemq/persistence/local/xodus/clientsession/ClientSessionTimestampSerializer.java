@@ -16,7 +16,7 @@
 
 package com.hivemq.persistence.local.xodus.clientsession;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 class ClientSessionTimestampSerializer {
 

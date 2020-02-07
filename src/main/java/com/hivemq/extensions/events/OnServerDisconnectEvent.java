@@ -16,12 +16,11 @@
 
 package com.hivemq.extensions.events;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 /**
  * The event to fire when the server sends a disconnect to a client or closes a clients channel.
@@ -35,25 +34,19 @@ public class OnServerDisconnectEvent {
     private final @Nullable String reasonString;
     private final @Nullable UserProperties userProperties;
 
-    public OnServerDisconnectEvent() {
-        this(null);
-    }
+    public OnServerDisconnectEvent(
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable Mqtt5UserProperties userProperties) {
 
-    public OnServerDisconnectEvent(final @Nullable DisconnectedReasonCode disconnectReasonCode,
-                                   final @Nullable String reasonString,
-                                   final @Nullable Mqtt5UserProperties userProperties) {
-        this.reasonCode = disconnectReasonCode;
+        this.reasonCode = reasonCode;
         this.reasonString = reasonString;
-        if (userProperties == null) {
-            this.userProperties = null;
-        } else {
-            this.userProperties = userProperties.getPluginUserProperties();
-        }
+        this.userProperties = (userProperties == null) ? null : userProperties.getPluginUserProperties();
     }
 
     public OnServerDisconnectEvent(final @Nullable DISCONNECT disconnect) {
         if (disconnect != null) {
-            this.reasonCode = Mqtt5DisconnectReasonCode.toPluginDisconnectedCode(disconnect.getReasonCode());
+            this.reasonCode = disconnect.getReasonCode().toDisconnectedReasonCode();
             this.reasonString = disconnect.getReasonString();
             this.userProperties = disconnect.getUserProperties().getPluginUserProperties();
         } else {
@@ -74,5 +67,4 @@ public class OnServerDisconnectEvent {
     public @Nullable UserProperties getUserProperties() {
         return userProperties;
     }
-
 }

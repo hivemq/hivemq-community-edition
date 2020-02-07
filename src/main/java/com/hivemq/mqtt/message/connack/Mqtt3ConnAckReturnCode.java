@@ -16,9 +16,8 @@
 
 package com.hivemq.mqtt.message.connack;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.mqtt.message.reason.MqttConnAckCode;
 
 /**
  * The return code of a MQTT 3.1.1 {@link CONNACK} message.
@@ -29,7 +28,7 @@ import com.hivemq.mqtt.message.reason.MqttConnAckCode;
  *
  * @since 1.4
  */
-public enum Mqtt3ConnAckReturnCode implements MqttConnAckCode {
+public enum Mqtt3ConnAckReturnCode {
     ACCEPTED(0),
     REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1),
     REFUSED_IDENTIFIER_REJECTED(2),
@@ -47,7 +46,7 @@ public enum Mqtt3ConnAckReturnCode implements MqttConnAckCode {
         return code;
     }
 
-    public static Mqtt3ConnAckReturnCode fromCode(final int code) {
+    public static @NotNull Mqtt3ConnAckReturnCode fromCode(final int code) {
         final Mqtt3ConnAckReturnCode[] values = values();
         if (code < 0 || code >= values.length) {
             throw new IllegalArgumentException("No Return code with value " + code + " defined");
@@ -55,8 +54,7 @@ public enum Mqtt3ConnAckReturnCode implements MqttConnAckCode {
         return values[code];
     }
 
-    @NotNull
-    public static Mqtt3ConnAckReturnCode fromReasonCode(@NotNull final Mqtt5ConnAckReasonCode reasonCode) {
+    public static @NotNull Mqtt3ConnAckReturnCode fromReasonCode(final @NotNull Mqtt5ConnAckReasonCode reasonCode) {
         switch (reasonCode) {
             case SUCCESS:
                 return ACCEPTED;
@@ -65,13 +63,28 @@ public enum Mqtt3ConnAckReturnCode implements MqttConnAckCode {
             case CLIENT_IDENTIFIER_NOT_VALID:
                 return REFUSED_IDENTIFIER_REJECTED;
             case SERVER_UNAVAILABLE:
+            case SERVER_BUSY:
+            case USE_ANOTHER_SERVER:
+            case SERVER_MOVED:
                 return REFUSED_SERVER_UNAVAILABLE;
             case BAD_USER_NAME_OR_PASSWORD:
+            case BAD_AUTHENTICATION_METHOD:
                 return REFUSED_BAD_USERNAME_OR_PASSWORD;
+            case UNSPECIFIED_ERROR:
+            case MALFORMED_PACKET:
+            case PROTOCOL_ERROR:
+            case IMPLEMENTATION_SPECIFIC_ERROR:
             case NOT_AUTHORIZED:
-                return REFUSED_NOT_AUTHORIZED;
+            case BANNED:
+            case TOPIC_NAME_INVALID:
+            case PACKET_TOO_LARGE:
+            case QUOTA_EXCEEDED:
+            case PAYLOAD_FORMAT_INVALID:
+            case RETAIN_NOT_SUPPORTED:
+            case QOS_NOT_SUPPORTED:
+            case CONNECTION_RATE_EXCEEDED:
             default:
-                throw new IllegalStateException();
+                return REFUSED_NOT_AUTHORIZED;
         }
     }
 }

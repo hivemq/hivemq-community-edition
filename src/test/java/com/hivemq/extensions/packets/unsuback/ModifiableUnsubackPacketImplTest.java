@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.packets.unsuback;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackReasonCode;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;

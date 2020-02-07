@@ -16,9 +16,10 @@
 
 package com.hivemq.extensions.events;
 
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
 /**
  * The event to fire when client auth failed.
@@ -32,10 +33,14 @@ public class OnAuthFailedEvent {
     private final @Nullable String reasonString;
     private final @Nullable UserProperties userProperties;
 
-    public OnAuthFailedEvent(final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString, final @Nullable UserProperties userProperties) {
+    public OnAuthFailedEvent(
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable Mqtt5UserProperties userProperties) {
+
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
-        this.userProperties = userProperties;
+        this.userProperties = (userProperties == null) ? null : userProperties.getPluginUserProperties();
     }
 
     public @Nullable DisconnectedReasonCode getReasonCode() {

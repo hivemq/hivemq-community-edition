@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.event;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 
 /**

@@ -18,8 +18,8 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
 import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
@@ -79,9 +79,11 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     @Nullable ClientLifecycleEventListenerProviderInput providerInput;
 
     @Inject
-    public ClientLifecycleEventHandler(@NotNull final LifecycleEventListeners lifecycleEventListeners,
-                                       @NotNull final PluginTaskExecutorService pluginTaskExecutorService,
-            @NotNull final HiveMQExtensions hiveMQExtensions) {
+    public ClientLifecycleEventHandler(
+            final @NotNull LifecycleEventListeners lifecycleEventListeners,
+            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull HiveMQExtensions hiveMQExtensions) {
+
         this.lifecycleEventListeners = lifecycleEventListeners;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -160,7 +162,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             providerInput = new ClientLifecycleEventListenerProviderInputImpl(clientId, ctx.channel());
         }
 
-        final PluginInTaskContext taskContext = new ProviderInTaskContext(EventTask.class, clientId);
+        final PluginInTaskContext taskContext = new ProviderInTaskContext(clientId);
         final ServerInitiatedDisconnectInputImpl disconnectInput = new ServerInitiatedDisconnectInputImpl(clientId, ctx.channel(), disconnectEvent.getReasonCode(), disconnectEvent.getReasonString(), disconnectEvent.getUserProperties());
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
@@ -189,7 +191,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             providerInput = new ClientLifecycleEventListenerProviderInputImpl(clientId, ctx.channel());
         }
 
-        final PluginInTaskContext taskContext = new ProviderInTaskContext(EventTask.class, clientId);
+        final PluginInTaskContext taskContext = new ProviderInTaskContext(clientId);
         final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl(clientId, ctx.channel(), disconnectEvent.getReasonCode(), disconnectEvent.getReasonString(), disconnectEvent.getUserProperties(), disconnectEvent.isGraceful());
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
@@ -219,7 +221,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             providerInput = new ClientLifecycleEventListenerProviderInputImpl(clientId, ctx.channel());
         }
 
-        final PluginInTaskContext taskContext = new ProviderInTaskContext(EventTask.class, clientId);
+        final PluginInTaskContext taskContext = new ProviderInTaskContext(clientId);
         final AuthenticationFailedInputImpl failedInput = new AuthenticationFailedInputImpl(ctx.channel(), clientId, authFailedEvent.getReasonCode(), authFailedEvent.getReasonString(), authFailedEvent.getUserProperties());
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
@@ -248,7 +250,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             providerInput = new ClientLifecycleEventListenerProviderInputImpl(clientId, ctx.channel());
         }
 
-        final PluginInTaskContext taskContext = new ProviderInTaskContext(EventTask.class, clientId);
+        final PluginInTaskContext taskContext = new ProviderInTaskContext(clientId);
         final AuthenticationSuccessfulInputImpl input = new AuthenticationSuccessfulInputImpl(clientId, ctx.channel());
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
@@ -272,7 +274,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             providerInput = new ClientLifecycleEventListenerProviderInputImpl(connect.getClientIdentifier(), ctx.channel());
         }
 
-        final PluginInTaskContext taskContext = new ProviderInTaskContext(EventTask.class, connect.getClientIdentifier());
+        final PluginInTaskContext taskContext = new ProviderInTaskContext(connect.getClientIdentifier());
         final ConnectionStartInputImpl connectionStartInput = new ConnectionStartInputImpl(connect, ctx.channel());
 
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
@@ -295,8 +297,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private static class ProviderInTaskContext extends PluginInTaskContext {
 
-        ProviderInTaskContext(final @NotNull Class<?> taskClazz, final @NotNull String identifier) {
-            super(taskClazz, identifier);
+        ProviderInTaskContext(final @NotNull String identifier) {
+            super(identifier);
         }
     }
 

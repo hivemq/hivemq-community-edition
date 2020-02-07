@@ -21,8 +21,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.*;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
@@ -135,7 +135,7 @@ public class ClientServiceImpl implements ClientService {
                     reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                     "Reason code %s must not be used for disconnect packets.", reasonCode);
             Preconditions.checkArgument(
-                    Mqtt5DisconnectReasonCode.canBeSentByServer(reasonCode),
+                    Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
                     "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                     reasonCode);
         }

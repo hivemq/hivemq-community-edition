@@ -16,7 +16,7 @@
 
 package com.hivemq.util;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientsession.ClientSession;
 
 import static com.google.common.base.Preconditions.checkNotNull;

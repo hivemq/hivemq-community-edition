@@ -17,8 +17,8 @@
 package com.hivemq.configuration.service.entity;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.annotations.Immutable;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

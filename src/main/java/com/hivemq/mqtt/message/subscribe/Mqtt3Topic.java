@@ -16,7 +16,7 @@
 
 package com.hivemq.mqtt.message.subscribe;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 
 /**

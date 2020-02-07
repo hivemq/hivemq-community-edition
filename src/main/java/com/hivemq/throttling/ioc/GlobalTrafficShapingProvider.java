@@ -16,7 +16,7 @@
 
 package com.hivemq.throttling.ioc;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;

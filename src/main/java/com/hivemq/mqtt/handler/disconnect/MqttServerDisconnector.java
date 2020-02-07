@@ -16,8 +16,9 @@
 
 package com.hivemq.mqtt.handler.disconnect;
 
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import io.netty.channel.Channel;
 
@@ -28,21 +29,33 @@ public interface MqttServerDisconnector {
 
     /**
      * Send a DISCONNECT with optional reason code and reason string.
-     *
+     * <p>
      * log a message to console, file and event log.
-     *
+     * <p>
      * close the channel.
      *
-     * @param channel the Channel of the mqtt client
-     * @param logMessage the message to log
+     * @param channel         the Channel of the mqtt client
+     * @param logMessage      the message to log
      * @param eventLogMessage the event log message
-     * @param reasonCode the reason code
-     * @param reasonString the reason string
+     * @param reasonCode      the reason code
+     * @param reasonString    the reason string
      */
-    void disconnect(@NotNull final Channel channel,
-                    @Nullable final String logMessage,
-                    @Nullable final String eventLogMessage,
-                    @Nullable final Mqtt5DisconnectReasonCode reasonCode,
-                    @Nullable final String reasonString);
+    default void disconnect(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString) {
 
+        disconnect(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
+    }
+
+    void disconnect(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final boolean isAuthentication);
 }

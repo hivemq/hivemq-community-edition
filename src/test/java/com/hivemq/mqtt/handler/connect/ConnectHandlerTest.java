@@ -16,38 +16,31 @@
 
 package com.hivemq.mqtt.handler.connect;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.client.parameter.AuthenticatorProviderInputFactory;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
-import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.PluginTaskExecutorService;
+import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.extensions.services.auth.Authorizers;
-import com.hivemq.extensions.services.auth.ModifiableClientSettingsImpl;
-import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
-import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -80,11 +73,11 @@ import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.jodah.concurrentunit.Waiter;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.*;
 
@@ -121,28 +114,18 @@ public class ConnectHandlerTest {
     private ChannelDependencies channelDependencies;
 
     @Mock
-    private Authenticators authenticators;
-
-    @Mock
     private Authorizers authorizers;
-
-    @Mock
-    private PluginTaskExecutorService pluginTaskExecutorService;
-
-    @Mock
-    private IsolatedPluginClassloader isolatedPluginClassloader;
-    @Mock
-    private IsolatedPluginClassloader isolatedPluginClassloader2;
-    @Mock
-    private IsolatedPluginClassloader isolatedPluginClassloader3;
     @Mock
     private PluginAuthorizerService pluginAuthorizerService;
+    @Mock
+    private PluginAuthenticatorServiceImpl internalAuthServiceImpl;
 
     private FullConfigurationService configurationService;
     private MqttConnacker mqttConnacker;
     private ChannelHandlerContext ctx;
     private ConnectHandler handler;
-    private MetricsHolder metricsHolder;
+    private ModifiableDefaultPermissions defaultPermissions;
+
     private final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
     @Before
@@ -152,11 +135,11 @@ public class ConnectHandlerTest {
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
         when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any())).thenReturn(Futures.immediateFuture(null));
 
-        metricsHolder = new MetricsHolder(new MetricRegistry());
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog, configurationService.mqttConfiguration());
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
+        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog);
         mqttConnacker = new MqttConnacker(connackSendUtil);
 
         when(channelPersistence.get(anyString())).thenReturn(null);
@@ -164,7 +147,14 @@ public class ConnectHandlerTest {
         when(channelDependencies.getAuthInProgressMessageHandler()).thenReturn(
                 new AuthInProgressMessageHandler(mqttConnacker));
 
+        defaultPermissions = new ModifiableDefaultPermissionsImpl();
+
         buildPipeline();
+    }
+
+    @After
+    public void tearDown() {
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
     }
 
     @Test
@@ -699,7 +689,6 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("sameClientId")
-                .withMqtt5UserProperties(Mqtt5UserProperties.of(new MqttUserProperty("test", "test")))
                 .build();
 
         embeddedChannel.writeInbound(connect1);
@@ -768,7 +757,6 @@ public class ConnectHandlerTest {
         final DISCONNECT disconnectMessage = testDisconnectHandler.getDisconnectMessage();
         assertNull(disconnectMessage);
     }
-
 
     @Test
     public void test_too_long_clientid() throws Exception {
@@ -940,6 +928,7 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt3ConnAckReturnCode.ACCEPTED, connack.getReturnCode());
         assertTrue(embeddedChannel.isActive());
+
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get() != null);
     }
 
@@ -996,29 +985,13 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
+
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get() != null);
     }
 
     /* ******
      * Auth *
      ********/
-
-    @Test(timeout = 5000)
-    public void test_auth_in_progress_message_handler_is_set() {
-        when(authenticators.getAuthenticatorProviderMap()).thenReturn(
-                ImmutableMap.of("extension1", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
-                }, isolatedPluginClassloader)));
-        when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
-
-        createHandler();
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
-
-
-        embeddedChannel.writeInbound(connect);
-
-        assertNotNull(embeddedChannel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
-    }
 
     @Test(timeout = 5000)
     public void test_auth_in_progress_message_handler_is_removed() {
@@ -1039,45 +1012,18 @@ public class ConnectHandlerTest {
 
     @Test(timeout = 5000)
     public void test_auth_is_performed() {
-        when(authenticators.getAuthenticatorProviderMap()).thenReturn(
-                ImmutableMap.of(
-                        "extension1", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
-                        }, isolatedPluginClassloader),
-                        "extension2", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
-                        }, isolatedPluginClassloader2),
-                        "extension3", new WrappedAuthenticatorProvider((input) -> (SimpleAuthenticator) (simpleAuthInput, simpleAuthOutput) -> {
-                        }, isolatedPluginClassloader3)));
         createHandler();
-        when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
 
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
         embeddedChannel.writeInbound(connect);
 
-        verify(pluginTaskExecutorService, times(3)).handlePluginInOutTaskExecution(any(), any(), any(), any());
+        verify(internalAuthServiceImpl, times(1)).authenticateConnect(any(), any(), any());
     }
 
     @Test(timeout = 5000)
     public void test_connack_success_if_no_authenticator_registered() {
         createHandler();
-
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
-        embeddedChannel.writeInbound(connect);
-
-        final CONNACK connack = embeddedChannel.readOutbound();
-
-        assertNotNull(connack);
-        assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
-        assertTrue(embeddedChannel.isActive());
-    }
-
-    @Test(timeout = 5000)
-    public void test_connect_unauthenticated_if_no_authenticator_registered_and_internal_config_allow() {
-
-        createHandler();
-
-        when(authenticators.areAuthenticatorsAvailable()).thenReturn(true);
 
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
@@ -1117,10 +1063,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
-
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
 
         embeddedChannel.writeInbound(connect);
 
@@ -1287,9 +1230,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1313,9 +1254,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1339,10 +1278,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                         .withWillPublish(willPublish).build();
 
-        final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
-
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        defaultPermissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
 
         embeddedChannel.writeInbound(connect);
 
@@ -1372,18 +1308,17 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
         assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get().intValue());
         assertEquals(123, connect.getReceiveMaximum());
-        assertEquals(NONE, embeddedChannel.attr(ChannelAttributes.OVERLOAD_PROTECTION_THROTTLING_LEVEL).get());
     }
 
     private void createHandler() {
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_CONNECT_HANDLER);
         }
+        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_BARRIER)) {
+            embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_BARRIER);
+        }
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER);
-        }
-        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER)) {
-            embeddedChannel.pipeline().remove(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER);
         }
 
         configurationService.mqttConfiguration().setServerReceiveMaximum(10);
@@ -1397,20 +1332,24 @@ public class ConnectHandlerTest {
         handler = new ConnectHandler(new DisconnectClientOnConnectMessageHandler(eventLog), clientSessionPersistence,
                 channelPersistence, configurationService, eventLog,
                 orderedTopicHandlerProvider, flowControlHandlerProvider, mqttConnacker,
-                new TopicAliasLimiterImpl(), authenticators,
-                pluginTaskExecutorService, channelDependencies, mock(PluginOutPutAsyncer.class),
-                Mockito.mock(AuthenticatorProviderInputFactory.class),
-                mock(PublishPollService.class), mock(SharedSubscriptionService.class), authorizers, pluginAuthorizerService);
+                new TopicAliasLimiterImpl(),
+                mock(PublishPollService.class), mock(SharedSubscriptionService.class), internalAuthServiceImpl, authorizers, pluginAuthorizerService);
 
         handler.postConstruct();
         embeddedChannel.pipeline()
                 .addAfter(ChannelHandlerNames.MQTT_MESSAGE_DECODER, ChannelHandlerNames.MQTT_CONNECT_HANDLER, handler);
         embeddedChannel.pipeline()
-                .addBefore(ChannelHandlerNames.MQTT_CONNECT_HANDLER, ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER,
-                        new DummyHandler());
+                .addAfter(ChannelHandlerNames.MQTT_CONNECT_HANDLER, ChannelHandlerNames.MQTT_MESSAGE_BARRIER, new DummyHandler());
         embeddedChannel.pipeline()
-                .addBefore(ChannelHandlerNames.STOP_READING_AFTER_CONNECT_HANDLER, ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER,
+                .addBefore(ChannelHandlerNames.MQTT_MESSAGE_BARRIER, ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER,
                         new DummyHandler());
+
+        doAnswer(invocation -> {
+            ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(defaultPermissions);
+            handler.connectSuccessfulUnauthenticated(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2));
+            return null;
+        }).when(internalAuthServiceImpl).authenticateConnect(any(), any(), any());
+
     }
 
     private void buildPipeline() {
@@ -1461,6 +1400,7 @@ public class ConnectHandlerTest {
         }
     }
 
+
     private static class TestDisconnectHandler extends ChannelDuplexHandler {
         private final Waiter waiter;
         private final boolean disconnectExpected;
@@ -1497,4 +1437,5 @@ public class ConnectHandlerTest {
             return disconnectMessage;
         }
     }
+
 }

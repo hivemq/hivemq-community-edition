@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.executor.task;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * The necessary context for the execution of a {@link PluginTask}.
@@ -26,16 +26,7 @@ import com.hivemq.annotations.NotNull;
 public interface PluginTaskContext {
 
     /**
-     * @return usually a {@link com.hivemq.extensions.classloader.IsolatedPluginClassloader} for setting the {@link
-     * Thread#contextClassLoader} before the {@link PluginTask} is executed.
-     */
-    @NotNull
-    ClassLoader getPluginClassLoader();
-
-    /**
      * @return a String for the internal scheduling of the {@link com.hivemq.extensions.executor.PluginTaskExecutorService}.
      */
-    @NotNull
-    String getIdentifier();
-
+    @NotNull String getIdentifier();
 }

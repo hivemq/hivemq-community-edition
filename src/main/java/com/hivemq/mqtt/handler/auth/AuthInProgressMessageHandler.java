@@ -17,10 +17,11 @@
 package com.hivemq.mqtt.handler.auth;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,31 +40,34 @@ import static com.hivemq.util.ChannelUtils.getClientId;
 public class AuthInProgressMessageHandler extends ChannelInboundHandlerAdapter {
 
     @NotNull
-    private static final String DISCONNECT_LOG_MESSAGE = "The client with id %s and IP {} sent a non " +
-            "AUTH non DISCONNECT message during enhanced authentication. " +
+    private static final String DISCONNECT_LOG_MESSAGE = "The client with id %s and IP {} sent a message other than " +
+            "AUTH or DISCONNECT during enhanced authentication. " +
             "This is not allowed. Disconnecting client.";
 
-    @NotNull
-    private final MqttConnacker connacker;
+    private final @NotNull MqttConnacker connacker;
 
     @VisibleForTesting
     @Inject
-    public AuthInProgressMessageHandler(@NotNull final MqttConnacker connacker) {
+    public AuthInProgressMessageHandler(final @NotNull MqttConnacker connacker) {
         this.connacker = connacker;
     }
 
     @Override
-    public void channelRead(@NotNull final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
+    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
 
         if (msg instanceof AUTH || msg instanceof DISCONNECT) {
             super.channelRead(ctx, msg);
             return;
         }
 
-        connacker.connackErrorMqtt5(ctx.channel(),
+        final String reasonString = "Client must not send a message other than AUTH or DISCONNECT during enhanced authentication";
+        connacker.connackError(
+                ctx.channel(),
                 String.format(DISCONNECT_LOG_MESSAGE, getClientId(ctx.channel())),
-                "Sent non AUTH non DISCONNECT message",
+                "Sent message other than AUTH or DISCONNECT during enhanced authentication",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
-                "non AUTH non DISCONNECT message");
+                reasonString,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                true);
     }
 }

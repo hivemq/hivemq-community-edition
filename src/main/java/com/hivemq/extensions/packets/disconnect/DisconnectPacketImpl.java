@@ -40,7 +40,7 @@ public class DisconnectPacketImpl implements DisconnectPacket {
     private final @NotNull UserProperties userProperties;
 
     public DisconnectPacketImpl(final @NotNull DISCONNECT disconnect) {
-        reasonCode = DisconnectReasonCode.valueOf(disconnect.getReasonCode().name());
+        reasonCode = disconnect.getReasonCode().toDisconnectReasonCode();
         reasonString = disconnect.getReasonString();
         sessionExpiryInterval = disconnect.getSessionExpiryInterval();
         serverReference = disconnect.getServerReference();

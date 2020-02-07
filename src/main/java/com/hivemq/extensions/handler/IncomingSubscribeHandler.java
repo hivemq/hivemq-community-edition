@@ -19,8 +19,8 @@ package com.hivemq.extensions.handler;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -71,11 +71,13 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
     private final @NotNull FullConfigurationService fullConfigurationService;
 
     @Inject
-    public IncomingSubscribeHandler(final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-                                    final @NotNull PluginOutPutAsyncer asyncer,
-                                    final @NotNull HiveMQExtensions hiveMQExtensions,
-                                    final @NotNull PluginAuthorizerService pluginAuthorizerService,
-                                    final @NotNull FullConfigurationService fullConfigurationService) {
+    public IncomingSubscribeHandler(
+            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginAuthorizerService pluginAuthorizerService,
+            final @NotNull FullConfigurationService fullConfigurationService) {
+
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -84,7 +86,7 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
     }
 
     @Override
-    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg) throws Exception {
+    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg) {
         interceptOrDelegate(ctx, msg);
     }
 
@@ -113,14 +115,16 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
             return;
         }
 
-        final List<SubscribeInboundInterceptor> subscribeInboundInterceptors = clientContext.getSubscribeInboundInterceptors();
+        final List<SubscribeInboundInterceptor> subscribeInboundInterceptors =
+                clientContext.getSubscribeInboundInterceptors();
 
-        final SubscribeInboundOutputImpl inboundOutput = new SubscribeInboundOutputImpl(fullConfigurationService, asyncer, subscribe);
-        final SubscribeInboundInputImpl inboundInput = new SubscribeInboundInputImpl(new SubscribePacketImpl(subscribe), clientId, channel);
+        final SubscribeInboundOutputImpl inboundOutput =
+                new SubscribeInboundOutputImpl(fullConfigurationService, asyncer, subscribe);
+        final SubscribeInboundInputImpl inboundInput =
+                new SubscribeInboundInputImpl(new SubscribePacketImpl(subscribe), clientId, channel);
         final SettableFuture<Void> interceptorFuture = SettableFuture.create();
         final SubscribeInboundInterceptorContext interceptorContext = new SubscribeInboundInterceptorContext(
-                SubscribeInboundInterceptorTask.class, clientId, inboundOutput, inboundInput, interceptorFuture, subscribeInboundInterceptors.size()
-        );
+                clientId, inboundOutput, inboundInput, interceptorFuture, subscribeInboundInterceptors.size());
 
         for (final SubscribeInboundInterceptor interceptor : subscribeInboundInterceptors) {
 
@@ -133,7 +137,8 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
                 break;
             }
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader((IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
 
             //disabled extension would be null
             if (plugin == null) {
@@ -141,14 +146,16 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
                 continue;
             }
 
-            final SubscribeInboundInterceptorTask interceptorTask = new SubscribeInboundInterceptorTask(interceptor, plugin.getId());
+            final SubscribeInboundInterceptorTask interceptorTask =
+                    new SubscribeInboundInterceptorTask(interceptor, plugin.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(interceptorContext, inboundInput, inboundOutput, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    interceptorContext, inboundInput, inboundOutput, interceptorTask);
         }
 
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(inboundOutput, subscribe, ctx, pluginAuthorizerService);
+        final InterceptorFutureCallback callback =
+                new InterceptorFutureCallback(inboundOutput, subscribe, ctx, pluginAuthorizerService);
         Futures.addCallback(interceptorFuture, callback, ctx.executor());
-
     }
 
     private static class InterceptorFutureCallback implements FutureCallback<Void> {
@@ -158,10 +165,12 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull PluginAuthorizerService pluginAuthorizerService;
 
-        InterceptorFutureCallback(final @NotNull SubscribeInboundOutputImpl inboundOutput,
-                                  final @NotNull SUBSCRIBE subscribe,
-                                  final @NotNull ChannelHandlerContext ctx,
-                                  final @NotNull PluginAuthorizerService pluginAuthorizerService) {
+        InterceptorFutureCallback(
+                final @NotNull SubscribeInboundOutputImpl inboundOutput,
+                final @NotNull SUBSCRIBE subscribe,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull PluginAuthorizerService pluginAuthorizerService) {
+
             this.inboundOutput = inboundOutput;
             this.subscribe = subscribe;
             this.ctx = ctx;
@@ -184,7 +193,8 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
                 ackReasonCodes.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
             }
             // no need to check mqtt version since the mqtt 3 encoder will just not encode reason string and properties.
-            ctx.writeAndFlush(new SUBACK(subscribe.getPacketIdentifier(), ackReasonCodes, ReasonStrings.SUBACK_EXTENSION_PREVENTED));
+            ctx.writeAndFlush(new SUBACK(subscribe.getPacketIdentifier(), ackReasonCodes,
+                    ReasonStrings.SUBACK_EXTENSION_PREVENTED));
         }
 
         @Override
@@ -202,13 +212,14 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
 
-        SubscribeInboundInterceptorContext(final @NotNull Class<?> taskClazz,
-                                           final @NotNull String identifier,
-                                           final @NotNull SubscribeInboundOutputImpl output,
-                                           final @NotNull SubscribeInboundInputImpl input,
-                                           final @NotNull SettableFuture<Void> interceptorFuture,
-                                           final int interceptorCount) {
-            super(taskClazz, identifier);
+        SubscribeInboundInterceptorContext(
+                final @NotNull String identifier,
+                final @NotNull SubscribeInboundOutputImpl output,
+                final @NotNull SubscribeInboundInputImpl input,
+                final @NotNull SettableFuture<Void> interceptorFuture,
+                final int interceptorCount) {
+
+            super(identifier);
             this.output = output;
             this.input = input;
             this.interceptorFuture = interceptorFuture;
@@ -219,7 +230,8 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
         @Override
         public void pluginPost(@NotNull final SubscribeInboundOutputImpl pluginOutput) {
 
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
+                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
                 //Timeout fallback failure means publish delivery prevention
                 pluginOutput.forciblyPreventSubscribeDelivery();
             }
@@ -241,19 +253,25 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
         }
     }
 
-    private class SubscribeInboundInterceptorTask implements PluginInOutTask<SubscribeInboundInputImpl, SubscribeInboundOutputImpl> {
+    private class SubscribeInboundInterceptorTask
+            implements PluginInOutTask<SubscribeInboundInputImpl, SubscribeInboundOutputImpl> {
 
         private final @NotNull SubscribeInboundInterceptor interceptor;
         private final @NotNull String extensionId;
 
-        private SubscribeInboundInterceptorTask(final @NotNull SubscribeInboundInterceptor interceptor,
-                                                final @NotNull String extensionId) {
+        private SubscribeInboundInterceptorTask(
+                final @NotNull SubscribeInboundInterceptor interceptor,
+                final @NotNull String extensionId) {
+
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
-        public @NotNull SubscribeInboundOutputImpl apply(final @NotNull SubscribeInboundInputImpl subscribeInboundInput, final @NotNull SubscribeInboundOutputImpl subscribeInboundOutput) {
+        public @NotNull SubscribeInboundOutputImpl apply(
+                final @NotNull SubscribeInboundInputImpl subscribeInboundInput,
+                final @NotNull SubscribeInboundOutputImpl subscribeInboundOutput) {
+
             if (subscribeInboundOutput.deliveryPrevented()) {
                 //it's already prevented so no further interceptors must be called.
                 return subscribeInboundOutput;

@@ -17,8 +17,8 @@
 package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationFailedInput;
@@ -35,7 +35,8 @@ import java.util.function.Supplier;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class AuthenticationFailedInputImpl implements AuthenticationFailedInput, PluginTaskInput, Supplier<AuthenticationFailedInputImpl> {
+public class AuthenticationFailedInputImpl
+        implements AuthenticationFailedInput, PluginTaskInput, Supplier<AuthenticationFailedInputImpl> {
 
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
@@ -43,11 +44,13 @@ public class AuthenticationFailedInputImpl implements AuthenticationFailedInput,
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
 
-    public AuthenticationFailedInputImpl(final @NotNull Channel channel,
-                                         final @NotNull String clientId,
-                                         final @Nullable DisconnectedReasonCode reasonCode,
-                                         final @Nullable String reasonString,
-                                         final @Nullable UserProperties userProperties) {
+    public AuthenticationFailedInputImpl(
+            final @NotNull Channel channel,
+            final @NotNull String clientId,
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable UserProperties userProperties) {
+
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "Client id must never be null");
         this.reasonCode = reasonCode;
@@ -82,9 +85,8 @@ public class AuthenticationFailedInputImpl implements AuthenticationFailedInput,
         return Optional.ofNullable(userProperties);
     }
 
-    @NotNull
     @Override
-    public AuthenticationFailedInputImpl get() {
+    public @NotNull AuthenticationFailedInputImpl get() {
         return this;
     }
 }

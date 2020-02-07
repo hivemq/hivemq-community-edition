@@ -17,8 +17,8 @@
 package com.hivemq.extensions.executor.task;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.annotations.NotNull;
-import com.hivemq.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import org.junit.After;
@@ -539,6 +539,7 @@ public class PluginTaskExecutorTest {
 
     }
 
+
     @Test(timeout = 5000)
     public void test_async_throws_exception_queue_can_continue() throws Exception {
 
@@ -557,80 +558,80 @@ public class PluginTaskExecutorTest {
     }
 
     private static void addTask(final PluginTaskExecutor pluginTaskExecutor,
-                                   @NotNull final CountDownLatch latch,
-                                   @NotNull final String clientId,
-                                   final boolean async,
-                                   final int number,
-                                   @NotNull final List<Integer> executionOrder,
-                                   final int delay,
-                                   @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            @NotNull final String clientId,
+            final boolean async,
+            final int number,
+            @NotNull final List<Integer> executionOrder,
+            final int delay,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<>(new TestPluginInOutContext(String.class, clientId),
+                new PluginTaskExecution<>(new TestPluginInOutContext(clientId),
                         () -> new TestPluginTaskInput(),
                         () -> async ? new TestPluginTaskOutputAsync() : new TestPluginTaskOutput(),
                         new TestPluginInOutTask(latch, number, executionOrder, delay, classloader)));
     }
 
     private static void addOutTask(final PluginTaskExecutor pluginTaskExecutor,
-                                      @NotNull final CountDownLatch latch,
-                                      @NotNull final String clientId,
-                                      final boolean async,
-                                      final int number,
-                                      @NotNull final List<Integer> executionOrder,
-                                      final int delay,
-                                      @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            @NotNull final String clientId,
+            final boolean async,
+            final int number,
+            @NotNull final List<Integer> executionOrder,
+            final int delay,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<>(new TestPluginOutContext(String.class, clientId),
+                new PluginTaskExecution<>(new TestPluginOutContext(clientId),
                         null,
                         () -> async ? new TestPluginTaskOutputAsync() : new TestPluginTaskOutput(),
                         new TestPluginOutTask(latch, number, executionOrder, delay, classloader)));
     }
 
     private static void addInTask(final PluginTaskExecutor pluginTaskExecutor,
-                                     @NotNull final CountDownLatch latch,
-                                     @NotNull final String clientId,
-                                     final boolean async,
-                                     final int number,
-                                     @NotNull final List<Integer> executionOrder,
-                                     final int delay,
-                                     @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            @NotNull final String clientId,
+            final boolean async,
+            final int number,
+            @NotNull final List<Integer> executionOrder,
+            final int delay,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<TestPluginTaskInput, DefaultPluginTaskOutput>(new TestPluginInContext(String.class, clientId),
+                new PluginTaskExecution<TestPluginTaskInput, DefaultPluginTaskOutput>(new TestPluginInContext(clientId),
                         () -> new TestPluginTaskInput(),
                         null,
                         new TestPluginInTask(latch, number, executionOrder, delay, classloader)));
     }
 
     private static void addExceptionTask(final PluginTaskExecutor pluginTaskExecutor,
-                                            @NotNull final CountDownLatch latch,
-                                            final boolean async,
-                                            @NotNull final List<Integer> executionOrder,
-                                            @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            final boolean async,
+            @NotNull final List<Integer> executionOrder,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<>(new TestPluginInOutContext(PluginTaskExecutorTest.class, "client"),
+                new PluginTaskExecution<>(new TestPluginInOutContext("client"),
                         () -> new TestPluginTaskInput(),
                         () -> async ? new TestPluginTaskOutputAsync() : new TestPluginTaskOutput(),
                         new TestPluginInOutexceptionTask(latch, 1, executionOrder, 0, classloader)));
     }
 
     private static void addExceptionPostTask(final PluginTaskExecutor pluginTaskExecutor,
-                                                @NotNull final CountDownLatch latch,
-                                                final boolean async,
-                                                @NotNull final List<Integer> executionOrder,
-                                                @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            final boolean async,
+            @NotNull final List<Integer> executionOrder,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<>(new TestPluginInOutExceptionContext(PluginTaskExecutorTest.class, "client"),
+                new PluginTaskExecution<>(new TestPluginInOutExceptionContext("client"),
                         () -> new TestPluginTaskInput(),
                         () -> async ? new TestPluginTaskOutputAsync() : new TestPluginTaskOutput(),
                         new TestPluginInOutTask(latch, 1, executionOrder, 0, classloader)));
     }
 
     private static void addExceptionAsyncTask(final PluginTaskExecutor pluginTaskExecutor,
-                                                 @NotNull final CountDownLatch latch,
-                                                 @NotNull final List<Integer> executionOrder,
-                                                 @NotNull final IsolatedPluginClassloader classloader) {
+            @NotNull final CountDownLatch latch,
+            @NotNull final List<Integer> executionOrder,
+            @NotNull final IsolatedPluginClassloader classloader) {
         pluginTaskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<>(new TestPluginInOutContext(PluginTaskExecutorTest.class, "client"),
+                new PluginTaskExecution<>(new TestPluginInOutContext("client"),
                         () -> new TestPluginTaskInput(),
                         () -> new TestPluginTaskOutputExceptionAsync(),
                         new TestPluginInOutTask(latch, 1, executionOrder, 0, classloader)));
@@ -643,8 +644,8 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginInOutContext extends PluginInOutTaskContext<TestPluginTaskOutput> {
 
-        TestPluginInOutContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-            super(taskClazz, identifier);
+        TestPluginInOutContext(@NotNull final String identifier) {
+            super(identifier);
         }
 
         @Override
@@ -655,8 +656,8 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginOutContext extends PluginOutTaskContext<TestPluginTaskOutput> {
 
-        TestPluginOutContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-            super(taskClazz, identifier);
+        TestPluginOutContext(@NotNull final String identifier) {
+            super(identifier);
         }
 
         @Override
@@ -667,16 +668,16 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginInContext extends PluginInTaskContext {
 
-        TestPluginInContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-            super(taskClazz, identifier);
+        TestPluginInContext(@NotNull final String identifier) {
+            super(identifier);
         }
 
     }
 
     private static class TestPluginInOutExceptionContext extends PluginInOutTaskContext<TestPluginTaskOutput> {
 
-        TestPluginInOutExceptionContext(@NotNull final Class<?> taskClazz, @NotNull final String identifier) {
-            super(taskClazz, identifier);
+        TestPluginInOutExceptionContext(@NotNull final String identifier) {
+            super(identifier);
         }
 
         @Override
@@ -770,8 +771,8 @@ public class PluginTaskExecutorTest {
         private final IsolatedPluginClassloader classloader;
 
         TestPluginInOutTask(@NotNull final CountDownLatch latch, final int number,
-                            @NotNull final List<Integer> executionOrder, final int delay,
-                            @NotNull final IsolatedPluginClassloader classloader) {
+                @NotNull final List<Integer> executionOrder, final int delay,
+                @NotNull final IsolatedPluginClassloader classloader) {
 
             this.latch = latch;
             this.number = number;
@@ -783,7 +784,7 @@ public class PluginTaskExecutorTest {
         @NotNull
         @Override
         public TestPluginTaskOutput apply(@NotNull final TestPluginTaskInput testPluginTaskInput,
-                                          @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
+                @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
             if (delay > 0) {
                 try {
                     Thread.sleep(delay);
@@ -817,8 +818,8 @@ public class PluginTaskExecutorTest {
         private final IsolatedPluginClassloader classloader;
 
         TestPluginOutTask(@NotNull final CountDownLatch latch, final int number,
-                          @NotNull final List<Integer> executionOrder, final int delay,
-                          @NotNull final IsolatedPluginClassloader classloader) {
+                @NotNull final List<Integer> executionOrder, final int delay,
+                @NotNull final IsolatedPluginClassloader classloader) {
 
             this.latch = latch;
             this.number = number;
@@ -862,8 +863,8 @@ public class PluginTaskExecutorTest {
         private final IsolatedPluginClassloader classloader;
 
         TestPluginInTask(@NotNull final CountDownLatch latch, final int number,
-                         @NotNull final List<Integer> executionOrder, final int delay,
-                         @NotNull final IsolatedPluginClassloader classloader) {
+                @NotNull final List<Integer> executionOrder, final int delay,
+                @NotNull final IsolatedPluginClassloader classloader) {
 
             this.latch = latch;
             this.number = number;
@@ -898,14 +899,14 @@ public class PluginTaskExecutorTest {
     private static class TestPluginInOutexceptionTask extends TestPluginInOutTask {
 
         TestPluginInOutexceptionTask(@NotNull final CountDownLatch latch, final int number,
-                                     @NotNull final List<Integer> executionOrder, final int delay,
-                                     @NotNull final IsolatedPluginClassloader classloader) {
+                @NotNull final List<Integer> executionOrder, final int delay,
+                @NotNull final IsolatedPluginClassloader classloader) {
             super(latch, number, executionOrder, delay, classloader);
         }
 
         @Override
         public @NotNull TestPluginTaskOutput apply(@NotNull final TestPluginTaskInput testPluginTaskInput,
-                                                   @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
+                @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
             super.apply(testPluginTaskInput, testPluginTaskOutput);
 
             throw new RuntimeException("Test-Exception");

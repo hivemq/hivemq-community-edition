@@ -16,7 +16,6 @@
 
 package com.hivemq.extensions;
 
-import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -24,11 +23,10 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.config.HiveMQPluginXMLReader;
-import com.hivemq.extensions.parameters.start.ExtensionStartOutputImpl;
-import com.hivemq.extensions.parameters.start.ExtensionStartStopInputImpl;
-import com.hivemq.extensions.parameters.stop.ExtensionStopOutputImpl;
+import com.hivemq.extensions.parameter.ExtensionStartOutputImpl;
+import com.hivemq.extensions.parameter.ExtensionStartStopInputImpl;
+import com.hivemq.extensions.parameter.ExtensionStopOutputImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

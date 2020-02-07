@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.handler;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -34,7 +34,7 @@ public interface PluginAuthorizerService {
      * @param ctx the context of the channel handler
      * @param msg the publish message to authorize
      */
-    void authorizePublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH msg);
+    void authorizePublish(@NotNull ChannelHandlerContext ctx, @NotNull PUBLISH msg);
 
     /**
      * authorize a will publish message when authorizers are available
@@ -42,7 +42,7 @@ public interface PluginAuthorizerService {
      * @param ctx     the context of the channel handler
      * @param connect the connect message to authorize the will for.
      */
-    void authorizeWillPublish(final @NotNull ChannelHandlerContext ctx, @NotNull final CONNECT connect);
+    void authorizeWillPublish(@NotNull ChannelHandlerContext ctx, @NotNull CONNECT connect);
 
     /**
      * authorize a subscribe message when authorizers are available, otherwise delegate to subscribe handler
@@ -50,6 +50,5 @@ public interface PluginAuthorizerService {
      * @param ctx the context of the channel handler
      * @param msg the subscribe message to authorize
      */
-    void authorizeSubscriptions(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg);
-
+    void authorizeSubscriptions(@NotNull ChannelHandlerContext ctx, @NotNull SUBSCRIBE msg);
 }

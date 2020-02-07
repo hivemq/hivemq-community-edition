@@ -43,7 +43,7 @@ public class UnsubackPacketImpl implements UnsubackPacket {
     public UnsubackPacketImpl(final @NotNull UNSUBACK unsuback) {
         final ImmutableList.Builder<UnsubackReasonCode> builder = ImmutableList.builder();
         for (final Mqtt5UnsubAckReasonCode code : unsuback.getReasonCodes()) {
-            builder.add(UnsubackReasonCode.valueOf(code.name()));
+            builder.add(code.toUnsubackReasonCode());
         }
         reasonCodes = builder.build();
         reasonString = unsuback.getReasonString();

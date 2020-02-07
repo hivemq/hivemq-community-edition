@@ -16,7 +16,7 @@
 
 package com.hivemq.configuration.entity.listener;
 
-import com.hivemq.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
 import com.hivemq.configuration.entity.listener.tls.KeystoreEntity;
 import com.hivemq.configuration.entity.listener.tls.TruststoreEntity;
