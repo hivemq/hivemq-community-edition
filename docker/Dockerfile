@@ -17,6 +17,9 @@ ENV HIVEMQ_UID=10000
 # Additional JVM options, may be overwritten by user
 ENV JAVA_OPTS "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
 
+# Default allow all extension, set this to false to disable it
+ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
+
 # gosu for root step-down to user-privileged process
 ENV GOSU_VERSION 1.11
 
