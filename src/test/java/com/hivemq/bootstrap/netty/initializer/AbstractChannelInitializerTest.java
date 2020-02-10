@@ -16,12 +16,12 @@
 
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.security.exception.SslException;
 import io.netty.channel.*;
@@ -130,16 +130,17 @@ public class AbstractChannelInitializerTest {
 
         final IdleStateHandler[] idleStateHandler = new IdleStateHandler[1];
 
-        when(pipeline.addLast(anyString(), any(ChannelHandler.class))).thenAnswer(new Answer<ChannelPipeline>() {
-            @Override
-            public ChannelPipeline answer(final InvocationOnMock invocation) throws Throwable {
+        when(pipeline.addAfter(anyString(), anyString(), any(ChannelHandler.class))).thenAnswer(
+                new Answer<ChannelPipeline>() {
+                    @Override
+                    public ChannelPipeline answer(final InvocationOnMock invocation) throws Throwable {
 
-                if (invocation.getArguments()[0].equals(NEW_CONNECTION_IDLE_HANDLER)) {
-                    idleStateHandler[0] = (IdleStateHandler) (invocation.getArguments()[1]);
-                }
-                return pipeline;
-            }
-        });
+                        if (invocation.getArguments()[1].equals(NEW_CONNECTION_IDLE_HANDLER)) {
+                            idleStateHandler[0] = (IdleStateHandler) (invocation.getArguments()[2]);
+                        }
+                        return pipeline;
+                    }
+                });
 
         abstractChannelInitializer.initChannel(socketChannel);
 
