@@ -1,32 +1,58 @@
-apply plugin: 'com.jfrog.bintray'
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.github.hierynomus.license'
+    id 'com.jfrog.bintray'
+}
 
+group = 'com.hivemq'
 version = '4.3.0'
+description = 'SDK for the development of HiveMQ extensions'
+
+sourceCompatibility = 10
+targetCompatibility = 10
+
+ext {
+    readableName = 'HiveMQ Extension SDK'
+    url = 'https://www.hivemq.com/'
+    vendor = 'dc-square GmbH'
+    githubOrg = 'hivemq'
+    githubRepo = 'hivemq-extension-sdk'
+    githubUrl = 'https://github.com/' + githubOrg + '/' + githubRepo
+    scmConnection = 'scm:git:git://github.com/' + githubOrg + '/' + githubRepo + '.git'
+    scmDeveloperConnection = 'scm:git:ssh://git@github.com/' + githubOrg + '/' + githubRepo + '.git'
+    issuesUrl = githubUrl + '/issues'
+    licenseShortName = 'Apache-2.0'
+    licenseReadableName = 'The Apache License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+}
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.0.2'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }
 
-void addManifest(Jar jar) {
-    jar.manifest {
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar) {
+    manifest {
         attributes 'Implementation-Title': project.name
-        attributes 'Implementation-Vendor': 'dc-square GmbH'
+        attributes 'Implementation-Vendor': project.vendor
         attributes 'Implementation-Version': project.version
     }
 }
 
-jar {
-    addManifest(it)
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
-}
-
 javadoc {
-    title "HiveMQ ${project.version} Extension SDK API"
+    title "${project.readableName} ${project.version} API"
 
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
-
-    failOnError = true
 
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
@@ -35,7 +61,7 @@ javadoc {
     doLast {
         javaexec {
             main = '-jar'
-            args = ["$rootDir/gradle/tools/javadoc-cleaner-1.0.jar"]
+            args = ["${project.rootDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }
@@ -43,10 +69,8 @@ javadoc {
 task javadocJar(type: Jar) {
     group 'documentation'
 
-    from javadoc
+    from tasks.javadoc
     classifier 'javadoc'
-    addManifest(it)
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 task sourcesJar(type: Jar) {
@@ -54,8 +78,6 @@ task sourcesJar(type: Jar) {
 
     from sourceSets.main.allSource
     classifier 'sources'
-    addManifest(it)
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 publishing {
@@ -63,93 +85,94 @@ publishing {
         extensionSdk(MavenPublication) {
 
             from components.java
-            artifact javadocJar
-            artifact sourcesJar
+            artifact tasks.javadocJar
+            artifact tasks.sourcesJar
 
             pom {
-                name = 'HiveMQ Extension SDK'
-                description = 'SDK for the development of HiveMQ extensions'
-                url = 'http://www.hivemq.com/'
+                name = project.readableName
+                description = project.description
+                url = project.url
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = project.licenseReadableName
+                        url = project.licenseUrl
                     }
                 }
                 developers {
                     developer {
                         id = 'cschaebe'
                         name = 'Christoph Schaebel'
-                        email = 'christoph.schaebel@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'christoph.schaebel@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                     developer {
                         id = 'lbrandl'
                         name = 'Lukas Brandl'
-                        email = 'lukas.brandl@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'lukas.brandl@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                     developer {
                         id = 'flimpoeck'
                         name = 'Florian Limpoeck'
-                        email = 'florian.limpoeck@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'florian.limpoeck@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                 }
                 scm {
-                    connection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-extension-sdk.git'
-                    url = 'https://github.com/hivemq/hivemq-extension-sdk/tree/master'
+                    connection = project.scmConnection
+                    developerConnection = project.scmDeveloperConnection
+                    url = project.githubUrl
+                }
+                issueManagement {
+                    system = 'github'
+                    url = project.issuesUrl
                 }
             }
         }
-    }
-
-    repositories {
-        mavenLocal()
     }
 }
 
 bintray {
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['extensionSdk'] //When uploading Maven-based publication files
-    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
-    publish = false //[Default: false] Whether version should be auto published after an upload
-    override = false //[Default: false] Whether to override version artifacts already published
-    //Package configuration. The plugin will use the repo and name properties to check if the package already exists. In that case, there's no need to configure the other package properties (like userOrg, desc, etc).
+    publications = publishing.publications.withType(MavenPublication).stream().collect { it.name }
+    dryRun = false
+    publish = false
+    override = false
     pkg {
+        userOrg = 'hivemq'
         repo = 'HiveMQ'
         name = 'hivemq-extension-sdk'
-        userOrg = 'hivemq' //An optional organization name when the repo belongs to one of the user's orgs
-        desc = 'The enterprise MQTT broker HiveMQ offers this free and open source extension SDK. This allows everyone to extend HiveMQ and add custom functionality via extensions.'
-        websiteUrl = 'https://github.com/hivemq/hivemq-extension-sdk'
-        vcsUrl = 'https://github.com/hivemq/hivemq-extension-sdk.git'
-        licenses = ['Apache-2.0']
-        labels = ['hivemq']
+        desc = project.description
+        websiteUrl = project.githubUrl
+        issueTrackerUrl = project.issuesUrl
+        vcsUrl = project.githubUrl + '.git'
+        licenses = [project.licenseShortName]
+        labels = ['hivemq', 'extension', 'sdk', 'mqtt', 'mqtt5']
+        githubRepo = project.githubOrg + '/' + project.githubRepo
+        githubReleaseNotesFile = 'README.adoc'
         publicDownloadNumbers = false
-        githubRepo = 'hivemq/hivemq-extension-sdk' //Optional Github repository
-        githubReleaseNotesFile = 'README.adoc' //Optional Github readme file
-
-        //Optional version descriptor
         version {
-            //Optional configuration for GPG signing
+            released = new Date()
             gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
+                sign = true
             }
-            //Optional configuration for Maven Central sync of the version
             mavenCentralSync {
-                sync = false //[Default: true] Determines whether to sync the version to Maven Central.
+                sync = false
                 user = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
-                //OSS user token: mandatory
                 password = project.hasProperty('mavenCentralKey') ? project.property('mavenCentralKey') : System.getenv('MAVEN_CENTRAL_KEY')
-                //OSS user password: mandatory
                 close = '0'
-                //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
             }
         }
+    }
+}
+
+license {
+    header file("${project.projectDir}/HEADER")
+    mapping {
+        java = 'SLASHSTAR_STYLE'
     }
 }
