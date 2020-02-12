@@ -246,23 +246,13 @@ dependencies {
 /******************************
  * Change metadata of jar file *
  ******************************/
-// Create the executable jar and exclude some certificates
 jar {
-
     manifest {
         attributes 'Implementation-Title': 'HiveMQ'
         attributes 'Implementation-Vendor': 'dc-square GmbH'
         attributes 'Implementation-Version': project.version
         attributes 'HiveMQ-Version': project.version
         attributes 'Main-Class': project.mainClassName
-    }
-
-    // remove the security files (from mail.jar / activation.jar) so that the jar will be executable.
-    from(configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
-        exclude 'META-INF/MANIFEST.MF'
-        exclude 'META-INF/*.SF'
-        exclude 'META-INF/*.DSA'
-        exclude 'META-INF/*.RSA'
     }
 }
 
