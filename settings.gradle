@@ -1,3 +1,14 @@
+pluginManagement {
+    plugins {
+        id 'com.github.johnrengelman.shadow' version '4.0.4'
+        id 'com.github.hierynomus.license' version '0.15.0'
+        id 'com.jfrog.bintray' version '1.8.4'
+        id 'org.owasp.dependencycheck' version '5.3.2'
+        id 'com.github.spotbugs' version '3.0.0'
+        id 'de.thetaphi.forbiddenapis' version '2.6'
+    }
+}
+
 rootProject.name = 'hivemq-community-edition'
 
 include 'hivemq-extension-sdk'

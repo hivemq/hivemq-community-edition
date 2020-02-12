@@ -1,10 +1,37 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
-    id 'com.github.hierynomus.license' version '0.15.0' apply false
-    id 'com.jfrog.bintray' version '1.8.4' apply false
-    id 'org.owasp.dependencycheck' version '5.3.2' apply false
-    id 'com.github.spotbugs' version '1.6.9' apply false
-    id 'de.thetaphi.forbiddenapis' version '2.6' apply false
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow'
+    id 'com.github.hierynomus.license'
+    id 'org.owasp.dependencycheck'
+    id 'idea'
+
+    /** Code Quality Plugins **/
+    id 'jacoco'
+    id 'pmd'
+    id 'com.github.spotbugs'
+    id 'de.thetaphi.forbiddenapis'
+}
+
+allprojects {
+    group 'com.hivemq'
+}
+
+version = '2020.3-SNAPSHOT'
+
+mainClassName = 'com.hivemq.HiveMQServer'
+
+allprojects {
+    apply plugin: 'java'
+
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+    javadoc.options.encoding = 'UTF-8'
 }
 
 allprojects {
@@ -13,43 +40,8 @@ allprojects {
     }
 }
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
-    apply plugin: 'com.github.hierynomus.license'
-}
-
-apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'idea'
-apply plugin: 'org.owasp.dependencycheck'
-
-/************************
- * Code Quality Plugins *
- ***********************/
-apply plugin: 'jacoco'
-apply plugin: 'pmd'
-apply plugin: 'com.github.spotbugs'
-apply plugin: 'de.thetaphi.forbiddenapis'
-
-allprojects {
-    sourceCompatibility = 11
-    targetCompatibility = 11
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
-    javadoc.options.encoding = 'UTF-8'
-
-    group 'com.hivemq'
-}
-
-version = '2020.3-SNAPSHOT'
-
-mainClassName = 'com.hivemq.HiveMQServer'
-
 // Project Variables
-project.ext {
+ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.64'
     jacksonVersion = '2.10.3'
