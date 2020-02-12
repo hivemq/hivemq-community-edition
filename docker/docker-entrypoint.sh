@@ -11,6 +11,13 @@ else
     ADDR=${HIVEMQ_BIND_ADDRESS}
 fi
 
+# Remove allow all extension if applicable
+
+if [[ "${HIVEMQ_ALLOW_ALL_CLIENTS}" != "true" ]]; then
+    echo "Disabling allow all extension"
+    rm -rf /opt/hivemq/extensions/hivemq-allow-all-extension &>/dev/null || true
+fi
+
 echo "set bind address from container hostname to ${ADDR}"
 export HIVEMQ_BIND_ADDRESS=${ADDR}
 

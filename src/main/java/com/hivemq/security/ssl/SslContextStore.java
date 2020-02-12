@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -129,6 +130,7 @@ public class SslContextStore {
             final byte[] buffer = new byte[BUF_LEN];
             while (fileInputStream.read(buffer) != -1) {
                 hasher.putBytes(buffer);
+                Arrays.fill(buffer, (byte) 0);
             }
         }
     }
