@@ -44,7 +44,7 @@ allprojects {
     group 'com.hivemq'
 }
 
-version = '2020.2'
+version = '2020.3'
 
 mainClassName = 'com.hivemq.HiveMQServer'
 
