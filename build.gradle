@@ -7,32 +7,53 @@ plugins {
     id 'org.owasp.dependencycheck'
     id 'idea'
 
-    /** Code Quality Plugins **/
+    /* Code Quality Plugins */
     id 'jacoco'
     id 'pmd'
     id 'com.github.spotbugs'
     id 'de.thetaphi.forbiddenapis'
 }
 
-allprojects {
-    group 'com.hivemq'
-}
 
+/* ******************** metadata ******************** */
+
+group 'com.hivemq'
 version = '2020.3-SNAPSHOT'
+description = 'HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5'
 
 mainClassName = 'com.hivemq.HiveMQServer'
 
-allprojects {
-    apply plugin: 'java'
-
-    sourceCompatibility = 11
-    targetCompatibility = 11
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
-    javadoc.options.encoding = 'UTF-8'
+ext {
+    readableName = 'HiveMQ Community Edition'
+    url = 'https://www.hivemq.com/'
+    vendor = 'dc-square GmbH'
+    githubOrg = 'hivemq'
+    githubRepo = 'hivemq-community-edition'
+    githubUrl = 'https://github.com/' + githubOrg + '/' + githubRepo
+    scmConnection = 'scm:git:git://github.com/' + githubOrg + '/' + githubRepo + '.git'
+    scmDeveloperConnection = 'scm:git:ssh://git@github.com/' + githubOrg + '/' + githubRepo + '.git'
+    issuesUrl = githubUrl + '/issues'
+    licenseShortName = 'Apache-2.0'
+    licenseReadableName = 'The Apache License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 }
+
+
+/* ******************** java ******************** */
+
+allprojects {
+    plugins.withType(JavaPlugin) {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+
+        tasks.withType(JavaCompile) {
+            options.encoding = 'UTF-8'
+        }
+    }
+}
+
+
+/* ******************** dependencies ******************** */
 
 allprojects {
     repositories {
@@ -40,7 +61,6 @@ allprojects {
     }
 }
 
-// Project Variables
 ext {
     // Project Dependency Versions
     bouncycastlesVersion = '1.64'
@@ -51,15 +71,7 @@ ext {
     metricsVersion = '4.0.7'
 
     // Additional Versions
-    jacocoVersion = '0.8.5'
-    pmdVersion = '6.22.0'
-    spotbugsVersion = '3.1.12'
     shrinkwrapVersion = '1.2.6'
-
-    projectString = "hivemq-ce-${project.version}"
-    packagingDir = "${buildDir}/package"
-    packagingProjectDir = "${packagingDir}/${projectString}"
-    zipDir = "${buildDir}/zip"
 }
 
 configurations {
@@ -75,10 +87,6 @@ sourceSets {
         runtimeClasspath += configurations.provided
     }
 }
-
-/****************
- * Dependencies *
- ***************/
 
 dependencies {
 
@@ -243,18 +251,8 @@ dependencies {
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0'
 }
 
-/******************************
- * Change metadata of jar file *
- ******************************/
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'HiveMQ'
-        attributes 'Implementation-Vendor': 'dc-square GmbH'
-        attributes 'Implementation-Version': project.version
-        attributes 'HiveMQ-Version': project.version
-        attributes 'Main-Class': project.mainClassName
-    }
-}
+
+/* ******************** test ******************** */
 
 test {
     jvmArgs += ["-Dfile.encoding=UTF-8", "-noverify", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.nio=ALL-UNNAMED", "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "jdk.management/com.sun.management.internal=ALL-UNNAMED", "--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"]
@@ -283,42 +281,25 @@ test {
     }
 }
 
-/***********************
- * Code Coverage Tasks *
- ***********************/
 
-pmd {
-    toolVersion = pmdVersion
-    sourceSets = [sourceSets.main]
-    ignoreFailures = true
-    rulePriority = 3
+/* ******************** packaging ******************** */
+
+ext {
+    projectString = "hivemq-ce-${project.version}"
+    packagingDir = "${buildDir}/package"
+    packagingProjectDir = "${packagingDir}/${projectString}"
+    zipDir = "${buildDir}/zip"
 }
 
-jacoco {
-    toolVersion = jacocoVersion
-}
-
-spotbugs {
-    toolVersion = spotbugsVersion
-    sourceSets = [sourceSets.main]
-    ignoreFailures = true
-    reportsDir = file("${buildDir}/reports/findbugs")
-    reportLevel = 'medium'
-}
-
-/****************************
- * Build Preconditions *
- ***************************/
-
-compileJava {
-    if (!System.properties['java.version'].startsWith('11')) {
-        throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'HiveMQ'
+        attributes 'Implementation-Vendor': project.vendor
+        attributes 'Implementation-Version': project.version
+        attributes 'HiveMQ-Version': project.version
+        attributes 'Main-Class': project.mainClassName
     }
 }
-
-/****************************
- * Packaging & XSD Creation *
- ***************************/
 
 shadowJar {
     mergeServiceFiles()
@@ -388,10 +369,6 @@ task packaging(type: Zip) {
 
 defaultTasks 'clean', 'packaging'
 
-/************
- * JavaDoc  *
- ************/
-
 javadoc {
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
@@ -412,9 +389,39 @@ javadoc {
     }
 }
 
-/*******************
- * OWASP CVE CHECK *
- *******************/
+
+/* ******************** checks ******************** */
+
+ext {
+    jacocoVersion = '0.8.5'
+    pmdVersion = '6.22.0'
+    spotbugsVersion = '3.1.12'
+}
+
+compileJava {
+    if (!System.properties['java.version'].startsWith('11')) {
+        throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
+    }
+}
+
+jacoco {
+    toolVersion = jacocoVersion
+}
+
+pmd {
+    toolVersion = pmdVersion
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+    rulePriority = 3
+}
+
+spotbugs {
+    toolVersion = spotbugsVersion
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+    reportsDir = file("${buildDir}/reports/findbugs")
+    reportLevel = 'medium'
+}
 
 dependencyCheck {
     analyzers {
@@ -427,22 +434,29 @@ dependencyCheck {
 }
 check.dependsOn dependencyCheckAnalyze
 
-/*************
- * MiscStuff *
- *************/
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [configurations.provided]
-
-        downloadJavadoc = true
-        downloadSources = true
-    }
+forbiddenApis {
+    bundledSignatures = ['jdk-system-out']
+    ignoreFailures = false
 }
 
-/**************
- * Compliance *
- **************/
+forbiddenApisMain {
+    exclude '**/BatchedException.class'
+    exclude '**/LoggingBootstrap.class'
+}
+
+forbiddenApisTest.enabled = false
+
+
+/* ******************** compliance ******************** */
+
+allprojects {
+    license {
+        header file("${rootDir}/HEADER")
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
+    }
+}
 
 downloadLicenses {
     ext.apacheTwo = license('Apache License, Version 2.0', 'http://opensource.org/licenses/Apache-2.0')
@@ -460,15 +474,6 @@ downloadLicenses {
     ]
 }
 
-allprojects {
-    license {
-        header file("${rootDir}/HEADER")
-        mapping {
-            java = 'SLASHSTAR_STYLE'
-        }
-    }
-}
-
 task updateThirdPartyLicenses {
     group 'license'
     dependsOn ':downloadLicenses'
@@ -484,22 +489,8 @@ task updateThirdPartyLicenses {
     }
 }
 
-forbiddenApisMain {
-    exclude '**/BatchedException.class'
-    exclude '**/LoggingBootstrap.class'
-}
 
-forbiddenApis {
-    bundledSignatures = ['jdk-system-out']
-    ignoreFailures = false
-}
-
-//disable
-forbiddenApisTest.enabled = false
-
-/*****************
- * Maven Publish *
- *****************/
+/* ******************** publishing ******************** */
 
 publishing {
     publications {
@@ -508,48 +499,60 @@ publishing {
             artifact packaging
 
             pom {
-                name = 'HiveMQ Community Edition'
-                description = 'HiveMQ Community Edition Distribution'
-                url = 'http://www.hivemq.com/'
+                name = project.readableName
+                description = project.description
+                url = project.url
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = project.licenseReadableName
+                        url = project.licenseUrl
                     }
                 }
                 developers {
                     developer {
                         id = 'cschaebe'
                         name = 'Christoph Schaebel'
-                        email = 'christoph.schaebel@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'christoph.schaebel@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                     developer {
                         id = 'lbrandl'
                         name = 'Lukas Brandl'
-                        email = 'lukas.brandl@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'lukas.brandl@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                     developer {
                         id = 'flimpoeck'
                         name = 'Florian Limpoeck'
-                        email = 'florian.limpoeck@dc-square.de'
-                        organization = 'dc-square GmbH'
-                        organizationUrl = 'https://www.dc-square.de'
+                        email = 'florian.limpoeck@hivemq.com'
+                        organization = project.vendor
+                        organizationUrl = project.url
                     }
                 }
                 scm {
-                    connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
-                    developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
-                    url = 'https://github.com/hivemq/hivemq-community-edition/tree/master'
+                    connection = project.scmConnection
+                    developerConnection = project.scmDeveloperConnection
+                    url = project.githubUrl
+                }
+                issueManagement {
+                    system = 'github'
+                    url = project.issuesUrl
                 }
             }
         }
     }
+}
 
-    repositories {
-        mavenLocal()
+
+/* ******************** ide ******************** */
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
