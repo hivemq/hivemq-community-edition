@@ -75,6 +75,13 @@ To execute this image, simply run the following command:
 docker run --name hivemq-ce -d -p 1883:1883 hivemq/hivemq-ce
 ----
 
+To change the default log level you can set the environment variable `HIVEMQ_LOG_LEVEL` when running the container:
+
+[source,bash]
+----
+docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 hivemq/hivemq-ce
+----
+
 == Building from Source
 
 === Prerequisites
@@ -116,8 +123,6 @@ docker run hivemq/hivemq-ce
 The Docker image `hivemq/hivemq-ce` is created locally.
 
 You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
-
-To change the default log level you can set the environment variable `HIVEMQ_LOG_LEVEL` when running the container.
 
 == Start
 
