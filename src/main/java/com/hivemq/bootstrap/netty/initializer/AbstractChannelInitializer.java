@@ -17,11 +17,11 @@
 package com.hivemq.bootstrap.netty.initializer;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
@@ -117,6 +117,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
+        ch.pipeline().addLast(CONNECTION_LIMITER, channelDependencies.getConnectionLimiterHandler());
         ch.pipeline().addLast(MQTT_CONNECT_HANDLER, channelDependencies.getConnectHandler());
 
         ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
@@ -152,8 +153,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         if (timeoutMillis > 0) {
             final IdleStateHandler idleStateHandler = new IdleStateHandler(timeoutMillis, 0, 0, TimeUnit.MILLISECONDS);
 
-            ch.pipeline().addLast(NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
-            ch.pipeline().addLast(NO_CONNECT_IDLE_EVENT_HANDLER, channelDependencies.getNoConnectIdleHandler());
+            ch.pipeline().addAfter(MQTT_MESSAGE_ENCODER, NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
+            ch.pipeline()
+                    .addAfter(NEW_CONNECTION_IDLE_HANDLER, NO_CONNECT_IDLE_EVENT_HANDLER,
+                            channelDependencies.getNoConnectIdleHandler());
         }
     }
 

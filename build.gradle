@@ -44,7 +44,7 @@ allprojects {
     group 'com.hivemq'
 }
 
-version = '2019.2-SNAPSHOT'
+version = '2020.3'
 
 mainClassName = 'com.hivemq.HiveMQServer'
 
@@ -95,8 +95,6 @@ dependencies {
             [group: 'io.netty', name: 'netty-handler', version: nettyVersion],
             [group: 'io.netty', name: 'netty-codec-http', version: nettyVersion],
 
-            /* Javassist is needed for better netty performance */
-            [group: 'org.javassist', name: 'javassist', version: '3.24.0-GA'],
             /* Logging */
             [group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'],
 
@@ -219,6 +217,8 @@ dependencies {
 
             // wiremock
             [group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0'],
+
+            [group: 'org.javassist', name: 'javassist', version: '3.26.0-GA'],
     )
 
     testCompile([group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0']) {

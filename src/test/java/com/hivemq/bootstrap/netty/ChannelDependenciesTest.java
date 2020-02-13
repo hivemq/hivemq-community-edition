@@ -29,6 +29,7 @@ import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
+import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
@@ -188,6 +189,9 @@ public class ChannelDependenciesTest {
     @Mock
     private PingInterceptorHandler pingInterceptorHandler;
 
+    @Mock
+    private ConnectionLimiterHandler connectionLimiterHandler;
+
     @Before
     public void setUp() throws Exception {
 
@@ -197,6 +201,7 @@ public class ChannelDependenciesTest {
                 () -> statisticsInitializer,
                 noConnectIdleHandler,
                 () -> connectHandler,
+                connectionLimiterHandler,
                 connectPersistenceUpdateHandler,
                 disconnectHandler,
                 () -> subscribeHandler,
@@ -286,5 +291,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getUnsubackOutboundInterceptorHandler());
         assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
         assertNotNull(channelDependencies.getPingInterceptorHandler());
+        assertNotNull(channelDependencies.getConnectionLimiterHandler());
     }
 }
