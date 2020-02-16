@@ -55,10 +55,8 @@ allprojects {
 
 /* ******************** dependencies ******************** */
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
+repositories {
+    mavenCentral()
 }
 
 ext {
@@ -319,7 +317,7 @@ task cleanPackaging {
 task copyXml(type: Copy) {
     group 'packaging'
 
-    mustRunAfter ':cleanPackaging'
+    mustRunAfter tasks.cleanPackaging
 
     from "${projectDir}/src/main/resources/config.xml"
     into "${project.packagingProjectDir}/conf"
@@ -328,7 +326,7 @@ task copyXml(type: Copy) {
 task copyPackaging(type: Copy) {
     group 'packaging'
 
-    mustRunAfter ':cleanPackaging'
+    mustRunAfter tasks.cleanPackaging
 
     from "${projectDir}/src/packaging"
     into "${project.packagingProjectDir}"
@@ -342,8 +340,8 @@ task copyPackaging(type: Copy) {
 task copyJar(type: Copy) {
     group 'packaging'
 
-    mustRunAfter ':cleanPackaging'
-    dependsOn ':shadowJar'
+    mustRunAfter tasks.cleanPackaging
+    dependsOn tasks.shadowJar
 
     from "${buildDir}/libs/${projectString}.jar"
     into "${project.packagingProjectDir}/bin"
@@ -356,10 +354,10 @@ task copyJar(type: Copy) {
 task packaging(type: Zip) {
     group 'packaging'
 
-    dependsOn ':cleanPackaging'
-    dependsOn ':copyXml'
-    dependsOn ':copyPackaging'
-    dependsOn ':copyJar'
+    dependsOn tasks.cleanPackaging
+    dependsOn tasks.copyXml
+    dependsOn tasks.copyPackaging
+    dependsOn tasks.copyJar
 
     from "${project.packagingDir}"
     destinationDir new File(project.zipDir)
@@ -373,10 +371,6 @@ javadoc {
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
 
-    failOnError = true
-
-    source += project(':hivemq-extension-sdk').sourceSets.main.allJava
-
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
     options.addBooleanOption '-no-module-directories', true
@@ -384,7 +378,7 @@ javadoc {
     doLast {
         javaexec {
             main = '-jar'
-            args = ["${rootDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
+            args = ["${projectDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
 }
@@ -429,7 +423,7 @@ dependencyCheck {
     }
     format = 'ALL'
     scanConfigurations = ['compile']
-    suppressionFile = "${rootDir}/gradle/dependency-check/suppress.xml"
+    suppressionFile = "${projectDir}/gradle/dependency-check/suppress.xml"
     failOnError = false
 }
 check.dependsOn dependencyCheckAnalyze
@@ -476,11 +470,11 @@ downloadLicenses {
 
 task updateThirdPartyLicenses {
     group 'license'
-    dependsOn ':downloadLicenses'
+    dependsOn tasks.downloadLicenses
     doLast {
         javaexec {
             main = '-jar'
-            args = ["${rootDir}/gradle/tools/license-third-party-tool-1.0.jar",
+            args = ["${projectDir}/gradle/tools/license-third-party-tool-1.0.jar",
                     "${buildDir}/reports/license/dependency-license.xml",
                     "${projectDir}/src/packaging/third-party-licenses/licenses",
                     "${projectDir}/src/packaging/third-party-licenses/licenses.html"
@@ -496,7 +490,7 @@ publishing {
     publications {
         distribution(MavenPublication) {
 
-            artifact packaging
+            artifact tasks.packaging
 
             pom {
                 name = project.readableName
