@@ -301,9 +301,6 @@ jar {
 
 shadowJar {
     mergeServiceFiles()
-
-    baseName = 'hivemq-ce'
-    classifier = ''
 }
 
 task cleanPackaging {
@@ -343,11 +340,11 @@ task copyJar(type: Copy) {
     mustRunAfter tasks.cleanPackaging
     dependsOn tasks.shadowJar
 
-    from "${buildDir}/libs/${projectString}.jar"
+    from tasks.shadowJar
     into "${project.packagingProjectDir}/bin"
 
     rename { String fileName ->
-        fileName.replace("${projectString}.jar", "hivemq.jar")
+        fileName.replace(tasks.shadowJar.archiveFileName.get(), "hivemq.jar")
     }
 }
 
