@@ -72,20 +72,6 @@ ext {
     shrinkwrapVersion = '1.2.6'
 }
 
-configurations {
-    provided
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.provided
-    }
-    test {
-        compileClasspath += configurations.provided
-        runtimeClasspath += configurations.provided
-    }
-}
-
 dependencies {
 
     compile(
@@ -239,10 +225,6 @@ dependencies {
              * Shrinkwrap Implementation for creating JAR Archives on the fly
              */
             [group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-impl-base', version: shrinkwrapVersion],
-    )
-
-    provided(
-            [group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.0'],
     )
 
     //plugins for spotbugs
@@ -541,8 +523,6 @@ publishing {
 
 idea {
     module {
-        scopes.PROVIDED.plus += [configurations.provided]
-
         downloadJavadoc = true
         downloadSources = true
     }
