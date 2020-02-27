@@ -561,8 +561,8 @@ public class PluginAuthorizerServiceImplTest {
             throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name)
-                .addClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name + "$1");
+                .addClass("com.hivemq.extensions.handler.testextensions." + name)
+                .addClass("com.hivemq.extensions.handler.testextensions." + name + "$1");
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
@@ -572,132 +572,12 @@ public class PluginAuthorizerServiceImplTest {
                 new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> providerClass =
-                cl.loadClass("com.hivemq.extensions.handler.PluginAuthorizerServiceImplTest$" + name);
+                cl.loadClass("com.hivemq.extensions.handler.testextensions." + name);
 
         final AuthorizerProvider testProvider =
                 (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
                         .newInstance(countDownLatch);
         return testProvider;
-    }
-
-    public static class TestAuthorizerForgetProvider implements AuthorizerProvider {
-
-        private final CountDownLatch countDownLatch;
-
-        public TestAuthorizerForgetProvider(final CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
-            return new SubscriptionAuthorizer() {
-                @Override
-                public void authorizeSubscribe(
-                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
-                    System.out.println("authorize");
-                    countDownLatch.countDown();
-                }
-            };
-        }
-    }
-
-    public static class TestAuthorizerDisconnectProvider implements AuthorizerProvider {
-
-        private final CountDownLatch countDownLatch;
-
-        public TestAuthorizerDisconnectProvider(final CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
-            return new SubscriptionAuthorizer() {
-                @Override
-                public void authorizeSubscribe(
-                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
-                    System.out.println("authorize");
-                    subscriptionAuthorizerOutput.disconnectClient();
-                    countDownLatch.countDown();
-                }
-            };
-        }
-    }
-
-    public static class TestAuthorizerNextProvider implements AuthorizerProvider {
-
-        private final CountDownLatch countDownLatch;
-
-        public TestAuthorizerNextProvider(final CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
-            return new SubscriptionAuthorizer() {
-                @Override
-                public void authorizeSubscribe(
-                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
-                    System.out.println("authorize");
-                    subscriptionAuthorizerOutput.nextExtensionOrDefault();
-                    countDownLatch.countDown();
-                }
-            };
-        }
-    }
-
-    public static class TestPubAuthorizerNextProvider implements AuthorizerProvider {
-
-        private final CountDownLatch countDownLatch;
-
-        public TestPubAuthorizerNextProvider(final CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
-            return new PublishAuthorizer() {
-                @Override
-                public void authorizePublish(final PublishAuthorizerInput input, final PublishAuthorizerOutput output) {
-                    System.out.println("authorize");
-                    output.nextExtensionOrDefault();
-                    countDownLatch.countDown();
-                }
-            };
-        }
-    }
-
-    public static class TestTimeoutAuthorizerProvider implements AuthorizerProvider {
-
-        private final CountDownLatch countDownLatch;
-
-        public TestTimeoutAuthorizerProvider(final CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
-            return new SubscriptionAuthorizer() {
-                @Override
-                public void authorizeSubscribe(
-                        @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                        @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
-                    subscriptionAuthorizerOutput.async(Duration.ofMillis(1), TimeoutFallback.FAILURE);
-
-                    System.out.println("authorize async");
-
-                    try {
-                        Thread.sleep(100);
-                    } catch (final InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    countDownLatch.countDown();
-                }
-            };
-        }
     }
 
     private void clearHandlers() {
