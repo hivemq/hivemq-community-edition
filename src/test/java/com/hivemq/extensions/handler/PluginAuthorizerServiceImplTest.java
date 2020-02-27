@@ -17,15 +17,9 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.extension.sdk.api.async.TimeoutFallback;
-import com.hivemq.extension.sdk.api.auth.Authorizer;
-import com.hivemq.extension.sdk.api.auth.PublishAuthorizer;
-import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
-import com.hivemq.extension.sdk.api.auth.parameter.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extensions.HiveMQExtension;
@@ -68,7 +62,6 @@ import util.TestMessageUtil;
 
 import java.io.File;
 import java.net.URL;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
