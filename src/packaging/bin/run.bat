@@ -54,7 +54,7 @@ rem  limitations under the License.
   )
 
   rem ########### VARIABLES
-  set "JAVA_OPTS=-Djava.net.preferIPv4Stack=true -noverify %JAVA_OPTS%"
+  set "JAVA_OPTS=-Djava.net.preferIPv4Stack=true %JAVA_OPTS%"
 
   if %java_version_start% LEQ 10 (
     echo ERROR! HiveMQ requires at least Java 11
