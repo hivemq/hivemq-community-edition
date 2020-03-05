@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.services;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -113,7 +114,7 @@ public class PublishDistributorImpl implements PublishDistributor {
     @Override
     public ListenableFuture<PublishStatus> sendMessageToSubscriber(@NotNull final PUBLISH publish, @NotNull final String clientId, final int subscriptionQos,
                                                                    final boolean sharedSubscription, final boolean retainAsPublished,
-                                                                   @Nullable final List<Integer> subscriptionIdentifier) {
+                                                                   @Nullable final ImmutableIntArray subscriptionIdentifier) {
 
         return handlePublish(publish, clientId, subscriptionQos, sharedSubscription, retainAsPublished, subscriptionIdentifier);
     }
@@ -121,7 +122,7 @@ public class PublishDistributorImpl implements PublishDistributor {
     @NotNull
     private ListenableFuture<PublishStatus> handlePublish(@NotNull final PUBLISH publish, @NotNull final String client, final int subscriptionQos,
                                                           final boolean sharedSubscription, final boolean retainAsPublished,
-                                                          @Nullable final List<Integer> subscriptionIdentifier) {
+                                                          @Nullable final ImmutableIntArray subscriptionIdentifier) {
 
         if (sharedSubscription) {
             return queuePublish(client, publish, subscriptionQos, true, retainAsPublished, subscriptionIdentifier);
@@ -146,7 +147,7 @@ public class PublishDistributorImpl implements PublishDistributor {
     @NotNull
     private SettableFuture<PublishStatus> queuePublish(@NotNull final String client, @NotNull final PUBLISH publish,
                                                        final int subscriptionQos, final boolean shared, final boolean retainAsPublished,
-                                                       @Nullable final List<Integer> subscriptionIdentifier) {
+                                                       @Nullable final ImmutableIntArray subscriptionIdentifier) {
 
         final ListenableFuture<Void> future = clientQueuePersistence.add(client, shared, createPublish(publish, subscriptionQos, retainAsPublished, subscriptionIdentifier));
         final SettableFuture<PublishStatus> statusFuture = SettableFuture.create();
@@ -166,13 +167,13 @@ public class PublishDistributorImpl implements PublishDistributor {
     }
 
     @NotNull
-    private PUBLISH createPublish(@NotNull final PUBLISH publish, final int subscriptionQos, final boolean retainAsPublished, @Nullable final List<Integer> subscriptionIdentifier) {
+    private PUBLISH createPublish(@NotNull final PUBLISH publish, final int subscriptionQos, final boolean retainAsPublished, @Nullable final ImmutableIntArray subscriptionIdentifier) {
         final long payloadId = payloadPersistence.add(publish.getPayload(), 1);
-        final ImmutableList<Integer> identifiers;
+        final ImmutableIntArray identifiers;
         if (subscriptionIdentifier == null) {
-            identifiers = ImmutableList.of();
+            identifiers = ImmutableIntArray.of();
         } else {
-            identifiers = ImmutableList.copyOf(subscriptionIdentifier);
+            identifiers = subscriptionIdentifier;
         }
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder()
@@ -180,7 +181,7 @@ public class PublishDistributorImpl implements PublishDistributor {
                 .withPayloadId(payloadId)
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)
-                .withSubscriptionIdentifiers(ImmutableList.copyOf(identifiers));
+                .withSubscriptionIdentifiers(identifiers);
 
         final int qos = Math.min(publish.getQoS().getQosNumber(), subscriptionQos);
         builder.withQoS(QoS.valueOf(qos));

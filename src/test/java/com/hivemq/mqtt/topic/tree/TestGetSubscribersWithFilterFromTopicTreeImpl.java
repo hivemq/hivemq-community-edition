@@ -431,7 +431,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
         final SubscriberWithIdentifiers subscribers = topicTree.getSubscriber("client1", "topic/a");
 
-        assertEquals(1, subscribers.getSubscriptionIdentifier().size());
+        assertEquals(1, subscribers.getSubscriptionIdentifier().length());
         assertTrue(subscribers.getSubscriptionIdentifier().contains(2));
     }
 
@@ -444,7 +444,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
         final SubscriberWithIdentifiers subscribers = topicTree.getSubscriber("client1", "topic/a");
 
-        assertEquals(2, subscribers.getSubscriptionIdentifier().size());
+        assertEquals(2, subscribers.getSubscriptionIdentifier().length());
         assertTrue(subscribers.getSubscriptionIdentifier().contains(1));
         assertTrue(subscribers.getSubscriptionIdentifier().contains(2));
     }
@@ -459,8 +459,8 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
         final SubscriberWithIdentifiers subscribers = topicTree.getSubscriber("client1", "topic/a");
 
-        assertEquals(1, subscribers.getSubscriptionIdentifier().size());
-        assertEquals(1, subscribers.getSubscriptionIdentifier().get(0).intValue());
+        assertEquals(1, subscribers.getSubscriptionIdentifier().length());
+        assertEquals(1, subscribers.getSubscriptionIdentifier().get(0));
     }
 
 

@@ -17,6 +17,7 @@
 package com.hivemq.persistence.clientqueue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -239,8 +240,8 @@ class ClientQueuePersistenceSerializer {
         final byte[] responseTopic = message.getResponseTopic() == null ? null : message.getResponseTopic().getBytes(UTF_8);
         final byte[] contentType = message.getContentType() == null ? null : message.getContentType().getBytes(UTF_8);
         final byte[] correlationData = message.getCorrelationData();
-        final ImmutableList<Integer> subscriptionIdentifiers = message.getSubscriptionIdentifiers();
-        final int subscriptionIdentifierLength = subscriptionIdentifiers == null ? 0 : subscriptionIdentifiers.size();
+        final ImmutableIntArray subscriptionIdentifiers = message.getSubscriptionIdentifiers();
+        final int subscriptionIdentifierLength = subscriptionIdentifiers == null ? 0 : subscriptionIdentifiers.length();
         final int payloadFormatIndicator = message.getPayloadFormatIndicator() != null ? message.getPayloadFormatIndicator().getCode() : -1;
         final Mqtt5UserProperties userProperties = message.getUserProperties();
 
@@ -319,8 +320,9 @@ class ClientQueuePersistenceSerializer {
             Bytes.copyIntToByteArray(subscriptionIdentifierLength, result, cursor);
             cursor += Integer.BYTES;
             if (subscriptionIdentifierLength > 0) {
-                for (final Integer identifier : subscriptionIdentifiers) {
-                    Bytes.copyIntToByteArray(identifier, result, cursor);
+
+                for (int i = 0; i < subscriptionIdentifiers.length(); i++) {
+                    Bytes.copyIntToByteArray(subscriptionIdentifiers.get(i), result, cursor);
                     cursor += Integer.BYTES;
                 }
             }
@@ -410,7 +412,7 @@ class ClientQueuePersistenceSerializer {
             final int subscriptionIdentifiersLength = Bytes.readInt(serialized, cursor);
             cursor += Integer.BYTES;
 
-            final ImmutableList.Builder<Integer> subscriptionIdentifiers = ImmutableList.builder();
+            final ImmutableIntArray.Builder subscriptionIdentifiers = ImmutableIntArray.builder();
             for (int i = 0; i < subscriptionIdentifiersLength; i++) {
                 subscriptionIdentifiers.add(Bytes.readInt(serialized, cursor));
                 cursor += Integer.BYTES;

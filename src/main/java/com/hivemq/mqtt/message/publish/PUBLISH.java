@@ -19,6 +19,7 @@ package com.hivemq.mqtt.message.publish;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -68,7 +69,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     private final @Nullable String responseTopic;
     private final @Nullable byte[] correlationData;
     private final boolean isNewTopicAlias;
-    private final @Nullable ImmutableList<Integer> subscriptionIdentifiers;
+    private final @Nullable ImmutableIntArray subscriptionIdentifiers;
 
     private final @Nullable PublishPayloadPersistence persistence;
     private @Nullable
@@ -91,7 +92,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             final int packetIdentifier,
             final boolean isDup,
             final boolean isNewTopicAlias,
-            @Nullable final ImmutableList<Integer> subscriptionIdentifiers,
+            @Nullable final ImmutableIntArray subscriptionIdentifiers,
             final @Nullable PublishPayloadPersistence persistence,
             final @Nullable Long payloadId,
             final long timestamp,
@@ -315,7 +316,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     @Nullable
     @Override
-    public ImmutableList<Integer> getSubscriptionIdentifiers() {
+    public ImmutableIntArray getSubscriptionIdentifiers() {
         return subscriptionIdentifiers;
     }
 

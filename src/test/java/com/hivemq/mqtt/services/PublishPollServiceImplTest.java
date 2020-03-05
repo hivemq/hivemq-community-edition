@@ -253,11 +253,11 @@ public class PublishPollServiceImplTest {
         final List<PUBLISH> values = captor.getAllValues();
         assertEquals(2, values.get(0).getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, values.get(0).getQoS());
-        assertEquals(1, values.get(0).getSubscriptionIdentifiers().get(0).intValue());
+        assertEquals(1, values.get(0).getSubscriptionIdentifiers().get(0));
 
         assertEquals(3, values.get(1).getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, values.get(1).getQoS());
-        assertEquals(1, values.get(1).getSubscriptionIdentifiers().get(0).intValue());
+        assertEquals(1, values.get(1).getSubscriptionIdentifiers().get(0));
         assertEquals(3, inFlightCount.get());
     }
 

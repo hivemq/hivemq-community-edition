@@ -16,6 +16,7 @@
 
 package com.hivemq.codec.encoder.mqtt5;
 
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -85,13 +86,12 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
 
         propertyLength += publish.getUserProperties().encodedLength();
 
-        final List<Integer> subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
+        final ImmutableIntArray subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         if (subscriptionIdentifiers != null) {
-            for (final Integer subscriptionIdentifier : subscriptionIdentifiers) {
-                propertyLength += variableByteIntegerPropertyEncodedLength(subscriptionIdentifier);
+            for (int i = 0; i < subscriptionIdentifiers.length(); i++) {
+                propertyLength += variableByteIntegerPropertyEncodedLength(subscriptionIdentifiers.get(i));
             }
         }
-
         return propertyLength;
     }
 
@@ -149,10 +149,10 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
         encodeFixedProperties(publish, out);
         encodeOmissibleProperties(publish, out);
 
-        final List<Integer> subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
+        final ImmutableIntArray subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         if (subscriptionIdentifiers != null) {
-            for (final Integer subscriptionIdentifier : subscriptionIdentifiers) {
-                encodeVariableByteIntegerProperty(SUBSCRIPTION_IDENTIFIER, subscriptionIdentifier, out);
+            for (int i = 0; i < subscriptionIdentifiers.length(); i++) {
+                encodeVariableByteIntegerProperty(SUBSCRIPTION_IDENTIFIER, subscriptionIdentifiers.get(i), out);
             }
         }
     }

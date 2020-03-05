@@ -20,6 +20,7 @@ import com.codahale.metrics.Counter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Striped;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -296,11 +297,12 @@ public class TopicTreeImpl implements LocalTopicTree {
                 } else {
                     last.setQos(current.getQos());
                     if (current.getSubscriptionIdentifier() != null) {
-                        final ImmutableList<Integer> subscriptionIds = last.getSubscriptionIdentifier();
+                        final ImmutableIntArray subscriptionIds = last.getSubscriptionIdentifier();
                         final Integer subscriptionId = current.getSubscriptionIdentifier();
-                        final ImmutableList<Integer> mergedSubscriptionIds = ImmutableList
-                                .<Integer>builderWithExpectedSize(subscriptionIds.size() + 1)
-                                .addAll(subscriptionIds).add(subscriptionId).build();
+                        final ImmutableIntArray mergedSubscriptionIds = ImmutableIntArray.builder(subscriptionIds.length() + 1)
+                                .addAll(subscriptionIds)
+                                .add(subscriptionId)
+                                .build();
                         last.setSubscriptionIdentifiers(mergedSubscriptionIds);
                     }
                 }
