@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.topic;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.Bytes;
@@ -35,7 +36,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
     private final byte flags;
     @Nullable
     private final String sharedName;
-    private @NotNull ImmutableList<Integer> subscriptionIdentifier;
+    private @NotNull ImmutableIntArray subscriptionIdentifier;
     // The topic filter is only present for shared subscription
     private final @Nullable String topicFilter;
 
@@ -45,7 +46,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         this.qos = qos;
         this.flags = flags;
         this.sharedName = sharedName;
-        this.subscriptionIdentifier = ImmutableList.of();
+        this.subscriptionIdentifier = ImmutableIntArray.of();
         this.topicFilter = null;
     }
 
@@ -56,7 +57,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         this.qos = qos;
         this.flags = flags;
         this.sharedName = sharedName;
-        this.subscriptionIdentifier = subscriptionIdentifier;
+        this.subscriptionIdentifier = ImmutableIntArray.of();
         this.topicFilter = topicFilter;
     }
 
@@ -68,7 +69,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         this.sharedName = subscriberWithQoS.getSharedName();
         final Integer subscriptionIdentifier = subscriberWithQoS.getSubscriptionIdentifier();
         this.subscriptionIdentifier =
-                (subscriptionIdentifier == null) ? ImmutableList.of() : ImmutableList.of(subscriptionIdentifier);
+                (subscriptionIdentifier == null) ? ImmutableIntArray.of() : ImmutableIntArray.of(subscriptionIdentifier);
         this.topicFilter = subscriberWithQoS.getTopicFilter();
     }
 
@@ -97,11 +98,11 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         return sharedName;
     }
 
-    public @NotNull ImmutableList<Integer> getSubscriptionIdentifier() {
+    public @NotNull ImmutableIntArray getSubscriptionIdentifier() {
         return subscriptionIdentifier;
     }
 
-    public void setSubscriptionIdentifiers(final @NotNull ImmutableList<Integer> subscriptionIdentifiers) {
+    public void setSubscriptionIdentifiers(final @NotNull ImmutableIntArray subscriptionIdentifiers) {
         this.subscriptionIdentifier = subscriptionIdentifiers;
     }
 

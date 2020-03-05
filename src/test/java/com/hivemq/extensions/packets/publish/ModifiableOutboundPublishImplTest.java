@@ -16,6 +16,7 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -59,7 +60,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -86,7 +87,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -113,7 +114,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -135,7 +136,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -157,7 +158,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -180,7 +181,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -202,7 +203,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -224,7 +225,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -252,7 +253,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -279,7 +280,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -306,7 +307,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -328,7 +329,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -355,7 +356,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -382,7 +383,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -409,7 +410,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -436,7 +437,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -459,7 +460,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -486,7 +487,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -513,7 +514,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -540,7 +541,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -567,7 +568,7 @@ public class ModifiableOutboundPublishImplTest {
                 "contentType",
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -594,7 +595,7 @@ public class ModifiableOutboundPublishImplTest {
                 "contentType",
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -621,7 +622,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -643,7 +644,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -665,7 +666,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -693,7 +694,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -721,7 +722,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 "responseTopic",
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -748,7 +749,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 "responseTopic",
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -775,7 +776,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -797,7 +798,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -819,7 +820,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -847,7 +848,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -874,7 +875,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 ByteBuffer.wrap("correlationData".getBytes()),
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -901,7 +902,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 ByteBuffer.wrap("correlationData".getBytes()),
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -928,7 +929,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -955,7 +956,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(1, 2),
+                ImmutableIntArray.of(1, 2),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -982,7 +983,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -1004,7 +1005,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -1026,7 +1027,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -1053,7 +1054,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -1077,7 +1078,7 @@ public class ModifiableOutboundPublishImplTest {
                 null,
                 null,
                 null,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableOutboundPublishImpl modifiablePacket =
                 new ModifiableOutboundPublishImpl(packet, configurationService);
@@ -1106,7 +1107,7 @@ public class ModifiableOutboundPublishImplTest {
                 "contentType",
                 "responseTopic",
                 ByteBuffer.wrap("correlationData".getBytes()),
-                ImmutableList.of(1, 2),
+                ImmutableIntArray.of(1, 2),
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }

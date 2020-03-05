@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.packets.publish;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -64,7 +64,7 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
                 contentType,
                 responseTopic,
                 correlationData,
-                ImmutableList.of(),
+                ImmutableIntArray.of(),
                 userProperties);
         this.willDelay = willDelay;
     }

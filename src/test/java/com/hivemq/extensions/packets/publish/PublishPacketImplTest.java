@@ -16,6 +16,7 @@
 
 package com.hivemq.extensions.packets.publish;
 
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -33,6 +34,7 @@ public class PublishPacketImplTest {
                 .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
                 .withNonnullFields("topic", "qos", "subscriptionIdentifiers", "userProperties")
                 .suppress(Warning.STRICT_INHERITANCE)
+                .withPrefabValues(ImmutableIntArray.class, ImmutableIntArray.of(), ImmutableIntArray.of(123))
                 .verify();
     }
 }

@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.services;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -78,7 +79,7 @@ public class PublishDistributorImplTest {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(false, 1000L));
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
-                0, false, false, ImmutableList.of(1)).get();
+                0, false, false, ImmutableIntArray.of(1)).get();
 
         assertEquals(PublishStatus.NOT_CONNECTED, status);
 
@@ -89,7 +90,7 @@ public class PublishDistributorImplTest {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(null);
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
-                0, false, false, ImmutableList.of(1)).get();
+                0, false, false, ImmutableIntArray.of(1)).get();
 
         assertEquals(PublishStatus.NOT_CONNECTED, status);
     }
@@ -101,7 +102,7 @@ public class PublishDistributorImplTest {
 
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
-                0, false, false, ImmutableList.of(1)).get();
+                0, false, false, ImmutableIntArray.of(1)).get();
 
         verify(clientQueuePersistence).add(eq("client"), eq(false), any(PUBLISH.class));
         assertEquals(PublishStatus.DELIVERED, status);
@@ -114,7 +115,7 @@ public class PublishDistributorImplTest {
 
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "client",
-                0, false, false, ImmutableList.of(1)).get();
+                0, false, false, ImmutableIntArray.of(1)).get();
 
         verify(clientQueuePersistence).add(eq("client"), eq(false), any(PUBLISH.class));
         assertEquals(PublishStatus.FAILED, status);
@@ -126,7 +127,7 @@ public class PublishDistributorImplTest {
 
 
         final PublishStatus status = publishDistributor.sendMessageToSubscriber(createPublish(QoS.AT_LEAST_ONCE), "group/topic",
-                0, true, false, ImmutableList.of(1)).get();
+                0, true, false, ImmutableIntArray.of(1)).get();
 
         verify(clientQueuePersistence).add(eq("group/topic"), eq(true), any(PUBLISH.class));
         assertEquals(PublishStatus.DELIVERED, status);

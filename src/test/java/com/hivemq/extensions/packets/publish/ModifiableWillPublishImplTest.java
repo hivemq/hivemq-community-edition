@@ -16,6 +16,7 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -170,6 +171,7 @@ public class ModifiableWillPublishImplTest {
                 .withIgnoredFields("configurationService", "modified")
                 .withRedefinedSuperclass()
                 .suppress(Warning.STRICT_INHERITANCE, Warning.NONFINAL_FIELDS)
+                .withPrefabValues(ImmutableIntArray.class, ImmutableIntArray.of(), ImmutableIntArray.of(123))
                 .verify();
     }
 }

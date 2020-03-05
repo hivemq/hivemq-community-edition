@@ -423,7 +423,7 @@ public class IncomingPublishHandlerTest {
 
     }
 
-    @Test
+    @Test(timeout =  5000)
     public void test_read_publish_context_has_interceptors_change_topic_mqtt5() throws Exception {
 
         final ClientContextImpl clientContext =

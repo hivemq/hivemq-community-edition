@@ -16,6 +16,7 @@
 
 package com.hivemq.mqtt.services;
 
+import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -23,7 +24,6 @@ import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -69,6 +69,6 @@ public interface PublishDistributor {
     @NotNull
     ListenableFuture<PublishStatus> sendMessageToSubscriber(@NotNull PUBLISH publish, @NotNull String clientId, final int subscriptionQos,
                                                             boolean sharedSubscription, boolean retainAsPublished,
-                                                            @Nullable List<Integer> subscriptionIdentifier);
+                                                            @Nullable ImmutableIntArray subscriptionIdentifier);
 
 }

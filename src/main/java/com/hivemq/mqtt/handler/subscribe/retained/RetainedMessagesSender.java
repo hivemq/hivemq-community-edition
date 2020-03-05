@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.handler.subscribe.retained;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -174,11 +175,13 @@ public class RetainedMessagesSender {
                 final Topic subscribedTopic = subscribedTopics[i];
 
                 final QoS qos = PublishUtil.getMinQoS(subscribedTopic.getQoS(), retainedMessage.getQos());
-                final ImmutableList<Integer> subscriptionIdentifier;
+
+                final ImmutableIntArray subscriptionIdentifiers;
+
                 if (subscribedTopic.getSubscriptionIdentifier() != null) {
-                    subscriptionIdentifier = ImmutableList.of(subscribedTopic.getSubscriptionIdentifier());
+                    subscriptionIdentifiers = ImmutableIntArray.of(subscribedTopic.getSubscriptionIdentifier());
                 } else {
-                    subscriptionIdentifier = ImmutableList.of();
+                    subscriptionIdentifiers = ImmutableIntArray.of();
                 }
 
                 final PUBLISHFactory.Mqtt5Builder publishBuilder = new PUBLISHFactory.Mqtt5Builder()
@@ -197,7 +200,7 @@ public class RetainedMessagesSender {
                         .withContentType(retainedMessage.getContentType())
                         .withCorrelationData(retainedMessage.getCorrelationData())
                         .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
-                        .withSubscriptionIdentifiers(subscriptionIdentifier);
+                        .withSubscriptionIdentifiers(subscriptionIdentifiers);
                 builder.add(publishBuilder.build());
 
             }

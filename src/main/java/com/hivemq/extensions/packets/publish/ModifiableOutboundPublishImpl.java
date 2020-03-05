@@ -17,7 +17,7 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -56,7 +56,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     private @Nullable String contentType;
     private @Nullable String responseTopic;
     private @Nullable ByteBuffer correlationData;
-    private @NotNull ImmutableList<Integer> subscriptionIdentifiers;
+    private @NotNull ImmutableIntArray subscriptionIdentifiers;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
     private final @NotNull FullConfigurationService configurationService;
@@ -77,7 +77,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         contentType = packet.contentType;
         responseTopic = packet.responseTopic;
         correlationData = packet.correlationData;
-        subscriptionIdentifiers = packet.getSubscriptionIdentifiers();
+        subscriptionIdentifiers = packet.subscriptionIdentifiers;
         userProperties = new ModifiableUserPropertiesImpl(
                 packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
@@ -233,8 +233,8 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     @Override
-    public @NotNull ImmutableList<Integer> getSubscriptionIdentifiers() {
-        return subscriptionIdentifiers;
+    public @NotNull List<Integer> getSubscriptionIdentifiers() {
+        return subscriptionIdentifiers.asList();
     }
 
     @Override
@@ -243,10 +243,11 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         for (final Integer subscriptionIdentifier : subscriptionIdentifiers) {
             checkNotNull(subscriptionIdentifier, "At least one element of the subscription identifiers was null");
         }
-        if (this.subscriptionIdentifiers.equals(subscriptionIdentifiers)) {
+        final ImmutableIntArray immutableIntArray = ImmutableIntArray.copyOf(subscriptionIdentifiers);
+        if (this.subscriptionIdentifiers.equals(immutableIntArray)) {
             return;
         }
-        this.subscriptionIdentifiers = ImmutableList.copyOf(subscriptionIdentifiers);
+        this.subscriptionIdentifiers = immutableIntArray;
         modified = true;
     }
 

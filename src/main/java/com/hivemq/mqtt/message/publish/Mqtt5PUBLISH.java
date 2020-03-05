@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.message.publish;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.QoS;
@@ -122,7 +123,7 @@ public interface Mqtt5PUBLISH extends Message {
     /**
      * @return the subscription identifiers of the publish message
      */
-    ImmutableList<Integer> getSubscriptionIdentifiers();
+    ImmutableIntArray getSubscriptionIdentifiers();
 
     /**
      * @return the content type of the publish message

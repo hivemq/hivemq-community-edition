@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.packets.publish;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -27,6 +27,7 @@ import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class PublishPacketImpl implements PublishPacket {
     final @Nullable String contentType;
     final @Nullable String responseTopic;
     final @Nullable ByteBuffer correlationData;
-    final @NotNull ImmutableList<Integer> subscriptionIdentifiers;
+    final @NotNull ImmutableIntArray subscriptionIdentifiers;
     final @NotNull UserPropertiesImpl userProperties;
 
     public PublishPacketImpl(
@@ -64,7 +65,7 @@ public class PublishPacketImpl implements PublishPacket {
             final @Nullable String contentType,
             final @Nullable String responseTopic,
             final @Nullable ByteBuffer correlationData,
-            final @NotNull ImmutableList<Integer> subscriptionIdentifiers,
+            final @NotNull ImmutableIntArray subscriptionIdentifiers,
             final @NotNull UserPropertiesImpl userProperties) {
 
         this.topic = topic;
@@ -96,7 +97,7 @@ public class PublishPacketImpl implements PublishPacket {
                 publish.getContentType(),
                 publish.getResponseTopic(),
                 publish.getCorrelationData() == null ? null : ByteBuffer.wrap(publish.getCorrelationData()),
-                (publish.getSubscriptionIdentifiers() == null) ? ImmutableList.of() :
+                (publish.getSubscriptionIdentifiers() == null) ? ImmutableIntArray.of() :
                         publish.getSubscriptionIdentifiers(),
                 UserPropertiesImpl.of(publish.getUserProperties().asList()));
     }
@@ -161,8 +162,8 @@ public class PublishPacketImpl implements PublishPacket {
     }
 
     @Override
-    public @NotNull ImmutableList<Integer> getSubscriptionIdentifiers() {
-        return subscriptionIdentifiers;
+    public @NotNull List<Integer> getSubscriptionIdentifiers() {
+        return subscriptionIdentifiers.asList();
     }
 
     @Override

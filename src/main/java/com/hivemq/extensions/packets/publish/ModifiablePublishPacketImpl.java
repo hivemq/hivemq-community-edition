@@ -17,7 +17,7 @@
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -31,6 +31,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     @Nullable String contentType;
     @Nullable String responseTopic;
     @Nullable ByteBuffer correlationData;
-    final @NotNull ImmutableList<Integer> subscriptionIdentifiers;
+    final @NotNull ImmutableIntArray subscriptionIdentifiers;
     final @NotNull ModifiableUserPropertiesImpl userProperties;
 
     final @NotNull FullConfigurationService configurationService;
@@ -250,8 +251,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     @Override
-    public @NotNull ImmutableList<Integer> getSubscriptionIdentifiers() {
-        return subscriptionIdentifiers;
+    public @NotNull List<Integer> getSubscriptionIdentifiers() {
+        return subscriptionIdentifiers.asList();
     }
 
     @Override

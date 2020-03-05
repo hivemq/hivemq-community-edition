@@ -17,6 +17,7 @@
 package util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -219,6 +220,13 @@ public class TestMessageUtil {
             final boolean isNewTopicAlias,
             @Nullable final ImmutableList<Integer> subscriptionIdentifiers) {
 
+        final ImmutableIntArray subscriptionIdentifierArray;
+        if (subscriptionIdentifiers == null) {
+            subscriptionIdentifierArray = ImmutableIntArray.of();
+        } else {
+            subscriptionIdentifierArray = ImmutableIntArray.copyOf(subscriptionIdentifiers);
+        }
+
         return new PUBLISHFactory.Mqtt5Builder()
                 .withHivemqId(hivemqId)
                 .withTopic(topic)
@@ -234,7 +242,7 @@ public class TestMessageUtil {
                 .withPacketIdentifier(packetIdentifier)
                 .withDuplicateDelivery(isDup)
                 .withNewTopicAlias(isNewTopicAlias)
-                .withSubscriptionIdentifiers(subscriptionIdentifiers)
+                .withSubscriptionIdentifiers(subscriptionIdentifierArray)
                 .build();
     }
 

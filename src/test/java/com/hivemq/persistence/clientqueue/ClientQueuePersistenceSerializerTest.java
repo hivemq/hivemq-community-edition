@@ -17,6 +17,7 @@
 package com.hivemq.persistence.clientqueue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.QoS;
@@ -164,7 +165,7 @@ public class ClientQueuePersistenceSerializerTest {
                 .withContentType("contentType")
                 .withCorrelationData(new byte[]{1, 2, 3})
                 .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
-                .withSubscriptionIdentifiers(ImmutableList.of(1, 2, 3))
+                .withSubscriptionIdentifiers(ImmutableIntArray.of(1, 2, 3))
                 .build();
 
         ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, true);
@@ -194,7 +195,7 @@ public class ClientQueuePersistenceSerializerTest {
         assertEquals("contentType", readPublish.getContentType());
         assertArrayEquals(new byte[]{1, 2, 3}, readPublish.getCorrelationData());
         assertEquals(Mqtt5PayloadFormatIndicator.UTF_8, readPublish.getPayloadFormatIndicator());
-        assertEquals(3, readPublish.getSubscriptionIdentifiers().size());
+        assertEquals(3, readPublish.getSubscriptionIdentifiers().length());
     }
 
     @Test

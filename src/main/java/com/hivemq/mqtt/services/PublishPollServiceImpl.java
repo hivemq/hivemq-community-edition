@@ -329,8 +329,8 @@ public class PublishPollServiceImpl implements PublishPollService {
                         // We can't sent the qos when the message is queue, because we don't know the which client is will be sent
                         final QoS minQos = QoS.valueOf(Math.min(qos, publish.getQoS().getQosNumber()));
                         // There can only be one subscription ID for this message, because there are no overlapping shared subscriptions
-                        final ImmutableList<Integer> subscriptionIdentifiers = subscriptionIdentifier != null ?
-                                ImmutableList.of(subscriptionIdentifier) : ImmutableList.of();
+                        final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
+                                ImmutableIntArray.of(subscriptionIdentifier) : ImmutableIntArray.of();
                         int packetId = 0;
                         if (minQos.getQosNumber() > 0) {
                             packetId = messageIDPool.takeNextId();
