@@ -17,9 +17,10 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQPluginEvent;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Christoph Schäbel
@@ -31,15 +32,5 @@ public interface PluginLifecycleHandler {
      *
      * @param hiveMQPluginEvents {@link ImmutableList} of {@link HiveMQPluginEvent}s which should be processed.
      */
-    void handlePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents);
-
-    /**
-     * Stops the extension with the specified extension id.
-     * The extension will stay enabled.
-     *
-     * @param pluginId the pluginId of the extension that should be stopped.
-     * @return {@link ListenableFuture} which returns when the extension is stopped.
-     */
-    @NotNull ListenableFuture<Void> pluginStop(final @NotNull String pluginId);
-
+    CompletableFuture<Void> handlePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents);
 }

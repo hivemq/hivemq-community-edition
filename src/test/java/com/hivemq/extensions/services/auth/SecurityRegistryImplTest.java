@@ -16,6 +16,7 @@
 
 package com.hivemq.extensions.services.auth;
 
+
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authenticator;
@@ -70,7 +71,6 @@ public class SecurityRegistryImplTest {
     @Mock
     private PluginAuthenticatorService pluginAuthenticatorService;
 
-
     private Authenticator authenticator1;
     private Authenticator authenticator2;
     private AuthenticatorProvider provider1;
@@ -89,18 +89,21 @@ public class SecurityRegistryImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        authenticators = new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence);
+        authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authorizers = new AuthorizersImpl(hiveMQExtensions);
         securityRegistry = new SecurityRegistryImpl(authenticators, authorizers);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(hiveMQExtension);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(
+                hiveMQExtension);
         when(hiveMQExtensions.getExtension(anyString())).thenReturn(hiveMQExtension);
 
         when(hiveMQExtension.getId()).thenReturn("extension1");
         when(hiveMQExtension.getPriority()).thenReturn(1);
 
-        final IsolatedPluginClassloader classloader = IsolatedPluginClassLoaderUtil.buildClassLoader(temporaryFolder,
-                new Class[]{TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class,
+        final IsolatedPluginClassloader classloader = IsolatedPluginClassLoaderUtil.buildClassLoader(
+                temporaryFolder,
+                new Class[]{
+                        TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class,
                         EnhancedTestProvider1.class, EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
                 });
 
@@ -109,8 +112,10 @@ public class SecurityRegistryImplTest {
         authenticator1 = provider1.getAuthenticator(null);
         authenticator2 = provider2.getAuthenticator(null);
 
-        enhancedProvider1 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, EnhancedTestProvider1.class);
-        enhancedProvider2 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, EnhancedTestProvider2.class);
+        enhancedProvider1 =
+                IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, EnhancedTestProvider1.class);
+        enhancedProvider2 =
+                IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, EnhancedTestProvider2.class);
         enhancedAuthenticator1 = enhancedProvider1.getEnhancedAuthenticator(null);
         enhancedAuthenticator2 = enhancedProvider2.getEnhancedAuthenticator(null);
     }
@@ -120,7 +125,8 @@ public class SecurityRegistryImplTest {
 
         securityRegistry.setAuthenticatorProvider(provider1);
 
-        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
+        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
+                authenticators.getAuthenticatorProviderMap();
 
         assertEquals(1, registeredAuthenticators.size());
         registeredAuthenticators.values().iterator().next().setCheckThreading(false);
@@ -131,7 +137,8 @@ public class SecurityRegistryImplTest {
     public void test_set_second_authenticator_provider_from_same_classloader() {
 
         securityRegistry.setAuthenticatorProvider(provider1);
-        Map<String, WrappedAuthenticatorProvider> registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
+        Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
+                authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
         registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(authenticator1, registeredAuthenticators.values().iterator().next().getAuthenticator(null));
@@ -150,28 +157,36 @@ public class SecurityRegistryImplTest {
 
         securityRegistry.setEnhancedAuthenticatorProvider(enhancedProvider1);
 
-        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
+        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
+                authenticators.getAuthenticatorProviderMap();
 
         assertEquals(1, registeredAuthenticators.size());
         registeredAuthenticators.values().iterator().next().setCheckThreading(false);
-        assertSame(enhancedAuthenticator1, registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
+        assertSame(
+                enhancedAuthenticator1,
+                registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
     }
 
     @Test(timeout = 5000)
     public void test_set_second_enhanced_authenticator_provider_from_same_classloader() {
 
         securityRegistry.setEnhancedAuthenticatorProvider(enhancedProvider1);
-        Map<String, WrappedAuthenticatorProvider> registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
+        Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
+                authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
         registeredAuthenticators.values().iterator().next().setCheckThreading(false);
-        assertSame(enhancedAuthenticator1, registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
+        assertSame(
+                enhancedAuthenticator1,
+                registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
 
         //replace authenticator
         securityRegistry.setEnhancedAuthenticatorProvider(enhancedProvider2);
         registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
         registeredAuthenticators.values().iterator().next().setCheckThreading(false);
-        assertSame(enhancedAuthenticator2, registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
+        assertSame(
+                enhancedAuthenticator2,
+                registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
 
     }
 

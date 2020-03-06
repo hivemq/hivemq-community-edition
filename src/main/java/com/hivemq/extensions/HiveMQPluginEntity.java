@@ -46,6 +46,9 @@ public class HiveMQPluginEntity {
     @XmlElement(name = "priority", defaultValue = "0")
     private int priority = 0;
 
+    @XmlElement(name = "start-priority", defaultValue = "1000")
+    private int startPriority = 1000;
+
     @Nullable
     @XmlElement(name = "author")
     private String author;
@@ -54,11 +57,13 @@ public class HiveMQPluginEntity {
     public HiveMQPluginEntity() {
     }
 
-    public HiveMQPluginEntity(@NotNull final String id, @NotNull final String name, @NotNull final String version, final int priority, @Nullable final String author) {
+    public HiveMQPluginEntity(@NotNull final String id, @NotNull final String name, @NotNull final String version,
+                              final int priority, final int startPriority, @Nullable final String author) {
         this.id = id;
         this.name = name;
         this.version = version;
         this.priority = priority;
+        this.startPriority = startPriority;
         this.author = author;
     }
 
@@ -79,6 +84,10 @@ public class HiveMQPluginEntity {
 
     public int getPriority() {
         return this.priority;
+    }
+
+    public int getStartPriority() {
+        return startPriority;
     }
 
     @Nullable

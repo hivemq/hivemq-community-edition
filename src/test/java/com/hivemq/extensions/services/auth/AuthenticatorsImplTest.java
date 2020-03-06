@@ -55,12 +55,6 @@ public class AuthenticatorsImplTest {
     @Mock
     private HiveMQExtension extension2;
 
-    @Mock
-    private PluginAuthenticatorService pluginAuthenticatorService;
-
-    @Mock
-    private ChannelPersistence channelPersistence;
-
     private WrappedAuthenticatorProvider simpleProvider1;
     private WrappedAuthenticatorProvider simpleProvider2;
 
@@ -92,7 +86,7 @@ public class AuthenticatorsImplTest {
         simpleProvider2 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2, isolatedPluginClassloader2);
         simpleProvider1.setCheckThreading(false);
         simpleProvider2.setCheckThreading(false);
-        authenticators = new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence);
+        authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authenticators.registerAuthenticatorProvider(simpleProvider1);
         authenticators.registerAuthenticatorProvider(simpleProvider2);
     }

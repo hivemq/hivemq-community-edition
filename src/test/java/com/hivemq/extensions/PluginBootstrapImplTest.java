@@ -77,7 +77,7 @@ public class PluginBootstrapImplTest {
         MockitoAnnotations.initMocks(this);
 
         pluginBootstrap = new PluginBootstrapImpl(pluginLoader, new SystemInformationImpl(), pluginLifecycleHandler,
-                hiveMQExtensions, shutdownHooks);
+                hiveMQExtensions, shutdownHooks,authenticators);
     }
 
     @Test

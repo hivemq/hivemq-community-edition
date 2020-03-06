@@ -16,24 +16,25 @@
 
 package com.hivemq.extensions.loader;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.HiveMQPluginEvent;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
-import com.hivemq.extensions.services.auth.Authenticators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Comparator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 /**
  * @author Christoph Schäbel
  * @author Silvio Giebl
+ * @author Georg Held
  */
 @Singleton
 public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
@@ -42,65 +43,65 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
 
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull ExecutorService pluginStartStopExecutor;
-    private final @NotNull Authenticators authenticators;
 
     @Inject
-    PluginLifecycleHandlerImpl(
+    @VisibleForTesting
+    public PluginLifecycleHandlerImpl(
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor,
-            final @NotNull Authenticators authenticators) {
+            final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor) {
 
         this.hiveMQExtensions = hiveMQExtensions;
         this.pluginStartStopExecutor = pluginStartStopExecutor;
-        this.authenticators = authenticators;
     }
 
     @Override
-    public void handlePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents) {
-        for (final HiveMQPluginEvent hiveMQPluginEvent : hiveMQPluginEvents) {
-            handlePluginEvent(hiveMQPluginEvent);
+    public @NotNull CompletableFuture<Void> handlePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents) {
+
+        final ImmutableList<HiveMQPluginEvent> sorted = analyzePluginEvents(hiveMQPluginEvents);
+
+        CompletableFuture<Void> returnFuture = CompletableFuture.completedFuture(null);
+
+        for (final HiveMQPluginEvent hiveMQPluginEvent : sorted) {
+            returnFuture = returnFuture
+                    .thenComposeAsync((v) -> handlePluginEvent(hiveMQPluginEvent), pluginStartStopExecutor)
+                    .handle((v, t) -> {
+                        if (t != null) {
+                            log.debug("Exception during Extension Lifecycle event handling", t);
+                        }
+                        return null;
+                    });
+
         }
-        pluginStartStopExecutor.execute(() -> {
-            if (authenticators.getAuthenticatorProviderMap().isEmpty()) {
-                log.warn("\n###############################################################################" +
-                        "\n# No security extension present, MQTT clients can not connect to this broker. #" +
-                        "\n###############################################################################");
-            }
-        });
+        return returnFuture;
     }
 
-    @Override
-    public @NotNull ListenableFuture<Void> pluginStop(@NotNull final String pluginId) {
-        return stopPlugin(pluginId, false);
-    }
-
-    private void handlePluginEvent(final HiveMQPluginEvent hiveMQPluginEvent) {
+    private @NotNull CompletableFuture<Boolean> handlePluginEvent(final @NotNull HiveMQPluginEvent hiveMQPluginEvent) {
         switch (hiveMQPluginEvent.getChange()) {
             case ENABLE:
-                startPlugin(hiveMQPluginEvent);
-                break;
+                return startPlugin(hiveMQPluginEvent);
             case DISABLE:
-                stopPlugin(hiveMQPluginEvent.getPluginId(), true);
-                break;
+                return stopPlugin(hiveMQPluginEvent.getPluginId());
+            default:
+                return CompletableFuture.completedFuture(false);
         }
     }
 
-    private void startPlugin(final @NotNull HiveMQPluginEvent pluginEvent) {
+    private @NotNull CompletableFuture<Boolean> startPlugin(final @NotNull HiveMQPluginEvent pluginEvent) {
         final String pluginId = pluginEvent.getPluginId();
 
         log.debug("Starting extension with id \"{}\" at {}", pluginId, pluginEvent.getPluginFolder());
-
-        pluginStartStopExecutor.execute(() -> hiveMQExtensions.extensionStart(pluginId));
+        return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStart(pluginId), pluginStartStopExecutor);
     }
 
-    private @NotNull ListenableFuture<Void> stopPlugin(final @NotNull String pluginId, final boolean disable) {
-        log.debug("{} extension with id {}", disable ? "Disabling" : "Stopping", pluginId);
+    private @NotNull CompletableFuture<Boolean> stopPlugin(final @NotNull String pluginId) {
 
-        final SettableFuture<Void> stoppedFuture = SettableFuture.create();
-        pluginStartStopExecutor.execute(() -> {
-            hiveMQExtensions.extensionStop(pluginId, disable);
-            stoppedFuture.set(null);
-        });
-        return stoppedFuture;
+        log.debug("Stopping extension with id {}", pluginId);
+        return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false), pluginStartStopExecutor);
+    }
+
+    private @NotNull ImmutableList<HiveMQPluginEvent> analyzePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents) {
+        // Here duplicate start priority logging can be added, once it is specified
+        return ImmutableList.sortedCopyOf(
+                Comparator.comparingInt(HiveMQPluginEvent::getPriority).reversed(), hiveMQPluginEvents);
     }
 }

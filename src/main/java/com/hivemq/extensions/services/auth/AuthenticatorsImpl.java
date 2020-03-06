@@ -18,14 +18,13 @@ package com.hivemq.extensions.services.auth;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.annotations.GuardedBy;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.handler.PluginAuthenticatorService;
-import com.hivemq.persistence.ChannelPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,19 +50,13 @@ public class AuthenticatorsImpl implements Authenticators {
     @GuardedBy("authenticatorsLock")
     private final @NotNull TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-    private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
-    private final @NotNull ChannelPersistence channelPersistence;
 
     @Inject
     public AuthenticatorsImpl(
-            final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
-            final @NotNull ChannelPersistence channelPersistence) {
+            final @NotNull HiveMQExtensions hiveMQExtensions) {
 
         this.authenticatorPluginMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
         this.hiveMQExtensions = hiveMQExtensions;
-        this.pluginAuthenticatorService = pluginAuthenticatorService;
-        this.channelPersistence = channelPersistence;
     }
 
     @Override
@@ -97,6 +90,20 @@ public class AuthenticatorsImpl implements Authenticators {
             }
         } finally {
             writeLock.unlock();
+        }
+    }
+
+    @Override
+    public void checkAuthenticationSafetyAndLifeness() {
+
+        // Only check for lifeness if safety is given
+        if (InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
+            // Check lifeness
+            if (getAuthenticatorProviderMap().isEmpty()) {
+                log.warn("\n###############################################################################" +
+                        "\n# No security extension present, MQTT clients can not connect to this broker. #" +
+                        "\n###############################################################################");
+            }
         }
     }
 }

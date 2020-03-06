@@ -20,10 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.*;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.config.HiveMQPluginXMLReader;
@@ -241,7 +241,7 @@ public class PluginLoaderImpl implements PluginLoader {
         //check if folder is disabled
         if (!folderEnabled) {
             //plugin is always enabled here
-            return new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), pluginFolder);
+            return new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), xmlEntity.getStartPriority(), pluginFolder);
         }
 
         if (hiveMQExtensions.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
@@ -260,7 +260,7 @@ public class PluginLoaderImpl implements PluginLoader {
 
         hiveMQExtensions.addHiveMQPlugin(hiveMQExtension);
 
-        return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), pluginFolder);
+        return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), hiveMQExtension.getStartPriority(), pluginFolder);
     }
 
     @Nullable <T extends ExtensionMain> HiveMQExtension loadSinglePlugin(
