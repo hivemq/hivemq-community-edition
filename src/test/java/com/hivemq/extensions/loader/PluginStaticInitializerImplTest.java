@@ -152,7 +152,7 @@ public class PluginStaticInitializerImplTest {
         topicPermissionBuilder = new TopicPermissionBuilderImpl(fullConfigurationService);
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
-        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions, pluginAuthenticatorService, channelPersistence),
+        securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions),
                 new AuthorizersImpl(hiveMQExtensions));
         servicesDependencies = Mockito.spy(
                 new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,

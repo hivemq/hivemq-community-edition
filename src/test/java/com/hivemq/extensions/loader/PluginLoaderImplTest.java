@@ -435,7 +435,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions.addHiveMQPlugin(
                 new HiveMQExtensionImpl(
-                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, "author"),
+                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, 1, "author"),
                         pluginFolder1.toPath(),
                         new TestExtensionMainImpl(),
                         true));
@@ -465,7 +465,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions.addHiveMQPlugin(
                 new HiveMQExtensionImpl(
-                        new HiveMQPluginEntity("plugin-other-id", "my_plugin", "1.0.0", 1, "author"),
+                        new HiveMQPluginEntity("plugin-other-id", "my_plugin", "1.0.0", 1, 1, "author"),
                         pluginFolder1.toPath(),
                         new TestExtensionMainImpl(),
                         false));
@@ -486,7 +486,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions.addHiveMQPlugin(
                 new HiveMQExtensionImpl(
-                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, "author"),
+                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, 1, "author"),
                         pluginFolder1.toPath(),
                         new TestExtensionMainImpl(),
                         false));
@@ -516,7 +516,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions.addHiveMQPlugin(
                 new HiveMQExtensionImpl(
-                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, "author"),
+                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, 1, "author"),
                         pluginFolder1.toPath(),
                         new TestExtensionMainImpl(),
                         true));
@@ -557,7 +557,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions.addHiveMQPlugin(
                 new HiveMQExtensionImpl(
-                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, "author"),
+                        new HiveMQPluginEntity("plugin1", "my_plugin", "1.0.0", 1, 1, "author"),
                         pluginFolder1.toPath(),
                         new TestExtensionMainImpl(),
                         true));
