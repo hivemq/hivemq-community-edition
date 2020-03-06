@@ -16,13 +16,14 @@
 
 package com.hivemq.extensions;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Futures;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
@@ -30,7 +31,9 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.loader.PluginLifecycleHandler;
+import com.hivemq.extensions.loader.PluginLifecycleHandlerImpl;
 import com.hivemq.extensions.loader.PluginLoader;
+import com.hivemq.extensions.services.auth.Authenticators;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,8 +45,6 @@ import util.InitFutureUtilsExecutorRule;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -62,20 +63,23 @@ public class PluginBootstrapImplTest {
     private PluginLoader pluginLoader;
 
     @Mock
-    private PluginLifecycleHandler pluginLifecycleHandler;
-
-    @Mock
     HiveMQExtensions hiveMQExtensions;
 
     @Mock
     ShutdownHooks shutdownHooks;
 
+    @Mock
+    Authenticators authenticators;
+
     private PluginBootstrapImpl pluginBootstrap;
+    private PluginLifecycleHandler pluginLifecycleHandler;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
 
+
+        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
         pluginBootstrap = new PluginBootstrapImpl(pluginLoader, new SystemInformationImpl(), pluginLifecycleHandler,
                 hiveMQExtensions, shutdownHooks,authenticators);
     }
@@ -83,6 +87,7 @@ public class PluginBootstrapImplTest {
     @Test
     public void test_startPluginSystem_shutdown_hook_registered() {
 
+        when(pluginLoader.loadPlugins(any(Path.class), any(Class.class))).thenReturn(ImmutableList.of());
         pluginBootstrap.startPluginSystem();
 
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
@@ -97,12 +102,10 @@ public class PluginBootstrapImplTest {
         extensions.put("extension-2", new TestHiveMQExtension("extension-2", temporaryFolder));
 
         when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(extensions);
-
-        when(pluginLifecycleHandler.pluginStop(anyString())).thenReturn(Futures.immediateFuture(null));
-
         pluginBootstrap.stopPluginSystem();
 
-        verify(pluginLifecycleHandler, times(2)).pluginStop(anyString());
+        verify(hiveMQExtensions, times(1)).extensionStop(eq("extension-1"), eq(false));
+        verify(hiveMQExtensions, times(1)).extensionStop(eq("extension-2"), eq(false));
     }
 
     private static class TestHiveMQExtension implements HiveMQExtension {
@@ -129,6 +132,11 @@ public class PluginBootstrapImplTest {
         @Override
         public int getPriority() {
             return 0;
+        }
+
+        @Override
+        public int getStartPriority() {
+            return 1000;
         }
 
         @NotNull
