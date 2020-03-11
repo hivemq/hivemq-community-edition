@@ -23,7 +23,7 @@ echo '                 |_|  |_||_|  \_/  \___||_|  |_| \___\_\'
 echo
 echo "-------------------------------------------------------------------------"
 echo ""
-echo "  HiveMQ Start Script for Linux/Unix v1.10"
+echo "  HiveMQ Start Script for Linux/Unix v1.11"
 echo ""
 echo "                 DIAGNOSTIC MODE "
 echo ""
@@ -61,8 +61,8 @@ if hash java 2>/dev/null; then
         HIVEMQ_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
         HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
     else
-        HIVEMQ_FOLDER=$HIVEMQ_HOME
-        HOME_OPT=""
+        HIVEMQ_FOLDER="$HIVEMQ_HOME"
+        HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
     fi
 
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
