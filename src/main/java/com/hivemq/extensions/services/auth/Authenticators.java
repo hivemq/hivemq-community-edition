@@ -40,4 +40,9 @@ public interface Authenticators {
      * @param provider a wrapped {@link AuthenticatorProvider}
      */
     void registerAuthenticatorProvider(@NotNull WrappedAuthenticatorProvider provider);
+
+    /**
+     * Checks the safety (not security) and lifeness state of the authentication subsystem.
+     */
+    void checkAuthenticationSafetyAndLifeness();
 }

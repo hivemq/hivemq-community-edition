@@ -250,7 +250,7 @@ public class HiveMQExtensions {
     /**
      * Returns false if the extension is not known to HiveMQ or not enabled
      */
-    public boolean extensionStop(@NotNull final String extensionId, final boolean disable) {
+    public boolean extensionStop(@NotNull final String extensionId, boolean disable) {
         checkNotNull(extensionId, "every extension must have an id");
 
         final HiveMQExtension plugin;
@@ -287,6 +287,7 @@ public class HiveMQExtensions {
             log.warn("Uncaught exception was thrown from extension with id \"" + plugin.getId() +
                     "\" on extension stop. " +
                     "Extensions are responsible on their own to handle exceptions.", t);
+            disable = true;
 
         } finally {
             Thread.currentThread().setContextClassLoader(previousClassLoader);

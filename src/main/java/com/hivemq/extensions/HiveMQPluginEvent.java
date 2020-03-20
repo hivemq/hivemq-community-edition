@@ -26,11 +26,13 @@ import java.nio.file.Path;
 public class HiveMQPluginEvent {
     private final Change change;
     private final String pluginId;
+    private final int priority;
     private final Path pluginFolder;
 
-    public HiveMQPluginEvent(@NotNull final Change change, @NotNull final String pluginId, @NotNull final Path pluginFolder) {
+    public HiveMQPluginEvent(@NotNull final Change change, @NotNull final String pluginId, final int priority, @NotNull final Path pluginFolder) {
         this.change = change;
         this.pluginId = pluginId;
+        this.priority = priority;
         this.pluginFolder = pluginFolder;
     }
 
@@ -42,6 +44,10 @@ public class HiveMQPluginEvent {
     @NotNull
     public String getPluginId() {
         return pluginId;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     @NotNull

@@ -16,8 +16,8 @@
 
 package com.hivemq.extensions;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
@@ -73,6 +73,11 @@ public interface HiveMQExtension {
      * @return the extension's priority which is taken from the extension's hivemq-extension.xml
      */
     int getPriority();
+
+    /**
+     * @return the extension's start priority which is taken from the extension's hivemq-extension.xml
+     */
+    int getStartPriority();
 
     /**
      * @return the extension's name which is taken from the extension's hivemq-extension.xml
