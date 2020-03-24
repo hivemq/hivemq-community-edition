@@ -14,6 +14,7 @@ KillMode=process
 Restart=always
 KillSignal=15
 SuccessExitStatus=143
+TimeoutStopSec=3600
 
 [Install]
 WantedBy=multi-user.target
