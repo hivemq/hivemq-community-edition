@@ -118,7 +118,7 @@ dependencies {
             /* xml */
             [group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'],
             [group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.2'],
-            [group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'],
+            [group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.12'],
 
             /* javax */
             [group: 'javax.activation', name: 'activation', version: '1.1.1'],
