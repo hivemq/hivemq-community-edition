@@ -51,17 +51,17 @@ mainClassName = 'com.hivemq.HiveMQServer'
 // Project Variables
 project.ext {
     // Project Dependency Versions
-    bouncycastlesVersion = '1.60'
-    jacksonVersion = '2.9.8'
-    nettyVersion = '4.1.45.Final'
+    bouncycastlesVersion = '1.62'
+    jacksonVersion = '2.9.10'
+    nettyVersion = '4.1.48.Final'
     xodusVersion = '1.2.3'
-    guiceVersion = '4.2.2'
-    metricsVersion = '4.0.3'
+    guiceVersion = '4.2.3'
+    metricsVersion = '4.0.7'
 
     // Additional Versions
-    jacocoVersion = '0.8.2'
-    pmdVersion = '6.8.0'
-    spotbugsVersion = '3.1.11'
+    jacocoVersion = '0.8.5'
+    pmdVersion = '6.22.0'
+    spotbugsVersion = '3.1.12'
     shrinkwrapVersion = '1.2.6'
 
     projectString = "hivemq-ce-${project.version}"
@@ -96,7 +96,7 @@ dependencies {
             [group: 'io.netty', name: 'netty-codec-http', version: nettyVersion],
 
             /* Logging */
-            [group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'],
+            [group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.30'],
 
             /* bouncycastles */
             [group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: bouncycastlesVersion],
@@ -107,18 +107,18 @@ dependencies {
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion],
 
             /* rocksdb */
-            [group: 'org.rocksdb', name: 'rocksdbjni', version: '6.5.2'],
+            [group: 'org.rocksdb', name: 'rocksdbjni', version: '6.5.3'],
 
             /* apache commons */
             [group: 'commons-io', name: 'commons-io', version: '2.6'],
             [group: 'commons-codec', name: 'commons-codec', version: '1.11'],
             [group: 'commons-collections', name: 'commons-collections', version: '3.2.2'],
-            [group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'],
+            [group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'],
 
             /* xml */
-            [group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0'],
-            [group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.0'],
-            [group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.12'],
+            [group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'],
+            [group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.2'],
+            [group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'],
 
             /* javax */
             [group: 'javax.activation', name: 'activation', version: '1.1.1'],
@@ -126,12 +126,12 @@ dependencies {
             [group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'],
 
             /* Hashing */
-            [group: 'net.openhft', name: 'zero-allocation-hashing', version: '0.8'],
+            [group: 'net.openhft', name: 'zero-allocation-hashing', version: '0.11'],
 
     )
 
     /* Guava */
-    compile([group: 'com.google.guava', name: 'guava', version: '27.0-jre']) {
+    compile([group: 'com.google.guava', name: 'guava', version: '27.1-jre']) {
         //We don't need the HTTP Client since we are only interested in the server version
         exclude group: 'org.checkerframework', module: 'checker-qual'
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
