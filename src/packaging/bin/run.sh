@@ -76,7 +76,7 @@ if hash java 2>/dev/null; then
 
             if [ ! -f "$HIVEMQ_FOLDER/bin/hivemq.jar" ]; then
                 echoerr "ERROR! HiveMQ JAR not found."
-                echoerr $HIVEMQ_FOLDER;
+                echoerr "$HIVEMQ_FOLDER";
             else
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
@@ -94,7 +94,7 @@ if hash java 2>/dev/null; then
                 echo ""
                 # Run HiveMQ
                 JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
-                exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
+                exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" "${JAVA_OPTS}" -jar "${JAR_PATH}"
             fi
         fi
     fi
