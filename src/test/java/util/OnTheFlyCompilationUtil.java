@@ -37,6 +37,7 @@ import java.util.*;
  * Various utilities for compilation of Java classes on the fly
  *
  * @author Dominik Obermaier
+ * @author Georg Held
  */
 public class OnTheFlyCompilationUtil {
 
@@ -137,7 +138,7 @@ public class OnTheFlyCompilationUtil {
         public URL getResource(final String name) {
             final String[] list = tempDir.list(new NameFileFilter(name));
             if (list.length == 0) {
-                return null;
+                return super.getResource(name);
             } else {
                 try {
                     return new File(tempDir, list[0]).toURI().toURL();
