@@ -63,7 +63,7 @@ public class ClassServiceLoaderTest {
              The concrete steps are
 
              1. Compile the classes on the fly
-             2. Create a JAR file with thes classes
+             2. Create a JAR file with these classes
              3. Load the JAR file and test the service loader mechanism
          */
 
