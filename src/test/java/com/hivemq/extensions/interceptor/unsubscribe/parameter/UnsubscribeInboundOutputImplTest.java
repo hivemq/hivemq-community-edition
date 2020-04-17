@@ -15,49 +15,46 @@
  */
 package com.hivemq.extensions.interceptor.unsubscribe.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import org.junit.Before;
+import com.hivemq.extensions.packets.unsubscribe.ModifiableUnsubscribePacketImpl;
+import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
 
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class UnsubscribeInboundOutputImplTest {
 
-    @Mock
-    private PluginOutPutAsyncer pluginOutPutAsyncer;
-    private UnsubscribeInboundOutputImpl output;
-    private UNSUBSCRIBE unsubscribe;
+    @Test
+    public void constructor_and_getter() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        final FullConfigurationService config = new TestConfigurationBootstrap().getFullConfigurationService();
-        unsubscribe = TestMessageUtil.createFullMqtt5Unsubscribe();
-        output = new UnsubscribeInboundOutputImpl(pluginOutPutAsyncer, config, unsubscribe);
-        assertEquals(output, output.get());
+        final UnsubscribeInboundOutputImpl output = new UnsubscribeInboundOutputImpl(asyncer, modifiablePacket);
+
+        assertSame(modifiablePacket, output.getUnsubscribePacket());
     }
 
     @Test
-    public void test_getModifiable() {
-        final ModifiableUnsubscribePacket modifiableUnsubscribePacket = output.get().getUnsubscribePacket();
-        final ArrayList<String> strings = new ArrayList<>();
-        strings.add("different1");
-        strings.add("different2");
-        strings.add("different3");
-        modifiableUnsubscribePacket.setTopicFilters(strings);
-        assertNotEquals(unsubscribe.getTopics(), modifiableUnsubscribePacket.getTopicFilters());
+    public void update() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
+
+        final UnsubscribeInboundOutputImpl output = new UnsubscribeInboundOutputImpl(asyncer, modifiablePacket);
+
+        final UnsubscribeInboundInputImpl input = mock(UnsubscribeInboundInputImpl.class);
+        final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
+        final ModifiableUnsubscribePacketImpl newModifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
+        when(input.getUnsubscribePacket()).thenReturn(packet);
+        when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
+
+        final UnsubscribeInboundOutputImpl updated = output.update(input);
+
+        assertSame(newModifiablePacket, updated.getUnsubscribePacket());
     }
 }

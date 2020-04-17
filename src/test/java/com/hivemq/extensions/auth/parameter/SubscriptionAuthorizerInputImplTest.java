@@ -16,13 +16,13 @@
 
 package com.hivemq.extensions.auth.parameter;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
@@ -51,9 +51,11 @@ public class SubscriptionAuthorizerInputImplTest {
 
     @Test
     public void test_full_subscription() {
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE, true, true, Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 3);
-        final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
+        final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE, true, true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 3);
+        final SubscriptionAuthorizerInputImpl input =
+                new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
@@ -68,7 +70,7 @@ public class SubscriptionAuthorizerInputImplTest {
 
     @Test
     public void test_subscription_minimal() {
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
         final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
@@ -91,20 +93,20 @@ public class SubscriptionAuthorizerInputImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_topic_null() {
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         new SubscriptionAuthorizerInputImpl(userProperties, null, channel, "client");
     }
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
         new SubscriptionAuthorizerInputImpl(userProperties, topic, null, "client");
     }
 
     @Test(expected = NullPointerException.class)
     public void test_clientid_null() {
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
         new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, null);
     }

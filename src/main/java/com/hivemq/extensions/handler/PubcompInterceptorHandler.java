@@ -16,24 +16,30 @@
 
 package com.hivemq.extensions.handler;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pubcomp.PubcompOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.pubcomp.PubcompInboundInputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.PubcompInboundOutputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.PubcompOutboundInputImpl;
-import com.hivemq.extensions.interceptor.pubcomp.PubcompOutboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompInboundInputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompInboundOutputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompOutboundInputImpl;
+import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompOutboundOutputImpl;
+import com.hivemq.extensions.packets.pubcomp.ModifiablePubcompPacketImpl;
+import com.hivemq.extensions.packets.pubcomp.PubcompPacketImpl;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Exceptions;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,56 +99,8 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         handleOutboundPubcomp(ctx, (PUBCOMP) msg, promise);
     }
 
-    private void handleOutboundPubcomp(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull PUBCOMP pubcomp,
-            final @NotNull ChannelPromise promise) {
-
-        final Channel channel = ctx.channel();
-
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
-        if (clientId == null) {
-            return;
-        }
-
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null) {
-            ctx.write(pubcomp, promise);
-            return;
-        }
-        final List<PubcompOutboundInterceptor> interceptors = clientContext.getPubcompOutboundInterceptors();
-        if (interceptors.isEmpty()) {
-            ctx.write(pubcomp, promise);
-            return;
-        }
-
-        final PubcompOutboundOutputImpl output = new PubcompOutboundOutputImpl(configurationService, asyncer, pubcomp);
-        final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(clientId, channel, pubcomp);
-
-        final PubcompOutboundInterceptorContext interceptorContext =
-                new PubcompOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
-
-        for (final PubcompOutboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
-
-            // disabled extension would be null
-            if (extension == null) {
-                interceptorContext.increment(output);
-                continue;
-            }
-
-            final PubcompOutboundInterceptorTask interceptorTask =
-                    new PubcompOutboundInterceptorTask(interceptor, extension.getId());
-
-            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
-        }
-    }
-
     private void handleInboundPubcomp(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBCOMP pubcomp) {
         final Channel channel = ctx.channel();
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
             return;
@@ -159,66 +117,137 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
             return;
         }
 
-        final PubcompInboundOutputImpl output = new PubcompInboundOutputImpl(configurationService, asyncer, pubcomp);
-        final PubcompInboundInputImpl input = new PubcompInboundInputImpl(clientId, channel, pubcomp);
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
 
-        final PubcompInboundInterceptorContext interceptorContext =
-                new PubcompInboundInterceptorContext(clientId, input, ctx, interceptors.size());
+        final PubcompPacketImpl packet = new PubcompPacketImpl(pubcomp);
+        final PubcompInboundInputImpl input = new PubcompInboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<PubcompInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
+
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
+        final PubcompInboundOutputImpl output = new PubcompInboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<PubcompInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
+
+        final PubcompInboundInterceptorContext context =
+                new PubcompInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
 
         for (final PubcompInboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
-
-            // disabled extension would be null
-            if (extension == null) {
-                interceptorContext.increment(output);
+            if (extension == null) { // disabled extension would be null
+                context.finishInterceptor();
                 continue;
             }
 
-            final PubcompInboundInterceptorTask interceptorTask =
+            final PubcompInboundInterceptorTask task =
                     new PubcompInboundInterceptorTask(interceptor, extension.getId());
-
-            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
 
-    private static class PubcompInboundInterceptorContext extends PluginInOutTaskContext<PubcompInboundOutputImpl> {
+    private void handleOutboundPubcomp(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull PUBCOMP pubcomp,
+            final @NotNull ChannelPromise promise) {
 
-        private final @NotNull PubcompInboundInputImpl input;
-        private final @NotNull ChannelHandlerContext ctx;
+        final Channel channel = ctx.channel();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        if (clientId == null) {
+            return;
+        }
+
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
+        if (clientContext == null) {
+            ctx.write(pubcomp, promise);
+            return;
+        }
+        final List<PubcompOutboundInterceptor> interceptors = clientContext.getPubcompOutboundInterceptors();
+        if (interceptors.isEmpty()) {
+            ctx.write(pubcomp, promise);
+            return;
+        }
+
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
+
+        final PubcompPacketImpl packet = new PubcompPacketImpl(pubcomp);
+        final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<PubcompOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
+
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
+        final PubcompOutboundOutputImpl output = new PubcompOutboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<PubcompOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
+
+        final PubcompOutboundInterceptorContext context = new PubcompOutboundInterceptorContext(
+                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+
+        for (final PubcompOutboundInterceptor interceptor : interceptors) {
+
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
+                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            if (extension == null) { // disabled extension would be null
+                context.finishInterceptor();
+                continue;
+            }
+
+            final PubcompOutboundInterceptorTask task =
+                    new PubcompOutboundInterceptorTask(interceptor, extension.getId());
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
+        }
+    }
+
+    private static class PubcompInboundInterceptorContext extends PluginInOutTaskContext<PubcompInboundOutputImpl>
+            implements Runnable {
+
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ExtensionParameterHolder<PubcompInboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<PubcompInboundOutputImpl> outputHolder;
 
         PubcompInboundInterceptorContext(
                 final @NotNull String clientId,
-                final @NotNull PubcompInboundInputImpl input,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
-                final int interceptorCount) {
+                final @NotNull ExtensionParameterHolder<PubcompInboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<PubcompInboundOutputImpl> outputHolder) {
 
             super(clientId);
-            this.input = input;
-            this.ctx = ctx;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
         public void pluginPost(final @NotNull PubcompInboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on inbound PUBCOMP interception.");
-                output.update(input.getPubcompPacket());
+                log.debug("Async timeout on inbound PUBCOMP interception. Discarding changes made by the interceptor.");
+            } else if (output.isFailed()) {
+                log.debug("Exception on inbound PUBCOMP interception. Discarding changes made by the interceptor.");
             } else if (output.getPubcompPacket().isModified()) {
-                input.update(output.getPubcompPacket());
+                inputHolder.set(inputHolder.get().update(output));
             }
-            increment(output);
+            if (!finishInterceptor()) {
+                outputHolder.set(output.update(inputHolder.get()));
+            }
         }
 
-        public void increment(final @NotNull PubcompInboundOutputImpl output) {
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                final PUBCOMP finalPubcomp = PUBCOMP.createPubcompFrom(output.getPubcompPacket());
-                ctx.fireChannelRead(finalPubcomp);
+                ctx.executor().execute(this);
+                return true;
             }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            ctx.fireChannelRead(PUBCOMP.from(inputHolder.get().getPubcompPacket()));
         }
     }
 
@@ -229,8 +258,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull String extensionId;
 
         PubcompInboundInterceptorTask(
-                final @NotNull PubcompInboundInterceptor interceptor,
-                final @NotNull String extensionId) {
+                final @NotNull PubcompInboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -238,17 +266,17 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public @NotNull PubcompInboundOutputImpl apply(
-                final @NotNull PubcompInboundInputImpl input,
-                final @NotNull PubcompInboundOutputImpl output) {
+                final @NotNull PubcompInboundInputImpl input, final @NotNull PubcompInboundOutputImpl output) {
 
             try {
                 interceptor.onInboundPubcomp(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound pubcomp interception. " +
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBCOMP interception. " +
                                 "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception: ", e);
-                output.update(input.getPubcompPacket());
+                output.markAsFailed();
+                Exceptions.rethrowError(e);
             }
             return output;
         }
@@ -259,45 +287,59 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class PubcompOutboundInterceptorContext extends PluginInOutTaskContext<PubcompOutboundOutputImpl> {
+    private static class PubcompOutboundInterceptorContext extends PluginInOutTaskContext<PubcompOutboundOutputImpl>
+            implements Runnable {
 
-        private final @NotNull PubcompOutboundInputImpl input;
-        private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull ChannelPromise promise;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ChannelPromise promise;
+        private final @NotNull ExtensionParameterHolder<PubcompOutboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<PubcompOutboundOutputImpl> outputHolder;
 
         PubcompOutboundInterceptorContext(
                 final @NotNull String clientId,
-                final @NotNull PubcompOutboundInputImpl input,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
-                final int interceptorCount) {
+                final @NotNull ExtensionParameterHolder<PubcompOutboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<PubcompOutboundOutputImpl> outputHolder) {
 
             super(clientId);
-            this.input = input;
-            this.ctx = ctx;
-            this.promise = promise;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.promise = promise;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
         public void pluginPost(final @NotNull PubcompOutboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on outbound PUBCOMP interception.");
-                output.update(input.getPubcompPacket());
+                log.debug(
+                        "Async timeout on inbound DISCONNECT interception. Discarding changes made by the interceptor.");
+            } else if (output.isFailed()) {
+                log.debug("Exception on inbound DISCONNECT interception. Discarding changes made by the interceptor.");
             } else if (output.getPubcompPacket().isModified()) {
-                input.update(output.getPubcompPacket());
+                inputHolder.set(inputHolder.get().update(output));
             }
-            increment(output);
+            if (!finishInterceptor()) {
+                outputHolder.set(output.update(inputHolder.get()));
+            }
         }
 
-        public void increment(final @NotNull PubcompOutboundOutputImpl output) {
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                final PUBCOMP finalPubcomp = PUBCOMP.createPubcompFrom(output.getPubcompPacket());
-                ctx.writeAndFlush(finalPubcomp, promise);
+                ctx.executor().execute(this);
+                return true;
             }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            ctx.writeAndFlush(PUBCOMP.from(inputHolder.get().getPubcompPacket()), promise);
         }
     }
 
@@ -308,8 +350,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         private final @NotNull String extensionId;
 
         PubcompOutboundInterceptorTask(
-                final @NotNull PubcompOutboundInterceptor interceptor,
-                final @NotNull String extensionId) {
+                final @NotNull PubcompOutboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -317,17 +358,17 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
 
         @Override
         public @NotNull PubcompOutboundOutputImpl apply(
-                final @NotNull PubcompOutboundInputImpl input,
-                final @NotNull PubcompOutboundOutputImpl output) {
+                final @NotNull PubcompOutboundInputImpl input, final @NotNull PubcompOutboundOutputImpl output) {
 
             try {
                 interceptor.onOutboundPubcomp(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound pubcomp interception. " +
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBCOMP interception. " +
                                 "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception: ", e);
-                output.update(input.getPubcompPacket());
+                output.markAsFailed();
+                Exceptions.rethrowError(e);
             }
             return output;
         }

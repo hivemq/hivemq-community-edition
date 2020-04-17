@@ -17,17 +17,16 @@
 package com.hivemq.extensions.auth;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -61,7 +60,7 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
 
         super(asyncer);
         this.validateUTF8 = validateUTF8;
-        this.userProperties = new ModifiableUserPropertiesImpl(null, validateUTF8);
+        this.userProperties = new ModifiableUserPropertiesImpl(ImmutableList.of(), validateUTF8);
         this.defaultPermissions = defaultPermissions;
         this.clientSettings = clientSettings;
         this.timeout = timeout;
@@ -73,7 +72,7 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         // decided, authenticatorPresent, authenticationState are reset as the state is isolated per output object
         // authenticationData, reasonString are reset as they are set by decision methods
         validateUTF8 = prevOutput.validateUTF8;
-        userProperties = new ModifiableUserPropertiesImpl(prevOutput.userProperties.consolidate(), validateUTF8);
+        userProperties = new ModifiableUserPropertiesImpl(prevOutput.userProperties.asInternalList(), validateUTF8);
         defaultPermissions = prevOutput.defaultPermissions;
         clientSettings = prevOutput.clientSettings;
         timeout = prevOutput.timeout;
@@ -167,12 +166,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         return reasonString;
     }
 
-    public @NotNull ModifiableUserProperties getOutboundUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getOutboundUserProperties() {
         return userProperties;
-    }
-
-    @NotNull Mqtt5UserProperties getUserProperties() {
-        return userProperties.consolidate().toMqtt5UserProperties();
     }
 
     public @NotNull ModifiableDefaultPermissions getDefaultPermissions() {

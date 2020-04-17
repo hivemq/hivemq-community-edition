@@ -17,7 +17,6 @@
 package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extensions.auth.AuthConnectInput;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.ChannelAttributes;
@@ -25,6 +24,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
@@ -55,8 +55,8 @@ public class AuthConnectInputTest {
 
         assertEquals("method", connectPacket.getAuthenticationMethod().get());
         assertEquals("user", connectPacket.getUserName().get());
-        assertEquals("password", new String(connectPacket.getPassword().get().array()));
-        assertEquals("abc", new String(connectPacket.getAuthenticationData().get().array()));
+        assertEquals(ByteBuffer.wrap("password".getBytes()), connectPacket.getPassword().get());
+        assertEquals(ByteBuffer.wrap("abc".getBytes()), connectPacket.getAuthenticationData().get());
         assertEquals(taskInput, taskInput.get());
     }
 }

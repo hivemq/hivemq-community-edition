@@ -18,11 +18,12 @@ package com.hivemq.extensions.packets.pubrec;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,23 +33,29 @@ import java.util.Optional;
 @Immutable
 public class PubrecPacketImpl implements PubrecPacket {
 
-    private final int packetIdentifier;
-    private final @NotNull AckReasonCode reasonCode;
-    private final @Nullable String reasonString;
-    private final @NotNull UserProperties userProperties;
+    final int packetIdentifier;
+    final @NotNull AckReasonCode reasonCode;
+    final @Nullable String reasonString;
+    final @NotNull UserPropertiesImpl userProperties;
 
-    public PubrecPacketImpl(final @NotNull PUBREC pubrec) {
-        packetIdentifier = pubrec.getPacketIdentifier();
-        reasonCode = pubrec.getReasonCode().toAckReasonCode();
-        reasonString = pubrec.getReasonString();
-        userProperties = pubrec.getUserProperties().getPluginUserProperties();
+    public PubrecPacketImpl(
+            final int packetIdentifier,
+            final @NotNull AckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.packetIdentifier = packetIdentifier;
+        this.reasonCode = reasonCode;
+        this.reasonString = reasonString;
+        this.userProperties = userProperties;
     }
 
-    public PubrecPacketImpl(final @NotNull PubrecPacket pubrecPacket) {
-        packetIdentifier = pubrecPacket.getPacketIdentifier();
-        reasonCode = pubrecPacket.getReasonCode();
-        reasonString = pubrecPacket.getReasonString().orElse(null);
-        userProperties = pubrecPacket.getUserProperties();
+    public PubrecPacketImpl(final @NotNull PUBREC pubrec) {
+        this(
+                pubrec.getPacketIdentifier(),
+                pubrec.getReasonCode().toAckReasonCode(),
+                pubrec.getReasonString(),
+                UserPropertiesImpl.of(pubrec.getUserProperties().asList()));
     }
 
     @Override
@@ -67,7 +74,27 @@ public class PubrecPacketImpl implements PubrecPacket {
     }
 
     @Override
-    public @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PubrecPacketImpl)) {
+            return false;
+        }
+        final PubrecPacketImpl that = (PubrecPacketImpl) o;
+        return (packetIdentifier == that.packetIdentifier) &&
+                (reasonCode == that.reasonCode) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 }

@@ -17,10 +17,10 @@
 package com.hivemq.mqtt.message.mqtt5;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import io.netty.buffer.ByteBuf;
 
@@ -41,19 +41,8 @@ public class MqttUserProperty implements UserProperty {
      * @param value the value of the User Property.
      * @return the created User Property.
      */
-    public static MqttUserProperty of(@NotNull final String name, @NotNull final String value) {
-
+    public static MqttUserProperty of(final @NotNull String name, final @NotNull String value) {
         return new MqttUserProperty(name, value);
-    }
-
-    /**
-     * Creates a MqttUserProperty from any class implementing the {@link UserProperty} interface.
-     *
-     * @param userProperty a {@link UserProperty} instance
-     * @return the created MqttUserProperty
-     */
-    public static MqttUserProperty of(@NotNull final UserProperty userProperty) {
-        return new MqttUserProperty(userProperty.getName(), userProperty.getValue());
     }
 
     /**
@@ -63,8 +52,7 @@ public class MqttUserProperty implements UserProperty {
      * @param validateUTF8 true if should not characters must be validated
      * @return the decoded User Property or null if the name and/or value are not valid UTF-8 encoded Strings.
      */
-    @Nullable
-    public static MqttUserProperty decode(@NotNull final ByteBuf in, final boolean validateUTF8) {
+    public static @Nullable MqttUserProperty decode(final @NotNull ByteBuf in, final boolean validateUTF8) {
         final String name = MqttBinaryData.decodeString(in, validateUTF8);
         if (name == null) {
             return null;
@@ -79,28 +67,38 @@ public class MqttUserProperty implements UserProperty {
     private final @NotNull String name;
     private final @NotNull String value;
 
-    public MqttUserProperty(@NotNull final String name, @NotNull final String value) {
+    public MqttUserProperty(final @NotNull String name, final @NotNull String value) {
 
-        Preconditions.checkArgument(name.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+        Preconditions.checkArgument(
+                name.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
                 "A user property name must never exceed 65535 bytes");
 
-
-        Preconditions.checkArgument(value.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+        Preconditions.checkArgument(
+                value.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
                 "A user property value must never exceed 65535 bytes");
-
 
         this.name = name;
         this.value = value;
     }
 
-    @NotNull
-    public String getName() {
+    @Override
+    public @NotNull String getName() {
         return name;
     }
 
-    @NotNull
-    public String getValue() {
+    @Override
+    public @NotNull String getValue() {
         return value;
+    }
+
+    void encode(final @NotNull ByteBuf out) {
+        out.writeByte(MessageProperties.USER_PROPERTY);
+        MqttBinaryData.encode(name, out);
+        MqttBinaryData.encode(value, out);
+    }
+
+    int encodedLength() {
+        return 1 + MqttBinaryData.encodedLength(name) + MqttBinaryData.encodedLength(value);
     }
 
     @Override
@@ -120,4 +118,8 @@ public class MqttUserProperty implements UserProperty {
         return 31 * name.hashCode() + value.hashCode();
     }
 
+    @Override
+    public @NotNull String toString() {
+        return "(" + name + ", " + value + ")";
+    }
 }

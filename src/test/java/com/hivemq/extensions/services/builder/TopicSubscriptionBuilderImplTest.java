@@ -25,6 +25,9 @@ import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
 import com.hivemq.extensions.packets.subscribe.SubscriptionImpl;
+import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
+import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -63,7 +66,8 @@ public class TopicSubscriptionBuilderImplTest {
     @Test
     public void test_from_subscription() {
 
-        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.DO_NOT_SEND, true, false);
+        final SubscriptionImpl subscription = new SubscriptionImpl(
+                new Topic("topic", QoS.AT_LEAST_ONCE, false, true, Mqtt5RetainHandling.DO_NOT_SEND, null));
 
         final TopicSubscription topic = topicSubscriptionBuilder.fromSubscription(subscription)
                 .subscriptionIdentifier(1)

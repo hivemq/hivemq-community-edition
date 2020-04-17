@@ -16,37 +16,27 @@
 package com.hivemq.mqtt.message.pubrel;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extensions.packets.pubrel.ModifiablePubrelPacketImpl;
+import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserPropertiesBuilder;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
-import org.junit.Before;
 import org.junit.Test;
-import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class PUBRELTest {
 
-    private FullConfigurationService configurationService;
-
-    @Before
-    public void setUp() throws Exception {
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-    }
-
     @Test
     public void test_constructMqtt3() {
-        final PUBREL origin =
-                new PUBREL(1);
-        final ModifiablePubrelPacketImpl packet =
-                new ModifiablePubrelPacketImpl(configurationService, origin);
-        final PUBREL merged = PUBREL.createPubrelFrom(packet);
+        final PUBREL origin = new PUBREL(1);
+        final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
+
+        final PUBREL merged = PUBREL.from(packet);
+
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBRELequals(origin, merged);
@@ -54,13 +44,13 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5() {
-        final PUBREL origin =
-                new PUBREL(
-                        1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "NotAuthorized",
-                        Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrelPacketImpl packet =
-                new ModifiablePubrelPacketImpl(configurationService, origin);
-        final PUBREL merged = PUBREL.createPubrelFrom(packet);
+        final PUBREL origin = new PUBREL(
+                1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString",
+                Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
+
+        final PUBREL merged = PUBREL.from(packet);
+
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBRELequals(origin, merged);
@@ -68,18 +58,17 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5_withUserProperties() {
-
-        @NotNull final Mqtt5UserPropertiesBuilder builder = Mqtt5UserProperties.builder();
-        builder.add(new MqttUserProperty("user1", "value1"));
-        builder.add(new MqttUserProperty("user2", "value2"));
-        builder.add(new MqttUserProperty("user3", "value3"));
-        @NotNull final Mqtt5UserProperties userProperties = builder.build();
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
+                new MqttUserProperty("user1", "value1"),
+                new MqttUserProperty("user2", "value2"),
+                new MqttUserProperty("user3", "value3"));
 
         final PUBREL origin =
-                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "NotAuthorized", userProperties);
-        final ModifiablePubrelPacketImpl packet =
-                new ModifiablePubrelPacketImpl(configurationService, origin);
-        final PUBREL merged = PUBREL.createPubrelFrom(packet);
+                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString", userProperties);
+        final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
+
+        final PUBREL merged = PUBREL.from(packet);
+
         assertNotNull(merged);
         assertNotSame(origin, merged);
         assertPUBRELequals(origin, merged);

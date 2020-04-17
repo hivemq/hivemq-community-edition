@@ -20,9 +20,12 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -32,10 +35,12 @@ import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.unsubscribe.parameter.UnsubscribeInboundInputImpl;
 import com.hivemq.extensions.interceptor.unsubscribe.parameter.UnsubscribeInboundOutputImpl;
 import com.hivemq.extensions.packets.unsubscribe.ModifiableUnsubscribePacketImpl;
+import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Exceptions;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -51,6 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @Singleton
 @ChannelHandler.Sharable
@@ -90,7 +96,6 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
             final @NotNull UNSUBSCRIBE unsubscribe) {
 
         final Channel channel = ctx.channel();
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
             return;
@@ -101,89 +106,113 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
             ctx.fireChannelRead(unsubscribe);
             return;
         }
-
         final List<UnsubscribeInboundInterceptor> interceptors = clientContext.getUnsubscribeInboundInterceptors();
         if (interceptors.isEmpty()) {
             ctx.fireChannelRead(unsubscribe);
             return;
         }
 
-        final UnsubscribeInboundInputImpl input = new UnsubscribeInboundInputImpl(clientId, channel, unsubscribe);
-        final UnsubscribeInboundOutputImpl output =
-                new UnsubscribeInboundOutputImpl(asyncer, configurationService, unsubscribe);
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
 
-        final UnsubscribeInboundInterceptorContext interceptorContext =
-                new UnsubscribeInboundInterceptorContext(clientId, input, ctx, interceptors.size());
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(unsubscribe);
+        final UnsubscribeInboundInputImpl input = new UnsubscribeInboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<UnsubscribeInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
+
+        final ModifiableUnsubscribePacketImpl modifiablePacket =
+                new ModifiableUnsubscribePacketImpl(packet, configurationService);
+        final UnsubscribeInboundOutputImpl output = new UnsubscribeInboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<UnsubscribeInboundOutputImpl> outputHolder =
+                new ExtensionParameterHolder<>(output);
+
+        final UnsubscribeInboundInterceptorContext context =
+                new UnsubscribeInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
 
         for (final UnsubscribeInboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
             if (extension == null) {
-                interceptorContext.increment(output);
+                context.finishInterceptor();
                 continue;
             }
 
-            final UnsubscribeInboundInterceptorTask interceptorTask =
+            final UnsubscribeInboundInterceptorTask task =
                     new UnsubscribeInboundInterceptorTask(interceptor, extension.getId());
-            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
 
     private static class UnsubscribeInboundInterceptorContext
-            extends PluginInOutTaskContext<UnsubscribeInboundOutputImpl> {
+            extends PluginInOutTaskContext<UnsubscribeInboundOutputImpl> implements Runnable {
 
-        private final @NotNull UnsubscribeInboundInputImpl input;
-        private final @NotNull ChannelHandlerContext ctx;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ExtensionParameterHolder<UnsubscribeInboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<UnsubscribeInboundOutputImpl> outputHolder;
 
         UnsubscribeInboundInterceptorContext(
                 final @NotNull String identifier,
-                final @NotNull UnsubscribeInboundInputImpl input,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
-                final int interceptorCount) {
+                final @NotNull ExtensionParameterHolder<UnsubscribeInboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<UnsubscribeInboundOutputImpl> outputHolder) {
 
             super(identifier);
-            this.input = input;
-            this.ctx = ctx;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
         public void pluginPost(final @NotNull UnsubscribeInboundOutputImpl output) {
-            if (output.isTimedOut()) {
-                log.debug("Async timeout on inbound UNSUBSCRIBE interception.");
-                output.update(input.getUnsubscribePacket());
-                if (output.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                    output.preventDelivery();
+            if (output.isPreventDelivery()) {
+                finishInterceptor();
+            } else if (output.isTimedOut() && (output.getTimeoutFallback() == TimeoutFallback.FAILURE)) {
+                output.preventDelivery();
+                finishInterceptor();
+            } else {
+                if (output.getUnsubscribePacket().isModified()) {
+                    inputHolder.set(inputHolder.get().update(output));
                 }
-            } else if (output.getUnsubscribePacket().isModified()) {
-                input.update(output.getUnsubscribePacket());
+                if (!finishInterceptor()) {
+                    outputHolder.set(output.update(inputHolder.get()));
+                }
             }
-            increment(output);
         }
 
-        public void increment(final @NotNull UnsubscribeInboundOutputImpl output) {
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                if (output.isPreventDelivery()) {
-                    prevent(output.getUnsubscribePacket());
-                } else {
-                    final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.createUnsubscribeFrom(output.getUnsubscribePacket());
-                    ctx.fireChannelRead(unsubscribe);
-                }
+                ctx.executor().execute(this);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            final UnsubscribeInboundOutputImpl output = outputHolder.get();
+            if (output.isPreventDelivery()) {
+                prevent(output);
+            } else {
+                final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.from(inputHolder.get().getUnsubscribePacket());
+                ctx.fireChannelRead(unsubscribe);
             }
         }
 
-        private void prevent(final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket) {
-            final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodes = ImmutableList.builder();
-            for (int i = 0; i < unsubscribePacket.getTopicFilters().size(); i++) {
-                reasonCodes.add(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
+        private void prevent(final @NotNull UnsubscribeInboundOutputImpl output) {
+            final int size = output.getUnsubscribePacket().getTopicFilters().size();
+            final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
+            for (int i = 0; i < size; i++) {
+                reasonCodesBuilder.add(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
             }
-            final UNSUBACK unsuback = new UNSUBACK(unsubscribePacket.getPacketIdentifier(), reasonCodes.build(),
-                    ReasonStrings.UNSUBACK_EXTENSION_PREVENTED);
-            ctx.writeAndFlush(unsuback);
+            ctx.writeAndFlush(new UNSUBACK(
+                    output.getUnsubscribePacket().getPacketIdentifier(),
+                    reasonCodesBuilder.build(),
+                    ReasonStrings.UNSUBACK_EXTENSION_PREVENTED));
         }
     }
 
@@ -194,8 +223,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
         private final @NotNull String extensionId;
 
         UnsubscribeInboundInterceptorTask(
-                final @NotNull UnsubscribeInboundInterceptor interceptor,
-                final @NotNull String extensionId) {
+                final @NotNull UnsubscribeInboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -203,8 +231,7 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
 
         @Override
         public @NotNull UnsubscribeInboundOutputImpl apply(
-                final @NotNull UnsubscribeInboundInputImpl input,
-                final @NotNull UnsubscribeInboundOutputImpl output) {
+                final @NotNull UnsubscribeInboundInputImpl input, final @NotNull UnsubscribeInboundOutputImpl output) {
 
             if (output.isPreventDelivery()) {
                 return output;
@@ -212,12 +239,12 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
             try {
                 interceptor.onInboundUnsubscribe(input, output);
             } catch (final Throwable e) {
-                log.debug(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound unsubscribe interception. " +
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound UNSUBSCRIBE interception. " +
                                 "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original Exception:" + e);
-                output.update(input.getUnsubscribePacket());
                 output.preventDelivery();
+                Exceptions.rethrowError(e);
             }
             return output;
         }

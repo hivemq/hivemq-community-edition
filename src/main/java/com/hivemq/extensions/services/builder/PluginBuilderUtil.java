@@ -19,6 +19,7 @@ package com.hivemq.extensions.services.builder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.util.Topics;
 import com.hivemq.util.Utf8Utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -143,6 +144,23 @@ public class PluginBuilderUtil {
             throw new IllegalArgumentException("QoS " + qos.getQosNumber() + " not allowed. Maximum = " +
                     maxQos);
         }
+    }
+
+    public static void checkTopic(final @NotNull String topic, final int maxTopicLength, final boolean validateUtf8) {
+        checkNotNull(topic, "Topic must not be null");
+        checkArgument(
+                topic.length() <= maxTopicLength,
+                "Topic length must not exceed '" + maxTopicLength + "' characters, but has '" + topic.length() +
+                        "' characters");
+
+        if (!Topics.isValidTopicToPublish(topic)) {
+            throw new IllegalArgumentException("The topic (" + topic + ") is invalid for retained PUBLISH messages");
+        }
+
+        if (!isValidUtf8String(topic, validateUtf8)) {
+            throw new IllegalArgumentException("The topic (" + topic + ") is UTF-8 malformed");
+        }
+
     }
 
     private static void checkUtf8StringLength(final @NotNull String utf8String, final @NotNull String type) {

@@ -16,10 +16,12 @@
 
 package com.hivemq.extensions.packets.general;
 
+import com.google.common.collect.ImmutableList;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import org.junit.Before;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 
 import java.util.List;
@@ -30,35 +32,28 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @author Silvio Giebl
  */
 public class UserPropertiesImplTest {
 
-
-    private UserProperties userProperties;
-
-    @Before
-    public void setUp() throws Exception {
-
-        final MqttUserProperty userProperty1 = new MqttUserProperty("name", "value1");
-        final MqttUserProperty userProperty2 = new MqttUserProperty("name", "value2");
-        final MqttUserProperty userProperty3 = new MqttUserProperty("name", "value3");
-
-        userProperties = new UserPropertiesImpl(Mqtt5UserProperties.of(userProperty1, userProperty2, userProperty3));
-
-    }
-
     @Test
     public void test_get_first() {
+        final UserProperties userProperties = UserPropertiesImpl.of(ImmutableList.of(
+                MqttUserProperty.of("name", "value1"),
+                MqttUserProperty.of("name", "value2"),
+                MqttUserProperty.of("name", "value3")));
 
         assertTrue(userProperties.getFirst("name").isPresent());
         assertEquals("value1", userProperties.getFirst("name").get());
         assertEquals(Optional.empty(), userProperties.getFirst("name2"));
-
     }
 
     @Test
     public void test_get_all() {
+        final UserProperties userProperties = UserPropertiesImpl.of(ImmutableList.of(
+                MqttUserProperty.of("name", "value1"),
+                MqttUserProperty.of("name", "value2"),
+                MqttUserProperty.of("name", "value3")));
 
         final List<String> all = userProperties.getAllForName("name");
         final List<String> none = userProperties.getAllForName("name2");
@@ -70,25 +65,21 @@ public class UserPropertiesImplTest {
         assertEquals("value3", all.get(2));
 
         assertEquals(0, none.size());
-
     }
 
     @Test
     public void test_empty() {
-
-        userProperties = UserPropertiesImpl.NO_USER_PROPERTIES;
+        final UserProperties userProperties = UserPropertiesImpl.of(ImmutableList.of());
 
         assertTrue(userProperties.isEmpty());
-
     }
 
     @Test
-    public void test_convert() {
-
-        final UserPropertyImpl convert = UserPropertyImpl.convert(new MqttUserProperty("test", "value"));
-
-        assertEquals("test", convert.getName());
-        assertEquals("value", convert.getValue());
-
+    public void equals() {
+        EqualsVerifier.forClass(UserPropertiesImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
+                .withNonnullFields("list")
+                .suppress(Warning.STRICT_INHERITANCE)
+                .verify();
     }
 }

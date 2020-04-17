@@ -16,13 +16,11 @@
 
 package com.hivemq.mqtt.message.subscribe;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-
-import java.util.List;
 
 /**
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 public interface Mqtt3SUBSCRIBE {
@@ -30,5 +28,5 @@ public interface Mqtt3SUBSCRIBE {
     /**
      * @return a List of topics and their corresponding QoS the SUBSCRIBE message contains
      */
-    @NotNull List<Topic> getTopics();
+    @NotNull ImmutableList<Topic> getTopics();
 }

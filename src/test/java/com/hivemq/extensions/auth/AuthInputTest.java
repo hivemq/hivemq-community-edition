@@ -18,7 +18,6 @@ package com.hivemq.extensions.auth;
 
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
-import com.hivemq.extensions.auth.AuthInput;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -42,7 +41,7 @@ public class AuthInputTest {
     private final String method = "test";
     private final byte[] authData = "test".getBytes();
     private final Mqtt5AuthReasonCode reasonCode = Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION;
-    private final Mqtt5UserProperties userProperties = Mqtt5UserProperties.builder().add(new MqttUserProperty("test", "1")).build();
+    private final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "1"));
     private final String reasonString = "testString";
     private AUTH auth;
     private AuthInput authInput;

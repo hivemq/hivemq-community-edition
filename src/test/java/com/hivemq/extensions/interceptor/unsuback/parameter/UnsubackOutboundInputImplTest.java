@@ -15,47 +15,58 @@
  */
 package com.hivemq.extensions.interceptor.unsuback.parameter;
 
-import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.Assert;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extensions.packets.unsuback.ModifiableUnsubackPacketImpl;
+import com.hivemq.extensions.packets.unsuback.UnsubackPacketImpl;
 import org.junit.Test;
-import util.TestMessageUtil;
+
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class UnsubackOutboundInputImplTest {
 
     @Test
-    public void test_construction() {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+    public void constructor_and_getter() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final UnsubackPacketImpl packet = mock(UnsubackPacketImpl.class);
 
-        final UNSUBACK unsuback = TestMessageUtil.createFullMqtt5Unsuback();
-        final UnsubackOutboundInputImpl input = new UnsubackOutboundInputImpl("client", embeddedChannel, unsuback);
+        final UnsubackOutboundInputImpl input =
+                new UnsubackOutboundInputImpl(clientInformation, connectionInformation, packet);
 
-        Assert.assertNotNull(input.getClientInformation());
-        Assert.assertNotNull(input.getConnectionInformation());
-        Assert.assertNotNull(input.getUnsubackPacket());
+        assertSame(clientInformation, input.getClientInformation());
+        assertSame(connectionInformation, input.getConnectionInformation());
+        assertSame(packet, input.getUnsubackPacket());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void test_clientId_null() {
-        final UNSUBACK unsubackPacket = TestMessageUtil.createFullMqtt5Unsuback();
-        new UnsubackOutboundInputImpl(null, new EmbeddedChannel(), unsubackPacket);
-    }
+    @Test
+    public void update() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final UnsubackPacketImpl packet = mock(UnsubackPacketImpl.class);
 
-    @Test(expected = NullPointerException.class)
-    public void test_channel_null() {
-        final UNSUBACK unsubackPacket = TestMessageUtil.createFullMqtt5Unsuback();
-        new UnsubackOutboundInputImpl("client", null, unsubackPacket);
-    }
+        final UnsubackOutboundInputImpl input =
+                new UnsubackOutboundInputImpl(clientInformation, connectionInformation, packet);
 
-    @Test(expected = NullPointerException.class)
-    public void test_packet_null() {
-        new UnsubackOutboundInputImpl(null, new EmbeddedChannel(), null);
-    }
+        final ModifiableUnsubackPacketImpl modifiablePacket = mock(ModifiableUnsubackPacketImpl.class);
+        final UnsubackPacketImpl newPacket = mock(UnsubackPacketImpl.class);
+        final UnsubackOutboundOutputImpl output = mock(UnsubackOutboundOutputImpl.class);
+        when(output.getUnsubackPacket()).thenReturn(modifiablePacket);
+        when(modifiablePacket.copy()).thenReturn(newPacket);
 
+        final UnsubackOutboundInputImpl updated = input.update(output);
+
+        assertNotSame(input, updated);
+        assertSame(input.getClientInformation(), updated.getClientInformation());
+        assertSame(input.getConnectionInformation(), updated.getConnectionInformation());
+        assertNotSame(input.getUnsubackPacket(), updated.getUnsubackPacket());
+        assertSame(newPacket, updated.getUnsubackPacket());
+    }
 }

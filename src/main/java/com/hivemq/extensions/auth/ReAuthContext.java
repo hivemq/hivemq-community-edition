@@ -67,7 +67,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 channel,
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.SUCCESS,
-                output.getUserProperties(),
+                Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 output.getReasonString());
 
         authFuture.addListener((ChannelFutureListener) future -> {
@@ -87,7 +87,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 ReasonStrings.RE_AUTH_FAILED,
                 output.getReasonCode(),
                 output.getReasonString(),
-                output.getUserProperties(),
+                Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 true);
     }
 

@@ -16,49 +16,47 @@
 
 package com.hivemq.extensions.packets.general;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.hivemq.extensions.services.builder.PluginBuilderUtil.UTF_8_STRING_MAX_LENGTH;
 import static org.junit.Assert.*;
 
 /**
  * @author Georg Held
+ * @author Silvio Giebl
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class ModifiableUserPropertiesImplTest {
 
-
-    private ModifiableUserPropertiesImpl filledProps;
-    private ModifiableUserPropertiesImpl intermediateProps;
+    private @NotNull ModifiableUserPropertiesImpl filledProps;
 
     @Before
     public void setUp() throws Exception {
-        intermediateProps = new ModifiableUserPropertiesImpl(true);
-        intermediateProps.addUserProperty("one", "one");
-        intermediateProps.addUserProperty("one", "two");
-        intermediateProps.addUserProperty("two", "two");
-
-        filledProps = new ModifiableUserPropertiesImpl(intermediateProps, true);
+        filledProps = new ModifiableUserPropertiesImpl(ImmutableList.of(
+                MqttUserProperty.of("one", "one"),
+                MqttUserProperty.of("one", "two"),
+                MqttUserProperty.of("two", "two")
+        ), true);
     }
 
     @Test(timeout = 5000)
     public void test_get_delegated_user_properties() {
-
-
         final List<String> one = filledProps.getAllForName("one");
-        final String two = filledProps.getFirst("two").get();
+        final Optional<String> two = filledProps.getFirst("two");
 
-
-        assertEquals(2, one.size());
-        assertEquals("two", two);
+        assertEquals(ImmutableList.of("one", "two"), one);
+        assertEquals(Optional.of("two"), two);
     }
 
     @Test(timeout = 5000)
@@ -87,12 +85,6 @@ public class ModifiableUserPropertiesImplTest {
         final List<String> one = filledProps.getAllForName("one");
         assertEquals(1, one.size());
         assertEquals("one", one.get(0));
-    }
-
-    @Test(timeout = 5000)
-    public void test_delegate_is_returned() {
-
-        assertEquals(filledProps.legacy, filledProps.consolidate());
     }
 
     @Test(expected = NullPointerException.class)
@@ -220,14 +212,6 @@ public class ModifiableUserPropertiesImplTest {
         assertEquals(1, filledProps.asList().size());
     }
 
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void test_as_immutable() {
-        assertEquals(3, filledProps.asList().size());
-        final List<MqttUserProperty> imutable = filledProps.asImmutableList();
-        imutable.add(new MqttUserProperty("three", "three"));
-    }
-
     @Test(expected = NullPointerException.class)
     public void test_get_key_null() {
         filledProps.getAllForName(null);
@@ -236,5 +220,44 @@ public class ModifiableUserPropertiesImplTest {
     @Test(expected = NullPointerException.class)
     public void test_get_first_null() {
         filledProps.getFirst(null);
+    }
+
+    @Test
+    public void copy_noChanges() {
+        final ImmutableList<MqttUserProperty> list = ImmutableList.of(
+                MqttUserProperty.of("name1", "value1"),
+                MqttUserProperty.of("name2", "value2"));
+        final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
+
+        final UserPropertiesImpl copy = modifiableUserProperties.copy();
+
+        assertSame(list, copy.asInternalList());
+    }
+
+    @Test
+    public void copy_changes() {
+        final ImmutableList<MqttUserProperty> list = ImmutableList.of(
+                MqttUserProperty.of("name1", "value1"),
+                MqttUserProperty.of("name2", "value2"));
+        final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
+
+        modifiableUserProperties.removeName("name1");
+        modifiableUserProperties.addUserProperty("name3", "value3");
+        final UserPropertiesImpl copy = modifiableUserProperties.copy();
+
+        final ImmutableList<MqttUserProperty> expectedList = ImmutableList.of(
+                MqttUserProperty.of("name2", "value2"),
+                MqttUserProperty.of("name3", "value3"));
+        assertEquals(expectedList, copy.asInternalList());
+    }
+
+    @Test
+    public void equals() {
+        EqualsVerifier.forClass(ModifiableUserPropertiesImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
+                .withNonnullFields("list")
+                .withIgnoredFields("readWriteLock", "validateUTF8", "modified")
+                .suppress(Warning.STRICT_INHERITANCE, Warning.NONFINAL_FIELDS)
+                .verify();
     }
 }

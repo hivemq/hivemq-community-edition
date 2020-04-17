@@ -20,12 +20,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
+import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 
 import java.util.List;
 
@@ -34,7 +32,6 @@ import java.util.List;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- *
  * @since 1.4
  */
 @Immutable
@@ -58,7 +55,9 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
     }
 
     //MQTT 5
-    public UNSUBSCRIBE(@NotNull final ImmutableList<String> topicFilters, final int packetIdentifier, final Mqtt5UserProperties userProperties) {
+    public UNSUBSCRIBE(
+            @NotNull final ImmutableList<String> topicFilters, final int packetIdentifier,
+            final Mqtt5UserProperties userProperties) {
         super(userProperties);
 
         Preconditions.checkNotNull(topicFilters);
@@ -68,17 +67,11 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
         setPacketIdentifier(packetIdentifier);
     }
 
-    public static @NotNull UNSUBSCRIBE createUnsubscribeFrom(final @NotNull UnsubscribePacket packet) {
-
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-
-        final ImmutableList<String> topics = ImmutableList.copyOf(packet.getTopicFilters());
-
-        return new UNSUBSCRIBE(topics, packet.getPacketIdentifier(), mqtt5UserProperties);
+    public static @NotNull UNSUBSCRIBE from(final @NotNull UnsubscribePacketImpl packet) {
+        return new UNSUBSCRIBE(
+                packet.getTopicFilters(),
+                packet.getPacketIdentifier(),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 
     /**

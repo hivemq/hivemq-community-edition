@@ -18,14 +18,10 @@ package com.hivemq.extensions.packets.pubcomp;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.pubcomp.ModifiablePubcompPacket;
-import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompReasonCode;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -36,39 +32,25 @@ import java.util.Optional;
  */
 public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
 
-    private final @NotNull FullConfigurationService configurationService;
-
     private final int packetIdentifier;
     private final @NotNull PubcompReasonCode reasonCode;
     private @Nullable String reasonString;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiablePubcompPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PUBCOMP pubcomp) {
+            final @NotNull PubcompPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
+
+        packetIdentifier = packet.packetIdentifier;
+        reasonCode = packet.reasonCode;
+        reasonString = packet.reasonString;
+        userProperties = new ModifiableUserPropertiesImpl(
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
-        packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = pubcomp.getReasonCode().toPubcompReasonCode();
-        reasonString = pubcomp.getReasonString();
-        userProperties = new ModifiableUserPropertiesImpl(
-                pubcomp.getUserProperties().getPluginUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
-    }
-
-    public ModifiablePubcompPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PubcompPacket pubcomp) {
-
-        this.configurationService = configurationService;
-        packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = pubcomp.getReasonCode();
-        reasonString = pubcomp.getReasonString().orElse(null);
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) pubcomp.getUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
     }
 
     @Override
@@ -97,11 +79,19 @@ public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     public boolean isModified() {
         return modified || userProperties.isModified();
+    }
+
+    public @NotNull PubcompPacketImpl copy() {
+        return new PubcompPacketImpl(packetIdentifier, reasonCode, reasonString, userProperties.copy());
+    }
+
+    public @NotNull ModifiablePubcompPacketImpl update(final @NotNull PubcompPacketImpl packet) {
+        return new ModifiablePubcompPacketImpl(packet, configurationService);
     }
 }

@@ -16,15 +16,12 @@
 
 package com.hivemq.mqtt.message.pubrel;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.pubrel.PubrelPacket;
+import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 
 /**
@@ -81,14 +78,6 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         return MessageType.PUBREL;
     }
 
-    public @Nullable Long getPublishTimestamp() {
-        return publishTimestamp;
-    }
-
-    public void setPublishTimestamp(@Nullable final Long publishTimestamp) {
-        this.publishTimestamp = publishTimestamp;
-    }
-
     public @Nullable Long getExpiryInterval() {
         return expiryInterval;
     }
@@ -97,19 +86,19 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         this.expiryInterval = expiryInterval;
     }
 
-    public static @NotNull PUBREL createPubrelFrom(final @NotNull PubrelPacket packet) {
+    public @Nullable Long getPublishTimestamp() {
+        return publishTimestamp;
+    }
 
-        final int packetIdentifier = packet.getPacketIdentifier();
-        final Mqtt5PubRelReasonCode reasonCode = Mqtt5PubRelReasonCode.from(packet.getReasonCode());
+    public void setPublishTimestamp(@Nullable final Long publishTimestamp) {
+        this.publishTimestamp = publishTimestamp;
+    }
 
-        final String reasonString = packet.getReasonString().orElse(null);
-
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-
-        return new PUBREL(packetIdentifier, reasonCode, reasonString, mqtt5UserProperties);
+    public static @NotNull PUBREL from(final @NotNull PubrelPacketImpl packet) {
+        return new PUBREL(
+                packet.getPacketIdentifier(),
+                Mqtt5PubRelReasonCode.from(packet.getReasonCode()),
+                packet.getReasonString().orElse(null),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 }

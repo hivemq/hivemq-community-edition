@@ -19,14 +19,10 @@ import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
-import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 
 import java.util.Objects;
@@ -38,39 +34,25 @@ import java.util.Optional;
  */
 public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
 
-    private final @NotNull FullConfigurationService configurationService;
-
     private final int packetIdentifier;
     private @NotNull AckReasonCode reasonCode;
     private @Nullable String reasonString;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiablePubackPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PUBACK puback) {
+            final @NotNull PubackPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
+
+        packetIdentifier = packet.packetIdentifier;
+        reasonCode = packet.reasonCode;
+        reasonString = packet.reasonString;
+        userProperties = new ModifiableUserPropertiesImpl(
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
-        packetIdentifier = puback.getPacketIdentifier();
-        reasonCode = puback.getReasonCode().toAckReasonCode();
-        reasonString = puback.getReasonString();
-        userProperties = new ModifiableUserPropertiesImpl(
-                puback.getUserProperties().getPluginUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
-    }
-
-    public ModifiablePubackPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PubackPacket pubackPacket) {
-
-        this.configurationService = configurationService;
-        packetIdentifier = pubackPacket.getPacketIdentifier();
-        reasonCode = pubackPacket.getReasonCode();
-        reasonString = pubackPacket.getReasonString().orElse(null);
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) pubackPacket.getUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
     }
 
     @Override
@@ -114,11 +96,19 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     public boolean isModified() {
         return modified || userProperties.isModified();
+    }
+
+    public @NotNull PubackPacketImpl copy() {
+        return new PubackPacketImpl(packetIdentifier, reasonCode, reasonString, userProperties.copy());
+    }
+
+    public @NotNull ModifiablePubackPacketImpl update(final @NotNull PubackPacketImpl packet) {
+        return new ModifiablePubackPacketImpl(packet, configurationService);
     }
 }

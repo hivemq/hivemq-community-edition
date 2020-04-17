@@ -19,6 +19,7 @@ package com.hivemq.extensions.auth;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -133,7 +134,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
                 ctx.channel(),
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                output.getUserProperties(),
+                Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 output.getReasonString());
 
         authFuture.addListener((ChannelFutureListener) future -> {

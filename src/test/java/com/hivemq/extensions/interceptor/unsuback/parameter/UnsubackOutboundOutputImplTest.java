@@ -15,45 +15,46 @@
  */
 package com.hivemq.extensions.interceptor.unsuback.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.packets.unsuback.ModifiableUnsubackPacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import org.junit.Before;
+import com.hivemq.extensions.packets.unsuback.ModifiableUnsubackPacketImpl;
+import com.hivemq.extensions.packets.unsuback.UnsubackPacketImpl;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+/**
+ * @author Robin Atherton
+ * @author Silvio Giebl
+ */
 public class UnsubackOutboundOutputImplTest {
 
-    private UNSUBACK unsuback;
+    @Test
+    public void constructor_and_getter() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableUnsubackPacketImpl modifiablePacket = mock(ModifiableUnsubackPacketImpl.class);
 
-    @Mock
-    private PluginOutPutAsyncer asyncer;
-    private UnsubackOutboundOutputImpl output;
+        final UnsubackOutboundOutputImpl output = new UnsubackOutboundOutputImpl(asyncer, modifiablePacket);
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
-        unsuback = TestMessageUtil.createFullMqtt5Unsuback();
-        output = new UnsubackOutboundOutputImpl(configurationService, asyncer, unsuback);
+        assertSame(modifiablePacket, output.getUnsubackPacket());
     }
 
     @Test
-    public void test_getModifiable() {
-        final ModifiableUnsubackPacket modifiableUnsubackPacket = output.getUnsubackPacket();
-        int i = 0;
-        for (Mqtt5UnsubAckReasonCode reasonCode : unsuback.getReasonCodes()) {
-            assertEquals(reasonCode.name(), unsuback.getReasonCodes().get(i).name());
-            i++;
-        }
-        assertEquals(unsuback.getUserProperties().size(), modifiableUnsubackPacket.getUserProperties().asList().size());
+    public void update() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableUnsubackPacketImpl modifiablePacket = mock(ModifiableUnsubackPacketImpl.class);
+
+        final UnsubackOutboundOutputImpl output = new UnsubackOutboundOutputImpl(asyncer, modifiablePacket);
+
+        final UnsubackOutboundInputImpl input = mock(UnsubackOutboundInputImpl.class);
+        final UnsubackPacketImpl packet = mock(UnsubackPacketImpl.class);
+        final ModifiableUnsubackPacketImpl newModifiablePacket = mock(ModifiableUnsubackPacketImpl.class);
+        when(input.getUnsubackPacket()).thenReturn(packet);
+        when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
+
+        final UnsubackOutboundOutputImpl updated = output.update(input);
+
+        assertSame(newModifiablePacket, updated.getUnsubackPacket());
     }
 }

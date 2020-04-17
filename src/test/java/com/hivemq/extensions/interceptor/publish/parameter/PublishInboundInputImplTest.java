@@ -16,83 +16,58 @@
 
 package com.hivemq.extensions.interceptor.publish.parameter;
 
-import com.hivemq.extension.sdk.api.packets.general.Qos;
-import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extensions.packets.publish.ModifiablePublishPacketImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
-import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.util.Bytes;
-import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
-import util.TestMessageUtil;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @author Silvio Giebl
  */
-@SuppressWarnings({"NullabilityAnnotations", "OptionalGetWithoutIsPresent"})
 public class PublishInboundInputImplTest {
 
     @Test
-    public void test_values_set_correctly() {
+    public void constructor_and_getter() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final PublishPacketImpl packet = mock(PublishPacketImpl.class);
 
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final PublishInboundInputImpl input =
+                new PublishInboundInputImpl(clientInformation, connectionInformation, packet);
 
-        final PublishInboundInputImpl publishInboundInput = new PublishInboundInputImpl(new PublishPacketImpl(TestMessageUtil.createFullMqtt5Publish()), "client", channel);
-
-        assertEquals("client", publishInboundInput.getClientInformation().getClientId());
-        assertEquals(true, publishInboundInput.getPublishPacket().getDupFlag());
-        assertEquals(Qos.EXACTLY_ONCE, publishInboundInput.getPublishPacket().getQos());
-        assertEquals(true, publishInboundInput.getPublishPacket().getRetain());
-        assertEquals("topic", publishInboundInput.getPublishPacket().getTopic());
-        assertEquals(1, publishInboundInput.getPublishPacket().getPacketId());
-        assertEquals(PayloadFormatIndicator.UTF_8, publishInboundInput.getPublishPacket().getPayloadFormatIndicator().get());
-        assertEquals(360, publishInboundInput.getPublishPacket().getMessageExpiryInterval().get().longValue());
-        assertEquals("response topic", publishInboundInput.getPublishPacket().getResponseTopic().get());
-        assertArrayEquals("correlation data".getBytes(), Bytes.getBytesFromReadOnlyBuffer(publishInboundInput.getPublishPacket().getCorrelationData()));
-        assertArrayEquals("payload".getBytes(), Bytes.getBytesFromReadOnlyBuffer(publishInboundInput.getPublishPacket().getPayload()));
-        assertEquals("content type", publishInboundInput.getPublishPacket().getContentType().get());
-        assertEquals(3, publishInboundInput.getPublishPacket().getSubscriptionIdentifiers().size());
-        assertEquals(2, publishInboundInput.getPublishPacket().getUserProperties().asList().size());
-
-        assertNotNull(publishInboundInput.getConnectionInformation());
-        assertEquals(publishInboundInput, publishInboundInput.get());
-
-
+        assertSame(clientInformation, input.getClientInformation());
+        assertSame(connectionInformation, input.getConnectionInformation());
+        assertSame(packet, input.getPublishPacket());
     }
 
     @Test
-    public void test_values_set_correctly_empty_optionals() {
+    public void update() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final PublishPacketImpl packet = mock(PublishPacketImpl.class);
 
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final PublishInboundInputImpl input =
+                new PublishInboundInputImpl(clientInformation, connectionInformation, packet);
 
-        final PublishInboundInputImpl publishInboundInput = new PublishInboundInputImpl(new PublishPacketImpl(TestMessageUtil.createMqtt5Publish("topic")), "client", channel);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
+        final PublishPacketImpl newPacket = mock(PublishPacketImpl.class);
+        final PublishInboundOutputImpl output = mock(PublishInboundOutputImpl.class);
+        when(output.getPublishPacket()).thenReturn(modifiablePacket);
+        when(modifiablePacket.copy()).thenReturn(newPacket);
 
-        assertEquals("client", publishInboundInput.getClientInformation().getClientId());
-        assertEquals(false, publishInboundInput.getPublishPacket().getDupFlag());
-        assertEquals(Qos.AT_LEAST_ONCE, publishInboundInput.getPublishPacket().getQos());
-        assertEquals(false, publishInboundInput.getPublishPacket().getRetain());
-        assertEquals("topic", publishInboundInput.getPublishPacket().getTopic());
-        assertEquals(1, publishInboundInput.getPublishPacket().getPacketId());
-        assertEquals(Optional.empty(), publishInboundInput.getPublishPacket().getPayloadFormatIndicator());
-        assertEquals(Optional.empty(), publishInboundInput.getPublishPacket().getMessageExpiryInterval());
-        assertEquals(Optional.empty(), publishInboundInput.getPublishPacket().getResponseTopic());
-        assertEquals(Optional.empty(), publishInboundInput.getPublishPacket().getCorrelationData());
-        assertArrayEquals("payload".getBytes(), Bytes.getBytesFromReadOnlyBuffer(publishInboundInput.getPublishPacket().getPayload()));
-        assertEquals(Optional.empty(), publishInboundInput.getPublishPacket().getContentType());
-        assertEquals(Collections.emptyList(), publishInboundInput.getPublishPacket().getSubscriptionIdentifiers());
-        assertEquals(0, publishInboundInput.getPublishPacket().getUserProperties().asList().size());
+        final PublishInboundInputImpl updated = input.update(output);
 
-        assertNotNull(publishInboundInput.getConnectionInformation());
-        assertEquals(publishInboundInput, publishInboundInput.get());
-
-
+        assertNotSame(input, updated);
+        assertSame(input.getClientInformation(), updated.getClientInformation());
+        assertSame(input.getConnectionInformation(), updated.getConnectionInformation());
+        assertNotSame(input.getPublishPacket(), updated.getPublishPacket());
+        assertSame(newPacket, updated.getPublishPacket());
     }
 }

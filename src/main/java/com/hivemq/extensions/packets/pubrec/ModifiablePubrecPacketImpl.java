@@ -19,14 +19,10 @@ import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extension.sdk.api.packets.pubrec.ModifiablePubrecPacket;
-import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 
 import java.util.Objects;
@@ -38,39 +34,25 @@ import java.util.Optional;
  */
 public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
 
-    private final @NotNull FullConfigurationService configurationService;
-
     private final int packetIdentifier;
     private @NotNull AckReasonCode reasonCode;
     private @Nullable String reasonString;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiablePubrecPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PUBREC pubrec) {
+            final @NotNull PubrecPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
+
+        packetIdentifier = packet.packetIdentifier;
+        reasonCode = packet.reasonCode;
+        reasonString = packet.reasonString;
+        userProperties = new ModifiableUserPropertiesImpl(
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
-        packetIdentifier = pubrec.getPacketIdentifier();
-        reasonCode = pubrec.getReasonCode().toAckReasonCode();
-        reasonString = pubrec.getReasonString();
-        userProperties = new ModifiableUserPropertiesImpl(
-                pubrec.getUserProperties().getPluginUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
-    }
-
-    public ModifiablePubrecPacketImpl(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PubrecPacket pubrecPacket) {
-
-        this.configurationService = configurationService;
-        packetIdentifier = pubrecPacket.getPacketIdentifier();
-        reasonCode = pubrecPacket.getReasonCode();
-        reasonString = pubrecPacket.getReasonString().orElse(null);
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) pubrecPacket.getUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
     }
 
     @Override
@@ -114,11 +96,19 @@ public class ModifiablePubrecPacketImpl implements ModifiablePubrecPacket {
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     public boolean isModified() {
         return modified || userProperties.isModified();
+    }
+
+    public @NotNull PubrecPacketImpl copy() {
+        return new PubrecPacketImpl(packetIdentifier, reasonCode, reasonString, userProperties.copy());
+    }
+
+    public @NotNull ModifiablePubrecPacketImpl update(final @NotNull PubrecPacketImpl pubrecPacket) {
+        return new ModifiablePubrecPacketImpl(pubrecPacket, configurationService);
     }
 }

@@ -16,56 +16,46 @@
 
 package com.hivemq.extensions.interceptor.suback.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.suback.ModifiableSubackPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
-import com.hivemq.mqtt.message.suback.SUBACK;
-import org.junit.Before;
+import com.hivemq.extensions.packets.suback.ModifiableSubackPacketImpl;
+import com.hivemq.extensions.packets.suback.SubackPacketImpl;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class SubackOutboundOutputImplTest {
 
+    @Test
+    public void constructor_and_getter() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
 
-    private @NotNull SUBACK subAck;
+        final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
 
-    @Mock
-    private @NotNull PluginOutPutAsyncer asyncer;
-    private @NotNull SubackOutboundOutputImpl output;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
-        subAck = TestMessageUtil.createFullMqtt5Suback();
-        output = new com.hivemq.extensions.interceptor.suback.parameter.SubackOutboundOutputImpl(configurationService, asyncer, subAck);
+        assertSame(modifiablePacket, output.getSubackPacket());
     }
 
     @Test
-    public void test_getModifiable() {
-        final ModifiableSubackPacket modifiableSubAckPacket = output.get().getSubackPacket();
-        assertEquals(subAck.getPacketIdentifier(), modifiableSubAckPacket.getPacketIdentifier());
-        assertEquals(
-                subAck.getUserProperties().size(), modifiableSubAckPacket.getUserProperties().asList().size());
-        assertEquals(subAck.getReasonString(), modifiableSubAckPacket.getReasonString().get());
-        final List<SubackReasonCode> reasonCodes = modifiableSubAckPacket.getReasonCodes();
-        for (int i = 0; i < reasonCodes.size(); i++) {
-            assertEquals(subAck.getReasonCodes().get(i), Mqtt5SubAckReasonCode.from(reasonCodes.get(i)));
-        }
-    }
+    public void update() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
 
+        final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
+
+        final SubackOutboundInputImpl input = mock(SubackOutboundInputImpl.class);
+        final SubackPacketImpl packet = mock(SubackPacketImpl.class);
+        final ModifiableSubackPacketImpl newModifiablePacket = mock(ModifiableSubackPacketImpl.class);
+        when(input.getSubackPacket()).thenReturn(packet);
+        when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
+
+        final SubackOutboundOutputImpl updated = output.update(input);
+
+        assertSame(newModifiablePacket, updated.getSubackPacket());
+    }
 }

@@ -19,15 +19,12 @@ import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
-import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 import java.util.Objects;
@@ -37,9 +34,8 @@ import java.util.Optional;
  * @author Robin Atherton
  * @author Silvio Giebl
  */
+@ThreadSafe
 public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboundDisconnectPacket {
-
-    private final @NotNull FullConfigurationService configurationService;
 
     private @NotNull DisconnectReasonCode reasonCode;
     private @Nullable String reasonString;
@@ -47,34 +43,21 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     private @Nullable String serverReference;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiableOutboundDisconnectPacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull DISCONNECT originalDisconnect) {
+            final @NotNull DisconnectPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
 
-        configurationService = fullConfigurationService;
-        reasonCode = originalDisconnect.getReasonCode().toDisconnectReasonCode();
-        reasonString = originalDisconnect.getReasonString();
-        sessionExpiryInterval = originalDisconnect.getSessionExpiryInterval();
-        serverReference = originalDisconnect.getServerReference();
+        reasonCode = packet.reasonCode;
+        reasonString = packet.reasonString;
+        sessionExpiryInterval = packet.sessionExpiryInterval;
+        serverReference = packet.serverReference;
         userProperties = new ModifiableUserPropertiesImpl(
-                originalDisconnect.getUserProperties().getPluginUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
-    }
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
-    public ModifiableOutboundDisconnectPacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull DisconnectPacket disconnectPacket) {
-
-        configurationService = fullConfigurationService;
-        reasonCode = disconnectPacket.getReasonCode();
-        reasonString = disconnectPacket.getReasonString().orElse(null);
-        sessionExpiryInterval = disconnectPacket.getSessionExpiryInterval().orElse(Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET);
-        serverReference = disconnectPacket.getServerReference().orElse(null);
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) disconnectPacket.getUserProperties(),
-                configurationService.securityConfiguration().validateUTF8());
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -83,7 +66,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     @Override
-    public synchronized void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
+    public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
         Preconditions.checkArgument(
                 reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
@@ -105,7 +88,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     @Override
-    public synchronized void setReasonString(final @Nullable String reasonString) {
+    public void setReasonString(final @Nullable String reasonString) {
         PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.reasonString, reasonString)) {
             return;
@@ -126,7 +109,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     @Override
-    public synchronized void setServerReference(final @Nullable String serverReference) {
+    public void setServerReference(final @Nullable String serverReference) {
         PluginBuilderUtil.checkServerReference(
                 serverReference, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.serverReference, serverReference)) {
@@ -137,11 +120,20 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     public boolean isModified() {
         return modified || userProperties.isModified();
+    }
+
+    public @NotNull DisconnectPacketImpl copy() {
+        return new DisconnectPacketImpl(
+                reasonCode, reasonString, sessionExpiryInterval, serverReference, userProperties.copy());
+    }
+
+    public @NotNull ModifiableOutboundDisconnectPacketImpl update(final @NotNull DisconnectPacketImpl packet) {
+        return new ModifiableOutboundDisconnectPacketImpl(packet, configurationService);
     }
 }

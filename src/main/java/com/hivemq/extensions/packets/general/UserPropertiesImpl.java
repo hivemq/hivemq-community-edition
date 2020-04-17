@@ -17,74 +17,83 @@
 package com.hivemq.extensions.packets.general;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.0.0
  */
-public class UserPropertiesImpl implements UserProperties, InternalUserProperties {
+@Immutable
+public class UserPropertiesImpl implements UserProperties {
 
-    @NotNull
-    private final Mqtt5UserProperties userProperties;
+    private static final UserPropertiesImpl NO_USER_PROPERTIES = new UserPropertiesImpl(ImmutableList.of());
 
-    /**
-     * Empty collection of User Properties.
-     */
-    public static final UserProperties NO_USER_PROPERTIES = new UserPropertiesImpl(Mqtt5UserProperties.NO_USER_PROPERTIES);
-
-    public UserPropertiesImpl(@NotNull final Mqtt5UserProperties mqtt5UserProperties) {
-        this.userProperties = mqtt5UserProperties;
+    public static @NotNull UserPropertiesImpl of(final @NotNull ImmutableList<MqttUserProperty> list) {
+        return list.isEmpty() ? NO_USER_PROPERTIES : new UserPropertiesImpl(list);
     }
 
-    @NotNull
+    private final @NotNull ImmutableList<MqttUserProperty> list;
+
+    private UserPropertiesImpl(final @NotNull ImmutableList<MqttUserProperty> list) {
+        this.list = list;
+    }
+
     @Override
-    public Optional<String> getFirst(@NotNull final String name) {
-        return userProperties.asList().stream()
+    public @NotNull Optional<String> getFirst(final @NotNull String name) {
+        checkNotNull(name, "Name must never be null");
+        return list.stream()
                 .filter(userProperty -> userProperty.getName().equals(name))
                 .findFirst()
-                .map(MqttUserProperty::getValue);
+                .map(UserProperty::getValue);
     }
 
-    @NotNull
     @Override
-    public List<String> getAllForName(@NotNull final String name) {
-        return userProperties.asList().stream()
+    public @NotNull ImmutableList<String> getAllForName(final @NotNull String name) {
+        checkNotNull(name, "Name must never be null");
+        return list.stream()
                 .filter(userProperty -> userProperty.getName().equals(name))
-                .map(MqttUserProperty::getValue)
-                .collect(Collectors.toList());
+                .map(UserProperty::getValue)
+                .collect(ImmutableList.toImmutableList());
     }
 
-    @NotNull
     @Override
-    public List<UserProperty> asList() {
-        return userProperties.asList()
-                .stream()
-                .map((Function<MqttUserProperty, UserProperty>) mqttUserProperty -> UserPropertyImpl.convert(mqttUserProperty))
-                .collect(Collectors.toUnmodifiableList());
+    public @NotNull ImmutableList<UserProperty> asList() {
+        return ImmutableList.copyOf(list);
+    }
+
+    public @NotNull ImmutableList<MqttUserProperty> asInternalList() {
+        return list;
     }
 
     @Override
     public boolean isEmpty() {
-        return userProperties.asList().isEmpty();
+        return list.isEmpty();
     }
 
     @Override
-    public @NotNull InternalUserProperties consolidate() {
-        return this;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserPropertiesImpl)) {
+            return false;
+        }
+        final UserPropertiesImpl that = (UserPropertiesImpl) o;
+        return list.equals(that.list);
     }
 
     @Override
-    public @NotNull ImmutableList<MqttUserProperty> asImmutableList() {
-        return userProperties.asList();
+    public int hashCode() {
+        return Objects.hash(list);
     }
 }

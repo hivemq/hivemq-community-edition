@@ -16,191 +16,255 @@
 
 package com.hivemq.extensions.interceptor.publish.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.mqtt.message.publish.PUBLISH;
-import org.junit.Before;
+import com.hivemq.extensions.packets.publish.ModifiablePublishPacketImpl;
+import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @author Silvio Giebl
  */
 public class PublishInboundOutputImplTest {
 
-    private PublishInboundOutputImpl publishInboundOutput;
+    @Test
+    public void constructor_and_getter() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-    private FullConfigurationService config;
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-    @Mock
-    private PluginOutPutAsyncer pluginOutPutAsyncer;
+        assertSame(modifiablePacket, output.getPublishPacket());
+    }
 
-    private PUBLISH origin;
+    @Test
+    public void update() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        config = new TestConfigurationBootstrap().getFullConfigurationService();
-        origin = TestMessageUtil.createFullMqtt5Publish();
-        publishInboundOutput = new PublishInboundOutputImpl(config, pluginOutPutAsyncer, origin);
-        assertEquals(publishInboundOutput, publishInboundOutput.get());
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
+
+        final PublishInboundInputImpl input = mock(PublishInboundInputImpl.class);
+        final PublishPacketImpl packet = mock(PublishPacketImpl.class);
+        final ModifiablePublishPacketImpl newModifiablePacket = mock(ModifiablePublishPacketImpl.class);
+        when(input.getPublishPacket()).thenReturn(packet);
+        when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
+
+        final PublishInboundOutputImpl updated = output.update(input);
+
+        assertSame(newModifiablePacket, updated.getPublishPacket());
     }
 
     @Test
     public void test_async_duration() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10));
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(TimeoutFallback.FAILURE, publishInboundOutput.getTimeoutFallback());
-        assertEquals(AckReasonCode.SUCCESS, publishInboundOutput.getReasonCode());
+        output.async(Duration.ofSeconds(10));
 
+        assertEquals(TimeoutFallback.FAILURE, output.getTimeoutFallback());
+        assertEquals(AckReasonCode.SUCCESS, output.getReasonCode());
     }
 
     @Test
     public void test_async_duration_fallback_failure() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE);
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(TimeoutFallback.FAILURE, publishInboundOutput.getTimeoutFallback());
-        assertEquals(AckReasonCode.SUCCESS, publishInboundOutput.getReasonCode());
+        output.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE);
 
+        assertEquals(TimeoutFallback.FAILURE, output.getTimeoutFallback());
+        assertEquals(AckReasonCode.SUCCESS, output.getReasonCode());
     }
 
     @Test
     public void test_async_duration_fallback_success() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(TimeoutFallback.SUCCESS, publishInboundOutput.getTimeoutFallback());
-        assertEquals(AckReasonCode.SUCCESS, publishInboundOutput.getReasonCode());
+        output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
 
+        assertEquals(TimeoutFallback.SUCCESS, output.getTimeoutFallback());
+        assertEquals(AckReasonCode.SUCCESS, output.getReasonCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_async_duration_fallback_success_reason_string_failed() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS, AckReasonCode.SUCCESS, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS, AckReasonCode.SUCCESS, "reason");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_async_duration_fallback_failure_reason_string_failed() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.SUCCESS, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.SUCCESS, "reason");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_async_duration_fallback_success_ack_failed() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS, AckReasonCode.NOT_AUTHORIZED, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS, AckReasonCode.NOT_AUTHORIZED, "reason");
     }
 
     @Test
     public void test_async_duration_fallback_failed_ack_failed_with_reason() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.NOT_AUTHORIZED, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(TimeoutFallback.FAILURE, publishInboundOutput.getTimeoutFallback());
-        assertEquals(AckReasonCode.NOT_AUTHORIZED, publishInboundOutput.getReasonCode());
-        assertEquals("reason", publishInboundOutput.getReasonString());
+        output.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.NOT_AUTHORIZED, "reason");
 
+        assertEquals(TimeoutFallback.FAILURE, output.getTimeoutFallback());
+        assertEquals(AckReasonCode.NOT_AUTHORIZED, output.getReasonCode());
+        assertEquals("reason", output.getReasonString());
     }
 
     @Test
     public void test_async_duration_fallback_failed_ack_failed_without_reason() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.NOT_AUTHORIZED);
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(TimeoutFallback.FAILURE, publishInboundOutput.getTimeoutFallback());
-        assertEquals(AckReasonCode.NOT_AUTHORIZED, publishInboundOutput.getReasonCode());
-        assertEquals(null, publishInboundOutput.getReasonString());
+        output.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, AckReasonCode.NOT_AUTHORIZED);
 
+        assertEquals(TimeoutFallback.FAILURE, output.getTimeoutFallback());
+        assertEquals(AckReasonCode.NOT_AUTHORIZED, output.getReasonCode());
+        assertEquals(null, output.getReasonString());
     }
 
     @Test
     public void test_prevent_delivery_default() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery();
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(AckReasonCode.SUCCESS, publishInboundOutput.getReasonCode());
-        assertEquals(null, publishInboundOutput.getReasonString());
-        assertTrue(publishInboundOutput.isPreventDelivery());
+        output.preventPublishDelivery();
+
+        assertEquals(AckReasonCode.SUCCESS, output.getReasonCode());
+        assertEquals(null, output.getReasonString());
+        assertTrue(output.isPreventDelivery());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void test_prevent_delivery_twice() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery();
-        publishInboundOutput.preventPublishDelivery();
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.preventPublishDelivery();
+        output.preventPublishDelivery();
     }
 
     @Test
     public void test_forcibly_prevention_after_default() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery();
-        publishInboundOutput.forciblyPreventPublishDelivery(AckReasonCode.QUOTA_EXCEEDED, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(AckReasonCode.QUOTA_EXCEEDED, publishInboundOutput.getReasonCode());
-        assertEquals("reason", publishInboundOutput.getReasonString());
+        output.preventPublishDelivery();
+        output.forciblyPreventPublishDelivery(AckReasonCode.QUOTA_EXCEEDED, "reason");
 
+        assertEquals(AckReasonCode.QUOTA_EXCEEDED, output.getReasonCode());
+        assertEquals("reason", output.getReasonString());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void test_async_twice() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.async(Duration.ZERO);
-        publishInboundOutput.async(Duration.ofMinutes(1), TimeoutFallback.SUCCESS);
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.async(Duration.ZERO);
+        output.async(Duration.ofMinutes(1), TimeoutFallback.SUCCESS);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_prevent_delivery_success_with_reason_string() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery(AckReasonCode.SUCCESS, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
+        output.preventPublishDelivery(AckReasonCode.SUCCESS, "reason");
     }
 
     @Test
     public void test_prevent_delivery_with_reason_code() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, publishInboundOutput.getReasonCode());
-        assertEquals(null, publishInboundOutput.getReasonString());
-        assertTrue(publishInboundOutput.isPreventDelivery());
+        output.preventPublishDelivery(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
+
+        assertEquals(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, output.getReasonCode());
+        assertEquals(null, output.getReasonString());
+        assertTrue(output.isPreventDelivery());
     }
 
     @Test
     public void test_prevent_delivery_with_reason_code_and_reason_string() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
 
-        publishInboundOutput.preventPublishDelivery(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, "reason");
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
 
-        assertEquals(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, publishInboundOutput.getReasonCode());
-        assertEquals("reason", publishInboundOutput.getReasonString());
-        assertTrue(publishInboundOutput.isPreventDelivery());
+        output.preventPublishDelivery(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, "reason");
+
+        assertEquals(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, output.getReasonCode());
+        assertEquals("reason", output.getReasonString());
+        assertTrue(output.isPreventDelivery());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_prevent_delivery_with_reason_code_null() {
-        publishInboundOutput.preventPublishDelivery(null);
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
+
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
+
+        output.preventPublishDelivery(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void test_prevent_delivery_with_reason_code_null_and_reason_string() {
-        publishInboundOutput.preventPublishDelivery(null, "reason");
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
+
+        final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
+
+        output.preventPublishDelivery(null, "reason");
     }
 }

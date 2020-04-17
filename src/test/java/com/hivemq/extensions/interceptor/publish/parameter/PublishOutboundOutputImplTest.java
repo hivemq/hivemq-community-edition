@@ -15,36 +15,56 @@
  */
 package com.hivemq.extensions.interceptor.publish.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import org.junit.Before;
+import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
+import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
+
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Lukas Brandl
+ * @author Silvio Giebl
  */
 public class PublishOutboundOutputImplTest {
 
-    private FullConfigurationService configurationService;
+    @Test
+    public void constructor_and_getter() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
 
-    @Mock
-    private PluginOutPutAsyncer asyncer;
+        final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
 
-    private PublishOutboundOutputImpl output;
+        assertSame(modifiablePacket, output.getPublishPacket());
+    }
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        output = new PublishOutboundOutputImpl(configurationService, asyncer, TestMessageUtil.createFullMqtt5Publish());
+    @Test
+    public void update() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
+
+        final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
+
+        final PublishOutboundInputImpl input = mock(PublishOutboundInputImpl.class);
+        final PublishPacketImpl packet = mock(PublishPacketImpl.class);
+        final ModifiableOutboundPublishImpl newModifiablePacket = mock(ModifiableOutboundPublishImpl.class);
+        when(input.getPublishPacket()).thenReturn(packet);
+        when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
+
+        final PublishOutboundOutputImpl updated = output.update(input);
+
+        assertSame(newModifiablePacket, updated.getPublishPacket());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void test_prevent_twice() {
+        final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
+        final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
+
+        final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
+
         output.preventPublishDelivery();
         output.preventPublishDelivery();
     }

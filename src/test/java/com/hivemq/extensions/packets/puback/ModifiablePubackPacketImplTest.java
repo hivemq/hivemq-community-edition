@@ -15,117 +15,198 @@
  */
 package com.hivemq.extensions.packets.puback;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.puback.PUBACK;
-import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
+
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class ModifiablePubackPacketImplTest {
 
-    private FullConfigurationService fullConfigurationService;
-    private ModifiablePubackPacketImpl modifiablePubackPacket;
-    private PUBACK fullMqtt5Puback;
+    private @NotNull FullConfigurationService configurationService;
 
     @Before
-    public void setUp() throws Exception {
-        fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        fullMqtt5Puback = new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, fullMqtt5Puback);
+    public void setUp() {
+        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
     }
 
     @Test
-    public void test_set_reason_string_to_failed() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonString("reason");
-        assertTrue(modifiablePubackPacket.isModified());
-        assertTrue(modifiablePubackPacket.getReasonString().isPresent());
-        assertEquals("reason", modifiablePubackPacket.getReasonString().get());
+    public void setReasonString() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("reason");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("reason"), modifiablePacket.getReasonString());
     }
 
     @Test
-    public void test_set_reason_string_to_null() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonString(null);
-        assertTrue(modifiablePubackPacket.isModified());
-        assertFalse(modifiablePubackPacket.getReasonString().isPresent());
+    public void setReasonString_null() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, "reason", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getReasonString());
     }
 
     @Test
-    public void test_set_reason_string_to_same() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "same", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonString("same");
-        assertFalse(modifiablePubackPacket.isModified());
+    public void setReasonString_same() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("same");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("same"), modifiablePacket.getReasonString());
+    }
+
+    @Test
+    public void setReasonCode() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.NO_MATCHING_SUBSCRIBERS);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.NO_MATCHING_SUBSCRIBERS, modifiablePacket.getReasonCode());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setReasonCode_null() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        modifiablePacket.setReasonCode(null);
+    }
+
+    @Test
+    public void setReasonCode_same() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.SUCCESS);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.SUCCESS, modifiablePacket.getReasonCode());
+    }
+
+    @Test
+    public void setReasonCode_error() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.NOT_AUTHORIZED, modifiablePacket.getReasonCode());
+    }
+
+    @Test
+    public void setReasonCode_sameError() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.UNSPECIFIED_ERROR, modifiablePacket.getReasonCode());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void test_switch_reason_code_to_failed_code() {
-        modifiablePubackPacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
+    public void setReasonCode_switchToError() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void test_switch_reason_code_from_failed_code() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonCode(AckReasonCode.SUCCESS);
+    public void setReasonCode_switchFromError() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        modifiablePacket.setReasonCode(AckReasonCode.SUCCESS);
     }
 
     @Test
-    public void test_switch_reason_code_from_failed_to_same_failed() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
-        assertFalse(modifiablePubackPacket.isModified());
+    public void copy_noChanges() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
+
+        final PubackPacketImpl copy = modifiablePacket.copy();
+
+        assertEquals(packet, copy);
     }
 
     @Test
-    public void test_switch_reason_code_from_failed_to_failed() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-        modifiablePubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
-        assertTrue(modifiablePubackPacket.isModified());
-        assertEquals(AckReasonCode.NOT_AUTHORIZED, modifiablePubackPacket.getReasonCode());
-    }
+    public void copy_changes() {
+        final PubackPacketImpl packet = new PubackPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubackPacketImpl modifiablePacket =
+                new ModifiablePubackPacketImpl(packet, configurationService);
 
-    @Test
-    public void test_all_values_set() {
-        final PubackPacketImpl pubackPacket = new PubackPacketImpl(fullMqtt5Puback);
-        assertEquals(fullMqtt5Puback.getPacketIdentifier(), pubackPacket.getPacketIdentifier());
-        assertEquals(fullMqtt5Puback.getReasonCode().name(), pubackPacket.getReasonCode().name());
-        assertFalse(pubackPacket.getReasonString().isPresent());
-        assertEquals(fullMqtt5Puback.getUserProperties().size(), pubackPacket.getUserProperties().asList().size());
-    }
+        modifiablePacket.setReasonString("reason");
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+        final PubackPacketImpl copy = modifiablePacket.copy();
 
-    @Test
-    public void test_change_modifiable_does_not_change_copy_of_packet() {
-        final PUBACK puback = new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubackPacketImpl
-                modifiablePubackPacket = new ModifiablePubackPacketImpl(fullConfigurationService, puback);
-
-        final PubackPacketImpl pubackPacket = new PubackPacketImpl(modifiablePubackPacket);
-
-        modifiablePubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
-        modifiablePubackPacket.setReasonString("OTHER REASON STRING");
-
-        assertTrue(pubackPacket.getReasonString().isPresent());
-        assertEquals(puback.getReasonString(), pubackPacket.getReasonString().get());
-        assertEquals(puback.getReasonCode().name(), pubackPacket.getReasonCode().name());
+        final PubackPacketImpl expectedPacket = new PubackPacketImpl(
+                1,
+                AckReasonCode.SUCCESS,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));
+        assertEquals(expectedPacket, copy);
     }
 }

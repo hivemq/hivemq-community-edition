@@ -16,10 +16,10 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -59,6 +59,7 @@ import util.TestConfigurationBootstrap;
 import java.io.File;
 import java.net.URL;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
@@ -137,7 +138,7 @@ public class ConnectInboundInterceptorHandlerTest {
         assertNull(channel.readInbound());
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void test_modify() throws Exception {
 
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestModifyInboundInterceptor");
@@ -157,7 +158,7 @@ public class ConnectInboundInterceptorHandlerTest {
         assertEquals("modified", connect.getClientIdentifier());
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void test_null_interceptor() throws Exception {
 
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestNullInterceptor");
@@ -177,40 +178,53 @@ public class ConnectInboundInterceptorHandlerTest {
         assertEquals("client", connect.getClientIdentifier());
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void test_timeout_failed() throws Exception {
 
-        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestTimeoutFailedInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
+        final ConnectInboundInterceptorProvider interceptorProvider =
+                getInterceptor("TestTimeoutFailedInboundInterceptor");
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(
+                ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final AtomicInteger counter = new AtomicInteger();
+        doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
+                .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
+                        anyString());
 
         channel.writeInbound(testConnect());
+
         channel.runPendingTasks();
-        verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
+        while (counter.get() == 0) {
+            Thread.sleep(10);
+            channel.runPendingTasks();
+        }
+        verify(connacker, timeout(5000)).connackError(
+                any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void test_exception() throws Exception {
 
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(
+                ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final AtomicInteger counter = new AtomicInteger();
+        doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
+                .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
+                        anyString());
 
         channel.writeInbound(testConnect());
+
         channel.runPendingTasks();
-
-        CONNECT connect = channel.readInbound();
-        while (connect == null) {
+        while (counter.get() == 0) {
+            Thread.sleep(10);
             channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-            connect = channel.readInbound();
         }
-
-        assertEquals("client", connect.getClientIdentifier());
-        verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
-        verify(connacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
+        verify(connacker, timeout(5000)).connackError(
+                any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
     }
 
     @NotNull
@@ -241,7 +255,10 @@ public class ConnectInboundInterceptorHandlerTest {
         @Override
         public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
-            return (input, output) -> output.getConnectPacket().setClientId("modified");
+            return (input, output) -> {
+                // this is getting called
+                output.getConnectPacket().setClientId("modified");
+            };
         }
     }
 

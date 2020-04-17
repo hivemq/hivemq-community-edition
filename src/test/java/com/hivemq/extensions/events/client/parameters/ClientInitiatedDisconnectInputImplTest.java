@@ -16,9 +16,10 @@
 
 package com.hivemq.extensions.events.client.parameters;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -57,7 +58,9 @@ public class ClientInitiatedDisconnectInputImplTest {
     public void test_construction_values_set() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client", channel, DisconnectedReasonCode.NORMAL_DISCONNECTION, "reason", Mqtt5UserProperties.of(new MqttUserProperty("key", "val")).getPluginUserProperties(), true);
+        final ClientInitiatedDisconnectInputImpl disconnectInput =
+                new ClientInitiatedDisconnectInputImpl("client", channel, DisconnectedReasonCode.NORMAL_DISCONNECTION,
+                        "reason", UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))), true);
         assertEquals(Optional.of(DisconnectedReasonCode.NORMAL_DISCONNECTION), disconnectInput.getReasonCode());
         assertEquals(Optional.of("reason"), disconnectInput.getReasonString());
         assertTrue(disconnectInput.getUserProperties().isPresent());
