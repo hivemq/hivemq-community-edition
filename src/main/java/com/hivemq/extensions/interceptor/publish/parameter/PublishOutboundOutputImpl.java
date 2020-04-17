@@ -16,31 +16,29 @@
 package com.hivemq.extensions.interceptor.publish.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
-import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
-import com.hivemq.mqtt.message.publish.PUBLISH;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 /**
  * @author Lukas Brandl
+ * @author Silvio Giebl
  * @since 4.2.0
  */
-public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutboundOutput> implements PublishOutboundOutput, PluginTaskOutput, Supplier<PublishOutboundOutputImpl> {
-
-    private final @NotNull AtomicBoolean preventDelivery;
+public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutboundOutput>
+        implements PublishOutboundOutput {
 
     private final @NotNull ModifiableOutboundPublishImpl publishPacket;
+    private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
 
-    public PublishOutboundOutputImpl(final @NotNull FullConfigurationService configurationService, final @NotNull PluginOutPutAsyncer asyncer, final @NotNull PUBLISH publish) {
+    public PublishOutboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiableOutboundPublishImpl publishPacket) {
+
         super(asyncer);
-        this.publishPacket = new ModifiableOutboundPublishImpl(configurationService, publish);
-        this.preventDelivery = new AtomicBoolean(false);
+        this.publishPacket = publishPacket;
     }
 
     @Override
@@ -48,19 +46,13 @@ public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutbou
         return publishPacket;
     }
 
-
     @Override
     public void preventPublishDelivery() {
         checkPrevented();
     }
 
     public void forciblyPreventPublishDelivery() {
-        this.preventDelivery.set(true);
-    }
-
-    @Override
-    public @NotNull PublishOutboundOutputImpl get() {
-        return this;
+        preventDelivery.set(true);
     }
 
     public boolean isPreventDelivery() {
@@ -71,5 +63,9 @@ public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutbou
         if (!preventDelivery.compareAndSet(false, true)) {
             throw new UnsupportedOperationException("preventPublishDelivery must not be called more than once");
         }
+    }
+
+    public @NotNull PublishOutboundOutputImpl update(final @NotNull PublishOutboundInputImpl input) {
+        return new PublishOutboundOutputImpl(asyncer, publishPacket.update(input.getPublishPacket()));
     }
 }

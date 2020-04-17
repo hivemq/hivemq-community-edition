@@ -16,147 +16,168 @@
 
 package com.hivemq.extensions.packets.general;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Georg Held
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
-public class ModifiableUserPropertiesImpl implements InternalUserProperties, ModifiableUserProperties {
+@ThreadSafe
+public class ModifiableUserPropertiesImpl implements ModifiableUserProperties {
 
-    @NotNull
-    private static final Function<Map.Entry<String, Set<String>>, Stream<? extends UserProperty>>
-            ENTRY_STREAM_FUNCTION = e -> {
-        final Stream.Builder<UserProperty> builder = Stream.builder();
-        e.getValue().forEach(l -> builder.add(new MqttUserProperty(e.getKey(), l)));
-        return builder.build();
-    };
-
-    @NotNull
-    @VisibleForTesting
-    InternalUserProperties legacy;
+    private final @NotNull ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private @NotNull List<MqttUserProperty> list;
 
     private final boolean validateUTF8;
+    private boolean modified = false;
 
-    @NotNull
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    public ModifiableUserPropertiesImpl(
+            final @NotNull ImmutableList<MqttUserProperty> list, final boolean validateUTF8) {
 
-    @Nullable
-    private Map<String, Set<String>> current;
-
-    private boolean modified;
-
-    public ModifiableUserPropertiesImpl(final boolean validateUTF8) {
-        this(null, validateUTF8);
-    }
-
-    public ModifiableUserPropertiesImpl(@Nullable final InternalUserProperties legacy, final boolean validateUTF8) {
-        if (legacy == null) {
-            this.legacy = EmptyUserPropertiesImpl.INSTANCE;
-        } else {
-            // It is necessary to copy here, because the legacy user properties can be modifiable
-            this.legacy = new UserPropertiesImpl(Mqtt5UserProperties.of(legacy.asImmutableList()));
-        }
+        this.list = list;
         this.validateUTF8 = validateUTF8;
-        this.modified = false;
     }
 
     @Override
-    public void addUserProperty(@NotNull final UserProperty userProperty) {
+    public @NotNull Optional<String> getFirst(final @NotNull String name) {
+        checkNotNull(name, "Name must never be null");
 
+        final Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return list.stream()
+                    .filter(userProperty -> userProperty.getName().equals(name))
+                    .findFirst()
+                    .map(UserProperty::getValue);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public @NotNull List<String> getAllForName(final @NotNull String name) {
+        checkNotNull(name, "Name must never be null");
+
+        final Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return list.stream()
+                    .filter(userProperty -> userProperty.getName().equals(name))
+                    .map(UserProperty::getValue)
+                    .collect(ImmutableList.toImmutableList());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public @NotNull ImmutableList<UserProperty> asList() {
+        final Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return ImmutableList.copyOf(list);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public @NotNull ImmutableList<MqttUserProperty> asInternalList() {
+        final Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return ImmutableList.copyOf(list);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        final Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return list.isEmpty();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void addUserProperty(final @NotNull UserProperty userProperty) {
         checkNotNull(userProperty, "User property must never be null");
-        if (!(userProperty instanceof UserPropertyImpl) && !(userProperty instanceof MqttUserProperty)) {
+        if (!(userProperty instanceof MqttUserProperty)) {
             throw new DoNotImplementException(UserProperty.class.getSimpleName());
         }
 
         final Lock lock = readWriteLock.writeLock();
         lock.lock();
-
         try {
-            this.modified = true;
-            addUserProperty(userProperty.getName(), userProperty.getValue());
+            modify().add(((MqttUserProperty) userProperty));
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public void addUserProperty(@NotNull final String name, @NotNull final String value) {
-        PluginBuilderUtil.checkUserProperty(name, value, validateUTF8);
-        final Lock lock = readWriteLock.writeLock();
-        lock.lock();
-
-        try {
-            this.modified = true;
-            createCurrent(name);
-
-            checkNotNull(current, "Current must not be null");
-            current.get(name).add(value);
-
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void removeUserProperty(@NotNull final String name, @NotNull final String value) {
+    public void addUserProperty(final @NotNull String name, final @NotNull String value) {
         PluginBuilderUtil.checkUserProperty(name, value, validateUTF8);
 
         final Lock lock = readWriteLock.writeLock();
         lock.lock();
-
         try {
-
-            this.modified = true;
-            createCurrent(name);
-
-            checkNotNull(current, "Current must not be null");
-
-            final Set<String> values = current.get(name);
-            values.remove(value);
-
+            modify().add(new MqttUserProperty(name, value));
         } finally {
             lock.unlock();
         }
     }
 
-    @NotNull
     @Override
-    public List<UserProperty> removeName(@NotNull final String name) {
+    public void removeUserProperty(final @NotNull String name, final @NotNull String value) {
+        PluginBuilderUtil.checkUserProperty(name, value, validateUTF8);
+
+        final Lock lock = readWriteLock.writeLock();
+        lock.lock();
+        try {
+            modify().remove(new MqttUserProperty(name, value));
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public @NotNull ImmutableList<UserProperty> removeName(final @NotNull String name) {
         PluginBuilderUtil.checkUserPropertyName(name, validateUTF8);
 
         final Lock lock = readWriteLock.writeLock();
         lock.lock();
-
         try {
-
-            this.modified = true;
-            createCurrent(name);
-
-            checkNotNull(current, "Current must not be null");
-
-            final Set<String> remove = current.remove(name);
-
-            return remove.stream().map(s -> new MqttUserProperty(name, s)).collect(ImmutableList.toImmutableList());
-
+            final ImmutableList.Builder<UserProperty> removed = ImmutableList.builder();
+            modify().removeIf(userProperty -> {
+                if (userProperty.getName().equals(name)) {
+                    removed.add(userProperty);
+                    return true;
+                }
+                return false;
+            });
+            return removed.build();
         } finally {
             lock.unlock();
         }
@@ -168,143 +189,44 @@ public class ModifiableUserPropertiesImpl implements InternalUserProperties, Mod
         lock.lock();
         try {
             modified = true;
-            current = null;
-            legacy = EmptyUserPropertiesImpl.INSTANCE;
+            list = new LinkedList<>();
         } finally {
             lock.unlock();
         }
     }
 
-    @NotNull
-    @Override
-    public Optional<String> getFirst(@NotNull final String name) {
-        checkNotNull(name, "Name must never be null");
-
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-
-        try {
-            if (current == null) {
-                if (modified) {
-                    return Optional.empty();
-                }
-                return legacy.getFirst(name);
-            }
-
-            return Optional.ofNullable(current.get(name)).flatMap(s -> s.stream().findAny());
-        } finally {
-            lock.unlock();
-        }
+    public @NotNull UserPropertiesImpl copy() {
+        return UserPropertiesImpl.of(asInternalList());
     }
 
-    @NotNull
-    @Override
-    public List<String> getAllForName(@NotNull final String name) {
-        checkNotNull(name, "Name must never be null");
-
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-
-        try {
-            if (current == null) {
-                if (modified) {
-                    return Collections.unmodifiableList(Collections.emptyList());
-                }
-                return legacy.getAllForName(name);
-            }
-
-            final Set<String> values = current.get(name);
-            return values == null ? ImmutableList.of() : ImmutableList.copyOf(values);
-        } finally {
-            lock.unlock();
+    private @NotNull LinkedList<MqttUserProperty> modify() {
+        if (list instanceof LinkedList) {
+            return (LinkedList<MqttUserProperty>) list;
         }
-    }
-
-    @NotNull
-    @Override
-    public List<UserProperty> asList() {
-
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-
-        try {
-            if (current == null) {
-                if (modified) {
-                    return Collections.unmodifiableList(Collections.emptyList());
-                }
-                return legacy.asList();
-            }
-            return current.entrySet().stream().flatMap(ENTRY_STREAM_FUNCTION).collect(ImmutableList.toImmutableList());
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public boolean isEmpty() {
-
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-
-        try {
-            if (modified) {
-                return current == null || current.isEmpty();
-            }
-            return legacy.isEmpty();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @NotNull
-    public InternalUserProperties consolidate() {
-
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-
-        try {
-            if (modified) {
-                if (current == null) {
-                    return EmptyUserPropertiesImpl.INSTANCE;
-                }
-                return this;
-            }
-            return legacy;
-        } finally {
-            lock.unlock();
-        }
-
-    }
-
-    @Override
-    public @NotNull ImmutableList<MqttUserProperty> asImmutableList() {
-        final Lock lock = readWriteLock.readLock();
-        lock.lock();
-        try {
-            return asList().stream().map(MqttUserProperty::of).collect(ImmutableList.toImmutableList());
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void createCurrent(@NotNull final String name) {
-
-        if (current == null) {
-            current = new HashMap<>();
-            for (final UserProperty userProperty : legacy.asList()) {
-                addUserProperty(userProperty);
-            }
-            legacy = EmptyUserPropertiesImpl.INSTANCE;
-        }
-
-        if (!current.containsKey(name)) {
-            current.put(name, new HashSet<>());
-        }
-
         modified = true;
+        final LinkedList<MqttUserProperty> modifiableList = new LinkedList<>(list);
+        list = modifiableList;
+        return modifiableList;
     }
 
     public boolean isModified() {
         return modified;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ModifiableUserPropertiesImpl)) {
+            return false;
+        }
+        final ModifiableUserPropertiesImpl that = (ModifiableUserPropertiesImpl) o;
+        return list.equals(that.list);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(list);
     }
 }

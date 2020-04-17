@@ -15,125 +15,198 @@
  */
 package com.hivemq.extensions.packets.pubrec;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
+
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class ModifiablePubrecPacketImplTest {
 
-    private FullConfigurationService fullConfigurationService;
-    private ModifiablePubrecPacketImpl modifiablePubrecPacket;
-    private PUBREC fullMqtt5Pubrec;
+    private @NotNull FullConfigurationService configurationService;
 
     @Before
-    public void setUp() throws Exception {
-        fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        fullMqtt5Pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, fullMqtt5Pubrec);
+    public void setUp() {
+        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
     }
 
     @Test
-    public void test_set_reason_string_to_failed() {
-        final PUBREC pubrec =
-                new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonString("reason");
-        assertTrue(modifiablePubrecPacket.isModified());
-        assertTrue(modifiablePubrecPacket.getReasonString().isPresent());
-        assertEquals("reason", modifiablePubrecPacket.getReasonString().get());
+    public void setReasonString() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("reason");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("reason"), modifiablePacket.getReasonString());
     }
 
     @Test
-    public void test_set_reason_string_to_null() {
-        final PUBREC pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonString(null);
-        assertTrue(modifiablePubrecPacket.isModified());
-        assertFalse(modifiablePubrecPacket.getReasonString().isPresent());
+    public void setReasonString_null() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, "reason", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getReasonString());
     }
 
     @Test
-    public void test_set_reason_string_to_same() {
-        final PUBREC pubrec =
-                new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "same", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonString("same");
-        assertFalse(modifiablePubrecPacket.isModified());
+    public void setReasonString_same() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("same");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("same"), modifiablePacket.getReasonString());
+    }
+
+    @Test
+    public void setReasonCode() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.NO_MATCHING_SUBSCRIBERS);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.NO_MATCHING_SUBSCRIBERS, modifiablePacket.getReasonCode());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setReasonCode_null() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        modifiablePacket.setReasonCode(null);
+    }
+
+    @Test
+    public void setReasonCode_same() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.SUCCESS);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.SUCCESS, modifiablePacket.getReasonCode());
+    }
+
+    @Test
+    public void setReasonCode_error() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.NOT_AUTHORIZED, modifiablePacket.getReasonCode());
+    }
+
+    @Test
+    public void setReasonCode_sameError() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(AckReasonCode.UNSPECIFIED_ERROR, modifiablePacket.getReasonCode());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void test_switch_reason_code_to_failed_code() {
-        modifiablePubrecPacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
+    public void setReasonCode_switchToError() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void test_switch_reason_code_from_failed_code() {
-        final PUBREC pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonCode(AckReasonCode.SUCCESS);
+    public void setReasonCode_switchFromError() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.UNSPECIFIED_ERROR, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        modifiablePacket.setReasonCode(AckReasonCode.SUCCESS);
     }
 
     @Test
-    public void test_switch_reason_code_from_failed_to_same_failed() {
-        final PUBREC pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonCode(AckReasonCode.UNSPECIFIED_ERROR);
-        assertFalse(modifiablePubrecPacket.isModified());
+    public void copy_noChanges() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        final PubrecPacketImpl copy = modifiablePacket.copy();
+
+        assertEquals(packet, copy);
     }
 
     @Test
-    public void test_switch_reason_code_from_failed_to_failed() {
-        final PUBREC pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-        modifiablePubrecPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
-        assertTrue(modifiablePubrecPacket.isModified());
-        assertEquals(AckReasonCode.NOT_AUTHORIZED, modifiablePubrecPacket.getReasonCode());
+    public void copy_changes() {
+        final PubrecPacketImpl packet = new PubrecPacketImpl(
+                1, AckReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrecPacketImpl modifiablePacket =
+                new ModifiablePubrecPacketImpl(packet, configurationService);
+
+        modifiablePacket.setReasonString("reason");
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+        final PubrecPacketImpl copy = modifiablePacket.copy();
+
+        final PubrecPacketImpl expectedPacket = new PubrecPacketImpl(
+                1,
+                AckReasonCode.SUCCESS,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));
+        assertEquals(expectedPacket, copy);
     }
-
-    @Test
-    public void test_all_values_set() {
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(fullMqtt5Pubrec);
-        assertEquals(fullMqtt5Pubrec.getPacketIdentifier(), pubrecPacket.getPacketIdentifier());
-        assertEquals(fullMqtt5Pubrec.getReasonCode().name(), pubrecPacket.getReasonCode().name());
-        assertFalse(pubrecPacket.getReasonString().isPresent());
-        assertEquals(fullMqtt5Pubrec.getUserProperties().size(), pubrecPacket.getUserProperties().asList().size());
-    }
-
-    @Test
-    public void test_change_modifiable_does_not_change_copy_of_packet() {
-        final PUBREC pubrec = new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrecPacketImpl
-                modifiablePubrecPacket = new ModifiablePubrecPacketImpl(fullConfigurationService, pubrec);
-
-        final PubrecPacketImpl pubrecPacket = new PubrecPacketImpl(modifiablePubrecPacket);
-
-        modifiablePubrecPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
-        modifiablePubrecPacket.setReasonString("OTHER REASON STRING");
-
-        assertTrue(pubrecPacket.getReasonString().isPresent());
-        assertEquals(pubrec.getReasonString(), pubrecPacket.getReasonString().get());
-        assertEquals(pubrec.getReasonCode().name(), pubrecPacket.getReasonCode().name());
-    }
-
 }

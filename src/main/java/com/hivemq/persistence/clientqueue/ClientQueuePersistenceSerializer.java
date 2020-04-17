@@ -17,9 +17,9 @@
 package com.hivemq.persistence.clientqueue;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -165,7 +165,6 @@ class ClientQueuePersistenceSerializer {
         return XodusUtils.bytesToByteIterable(createPublishBytes(publish, retained));
     }
 
-
     @NotNull
     ByteIterable serializeAndSetPacketId(@NotNull final ByteIterable serializedValue, final int packetId) {
         final byte[] bytes = XodusUtils.byteIterableToBytes(serializedValue);
@@ -261,7 +260,7 @@ class ClientQueuePersistenceSerializer {
                         (subscriptionIdentifiers == null ? 0 : Integer.BYTES + subscriptionIdentifierLength * Integer.BYTES) + // subscription identifiers
 
                         1 + // payload format indicator
-                        (userProperties.size() == 0 ? 0 : PropertiesSerializationUtil.encodedSize(userProperties))
+                        (userProperties.asList().size() == 0 ? 0 : PropertiesSerializationUtil.encodedSize(userProperties))
                 ];
 
         int cursor = 0;
@@ -294,7 +293,7 @@ class ClientQueuePersistenceSerializer {
         if (subscriptionIdentifiers != null) {
             presentFlags |= SUBSCRIPTION_IDENTIFIERS_PRESENT_BIT;
         }
-        if (userProperties.size() > 0) {
+        if (userProperties.asList().size() > 0) {
             presentFlags |= USER_PROPERTIES_PRESENT_BIT;
         }
 
@@ -328,7 +327,7 @@ class ClientQueuePersistenceSerializer {
         }
 
         cursor = XodusUtils.serializeByte((byte) payloadFormatIndicator, result, cursor);
-        if (userProperties.size() > 0) {
+        if (userProperties.asList().size() > 0) {
             PropertiesSerializationUtil.write(userProperties, result, cursor);
         }
 

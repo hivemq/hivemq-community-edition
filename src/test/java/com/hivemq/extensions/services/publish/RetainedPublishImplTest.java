@@ -16,9 +16,9 @@
 
 package com.hivemq.extensions.services.publish;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
-import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -41,7 +41,9 @@ public class RetainedPublishImplTest {
     @Test
     public void test_convert_all_nullable_null() {
 
-        final RetainedPublish retainedPublish = new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", null, null, null, null, null, null, UserPropertiesImpl.NO_USER_PROPERTIES);
+        final RetainedPublishImpl retainedPublish =
+                new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", null, null, null, null, null, null,
+                        UserPropertiesImpl.of(ImmutableList.of()));
 
         final RetainedMessage convert = RetainedPublishImpl.convert(retainedPublish);
 
@@ -60,7 +62,7 @@ public class RetainedPublishImplTest {
     @Test
     public void test_convert_all_set() {
 
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.of(
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of(
                 new MqttUserProperty("name", "value"),
                 new MqttUserProperty("name", "value2"),
                 new MqttUserProperty("name2", "val")));
@@ -78,7 +80,7 @@ public class RetainedPublishImplTest {
         assertEquals(UTF_8, convert.getPayloadFormatIndicator());
         assertEquals("response_topic", convert.getResponseTopic());
         assertEquals(null, convert.getPayloadId());
-        assertEquals(3, convert.getUserProperties().size());
+        assertEquals(3, convert.getUserProperties().asList().size());
         assertEquals(QoS.AT_MOST_ONCE, convert.getQos());
 
     }

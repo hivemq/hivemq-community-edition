@@ -16,9 +16,10 @@
 
 package com.hivemq.extensions.events;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
@@ -28,11 +29,12 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
  * @author Florian Limpöck
  * @since 4.0.0
  */
+@Immutable
 public class OnServerDisconnectEvent {
 
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
-    private final @Nullable UserProperties userProperties;
+    private final @Nullable UserPropertiesImpl userProperties;
 
     public OnServerDisconnectEvent(
             final @Nullable DisconnectedReasonCode reasonCode,
@@ -41,14 +43,14 @@ public class OnServerDisconnectEvent {
 
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
-        this.userProperties = (userProperties == null) ? null : userProperties.getPluginUserProperties();
+        this.userProperties = (userProperties == null) ? null : UserPropertiesImpl.of(userProperties.asList());
     }
 
     public OnServerDisconnectEvent(final @Nullable DISCONNECT disconnect) {
         if (disconnect != null) {
             this.reasonCode = disconnect.getReasonCode().toDisconnectedReasonCode();
             this.reasonString = disconnect.getReasonString();
-            this.userProperties = disconnect.getUserProperties().getPluginUserProperties();
+            this.userProperties = UserPropertiesImpl.of(disconnect.getUserProperties().asList());
         } else {
             this.reasonCode = null;
             this.reasonString = null;
@@ -64,7 +66,7 @@ public class OnServerDisconnectEvent {
         return reasonString;
     }
 
-    public @Nullable UserProperties getUserProperties() {
+    public @Nullable UserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 }

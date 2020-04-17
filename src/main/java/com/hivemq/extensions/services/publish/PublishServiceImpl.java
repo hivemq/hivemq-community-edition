@@ -17,12 +17,11 @@
 package com.hivemq.extensions.services.publish;
 
 import com.google.common.util.concurrent.*;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.HivemqId;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
@@ -34,8 +33,6 @@ import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserPropertiesBuilder;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.InternalPublishService;
@@ -44,7 +41,6 @@ import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Bytes;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
@@ -104,7 +100,7 @@ public class PublishServiceImpl implements PublishService {
             return CompletableFuture.failedFuture(new DoNotImplementException(Publish.class.getSimpleName()));
         }
 
-        final PUBLISH internalPublish = publishToPUBLISH(publish);
+        final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
         final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService.publish(internalPublish, globalManagedPluginExecutorService, null);
         return ListenableFutureConverter.toCompletable(FutureUtils.voidFutureFromAnyFuture(publishFuture), globalManagedPluginExecutorService);
     }
@@ -121,7 +117,7 @@ public class PublishServiceImpl implements PublishService {
         if (!(publish instanceof PublishImpl)) {
             return CompletableFuture.failedFuture(new DoNotImplementException(Publish.class.getSimpleName()));
         }
-        final PUBLISH internalPublish = publishToPUBLISH(publish);
+        final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
 
         final SettableFuture<PublishToClientResult> sendPublishFuture = SettableFuture.create();
         final SubscriberWithIdentifiers subscriber = topicTree.getSubscriber(clientId, publish.getTopic());
@@ -150,25 +146,13 @@ public class PublishServiceImpl implements PublishService {
     }
 
     @NotNull
-    private PUBLISH publishToPUBLISH(@NotNull final Publish publish) {
-        byte[] payload = null;
-        payload = Bytes.getBytesFromReadOnlyBuffer(publish.getPayload());
+    private PUBLISH publishToPUBLISH(@NotNull final PublishImpl publish) {
+        final byte[] payload = Bytes.getBytesFromReadOnlyBuffer(publish.getPayload());
 
-        byte[] correlationData = null;
-        correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
+        final byte[] correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
 
-        final Mqtt5UserPropertiesBuilder userPropertiesBuilder = Mqtt5UserProperties.builder();
-        for (final UserProperty userProperty : publish.getUserProperties().asList()) {
-            userPropertiesBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        Mqtt5PayloadFormatIndicator payloadFormatIndicator = null;
-        if (publish.getPayloadFormatIndicator().isPresent()) {
-            if (publish.getPayloadFormatIndicator().get() == PayloadFormatIndicator.UTF_8) {
-                payloadFormatIndicator = Mqtt5PayloadFormatIndicator.UTF_8;
-            } else {
-                payloadFormatIndicator = Mqtt5PayloadFormatIndicator.UNSPECIFIED;
-            }
-        }
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent() ?
+                Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get()) : null;
 
         return new PUBLISHFactory.Mqtt5Builder()
                 .withHivemqId(hiveMQId.get())
@@ -182,6 +166,7 @@ public class PublishServiceImpl implements PublishService {
                 .withPayload(payload)
                 .withContentType(publish.getContentType().orElse(null))
                 .withPayloadFormatIndicator(payloadFormatIndicator)
-                .withUserProperties(userPropertiesBuilder.build()).build();
+                .withUserProperties(Mqtt5UserProperties.of(publish.getUserProperties().asInternalList()))
+                .build();
     }
 }

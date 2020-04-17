@@ -21,33 +21,28 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.unsuback.parameter.UnsubackOutboundInput;
-import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackPacket;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.unsuback.UnsubackPacketImpl;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import io.netty.channel.Channel;
-
-import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
-public class UnsubackOutboundInputImpl
-        implements Supplier<UnsubackOutboundInputImpl>, UnsubackOutboundInput, PluginTaskInput {
+@Immutable
+public class UnsubackOutboundInputImpl implements UnsubackOutboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    private @NotNull UnsubackPacketImpl unsubackPacket;
+    private final @NotNull UnsubackPacketImpl unsubackPacket;
 
     public UnsubackOutboundInputImpl(
-            final @NotNull String clientId,
-            final @NotNull Channel channel,
-            final @NotNull UNSUBACK unsuback) {
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull UnsubackPacketImpl unsubackPacket) {
 
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        unsubackPacket = new UnsubackPacketImpl(unsuback);
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
+        this.unsubackPacket = unsubackPacket;
     }
 
     @Override
@@ -61,16 +56,12 @@ public class UnsubackOutboundInputImpl
     }
 
     @Override
-    public @Immutable @NotNull UnsubackPacket getUnsubackPacket() {
+    public @NotNull UnsubackPacketImpl getUnsubackPacket() {
         return unsubackPacket;
     }
 
-    @Override
-    public @NotNull UnsubackOutboundInputImpl get() {
-        return this;
-    }
-
-    public void update(final @NotNull UnsubackPacket unsubackPacket) {
-        this.unsubackPacket = new UnsubackPacketImpl(unsubackPacket);
+    public @NotNull UnsubackOutboundInputImpl update(final @NotNull UnsubackOutboundOutputImpl output) {
+        return new UnsubackOutboundInputImpl(
+                clientInformation, connectionInformation, output.getUnsubackPacket().copy());
     }
 }

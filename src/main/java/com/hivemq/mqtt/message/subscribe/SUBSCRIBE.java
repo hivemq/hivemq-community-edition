@@ -19,14 +19,10 @@ package com.hivemq.mqtt.message.subscribe;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
+import com.hivemq.extensions.packets.subscribe.SubscribePacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The MQTT SUBSCRIBE message
@@ -69,21 +65,20 @@ public class SUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3SUB
     }
 
     @NotNull
-    public static SUBSCRIBE from(final @NotNull ModifiableSubscribePacket subscribePacket) {
+    public static SUBSCRIBE from(final @NotNull SubscribePacketImpl packet) {
+        final ImmutableList.Builder<Topic> subscriptionBuilder = ImmutableList.builder();
+        packet.getSubscriptions().forEach(subscription -> subscriptionBuilder.add(
+                Topic.topicFromSubscription(subscription, packet.getSubscriptionIdentifier().orElse(null))));
 
-        final InternalUserProperties properties = (InternalUserProperties) subscribePacket.getUserProperties();
-
-        final ImmutableList<Topic> topics = ImmutableList.copyOf(subscribePacket.getSubscriptions()
-                .stream()
-                .map(subscription -> Topic.topicFromSubscription(subscription, subscribePacket.getSubscriptionIdentifier().orElse(null)))
-                .collect(Collectors.toList()));
-
-        return new SUBSCRIBE(properties.consolidate().toMqtt5UserProperties(), topics, subscribePacket.getPacketId(), subscribePacket.getSubscriptionIdentifier().orElse(DEFAULT_NO_SUBSCRIPTION_IDENTIFIER));
-
+        return new SUBSCRIBE(
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()),
+                subscriptionBuilder.build(),
+                packet.getPacketId(),
+                packet.getSubscriptionIdentifier().orElse(DEFAULT_NO_SUBSCRIPTION_IDENTIFIER));
     }
 
     @Override
-    public @NotNull List<Topic> getTopics() {
+    public @NotNull ImmutableList<Topic> getTopics() {
         return topics;
     }
 

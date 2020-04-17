@@ -18,20 +18,16 @@ package com.hivemq.extensions.packets.unsubscribe;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.ModifiableUnsubscribePacket;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 
 import java.util.List;
 import java.util.Objects;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePacket {
 
@@ -39,32 +35,23 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final int packetIdentifier;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiableUnsubscribePacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull UNSUBSCRIBE unsubscribe) {
+            final @NotNull UnsubscribePacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
 
-        topicFilters = unsubscribe.getTopics();
+        topicFilters = packet.topicFilters;
         userProperties = new ModifiableUserPropertiesImpl(
-                unsubscribe.getUserProperties().getPluginUserProperties(),
-                fullConfigurationService.securityConfiguration().validateUTF8());
-        packetIdentifier = unsubscribe.getPacketIdentifier();
-    }
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        packetIdentifier = packet.packetIdentifier;
 
-    public ModifiableUnsubscribePacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull UnsubscribePacket unsubscribe) {
-
-        topicFilters = ImmutableList.copyOf(unsubscribe.getTopicFilters());
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) unsubscribe.getUserProperties(),
-                fullConfigurationService.securityConfiguration().validateUTF8());
-        packetIdentifier = unsubscribe.getPacketIdentifier();
+        this.configurationService = configurationService;
     }
 
     @Override
-    public @Immutable @NotNull List<@NotNull String> getTopicFilters() {
+    public @NotNull ImmutableList<String> getTopicFilters() {
         return topicFilters;
     }
 
@@ -85,7 +72,7 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
@@ -95,6 +82,14 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     }
 
     public boolean isModified() {
-        return modified;
+        return modified || userProperties.isModified();
+    }
+
+    public @NotNull UnsubscribePacketImpl copy() {
+        return new UnsubscribePacketImpl(topicFilters, userProperties.copy(), packetIdentifier);
+    }
+
+    public @NotNull ModifiableUnsubscribePacketImpl update(final @NotNull UnsubscribePacketImpl packet) {
+        return new ModifiableUnsubscribePacketImpl(packet, configurationService);
     }
 }

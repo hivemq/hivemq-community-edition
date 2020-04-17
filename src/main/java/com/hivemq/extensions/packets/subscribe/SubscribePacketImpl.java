@@ -16,67 +16,65 @@
 
 package com.hivemq.extensions.packets.subscribe;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.mqtt.message.subscribe.Topic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author Florian Limpöck
- * @since 4.2.0
+ * @author Silvio Giebl
+ * @since 4.0.0
  */
+@Immutable
 public class SubscribePacketImpl implements SubscribePacket {
 
-    private final @NotNull List<Subscription> subscriptionList;
-    private final @NotNull UserProperties userProperties;
-    private final int subscriptionIdentifier;
-    private final int packetIdentifier;
+    final @NotNull ImmutableList<SubscriptionImpl> subscriptions;
+    final @NotNull UserPropertiesImpl userProperties;
+    final int subscriptionIdentifier;
+    final int packetIdentifier;
+
+    public SubscribePacketImpl(
+            final @NotNull ImmutableList<SubscriptionImpl> subscriptions,
+            final @NotNull UserPropertiesImpl userProperties,
+            final int subscriptionIdentifier,
+            final int packetIdentifier) {
+
+        this.subscriptions = subscriptions;
+        this.userProperties = userProperties;
+        this.subscriptionIdentifier = subscriptionIdentifier;
+        this.packetIdentifier = packetIdentifier;
+    }
 
     public SubscribePacketImpl(final @NotNull SUBSCRIBE subscribe) {
-
-        subscriptionList = subscribe.getTopics().stream()
-                .map((Function<Topic, Subscription>) topic -> new SubscriptionImpl(topic))
-                .collect(Collectors.toList());
-        userProperties = subscribe.getUserProperties().getPluginUserProperties();
+        final ImmutableList.Builder<SubscriptionImpl> builder = ImmutableList.builder();
+        subscribe.getTopics().forEach(topic -> builder.add(new SubscriptionImpl(topic)));
+        subscriptions = builder.build();
+        userProperties = UserPropertiesImpl.of(subscribe.getUserProperties().asList());
         subscriptionIdentifier = subscribe.getSubscriptionIdentifier();
         packetIdentifier = subscribe.getPacketIdentifier();
     }
 
-    public SubscribePacketImpl(final @NotNull ModifiableSubscribePacket subscribe) {
-
-        subscriptionList = new ArrayList<>(subscribe.getSubscriptions());
-        userProperties = subscribe.getUserProperties();
-        subscriptionIdentifier = subscribe.getSubscriptionIdentifier().orElse(Mqtt5SUBSCRIBE.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER);
-        packetIdentifier = subscribe.getPacketId();
-    }
-
-
-    @NotNull
     @Override
-    @Immutable
-    public List<Subscription> getSubscriptions() {
-        return subscriptionList;
+    public @NotNull ImmutableList<Subscription> getSubscriptions() {
+        return ImmutableList.copyOf(subscriptions);
     }
 
     @Override
-    public @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
-    @NotNull
     @Override
-    public Optional<Integer> getSubscriptionIdentifier() {
+    public @NotNull Optional<Integer> getSubscriptionIdentifier() {
         if (subscriptionIdentifier == Mqtt5SUBSCRIBE.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER) {
             return Optional.empty();
         } else {
@@ -87,5 +85,25 @@ public class SubscribePacketImpl implements SubscribePacket {
     @Override
     public int getPacketId() {
         return packetIdentifier;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SubscribePacketImpl)) {
+            return false;
+        }
+        final SubscribePacketImpl that = (SubscribePacketImpl) o;
+        return subscriptions.equals(that.subscriptions) &&
+                userProperties.equals(that.userProperties) &&
+                (subscriptionIdentifier == that.subscriptionIdentifier) &&
+                (packetIdentifier == that.packetIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subscriptions, userProperties, subscriptionIdentifier, packetIdentifier);
     }
 }

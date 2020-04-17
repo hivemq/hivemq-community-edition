@@ -16,10 +16,11 @@
 
 package com.hivemq.extensions.events.client.parameters;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -37,7 +38,6 @@ public class AuthenticationFailedInputImplTest {
 
     @Test
     public void test_construction_null_values() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", null, null, null);
@@ -47,15 +47,15 @@ public class AuthenticationFailedInputImplTest {
         assertEquals(Optional.empty(), input.getReasonString());
         assertEquals(Optional.empty(), input.getUserProperties());
         assertNotNull(input.getConnectionInformation());
-
     }
 
     @Test
     public void test_construction_with_values() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD, "reason", Mqtt5UserProperties.of(new MqttUserProperty("key", "value")).getPluginUserProperties());
+        final AuthenticationFailedInputImpl input =
+                new AuthenticationFailedInputImpl(channel, "client", DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD,
+                        "reason", UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "value"))));
 
         assertEquals(input, input.get());
         assertEquals("client", input.getClientInformation().getClientId());
@@ -65,15 +65,12 @@ public class AuthenticationFailedInputImplTest {
         assertTrue(userProperties.isPresent());
         assertEquals(1, userProperties.get().asList().size());
         assertNotNull(input.getConnectionInformation());
-
     }
 
     @Test(expected = NullPointerException.class)
     public void test_construction_client_id_null() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         new AuthenticationFailedInputImpl(channel, null, null, null, null);
-
     }
 }

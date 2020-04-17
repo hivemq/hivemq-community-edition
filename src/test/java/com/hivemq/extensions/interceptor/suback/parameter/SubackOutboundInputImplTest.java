@@ -15,80 +15,58 @@
  */
 package com.hivemq.extensions.interceptor.suback.parameter;
 
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extensions.packets.suback.ModifiableSubackPacketImpl;
 import com.hivemq.extensions.packets.suback.SubackPacketImpl;
-import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
-import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.assertj.core.util.Lists;
-import org.junit.Assert;
 import org.junit.Test;
-import util.TestMessageUtil;
 
-import java.util.List;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class SubackOutboundInputImplTest {
 
-    public static final Mqtt5UserProperties TEST_USER_PROPERTIES =
-            Mqtt5UserProperties.of(
-                    new MqttUserProperty("user1", "property1"),
-                    new MqttUserProperty("user2", "property2"));
-
     @Test
-    public void test_construction() {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+    public void constructor_and_getter() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final SubackPacketImpl packet = mock(SubackPacketImpl.class);
 
         final SubackOutboundInputImpl input =
-                new SubackOutboundInputImpl("client", embeddedChannel, TestMessageUtil.createFullMqtt5Suback());
-        Assert.assertNotNull(input.getClientInformation());
-        Assert.assertNotNull(input.getConnectionInformation());
-        Assert.assertNotNull(input.getSubackPacket());
+                new SubackOutboundInputImpl(clientInformation, connectionInformation, packet);
+
+        assertSame(clientInformation, input.getClientInformation());
+        assertSame(connectionInformation, input.getConnectionInformation());
+        assertSame(packet, input.getSubackPacket());
     }
 
     @Test
-    public void create_SUBACK_from_package_test() {
-        final SubackPacketImpl subAckPacket = new SubackPacketImpl(TestMessageUtil.createFullMqtt5Suback());
-        final List<Mqtt5SubAckReasonCode> reasonCodes = Lists.newArrayList(
-                Mqtt5SubAckReasonCode.GRANTED_QOS_0,
-                Mqtt5SubAckReasonCode.GRANTED_QOS_1,
-                Mqtt5SubAckReasonCode.GRANTED_QOS_2,
-                Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
-                Mqtt5SubAckReasonCode.NOT_AUTHORIZED,
-                Mqtt5SubAckReasonCode.TOPIC_FILTER_INVALID,
-                Mqtt5SubAckReasonCode.PACKET_IDENTIFIER_IN_USE,
-                Mqtt5SubAckReasonCode.QUOTA_EXCEEDED,
-                Mqtt5SubAckReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED,
-                Mqtt5SubAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
-                Mqtt5SubAckReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
+    public void update() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final SubackPacketImpl packet = mock(SubackPacketImpl.class);
 
-        final SUBACK subAck = new SUBACK(1, reasonCodes, "reason", TEST_USER_PROPERTIES);
-        final SUBACK subAckFromPacket = SUBACK.createSubAckFrom(subAckPacket);
-        Assert.assertEquals(subAck.getReasonCodes(), subAckFromPacket.getReasonCodes());
-        Assert.assertEquals(subAck.getReasonString(), subAckFromPacket.getReasonString());
-        Assert.assertEquals(subAck.getUserProperties(), subAckFromPacket.getUserProperties());
-        Assert.assertEquals(subAck.getPacketIdentifier(), subAckFromPacket.getPacketIdentifier());
+        final SubackOutboundInputImpl input =
+                new SubackOutboundInputImpl(clientInformation, connectionInformation, packet);
+
+        final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
+        final SubackPacketImpl newPacket = mock(SubackPacketImpl.class);
+        final SubackOutboundOutputImpl output = mock(SubackOutboundOutputImpl.class);
+        when(output.getSubackPacket()).thenReturn(modifiablePacket);
+        when(modifiablePacket.copy()).thenReturn(newPacket);
+
+        final SubackOutboundInputImpl updated = input.update(output);
+
+        assertNotSame(input, updated);
+        assertSame(input.getClientInformation(), updated.getClientInformation());
+        assertSame(input.getConnectionInformation(), updated.getConnectionInformation());
+        assertNotSame(input.getSubackPacket(), updated.getSubackPacket());
+        assertSame(newPacket, updated.getSubackPacket());
     }
-
-    @Test(expected = NullPointerException.class)
-    public void test_clientId_null() {
-        new SubackOutboundInputImpl(null, new EmbeddedChannel(), TestMessageUtil.createFullMqtt5Suback());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_channel_null() {
-        new SubackOutboundInputImpl("client", null, TestMessageUtil.createFullMqtt5Suback());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_packet_null() {
-        new SubackOutboundInputImpl("client", new EmbeddedChannel(), null);
-    }
-
 }

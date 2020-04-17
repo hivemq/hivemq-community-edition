@@ -16,20 +16,17 @@
 
 package com.hivemq.mqtt.message.connack;
 
-import com.google.common.collect.ImmutableList;
+import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extensions.packets.connack.ModifiableConnackPacketImpl;
+import com.hivemq.extensions.packets.connack.ConnackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties.MqttMessageWithReasonCode;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
 
@@ -140,46 +137,31 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.serverReference = serverReference;
     }
 
-    public static @NotNull CONNACK mergeConnackPacket(final @NotNull ModifiableConnackPacketImpl connackPacket, final @NotNull CONNACK origin) {
+    public static @NotNull CONNACK from(final @NotNull ConnackPacketImpl packet) {
 
-        if (!connackPacket.isModified()) {
-            return origin;
-        }
+        final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
+        final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
 
-        final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder();
-
-        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
-        for (final UserProperty userProperty : connackPacket.getUserProperties().asList()) {
-            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-
-        final QoS qoS;
-        final Qos extensionMaxQos = connackPacket.getMaximumQoS().orElse(null);
-        if (extensionMaxQos != null) {
-            qoS = QoS.valueOf(extensionMaxQos.getQosNumber());
-        } else {
-            qoS = null;
-        }
-
-        return builder.withAssignedClientIdentifier(connackPacket.getAssignedClientIdentifier().orElse(null))
-                .withSessionExpiryInterval(origin.getSessionExpiryInterval())
-                .withSessionPresent(connackPacket.getSessionPresent())
-                .withServerKeepAlive(origin.getServerKeepAlive())
-                .withServerReference(connackPacket.getServerReference().orElse(null))
-                .withReceiveMaximum(connackPacket.getReceiveMaximum())
-                .withMaximumPacketSize(connackPacket.getMaximumPacketSize())
-                .withTopicAliasMaximum(connackPacket.getTopicAliasMaximum())
-                .withResponseInformation(connackPacket.getResponseInformation().orElse(null))
-                .withAuthMethod(connackPacket.getAuthenticationMethod().orElse(null))
-                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connackPacket.getAuthenticationData()))
-                .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
-                .withReasonCode(Mqtt5ConnAckReasonCode.from(connackPacket.getReasonCode()))
-                .withReasonString(connackPacket.getReasonString().orElse(null))
+        return new CONNACK.Mqtt5Builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
+                .withSessionPresent(packet.getSessionPresent())
+                .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
+                .withServerKeepAlive(packet.getServerKeepAlive().orElse(KEEP_ALIVE_NOT_SET))
+                .withAssignedClientIdentifier(packet.getAssignedClientIdentifier().orElse(null))
+                .withAuthMethod(packet.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()))
+                .withReceiveMaximum(packet.getReceiveMaximum())
+                .withMaximumPacketSize(packet.getMaximumPacketSize())
+                .withTopicAliasMaximum(packet.getTopicAliasMaximum())
                 .withMaximumQoS(qoS)
-                .withSharedSubscriptionAvailable(connackPacket.getSharedSubscriptionsAvailable())
-                .withSubscriptionIdentifierAvailable(connackPacket.getSubscriptionIdentifiersAvailable())
-                .withWildcardSubscriptionAvailable(connackPacket.getWildCardSubscriptionAvailable())
-                .withRetainAvailable(connackPacket.getRetainAvailable())
+                .withRetainAvailable(packet.getRetainAvailable())
+                .withWildcardSubscriptionAvailable(packet.getWildCardSubscriptionAvailable())
+                .withSharedSubscriptionAvailable(packet.getSharedSubscriptionsAvailable())
+                .withSubscriptionIdentifierAvailable(packet.getSubscriptionIdentifiersAvailable())
+                .withResponseInformation(packet.getResponseInformation().orElse(null))
+                .withServerReference(packet.getServerReference().orElse(null))
+                .withReasonString(packet.getReasonString().orElse(null))
+                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
                 .build();
     }
 

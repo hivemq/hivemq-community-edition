@@ -15,28 +15,32 @@
  */
 package com.hivemq.extensions.interceptor.pingreq.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.parameter.PingReqInboundInput;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
-import io.netty.channel.Channel;
 
 import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
+@Immutable
 public class PingReqInboundInputImpl
-        implements Supplier<PingReqInboundInputImpl>, PingReqInboundInput, PluginTaskInput {
+        implements PingReqInboundInput, Supplier<PingReqInboundInputImpl>, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
 
-    public PingReqInboundInputImpl(final @NotNull String clientId, final @NotNull Channel channel) {
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+    public PingReqInboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation) {
+
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
     }
 
     @Override

@@ -18,16 +18,15 @@ package com.hivemq.extensions.interceptor.pingreq.parameter;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.parameter.PingReqInboundOutput;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.task.AbstractSimpleAsyncOutput;
-import com.hivemq.extensions.executor.task.PluginTaskOutput;
+import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
 
 import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
  */
-public class PingReqInboundOutputImpl extends AbstractSimpleAsyncOutput<PingReqInboundOutput>
-        implements PingReqInboundOutput, PluginTaskOutput, Supplier<PingReqInboundOutputImpl> {
+public class PingReqInboundOutputImpl extends AbstractAsyncOutput<PingReqInboundOutput>
+        implements PingReqInboundOutput, Supplier<PingReqInboundOutputImpl> {
 
     public PingReqInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer) {
         super(asyncer);

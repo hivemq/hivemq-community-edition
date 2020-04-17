@@ -16,85 +16,90 @@
 
 package com.hivemq.extensions.packets.subscribe;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscription;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
-import com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE;
-import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.mqtt.message.subscribe.Topic;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.2.0
  */
 @ThreadSafe
 public class ModifiableSubscribePacketImpl implements ModifiableSubscribePacket {
 
+    private final @NotNull ImmutableList<ModifiableSubscriptionImpl> subscriptions;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final int subscriptionIdentifier;
     private final int packetIdentifier;
 
-    private final @NotNull List<ModifiableSubscription> modifiableSubscriptionList;
+    private final @NotNull FullConfigurationService configurationService;
 
-    public ModifiableSubscribePacketImpl(final @NotNull FullConfigurationService configurationService, final @NotNull SUBSCRIBE subscribe) {
+    public ModifiableSubscribePacketImpl(
+            final @NotNull SubscribePacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
 
-        Preconditions.checkNotNull(subscribe, "subscribe must never be null");
-        Preconditions.checkNotNull(configurationService, "config must never be null");
+        final ImmutableList.Builder<ModifiableSubscriptionImpl> builder = ImmutableList.builder();
+        packet.subscriptions.forEach(
+                subscription -> builder.add(new ModifiableSubscriptionImpl(subscription, configurationService)));
+        subscriptions = builder.build();
+        userProperties = new ModifiableUserPropertiesImpl(
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        subscriptionIdentifier = packet.subscriptionIdentifier;
+        packetIdentifier = packet.packetIdentifier;
 
-        subscriptionIdentifier = subscribe.getSubscriptionIdentifier();
-        packetIdentifier = subscribe.getPacketIdentifier();
-
-        modifiableSubscriptionList = subscribe.getTopics().stream()
-                .map((Function<Topic, ModifiableSubscriptionImpl>) topic -> new ModifiableSubscriptionImpl(configurationService, Objects.requireNonNull(topic)))
-                .collect(Collectors.toList());
-
-        this.userProperties = new ModifiableUserPropertiesImpl(subscribe.getUserProperties().getPluginUserProperties(), configurationService.securityConfiguration().validateUTF8());
+        this.configurationService = configurationService;
     }
 
-    @NotNull
     @Override
-    public synchronized Optional<Integer> getSubscriptionIdentifier() {
-        if (subscriptionIdentifier == Mqtt5SUBSCRIBE.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER) {
+    public @NotNull ImmutableList<ModifiableSubscription> getSubscriptions() {
+        return ImmutableList.copyOf(subscriptions);
+    }
+
+    @Override
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
+        return userProperties;
+    }
+
+    @Override
+    public @NotNull Optional<Integer> getSubscriptionIdentifier() {
+        if (subscriptionIdentifier == DEFAULT_NO_SUBSCRIPTION_IDENTIFIER) {
             return Optional.empty();
         } else {
             return Optional.of(subscriptionIdentifier);
         }
     }
 
-    @NotNull
     @Override
-    @Immutable
-    public synchronized List<ModifiableSubscription> getSubscriptions() {
-        return modifiableSubscriptionList;
-    }
-
-    @Override
-    public synchronized @NotNull ModifiableUserPropertiesImpl getUserProperties() {
-        return userProperties;
-    }
-
-    @Override
-    public synchronized int getPacketId() {
+    public int getPacketId() {
         return packetIdentifier;
     }
 
-    public synchronized boolean isModified() {
-        for (final ModifiableSubscription modifiableSubscription : modifiableSubscriptionList) {
+    public boolean isModified() {
+        for (final ModifiableSubscription modifiableSubscription : subscriptions) {
             if (((ModifiableSubscriptionImpl) modifiableSubscription).isModified()) {
                 return true;
             }
         }
         return userProperties.isModified();
+    }
+
+    public @NotNull SubscribePacketImpl copy() {
+        final ImmutableList.Builder<SubscriptionImpl> builder = ImmutableList.builder();
+        subscriptions.forEach(subscription -> builder.add(subscription.copy()));
+        return new SubscribePacketImpl(
+                builder.build(), userProperties.copy(), subscriptionIdentifier, packetIdentifier);
+    }
+
+    public @NotNull ModifiableSubscribePacketImpl update(final @NotNull SubscribePacketImpl packet) {
+        return new ModifiableSubscribePacketImpl(packet, configurationService);
     }
 }

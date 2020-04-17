@@ -16,16 +16,15 @@
 
 package com.hivemq.extensions.handler;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -34,6 +33,7 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.subscribe.parameter.SubscribeInboundInputImpl;
 import com.hivemq.extensions.interceptor.subscribe.parameter.SubscribeInboundOutputImpl;
+import com.hivemq.extensions.packets.subscribe.ModifiableSubscribePacketImpl;
 import com.hivemq.extensions.packets.subscribe.SubscribePacketImpl;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
@@ -56,33 +56,34 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.1.0
  */
-@ChannelHandler.Sharable
 @Singleton
+@ChannelHandler.Sharable
 public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
 
     private static final Logger log = LoggerFactory.getLogger(IncomingSubscribeHandler.class);
 
-    private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
+    private final @NotNull PluginTaskExecutorService executorService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-    private final @NotNull PluginAuthorizerService pluginAuthorizerService;
-    private final @NotNull FullConfigurationService fullConfigurationService;
+    private final @NotNull PluginAuthorizerService authorizerService;
+    private final @NotNull FullConfigurationService configurationService;
 
     @Inject
     public IncomingSubscribeHandler(
-            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull PluginTaskExecutorService executorService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginAuthorizerService pluginAuthorizerService,
-            final @NotNull FullConfigurationService fullConfigurationService) {
+            final @NotNull PluginAuthorizerService authorizerService,
+            final @NotNull FullConfigurationService configurationService) {
 
-        this.pluginTaskExecutorService = pluginTaskExecutorService;
+        this.executorService = executorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
-        this.pluginAuthorizerService = pluginAuthorizerService;
-        this.fullConfigurationService = fullConfigurationService;
+        this.authorizerService = authorizerService;
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -98,170 +99,136 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
      * @param subscribe the subscribe to process
      */
     private void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE subscribe) {
-
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
             return;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getSubscribeInboundInterceptors().isEmpty()) {
-            pluginAuthorizerService.authorizeSubscriptions(ctx, subscribe);
+        if (clientContext == null) {
+            authorizerService.authorizeSubscriptions(ctx, subscribe);
+            return;
+        }
+        final List<SubscribeInboundInterceptor> interceptors = clientContext.getSubscribeInboundInterceptors();
+        if (interceptors.isEmpty()) {
+            authorizerService.authorizeSubscriptions(ctx, subscribe);
             return;
         }
 
-        final List<SubscribeInboundInterceptor> subscribeInboundInterceptors =
-                clientContext.getSubscribeInboundInterceptors();
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
 
-        final SubscribeInboundOutputImpl inboundOutput =
-                new SubscribeInboundOutputImpl(fullConfigurationService, asyncer, subscribe);
-        final SubscribeInboundInputImpl inboundInput =
-                new SubscribeInboundInputImpl(new SubscribePacketImpl(subscribe), clientId, channel);
-        final SettableFuture<Void> interceptorFuture = SettableFuture.create();
-        final SubscribeInboundInterceptorContext interceptorContext = new SubscribeInboundInterceptorContext(
-                clientId, inboundOutput, inboundInput, interceptorFuture, subscribeInboundInterceptors.size());
+        final SubscribePacketImpl packet = new SubscribePacketImpl(subscribe);
+        final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
 
-        for (final SubscribeInboundInterceptor interceptor : subscribeInboundInterceptors) {
+        final ModifiableSubscribePacketImpl modifiablePacket =
+                new ModifiableSubscribePacketImpl(packet, configurationService);
+        final SubscribeInboundOutputImpl output = new SubscribeInboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder =
+                new ExtensionParameterHolder<>(output);
 
-            //we can stop running interceptors if delivery is prevented.
-            if (inboundOutput.deliveryPrevented()) {
-                //we do not know if it is already set by an async task so we check it
-                if (!interceptorFuture.isDone()) {
-                    interceptorFuture.set(null);
-                }
-                break;
-            }
+        final SubscribeInboundInterceptorContext context =
+                new SubscribeInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
 
-            final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(
+        for (final SubscribeInboundInterceptor interceptor : interceptors) {
+
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
-
-            //disabled extension would be null
-            if (plugin == null) {
-                interceptorContext.increment();
+            if (extension == null) { // disabled extension would be null
+                context.finishInterceptor();
                 continue;
             }
 
-            final SubscribeInboundInterceptorTask interceptorTask =
-                    new SubscribeInboundInterceptorTask(interceptor, plugin.getId());
-
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    interceptorContext, inboundInput, inboundOutput, interceptorTask);
-        }
-
-        final InterceptorFutureCallback callback =
-                new InterceptorFutureCallback(inboundOutput, subscribe, ctx, pluginAuthorizerService);
-        Futures.addCallback(interceptorFuture, callback, ctx.executor());
-    }
-
-    private static class InterceptorFutureCallback implements FutureCallback<Void> {
-
-        private final @NotNull SubscribeInboundOutputImpl inboundOutput;
-        private final @NotNull SUBSCRIBE subscribe;
-        private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull PluginAuthorizerService pluginAuthorizerService;
-
-        InterceptorFutureCallback(
-                final @NotNull SubscribeInboundOutputImpl inboundOutput,
-                final @NotNull SUBSCRIBE subscribe,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull PluginAuthorizerService pluginAuthorizerService) {
-
-            this.inboundOutput = inboundOutput;
-            this.subscribe = subscribe;
-            this.ctx = ctx;
-            this.pluginAuthorizerService = pluginAuthorizerService;
-        }
-
-        @Override
-        public void onSuccess(final @Nullable Void result) {
-            if (inboundOutput.deliveryPrevented()) {
-                preventSubscribe();
-            } else {
-                final SUBSCRIBE finalSubscribe = SUBSCRIBE.from(inboundOutput.getSubscribePacket());
-                pluginAuthorizerService.authorizeSubscriptions(ctx, finalSubscribe);
-            }
-        }
-
-        private void preventSubscribe() {
-            final List<Mqtt5SubAckReasonCode> ackReasonCodes = new ArrayList<>(subscribe.getTopics().size());
-            for (int i = 0; i < subscribe.getTopics().size(); i++) {
-                ackReasonCodes.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
-            }
-            // no need to check mqtt version since the mqtt 3 encoder will just not encode reason string and properties.
-            ctx.writeAndFlush(new SUBACK(subscribe.getPacketIdentifier(), ackReasonCodes,
-                    ReasonStrings.SUBACK_EXTENSION_PREVENTED));
-        }
-
-        @Override
-        public void onFailure(final @NotNull Throwable t) {
-            //should never happen, since the settable future never sets an exception
-            pluginAuthorizerService.authorizeSubscriptions(ctx, subscribe);
+            final SubscribeInboundInterceptorTask task =
+                    new SubscribeInboundInterceptorTask(interceptor, extension.getId());
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
 
-    private class SubscribeInboundInterceptorContext extends PluginInOutTaskContext<SubscribeInboundOutputImpl> {
+    private class SubscribeInboundInterceptorContext extends PluginInOutTaskContext<SubscribeInboundOutputImpl>
+            implements Runnable {
 
-        private final @NotNull SubscribeInboundOutputImpl output;
-        private final @NotNull SubscribeInboundInputImpl input;
-        private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder;
 
         SubscribeInboundInterceptorContext(
-                final @NotNull String identifier,
-                final @NotNull SubscribeInboundOutputImpl output,
-                final @NotNull SubscribeInboundInputImpl input,
-                final @NotNull SettableFuture<Void> interceptorFuture,
-                final int interceptorCount) {
+                final @NotNull String clientId,
+                final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder) {
 
-            super(identifier);
-            this.output = output;
-            this.input = input;
-            this.interceptorFuture = interceptorFuture;
+            super(clientId);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
-        public void pluginPost(@NotNull final SubscribeInboundOutputImpl pluginOutput) {
-
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
-                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                //Timeout fallback failure means publish delivery prevention
-                pluginOutput.forciblyPreventSubscribeDelivery();
-            }
-
-            if (output.getSubscribePacket().isModified()) {
-                input.updateSubscribe(output.getSubscribePacket());
-            }
-
-            if (counter.incrementAndGet() == interceptorCount || pluginOutput.deliveryPrevented()) {
-                interceptorFuture.set(null);
+        public void pluginPost(final @NotNull SubscribeInboundOutputImpl output) {
+            if (output.isPreventDelivery()) {
+                finishInterceptor();
+            } else if (output.isTimedOut() && (output.getTimeoutFallback() == TimeoutFallback.FAILURE)) {
+                output.forciblyPreventSubscribeDelivery();
+                finishInterceptor();
+            } else {
+                if (output.getSubscribePacket().isModified()) {
+                    inputHolder.set(inputHolder.get().update(output));
+                }
+                if (!finishInterceptor()) {
+                    outputHolder.set(output.update(inputHolder.get()));
+                }
             }
         }
 
-        public void increment() {
-            //we must set the future when no more interceptors are registered
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+                ctx.executor().execute(this);
+                return true;
             }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            final SubscribeInboundOutputImpl output = outputHolder.get();
+            if (output.isPreventDelivery()) {
+                prevent(output);
+            } else {
+                final SUBSCRIBE finalSubscribe = SUBSCRIBE.from(inputHolder.get().getSubscribePacket());
+                authorizerService.authorizeSubscriptions(ctx, finalSubscribe);
+            }
+        }
+
+        private void prevent(final @NotNull SubscribeInboundOutputImpl output) {
+            final int size = output.getSubscribePacket().getSubscriptions().size();
+            final List<Mqtt5SubAckReasonCode> reasonCodesBuilder = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                reasonCodesBuilder.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
+            }
+            // no need to check mqtt version since the mqtt 3 encoder will just not encode reason string and properties.
+            ctx.writeAndFlush(new SUBACK(
+                    output.getSubscribePacket().getPacketId(),
+                    reasonCodesBuilder,
+                    ReasonStrings.SUBACK_EXTENSION_PREVENTED));
         }
     }
 
-    private class SubscribeInboundInterceptorTask
+    private static class SubscribeInboundInterceptorTask
             implements PluginInOutTask<SubscribeInboundInputImpl, SubscribeInboundOutputImpl> {
 
         private final @NotNull SubscribeInboundInterceptor interceptor;
         private final @NotNull String extensionId;
 
         private SubscribeInboundInterceptorTask(
-                final @NotNull SubscribeInboundInterceptor interceptor,
-                final @NotNull String extensionId) {
+                final @NotNull SubscribeInboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -269,23 +236,23 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
 
         @Override
         public @NotNull SubscribeInboundOutputImpl apply(
-                final @NotNull SubscribeInboundInputImpl subscribeInboundInput,
-                final @NotNull SubscribeInboundOutputImpl subscribeInboundOutput) {
+                final @NotNull SubscribeInboundInputImpl input, final @NotNull SubscribeInboundOutputImpl output) {
 
-            if (subscribeInboundOutput.deliveryPrevented()) {
-                //it's already prevented so no further interceptors must be called.
-                return subscribeInboundOutput;
+            if (output.isPreventDelivery()) {
+                // it's already prevented so no further interceptors must be called.
+                return output;
             }
             try {
-                interceptor.onInboundSubscribe(subscribeInboundInput, subscribeInboundOutput);
+                interceptor.onInboundSubscribe(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound subscribe interception. Extensions are responsible on their own to handle exceptions.",
-                        extensionId);
-                subscribeInboundOutput.forciblyPreventSubscribeDelivery();
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound SUBSCRIBE interception. " +
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception:", e);
+                output.forciblyPreventSubscribeDelivery();
                 Exceptions.rethrowError(e);
             }
-            return subscribeInboundOutput;
+            return output;
         }
 
         @Override

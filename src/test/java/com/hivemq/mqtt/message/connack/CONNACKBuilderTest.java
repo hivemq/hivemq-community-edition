@@ -60,7 +60,7 @@ public class CONNACKBuilderTest {
         assertEquals(connack.getType(), MessageType.CONNACK);
         assertEquals(connack.getPacketIdentifier(), 0);
         assertEquals(connack.getReasonCode(), Mqtt5ConnAckReasonCode.SUCCESS);
-        assertEquals(connack.getUserProperties().size(), 0);
+        assertEquals(connack.getUserProperties().asList().size(), 0);
         assertFalse(connack.isSessionPresent());
         assertNull(connack.getReasonString());
         assertTrue(connack.isRetainAvailable());

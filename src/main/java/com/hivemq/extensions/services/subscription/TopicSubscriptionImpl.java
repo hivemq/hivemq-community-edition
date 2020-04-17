@@ -54,7 +54,7 @@ public class TopicSubscriptionImpl implements TopicSubscription {
     public TopicSubscriptionImpl(final @NotNull Topic topic) {
         Preconditions.checkNotNull(topic, "Topic must never be null");
         this.topicFilter = topic.getTopic();
-        this.qos = Objects.requireNonNull(Qos.valueOf(topic.getQoS().getQosNumber()));
+        this.qos = topic.getQoS().toQos();
         this.retainAsPublished = topic.isRetainAsPublished();
         this.noLocal = topic.isNoLocal();
         this.subscriptionIdentifier = topic.getSubscriptionIdentifier();

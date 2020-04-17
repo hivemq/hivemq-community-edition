@@ -185,7 +185,7 @@ public class ClientQueuePersistenceSerializerTest {
         assertEquals(false, readPublish.isDuplicateDelivery());
 
 
-        assertEquals(2, readPublish.getUserProperties().size());
+        assertEquals(2, readPublish.getUserProperties().asList().size());
         assertEquals("name1", readPublish.getUserProperties().asList().get(0).getName());
         assertEquals("value1", readPublish.getUserProperties().asList().get(0).getValue());
         assertEquals("name2", readPublish.getUserProperties().asList().get(1).getName());
@@ -231,7 +231,7 @@ public class ClientQueuePersistenceSerializerTest {
         assertEquals(false, readPublish.isDuplicateDelivery());
 
 
-        assertEquals(0, readPublish.getUserProperties().size());
+        assertEquals(0, readPublish.getUserProperties().asList().size());
         assertNull(readPublish.getResponseTopic());
         assertNull(readPublish.getContentType());
         assertNull(readPublish.getCorrelationData());

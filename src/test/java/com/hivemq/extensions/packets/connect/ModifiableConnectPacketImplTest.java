@@ -15,193 +15,1396 @@
  */
 package com.hivemq.extensions.packets.connect;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extensions.services.builder.WillPublishBuilderImpl;
-import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
+import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
+import com.hivemq.extensions.packets.publish.ModifiableWillPublishImpl;
+import com.hivemq.extensions.packets.publish.WillPublishPacketImpl;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Lukas Brandl
+ * @author Silvio Giebl
  */
 public class ModifiableConnectPacketImplTest {
 
-    private ModifiableConnectPacketImpl modifiablePacket;
-
-    private CONNECT original;
-
-    private FullConfigurationService configurationService;
+    private @NotNull FullConfigurationService configurationService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-
-        final CONNECT.Mqtt5Builder builder = new CONNECT.Mqtt5Builder();
-        builder.withClientIdentifier("clientId")
-                .withKeepAlive(60)
-                .withSessionExpiryInterval(60);
-        original = builder.build();
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
     }
 
     @Test
-    public void test_change_all_valid_values() {
-        modifiablePacket.setClientId("id modified");
-        modifiablePacket.setKeepAlive(1);
-        modifiablePacket.setSessionExpiryInterval(2);
-        modifiablePacket.setAuthenticationData(ByteBuffer.wrap(new byte[]{3}));
-        modifiablePacket.setAuthenticationMethod("auth modified");
-        modifiablePacket.setMaximumPacketSize(4);
-        modifiablePacket.setPassword(ByteBuffer.wrap(new byte[]{5}));
-        modifiablePacket.setRequestProblemInformation(true);
-        modifiablePacket.setRequestResponseInformation(true);
-        modifiablePacket.setTopicAliasMaximum(6);
-        modifiablePacket.setUserName("user modified");
-
-        final CONNECT result = CONNECT.mergeConnectPacket(modifiablePacket, original, "clusterId");
-
-        assertEquals("id modified", result.getClientIdentifier());
-        assertEquals(1, result.getKeepAlive());
-        assertEquals(2, result.getSessionExpiryInterval());
-        assertEquals(3, result.getAuthData()[0]);
-        assertEquals("auth modified", result.getAuthMethod());
-        assertEquals(4, result.getMaximumPacketSize());
-        assertEquals(5, result.getPassword()[0]);
-        assertTrue(result.isResponseInformationRequested());
-        assertTrue(result.isProblemInformationRequested());
-        assertEquals(6, result.getTopicAliasMaximum());
-        assertEquals("user modified", result.getUsername());
-
-        assertTrue(modifiablePacket.isModified());
-    }
-
-    @Test
-    public void test_change_all_valid_values_to_values_before() {
-        final CONNECT.Mqtt5Builder builder = new CONNECT.Mqtt5Builder();
-        builder.withClientIdentifier("id modified")
-                .withKeepAlive(1)
-                .withSessionExpiryInterval(2)
-                .withAuthData(new byte[]{3})
-                .withAuthMethod("auth modified")
-                .withMaximumPacketSize(4)
-                .withPassword(new byte[]{5})
-                .withResponseInformationRequested(true)
-                .withProblemInformationRequested(true)
-                .withTopicAliasMaximum(6)
-                .withUsername("user modified");
-        original = builder.build();
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-
-        modifiablePacket.setClientId("id modified");
-        modifiablePacket.setKeepAlive(1);
-        modifiablePacket.setSessionExpiryInterval(2);
-        modifiablePacket.setAuthenticationData(ByteBuffer.wrap(new byte[]{3}));
-        modifiablePacket.setAuthenticationMethod("auth modified");
-        modifiablePacket.setMaximumPacketSize(4);
-        modifiablePacket.setPassword(ByteBuffer.wrap(new byte[]{5}));
-        modifiablePacket.setRequestProblemInformation(true);
-        modifiablePacket.setRequestResponseInformation(true);
-        modifiablePacket.setTopicAliasMaximum(6);
-        modifiablePacket.setUserName("user modified");
+    public void setClientId() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
 
         assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setClientId("modifiedClientId");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals("modifiedClientId", modifiablePacket.getClientId());
     }
 
     @Test
-    public void test_modify_packet() {
+    public void setClientId_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
 
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setClientId("id modified");
-        assertTrue(modifiablePacket.isModified());
+        assertFalse(modifiablePacket.isModified());
 
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setKeepAlive(1);
-        assertTrue(modifiablePacket.isModified());
+        modifiablePacket.setClientId("clientId");
 
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setSessionExpiryInterval(2);
-        assertTrue(modifiablePacket.isModified());
+        assertFalse(modifiablePacket.isModified());
+        assertEquals("clientId", modifiablePacket.getClientId());
+    }
 
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setAuthenticationData(ByteBuffer.wrap(new byte[]{3}));
-        assertTrue(modifiablePacket.isModified());
+    @Test(expected = NullPointerException.class)
+    public void setClientId_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
 
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setAuthenticationMethod("auth modified");
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setMaximumPacketSize(4);
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setPassword(ByteBuffer.wrap(new byte[]{5}));
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setRequestProblemInformation(false);
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setRequestResponseInformation(true);
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setTopicAliasMaximum(6);
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setUserName("user modified");
-        assertTrue(modifiablePacket.isModified());
-
-        modifiablePacket = new ModifiableConnectPacketImpl(configurationService, original);
-        modifiablePacket.setWillPublish(new WillPublishBuilderImpl(configurationService).topic("topic")
-                .payload(ByteBuffer.wrap("message".getBytes())).build());
-        assertTrue(modifiablePacket.isModified());
+        modifiablePacket.setClientId(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_client_id_null_char() {
+    public void setClientId_empty() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        modifiablePacket.setClientId("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setClientId_invalid() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
         modifiablePacket.setClientId("\0");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_client_id_to_long() {
+    public void setClientId_tooLong() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
         configurationService.restrictionsConfiguration().setMaxClientIdLength(10);
         modifiablePacket.setClientId("0123456789_0123456789");
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_max_keep_alive() {
-        configurationService.mqttConfiguration().setKeepAliveMax(60);
-        modifiablePacket.setKeepAlive(61);
+    @Test
+    public void setCleanStart() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setCleanStart(true);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(true, modifiablePacket.getCleanStart());
+    }
+
+    @Test
+    public void setCleanStart_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setCleanStart(false);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(false, modifiablePacket.getCleanStart());
+    }
+
+    @Test
+    public void setSessionExpiryInterval() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setSessionExpiryInterval(60);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(60, modifiablePacket.getSessionExpiryInterval());
+    }
+
+    @Test
+    public void setSessionExpiryInterval_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setSessionExpiryInterval(100);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(100, modifiablePacket.getSessionExpiryInterval());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_expiry_interval_maximum() {
+    public void setSessionExpiryInterval_largerThanMax() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
         configurationService.mqttConfiguration().setMaxSessionExpiryInterval(60);
         modifiablePacket.setSessionExpiryInterval(61);
     }
 
+    @Test
+    public void setKeepAlive() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setKeepAlive(10);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(10, modifiablePacket.getKeepAlive());
+    }
+
+    @Test
+    public void setKeepAlive_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setKeepAlive(60);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(60, modifiablePacket.getKeepAlive());
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void test_max_packet_size() {
+    public void setKeepAlive_largerThanMax() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        configurationService.mqttConfiguration().setKeepAliveMax(60);
+        modifiablePacket.setKeepAlive(61);
+    }
+
+    @Test
+    public void setReceiveMaximum() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReceiveMaximum(2);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(2, modifiablePacket.getReceiveMaximum());
+    }
+
+    @Test
+    public void setReceiveMaximum_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReceiveMaximum(3);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(3, modifiablePacket.getReceiveMaximum());
+    }
+
+    @Test
+    public void setMaximumPacketSize() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setMaximumPacketSize(100);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(100, modifiablePacket.getMaximumPacketSize());
+    }
+
+    @Test
+    public void setMaximumPacketSize_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setMaximumPacketSize(1000);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(1000, modifiablePacket.getMaximumPacketSize());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setMaximumPacketSize_largerThanMax() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
         configurationService.mqttConfiguration().setMaxPacketSize(60);
         modifiablePacket.setMaximumPacketSize(61);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_auth_method_null_char() {
-        modifiablePacket.setAuthenticationMethod("\0");
+    @Test
+    public void setTopicAliasMaximum() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setTopicAliasMaximum(1);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(1, modifiablePacket.getTopicAliasMaximum());
+    }
+
+    @Test
+    public void setTopicAliasMaximum_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setTopicAliasMaximum(10);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(10, modifiablePacket.getTopicAliasMaximum());
+    }
+
+    @Test
+    public void setRequestProblemInformation() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRequestProblemInformation(false);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(false, modifiablePacket.getRequestProblemInformation());
+    }
+
+    @Test
+    public void setRequestProblemInformation_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRequestProblemInformation(true);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(true, modifiablePacket.getRequestProblemInformation());
+    }
+
+    @Test
+    public void setRequestResponseInformation() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRequestResponseInformation(false);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(false, modifiablePacket.getRequestResponseInformation());
+    }
+
+    @Test
+    public void setRequestResponseInformation_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRequestResponseInformation(true);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(true, modifiablePacket.getRequestResponseInformation());
+    }
+
+    @Test
+    public void setUserName() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setUserName("username");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("username"), modifiablePacket.getUserName());
+    }
+
+    @Test
+    public void setUserName_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                "username",
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setUserName("username");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("username"), modifiablePacket.getUserName());
+    }
+
+    @Test
+    public void setUserName_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                "username",
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setUserName(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getUserName());
+    }
+
+    @Test
+    public void setPassword() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPassword(ByteBuffer.wrap("password".getBytes()));
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("password".getBytes())), modifiablePacket.getPassword());
+    }
+
+    @Test
+    public void setPassword_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                ByteBuffer.wrap("password".getBytes()),
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPassword(ByteBuffer.wrap("password".getBytes()));
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("password".getBytes())), modifiablePacket.getPassword());
+    }
+
+    @Test
+    public void setPassword_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                ByteBuffer.wrap("password".getBytes()),
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPassword(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getPassword());
+    }
+
+    @Test
+    public void setAuthenticationMethod() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationMethod("authMethod");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("authMethod"), modifiablePacket.getAuthenticationMethod());
+    }
+
+    @Test
+    public void setAuthenticationMethod_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                "authMethod",
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationMethod("authMethod");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("authMethod"), modifiablePacket.getAuthenticationMethod());
+    }
+
+    @Test
+    public void setAuthenticationMethod_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                "authMethod",
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationMethod(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getAuthenticationMethod());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_client_id_empty() {
-        modifiablePacket.setClientId("");
+    public void setAuthenticationMethod_invalid() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        modifiablePacket.setAuthenticationMethod("\0");
+    }
+
+    @Test
+    public void setAuthenticationData() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationData(ByteBuffer.wrap("authData".getBytes()));
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("authData".getBytes())), modifiablePacket.getAuthenticationData());
+    }
+
+    @Test
+    public void setAuthenticationData_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                ByteBuffer.wrap("authData".getBytes()),
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationData(ByteBuffer.wrap("authData".getBytes()));
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("authData".getBytes())), modifiablePacket.getAuthenticationData());
+    }
+
+    @Test
+    public void setAuthenticationData_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                ByteBuffer.wrap("authData".getBytes()),
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setAuthenticationData(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getAuthenticationData());
+    }
+
+    @Test
+    public void setWillPublish() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        final WillPublishPacketImpl willPublishPacket = new WillPublishPacketImpl(
+                "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                UserPropertiesImpl.of(ImmutableList.of()), 0);
+        modifiablePacket.setWillPublish(willPublishPacket);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(
+                Optional.of(new ModifiableWillPublishImpl(willPublishPacket, configurationService)),
+                modifiablePacket.getWillPublish());
+    }
+
+    @Test
+    public void setWillPublish_same() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                new WillPublishPacketImpl(
+                        "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        final WillPublishPacketImpl willPublishPacket = new WillPublishPacketImpl(
+                "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                UserPropertiesImpl.of(ImmutableList.of()), 0);
+        modifiablePacket.setWillPublish(willPublishPacket);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(
+                Optional.of(new ModifiableWillPublishImpl(willPublishPacket, configurationService)),
+                modifiablePacket.getWillPublish());
+    }
+
+    @Test
+    public void setWillPublish_null() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                new WillPublishPacketImpl(
+                        "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setWillPublish(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getWillPublish());
+    }
+
+    @Test
+    public void modifyWillPublish() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                new WillPublishPacketImpl(
+                        "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.getModifiableWillPublish().ifPresent(
+                modifiableWillPublish -> modifiableWillPublish.setTopic("modifiedTopic"));
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("modifiedTopic"), modifiablePacket.getWillPublish().map(WillPublishPacket::getTopic));
+    }
+
+    @Test
+    public void modifyUserProperties() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("testValue"), modifiablePacket.getUserProperties().getFirst("testName"));
+    }
+
+    @Test
+    public void copy_noChanges() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        final ConnectPacketImpl copy = modifiablePacket.copy();
+
+        assertEquals(packet, copy);
+    }
+
+    @Test
+    public void copy_changes() {
+        final ConnectPacketImpl packet = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "clientId",
+                false,
+                100,
+                60,
+                3,
+                1000,
+                10,
+                true,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
+
+        modifiablePacket.setClientId("modifiedClientId");
+        modifiablePacket.setCleanStart(true);
+        modifiablePacket.setSessionExpiryInterval(60);
+        modifiablePacket.setKeepAlive(10);
+        modifiablePacket.setReceiveMaximum(2);
+        modifiablePacket.setMaximumPacketSize(100);
+        modifiablePacket.setTopicAliasMaximum(1);
+        modifiablePacket.setRequestProblemInformation(false);
+        modifiablePacket.setRequestResponseInformation(false);
+        modifiablePacket.setUserName("username");
+        modifiablePacket.setPassword(ByteBuffer.wrap("password".getBytes()));
+        modifiablePacket.setAuthenticationMethod("authMethod");
+        modifiablePacket.setAuthenticationData(ByteBuffer.wrap("authData".getBytes()));
+        modifiablePacket.setWillPublish(new WillPublishPacketImpl(
+                "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                UserPropertiesImpl.of(ImmutableList.of()), 0));
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+        final ConnectPacketImpl copy = modifiablePacket.copy();
+
+        final ConnectPacketImpl expectedPacket = new ConnectPacketImpl(
+                MqttVersion.V_5,
+                "modifiedClientId",
+                true,
+                60,
+                10,
+                2,
+                100,
+                1,
+                false,
+                false,
+                "username",
+                ByteBuffer.wrap("password".getBytes()),
+                "authMethod",
+                ByteBuffer.wrap("authData".getBytes()),
+                new WillPublishPacketImpl(
+                        "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
+                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
+        assertEquals(expectedPacket, copy);
     }
 }

@@ -18,9 +18,12 @@ package com.hivemq.extensions.handler;
 
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.suback.SubackOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -29,8 +32,11 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.suback.parameter.SubackOutboundInputImpl;
 import com.hivemq.extensions.interceptor.suback.parameter.SubackOutboundOutputImpl;
+import com.hivemq.extensions.packets.suback.ModifiableSubackPacketImpl;
+import com.hivemq.extensions.packets.suback.SubackPacketImpl;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Exceptions;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @Singleton
 @ChannelHandler.Sharable
@@ -86,7 +93,6 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
             return;
@@ -103,68 +109,88 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
             return;
         }
 
-        final SubackOutboundInputImpl input = new SubackOutboundInputImpl(clientId, channel, suback);
-        final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(configurationService, asyncer, suback);
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
 
-        final SubAckOutboundInterceptorContext interceptorContext =
-                new SubAckOutboundInterceptorContext(clientId, input, ctx, promise, interceptors.size());
+        final SubackPacketImpl packet = new SubackPacketImpl(suback);
+        final SubackOutboundInputImpl input = new SubackOutboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<SubackOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
+
+        final ModifiableSubackPacketImpl modifiablePacket =
+                new ModifiableSubackPacketImpl(packet, configurationService);
+        final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<SubackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
+
+        final SubAckOutboundInterceptorContext context = new SubAckOutboundInterceptorContext(
+                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
 
         for (final SubackOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
-
             if (extension == null) {
-                interceptorContext.increment(output);
+                context.finishInterceptor();
                 continue;
             }
 
-            final SubackOutboundInterceptorTask interceptorTask =
+            final SubackOutboundInterceptorTask task =
                     new SubackOutboundInterceptorTask(interceptor, extension.getId());
-
-            executorService.handlePluginInOutTaskExecution(interceptorContext, input, output, interceptorTask);
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
 
-    private static class SubAckOutboundInterceptorContext extends PluginInOutTaskContext<SubackOutboundOutputImpl> {
+    private static class SubAckOutboundInterceptorContext extends PluginInOutTaskContext<SubackOutboundOutputImpl>
+            implements Runnable {
 
-        private final @NotNull SubackOutboundInputImpl input;
-        private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull ChannelPromise promise;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ChannelPromise promise;
+        private final @NotNull ExtensionParameterHolder<SubackOutboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<SubackOutboundOutputImpl> outputHolder;
 
         SubAckOutboundInterceptorContext(
                 final @NotNull String identifier,
-                final @NotNull SubackOutboundInputImpl input,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ChannelPromise promise,
-                final int interceptorCount) {
+                final @NotNull ExtensionParameterHolder<SubackOutboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<SubackOutboundOutputImpl> outputHolder) {
 
             super(identifier);
-            this.input = input;
             this.ctx = ctx;
             this.promise = promise;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
         public void pluginPost(final @NotNull SubackOutboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on outbound SUBACK interception.");
-                output.update(input.getSubackPacket());
+                log.debug("Async timeout on outbound SUBACK interception. Discarding changes made by the interceptor.");
+            } else if (output.isFailed()) {
+                log.debug("Exception on outbound SUBACK interception. Discarding changes made by the interceptor.");
             } else if (output.getSubackPacket().isModified()) {
-                input.update(output.getSubackPacket());
+                inputHolder.set(inputHolder.get().update(output));
             }
-            increment(output);
+            if (!finishInterceptor()) {
+                outputHolder.set(output.update(inputHolder.get()));
+            }
         }
 
-        public void increment(final @NotNull SubackOutboundOutputImpl output) {
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                final SUBACK finalSuback = SUBACK.createSubAckFrom(output.getSubackPacket());
-                ctx.writeAndFlush(finalSuback, promise);
+                ctx.executor().execute(this);
+                return true;
             }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            ctx.writeAndFlush(SUBACK.from(inputHolder.get().getSubackPacket()), promise);
         }
     }
 
@@ -175,8 +201,7 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
         private final @NotNull String extensionId;
 
         SubackOutboundInterceptorTask(
-                final @NotNull SubackOutboundInterceptor interceptor,
-                final @NotNull String extensionId) {
+                final @NotNull SubackOutboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -184,17 +209,17 @@ public class SubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdap
 
         @Override
         public @NotNull SubackOutboundOutputImpl apply(
-                final @NotNull SubackOutboundInputImpl input,
-                final @NotNull SubackOutboundOutputImpl output) {
+                final @NotNull SubackOutboundInputImpl input, final @NotNull SubackOutboundOutputImpl output) {
 
             try {
                 interceptor.onOutboundSuback(input, output);
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound SUBACK interception. " +
-                                "Extensions are responsible to handle their own exceptions.", extensionId);
+                                "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception: ", e);
-                output.update(input.getSubackPacket());
+                output.markAsFailed();
+                Exceptions.rethrowError(e);
             }
             return output;
         }

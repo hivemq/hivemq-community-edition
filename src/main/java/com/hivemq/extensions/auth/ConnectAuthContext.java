@@ -66,7 +66,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
         ctx.channel().attr(ChannelAttributes.AUTH_DATA).set(output.getAuthenticationData());
         ctx.channel()
                 .attr(ChannelAttributes.AUTH_USER_PROPERTIES)
-                .set(output.getUserProperties());
+                .set(Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()));
         connectHandler.connectSuccessfulAuthenticated(ctx, connect, output.getClientSettings());
     }
 
@@ -78,7 +78,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
                 ReasonStrings.AUTH_FAILED,
                 output.getReasonCode(),
                 output.getReasonString(),
-                output.getUserProperties(),
+                Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 true);
     }
 

@@ -32,6 +32,7 @@ import com.hivemq.extensions.client.ClientAuthorizersImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.handler.tasks.*;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -262,7 +263,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         for (final Topic topic : msg.getTopics()) {
 
             final SubscriptionAuthorizerInputImpl input =
-                    new SubscriptionAuthorizerInputImpl(msg.getUserProperties().getPluginUserProperties(), topic,
+                    new SubscriptionAuthorizerInputImpl(UserPropertiesImpl.of(msg.getUserProperties().asList()), topic,
                             ctx.channel(), clientId);
             final SubscriptionAuthorizerOutputImpl output = new SubscriptionAuthorizerOutputImpl(asyncer);
 

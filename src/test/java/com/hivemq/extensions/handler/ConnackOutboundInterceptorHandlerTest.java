@@ -17,9 +17,9 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -41,8 +41,6 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -137,21 +135,7 @@ public class ConnackOutboundInterceptorHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_channel_inactive() throws Exception {
-
-        final ChannelHandlerContext context = channel.pipeline().context(handler);
-
-        channel.close();
-
-        handler.write(context, testConnack(), Mockito.mock(ChannelPromise.class));
-
-        channel.runPendingTasks();
-
-        assertNull(channel.readOutbound());
-    }
-
-    @Test(timeout = 5000)
-    public void test_no_interceptors() throws Exception {
+    public void test_no_interceptors() {
 
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of());
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);

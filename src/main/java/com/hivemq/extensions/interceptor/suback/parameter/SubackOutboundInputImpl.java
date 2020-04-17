@@ -20,33 +20,28 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.suback.parameter.SubackOutboundInput;
-import com.hivemq.extension.sdk.api.packets.suback.SubackPacket;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.suback.SubackPacketImpl;
-import com.hivemq.mqtt.message.suback.SUBACK;
-import io.netty.channel.Channel;
-
-import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
-public class SubackOutboundInputImpl
-        implements Supplier<SubackOutboundInputImpl>, SubackOutboundInput, PluginTaskInput {
+@Immutable
+public class SubackOutboundInputImpl implements SubackOutboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    private @NotNull SubackPacketImpl subackPacket;
+    private final @NotNull SubackPacketImpl subackPacket;
 
     public SubackOutboundInputImpl(
-            final @NotNull String clientId,
-            final @NotNull Channel channel,
-            final @NotNull SUBACK suback) {
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull SubackPacketImpl subackPacket) {
 
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        subackPacket = new SubackPacketImpl(suback);
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
+        this.subackPacket = subackPacket;
     }
 
     @Override
@@ -60,16 +55,11 @@ public class SubackOutboundInputImpl
     }
 
     @Override
-    public @Immutable @NotNull SubackPacket getSubackPacket() {
+    public @NotNull SubackPacketImpl getSubackPacket() {
         return subackPacket;
     }
 
-    @Override
-    public @NotNull SubackOutboundInputImpl get() {
-        return this;
-    }
-
-    public void update(final @NotNull SubackPacket subAckPacket) {
-        this.subackPacket = new SubackPacketImpl(subAckPacket);
+    public @NotNull SubackOutboundInputImpl update(final @NotNull SubackOutboundOutputImpl output) {
+        return new SubackOutboundInputImpl(clientInformation, connectionInformation, output.getSubackPacket().copy());
     }
 }

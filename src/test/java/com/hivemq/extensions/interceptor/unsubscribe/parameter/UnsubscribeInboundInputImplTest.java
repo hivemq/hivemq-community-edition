@@ -15,76 +15,58 @@
  */
 package com.hivemq.extensions.interceptor.unsubscribe.parameter;
 
-import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extensions.packets.unsubscribe.ModifiableUnsubscribePacketImpl;
 import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
-import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
-import util.TestMessageUtil;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class UnsubscribeInboundInputImplTest {
 
     @Test
-    public void test_construction() {
-        final ImmutableList<String> topicFilters =
-                ImmutableList.of(
-                        new Topic("topic", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, null).toString());
-        final UNSUBSCRIBE unsubscribe =
-                new UNSUBSCRIBE(topicFilters, 1, Mqtt5UserProperties.of(MqttUserProperty.of("Prop", "Value")));
+    public void constructor_and_getter() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        final UnsubscribeInboundInputImpl input =
+                new UnsubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
 
-        final UnsubscribeInboundInputImpl client =
-                new UnsubscribeInboundInputImpl("client", embeddedChannel, unsubscribe);
-
-        assertEquals(client.getClientInformation().getClientId(), "client");
-        assertEquals(client.getConnectionInformation().getMqttVersion(), MqttVersion.V_5);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_client_id_null() {
-        new UnsubscribeInboundInputImpl(null, new EmbeddedChannel(), TestMessageUtil.createFullMqtt5Unsubscribe());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_channel_null() {
-        new UnsubscribeInboundInputImpl("client", null, TestMessageUtil.createFullMqtt5Unsubscribe());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void test_packet_null() {
-        new UnsubscribeInboundInputImpl("client", new EmbeddedChannel(), null);
+        assertSame(clientInformation, input.getClientInformation());
+        assertSame(connectionInformation, input.getConnectionInformation());
+        assertSame(packet, input.getUnsubscribePacket());
     }
 
     @Test
-    public void test_update() {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
-        final UNSUBSCRIBE unsubscribePacket1 = TestMessageUtil.createFullMqtt5Unsubscribe();
-        final UNSUBSCRIBE unsubscribePacket2 = TestMessageUtil.createFullMqtt5Unsubscribe();
+    public void update() {
+        final ClientInformation clientInformation = mock(ClientInformation.class);
+        final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
+        final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
 
         final UnsubscribeInboundInputImpl input =
-                new UnsubscribeInboundInputImpl("client1", embeddedChannel, unsubscribePacket1);
-        input.update(new UnsubscribePacketImpl(unsubscribePacket2));
+                new UnsubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
 
-        assertNotSame(unsubscribePacket1, input.getUnsubscribePacket());
-        assertNotSame(unsubscribePacket2, input.getUnsubscribePacket());
+        final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
+        final UnsubscribePacketImpl newPacket = mock(UnsubscribePacketImpl.class);
+        final UnsubscribeInboundOutputImpl output = mock(UnsubscribeInboundOutputImpl.class);
+        when(output.getUnsubscribePacket()).thenReturn(modifiablePacket);
+        when(modifiablePacket.copy()).thenReturn(newPacket);
+
+        final UnsubscribeInboundInputImpl updated = input.update(output);
+
+        assertNotSame(input, updated);
+        assertSame(input.getClientInformation(), updated.getClientInformation());
+        assertSame(input.getConnectionInformation(), updated.getConnectionInformation());
+        assertNotSame(input.getUnsubscribePacket(), updated.getUnsubscribePacket());
+        assertSame(newPacket, updated.getUnsubscribePacket());
     }
 }

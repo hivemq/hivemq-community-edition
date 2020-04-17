@@ -18,11 +18,12 @@ package com.hivemq.extensions.packets.pubcomp;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompPacket;
 import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,23 +33,29 @@ import java.util.Optional;
 @Immutable
 public class PubcompPacketImpl implements PubcompPacket {
 
-    private final int packetIdentifier;
-    private final @NotNull PubcompReasonCode reasonCode;
-    private final @Nullable String reasonString;
-    private final @NotNull UserProperties userProperties;
+    final int packetIdentifier;
+    final @NotNull PubcompReasonCode reasonCode;
+    final @Nullable String reasonString;
+    final @NotNull UserPropertiesImpl userProperties;
 
-    public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
-        packetIdentifier = pubcomp.getPacketIdentifier();
-        reasonCode = pubcomp.getReasonCode().toPubcompReasonCode();
-        reasonString = pubcomp.getReasonString();
-        userProperties = pubcomp.getUserProperties().getPluginUserProperties();
+    public PubcompPacketImpl(
+            final int packetIdentifier,
+            final @NotNull PubcompReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.packetIdentifier = packetIdentifier;
+        this.reasonCode = reasonCode;
+        this.reasonString = reasonString;
+        this.userProperties = userProperties;
     }
 
-    public PubcompPacketImpl(final @NotNull PubcompPacket pubcompPacket) {
-        packetIdentifier = pubcompPacket.getPacketIdentifier();
-        reasonCode = pubcompPacket.getReasonCode();
-        reasonString = pubcompPacket.getReasonString().orElse(null);
-        userProperties = pubcompPacket.getUserProperties();
+    public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
+        this(
+                pubcomp.getPacketIdentifier(),
+                pubcomp.getReasonCode().toPubcompReasonCode(),
+                pubcomp.getReasonString(),
+                UserPropertiesImpl.of(pubcomp.getUserProperties().asList()));
     }
 
     @Override
@@ -67,7 +74,27 @@ public class PubcompPacketImpl implements PubcompPacket {
     }
 
     @Override
-    public @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PubcompPacketImpl)) {
+            return false;
+        }
+        final PubcompPacketImpl that = (PubcompPacketImpl) o;
+        return (packetIdentifier == that.packetIdentifier) &&
+                (reasonCode == that.reasonCode) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 }

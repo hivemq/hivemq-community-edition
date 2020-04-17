@@ -16,60 +16,52 @@
 
 package com.hivemq.extensions.interceptor.publish.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundInput;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
-import io.netty.channel.Channel;
-
-import java.util.function.Supplier;
+import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.0.0
  */
-public class PublishInboundInputImpl implements Supplier<PublishInboundInputImpl>, PublishInboundInput, PluginTaskInput {
+@Immutable
+public class PublishInboundInputImpl implements PublishInboundInput, PluginTaskInput {
 
-    private @NotNull PublishPacket publishPacket;
-    private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
+    private final @NotNull ConnectionInformation connectionInformation;
+    private final @NotNull PublishPacketImpl publishPacket;
 
     public PublishInboundInputImpl(
-            final @NotNull PublishPacket publishPacket,
-            final @NotNull String clientId,
-            final @NotNull Channel channel) {
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull PublishPacketImpl publishPacket) {
+
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
         this.publishPacket = publishPacket;
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 
-    @NotNull
     @Override
-    public PublishPacket getPublishPacket() {
-        return publishPacket;
-    }
-
-    @NotNull
-    @Override
-    public ConnectionInformation getConnectionInformation() {
-        return connectionInformation;
-    }
-
-    @NotNull
-    @Override
-    public ClientInformation getClientInformation() {
+    public @NotNull ClientInformation getClientInformation() {
         return clientInformation;
     }
 
     @Override
-    public @NotNull PublishInboundInputImpl get() {
-        return this;
+    public @NotNull ConnectionInformation getConnectionInformation() {
+        return connectionInformation;
     }
 
-    public void updatePublish(final @NotNull PublishPacket publishPacket) {
-        this.publishPacket = publishPacket;
+    @Override
+    public @NotNull PublishPacketImpl getPublishPacket() {
+        return publishPacket;
+    }
+
+    public @NotNull PublishInboundInputImpl update(final @NotNull PublishInboundOutputImpl output) {
+        return new PublishInboundInputImpl(clientInformation, connectionInformation, output.getPublishPacket().copy());
     }
 }
