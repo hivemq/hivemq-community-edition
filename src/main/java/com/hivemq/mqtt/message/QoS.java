@@ -17,6 +17,8 @@
 package com.hivemq.mqtt.message;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
 
 /**
  * The Quality of Service level
@@ -40,10 +42,11 @@ public enum QoS {
     EXACTLY_ONCE(2);
 
     private final int qosNumber;
+    private final @NotNull Qos qos;
 
     QoS(final int qosNumber) {
-
         this.qosNumber = qosNumber;
+        qos = Qos.valueOf(name());
     }
 
     /**
@@ -53,20 +56,36 @@ public enum QoS {
         return qosNumber;
     }
 
+    public @NotNull Qos toQos() {
+        return qos;
+    }
+
+    private static final @NotNull QoS @NotNull [] LOOKUP = new QoS[Qos.values().length];
+
+    static {
+        for (final QoS qoS : values()) {
+            LOOKUP[qoS.qos.ordinal()] = qoS;
+        }
+    }
+
     /**
      * Creates a QoS level enum from an integer
      *
-     * @param qosNumber the QoS level as integer (0,1,2)
+     * @param i the QoS level as integer (0,1,2)
      * @return the QoS level or <code>null</code> if an invalid QoS level was passed
      */
-    @NotNull
-    public static QoS valueOf(final int qosNumber) {
+    @Nullable
+    public static QoS valueOf(final int i) {
 
         for (final QoS qoS : QoS.values()) {
-            if (qoS.getQosNumber() == qosNumber) {
+            if (qoS.getQosNumber() == i) {
                 return qoS;
             }
         }
-        throw new IllegalArgumentException("QoS not found for number: " + qosNumber);
+        return null;
+    }
+
+    public static @NotNull QoS from(final @NotNull Qos qos) {
+        return LOOKUP[qos.ordinal()];
     }
 }

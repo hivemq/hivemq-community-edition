@@ -16,454 +16,1134 @@
 
 package com.hivemq.extensions.packets.publish;
 
-import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.publish.PUBLISH;
-import com.hivemq.mqtt.message.publish.PUBLISHFactory;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @author Silvio Giebl
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class ModifiablePublishPacketImplTest {
 
-    private ModifiablePublishPacketImpl modifiablePublishPacket;
-
-    private PUBLISH origin;
-
-    private FullConfigurationService configurationService;
+    private @NotNull FullConfigurationService configurationService;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-
-        configurationService.mqttConfiguration().setMaximumQos(QoS.AT_MOST_ONCE);
-        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(240L);
-        configurationService.mqttConfiguration().setRetainedMessagesEnabled(false);
-
-        origin = TestMessageUtil.createFullMqtt5Publish();
-        modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, origin);
     }
 
     @Test
-    public void test_change_all_valid_values() {
+    public void setTopic() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setContentType("modified contentType");
-        modifiablePublishPacket.setCorrelationData(ByteBuffer.wrap("modified correlation data".getBytes()));
-        modifiablePublishPacket.setMessageExpiryInterval(120L);
-        modifiablePublishPacket.setPayload(ByteBuffer.wrap("modified payload".getBytes()));
-        modifiablePublishPacket.setPayloadFormatIndicator(PayloadFormatIndicator.UNSPECIFIED);
-        modifiablePublishPacket.setQos(Qos.AT_MOST_ONCE);
-        modifiablePublishPacket.setTopic("modified topic");
-        modifiablePublishPacket.setResponseTopic("modified response topic");
-        modifiablePublishPacket.setRetain(false);
-        modifiablePublishPacket.getUserProperties().addUserProperty("mod-key", "mod-val");
+        assertFalse(modifiablePacket.isModified());
 
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
+        modifiablePacket.setTopic("modifiedTopic");
 
-        assertEquals("modified contentType", mergePublishPacket.getContentType());
-        assertArrayEquals("modified correlation data".getBytes(), mergePublishPacket.getCorrelationData());
-        assertEquals(120L, mergePublishPacket.getMessageExpiryInterval());
-        assertArrayEquals("modified payload".getBytes(), mergePublishPacket.getPayload());
-        assertEquals(Mqtt5PayloadFormatIndicator.UNSPECIFIED, mergePublishPacket.getPayloadFormatIndicator());
-        assertEquals(QoS.AT_MOST_ONCE, mergePublishPacket.getQoS());
-        assertEquals("modified topic", mergePublishPacket.getTopic());
-        assertEquals("modified response topic", mergePublishPacket.getResponseTopic());
-        assertEquals(false, mergePublishPacket.isRetain());
-        assertEquals(3, mergePublishPacket.getUserProperties().size());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals("modifiedTopic", modifiablePacket.getTopic());
     }
 
     @Test
-    public void test_change_all_valid_values_to_values_before() {
+    public void setTopic_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        configurationService.mqttConfiguration().setMaximumQos(QoS.EXACTLY_ONCE);
-        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(5000L);
-        configurationService.mqttConfiguration().setRetainedMessagesEnabled(true);
+        assertFalse(modifiablePacket.isModified());
 
-        modifiablePublishPacket.setContentType(origin.getContentType());
-        modifiablePublishPacket.setCorrelationData(ByteBuffer.wrap(origin.getCorrelationData()));
-        modifiablePublishPacket.setMessageExpiryInterval(origin.getMessageExpiryInterval());
-        modifiablePublishPacket.setPayload(ByteBuffer.wrap(origin.getPayload()));
-        modifiablePublishPacket.setPayloadFormatIndicator(PayloadFormatIndicator.valueOf(origin.getPayloadFormatIndicator().name()));
-        modifiablePublishPacket.setQos(Qos.valueOf(origin.getQoS().getQosNumber()));
-        modifiablePublishPacket.setTopic(origin.getTopic());
-        modifiablePublishPacket.setResponseTopic(origin.getResponseTopic());
-        modifiablePublishPacket.setRetain(origin.isRetain());
+        modifiablePacket.setTopic("topic");
 
-        assertFalse(modifiablePublishPacket.isModified());
-
+        assertFalse(modifiablePacket.isModified());
+        assertEquals("topic", modifiablePacket.getTopic());
     }
 
-    @Test
-    public void test_change_ContentType_modifies_packet() {
+    @Test(expected = NullPointerException.class)
+    public void setTopic_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setContentType("modified contentType");
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals("modified contentType", mergePublishPacket.getContentType());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_CorrelationData_modifies_packet() {
-
-        modifiablePublishPacket.setCorrelationData(ByteBuffer.wrap("modified correlation data".getBytes()));
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertArrayEquals("modified correlation data".getBytes(), mergePublishPacket.getCorrelationData());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_MessageExpiryInterval_modifies_packet() {
-
-        modifiablePublishPacket.setMessageExpiryInterval(120L);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(120L, mergePublishPacket.getMessageExpiryInterval());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_Payload_modifies_packet() {
-
-        modifiablePublishPacket.setPayload(ByteBuffer.wrap("modified payload".getBytes()));
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertArrayEquals("modified payload".getBytes(), mergePublishPacket.getPayload());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_PayloadFormatIndicator_modifies_packet() {
-
-        modifiablePublishPacket.setPayloadFormatIndicator(PayloadFormatIndicator.UNSPECIFIED);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(Mqtt5PayloadFormatIndicator.UNSPECIFIED, mergePublishPacket.getPayloadFormatIndicator());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_Qos_modifies_packet() {
-
-        modifiablePublishPacket.setQos(Qos.AT_MOST_ONCE);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(QoS.AT_MOST_ONCE, mergePublishPacket.getQoS());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        modifiablePacket.setTopic(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_change_Qos_over_max() {
+    public void setTopic_invalid() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setQos(Qos.AT_LEAST_ONCE);
-
-    }
-
-    @Test
-    public void test_change_Topic_modifies_packet() {
-
-        modifiablePublishPacket.setTopic("modified topic");
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals("modified topic", mergePublishPacket.getTopic());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_Topic_invalid() {
-
-        modifiablePublishPacket.setTopic("");
-
+        modifiablePacket.setTopic("");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_change_Topic_invalid_too_long() {
+    public void setTopic_tooLong() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
         configurationService.restrictionsConfiguration().setMaxTopicLength(10);
-
-        modifiablePublishPacket.setTopic("topic123456");
-
+        modifiablePacket.setTopic("topic123456");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_change_Topic_invalid_utf_8_must_not() {
+    public void setTopic_utf8MustNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setTopic("topic" + '\u0000');
-
+        modifiablePacket.setTopic("topic" + '\u0000');
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_change_Topic_invalid_utf_8_should_not() {
+    public void setTopic_utf8ShouldNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setTopic("topic" + '\u0001');
-
+        modifiablePacket.setTopic("topic" + '\u0001');
     }
 
     @Test
-    public void test_change_Topic_valid_utf_8_should_not() {
+    public void setTopic_utf8ShouldNot_allowed() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
 
         configurationService.securityConfiguration().setValidateUTF8(false);
+        modifiablePacket.setTopic("topic" + '\u0001');
 
-        modifiablePublishPacket.setTopic("topic" + '\u0001');
-
-        assertEquals("topic" + '\u0001', modifiablePublishPacket.getTopic());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_ResponseTopic_invalid_utf_8_must_not() {
-
-        modifiablePublishPacket.setResponseTopic("response-topic" + '\u0000');
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_ResponseTopic_invalid_utf_8_should_not() {
-
-        modifiablePublishPacket.setResponseTopic("response-topic" + '\u0001');
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals("topic" + '\u0001', modifiablePacket.getTopic());
     }
 
     @Test
-    public void test_change_ResponseTopic_valid_utf_8_should_not() {
+    public void setQos() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setQos(Qos.EXACTLY_ONCE);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Qos.EXACTLY_ONCE, modifiablePacket.getQos());
+    }
+
+    @Test
+    public void setQos_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setQos(Qos.AT_LEAST_ONCE);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Qos.AT_LEAST_ONCE, modifiablePacket.getQos());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setQos_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setQos(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setQos_exceedsMax() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        configurationService.mqttConfiguration().setMaximumQos(QoS.AT_LEAST_ONCE);
+        modifiablePacket.setQos(Qos.EXACTLY_ONCE);
+    }
+
+    @Test
+    public void setPayload() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPayload(ByteBuffer.wrap("modifiedPayload".getBytes()));
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("modifiedPayload".getBytes())), modifiablePacket.getPayload());
+    }
+
+    @Test
+    public void setPayload_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPayload(ByteBuffer.wrap("payload".getBytes()));
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("payload".getBytes())), modifiablePacket.getPayload());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setPayload_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setPayload(null);
+    }
+
+    @Test
+    public void setRetain() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRetain(true);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(true, modifiablePacket.getRetain());
+    }
+
+    @Test
+    public void setRetain_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setRetain(false);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(false, modifiablePacket.getRetain());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setRetain_notAvailable() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        configurationService.mqttConfiguration().setRetainedMessagesEnabled(false);
+        modifiablePacket.setRetain(true);
+    }
+
+    @Test
+    public void setMessageExpiryInterval() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setMessageExpiryInterval(30);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(30L), modifiablePacket.getMessageExpiryInterval());
+    }
+
+    @Test
+    public void setMessageExpiryInterval_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setMessageExpiryInterval(60);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(60L), modifiablePacket.getMessageExpiryInterval());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setMessageExpiryInterval_exceedsMax() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(240L);
+        modifiablePacket.setMessageExpiryInterval(241);
+    }
+
+    @Test
+    public void setPayloadFormatIndicator() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPayloadFormatIndicator(PayloadFormatIndicator.UNSPECIFIED);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(PayloadFormatIndicator.UNSPECIFIED), modifiablePacket.getPayloadFormatIndicator());
+    }
+
+    @Test
+    public void setPayloadFormatIndicator_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                PayloadFormatIndicator.UNSPECIFIED,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPayloadFormatIndicator(PayloadFormatIndicator.UNSPECIFIED);
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(PayloadFormatIndicator.UNSPECIFIED), modifiablePacket.getPayloadFormatIndicator());
+    }
+
+    @Test
+    public void setPayloadFormatIndicator_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                PayloadFormatIndicator.UNSPECIFIED,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setPayloadFormatIndicator(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getPayloadFormatIndicator());
+    }
+
+    @Test
+    public void setContentType() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setContentType("contentType");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("contentType"), modifiablePacket.getContentType());
+    }
+
+    @Test
+    public void setContentType_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                "contentType",
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setContentType("contentType");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("contentType"), modifiablePacket.getContentType());
+    }
+
+    @Test
+    public void setContentType_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                "contentType",
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setContentType(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getContentType());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setContentType_utf8MustNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setContentType("contentType" + '\u0000');
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setContentType_utf8ShouldNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setContentType("contentType" + '\u0001');
+    }
+
+    @Test
+    public void setContentType_utf8ShouldNot_allowed() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
 
         configurationService.securityConfiguration().setValidateUTF8(false);
+        modifiablePacket.setContentType("contentType" + '\u0001');
 
-        modifiablePublishPacket.setResponseTopic("response-topic" + '\u0001');
-
-        assertEquals("response-topic" + '\u0001', modifiablePublishPacket.getResponseTopic().get());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_ContentType_invalid_utf_8_must_not() {
-
-        modifiablePublishPacket.setContentType("content-type" + '\u0000');
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_ContentType_invalid_utf_8_should_not() {
-
-        modifiablePublishPacket.setContentType("content-type" + '\u0001');
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("contentType" + '\u0001'), modifiablePacket.getContentType());
     }
 
     @Test
-    public void test_change_ContentType_valid_utf_8_should_not() {
+    public void setResponseTopic() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setResponseTopic("responseTopic");
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("responseTopic"), modifiablePacket.getResponseTopic());
+    }
+
+    @Test
+    public void setResponseTopic_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                "responseTopic",
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setResponseTopic("responseTopic");
+
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of("responseTopic"), modifiablePacket.getResponseTopic());
+    }
+
+    @Test
+    public void setResponseTopic_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                "responseTopic",
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setResponseTopic(null);
+
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getResponseTopic());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setResponseTopic_utf8MustNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setResponseTopic("responseTopic" + '\u0000');
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setResponseTopic_utf8ShouldNot() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        modifiablePacket.setResponseTopic("responseTopic" + '\u0001');
+    }
+
+    @Test
+    public void setResponseTopic_utf8ShouldNot_allowed() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
 
         configurationService.securityConfiguration().setValidateUTF8(false);
+        modifiablePacket.setResponseTopic("responseTopic" + '\u0001');
 
-        modifiablePublishPacket.setContentType("content-type" + '\u0001');
-
-        assertEquals("content-type" + '\u0001', modifiablePublishPacket.getContentType().get());
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("responseTopic" + '\u0001'), modifiablePacket.getResponseTopic());
     }
 
     @Test
-    public void test_change_ResponseTopic_modifies_packet() {
+    public void setCorrelationData() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setResponseTopic("modified response topic");
+        assertFalse(modifiablePacket.isModified());
 
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
+        modifiablePacket.setCorrelationData(ByteBuffer.wrap("correlationData".getBytes()));
 
-        assertEquals("modified response topic", mergePublishPacket.getResponseTopic());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("correlationData".getBytes())), modifiablePacket.getCorrelationData());
     }
 
     @Test
-    public void test_change_ResponseTopic_null() {
+    public void setCorrelationData_same() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                ByteBuffer.wrap("correlationData".getBytes()),
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setResponseTopic(null);
+        assertFalse(modifiablePacket.isModified());
 
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
+        modifiablePacket.setCorrelationData(ByteBuffer.wrap("correlationData".getBytes()));
 
-        assertEquals(null, mergePublishPacket.getResponseTopic());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        assertFalse(modifiablePacket.isModified());
+        assertEquals(Optional.of(ByteBuffer.wrap("correlationData".getBytes())), modifiablePacket.getCorrelationData());
     }
 
     @Test
-    public void test_change_ResponseTopic_null_was_null() {
+    public void setCorrelationData_null() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                ByteBuffer.wrap("correlationData".getBytes()),
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        origin = TestMessageUtil.createMqtt5Publish();
+        assertFalse(modifiablePacket.isModified());
 
-        modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, TestMessageUtil.createMqtt5Publish());
+        modifiablePacket.setCorrelationData(null);
 
-        modifiablePublishPacket.setResponseTopic(null);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getResponseTopic());
-
-        assertFalse(modifiablePublishPacket.isModified());
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.empty(), modifiablePacket.getCorrelationData());
     }
 
     @Test
-    public void test_change_ContentType_null() {
+    public void modifyUserProperties() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setContentType(null);
+        assertFalse(modifiablePacket.isModified());
 
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
 
-        assertEquals(null, mergePublishPacket.getContentType());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        assertTrue(modifiablePacket.isModified());
+        assertEquals(Optional.of("testValue"), modifiablePacket.getUserProperties().getFirst("testName"));
     }
 
     @Test
-    public void test_change_ContentType_null_was_null() {
+    public void copy_noChanges() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        origin = TestMessageUtil.createMqtt5Publish();
+        final PublishPacketImpl copy = modifiablePacket.copy();
 
-        modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, TestMessageUtil.createMqtt5Publish());
-
-        modifiablePublishPacket.setContentType(null);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getContentType());
-
-        assertFalse(modifiablePublishPacket.isModified());
-
+        assertEquals(packet, copy);
     }
 
     @Test
-    public void test_change_CorrelationData_null() {
+    public void copy_changes() {
+        final PublishPacketImpl packet = new PublishPacketImpl(
+                "topic",
+                Qos.AT_LEAST_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("payload".getBytes()),
+                false,
+                60,
+                null,
+                null,
+                null,
+                null,
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePublishPacketImpl modifiablePacket =
+                new ModifiablePublishPacketImpl(packet, configurationService);
 
-        modifiablePublishPacket.setCorrelationData(null);
+        modifiablePacket.setTopic("modifiedTopic");
+        modifiablePacket.setQos(Qos.EXACTLY_ONCE);
+        modifiablePacket.setPayload(ByteBuffer.wrap("modifiedPayload".getBytes()));
+        modifiablePacket.setRetain(true);
+        modifiablePacket.setMessageExpiryInterval(30);
+        modifiablePacket.setPayloadFormatIndicator(PayloadFormatIndicator.UNSPECIFIED);
+        modifiablePacket.setContentType("contentType");
+        modifiablePacket.setResponseTopic("responseTopic");
+        modifiablePacket.setCorrelationData(ByteBuffer.wrap("correlationData".getBytes()));
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+        final PublishPacketImpl copy = modifiablePacket.copy();
 
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getCorrelationData());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+        final PublishPacketImpl expectedPacket = new PublishPacketImpl(
+                "modifiedTopic",
+                Qos.EXACTLY_ONCE,
+                1,
+                false,
+                ByteBuffer.wrap("modifiedPayload".getBytes()),
+                true,
+                30,
+                PayloadFormatIndicator.UNSPECIFIED,
+                "contentType",
+                "responseTopic",
+                ByteBuffer.wrap("correlationData".getBytes()),
+                ImmutableList.of(),
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
+        assertEquals(expectedPacket, copy);
     }
 
     @Test
-    public void test_change_CorrelationData_null_was_null() {
-
-        origin = TestMessageUtil.createMqtt5Publish();
-
-        modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, TestMessageUtil.createMqtt5Publish());
-
-        modifiablePublishPacket.setCorrelationData(null);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getCorrelationData());
-
-        assertFalse(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_PayloadFormatIndicator_null() {
-
-        modifiablePublishPacket.setPayloadFormatIndicator(null);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getPayloadFormatIndicator());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_PayloadFormatIndicator_null_was_null() {
-
-        origin = TestMessageUtil.createMqtt5Publish();
-
-        modifiablePublishPacket = new ModifiablePublishPacketImpl(configurationService, TestMessageUtil.createMqtt5Publish());
-
-        modifiablePublishPacket.setPayloadFormatIndicator(null);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(null, mergePublishPacket.getPayloadFormatIndicator());
-
-        assertFalse(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test
-    public void test_change_Retain_modifies_packet() {
-
-        modifiablePublishPacket.setRetain(false);
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(false, mergePublishPacket.isRetain());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_change_Retain_not_available() {
-
-        modifiablePublishPacket.setRetain(true);
-
-    }
-
-    @Test
-    public void test_change_UserProperties_modifies_packet() {
-
-        modifiablePublishPacket.getUserProperties().addUserProperty("mod-key", "mod-val");
-
-        final PUBLISH mergePublishPacket = PUBLISHFactory.mergePublishPacket(modifiablePublishPacket, origin);
-
-        assertEquals(3, mergePublishPacket.getUserProperties().size());
-
-        assertTrue(modifiablePublishPacket.isModified());
-
+    public void equals() {
+        EqualsVerifier.forClass(ModifiablePublishPacketImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
+                .withNonnullFields("topic", "qos", "subscriptionIdentifiers", "userProperties")
+                .withIgnoredFields("configurationService", "modified")
+                .suppress(Warning.STRICT_INHERITANCE, Warning.NONFINAL_FIELDS)
+                .verify();
     }
 }

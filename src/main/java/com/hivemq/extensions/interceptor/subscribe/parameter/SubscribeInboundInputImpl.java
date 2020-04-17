@@ -16,62 +16,53 @@
 
 package com.hivemq.extensions.interceptor.subscribe.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundInput;
-import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscribePacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.subscribe.SubscribePacketImpl;
-import io.netty.channel.Channel;
-
-import java.util.function.Supplier;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.2.0
  */
-public class SubscribeInboundInputImpl implements Supplier<SubscribeInboundInputImpl>, SubscribeInboundInput, PluginTaskInput {
+@Immutable
+public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginTaskInput {
 
-    private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
-    private @NotNull SubscribePacket subscribePacket;
+    private final @NotNull ConnectionInformation connectionInformation;
+    private final @NotNull SubscribePacketImpl subscribePacket;
 
     public SubscribeInboundInputImpl(
-            final @NotNull SubscribePacket subscribePacket,
-            final @NotNull String clientId,
-            final @NotNull Channel channel) {
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull SubscribePacketImpl subscribePacket) {
+
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
         this.subscribePacket = subscribePacket;
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 
-    @NotNull
     @Override
-    public SubscribePacket getSubscribePacket() {
-        return subscribePacket;
-    }
-
-    @NotNull
-    @Override
-    public ConnectionInformation getConnectionInformation() {
-        return connectionInformation;
-    }
-
-    @NotNull
-    @Override
-    public ClientInformation getClientInformation() {
+    public @NotNull ClientInformation getClientInformation() {
         return clientInformation;
     }
 
     @Override
-    public @NotNull SubscribeInboundInputImpl get() {
-        return this;
+    public @NotNull ConnectionInformation getConnectionInformation() {
+        return connectionInformation;
     }
 
-    public void updateSubscribe(final @NotNull ModifiableSubscribePacket subscribePacket) {
-        this.subscribePacket = new SubscribePacketImpl(subscribePacket);
+    @Override
+    public @NotNull SubscribePacketImpl getSubscribePacket() {
+        return subscribePacket;
+    }
+
+    public @NotNull SubscribeInboundInputImpl update(final @NotNull SubscribeInboundOutputImpl output) {
+        return new SubscribeInboundInputImpl(
+                clientInformation, connectionInformation, output.getSubscribePacket().copy());
     }
 }

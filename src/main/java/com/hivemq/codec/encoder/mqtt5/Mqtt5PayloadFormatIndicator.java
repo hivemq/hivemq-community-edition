@@ -16,7 +16,9 @@
 
 package com.hivemq.codec.encoder.mqtt5;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
 
 /**
  * Payload Format Indicator according to the MQTT 5 specification.
@@ -28,6 +30,12 @@ public enum Mqtt5PayloadFormatIndicator {
     UNSPECIFIED,
     UTF_8;
 
+    private final @NotNull PayloadFormatIndicator payloadFormatIndicator;
+
+    Mqtt5PayloadFormatIndicator() {
+        payloadFormatIndicator = PayloadFormatIndicator.valueOf(name());
+    }
+
     /**
      * @return the byte code of this Payload Format Indicator.
      */
@@ -35,12 +43,25 @@ public enum Mqtt5PayloadFormatIndicator {
         return ordinal();
     }
 
+    public @NotNull PayloadFormatIndicator toPayloadFormatIndicator() {
+        return payloadFormatIndicator;
+    }
+
+    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] LOOKUP =
+            new Mqtt5PayloadFormatIndicator[PayloadFormatIndicator.values().length];
+
+    static {
+        for (final Mqtt5PayloadFormatIndicator payloadFormatIndicator : values()) {
+            LOOKUP[payloadFormatIndicator.payloadFormatIndicator.ordinal()] = payloadFormatIndicator;
+        }
+    }
+
     /**
      * Returns the Payload Format Indicator belonging to the given byte code.
      *
      * @param code the byte code.
      * @return the Payload Format Indicator belonging to the byte code or null if the byte code is not a valid Payload
-     * Format Indicator.
+     *         Format Indicator.
      */
     @Nullable
     public static Mqtt5PayloadFormatIndicator fromCode(final int code) {
@@ -51,4 +72,9 @@ public enum Mqtt5PayloadFormatIndicator {
         return values[code];
     }
 
+    public static @NotNull Mqtt5PayloadFormatIndicator from(
+            final @NotNull PayloadFormatIndicator payloadFormatIndicator) {
+
+        return LOOKUP[payloadFormatIndicator.ordinal()];
+    }
 }

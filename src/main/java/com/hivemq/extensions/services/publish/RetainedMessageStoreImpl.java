@@ -18,8 +18,8 @@ package com.hivemq.extensions.services.publish;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 @LazySingleton
@@ -111,7 +110,9 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
         if (!(retainedPublish instanceof RetainedPublishImpl)) {
             return CompletableFuture.failedFuture(new DoNotImplementException(RetainedPublish.class.getSimpleName()));
         }
-        final ListenableFuture<Void> persist = retainedMessagePersistence.persist(retainedPublish.getTopic(), RetainedPublishImpl.convert(retainedPublish));
+        final ListenableFuture<Void> persist = retainedMessagePersistence.persist(
+                retainedPublish.getTopic(),
+                RetainedPublishImpl.convert((RetainedPublishImpl) retainedPublish));
 
         return ListenableFutureConverter.toCompletable(persist, globalManagedPluginExecutorService);
     }

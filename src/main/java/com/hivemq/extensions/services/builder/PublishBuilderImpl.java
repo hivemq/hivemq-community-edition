@@ -18,11 +18,11 @@ package com.hivemq.extensions.services.builder;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
@@ -34,7 +34,6 @@ import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.extensions.services.publish.PublishImpl;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.Topics;
@@ -78,7 +77,7 @@ public class PublishBuilderImpl implements PublishBuilder {
     private ByteBuffer payload;
 
     @NotNull
-    private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = new ImmutableList.Builder<>();
+    private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
 
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
@@ -249,7 +248,7 @@ public class PublishBuilderImpl implements PublishBuilder {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
 
-        return new PublishImpl(qos, retain, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic, correlationData,
-                contentType, payload, new UserPropertiesImpl(Mqtt5UserProperties.of(userPropertyBuilder.build())));
+        return new PublishImpl(qos, retain, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
+                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

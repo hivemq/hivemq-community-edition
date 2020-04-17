@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.disconnect;
 
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnClientDisconnectEvent;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -81,7 +82,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             ctx.channel().attr(SEND_WILL).set(false);
         }
         if (ctx.channel().attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
-            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(), msg.getReasonString(), msg.getUserProperties().getPluginUserProperties(), true));
+            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(), msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
         }
         ctx.channel().close();
     }

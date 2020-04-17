@@ -17,26 +17,26 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-import com.hivemq.extensions.interceptor.connack.ConnackOutboundInputImpl;
-import com.hivemq.extensions.interceptor.connack.ConnackOutboundOutputImpl;
-import com.hivemq.extensions.interceptor.connack.ConnackOutboundProviderInputImpl;
+import com.hivemq.extensions.interceptor.connack.parameter.ConnackOutboundInputImpl;
+import com.hivemq.extensions.interceptor.connack.parameter.ConnackOutboundOutputImpl;
+import com.hivemq.extensions.interceptor.connack.parameter.ConnackOutboundProviderInputImpl;
 import com.hivemq.extensions.packets.connack.ConnackPacketImpl;
+import com.hivemq.extensions.packets.connack.ModifiableConnackPacketImpl;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  * @since 4.2.0
  */
 @Singleton
@@ -62,33 +63,20 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
 
     private static final Logger log = LoggerFactory.getLogger(ConnackOutboundInterceptorHandler.class);
 
-    @NotNull
-    private final FullConfigurationService configurationService;
-
-    @NotNull
-    private final PluginOutPutAsyncer asyncer;
-
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-
-    @NotNull
-    private final PluginTaskExecutorService pluginTaskExecutorService;
-
-    @NotNull
-    private final Interceptors interceptors;
-
-    @NotNull
-    private final ServerInformation serverInformation;
-
-    @NotNull
-    private final EventLog eventLog;
+    private final @NotNull FullConfigurationService configurationService;
+    private final @NotNull PluginOutPutAsyncer asyncer;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull PluginTaskExecutorService executorService;
+    private final @NotNull Interceptors interceptors;
+    private final @NotNull ServerInformation serverInformation;
+    private final @NotNull EventLog eventLog;
 
     @Inject
     public ConnackOutboundInterceptorHandler(
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
+            final @NotNull PluginTaskExecutorService executorService,
             final @NotNull Interceptors interceptors,
             final @NotNull ServerInformation serverInformation,
             final @NotNull EventLog eventLog) {
@@ -96,7 +84,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
-        this.pluginTaskExecutorService = pluginTaskExecutorService;
+        this.executorService = executorService;
         this.interceptors = interceptors;
         this.serverInformation = serverInformation;
         this.eventLog = eventLog;
@@ -106,198 +94,167 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
     public void write(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull Object msg,
-            final @NotNull ChannelPromise promise)
-            throws Exception {
+            final @NotNull ChannelPromise promise) {
 
-        if (!(msg instanceof CONNACK)) {
-            super.write(ctx, msg, promise);
-            return;
+        if (msg instanceof CONNACK) {
+            writeConnack(ctx, (CONNACK) msg, promise);
+        } else {
+            ctx.write(msg, promise);
         }
+    }
 
-        final CONNACK connack = (CONNACK) msg;
+    public void writeConnack(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull CONNACK connack,
+            final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return;
-        }
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
             return;
         }
 
-        final ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders =
+        final ImmutableMap<String, ConnackOutboundInterceptorProvider> providers =
                 interceptors.connackOutboundInterceptorProviders();
-        if (connackOutboundInterceptorProviders.isEmpty()) {
-            super.write(ctx, msg, promise);
+        if (providers.isEmpty()) {
+            ctx.write(connack, promise);
             return;
         }
 
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        final boolean requestResponseInformation =
+                Objects.requireNonNullElse(channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).get(), false);
+
         final ConnackOutboundProviderInputImpl providerInput =
-                new ConnackOutboundProviderInputImpl(serverInformation, channel, clientId);
+                new ConnackOutboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
 
-        final Boolean requestResponseInformation = channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).get();
-        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(configurationService, asyncer, connack,
-                Objects.requireNonNullElse(requestResponseInformation, false));
-        final ConnackOutboundInputImpl input =
-                new ConnackOutboundInputImpl(new ConnackPacketImpl(connack), clientId, channel);
-        final SettableFuture<Void> interceptorFuture = SettableFuture.create();
-        final ConnackInterceptorContext interceptorContext = new ConnackInterceptorContext(
-                clientId, input, interceptorFuture, connackOutboundInterceptorProviders.size());
+        final ConnackPacketImpl packet = new ConnackPacketImpl(connack);
+        final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
 
-        for (final Map.Entry<String, ConnackOutboundInterceptorProvider> entry : connackOutboundInterceptorProviders.entrySet()) {
-            if (interceptorFuture.isDone()) {
-                // The future is set in case an async interceptor timeout failed
-                break;
-            }
-            final ConnackOutboundInterceptorProvider interceptorProvider = entry.getValue();
-            final HiveMQExtension plugin = hiveMQExtensions.getExtension(entry.getKey());
+        final ModifiableConnackPacketImpl modifiablePacket =
+                new ModifiableConnackPacketImpl(packet, configurationService, requestResponseInformation);
+        final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
 
-            //disabled extension would be null
-            if (plugin == null) {
-                interceptorContext.increment(output.connackPrevented());
+        final ConnackInterceptorContext context =
+                new ConnackInterceptorContext(clientId, providers.size(), ctx, promise, inputHolder, outputHolder);
+
+        for (final Map.Entry<String, ConnackOutboundInterceptorProvider> entry : providers.entrySet()) {
+            final ConnackOutboundInterceptorProvider provider = entry.getValue();
+
+            final HiveMQExtension extension = hiveMQExtensions.getExtension(entry.getKey());
+            if (extension == null) { // disabled extension would be null
+                context.finishInterceptor();
                 continue;
             }
-            final ConnackInterceptorTask interceptorTask =
-                    new ConnackInterceptorTask(interceptorProvider, providerInput, interceptorFuture, plugin.getId());
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
-        }
-
-        final InterceptorFutureCallback callback =
-                new InterceptorFutureCallback(output, connack, ctx, promise, eventLog);
-        Futures.addCallback(interceptorFuture, callback, ctx.executor());
-
-    }
-
-    private static class InterceptorFutureCallback implements FutureCallback<Void> {
-
-        private final @NotNull ConnackOutboundOutputImpl output;
-        private final @NotNull CONNACK connack;
-        private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull ChannelPromise promise;
-        private final @NotNull EventLog eventLog;
-
-        InterceptorFutureCallback(
-                final @NotNull ConnackOutboundOutputImpl output,
-                final @NotNull CONNACK connack,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise,
-                final @NotNull EventLog eventLog) {
-
-            this.output = output;
-            this.connack = connack;
-            this.ctx = ctx;
-            this.promise = promise;
-            this.eventLog = eventLog;
-        }
-
-        @Override
-        public void onSuccess(final @Nullable Void result) {
-            try {
-                if (output.connackPrevented()) {
-                    eventLog.clientWasDisconnected(
-                            ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
-                    ctx.channel().close();
-                    return;
-                }
-                final CONNACK finalConnack = CONNACK.mergeConnackPacket(output.getConnackPacket(), connack);
-                ctx.writeAndFlush(finalConnack, promise);
-            } catch (final Exception e) {
-                log.error("Exception while modifying an intercepted CONNACK message.", e);
-                ctx.writeAndFlush(connack, promise);
-            }
-        }
-
-        @Override
-        public void onFailure(final @NotNull Throwable t) {
-            //should never happen, since the settable future never sets an exception
-            ctx.channel().close();
+            final ConnackInterceptorTask task = new ConnackInterceptorTask(provider, providerInput, extension.getId());
+            executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
 
-    private class ConnackInterceptorContext extends PluginInOutTaskContext<ConnackOutboundOutputImpl> {
+    private class ConnackInterceptorContext extends PluginInOutTaskContext<ConnackOutboundOutputImpl>
+            implements Runnable {
 
-        private final @NotNull ConnackOutboundInputImpl input;
-        private final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ChannelPromise promise;
+        private final @NotNull ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder;
 
         ConnackInterceptorContext(
                 final @NotNull String clientId,
-                final @NotNull ConnackOutboundInputImpl input,
-                final @NotNull SettableFuture<Void> interceptorFuture,
-                final int interceptorCount) {
+                final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise,
+                final @NotNull ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder) {
 
             super(clientId);
-            this.input = input;
-            this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.promise = promise;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
-        public void pluginPost(final @NotNull ConnackOutboundOutputImpl pluginOutput) {
-
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
-                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                pluginOutput.forciblyDisconnect();
-                increment(pluginOutput.connackPrevented());
-                return;
+        public void pluginPost(final @NotNull ConnackOutboundOutputImpl output) {
+            if (output.isPrevent()) {
+                finishInterceptor();
+            } else if (output.isTimedOut() && (output.getTimeoutFallback() == TimeoutFallback.FAILURE)) {
+                output.prevent();
+                finishInterceptor();
+            } else {
+                if (output.getConnackPacket().isModified()) {
+                    inputHolder.set(inputHolder.get().update(output));
+                }
+                if (!finishInterceptor()) {
+                    outputHolder.set(output.update(inputHolder.get()));
+                }
             }
-
-            if (pluginOutput.getConnackPacket().isModified()) {
-                input.updateConnack(pluginOutput.getConnackPacket());
-            }
-            increment(pluginOutput.connackPrevented());
         }
 
-        public void increment(final boolean connackPrevented) {
-            //we must set the future when no more interceptors are registered
-            if (counter.incrementAndGet() == interceptorCount || connackPrevented) {
-                interceptorFuture.set(null);
+        public boolean finishInterceptor() {
+            if (counter.incrementAndGet() == interceptorCount) {
+                ctx.executor().execute(this);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            if (outputHolder.get().isPrevent()) {
+                eventLog.clientWasDisconnected(
+                        ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
+                ctx.channel().close();
+            } else {
+                ctx.writeAndFlush(CONNACK.from(inputHolder.get().getConnackPacket()), promise);
             }
         }
     }
 
-    private class ConnackInterceptorTask
+    private static class ConnackInterceptorTask
             implements PluginInOutTask<ConnackOutboundInputImpl, ConnackOutboundOutputImpl> {
 
-        private final @NotNull ConnackOutboundInterceptorProvider interceptorProvider;
-        private final @NotNull ConnackOutboundProviderInputImpl connackOutboundProviderInput;
-        private final @NotNull SettableFuture<Void> interceptorFuture;
-        private final @NotNull String pluginId;
+        private final @NotNull ConnackOutboundInterceptorProvider provider;
+        private final @NotNull ConnackOutboundProviderInputImpl providerInput;
+        private final @NotNull String extensionId;
 
         private ConnackInterceptorTask(
-                final @NotNull ConnackOutboundInterceptorProvider interceptorProvider,
-                final @NotNull ConnackOutboundProviderInputImpl connackOutboundProviderInput,
-                final @NotNull SettableFuture<Void> interceptorFuture,
-                final @NotNull String pluginId) {
+                final @NotNull ConnackOutboundInterceptorProvider provider,
+                final @NotNull ConnackOutboundProviderInputImpl providerInput,
+                final @NotNull String extensionId) {
 
-            this.interceptorProvider = interceptorProvider;
-            this.connackOutboundProviderInput = connackOutboundProviderInput;
-            this.interceptorFuture = interceptorFuture;
-            this.pluginId = pluginId;
+            this.provider = provider;
+            this.providerInput = providerInput;
+            this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull ConnackOutboundOutputImpl apply(
-                final @NotNull ConnackOutboundInputImpl input,
-                final @NotNull ConnackOutboundOutputImpl output) {
+                final @NotNull ConnackOutboundInputImpl input, final @NotNull ConnackOutboundOutputImpl output) {
 
+            if (output.isPrevent()) {
+                // it's already prevented so no further interceptors must be called.
+                return output;
+            }
             try {
-                final ConnackOutboundInterceptor interceptor =
-                        interceptorProvider.getConnackOutboundInterceptor(connackOutboundProviderInput);
-                if (interceptor != null && !interceptorFuture.isDone()) {
+                final ConnackOutboundInterceptor interceptor = provider.getConnackOutboundInterceptor(providerInput);
+                if (interceptor != null) {
                     interceptor.onOutboundConnack(input, output);
                 }
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on connack interception. The exception should be handled by the extension.",
-                        pluginId);
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound CONNACK interception. " +
+                                "Extensions are responsible for their own exception handling.", extensionId);
                 log.debug("Original exception:", e);
-                output.forciblyDisconnect();
+                output.prevent();
                 Exceptions.rethrowError(e);
             }
             return output;
@@ -305,7 +262,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
 
         @Override
         public @NotNull ClassLoader getPluginClassLoader() {
-            return interceptorProvider.getClass().getClassLoader();
+            return provider.getClass().getClassLoader();
         }
     }
 }

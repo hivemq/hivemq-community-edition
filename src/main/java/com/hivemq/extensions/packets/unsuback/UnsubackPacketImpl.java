@@ -20,46 +20,49 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackPacket;
 import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackReasonCode;
-import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * @author Robin Atherton
  * @author Silvio Giebl
  */
+@Immutable
 public class UnsubackPacketImpl implements UnsubackPacket {
 
-    private final @NotNull ImmutableList<UnsubackReasonCode> reasonCodes;
-    private final @Nullable String reasonString;
-    private final int packetIdentifier;
-    private final @NotNull UserProperties userProperties;
+    final @NotNull ImmutableList<UnsubackReasonCode> reasonCodes;
+    final @Nullable String reasonString;
+    final int packetIdentifier;
+    final @NotNull UserPropertiesImpl userProperties;
+
+    public UnsubackPacketImpl(
+            final @NotNull ImmutableList<UnsubackReasonCode> reasonCodes,
+            final @Nullable String reasonString,
+            final int packetIdentifier,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.reasonCodes = reasonCodes;
+        this.reasonString = reasonString;
+        this.packetIdentifier = packetIdentifier;
+        this.userProperties = userProperties;
+    }
 
     public UnsubackPacketImpl(final @NotNull UNSUBACK unsuback) {
         final ImmutableList.Builder<UnsubackReasonCode> builder = ImmutableList.builder();
-        for (final Mqtt5UnsubAckReasonCode code : unsuback.getReasonCodes()) {
-            builder.add(code.toUnsubackReasonCode());
-        }
+        unsuback.getReasonCodes().forEach(code -> builder.add(code.toUnsubackReasonCode()));
         reasonCodes = builder.build();
         reasonString = unsuback.getReasonString();
         packetIdentifier = unsuback.getPacketIdentifier();
-        userProperties = unsuback.getUserProperties().getPluginUserProperties();
-    }
-
-    public UnsubackPacketImpl(final @NotNull UnsubackPacket unsubackPacket) {
-        reasonCodes = ImmutableList.copyOf(unsubackPacket.getReasonCodes());
-        reasonString = unsubackPacket.getReasonString().orElse(null);
-        packetIdentifier = unsubackPacket.getPacketIdentifier();
-        userProperties = unsubackPacket.getUserProperties();
+        userProperties = UserPropertiesImpl.of(unsuback.getUserProperties().asList());
     }
 
     @Override
-    public @Immutable @NotNull List<@NotNull UnsubackReasonCode> getReasonCodes() {
+    public @NotNull ImmutableList<UnsubackReasonCode> getReasonCodes() {
         return reasonCodes;
     }
 
@@ -74,7 +77,27 @@ public class UnsubackPacketImpl implements UnsubackPacket {
     }
 
     @Override
-    public @Immutable @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UnsubackPacketImpl)) {
+            return false;
+        }
+        final UnsubackPacketImpl that = (UnsubackPacketImpl) o;
+        return reasonCodes.equals(that.reasonCodes) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                (packetIdentifier == that.packetIdentifier) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reasonCodes, reasonString, packetIdentifier, userProperties);
     }
 }

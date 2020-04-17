@@ -17,16 +17,13 @@
 package com.hivemq.mqtt.message.connect;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extensions.packets.connect.ModifiableConnectPacketImpl;
+import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.Bytes;
 
 import java.nio.charset.StandardCharsets;
@@ -500,39 +497,25 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         }
     }
 
-    public static @NotNull CONNECT mergeConnectPacket(final @NotNull ModifiableConnectPacketImpl connectPacket, final @NotNull CONNECT origin,
-                                                      @NotNull final String clusterId) {
-
-        if (!connectPacket.isModified()) {
-            return origin;
-        }
-
-        final CONNECT.Mqtt5Builder builder = new CONNECT.Mqtt5Builder();
-
-        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
-        for (final UserProperty userProperty : connectPacket.getUserProperties().asList()) {
-            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-
-        return builder.withClientIdentifier(connectPacket.getClientId())
-                .withCleanStart(connectPacket.getCleanStart())
-                .withWillPublish(MqttWillPublish.fromWillPacket(clusterId, connectPacket.getWillPublish().orElse(null)))
-                .withSessionExpiryInterval(connectPacket.getSessionExpiryInterval())
-                .withKeepAlive(connectPacket.getKeepAlive())
-                .withReceiveMaximum(connectPacket.getReceiveMaximum())
-                .withMaximumPacketSize(connectPacket.getMaximumPacketSize())
-                .withTopicAliasMaximum(connectPacket.getTopicAliasMaximum())
-                .withResponseInformationRequested(connectPacket.getRequestResponseInformation())
-                .withProblemInformationRequested(connectPacket.getRequestProblemInformation())
-                .withAuthMethod(connectPacket.getAuthenticationMethod().orElse(null))
-                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(connectPacket.getAuthenticationData()))
-                .withMqtt5UserProperties(Mqtt5UserProperties.of(userProperties.build()))
-                .withUsername(connectPacket.getUserName().orElse(null))
-                .withPassword(Bytes.getBytesFromReadOnlyBuffer(connectPacket.getPassword()))
-                .withWill(connectPacket.getWillPublish().isPresent())
-                .withUsernameRequired(connectPacket.getUserName().isPresent())
-                .withPasswordRequired(connectPacket.getPassword().isPresent())
+    public static @NotNull CONNECT from(final @NotNull ConnectPacketImpl packet, final @NotNull String clusterId) {
+        return new CONNECT.Mqtt5Builder().withClientIdentifier(packet.getClientId())
+                .withCleanStart(packet.getCleanStart())
+                .withWillPublish(MqttWillPublish.fromWillPacket(clusterId, packet.getWillPublish().orElse(null)))
+                .withSessionExpiryInterval(packet.getSessionExpiryInterval())
+                .withKeepAlive(packet.getKeepAlive())
+                .withReceiveMaximum(packet.getReceiveMaximum())
+                .withMaximumPacketSize(packet.getMaximumPacketSize())
+                .withTopicAliasMaximum(packet.getTopicAliasMaximum())
+                .withResponseInformationRequested(packet.getRequestResponseInformation())
+                .withProblemInformationRequested(packet.getRequestProblemInformation())
+                .withAuthMethod(packet.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()))
+                .withMqtt5UserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
+                .withUsername(packet.getUserName().orElse(null))
+                .withPassword(Bytes.getBytesFromReadOnlyBuffer(packet.getPassword()))
+                .withWill(packet.getWillPublish().isPresent())
+                .withUsernameRequired(packet.getUserName().isPresent())
+                .withPasswordRequired(packet.getPassword().isPresent())
                 .build();
     }
-
 }

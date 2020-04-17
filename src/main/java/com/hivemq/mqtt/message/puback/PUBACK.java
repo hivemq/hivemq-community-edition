@@ -16,15 +16,12 @@
 
 package com.hivemq.mqtt.message.puback;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
+import com.hivemq.extensions.packets.puback.PubackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 
 /**
@@ -57,19 +54,11 @@ public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         return MessageType.PUBACK;
     }
 
-    public static @NotNull PUBACK createPubackFrom(final @NotNull PubackPacket packet) {
-
-        final int packetIdentifier = packet.getPacketIdentifier();
-        final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.from(packet.getReasonCode());
-
-        final String reasonString = packet.getReasonString().orElse(null);
-
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-
-        return new PUBACK(packetIdentifier, reasonCode, reasonString, mqtt5UserProperties);
+    public static @NotNull PUBACK from(final @NotNull PubackPacketImpl packet) {
+        return new PUBACK(
+                packet.getPacketIdentifier(),
+                Mqtt5PubAckReasonCode.from(packet.getReasonCode()),
+                packet.getReasonString().orElse(null),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 }

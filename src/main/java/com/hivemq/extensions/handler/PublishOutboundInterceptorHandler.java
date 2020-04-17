@@ -16,17 +16,15 @@
 
 package com.hivemq.extensions.handler;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -35,6 +33,7 @@ import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.interceptor.publish.parameter.PublishOutboundInputImpl;
 import com.hivemq.extensions.interceptor.publish.parameter.PublishOutboundOutputImpl;
+import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -54,9 +53,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Lukas Brandl
+ * @author Silvio Giebl
  */
-@ChannelHandler.Sharable
 @Singleton
+@ChannelHandler.Sharable
 public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(PublishOutboundInterceptorHandler.class);
@@ -86,133 +86,135 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
     public void write(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull Object msg,
-            final @NotNull ChannelPromise promise)
-            throws Exception {
+            final @NotNull ChannelPromise promise) {
 
         if (!(msg instanceof PUBLISH)) {
-            super.write(ctx, msg, promise);
+            ctx.write(msg, promise);
             return;
         }
-        if (!handlePublish(ctx, (PUBLISH) msg, promise)) {
-            super.write(ctx, msg, promise);
-        }
+        handlePublish(ctx, (PUBLISH) msg, promise);
     }
 
     // Returns true if the publish is handled by the outbound interceptor handling
-    private boolean handlePublish(
+    private void handlePublish(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBLISH publish,
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        if (!channel.isActive()) {
-            return false;
-        }
-
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
-            return false;
+            return;
         }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
-        if (clientContext == null || clientContext.getPublishOutboundInterceptors().isEmpty()) {
-            return false;
+        if (clientContext == null) {
+            ctx.write(publish, promise);
+            return;
+        }
+        final List<PublishOutboundInterceptor> interceptors = clientContext.getPublishOutboundInterceptors();
+        if (interceptors.isEmpty()) {
+            ctx.write(publish, promise);
+            return;
         }
 
-        final List<PublishOutboundInterceptor> publishOutboundInterceptors =
-                clientContext.getPublishOutboundInterceptors();
-        final PublishOutboundInputImpl input =
-                new PublishOutboundInputImpl(new PublishPacketImpl(publish), clientId, channel);
-        final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(configurationService, asyncer, publish);
-        final SettableFuture<Void> interceptorFuture = SettableFuture.create();
-        final PublishOutboundInterceptorContext interceptorContext = new PublishOutboundInterceptorContext(
-                clientId, output, input, interceptorFuture, publishOutboundInterceptors.size());
+        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
 
-        for (final PublishOutboundInterceptor interceptor : publishOutboundInterceptors) {
+        final PublishPacketImpl packet = new PublishPacketImpl(publish);
+        final PublishOutboundInputImpl input = new PublishOutboundInputImpl(clientInfo, connectionInfo, packet);
+        final ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
 
-            //we can stop running interceptors if delivery is prevented.
-            if (output.isPreventDelivery()) {
-                //we do not know if it is already set by an async task so we check it
-                if (!interceptorFuture.isDone()) {
-                    interceptorFuture.set(null);
-                }
-                break;
-            }
+        final ModifiableOutboundPublishImpl modifiablePacket =
+                new ModifiableOutboundPublishImpl(packet, configurationService);
+        final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
+        final ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
+
+        final PublishOutboundInterceptorContext context = new PublishOutboundInterceptorContext(
+                clientId, interceptors.size(), ctx, promise, publish, inputHolder, outputHolder);
+
+        for (final PublishOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
                     (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
-
-            //disabled extension would be null
-            if (extension == null) {
-                interceptorContext.increment();
+            if (extension == null) { // disabled extension would be null
+                context.finishInterceptor();
                 continue;
             }
 
-            final PublishOutboundInterceptorTask interceptorTask =
+            final PublishOutboundInterceptorTask task =
                     new PublishOutboundInterceptorTask(interceptor, extension.getId());
-
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    interceptorContext, input, output, interceptorTask);
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
-
-        final SettableFuture<PublishStatus> publishFuture;
-        if (publish instanceof PublishWithFuture) {
-            publishFuture = ((PublishWithFuture) publish).getFuture();
-        } else {
-            publishFuture = null;
-        }
-        final InterceptorFutureCallback callback = new InterceptorFutureCallback(
-                output, clientId, publish, ctx, messageDroppedService, publishFuture, promise);
-        Futures.addCallback(interceptorFuture, callback, ctx.executor());
-        return true;
     }
 
-    static class PublishOutboundInterceptorContext extends PluginInOutTaskContext<PublishOutboundOutputImpl> {
+    private class PublishOutboundInterceptorContext extends PluginInOutTaskContext<PublishOutboundOutputImpl>
+            implements Runnable {
 
-        private final @NotNull PublishOutboundOutputImpl output;
-        private final @NotNull PublishOutboundInputImpl input;
-        @VisibleForTesting
-        final @NotNull SettableFuture<Void> interceptorFuture;
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ChannelPromise promise;
+        private final @NotNull PUBLISH publish;
+        private final @NotNull ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder;
+        private final @NotNull ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder;
 
         PublishOutboundInterceptorContext(
                 final @NotNull String identifier,
-                final @NotNull PublishOutboundOutputImpl output,
-                final @NotNull PublishOutboundInputImpl input,
-                final @NotNull SettableFuture<Void> interceptorFuture,
-                final int interceptorCount) {
+                final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise,
+                final @NotNull PUBLISH publish,
+                final @NotNull ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder,
+                final @NotNull ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder) {
 
             super(identifier);
-            this.output = output;
-            this.input = input;
-            this.interceptorFuture = interceptorFuture;
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
+            this.ctx = ctx;
+            this.promise = promise;
+            this.publish = publish;
+            this.inputHolder = inputHolder;
+            this.outputHolder = outputHolder;
         }
 
         @Override
-        public void pluginPost(final @NotNull PublishOutboundOutputImpl pluginOutput) {
-
-            if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
-                    pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-                //Timeout fallback failure means publish delivery prevention
-                pluginOutput.forciblyPreventPublishDelivery();
-            }
-
-            if (output.getPublishPacket().isModified()) {
-                input.updatePublish(output.getPublishPacket());
-            }
-
-            if (counter.incrementAndGet() == interceptorCount || pluginOutput.isPreventDelivery()) {
-                interceptorFuture.set(null);
+        public void pluginPost(final @NotNull PublishOutboundOutputImpl output) {
+            if (output.isPreventDelivery()) {
+                finishInterceptor();
+            } else if (output.isTimedOut() && (output.getTimeoutFallback() == TimeoutFallback.FAILURE)) {
+                output.forciblyPreventPublishDelivery();
+                finishInterceptor();
+            } else {
+                if (output.getPublishPacket().isModified()) {
+                    inputHolder.set(inputHolder.get().update(output));
+                }
+                if (!finishInterceptor()) {
+                    outputHolder.set(output.update(inputHolder.get()));
+                }
             }
         }
 
-        public void increment() {
-            //we must set the future when no more interceptors are registered
+        public boolean finishInterceptor() {
             if (counter.incrementAndGet() == interceptorCount) {
-                interceptorFuture.set(null);
+                ctx.executor().execute(this);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void run() {
+            if (outputHolder.get().isPreventDelivery()) {
+                messageDroppedService.extensionPrevented(
+                        getIdentifier(), publish.getTopic(), publish.getQoS().getQosNumber());
+                promise.setSuccess();
+                if (publish instanceof PublishWithFuture) {
+                    ((PublishWithFuture) publish).getFuture().set(PublishStatus.DELIVERED);
+                }
+            } else {
+                final PUBLISH mergedPublish = PUBLISHFactory.merge(inputHolder.get().getPublishPacket(), publish);
+                ctx.writeAndFlush(mergedPublish, promise);
             }
         }
     }
@@ -221,91 +223,39 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             implements PluginInOutTask<PublishOutboundInputImpl, PublishOutboundOutputImpl> {
 
         private final @NotNull PublishOutboundInterceptor interceptor;
-        private final @NotNull String pluginId;
+        private final @NotNull String extensionId;
 
         private PublishOutboundInterceptorTask(
-                final @NotNull PublishOutboundInterceptor interceptor,
-                final @NotNull String pluginId) {
+                final @NotNull PublishOutboundInterceptor interceptor, final @NotNull String extensionId) {
 
             this.interceptor = interceptor;
-            this.pluginId = pluginId;
+            this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PublishOutboundOutputImpl apply(
-                final @NotNull PublishOutboundInputImpl publishOutboundInput,
-                final @NotNull PublishOutboundOutputImpl publishOutboundOutput) {
+                final @NotNull PublishOutboundInputImpl input, final @NotNull PublishOutboundOutputImpl output) {
 
-            if (publishOutboundOutput.isPreventDelivery()) {
-                //it's already prevented so no further interceptors must be called.
-                return publishOutboundOutput;
+            if (output.isPreventDelivery()) {
+                // it's already prevented so no further interceptors must be called.
+                return output;
             }
             try {
-                interceptor.onOutboundPublish(publishOutboundInput, publishOutboundOutput);
+                interceptor.onOutboundPublish(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound publish interception. " +
-                                "Extensions are responsible on their own to handle exceptions.", pluginId);
-
-                publishOutboundOutput.forciblyPreventPublishDelivery();
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
+                                "Extensions are responsible for their own exception handling.", extensionId);
+                log.debug("Original exception:", e);
+                output.forciblyPreventPublishDelivery();
                 Exceptions.rethrowError(e);
             }
-            return publishOutboundOutput;
+            return output;
         }
 
         @Override
         public @NotNull ClassLoader getPluginClassLoader() {
             return interceptor.getClass().getClassLoader();
-        }
-    }
-
-    private static class InterceptorFutureCallback implements FutureCallback<Void> {
-
-        private final @NotNull PublishOutboundOutputImpl outboundOutput;
-        private final @NotNull String clientId;
-        private final @NotNull PUBLISH publish;
-        private final @NotNull ChannelHandlerContext ctx;
-        private final @NotNull MessageDroppedService messageDroppedService;
-        private final @Nullable SettableFuture<PublishStatus> publishFuture;
-        private final @NotNull ChannelPromise promise;
-
-        InterceptorFutureCallback(
-                final @NotNull PublishOutboundOutputImpl outboundOutput,
-                final @NotNull String clientId,
-                final @NotNull PUBLISH publish,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull MessageDroppedService messageDroppedService,
-                final @Nullable SettableFuture<PublishStatus> publishFuture,
-                final @NotNull ChannelPromise promise) {
-
-            this.outboundOutput = outboundOutput;
-            this.clientId = clientId;
-            this.publish = publish;
-            this.ctx = ctx;
-            this.messageDroppedService = messageDroppedService;
-            this.publishFuture = publishFuture;
-            this.promise = promise;
-        }
-
-        @Override
-        public void onSuccess(final @Nullable Void result) {
-            if (outboundOutput.isPreventDelivery()) {
-                messageDroppedService.extensionPrevented(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
-                promise.setSuccess();
-                if (publishFuture != null) {
-                    publishFuture.set(PublishStatus.DELIVERED);
-                }
-            } else {
-                final PUBLISH mergedPublish =
-                        PUBLISHFactory.mergePublishPacket(outboundOutput.getPublishPacket(), publish);
-                ctx.writeAndFlush(mergedPublish, promise);
-            }
-        }
-
-        @Override
-        public void onFailure(final @NotNull Throwable t) {
-            //should never happen, since the settable future never sets an exception
-            Exceptions.rethrowError("Exception in publish outbound interceptor handling. ", t);
         }
     }
 }

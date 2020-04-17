@@ -20,13 +20,10 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.suback.SubackPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
+import com.hivemq.extensions.packets.suback.SubackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCodes;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 
 import java.util.List;
@@ -85,17 +82,14 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
         return MessageType.SUBACK;
     }
 
-    public static @NotNull SUBACK createSubAckFrom(final @NotNull SubackPacket packet) {
+    public static @NotNull SUBACK from(final @NotNull SubackPacketImpl packet) {
         final ImmutableList.Builder<Mqtt5SubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
-        for (final SubackReasonCode code : packet.getReasonCodes()) {
-            reasonCodesBuilder.add(Mqtt5SubAckReasonCode.from(code));
-        }
-        final String reasonString = packet.getReasonString().orElse(null);
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-        return new SUBACK(packet.getPacketIdentifier(), reasonCodesBuilder.build(), reasonString, mqtt5UserProperties);
+        packet.getReasonCodes().forEach(reasonCode -> reasonCodesBuilder.add(Mqtt5SubAckReasonCode.from(reasonCode)));
+
+        return new SUBACK(
+                packet.getPacketIdentifier(),
+                reasonCodesBuilder.build(),
+                packet.getReasonString().orElse(null),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 }

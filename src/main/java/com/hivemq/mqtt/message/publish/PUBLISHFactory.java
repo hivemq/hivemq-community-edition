@@ -18,16 +18,12 @@ package com.hivemq.mqtt.message.publish;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extensions.packets.publish.ModifiableOutboundPublishImpl;
-import com.hivemq.extensions.packets.publish.ModifiablePublishPacketImpl;
+import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.Bytes;
 
@@ -340,56 +336,31 @@ public class PUBLISHFactory {
         }
     }
 
-    public static @NotNull PUBLISH mergePublishPacket(final @NotNull ModifiablePublishPacketImpl publishPacket, final @NotNull PUBLISH origin) {
+    public static @NotNull PUBLISH merge(final @NotNull PublishPacketImpl packet, final @NotNull PUBLISH origin) {
 
-        if (!publishPacket.isModified()) {
-            return origin;
-        }
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = packet.getPayloadFormatIndicator().isPresent() ?
+                Mqtt5PayloadFormatIndicator.from(packet.getPayloadFormatIndicator().get()) : null;
 
-        return mergePublishPacket((PublishPacket) publishPacket, origin);
-
-    }
-
-    public static @NotNull PUBLISH mergePublishPacket(final @NotNull ModifiableOutboundPublishImpl publishPacket, final @NotNull PUBLISH origin) {
-
-        if (!publishPacket.isModified()) {
-            return origin;
-        }
-        return mergePublishPacket((PublishPacket) publishPacket, origin);
-    }
-
-    private static @NotNull PUBLISH mergePublishPacket(final @NotNull PublishPacket publishPacket, final @NotNull PUBLISH origin) {
-
-        final Mqtt5Builder builder = new Mqtt5Builder();
-
-        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publishPacket.getPayloadFormatIndicator().isPresent() ? Mqtt5PayloadFormatIndicator.valueOf(publishPacket.getPayloadFormatIndicator().get().name()) : null;
-
-        final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
-        for (final UserProperty userProperty : publishPacket.getUserProperties().asList()) {
-            userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-
-        return builder
+        return new Mqtt5Builder()
                 .withTimestamp(origin.getTimestamp())
                 .withPublishId(origin.getLocalPublishId())
                 .withHivemqId(origin.getHivemqId())
-                .withTopic(publishPacket.getTopic())
-                .withQoS(QoS.valueOf(publishPacket.getQos().getQosNumber()))
-                .withPayload(Bytes.getBytesFromReadOnlyBuffer(publishPacket.getPayload()))
-                .withRetain(publishPacket.getRetain())
-                .withMessageExpiryInterval(publishPacket.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))
-                .withDuplicateDelivery(publishPacket.getDupFlag())
-                .withPacketIdentifier(publishPacket.getPacketId())
+                .withTopic(packet.getTopic())
+                .withQoS(QoS.from(packet.getQos()))
+                .withPayload(Bytes.getBytesFromReadOnlyBuffer(packet.getPayload()))
+                .withRetain(packet.getRetain())
+                .withMessageExpiryInterval(packet.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))
+                .withDuplicateDelivery(packet.getDupFlag())
+                .withPacketIdentifier(packet.getPacketId())
                 .withPayloadId(origin.getPayloadId())
                 .withPersistence(origin.getPersistence())
                 .withPayloadFormatIndicator(payloadFormatIndicator)
-                .withContentType(publishPacket.getContentType().orElse(null))
-                .withResponseTopic(publishPacket.getResponseTopic().orElse(null))
-                .withCorrelationData(Bytes.getBytesFromReadOnlyBuffer(publishPacket.getCorrelationData()))
+                .withContentType(packet.getContentType().orElse(null))
+                .withResponseTopic(packet.getResponseTopic().orElse(null))
+                .withCorrelationData(Bytes.getBytesFromReadOnlyBuffer(packet.getCorrelationData()))
                 .withNewTopicAlias(origin.isNewTopicAlias())
-                .withSubscriptionIdentifiers(ImmutableList.copyOf(publishPacket.getSubscriptionIdentifiers()))
-                .withUserProperties(Mqtt5UserProperties.of(userProperties.build()))
+                .withSubscriptionIdentifiers(ImmutableList.copyOf(packet.getSubscriptionIdentifiers()))
+                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
                 .build();
-
     }
 }

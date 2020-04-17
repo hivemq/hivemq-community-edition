@@ -21,13 +21,12 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.auth.AUTH;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,25 +34,41 @@ import java.util.Optional;
  * @author Florian Limpöck
  * @author Silvio Giebl
  */
+@Immutable
 public class AuthPacketImpl implements AuthPacket {
 
-    private final @NotNull Mqtt5AuthReasonCode reasonCode;
+    private final @NotNull AuthReasonCode reasonCode;
     private final @NotNull String method;
     private final @Nullable byte[] data;
     private final @Nullable String reasonString;
-    private final @NotNull Mqtt5UserProperties userProperties;
+    private final @NotNull UserPropertiesImpl userProperties;
+
+    public AuthPacketImpl(
+            final @NotNull AuthReasonCode reasonCode,
+            final @NotNull String method,
+            final @Nullable byte[] data,
+            final @Nullable String reasonString,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.reasonCode = reasonCode;
+        this.method = method;
+        this.data = data;
+        this.reasonString = reasonString;
+        this.userProperties = userProperties;
+    }
 
     public AuthPacketImpl(final @NotNull AUTH auth) {
-        reasonCode = auth.getReasonCode();
-        method = auth.getAuthMethod();
-        data = auth.getAuthData();
-        reasonString = auth.getReasonString();
-        userProperties = auth.getUserProperties();
+        this(
+                auth.getReasonCode().toAuthReasonCode(),
+                auth.getAuthMethod(),
+                auth.getAuthData(),
+                auth.getReasonString(),
+                UserPropertiesImpl.of(auth.getUserProperties().asList()));
     }
 
     @Override
     public @NotNull AuthReasonCode getReasonCode() {
-        return reasonCode.toAuthReasonCode();
+        return reasonCode;
     }
 
     @Override
@@ -83,7 +98,30 @@ public class AuthPacketImpl implements AuthPacket {
     }
 
     @Override
-    public @Immutable @NotNull UserProperties getUserProperties() {
-        return userProperties.getPluginUserProperties();
+    public @NotNull UserPropertiesImpl getUserProperties() {
+        return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuthPacketImpl)) {
+            return false;
+        }
+        final AuthPacketImpl that = (AuthPacketImpl) o;
+        return (reasonCode == that.reasonCode) &&
+                method.equals(that.method) &&
+                Arrays.equals(data, that.data) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(reasonCode, method, reasonString, userProperties);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 }

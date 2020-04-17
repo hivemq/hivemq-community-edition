@@ -223,6 +223,8 @@ dependencies {
             [group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0'],
 
             [group: 'org.javassist', name: 'javassist', version: '3.26.0-GA'],
+
+            [group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.1.13']
     )
 
     testCompile([group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0']) {

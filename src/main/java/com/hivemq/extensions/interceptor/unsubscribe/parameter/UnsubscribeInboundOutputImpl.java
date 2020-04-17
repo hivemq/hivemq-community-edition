@@ -15,37 +15,30 @@
  */
 package com.hivemq.extensions.interceptor.unsubscribe.parameter;
 
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.parameter.UnsubscribeInboundOutput;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.task.AbstractAsyncOutput;
-import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.extensions.packets.unsubscribe.ModifiableUnsubscribePacketImpl;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<UnsubscribeInboundOutput>
-        implements UnsubscribeInboundOutput, PluginTaskOutput, Supplier<UnsubscribeInboundOutputImpl> {
+        implements UnsubscribeInboundOutput {
 
-    private final @NotNull FullConfigurationService configurationService;
-    private @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket;
-
-    private boolean preventDelivery = false;
+    private final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket;
+    private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
 
     public UnsubscribeInboundOutputImpl(
             final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull UNSUBSCRIBE unsubscribe) {
+            final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket) {
 
         super(asyncer);
-        this.configurationService = configurationService;
-        this.unsubscribePacket = new ModifiableUnsubscribePacketImpl(configurationService, unsubscribe);
+        this.unsubscribePacket = unsubscribePacket;
     }
 
     @Override
@@ -53,20 +46,15 @@ public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<Unsubscrib
         return unsubscribePacket;
     }
 
-    @Override
-    public @NotNull UnsubscribeInboundOutputImpl get() {
-        return this;
-    }
-
-    public void update(final @NotNull UnsubscribePacket unsubscribePacket) {
-        this.unsubscribePacket = new ModifiableUnsubscribePacketImpl(configurationService, unsubscribePacket);
-    }
-
     public void preventDelivery() {
-        preventDelivery = true;
+        preventDelivery.set(true);
     }
 
     public boolean isPreventDelivery() {
-        return preventDelivery;
+        return preventDelivery.get();
+    }
+
+    public @NotNull UnsubscribeInboundOutputImpl update(final @NotNull UnsubscribeInboundInputImpl input) {
+        return new UnsubscribeInboundOutputImpl(asyncer, unsubscribePacket.update(input.getUnsubscribePacket()));
     }
 }

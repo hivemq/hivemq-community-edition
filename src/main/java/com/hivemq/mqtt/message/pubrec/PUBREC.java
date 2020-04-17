@@ -16,15 +16,12 @@
 
 package com.hivemq.mqtt.message.pubrec;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.pubrec.PubrecPacket;
+import com.hivemq.extensions.packets.pubrec.PubrecPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 
 /**
@@ -52,24 +49,16 @@ public class PUBREC extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
-    public static PUBREC createPubrecFrom(final PubrecPacket packet) {
-        final int packetIdentifier = packet.getPacketIdentifier();
-
-        final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.from(packet.getReasonCode());
-
-        final String reasonString = packet.getReasonString().orElse(null);
-
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-
-        return new PUBREC(packetIdentifier, reasonCode, reasonString, mqtt5UserProperties);
-    }
-
     @Override
     public @NotNull MessageType getType() {
         return MessageType.PUBREC;
+    }
+
+    public static @NotNull PUBREC from(final @NotNull PubrecPacketImpl packet) {
+        return new PUBREC(
+                packet.getPacketIdentifier(),
+                Mqtt5PubRecReasonCode.from(packet.getReasonCode()),
+                packet.getReasonString().orElse(null),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 }

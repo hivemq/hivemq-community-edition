@@ -16,9 +16,10 @@
 
 package com.hivemq.extensions.events;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
 /**
@@ -27,11 +28,12 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
  * @author Florian Limpöck
  * @since 4.0.0
  */
+@Immutable
 public class OnAuthFailedEvent {
 
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
-    private final @Nullable UserProperties userProperties;
+    private final @Nullable UserPropertiesImpl userProperties;
 
     public OnAuthFailedEvent(
             final @Nullable DisconnectedReasonCode reasonCode,
@@ -40,7 +42,7 @@ public class OnAuthFailedEvent {
 
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
-        this.userProperties = (userProperties == null) ? null : userProperties.getPluginUserProperties();
+        this.userProperties = (userProperties == null) ? null : UserPropertiesImpl.of(userProperties.asList());
     }
 
     public @Nullable DisconnectedReasonCode getReasonCode() {
@@ -51,7 +53,7 @@ public class OnAuthFailedEvent {
         return reasonString;
     }
 
-    public @Nullable UserProperties getUserProperties() {
+    public @Nullable UserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 }

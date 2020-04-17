@@ -16,8 +16,9 @@
 
 package com.hivemq.extensions.services.builder;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -30,7 +31,6 @@ import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.extensions.services.publish.RetainedPublishImpl;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -85,17 +85,6 @@ public class RetainedPublishBuilderImplTest {
     public void test_message_expiry_validation() {
         configurationService.mqttConfiguration().setMaxMessageExpiryInterval(10);
         new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(11);
-    }
-
-    @Test
-    public void test_custom_max_message_expiry_value_validation() {
-        configurationService.mqttConfiguration().setMaxMessageExpiryInterval(10);
-        new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(10);
-    }
-
-    @Test
-    public void test_max_message_expiry_value_validation() {
-        new RetainedPublishBuilderImpl(configurationService).messageExpiryInterval(4_294_967_296L);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -192,7 +181,7 @@ public class RetainedPublishBuilderImplTest {
     @Test
     public void test_from_retained_publish() {
 
-        final UserPropertiesImpl userProperties = new UserPropertiesImpl(Mqtt5UserProperties.of(
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of(
                 new MqttUserProperty("name", "value"),
                 new MqttUserProperty("name", "value2"),
                 new MqttUserProperty("name2", "val")));
@@ -382,7 +371,7 @@ public class RetainedPublishBuilderImplTest {
         @NotNull
         @Override
         public UserProperties getUserProperties() {
-            return new UserPropertiesImpl(Mqtt5UserProperties.of(
+            return UserPropertiesImpl.of(ImmutableList.of(
                     new MqttUserProperty("name", "value"),
                     new MqttUserProperty("name", "value2"),
                     new MqttUserProperty("name2", "val")));

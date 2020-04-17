@@ -20,13 +20,10 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperty;
-import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackPacket;
-import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackReasonCode;
+import com.hivemq.extensions.packets.unsuback.UnsubackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 
 import java.util.List;
@@ -86,17 +83,14 @@ public class UNSUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAnd
         return MessageType.UNSUBACK;
     }
 
-    public static @NotNull UNSUBACK createUnsubackFrom(final @NotNull UnsubackPacket packet) {
-        final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodeBuilder = ImmutableList.builder();
-        for (final UnsubackReasonCode code : packet.getReasonCodes()) {
-            reasonCodeBuilder.add(Mqtt5UnsubAckReasonCode.from(code));
-        }
-        final String reasonString = packet.getReasonString().orElse(null);
-        final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-        for (final UserProperty userProperty : packet.getUserProperties().asList()) {
-            userPropertyBuilder.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
-        }
-        final Mqtt5UserProperties mqtt5UserProperties = Mqtt5UserProperties.of(userPropertyBuilder.build());
-        return new UNSUBACK(packet.getPacketIdentifier(), reasonCodeBuilder.build(), reasonString, mqtt5UserProperties);
+    public static @NotNull UNSUBACK from(final @NotNull UnsubackPacketImpl packet) {
+        final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
+        packet.getReasonCodes().forEach(reasonCode -> reasonCodesBuilder.add(Mqtt5UnsubAckReasonCode.from(reasonCode)));
+
+        return new UNSUBACK(
+                packet.getPacketIdentifier(),
+                reasonCodesBuilder.build(),
+                packet.getReasonString().orElse(null),
+                Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 }

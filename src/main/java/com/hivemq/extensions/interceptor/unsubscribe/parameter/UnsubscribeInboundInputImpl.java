@@ -20,33 +20,28 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.parameter.UnsubscribeInboundInput;
-import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
-import com.hivemq.extensions.PluginInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.unsubscribe.UnsubscribePacketImpl;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import io.netty.channel.Channel;
-
-import java.util.function.Supplier;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
-public class UnsubscribeInboundInputImpl
-        implements Supplier<UnsubscribeInboundInputImpl>, UnsubscribeInboundInput, PluginTaskInput {
+@Immutable
+public class UnsubscribeInboundInputImpl implements UnsubscribeInboundInput, PluginTaskInput {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    private @NotNull UnsubscribePacketImpl unsubscribePacket;
+    private final @NotNull UnsubscribePacketImpl unsubscribePacket;
 
     public UnsubscribeInboundInputImpl(
-            final @NotNull String clientId,
-            final @NotNull Channel channel,
-            final @NotNull UNSUBSCRIBE unsubscribe) {
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull UnsubscribePacketImpl unsubscribePacket) {
 
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        unsubscribePacket = new UnsubscribePacketImpl(unsubscribe);
+        this.clientInformation = clientInformation;
+        this.connectionInformation = connectionInformation;
+        this.unsubscribePacket = unsubscribePacket;
     }
 
     @Override
@@ -60,16 +55,12 @@ public class UnsubscribeInboundInputImpl
     }
 
     @Override
-    public @Immutable @NotNull UnsubscribePacket getUnsubscribePacket() {
+    public @NotNull UnsubscribePacketImpl getUnsubscribePacket() {
         return unsubscribePacket;
     }
 
-    @Override
-    public @NotNull UnsubscribeInboundInputImpl get() {
-        return this;
-    }
-
-    public void update(final @NotNull UnsubscribePacket unsubscribePacket) {
-        this.unsubscribePacket = new UnsubscribePacketImpl(unsubscribePacket);
+    public @NotNull UnsubscribeInboundInputImpl update(final @NotNull UnsubscribeInboundOutputImpl output) {
+        return new UnsubscribeInboundInputImpl(
+                clientInformation, connectionInformation, output.getUnsubscribePacket().copy());
     }
 }

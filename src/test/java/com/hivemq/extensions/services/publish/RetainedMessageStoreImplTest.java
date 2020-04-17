@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.services.publish;
 
-import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
 import util.TestException;
 
 import java.nio.ByteBuffer;
@@ -178,7 +177,7 @@ public class RetainedMessageStoreImplTest {
         final CompletableFuture<Void> remove = retainedMessageStore.remove("topic");
 
         assertNotNull(remove);
-        while (!remove.isDone()){
+        while (!remove.isDone()) {
             Thread.sleep(10);
         }
         assertTrue(remove.isDone());
@@ -194,7 +193,7 @@ public class RetainedMessageStoreImplTest {
         final CompletableFuture<Void> clear = retainedMessageStore.clear();
 
         assertNotNull(clear);
-        while (!clear.isDone()){
+        while (!clear.isDone()) {
             Thread.sleep(10);
         }
         assertTrue(clear.isDone());
@@ -210,7 +209,7 @@ public class RetainedMessageStoreImplTest {
         final CompletableFuture<Void> addOrReplace = retainedMessageStore.addOrReplace(getRetainedPublish());
 
         assertNotNull(addOrReplace);
-        while (!addOrReplace.isDone()){
+        while (!addOrReplace.isDone()) {
             Thread.sleep(10);
         }
         assertTrue(addOrReplace.isDone());
@@ -260,7 +259,8 @@ public class RetainedMessageStoreImplTest {
     @Test(expected = TestException.class)
     public void test_add_or_replace_retained_message_failed() throws Throwable {
 
-        when(retainedMessagePersistence.persist(anyString(), any(RetainedMessage.class))).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(retainedMessagePersistence.persist(anyString(), any(RetainedMessage.class))).thenReturn(
+                Futures.immediateFailedFuture(TestException.INSTANCE));
 
         try {
             retainedMessageStore.addOrReplace(getRetainedPublish()).get();
@@ -270,16 +270,20 @@ public class RetainedMessageStoreImplTest {
 
     }
 
-    private RetainedPublish getRetainedPublish(){
-        return new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", PayloadFormatIndicator.UTF_8, 12345L, "response_topic", ByteBuffer.wrap("correlation_data".getBytes()), "content_type", ByteBuffer.wrap("test3".getBytes()), UserPropertiesImpl.NO_USER_PROPERTIES);
+    private RetainedPublishImpl getRetainedPublish() {
+        return new RetainedPublishImpl(
+                Qos.AT_LEAST_ONCE, "topic", PayloadFormatIndicator.UTF_8, 12345L, "response_topic",
+                ByteBuffer.wrap("correlation_data".getBytes()), "content_type", ByteBuffer.wrap("test3".getBytes()),
+                UserPropertiesImpl.of(ImmutableList.of()));
     }
 
-    private RetainedMessage getRetainedMessage(){
+    private RetainedMessage getRetainedMessage() {
         return RetainedPublishImpl.convert(getRetainedPublish());
     }
 
     @SuppressWarnings("NullabilityAnnotations")
     private static class TestRetainedPublish implements RetainedPublish {
+
         @Override
         public Qos getQos() {
             return null;

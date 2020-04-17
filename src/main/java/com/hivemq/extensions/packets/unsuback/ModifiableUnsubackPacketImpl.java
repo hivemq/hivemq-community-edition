@@ -19,18 +19,13 @@ package com.hivemq.extensions.packets.unsuback;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.ModifiableUserProperties;
 import com.hivemq.extension.sdk.api.packets.unsuback.ModifiableUnsubackPacket;
-import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackPacket;
 import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackReasonCode;
-import com.hivemq.extensions.packets.general.InternalUserProperties;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,47 +37,29 @@ import java.util.Optional;
  */
 public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
 
-    private final @NotNull FullConfigurationService configurationService;
-
     private @NotNull ImmutableList<UnsubackReasonCode> reasonCodes;
     private @Nullable String reasonString;
     private final int packetIdentifier;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
 
+    private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
 
     public ModifiableUnsubackPacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull UNSUBACK unsuback) {
+            final @NotNull UnsubackPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
 
-        this.configurationService = fullConfigurationService;
-        final ImmutableList.Builder<UnsubackReasonCode> builder = ImmutableList.builder();
-        for (final Mqtt5UnsubAckReasonCode code : unsuback.getReasonCodes()) {
-            builder.add(code.toUnsubackReasonCode());
-        }
-        reasonCodes = builder.build();
-        reasonString = unsuback.getReasonString();
-        packetIdentifier = unsuback.getPacketIdentifier();
+        reasonCodes = packet.reasonCodes;
+        reasonString = packet.reasonString;
+        packetIdentifier = packet.packetIdentifier;
         userProperties = new ModifiableUserPropertiesImpl(
-                unsuback.getUserProperties().getPluginUserProperties(),
-                fullConfigurationService.securityConfiguration().validateUTF8());
-    }
+                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
 
-    public ModifiableUnsubackPacketImpl(
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull UnsubackPacket unsubackPacket) {
-
-        this.configurationService = fullConfigurationService;
-        reasonCodes = ImmutableList.copyOf(unsubackPacket.getReasonCodes());
-        reasonString = unsubackPacket.getReasonString().orElse(null);
-        packetIdentifier = unsubackPacket.getPacketIdentifier();
-        userProperties = new ModifiableUserPropertiesImpl(
-                (InternalUserProperties) unsubackPacket.getUserProperties(),
-                fullConfigurationService.securityConfiguration().validateUTF8());
+        this.configurationService = configurationService;
     }
 
     @Override
-    public @Immutable @NotNull List<@NotNull UnsubackReasonCode> getReasonCodes() {
+    public @NotNull ImmutableList<UnsubackReasonCode> getReasonCodes() {
         return reasonCodes;
     }
 
@@ -127,11 +104,19 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
     }
 
     @Override
-    public @NotNull ModifiableUserProperties getUserProperties() {
+    public @NotNull ModifiableUserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     public boolean isModified() {
         return modified || userProperties.isModified();
+    }
+
+    public @NotNull UnsubackPacketImpl copy() {
+        return new UnsubackPacketImpl(reasonCodes, reasonString, packetIdentifier, userProperties.copy());
+    }
+
+    public @NotNull ModifiableUnsubackPacketImpl update(final @NotNull UnsubackPacketImpl packet) {
+        return new ModifiableUnsubackPacketImpl(packet, configurationService);
     }
 }

@@ -16,8 +16,9 @@
 
 package com.hivemq.extensions.services.builder;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
@@ -28,7 +29,6 @@ import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.Bytes;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -69,7 +69,7 @@ public class WillPublishBuilderImplTest {
         assertEquals(testPublishPacket.getQos(), willPublishPacket.getQos());
         assertEquals(testPublishPacket.getRetain(), willPublishPacket.getRetain());
         assertEquals(testPublishPacket.getTopic(), willPublishPacket.getTopic());
-        assertEquals(-1, willPublishPacket.getPacketId());
+        assertEquals(0, willPublishPacket.getPacketId());
         assertEquals(testPublishPacket.getPayloadFormatIndicator(), willPublishPacket.getPayloadFormatIndicator());
         assertEquals(testPublishPacket.getMessageExpiryInterval(), willPublishPacket.getMessageExpiryInterval());
         assertEquals(testPublishPacket.getResponseTopic(), willPublishPacket.getResponseTopic());
@@ -123,7 +123,7 @@ public class WillPublishBuilderImplTest {
         assertEquals(publish.getQos(), willPublishPacket.getQos());
         assertEquals(publish.getRetain(), willPublishPacket.getRetain());
         assertEquals(publish.getTopic(), willPublishPacket.getTopic());
-        assertEquals(-1, willPublishPacket.getPacketId());
+        assertEquals(0, willPublishPacket.getPacketId());
         assertEquals(publish.getPayloadFormatIndicator(), willPublishPacket.getPayloadFormatIndicator());
         assertEquals(publish.getMessageExpiryInterval(), willPublishPacket.getMessageExpiryInterval());
         assertEquals(publish.getResponseTopic(), willPublishPacket.getResponseTopic());
@@ -190,8 +190,8 @@ public class WillPublishBuilderImplTest {
         assertEquals(2, willPublishPacket.getQos().getQosNumber());
         assertEquals(true, willPublishPacket.getRetain());
         assertEquals("TYPE", willPublishPacket.getContentType().get());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, Bytes.getBytesFromReadOnlyBuffer(willPublishPacket
-                .getCorrelationData()));
+        assertArrayEquals(
+                new byte[]{1, 2, 3, 4}, Bytes.getBytesFromReadOnlyBuffer(willPublishPacket.getCorrelationData()));
         assertEquals("responseTopic", willPublishPacket.getResponseTopic().get());
         assertEquals(10L, willPublishPacket.getMessageExpiryInterval().get().longValue());
         assertEquals(PayloadFormatIndicator.UTF_8, willPublishPacket.getPayloadFormatIndicator().get());
@@ -406,7 +406,7 @@ public class WillPublishBuilderImplTest {
         @NotNull
         @Override
         public UserProperties getUserProperties() {
-            return new UserPropertiesImpl(Mqtt5UserProperties.of(
+            return UserPropertiesImpl.of(ImmutableList.of(
                     new MqttUserProperty("name", "value"),
                     new MqttUserProperty("name", "value2"),
                     new MqttUserProperty("name2", "val")));

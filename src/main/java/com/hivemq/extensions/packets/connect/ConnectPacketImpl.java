@@ -16,126 +16,216 @@
 
 package com.hivemq.extensions.packets.connect;
 
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extensions.packets.general.MqttVersionUtil;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
+import com.hivemq.extensions.packets.publish.WillPublishPacketImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * @author Georg Held
+ * @author Robin Atherton
+ * @author Silvio Giebl
  */
+@Immutable
 public class ConnectPacketImpl implements ConnectPacket {
-    @NotNull
-    private final CONNECT connect;
 
-    @Nullable
-    private final WillPublishPacket willPublishPacket;
+    final @NotNull MqttVersion mqttVersion;
+    final @NotNull String clientId;
+    final boolean cleanStart;
+    final long sessionExpiryInterval;
+    final int keepAlive;
 
-    public ConnectPacketImpl(@NotNull final CONNECT connect) {
-        this.connect = connect;
-        this.willPublishPacket = WillPublishPacketImpl.fromMqttWillPublish(connect.getWillPublish());
+    final int receiveMaximum;
+    final long maximumPacketSize;
+    final int topicAliasMaximum;
+    final boolean requestProblemInformation;
+    final boolean requestResponseInformation;
+
+    final @Nullable String userName;
+    final @Nullable ByteBuffer password;
+    final @Nullable String authenticationMethod;
+    final @Nullable ByteBuffer authenticationData;
+
+    final @Nullable WillPublishPacketImpl willPublish;
+    final @NotNull UserPropertiesImpl userProperties;
+
+    public ConnectPacketImpl(
+            final @NotNull MqttVersion mqttVersion,
+            final @NotNull String clientId,
+            final boolean cleanStart,
+            final long sessionExpiryInterval,
+            final int keepAlive,
+            final int receiveMaximum,
+            final long maximumPacketSize,
+            final int topicAliasMaximum,
+            final boolean requestProblemInformation,
+            final boolean requestResponseInformation,
+            final @Nullable String userName,
+            final @Nullable ByteBuffer password,
+            final @Nullable String authenticationMethod,
+            final @Nullable ByteBuffer authenticationData,
+            final @Nullable WillPublishPacketImpl willPublish,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.mqttVersion = mqttVersion;
+        this.clientId = clientId;
+        this.cleanStart = cleanStart;
+        this.sessionExpiryInterval = sessionExpiryInterval;
+        this.keepAlive = keepAlive;
+        this.receiveMaximum = receiveMaximum;
+        this.maximumPacketSize = maximumPacketSize;
+        this.topicAliasMaximum = topicAliasMaximum;
+        this.requestProblemInformation = requestProblemInformation;
+        this.requestResponseInformation = requestResponseInformation;
+        this.userName = userName;
+        this.password = password;
+        this.authenticationMethod = authenticationMethod;
+        this.authenticationData = authenticationData;
+        this.willPublish = willPublish;
+        this.userProperties = userProperties;
     }
 
-    @NotNull
-    @Override
-    public MqttVersion getMqttVersion() {
-        return MqttVersionUtil.toMqttVersion(connect.getProtocolVersion());
+    public ConnectPacketImpl(final @NotNull CONNECT connect) {
+        this(
+                MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()),
+                connect.getClientIdentifier(),
+                connect.isCleanStart(),
+                connect.getSessionExpiryInterval(),
+                connect.getKeepAlive(),
+                connect.getReceiveMaximum(),
+                connect.getMaximumPacketSize(),
+                connect.getTopicAliasMaximum(),
+                connect.isProblemInformationRequested(),
+                connect.isResponseInformationRequested(),
+                connect.getUsername(),
+                (connect.getPassword() == null) ? null : ByteBuffer.wrap(connect.getPassword()),
+                connect.getAuthMethod(),
+                (connect.getAuthData() == null) ? null : ByteBuffer.wrap(connect.getAuthData()),
+                (connect.getWillPublish() == null) ? null : new WillPublishPacketImpl(connect.getWillPublish()),
+                UserPropertiesImpl.of(connect.getUserProperties().asList()));
     }
 
-    @NotNull
     @Override
-    public String getClientId() {
-        return connect.getClientIdentifier();
+    public @NotNull MqttVersion getMqttVersion() {
+        return mqttVersion;
+    }
+
+    @Override
+    public @NotNull String getClientId() {
+        return clientId;
     }
 
     @Override
     public boolean getCleanStart() {
-        return connect.isCleanStart();
-    }
-
-    @NotNull
-    @Override
-    public Optional<WillPublishPacket> getWillPublish() {
-        return Optional.ofNullable(willPublishPacket);
+        return cleanStart;
     }
 
     @Override
     public long getSessionExpiryInterval() {
-        return connect.getSessionExpiryInterval();
+        return sessionExpiryInterval;
     }
 
     @Override
     public int getKeepAlive() {
-        return connect.getKeepAlive();
+        return keepAlive;
     }
 
     @Override
     public int getReceiveMaximum() {
-        return connect.getReceiveMaximum();
+        return receiveMaximum;
     }
 
     @Override
     public long getMaximumPacketSize() {
-        return connect.getMaximumPacketSize();
+        return maximumPacketSize;
     }
 
     @Override
     public int getTopicAliasMaximum() {
-        return connect.getTopicAliasMaximum();
-    }
-
-    @Override
-    public boolean getRequestResponseInformation() {
-        return connect.isResponseInformationRequested();
+        return topicAliasMaximum;
     }
 
     @Override
     public boolean getRequestProblemInformation() {
-        return connect.isProblemInformationRequested();
+        return requestProblemInformation;
     }
 
-    @NotNull
     @Override
-    public Optional<String> getAuthenticationMethod() {
-        return Optional.ofNullable(connect.getAuthMethod());
+    public boolean getRequestResponseInformation() {
+        return requestResponseInformation;
     }
 
-    @NotNull
     @Override
-    public Optional<ByteBuffer> getAuthenticationData() {
-        final byte[] authData = connect.getAuthData();
-        if (authData == null) {
-            return Optional.empty();
+    public @NotNull Optional<String> getUserName() {
+        return Optional.ofNullable(userName);
+    }
+
+    @Override
+    public @NotNull Optional<ByteBuffer> getPassword() {
+        return (password == null) ? Optional.empty() : Optional.of(password.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @NotNull Optional<String> getAuthenticationMethod() {
+        return Optional.ofNullable(authenticationMethod);
+    }
+
+    @Override
+    public @NotNull Optional<ByteBuffer> getAuthenticationData() {
+        return (authenticationData == null) ? Optional.empty() : Optional.of(authenticationData.asReadOnlyBuffer());
+    }
+
+    @Override
+    public @NotNull Optional<WillPublishPacket> getWillPublish() {
+        return Optional.ofNullable(willPublish);
+    }
+
+    @Override
+    public @NotNull UserPropertiesImpl getUserProperties() {
+        return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
         }
-        return Optional.of(ByteBuffer.wrap(authData));
-    }
-
-    @NotNull
-    @Override
-    public UserProperties getUserProperties() {
-        return connect.getUserProperties().getPluginUserProperties();
-    }
-
-    @NotNull
-    @Override
-    public Optional<String> getUserName() {
-        return Optional.ofNullable(connect.getUsername());
-    }
-
-    @NotNull
-    @Override
-    public Optional<ByteBuffer> getPassword() {
-        final byte[] password = connect.getPassword();
-        if (password == null) {
-            return Optional.empty();
+        if (!(o instanceof ConnectPacketImpl)) {
+            return false;
         }
-        return Optional.of(ByteBuffer.wrap(password));
+        final ConnectPacketImpl that = (ConnectPacketImpl) o;
+        return (mqttVersion == that.mqttVersion) &&
+                clientId.equals(that.clientId) &&
+                (cleanStart == that.cleanStart) &&
+                (sessionExpiryInterval == that.sessionExpiryInterval) &&
+                (keepAlive == that.keepAlive) &&
+                (receiveMaximum == that.receiveMaximum) &&
+                (maximumPacketSize == that.maximumPacketSize) &&
+                (topicAliasMaximum == that.topicAliasMaximum) &&
+                (requestProblemInformation == that.requestProblemInformation) &&
+                (requestResponseInformation == that.requestResponseInformation) &&
+                Objects.equals(userName, that.userName) &&
+                Objects.equals(password, that.password) &&
+                Objects.equals(authenticationMethod, that.authenticationMethod) &&
+                Objects.equals(authenticationData, that.authenticationData) &&
+                Objects.equals(willPublish, that.willPublish) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mqttVersion, clientId, cleanStart, sessionExpiryInterval, keepAlive, receiveMaximum,
+                maximumPacketSize, topicAliasMaximum, requestProblemInformation, requestResponseInformation, userName,
+                password, authenticationMethod, authenticationData, willPublish, userProperties);
     }
 }

@@ -43,7 +43,7 @@ public class PropertiesSerializationUtilTest {
     public void test_one_property() {
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(ImmutableList.of(new MqttUserProperty("name", "value")));
         final int encodedSize = PropertiesSerializationUtil.encodedSize(userProperties);
-        assertEquals("name".length() + "value".length() + (4 * userProperties.size()) + 4, encodedSize);
+        assertEquals("name".length() + "value".length() + (4 * userProperties.asList().size()) + 4, encodedSize);
 
         final byte[] bytes = new byte[encodedSize];
         PropertiesSerializationUtil.write(userProperties, bytes, 0);
@@ -61,7 +61,7 @@ public class PropertiesSerializationUtilTest {
         final int encodedSize = PropertiesSerializationUtil.encodedSize(userProperties);
         assertEquals("name1".length() + "value1".length() +
                 "name2".length() + "value3".length() +
-                "name3".length() + "value3".length() + (4 * userProperties.size()) + 4, encodedSize);
+                "name3".length() + "value3".length() + (4 * userProperties.asList().size()) + 4, encodedSize);
 
         final byte[] bytes = new byte[encodedSize];
         PropertiesSerializationUtil.write(userProperties, bytes, 0);

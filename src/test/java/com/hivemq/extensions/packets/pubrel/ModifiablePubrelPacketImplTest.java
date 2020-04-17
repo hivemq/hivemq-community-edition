@@ -15,87 +15,106 @@
  */
 package com.hivemq.extensions.packets.pubrel;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.pubrel.PUBREL;
-import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.pubrel.PubrelReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
+
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Yannick Weber
+ * @author Silvio Giebl
  */
 public class ModifiablePubrelPacketImplTest {
 
-    private FullConfigurationService fullConfigurationService;
-    private ModifiablePubrelPacketImpl modifiablePubrelPacket;
-    private PUBREL fullMqtt5Pubrel;
+    private @NotNull FullConfigurationService configurationService;
 
     @Before
-    public void setUp() throws Exception {
-        fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        fullMqtt5Pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        modifiablePubrelPacket = new ModifiablePubrelPacketImpl(fullConfigurationService, fullMqtt5Pubrel);
+    public void setUp() {
+        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
     }
 
     @Test
-    public void test_set_reason_string_to_failed() {
-        final PUBREL pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, null,
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrelPacketImpl
-                modifiablePubrelPacket = new ModifiablePubrelPacketImpl(fullConfigurationService, pubrel);
-        modifiablePubrelPacket.setReasonString("reason");
-        assertTrue(modifiablePubrelPacket.isModified());
-        assertTrue(modifiablePubrelPacket.getReasonString().isPresent());
-        assertEquals("reason", modifiablePubrelPacket.getReasonString().get());
+    public void setReasonString() {
+        final PubrelPacketImpl packet = new PubrelPacketImpl(
+                1, PubrelReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("reason");
+
+        assertEquals(Optional.of("reason"), modifiablePacket.getReasonString());
+        assertTrue(modifiablePacket.isModified());
     }
 
     @Test
-    public void test_set_reason_string_to_null() {
-        final PUBREL pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrelPacketImpl
-                modifiablePubrelPacket = new ModifiablePubrelPacketImpl(fullConfigurationService, pubrel);
-        modifiablePubrelPacket.setReasonString(null);
-        assertTrue(modifiablePubrelPacket.isModified());
-        assertFalse(modifiablePubrelPacket.getReasonString().isPresent());
+    public void setReasonString_null() {
+        final PubrelPacketImpl packet = new PubrelPacketImpl(
+                1, PubrelReasonCode.SUCCESS, "reason", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString(null);
+
+        assertEquals(Optional.empty(), modifiablePacket.getReasonString());
+        assertTrue(modifiablePacket.isModified());
     }
 
     @Test
-    public void test_set_reason_string_to_same() {
-        final PUBREL pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "same",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrelPacketImpl
-                modifiablePubrelPacket = new ModifiablePubrelPacketImpl(fullConfigurationService, pubrel);
-        modifiablePubrelPacket.setReasonString("same");
-        assertFalse(modifiablePubrelPacket.isModified());
+    public void setReasonString_same() {
+        final PubrelPacketImpl packet = new PubrelPacketImpl(
+                1, PubrelReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setReasonString("same");
+
+        assertEquals(Optional.of("same"), modifiablePacket.getReasonString());
+        assertFalse(modifiablePacket.isModified());
     }
 
     @Test
-    public void test_all_values_set() {
-        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(fullMqtt5Pubrel);
-        assertEquals(fullMqtt5Pubrel.getPacketIdentifier(), pubrelPacket.getPacketIdentifier());
-        assertEquals(fullMqtt5Pubrel.getReasonCode().name(), pubrelPacket.getReasonCode().name());
-        assertFalse(pubrelPacket.getReasonString().isPresent());
-        assertEquals(fullMqtt5Pubrel.getUserProperties().size(), pubrelPacket.getUserProperties().asList().size());
+    public void copy_noChanges() {
+        final PubrelPacketImpl packet = new PubrelPacketImpl(
+                1, PubrelReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
+
+        final PubrelPacketImpl copy = modifiablePacket.copy();
+
+        assertEquals(packet, copy);
     }
 
     @Test
-    public void test_change_modifiable_does_not_change_copy_of_packet() {
-        final PUBREL pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
-        final ModifiablePubrelPacketImpl
-                modifiablePubrelPacket = new ModifiablePubrelPacketImpl(fullConfigurationService, pubrel);
+    public void copy_changes() {
+        final PubrelPacketImpl packet = new PubrelPacketImpl(
+                1, PubrelReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
 
-        final PubrelPacketImpl pubrelPacket = new PubrelPacketImpl(modifiablePubrelPacket);
+        modifiablePacket.setReasonString("reason");
+        modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
+        final PubrelPacketImpl copy = modifiablePacket.copy();
 
-        modifiablePubrelPacket.setReasonString("OTHER REASON STRING");
-
-        assertTrue(pubrelPacket.getReasonString().isPresent());
-        assertEquals(pubrel.getReasonString(), pubrelPacket.getReasonString().get());
-        assertEquals(pubrel.getReasonCode().name(), pubrelPacket.getReasonCode().name());
+        final PubrelPacketImpl expectedPacket = new PubrelPacketImpl(
+                1,
+                PubrelReasonCode.SUCCESS,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));
+        assertEquals(expectedPacket, copy);
     }
 }

@@ -18,11 +18,12 @@ package com.hivemq.extensions.packets.puback;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.puback.PubackPacket;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.puback.PUBACK;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,23 +33,29 @@ import java.util.Optional;
 @Immutable
 public class PubackPacketImpl implements PubackPacket {
 
-    private final int packetIdentifier;
-    private final @NotNull AckReasonCode reasonCode;
-    private final @Nullable String reasonString;
-    private final @NotNull UserProperties userProperties;
+    final int packetIdentifier;
+    final @NotNull AckReasonCode reasonCode;
+    final @Nullable String reasonString;
+    final @NotNull UserPropertiesImpl userProperties;
 
-    public PubackPacketImpl(final @NotNull PUBACK puback) {
-        packetIdentifier = puback.getPacketIdentifier();
-        reasonCode = puback.getReasonCode().toAckReasonCode();
-        reasonString = puback.getReasonString();
-        userProperties = puback.getUserProperties().getPluginUserProperties();
+    public PubackPacketImpl(
+            final int packetIdentifier,
+            final @NotNull AckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.packetIdentifier = packetIdentifier;
+        this.reasonCode = reasonCode;
+        this.reasonString = reasonString;
+        this.userProperties = userProperties;
     }
 
-    public PubackPacketImpl(final @NotNull PubackPacket pubackPacket) {
-        packetIdentifier = pubackPacket.getPacketIdentifier();
-        reasonCode = pubackPacket.getReasonCode();
-        reasonString = pubackPacket.getReasonString().orElse(null);
-        userProperties = pubackPacket.getUserProperties();
+    public PubackPacketImpl(final @NotNull PUBACK puback) {
+        this(
+                puback.getPacketIdentifier(),
+                puback.getReasonCode().toAckReasonCode(),
+                puback.getReasonString(),
+                UserPropertiesImpl.of(puback.getUserProperties().asList()));
     }
 
     @Override
@@ -67,7 +74,27 @@ public class PubackPacketImpl implements PubackPacket {
     }
 
     @Override
-    public @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PubackPacketImpl)) {
+            return false;
+        }
+        final PubackPacketImpl that = (PubackPacketImpl) o;
+        return (packetIdentifier == that.packetIdentifier) &&
+                (reasonCode == that.reasonCode) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 }

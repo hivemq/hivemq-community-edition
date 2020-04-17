@@ -15,48 +15,75 @@
  */
 package com.hivemq.extensions.packets.unsubscribe;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.unsubscribe.UnsubscribePacket;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Robin Atherton
+ * @author Silvio Giebl
  */
 @Immutable
 public class UnsubscribePacketImpl implements UnsubscribePacket {
 
-    private final @NotNull List<String> topicFilters;
-    private final @NotNull UserProperties userProperties;
-    private final int packetIdentifier;
+    final @NotNull ImmutableList<String> topicFilters;
+    final @NotNull UserPropertiesImpl userProperties;
+    final int packetIdentifier;
 
-    public UnsubscribePacketImpl(final @NotNull UNSUBSCRIBE unsubscribe) {
-        topicFilters = unsubscribe.getTopics();
-        userProperties = unsubscribe.getUserProperties().getPluginUserProperties();
-        packetIdentifier = unsubscribe.getPacketIdentifier();
+    public UnsubscribePacketImpl(
+            final @NotNull ImmutableList<String> topicFilters,
+            final @NotNull UserPropertiesImpl userProperties,
+            final int packetIdentifier) {
+
+        this.topicFilters = topicFilters;
+        this.userProperties = userProperties;
+        this.packetIdentifier = packetIdentifier;
     }
 
-    public UnsubscribePacketImpl(final @NotNull UnsubscribePacket unsubscribe) {
-        topicFilters = unsubscribe.getTopicFilters();
-        userProperties = unsubscribe.getUserProperties();
-        packetIdentifier = unsubscribe.getPacketIdentifier();
+    public UnsubscribePacketImpl(final @NotNull UNSUBSCRIBE unsubscribe) {
+        this(
+                unsubscribe.getTopics(),
+                UserPropertiesImpl.of(unsubscribe.getUserProperties().asList()),
+                unsubscribe.getPacketIdentifier());
     }
 
     @Override
-    public @Immutable @NotNull List<@NotNull String> getTopicFilters() {
+    public @NotNull ImmutableList<String> getTopicFilters() {
         return topicFilters;
     }
 
     @Override
-    public @Immutable @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
     }
 
     @Override
     public int getPacketIdentifier() {
         return this.packetIdentifier;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UnsubscribePacketImpl)) {
+            return false;
+        }
+        final UnsubscribePacketImpl that = (UnsubscribePacketImpl) o;
+        return topicFilters.equals(that.topicFilters) &&
+                userProperties.equals(that.userProperties) &&
+                (packetIdentifier == that.packetIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(topicFilters, userProperties, packetIdentifier);
     }
 }

@@ -16,8 +16,8 @@
 
 package com.hivemq.codec.decoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
@@ -134,7 +134,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(1, subscribe.getPacketIdentifier());
         assertEquals(123, subscribe.getSubscriptionIdentifier());
 
-        assertEquals(3, subscribe.getUserProperties().size());
+        assertEquals(3, subscribe.getUserProperties().asList().size());
 
         assertEquals("use1", subscribe.getUserProperties().asList().get(0).getName());
         assertEquals("propert1", subscribe.getUserProperties().asList().get(0).getValue());

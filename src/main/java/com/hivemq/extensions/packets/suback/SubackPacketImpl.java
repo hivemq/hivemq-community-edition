@@ -19,13 +19,12 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.suback.SubackPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
-import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
+import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.suback.SUBACK;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,31 +34,34 @@ import java.util.Optional;
 @Immutable
 public class SubackPacketImpl implements SubackPacket {
 
-    private final @NotNull ImmutableList<SubackReasonCode> reasonCodes;
-    private final @Nullable String reasonString;
-    private final int packetIdentifier;
-    private final @NotNull UserProperties userProperties;
+    final @NotNull ImmutableList<SubackReasonCode> reasonCodes;
+    final @Nullable String reasonString;
+    final int packetIdentifier;
+    final @NotNull UserPropertiesImpl userProperties;
+
+    public SubackPacketImpl(
+            final @NotNull ImmutableList<SubackReasonCode> reasonCodes,
+            final @Nullable String reasonString,
+            final int packetIdentifier,
+            final @NotNull UserPropertiesImpl userProperties) {
+
+        this.reasonCodes = reasonCodes;
+        this.reasonString = reasonString;
+        this.packetIdentifier = packetIdentifier;
+        this.userProperties = userProperties;
+    }
 
     public SubackPacketImpl(final @NotNull SUBACK subAck) {
         final ImmutableList.Builder<SubackReasonCode> builder = ImmutableList.builder();
-        for (final Mqtt5SubAckReasonCode code : subAck.getReasonCodes()) {
-            builder.add(code.toSubackReasonCode());
-        }
+        subAck.getReasonCodes().forEach(code -> builder.add(code.toSubackReasonCode()));
         reasonCodes = builder.build();
         reasonString = subAck.getReasonString();
         packetIdentifier = subAck.getPacketIdentifier();
-        userProperties = subAck.getUserProperties().getPluginUserProperties();
-    }
-
-    public SubackPacketImpl(final @NotNull SubackPacket subackPacket) {
-        reasonCodes = ImmutableList.copyOf(subackPacket.getReasonCodes());
-        reasonString = subackPacket.getReasonString().orElse(null);
-        packetIdentifier = subackPacket.getPacketIdentifier();
-        userProperties = subackPacket.getUserProperties();
+        userProperties = UserPropertiesImpl.of(subAck.getUserProperties().asList());
     }
 
     @Override
-    public @Immutable @NotNull List<@NotNull SubackReasonCode> getReasonCodes() {
+    public @NotNull ImmutableList<SubackReasonCode> getReasonCodes() {
         return reasonCodes;
     }
 
@@ -74,7 +76,27 @@ public class SubackPacketImpl implements SubackPacket {
     }
 
     @Override
-    public @Immutable @NotNull UserProperties getUserProperties() {
+    public @NotNull UserPropertiesImpl getUserProperties() {
         return userProperties;
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SubackPacketImpl)) {
+            return false;
+        }
+        final SubackPacketImpl that = (SubackPacketImpl) o;
+        return reasonCodes.equals(that.reasonCodes) &&
+                Objects.equals(reasonString, that.reasonString) &&
+                (packetIdentifier == that.packetIdentifier) &&
+                userProperties.equals(that.userProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reasonCodes, reasonString, packetIdentifier, userProperties);
     }
 }
