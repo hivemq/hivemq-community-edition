@@ -465,12 +465,28 @@ task updateThirdPartyLicenses {
 
 /* ******************** publishing ******************** */
 
+void addManifest(Jar jar) {
+    jar.manifest {
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Vendor': 'HiveMQ'
+        attributes 'Implementation-Version': project.version
+    }
+}
+
+task embeddedJar(type: Jar) {
+    group 'build'
+
+    from sourceSets.main.output
+    addManifest(it)
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+}
+
 publishing {
     publications {
         distribution(MavenPublication) {
 
             artifact tasks.packaging
-
+            artifactId 'hivemq-community-edition'
             pom {
                 name = project.readableName
                 description = project.description
@@ -514,6 +530,73 @@ publishing {
                     url = project.issuesUrl
                 }
             }
+
+            embedded(MavenPublication) {
+                from components.java
+                artifacts = [embeddedJar]
+                artifactId 'hivemq-community-edition-embedded'
+                pom {
+                    name = 'HiveMQ Community Edition Embedded'
+                    description = 'HiveMQ Community Edition Embedded'
+                    url = 'http://www.hivemq.com/'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'cschaebe'
+                            name = 'Christoph Schaebel'
+                            email = 'christoph.schaebel@hivemq.com'
+                            organization = 'HiveMQ GmbH'
+                            organizationUrl = 'https://www.hivemq.com'
+                        }
+                        developer {
+                            id = 'lbrandl'
+                            name = 'Lukas Brandl'
+                            email = 'lukas.brandl@hivemq.com'
+                            organization = 'HiveMQ GmbH'
+                            organizationUrl = 'https://www.hivemq.com'
+                        }
+                        developer {
+                            id = 'flimpoeck'
+                            name = 'Florian Limpoeck'
+                            email = 'florian.limpoeck@dc-square.de'
+                            organization = 'HiveMQ GmbH'
+                            organizationUrl = 'https://www.hivemq.com'
+                        }
+                        developer {
+                            id = 'sauroter'
+                            name = 'Georg Held'
+                            email = 'georg.held@hivemq.com'
+                            organization = 'HiveMQ GmbH'
+                            organizationUrl = 'https://www.hivemq.com'
+                        }
+
+                        developer {
+                            id = 'SgtSilvio'
+                            name = 'Silvio Giebl'
+                            email = 'silvio.giebl@hivemq.com'
+                            organization = 'HiveMQ GmbH'
+                            organizationUrl = 'https://www.hivemq.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                        developerConnection = 'scm:git:git@github.com:hivemq/hivemq-community-edition.git'
+                        url = 'https://github.com/hivemq/hivemq-community-edition/tree/master'
+                    }
+
+                    pom.withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    if (dep.artifactId.last().value().last() in ["logback-classic", "slf4j-log4j12"]) {
+                        assert dep.parent().remove(dep)
+                    }
+                }
+            }
+
         }
     }
 }
