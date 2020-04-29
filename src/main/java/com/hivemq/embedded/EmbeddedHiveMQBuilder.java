@@ -17,21 +17,23 @@ package com.hivemq.embedded;
 
 import com.hivemq.embedded.internal.EmbeddedHiveMQBuilderImpl;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.nio.file.Path;
 
 @DoNotImplement
 public interface EmbeddedHiveMQBuilder {
 
-    static EmbeddedHiveMQBuilder newBuilder() {
+    static @NotNull EmbeddedHiveMQBuilder newBuilder() {
         return new EmbeddedHiveMQBuilderImpl();
     }
 
-    EmbeddedHiveMQBuilder withConfigurationFolder(Path configFolder);
+    @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@NotNull Path configFolder);
 
-    EmbeddedHiveMQBuilder withExtensionFolder(Path extensionFolder);
+    @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionFolder);
 
-    EmbeddedHiveMQBuilder withDataFolder(Path dataFolder);
+    @NotNull EmbeddedHiveMQBuilder withDataFolder(@Nullable Path dataFolder);
 
-    EmbeddedHiveMQ build();
+    @NotNull EmbeddedHiveMQ build();
 }
