@@ -13,10 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded.internal;
+
+import com.codahale.metrics.MetricRegistry;
+import com.hivemq.embedded.EmbeddedHiveMQ;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Georg Held
  */
-public class EmbeddedHiveMQImpl {
+public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
+
+    private final @Nullable Path conf;
+    private final @NotNull Path extensions;
+    private final @NotNull Path data;
+
+    EmbeddedHiveMQImpl(final @Nullable Path conf, final @NotNull Path extensions, final @NotNull Path data) {
+
+        this.conf = conf;
+        this.extensions = extensions;
+        this.data = data;
+    }
+
+    @Override
+    public CompletableFuture<Void> start() {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Void> stop() {
+        return null;
+    }
+
+    @Override
+    public MetricRegistry getMetricRegistry() {
+        return null;
+    }
 }
