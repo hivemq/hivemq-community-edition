@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded;
 
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,19 +31,19 @@ public interface EmbeddedHiveMQ {
      *
      * @return a {@link} CompletableFuture that completes when HiveMQ is started and ready
      */
-    CompletableFuture<Void> start();
+    @NotNull CompletableFuture<Void> start();
 
     /**
      * Stop an embedded HiveMQ
      *
      * @return a {@link} CompletableFuture that completes when HiveMQ is stopped
      */
-    CompletableFuture<Void> stop();
+    @NotNull CompletableFuture<Void> stop();
 
     /**
      * Access HiveMQ's metric registry
      *
      * @return the {@link MetricRegistry} containing all HiveMQ metrics
      */
-    MetricRegistry getMetricRegistry();
+    @Nullable MetricRegistry getMetricRegistry();
 }
