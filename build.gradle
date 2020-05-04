@@ -182,7 +182,7 @@ dependencies {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
-    compile project(':hivemq-extension-sdk')
+    compile 'com.hivemq:hivemq-extension-sdk:4.3.0'
 
 
     testCompile(

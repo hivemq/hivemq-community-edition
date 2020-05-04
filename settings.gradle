@@ -11,4 +11,14 @@ pluginManagement {
 
 rootProject.name = 'hivemq-community-edition'
 
-include 'hivemq-extension-sdk'
+if (file('../hivemq-extension-sdk').exists()) {
+    includeBuild '../hivemq-extension-sdk'
+} else {
+    logger.warn('''
+To use the latest changes of or modify the extension sdk, please checkout the hivemq-extension-sdk repository next to the hivemq-community-edition repository
+Execute the following command from your project directory:
+git clone https://github.com/hivemq/hivemq-extension-sdk.git ../hivemq-extension-sdk
+You can also clone your fork:
+git clone https://github.com/<replace-with-your-fork>/hivemq-extension-sdk.git ../hivemq-extension-sdk
+''')
+}
