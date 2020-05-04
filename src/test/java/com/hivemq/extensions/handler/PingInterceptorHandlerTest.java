@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -94,7 +95,7 @@ public class PingInterceptorHandlerTest {
         when(plugin.getId()).thenReturn("plugin");
 
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
 
         final PingInterceptorHandler handler =
                 new PingInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);

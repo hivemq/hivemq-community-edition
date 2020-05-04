@@ -120,7 +120,7 @@ public class ConnectInboundInterceptorHandlerTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
 
         handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService,

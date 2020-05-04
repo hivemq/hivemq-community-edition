@@ -18,10 +18,10 @@ package com.hivemq.common.shutdown;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.*;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MarkerFactory;
@@ -42,11 +42,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A implementation for all shutdown hooks.
  * <p>
- * If you are adding a synchronous shutdown hook, the Shutdown Hook will be added to the registry. Please note,
- * such a synchronous shutdown hook  will <b>not</b> be executed by itself when HiveMQ is shutting down.
+ * If you are adding a synchronous shutdown hook, the Shutdown Hook will be added to the registry. Please note, such a
+ * synchronous shutdown hook  will <b>not</b> be executed by itself when HiveMQ is shutting down.
  * <p>
- * If you are adding an asynchronous Shutdown Hook, <b>it will be immediately registered to the JVM</b>. You can
- * get a read-only collection of all asynchronous Shutdown Hooks for further reference, though.
+ * If you are adding an asynchronous Shutdown Hook, <b>it will be immediately registered to the JVM</b>. You can get a
+ * read-only collection of all asynchronous Shutdown Hooks for further reference, though.
  *
  * @author Dominik Obermaier
  */
@@ -85,7 +85,8 @@ public class ShutdownHooks {
             return;
         }
 
-        if (systemInformation instanceof SystemInformationImpl && ((SystemInformationImpl) systemInformation).isEmbedded()) {
+        if (systemInformation instanceof SystemInformationImpl &&
+                ((SystemInformationImpl) systemInformation).isEmbedded()) {
             return;
         }
         log.trace("Registering synchronous shutdown hook");
@@ -160,12 +161,19 @@ public class ShutdownHooks {
 
             Runtime.getRuntime().removeShutdownHook(hiveMQShutdownHook);
         }
+    }
 
+    public synchronized void clearRuntime() {
+        asynchronousHooks.forEach(Runtime.getRuntime()::removeShutdownHook);
+
+        if (hivemqShutdownThread != null) {
+            Runtime.getRuntime().removeShutdownHook(hivemqShutdownThread);
+        }
     }
 
     /**
-     * Returns the registry with all Shutdown Hooks. Note, that the registry only contains
-     * all synchronous shutdown hooks.
+     * Returns the registry with all Shutdown Hooks. Note, that the registry only contains all synchronous shutdown
+     * hooks.
      *
      * @return A registry of all synchronous Shutdown Hooks.
      */
@@ -174,8 +182,8 @@ public class ShutdownHooks {
     }
 
     /**
-     * Provides a Set of all asynchronous shutdown hooks. Async Shutdown Hooks are already registered to the JVM,
-     * so this Set is read only
+     * Provides a Set of all asynchronous shutdown hooks. Async Shutdown Hooks are already registered to the JVM, so
+     * this Set is read only
      *
      * @return a read only set of shutdown hooks
      */
