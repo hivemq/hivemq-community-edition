@@ -100,7 +100,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
         handler = new DisconnectInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);

@@ -18,9 +18,10 @@ package com.hivemq.extensions.executor;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.executor.task.*;
@@ -35,9 +36,7 @@ import javax.inject.Provider;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Christoph Schäbel
@@ -62,7 +61,9 @@ public class PluginTaskExecutorServiceImplTest {
 
         InternalConfigurations.PLUGIN_TASK_QUEUE_EXECUTOR_COUNT.set(2);
 
-        executorService = new PluginTaskExecutorServiceImpl(new ExecutorProvider(Lists.newArrayList(executor1, executor2)));
+        executorService =
+                new PluginTaskExecutorServiceImpl(new ExecutorProvider(Lists.newArrayList(executor1, executor2)),
+                        mock(ShutdownHooks.class));
     }
 
     @Test
@@ -70,8 +71,8 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginInOutTaskExecution(
                 new TestPluginInOutContext(getIdForBucket(0)),
-                () -> new TestPluginTaskInput(),
-                () -> new TestPluginTaskOutput(),
+                TestPluginTaskInput::new,
+                TestPluginTaskOutput::new,
                 new TestPluginInOutTask(classloader)
         );
 
@@ -79,8 +80,8 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginInOutTaskExecution(
                 new TestPluginInOutContext(getIdForBucket(1)),
-                () -> new TestPluginTaskInput(),
-                () -> new TestPluginTaskOutput(),
+                TestPluginTaskInput::new,
+                TestPluginTaskOutput::new,
                 new TestPluginInOutTask(classloader)
         );
 
@@ -93,7 +94,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginInTaskExecution(
                 new TestPluginInContext(getIdForBucket(0)),
-                () -> new TestPluginTaskInput(),
+                TestPluginTaskInput::new,
                 new TestPluginInTask(classloader)
         );
 
@@ -101,7 +102,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginInTaskExecution(
                 new TestPluginInContext(getIdForBucket(1)),
-                () -> new TestPluginTaskInput(),
+                TestPluginTaskInput::new,
                 new TestPluginInTask(classloader)
         );
 
@@ -114,7 +115,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginOutTaskExecution(
                 new TestPluginOutContext(getIdForBucket(0)),
-                () -> new TestPluginTaskOutput(),
+                TestPluginTaskOutput::new,
                 new TestPluginOutTask(classloader)
         );
 
@@ -122,7 +123,7 @@ public class PluginTaskExecutorServiceImplTest {
 
         executorService.handlePluginOutTaskExecution(
                 new TestPluginOutContext(getIdForBucket(1)),
-                () -> new TestPluginTaskOutput(),
+                TestPluginTaskOutput::new,
                 new TestPluginOutTask(classloader)
         );
 
@@ -139,7 +140,6 @@ public class PluginTaskExecutorServiceImplTest {
             }
         }
     }
-
 
     private class ExecutorProvider implements Provider<PluginTaskExecutor> {
 
@@ -161,7 +161,6 @@ public class PluginTaskExecutorServiceImplTest {
             return iterator.next();
         }
     }
-
 
     private static class TestPluginTaskInput implements PluginTaskInput {
 
@@ -198,7 +197,6 @@ public class PluginTaskExecutorServiceImplTest {
         }
 
     }
-
 
     private static class TestPluginTaskOutput implements PluginTaskOutput {
 
@@ -250,7 +248,8 @@ public class PluginTaskExecutorServiceImplTest {
 
         @NotNull
         @Override
-        public TestPluginTaskOutput apply(@NotNull final TestPluginTaskInput testPluginTaskInput,
+        public TestPluginTaskOutput apply(
+                @NotNull final TestPluginTaskInput testPluginTaskInput,
                 @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
 
             return testPluginTaskOutput;
@@ -283,7 +282,6 @@ public class PluginTaskExecutorServiceImplTest {
 
     private static class TestPluginInTask implements PluginInTask<TestPluginTaskInput> {
 
-
         private final IsolatedPluginClassloader classloader;
 
         public TestPluginInTask(final IsolatedPluginClassloader classloader) {
@@ -300,6 +298,5 @@ public class PluginTaskExecutorServiceImplTest {
             return classloader;
         }
     }
-
 
 }

@@ -28,6 +28,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.embedded.EmbeddedHiveMQ;
+import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
@@ -46,7 +47,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private final @NotNull Path data;
     private final @NotNull SystemInformationImpl systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
-    private final @NotNull FullConfigurationService configurationService;
+    private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
     private @Nullable CompletableFuture<Void> startFuture;
@@ -62,12 +63,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         systemInformation = new SystemInformationImpl();
         metricRegistry = new MetricRegistry();
 
-        //Setup Logging
-        LoggingBootstrap.prepareLogging();
-        LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
 
-        systemInformation.setEmbedded(true);
-        configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 //        reduceResources();
     }
 
@@ -81,7 +77,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             try {
                 persistenceInjector.getInstance(PersistenceStartup.class).finish();
             } catch (final InterruptedException e) {
-                System.out.println("ERROR: Persistence Startup interrupted.");
+//                System.out.println("ERROR: Persistence Startup interrupted.");
             }
 
             injector =
@@ -95,6 +91,14 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         if (startFuture == null) {
             startFuture = new CompletableFuture<>();
             CompletableFuture.runAsync(() -> {
+
+                //Setup Logging
+                LoggingBootstrap.prepareLogging();
+                LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
+
+                systemInformation.setEmbedded(true);
+                configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+
                 bootstrapInjector();
                 final HiveMQServer instance = injector.getInstance(HiveMQServer.class);
                 try {
@@ -112,15 +116,24 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         if (startFuture == null) {
             stopFuture = CompletableFuture.completedFuture(null);
         } else if (stopFuture == null) {
-            startFuture = CompletableFuture.runAsync(() -> {
+            stopFuture = startFuture.thenRunAsync(() -> {
                 final ShutdownHooks instance = injector.getInstance(ShutdownHooks.class);
-                for (final HiveMQShutdownHook hiveMQShutdownHook : instance.getAsyncShutdownHooks()) {
+
+                for (HiveMQShutdownHook mqShutdownHook : instance.getRegistry().values()) {
+                    System.err.println("Synchronous: " + mqShutdownHook.getName());
+                    mqShutdownHook.run();
+                }
+                for (HiveMQShutdownHook hiveMQShutdownHook : instance.getAsyncShutdownHooks()) {
+                    System.err.println("Asynchronous: " + hiveMQShutdownHook.getName());
                     hiveMQShutdownHook.run();
                 }
 
+                instance.clearRuntime();
+                injector = null;
 //            if (tempFolder != null) {
 //                recursiveDelete(tempFolder);
 //            }
+                System.err.println("Stop done");
             });
         }
         return stopFuture;

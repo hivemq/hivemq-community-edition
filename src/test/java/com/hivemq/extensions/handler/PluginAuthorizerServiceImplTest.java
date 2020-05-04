@@ -141,7 +141,7 @@ public class PluginAuthorizerServiceImplTest {
         mqtt5Disconnector = new Mqtt5ServerDisconnector(mqttDisconnectUtil);
         mqtt3Disconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
 
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor);
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
         pluginAuthorizerService =
                 new PluginAuthorizerServiceImpl(authorizers, asyncer, pluginTaskExecutorService, serverInformation,
                         hiveMQExtensions, mqtt3Disconnector, mqtt5Disconnector, eventLog, incomingPublishService);

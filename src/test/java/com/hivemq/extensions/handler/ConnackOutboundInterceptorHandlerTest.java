@@ -63,6 +63,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -117,7 +118,7 @@ public class ConnackOutboundInterceptorHandlerTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
 
         handler = new ConnackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService, interceptors, serverInformation, eventLog);
         channel.pipeline().addFirst(handler);

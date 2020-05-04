@@ -29,11 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.util.SplittableRandom;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,22 +58,23 @@ public class SingleWriterService {
     private final int creditsPerExecution;
     private final long shutdownGracePeriod;
 
+    private final @NotNull AtomicBoolean postConstruct = new AtomicBoolean(true);
+    private final @NotNull AtomicLong nonemptyQueueCounter = new AtomicLong(0);
+    private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
+    private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
+
+    private final @NotNull ProducerQueues @NotNull [] producers = new ProducerQueues[AMOUNT_OF_PRODUCERS];
 
     @VisibleForTesting
-    ExecutorService executorService;
-
-    private final AtomicBoolean postConstruct = new AtomicBoolean(true);
-    private final AtomicLong nonemptyQueueCounter = new AtomicLong(0);
-    private final AtomicInteger runningThreadsCount = new AtomicInteger(0);
-    private final AtomicLong globalTaskCount = new AtomicLong(0);
-
-    private final ProducerQueues[] producers = new ProducerQueues[AMOUNT_OF_PRODUCERS];
+    @NotNull ExecutorService singleWriterExecutor;
     @VisibleForTesting
-    @NotNull
-    public final ExecutorService[] callbackExecutors;
+    public final @NotNull ExecutorService[] callbackExecutors;
+    @VisibleForTesting
+    final @NotNull ScheduledExecutorService checkScheduler;
 
     private final int amountOfQueues;
 
+    @Inject
     public SingleWriterService() {
 
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
@@ -84,7 +83,7 @@ public class SingleWriterService {
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
 
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("single-writer-%d");
-        executorService = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
+        singleWriterExecutor = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
 
         amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
@@ -95,10 +94,14 @@ public class SingleWriterService {
         callbackExecutors = new ExecutorService[amountOfQueues];
         for (int i = 0; i < amountOfQueues; i++) {
             final ThreadFactory callbackThreadFactory = ThreadFactoryUtil.create("single-writer-callback-" + i);
-            final ExecutorService executorService = Executors.newFixedThreadPool(1, callbackThreadFactory);
+            final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(callbackThreadFactory);
             callbackExecutors[i] = executorService;
         }
 
+
+        final ThreadFactory checkThreadFactory =
+                new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
+        checkScheduler = Executors.newSingleThreadScheduledExecutor(checkThreadFactory);
     }
 
     @PostConstruct
@@ -109,12 +112,13 @@ public class SingleWriterService {
         }
 
         // Periodically check if there are pending tasks in the queues
-        final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
-        Executors.newSingleThreadScheduledExecutor(threadFactory).scheduleAtFixedRate(() -> {
+        checkScheduler.scheduleAtFixedRate(() -> {
             try {
 
-                if (runningThreadsCount.getAndIncrement() == 0 && !executorService.isShutdown()) {
-                    executorService.submit(new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount, producers));
+                if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
+                    singleWriterExecutor.submit(
+                            new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount,
+                                    producers));
                 } else {
                     runningThreadsCount.decrementAndGet();
                 }
@@ -138,7 +142,8 @@ public class SingleWriterService {
         nonemptyQueueCounter.incrementAndGet();
 
         if (runningThreadsCount.getAndIncrement() < threadPoolSize) {
-            executorService.submit(new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount, producers));
+            singleWriterExecutor.submit(
+                    new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount, producers));
         } else {
             runningThreadsCount.decrementAndGet();
         }
@@ -208,13 +213,32 @@ public class SingleWriterService {
         return runningThreadsCount;
     }
 
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-
     @NotNull
     public ExecutorService[] getCallbackExecutors() {
         return callbackExecutors;
+    }
+
+    public void stop() {
+        final long start = System.currentTimeMillis();
+        if (log.isTraceEnabled()) {
+            log.trace("Shutting down single writer");
+        }
+
+        singleWriterExecutor.shutdown();
+
+        try {
+            singleWriterExecutor.awaitTermination(shutdownGracePeriod, TimeUnit.SECONDS);
+            if (log.isTraceEnabled()) {
+                log.trace("Finished single writer shutdown in {} ms", (System.currentTimeMillis() - start));
+            }
+        } catch (final InterruptedException e) {
+            //ignore
+        }
+        singleWriterExecutor.shutdownNow();
+        for (final @NotNull ExecutorService callbackExecutor : callbackExecutors) {
+            callbackExecutor.shutdownNow();
+        }
+        checkScheduler.shutdownNow();
     }
 
     private static class SingleWriterTask implements Runnable {
@@ -229,8 +253,10 @@ public class SingleWriterService {
 
         private static final SplittableRandom RANDOM = new SplittableRandom();
 
-        public SingleWriterTask(final AtomicLong nonemptyQueueCounter, final AtomicLong globalTaskCount, final AtomicInteger runningThreadsCount,
-                                final ProducerQueues[] producers) {
+        public SingleWriterTask(
+                final AtomicLong nonemptyQueueCounter, final AtomicLong globalTaskCount,
+                final AtomicInteger runningThreadsCount,
+                final ProducerQueues[] producers) {
 
             this.nonemptyQueueCounter = nonemptyQueueCounter;
             this.globalTaskCount = globalTaskCount;

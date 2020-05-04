@@ -17,6 +17,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
@@ -129,7 +130,7 @@ public class PluginInitializerHandlerTest {
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,
                 new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService),
                 hiveMQExtensions, clientSessionPersistence, mqttConnacker);
