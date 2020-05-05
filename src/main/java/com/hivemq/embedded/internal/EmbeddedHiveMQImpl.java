@@ -16,10 +16,10 @@
 
 package com.hivemq.embedded.internal;
 
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
-import com.hivemq.bootstrap.LoggingBootstrap;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
@@ -32,6 +32,8 @@ import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -42,6 +44,8 @@ import java.util.function.BiConsumer;
  */
 public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
+    private static final @NotNull Logger log = LoggerFactory.getLogger(EmbeddedHiveMQImpl.class);
+
     private final @Nullable Path conf;
     private final @NotNull Path extensions;
     private final @NotNull Path data;
@@ -50,8 +54,9 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
-    private @Nullable CompletableFuture<Void> startFuture;
-    private @Nullable CompletableFuture<Void> stopFuture;
+    private volatile @NotNull State currentState;
+    private volatile @Nullable CompletableFuture<Void> startFuture;
+    private volatile @Nullable CompletableFuture<Void> stopFuture;
 
     EmbeddedHiveMQImpl(final @Nullable Path conf, final @NotNull Path extensions, final @NotNull Path data) {
 
@@ -59,15 +64,66 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         this.extensions = extensions;
         this.data = data;
 
-
+        currentState = State.NOT_STARTED;
         systemInformation = new SystemInformationImpl();
+        // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
-
-
-//        reduceResources();
     }
 
-    public void bootstrapInjector() {
+    enum State {
+
+        NOT_STARTED,
+        STARTING,
+        RUNNING,
+        STOPPING,
+        STOPPED;
+
+        boolean isHigher(final @NotNull State other) {
+            return this.ordinal() > other.ordinal();
+        }
+
+        boolean isLower(final @NotNull State other) {
+            return this.ordinal() < other.ordinal();
+        }
+    }
+
+    private synchronized void advanceState(final @NotNull State newState) {
+        if ((currentState == State.STOPPED && newState == State.NOT_STARTED)
+                || newState.isHigher(currentState)) {
+            log.info("Advancing EmbeddedHiveMQState from \"{}\" to \"{}\"", currentState, newState);
+            currentState = newState;
+        }
+    }
+
+    @Override
+    public synchronized @NotNull CompletableFuture<Void> start() {
+        advanceState(State.NOT_STARTED);
+        if (currentState == State.NOT_STARTED) {
+            advanceState(State.STARTING);
+            log.info("Starting EmbeddedHiveMQ.");
+
+            startFuture = new CompletableFuture<>();
+            CompletableFuture.runAsync(() -> {
+
+                systemInformation.setEmbedded(true);
+                configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+
+                bootstrapInjector();
+                final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
+                try {
+                    hiveMQServer.start();
+                } catch (final Exception e) {
+                    throw new HiveMQServerException(e);
+                }
+                advanceState(State.RUNNING);
+            }).whenComplete(HiveMQServerException.handler(startFuture));
+        } else {
+            log.warn("Could not start EmbeddedHiveMQ. Reason: \"Already started\"");
+        }
+        return startFuture;
+    }
+
+    private void bootstrapInjector() {
         if (injector == null) {
             final HivemqId hiveMQId = new HivemqId();
             final Injector persistenceInjector =
@@ -77,7 +133,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             try {
                 persistenceInjector.getInstance(PersistenceStartup.class).finish();
             } catch (final InterruptedException e) {
-//                System.out.println("ERROR: Persistence Startup interrupted.");
+                log.error("EmbeddedHiveMQ persistence Startup interrupted.");
             }
 
             injector =
@@ -87,54 +143,37 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     }
 
     @Override
-    public synchronized @NotNull CompletableFuture<Void> start() {
-        if (startFuture == null) {
-            startFuture = new CompletableFuture<>();
-            CompletableFuture.runAsync(() -> {
-
-                //Setup Logging
-                LoggingBootstrap.prepareLogging();
-                LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
-
-                systemInformation.setEmbedded(true);
-                configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
-
-                bootstrapInjector();
-                final HiveMQServer instance = injector.getInstance(HiveMQServer.class);
-                try {
-                    instance.start();
-                } catch (final Exception e) {
-                    throw new HiveMQServerException(e);
-                }
-            }).whenComplete(HiveMQServerException.handler(startFuture));
-        }
-        return startFuture;
-    }
-
-    @Override
     public synchronized @NotNull CompletableFuture<Void> stop() {
-        if (startFuture == null) {
+        if (currentState == State.NOT_STARTED) {
+            log.warn("Could not stop EmbeddedHiveMQ. Reason: \"Not started\"");
             stopFuture = CompletableFuture.completedFuture(null);
-        } else if (stopFuture == null) {
-            stopFuture = startFuture.thenRunAsync(() -> {
-                final ShutdownHooks instance = injector.getInstance(ShutdownHooks.class);
 
-                for (HiveMQShutdownHook mqShutdownHook : instance.getRegistry().values()) {
-                    System.err.println("Synchronous: " + mqShutdownHook.getName());
-                    mqShutdownHook.run();
+        } else if (currentState.isLower(State.STOPPING)) {
+            advanceState(State.STOPPING);
+            log.info("Stopping EmbeddedHiveMQ.");
+
+            stopFuture = startFuture.thenRunAsync(() -> {
+                final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
+
+                for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
+                    // We call run, as we want to execute the hooks now, in this thread
+                    //noinspection CallToThreadRun
+                    hiveMQShutdownHook.run();
                 }
-                for (HiveMQShutdownHook hiveMQShutdownHook : instance.getAsyncShutdownHooks()) {
-                    System.err.println("Asynchronous: " + hiveMQShutdownHook.getName());
+                for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
+                    // We call run, as we want to execute the hooks now, in this thread
+                    //noinspection CallToThreadRun
                     hiveMQShutdownHook.run();
                 }
 
-                instance.clearRuntime();
+                shutdownHooks.clearRuntime();
+                //TODO Why is this necessary again?
+                metricRegistry.removeMatching(MetricFilter.ALL);
                 injector = null;
-//            if (tempFolder != null) {
-//                recursiveDelete(tempFolder);
-//            }
-                System.err.println("Stop done");
+                advanceState(State.STOPPED);
             });
+        } else {
+            log.warn("Could not stop EmbeddedHiveMQ. Reason: \"Already stopping\"");
         }
         return stopFuture;
     }
@@ -143,46 +182,6 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     public @Nullable MetricRegistry getMetricRegistry() {
         return metricRegistry;
     }
-
-//    private static final int persistenceBucketCountDefault = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
-//    private static final int payloadPersistenceBucketCountDefault =
-//            InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
-//    private static final int payloadPersistenceCleanupThreadsDefault =
-//            InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
-//    private static final int mqttEventExecutorThreadCountDefault =
-//            InternalConfigurations.MQTT_EVENT_EXECUTOR_THREAD_COUNT.get();
-//    private static final int singleWriterThreadPoolSizeDefault =
-//            InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
-//    private static final int persistenceStartupThreadPoolSizeDefault =
-//            InternalConfigurations.PERSISTENCE_STARTUP_THREAD_POOL_SIZE.get();
-//
-//    private void reduceResources() {
-//
-//        //only use 4 buckets per persistence to reduce count of open files
-//        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
-//        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
-//
-//        //reduce thread count to have less context switches
-//        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.set(2);
-//        InternalConfigurations.MQTT_EVENT_EXECUTOR_THREAD_COUNT.set(2);
-//        InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(2);
-//        InternalConfigurations.PERSISTENCE_STARTUP_THREAD_POOL_SIZE.set(2);
-//    }
-//
-//    public void cleanup() {
-//
-
-//
-//        //only use 4 buckets per persistence to reduce count of open files
-//        InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(persistenceBucketCountDefault);
-//        InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(payloadPersistenceBucketCountDefault);
-//
-//        //reduce thread count to have less context switches
-//        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.set(payloadPersistenceCleanupThreadsDefault);
-//        InternalConfigurations.MQTT_EVENT_EXECUTOR_THREAD_COUNT.set(mqttEventExecutorThreadCountDefault);
-//        InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(singleWriterThreadPoolSizeDefault);
-//        InternalConfigurations.PERSISTENCE_STARTUP_THREAD_POOL_SIZE.set(persistenceStartupThreadPoolSizeDefault);
-//    }
 
 //    @SuppressWarnings("ResultOfMethodCallIgnored")
 //    private File createHomeFolder() {
