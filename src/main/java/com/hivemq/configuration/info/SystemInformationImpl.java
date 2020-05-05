@@ -18,10 +18,10 @@ package com.hivemq.configuration.info;
 
 import com.google.common.io.Files;
 import com.hivemq.HiveMQServer;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.EnvironmentVariables;
 import com.hivemq.configuration.SystemProperties;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.ManifestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +30,7 @@ import oshi.SystemInfo;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * @author Christoph Schäbel
@@ -47,7 +48,7 @@ public class SystemInformationImpl implements SystemInformation {
     private File pluginFolder;
     private String hivemqVersion;
     private final long runningSince;
-    private boolean embedded = false;
+    private final boolean embedded;
     private final int processorCount;
 
     private final boolean usePathOfRunningJar;
@@ -57,8 +58,13 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     public SystemInformationImpl(final boolean usePathOfRunningJar) {
+        this(usePathOfRunningJar, false);
+    }
+
+    public SystemInformationImpl(final boolean usePathOfRunningJar, final boolean embedded) {
         this.usePathOfRunningJar = usePathOfRunningJar;
         this.runningSince = System.currentTimeMillis();
+        this.embedded = embedded;
         setHiveMQVersion();
         setFolders();
         processorCount = getPhysicalProcessorCount();
@@ -84,16 +90,18 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false);
-        logFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", true);
+        configFolder = Objects.requireNonNullElse(configFolder, setUpHiveMQFolder(
+                SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false));
+
+        logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
-        dataFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true);
-        pluginFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.EXTENSIONS_FOLDER, EnvironmentVariables.EXTENSION_FOLDER, "extensions", true);
+
+        dataFolder = Objects.requireNonNullElse(dataFolder, setUpHiveMQFolder(
+                SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
+
+        pluginFolder = Objects.requireNonNullElse(pluginFolder, setUpHiveMQFolder(
+                SystemProperties.EXTENSIONS_FOLDER, EnvironmentVariables.EXTENSION_FOLDER, "extensions", !embedded));
     }
 
     private void setHiveMQVersion() {
@@ -167,7 +175,9 @@ public class SystemInformationImpl implements SystemInformation {
         }
     }
 
-    private File getFolderWithOptionalSystemPropertyOrEnvironmentVariable(final String propertyName, final String variableName, final String defaultFolder, final boolean createFolderIfNotExists) {
+    private File setUpHiveMQFolder(
+            final String propertyName, final String variableName, final String defaultFolder,
+            final boolean createFolderIfNotExists) {
         final String folderName = getSystemPropertyOrEnvironmentVariable(propertyName, variableName);
         final File folder;
         if (folderName != null) {
@@ -205,7 +215,8 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     private void setHomeFolder() {
-        final String home = getSystemPropertyOrEnvironmentVariable(SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME);
+        final String home =
+                getSystemPropertyOrEnvironmentVariable(SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME);
 
         if (home != null) {
             homeFolder = findAbsoluteAndRelative(home);
@@ -224,20 +235,24 @@ public class SystemInformationImpl implements SystemInformation {
     private void useTemporaryHomeFolder() {
         final File tempDir = Files.createTempDir();
         tempDir.deleteOnExit();
-        log.warn("No {} property or {} environment variable was set. Using a temporary directory ({}) HiveMQ will behave unexpectedly!",
+        log.warn(
+                "No {} property or {} environment variable was set. Using a temporary directory ({}) HiveMQ will behave unexpectedly!",
                 SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME, tempDir.getAbsolutePath());
         homeFolder = tempDir;
     }
 
     private void usePathOfRunningJarAsHomeFolder() {
         final File pathOfRunningJar = getPathOfRunningJar();
-        log.warn("No {} property or {} environment variable was set. Using {}",
-                SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME, pathOfRunningJar.getAbsolutePath());
+        if (!embedded) {
+            log.warn("No {} property or {} environment variable was set. Using {}",
+                    SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME, pathOfRunningJar.getAbsolutePath());
+        }
         homeFolder = pathOfRunningJar;
     }
 
     private File getPathOfRunningJar() {
-        final String decode = URLDecoder.decode(HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+        final String decode = URLDecoder.decode(
+                HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
                 StandardCharsets.UTF_8);
         final String path = decode.substring(0, decode.lastIndexOf('/') + 1);
         return new File(path);
@@ -250,9 +265,5 @@ public class SystemInformationImpl implements SystemInformation {
 
     public boolean isEmbedded() {
         return embedded;
-    }
-
-    public void setEmbedded(final boolean embedded) {
-        this.embedded = embedded;
     }
 }
