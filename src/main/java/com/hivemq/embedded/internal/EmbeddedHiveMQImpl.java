@@ -65,12 +65,12 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         this.data = data;
 
         currentState = State.NOT_STARTED;
-        systemInformation = new SystemInformationImpl();
+        systemInformation = new SystemInformationImpl(true, true);
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
     }
 
-    enum State {
+    private enum State {
 
         NOT_STARTED,
         STARTING,
@@ -78,11 +78,11 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         STOPPING,
         STOPPED;
 
-        boolean isHigher(final @NotNull State other) {
+        private boolean isHigher(final @NotNull State other) {
             return this.ordinal() > other.ordinal();
         }
 
-        boolean isLower(final @NotNull State other) {
+        private boolean isLower(final @NotNull State other) {
             return this.ordinal() < other.ordinal();
         }
     }
@@ -90,7 +90,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private synchronized void advanceState(final @NotNull State newState) {
         if ((currentState == State.STOPPED && newState == State.NOT_STARTED)
                 || newState.isHigher(currentState)) {
-            log.info("Advancing EmbeddedHiveMQState from \"{}\" to \"{}\"", currentState, newState);
+            log.debug("Advancing EmbeddedHiveMQState from \"{}\" to \"{}\"", currentState, newState);
             currentState = newState;
         }
     }
@@ -105,7 +105,6 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             startFuture = new CompletableFuture<>();
             CompletableFuture.runAsync(() -> {
 
-                systemInformation.setEmbedded(true);
                 configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
                 bootstrapInjector();
