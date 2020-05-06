@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded;
 
 import com.hivemq.embedded.internal.EmbeddedHiveMQBuilderImpl;
@@ -25,15 +26,45 @@ import java.nio.file.Path;
 @DoNotImplement
 public interface EmbeddedHiveMQBuilder {
 
+    /**
+     * @return a new EmbeddedHiveMQBuilder.
+     */
     static @NotNull EmbeddedHiveMQBuilder newBuilder() {
         return new EmbeddedHiveMQBuilderImpl();
     }
 
+    /**
+     * This sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure
+     * it.
+     *
+     * @param configFolder the used configuration folder.
+     * @return this builder.
+     * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
+     *         Folders</a>
+     */
     @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@NotNull Path configFolder);
 
-    @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionFolder);
-
+    /**
+     * This sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure
+     * it.
+     *
+     * @param dataFolder the used configuration folder.
+     * @return this builder.
+     * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
+     *         Folders</a>
+     */
     @NotNull EmbeddedHiveMQBuilder withDataFolder(@Nullable Path dataFolder);
+
+    /**
+     * This sets the HIVEMQ_EXTENSION_FOLDER to the given argument. Using this method overrides all other ways to
+     * configure it.
+     *
+     * @param extensionsFolder the used extensions folder.
+     * @return this builder.
+     * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
+     *         Folders</a>
+     */
+    @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionsFolder);
 
     @NotNull EmbeddedHiveMQ build();
 }
