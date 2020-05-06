@@ -65,7 +65,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         this.data = data;
 
         currentState = State.NOT_STARTED;
-        systemInformation = new SystemInformationImpl(true, true);
+        systemInformation = new SystemInformationImpl(true, true, null, null, null);
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
     }
