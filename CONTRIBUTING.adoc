@@ -77,6 +77,21 @@ git clone https://github.com/<your user name>/hivemq-community-edition.git
 Choose to sync the gradle project, if so prompted by the IDE.
 After setting the gradle and project SDK (Java 11), you are good to go.
 
+=== Checking out the HiveMQ Extension SDK
+
+HiveMQ CE uses the HiveMQ Extension SDK which resides in https://github.com/hivemq/hivemq-extension-sdk[its own repository].
+By default, you can not use the latest changes of or modify the Extension SDK.
+Please checkout the `hivemq-extension-sdk` repository next to the `hivemq-community-edition` repository.
+Gradle and IntelliJ will then automatically wire the two projects.
+
+If you only want to use the Extension SDK, execute the following command from the `hivemq-community-edition` project directory:
+
+`git clone https://github.com/hivemq/hivemq-extension-sdk.git ../hivemq-extension-sdk`
+
+If you also want to make changes to the Extension SDK, please fork the `hivemq-extension-sdk` repository and clone your fork:
+
+`git clone https://github.com/<your user name>/hivemq-extension-sdk.git ../hivemq-extension-sdk`
+
 === Branching Model
 
 A modified version of https://nvie.com/posts/a-successful-git-branching-model/[git-flow] is used for the structuring of the HiveMQ CE repository.
@@ -104,18 +119,12 @@ class SomeClass {
 }
 ----
 
-Four annotations are provided for this purpose, two for each type:
+The following annotations are provided for this purpose:
 
 .@Nullable
 ----
-com.hivemq.annotations.Nullable
-com.hivemq.extension.sdk.api.annotations.Nullable
-----
-
-.@NotNull
-----
-com.hivemq.annotations.NotNull
 com.hivemq.extension.sdk.api.annotations.NotNull
+com.hivemq.extension.sdk.api.annotations.Nullable
 ----
 
 === Commit Guidelines
