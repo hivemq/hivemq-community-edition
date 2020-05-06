@@ -17,22 +17,20 @@
 package com.hivemq.extensions;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.loader.PluginLifecycleHandler;
 import com.hivemq.extensions.loader.PluginLoader;
 import com.hivemq.extensions.services.auth.Authenticators;
-import com.hivemq.persistence.util.FutureUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.concurrent.ExecutionException;
+import java.nio.file.Path;
 
 /**
  * @author Christoph Schäbel
@@ -42,26 +40,21 @@ public class PluginBootstrapImpl implements PluginBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(PluginBootstrapImpl.class);
 
-    @NotNull
-    private final PluginLoader pluginLoader;
-    @NotNull
-    private final SystemInformation systemInformation;
-    @NotNull
-    private final PluginLifecycleHandler lifecycleHandler;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-    @NotNull
-    private final ShutdownHooks shutdownHooks;
-    @NotNull
-    private final Authenticators authenticators;
+    private final @NotNull PluginLoader pluginLoader;
+    private final @NotNull SystemInformation systemInformation;
+    private final @NotNull PluginLifecycleHandler lifecycleHandler;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull ShutdownHooks shutdownHooks;
+    private final @NotNull Authenticators authenticators;
 
     @Inject
-    public PluginBootstrapImpl(@NotNull final PluginLoader pluginLoader,
-                               @NotNull final SystemInformation systemInformation,
-                               @NotNull final PluginLifecycleHandler lifecycleHandler,
-                               @NotNull final HiveMQExtensions hiveMQExtensions,
-                               @NotNull final ShutdownHooks shutdownHooks,
-                               @NotNull final Authenticators authenticators) {
+    public PluginBootstrapImpl(
+            final @NotNull PluginLoader pluginLoader,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull PluginLifecycleHandler lifecycleHandler,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull ShutdownHooks shutdownHooks,
+            final @NotNull Authenticators authenticators) {
         this.pluginLoader = pluginLoader;
         this.systemInformation = systemInformation;
         this.lifecycleHandler = lifecycleHandler;
@@ -76,9 +69,11 @@ public class PluginBootstrapImpl implements PluginBootstrap {
         log.info("Starting HiveMQ extension system.");
 
         shutdownHooks.add(new PluginSystemShutdownHook(this));
+        final Path extensionFolder = systemInformation.getExtensionsFolder().toPath();
 
         //load already installed extensions
-        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents = pluginLoader.loadPlugins(systemInformation.getExtensionsFolder().toPath(), ExtensionMain.class);
+        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents = pluginLoader.loadPlugins(
+                extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
 
         //start them if needed
         lifecycleHandler.handlePluginEvents(hiveMQPluginEvents)
@@ -91,7 +86,9 @@ public class PluginBootstrapImpl implements PluginBootstrap {
 
         final ImmutableList<HiveMQPluginEvent> events = hiveMQExtensions.getEnabledHiveMQExtensions()
                 .values().stream()
-                .map(extension -> new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE, extension.getId(), extension.getStartPriority(), extension.getPluginFolderPath()))
+                .map(extension -> new HiveMQPluginEvent(
+                        HiveMQPluginEvent.Change.DISABLE, extension.getId(), extension.getStartPriority(),
+                        extension.getPluginFolderPath()))
                 .collect(ImmutableList.toImmutableList());
 
         //stop extensions

@@ -41,12 +41,12 @@ public class SystemInformationImpl implements SystemInformation {
     private static final Logger log = LoggerFactory.getLogger(SystemInformationImpl.class);
     public static final String DEVELOPMENT_VERSION = "Development Snapshot";
 
-    private File homeFolder;
-    private File configFolder;
-    private File logFolder;
-    private File dataFolder;
-    private File pluginFolder;
-    private String hivemqVersion;
+    private @NotNull File homeFolder;
+    private @NotNull File configFolder;
+    private @NotNull File logFolder;
+    private @NotNull File dataFolder;
+    private @NotNull File pluginFolder;
+    private @NotNull String hivemqVersion;
     private final long runningSince;
     private final boolean embedded;
     private final int processorCount;
@@ -58,13 +58,20 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     public SystemInformationImpl(final boolean usePathOfRunningJar) {
-        this(usePathOfRunningJar, false);
+        this(usePathOfRunningJar, false, null, null, null);
     }
 
-    public SystemInformationImpl(final boolean usePathOfRunningJar, final boolean embedded) {
+    public SystemInformationImpl(
+            final boolean usePathOfRunningJar, final boolean embedded, final @Nullable File configFolder,
+            final @Nullable File dataFolder, final @Nullable File pluginFolder) {
         this.usePathOfRunningJar = usePathOfRunningJar;
-        this.runningSince = System.currentTimeMillis();
         this.embedded = embedded;
+        this.configFolder = configFolder;
+        this.dataFolder = dataFolder;
+        this.pluginFolder = pluginFolder;
+
+
+        this.runningSince = System.currentTimeMillis();
         setHiveMQVersion();
         setFolders();
         processorCount = getPhysicalProcessorCount();

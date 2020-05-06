@@ -75,4 +75,9 @@ public interface SystemInformation {
      * @return the count of CPUs HiveMQ uses
      */
     int getProcessorCount();
+
+    /**
+     * @return is HiveMQ running in embedded mode
+     */
+    boolean isEmbedded();
 }

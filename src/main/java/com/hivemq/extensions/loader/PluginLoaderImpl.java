@@ -54,22 +54,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class PluginLoaderImpl implements PluginLoader {
 
     private static final Logger log = LoggerFactory.getLogger(PluginLoaderImpl.class);
-    @NotNull
-    private final ClassServiceLoader serviceLoader;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-    @NotNull
-    private final HiveMQPluginFactory hiveMQPluginFactory;
-    @NotNull
-    private final PluginStaticInitializer staticInitializer;
+
+    private final @NotNull ClassServiceLoader serviceLoader;
+    private final @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQPluginFactory hiveMQPluginFactory;
+    private final @NotNull PluginStaticInitializer staticInitializer;
 
     @Inject
     @VisibleForTesting
     public PluginLoaderImpl(
-            @NotNull final ClassServiceLoader serviceLoader,
-            @NotNull final HiveMQExtensions hiveMQExtensions,
-            @NotNull final HiveMQPluginFactory hiveMQPluginFactory,
-            @NotNull final PluginStaticInitializer staticInitializer) {
+            final @NotNull ClassServiceLoader serviceLoader,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull HiveMQPluginFactory hiveMQPluginFactory,
+            final @NotNull PluginStaticInitializer staticInitializer) {
         this.serviceLoader = serviceLoader;
         this.hiveMQExtensions = hiveMQExtensions;
         this.hiveMQPluginFactory = hiveMQPluginFactory;
@@ -79,15 +76,23 @@ public class PluginLoaderImpl implements PluginLoader {
     @ReadOnly
     @NotNull
     public <T extends ExtensionMain> ImmutableList<HiveMQPluginEvent> loadPlugins(
-            @NotNull final Path pluginFolder,
-            @NotNull final Class<T> desiredPluginClass) {
+            @NotNull final Path pluginFolder, final boolean permissive, @NotNull final Class<T> desiredPluginClass) {
 
         checkNotNull(desiredPluginClass, "extension class must not be null");
         checkNotNull(pluginFolder, "extension folder must not be null");
 
-        checkArgument(Files.exists(pluginFolder), "%s does not exist", pluginFolder.toAbsolutePath());
-        checkArgument(Files.isReadable(pluginFolder), "%s is not readable", pluginFolder.toAbsolutePath());
-        checkArgument(Files.isDirectory(pluginFolder), "%s is not a directory", pluginFolder.toAbsolutePath());
+
+        try {
+            checkArgument(Files.exists(pluginFolder), "%s does not exist", pluginFolder.toAbsolutePath());
+            checkArgument(Files.isReadable(pluginFolder), "%s is not readable", pluginFolder.toAbsolutePath());
+            checkArgument(Files.isDirectory(pluginFolder), "%s is not a directory", pluginFolder.toAbsolutePath());
+        } catch (final @NotNull IllegalArgumentException exception) {
+            if (permissive) {
+                log.warn("Extension folder could not be used: \"{}\"", exception.getMessage());
+                return ImmutableList.of();
+            }
+            throw exception;
+        }
 
         final ImmutableList.Builder<HiveMQPluginEvent> extensions = ImmutableList.builder();
         try {
@@ -241,7 +246,8 @@ public class PluginLoaderImpl implements PluginLoader {
         //check if folder is disabled
         if (!folderEnabled) {
             //plugin is always enabled here
-            return new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), xmlEntity.getStartPriority(), pluginFolder);
+            return new HiveMQPluginEvent(
+                    HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), xmlEntity.getStartPriority(), pluginFolder);
         }
 
         if (hiveMQExtensions.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
@@ -260,7 +266,9 @@ public class PluginLoaderImpl implements PluginLoader {
 
         hiveMQExtensions.addHiveMQPlugin(hiveMQExtension);
 
-        return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), hiveMQExtension.getStartPriority(), pluginFolder);
+        return new HiveMQPluginEvent(
+                HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), hiveMQExtension.getStartPriority(),
+                pluginFolder);
     }
 
     @Nullable <T extends ExtensionMain> HiveMQExtension loadSinglePlugin(
