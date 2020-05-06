@@ -20,28 +20,34 @@ import com.codahale.metrics.MetricRegistry;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 
 import java.util.concurrent.CompletableFuture;
 
 @DoNotImplement
+@ThreadSafe
 public interface EmbeddedHiveMQ {
 
     /**
-     * Start an embedded HiveMQ
+     * Start an EmbeddedHiveMQ.
+     * <p>
+     * This method can be called multiple times.
      *
-     * @return a {@link} CompletableFuture that completes when HiveMQ is started and ready
+     * @return a {@link CompletableFuture} that completes when HiveMQ is started and ready
      */
     @NotNull CompletableFuture<Void> start();
 
     /**
-     * Stop an embedded HiveMQ
+     * Stop an EmbeddedHiveMQ. Calling stop clears the metric registry returned by {@link #getMetricRegistry()}.
+     * <p>
+     * This method can be called multiple times.
      *
-     * @return a {@link} CompletableFuture that completes when HiveMQ is stopped
+     * @return a {@link CompletableFuture} that completes when HiveMQ is stopped
      */
     @NotNull CompletableFuture<Void> stop();
 
     /**
-     * Access HiveMQ's metric registry
+     * Access HiveMQ's metric registry. The metric registry can be accessed before EmbeddedHiveMQ is started.
      *
      * @return the {@link MetricRegistry} containing all HiveMQ metrics
      */
