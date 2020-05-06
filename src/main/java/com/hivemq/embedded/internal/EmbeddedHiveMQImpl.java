@@ -28,14 +28,13 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.embedded.EmbeddedHiveMQ;
-import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -46,9 +45,6 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(EmbeddedHiveMQImpl.class);
 
-    private final @Nullable Path conf;
-    private final @NotNull Path extensions;
-    private final @NotNull Path data;
     private final @NotNull SystemInformationImpl systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
     private @Nullable FullConfigurationService configurationService;
@@ -58,14 +54,11 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private volatile @Nullable CompletableFuture<Void> startFuture;
     private volatile @Nullable CompletableFuture<Void> stopFuture;
 
-    EmbeddedHiveMQImpl(final @Nullable Path conf, final @NotNull Path extensions, final @NotNull Path data) {
-
-        this.conf = conf;
-        this.extensions = extensions;
-        this.data = data;
+    EmbeddedHiveMQImpl(
+            final @Nullable File conf, final @Nullable File data, final @Nullable File extensions) {
 
         currentState = State.NOT_STARTED;
-        systemInformation = new SystemInformationImpl(true, true, null, null, null);
+        systemInformation = new SystemInformationImpl(true, true, conf, data, extensions);
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
     }
@@ -166,7 +159,6 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 }
 
                 shutdownHooks.clearRuntime();
-                //TODO Why is this necessary again?
                 metricRegistry.removeMatching(MetricFilter.ALL);
                 injector = null;
                 advanceState(State.STOPPED);
@@ -181,44 +173,6 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     public @Nullable MetricRegistry getMetricRegistry() {
         return metricRegistry;
     }
-
-//    @SuppressWarnings("ResultOfMethodCallIgnored")
-//    private File createHomeFolder() {
-//        try {
-//            final File createdFolder = File.createTempFile("junit", "");
-//            createdFolder.delete();
-//            createdFolder.mkdir();
-//            System.setProperty(SystemProperties.HIVEMQ_HOME, createdFolder.getAbsolutePath());
-//            return createdFolder;
-//        } catch (final IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-//
-//    @SuppressWarnings("ResultOfMethodCallIgnored")
-//    private void createConfigFile(final String configXML) {
-//        try {
-//            final File configFolder = new File(tempFolder, "conf");
-//            configFolder.mkdir();
-//            final File file = new File(configFolder, "config.xml");
-//            file.createNewFile();
-//            Files.write(configXML.getBytes(UTF_8), file);
-//        } catch (final IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @SuppressWarnings("ResultOfMethodCallIgnored")
-//    private void recursiveDelete(final File file) {
-//        final File[] files = file.listFiles();
-//        if (files != null) {
-//            for (final File each : files) {
-//                recursiveDelete(each);
-//            }
-//        }
-//        file.delete();
-//    }
 
     private static class HiveMQServerException extends RuntimeException {
 
