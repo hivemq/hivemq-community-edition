@@ -12,7 +12,7 @@ pluginManagement {
 rootProject.name = 'hivemq-community-edition'
 
 if (file('../hivemq-extension-sdk').exists()) {
-    if (!file('../settings.gradle').exists() && !file('../settings.gradle.kts').exists()) {
+    if (gradle.parent == null) { // not part of a composite build
         includeBuild '../hivemq-extension-sdk'
     }
 } else {
