@@ -1,16 +1,9 @@
 jdk:
   - openjdk11
 before_install:
-  - BRANCH=`git name-rev --name-only HEAD`
-  - REMOTE=`git config branch.$BRANCH.remote`
-  - REMOTE_URL=`git config remote.$REMOTE.url`
-  - SDK_REMOTE_URL=`echo $REMOTE_URL | sed s/hivemq-community-edition.git/hivemq-extension-sdk.git/`
   - mkdir hivemq-community-edition
   - ls -a | grep -v hivemq-community-edition | xargs mv -t hivemq-community-edition
-  - `git clone $SDK_REMOTE_URL`
-  - cd hivemq-extension-sdk
-  - `git checkout $BRANCH` || true
-  - cd ..
+  - git clone https://github.com/hivemq/hivemq-extension-sdk.git
 install:
   - hivemq-community-edition/gradlew -p hivemq-community-edition publishToMavenLocal
   - hivemq-extension-sdk/gradlew -p hivemq-extension-sdk publishToMavenLocal
