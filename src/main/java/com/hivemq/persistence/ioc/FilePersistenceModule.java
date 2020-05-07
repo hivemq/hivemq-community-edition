@@ -18,12 +18,14 @@ package com.hivemq.persistence.ioc;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.ioc.provider.MetricsHolderProvider;
+import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedServiceProvider;
 import com.hivemq.persistence.PersistenceStartup;
@@ -34,13 +36,13 @@ import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionSubscriptionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.PayloadPersistenceScheduledExecutorProvider;
-import com.hivemq.persistence.ioc.provider.local.RetainedMessageLocalPersistenceProvider;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
+import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadLocalPersistenceProvider;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
+import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 
 import javax.inject.Singleton;
@@ -51,12 +53,15 @@ import javax.inject.Singleton;
  */
 public class FilePersistenceModule extends SingletonModule<Class<FilePersistenceModule>> {
 
-    @NotNull
-    private final MetricRegistry metricRegistry;
+    private final @NotNull MetricRegistry metricRegistry;
+    private final @NotNull PersistenceType payloadPersistenceType;
+    private final @NotNull PersistenceType retainedPersistenceType;
 
     public FilePersistenceModule(@NotNull final MetricRegistry metricRegistry) {
         super(FilePersistenceModule.class);
         this.metricRegistry = metricRegistry;
+        this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
+        this.retainedPersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
 
     @Override
@@ -73,10 +78,20 @@ public class FilePersistenceModule extends SingletonModule<Class<FilePersistence
         bind(ClientSessionSubscriptionLocalPersistence.class).toProvider(ClientSessionSubscriptionLocalProvider.class)
                 .in(Singleton.class);
         bind(ClientQueueLocalPersistence.class).to(ClientQueueXodusLocalPersistence.class).in(Singleton.class);
-        bind(RetainedMessageLocalPersistence.class).toProvider(RetainedMessageLocalPersistenceProvider.class)
-                .in(Singleton.class);
-        bind(PublishPayloadLocalPersistence.class).toProvider(PublishPayloadLocalPersistenceProvider.class)
-                .in(Singleton.class);
+
+        if (retainedPersistenceType == PersistenceType.FILE) {
+            bind(RetainedMessageLocalPersistence.class).to(RetainedMessageXodusLocalPersistence.class)
+                    .in(Singleton.class);
+        }
+        if (payloadPersistenceType == PersistenceType.FILE) {
+            bind(PublishPayloadLocalPersistence.class).to(PublishPayloadXodusLocalPersistence.class)
+                    .in(Singleton.class);
+        }
+
+        if (retainedPersistenceType == PersistenceType.FILE_NATIVE ||
+                payloadPersistenceType == PersistenceType.FILE_NATIVE) {
+            install(new FilePersistenceRocksDBModule());
+        }
 
         bind(PublishPayloadPersistence.class).to(PublishPayloadPersistenceImpl.class).in(Singleton.class);
 
