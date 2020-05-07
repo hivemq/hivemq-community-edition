@@ -481,6 +481,10 @@ task embeddedJar(type: Jar) {
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 publishing {
     publications {
         distribution(MavenPublication) {
@@ -596,7 +600,15 @@ publishing {
                     }
                 }
             }
+        }
 
+        sources(MavenPublication) {
+            from components.java
+            artifactId 'hivemq-community-edition-embedded'
+
+            artifact sourceJar {
+                classifier "sources"
+            }
         }
     }
 }
