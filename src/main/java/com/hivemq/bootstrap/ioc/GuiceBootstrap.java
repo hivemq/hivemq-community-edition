@@ -64,7 +64,7 @@ public class GuiceBootstrap {
 
         if (!Boolean.parseBoolean(System.getProperty("diagnosticMode"))) {
             log.trace("Turning Guice stack traces off");
-            //System.setProperty("guice_include_stack_traces", "OFF");
+            System.setProperty("guice_include_stack_traces", "OFF");
         }
 
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();

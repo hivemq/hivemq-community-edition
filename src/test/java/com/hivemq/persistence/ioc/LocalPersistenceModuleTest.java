@@ -65,6 +65,7 @@ import static com.hivemq.migration.meta.PersistenceType.FILE;
 import static com.hivemq.migration.meta.PersistenceType.FILE_NATIVE;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -121,6 +122,18 @@ public class LocalPersistenceModuleTest {
 
         when(persistenceInjector.getInstance(ClientQueueXodusLocalPersistence.class)).thenReturn(
                 Mockito.mock(ClientQueueXodusLocalPersistence.class));
+
+        when(persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class)).thenReturn(
+                mock(RetainedMessageRocksDBLocalPersistence.class));
+
+        when(persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class)).thenReturn(
+                mock(PublishPayloadRocksDBLocalPersistence.class));
+
+        when(persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class)).thenReturn(
+                mock(RetainedMessageXodusLocalPersistence.class));
+
+        when(persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class)).thenReturn(
+                mock(PublishPayloadXodusLocalPersistence.class));
 
         when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(
                 Mockito.mock(PersistenceStartup.class));
