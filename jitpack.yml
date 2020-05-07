@@ -1,9 +1,14 @@
 jdk:
   - openjdk11
+
 before_install:
   - mkdir hivemq-community-edition
   - ls -a | grep -v hivemq-community-edition | xargs mv -t hivemq-community-edition
   - git clone https://github.com/hivemq/hivemq-extension-sdk.git
+  - cd hivemq-extension-sdk
+  - git checkout $GIT_BRANCH || true
+  - cd ..
+
 install:
   - hivemq-community-edition/gradlew -p hivemq-community-edition publishToMavenLocal
   - hivemq-extension-sdk/gradlew -p hivemq-extension-sdk publishToMavenLocal
