@@ -1,15 +1,23 @@
 language: java
 
-# workaround as openjdk11 can not be installed https://travis-ci.community/t/install-of-openjdk11-is-failing-again/3061/16
 dist: xenial
 
 jdk:
   - openjdk11
 
+before_install:
+  - BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - git clone https://github.com/hivemq/hivemq-extension-sdk.git ../hivemq-extension-sdk
+  - cd ../hivemq-extension-sdk
+  - git checkout $BRANCH || true
+  - cd ../hivemq-community-edition
+
 stages:
   - test
   - name: docker
-    if: ((branch = master) || (tag IS present)) && type != pull_request
+    if: ((branch = master) || (tag IS present)) && (type != pull_request)
+  - name: release
+    if: (tag IS present) && (type != pull_request)
 
 jobs:
   include:
@@ -19,6 +27,19 @@ jobs:
     - stage: docker
       install: skip
       script: PUSH_IMAGE=true docker/build.sh
+    - stage: release
+      install: skip
+      script: ./gradlew packaging
+      deploy:
+        provider: releases
+        token:
+          secure: "C9pHI53AodsU/jJDYurCn1gENWJTTuo62MrfFSEA68MylXywuIYaO3AZtQAscFCDSfHWeSdanIfB/TpnpIc1Y/lj7hXdSI1eid1xtbbSXkAQCMj4zjUBmZiPO415Ic+VSNETCP0NPDCkmJckolKBdUWhM7zAO+8N4SCs0Qz4N/Iy3QgFaHU0/QfXgnW4v8OS/7Or59etMyDklbqwR250tAOlkmx6ywzDo0BMMfo2pBu8HfZSEG+E07Sr7QJUwXQ+1pCReCga+2bW2+qRYwU6gzPGktg+g+fS0b9tLJUUi1hp7MEEHG4pdajINdGi1PklucBbnBNeCJyIZgfgBwbaBUiceAJkWxGEm3eZy6ueAFPhaEXcZH9hdncRHNX9UFy+PLLA03HA1icLIW8fESdr1keuHKDFSIWvxU9UcnSzHAVXTGKzeuOsDjP/YSy/RSSPlVCiqQjKB5Ld1D8IKytUs0h3Vg+T60G+6hhOxREg5XRAH+jC/o7Ojh1v2fQ8Ty1mFMRBxYTAjdRQgocvJ+FIToH2tx/f5Fp+Ij73CO0RC+L87QgpOwvxQ6pqEjrnEDw8/MpChxugsIHW7OJO2yCKgiTr0FBxsaWZbvLVoJV4uXjjbQuceeh6I/xwn78jrP07r0D5o8E380g6OYMhEne0qo8Fw6J6NT3MMPMPdFaCOYE="
+        file: "build/zip/hivemq-*.zip"
+        file_glob: true
+        skip_cleanup: true
+        draft: false
+        on:
+          tags: true
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -28,18 +49,3 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-before_deploy:
-  - ./gradlew clean
-  - ./gradlew packaging
-
-deploy:
-  provider: releases
-  api_key:
-    secure: "C9pHI53AodsU/jJDYurCn1gENWJTTuo62MrfFSEA68MylXywuIYaO3AZtQAscFCDSfHWeSdanIfB/TpnpIc1Y/lj7hXdSI1eid1xtbbSXkAQCMj4zjUBmZiPO415Ic+VSNETCP0NPDCkmJckolKBdUWhM7zAO+8N4SCs0Qz4N/Iy3QgFaHU0/QfXgnW4v8OS/7Or59etMyDklbqwR250tAOlkmx6ywzDo0BMMfo2pBu8HfZSEG+E07Sr7QJUwXQ+1pCReCga+2bW2+qRYwU6gzPGktg+g+fS0b9tLJUUi1hp7MEEHG4pdajINdGi1PklucBbnBNeCJyIZgfgBwbaBUiceAJkWxGEm3eZy6ueAFPhaEXcZH9hdncRHNX9UFy+PLLA03HA1icLIW8fESdr1keuHKDFSIWvxU9UcnSzHAVXTGKzeuOsDjP/YSy/RSSPlVCiqQjKB5Ld1D8IKytUs0h3Vg+T60G+6hhOxREg5XRAH+jC/o7Ojh1v2fQ8Ty1mFMRBxYTAjdRQgocvJ+FIToH2tx/f5Fp+Ij73CO0RC+L87QgpOwvxQ6pqEjrnEDw8/MpChxugsIHW7OJO2yCKgiTr0FBxsaWZbvLVoJV4uXjjbQuceeh6I/xwn78jrP07r0D5o8E380g6OYMhEne0qo8Fw6J6NT3MMPMPdFaCOYE="
-  file: "build/zip/hivemq-*.zip"
-  file_glob: true
-  skip_cleanup: true
-  draft: false
-  on:
-    tags: true
