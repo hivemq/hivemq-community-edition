@@ -19,7 +19,6 @@ package com.hivemq.embedded;
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 
 import java.util.concurrent.CompletableFuture;
@@ -51,5 +50,5 @@ public interface EmbeddedHiveMQ {
      *
      * @return the {@link MetricRegistry} containing all HiveMQ metrics
      */
-    @Nullable MetricRegistry getMetricRegistry();
+    @NotNull MetricRegistry getMetricRegistry();
 }

@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -42,40 +41,6 @@ import java.util.Optional;
  * @author Georg Held
  */
 abstract public class PluginAbstractTest {
-
-    private static final String validPluginXML = "<hivemq-extension>" +
-            "<id>%s</id>" +
-            "<name>Some Name</name>" +
-            "<version>1.2.3-Version</version>" +
-            "<priority>1000</priority>" +
-            "</hivemq-extension>";
-
-    private static void writeValidPluginXML(final File pluginXml, final String pluginId) throws IOException {
-        FileUtils.writeStringToFile(pluginXml, String.format(validPluginXML, pluginId), Charset.defaultCharset());
-    }
-
-    protected File createValidPlugin(final TemporaryFolder temporaryFolder, final String pluginFolder, final String pluginId, final boolean createJar, final boolean enable) throws Exception {
-        final File validPluginFolder = temporaryFolder.newFolder(pluginFolder, pluginId + (enable ? "" : ".disabled"));
-        writeValidPluginXML(new File(validPluginFolder, "hivemq-extension.xml"), pluginId);
-
-        if (createJar) {
-            new File(validPluginFolder, "validPlugin.jar").createNewFile();
-        }
-        return validPluginFolder;
-    }
-
-    protected File createValidPlugin(final TemporaryFolder temporaryFolder, final String pluginFolder, final String pluginId) throws Exception {
-        return createValidPlugin(temporaryFolder, pluginFolder, pluginId, true, true);
-    }
-
-    protected Path shrinkwrapPlugin(final TemporaryFolder tmpFolder, final String hmqPluginFolder, final String pluginId, final Class<? extends ExtensionMain> mainClazz, final boolean enable) throws Exception {
-        final File validPlugin = createValidPlugin(tmpFolder, hmqPluginFolder, pluginId, false, enable);
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).
-                addAsServiceProviderAndClasses(ExtensionMain.class, mainClazz);
-        javaArchive.as(ZipExporter.class).exportTo(new File(validPlugin, "extension.jar"));
-
-        return validPlugin.toPath();
-    }
 
     protected ExtensionStartOutput getTestPluginStartOutput() {
         return reason -> {

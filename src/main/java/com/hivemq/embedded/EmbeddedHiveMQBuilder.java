@@ -66,5 +66,8 @@ public interface EmbeddedHiveMQBuilder {
      */
     @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionsFolder);
 
+    /**
+     * @return a new EmbeddedHiveQM with the configured HiveMQ folders.
+     */
     @NotNull EmbeddedHiveMQ build();
 }

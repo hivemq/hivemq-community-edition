@@ -18,6 +18,7 @@ package com.hivemq.embedded.internal;
 
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
@@ -170,7 +171,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     }
 
     @Override
-    public @Nullable MetricRegistry getMetricRegistry() {
+    public @NotNull MetricRegistry getMetricRegistry() {
         return metricRegistry;
     }
 
@@ -193,5 +194,10 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 result.complete(value);
             };
         }
+    }
+
+    @VisibleForTesting
+    @Nullable Injector getInjector() {
+        return injector;
     }
 }
