@@ -1,12 +1,12 @@
 pluginManagement {
     plugins {
-        id 'com.github.johnrengelman.shadow' version '4.0.4'
-        id 'com.github.hierynomus.license' version '0.15.0'
-        id 'com.jfrog.bintray' version '1.8.4'
-        id 'org.owasp.dependencycheck' version '5.3.2'
-        id 'com.github.spotbugs' version '3.0.0'
-        id 'de.thetaphi.forbiddenapis' version '2.6'
-        id 'com.github.sgtsilvio.gradle.metadata' version '0.1.1'
+        id 'com.github.johnrengelman.shadow' version "${getProperty("plugin.shadow.version")}"
+        id 'com.github.hierynomus.license' version "${getProperty("plugin.license.version")}"
+        id 'com.jfrog.bintray' version "${getProperty("plugin.bintray.version")}"
+        id 'org.owasp.dependencycheck' version "${getProperty("plugin.dependencycheck.version")}"
+        id 'com.github.spotbugs' version "${getProperty("plugin.spotbugs.version")}"
+        id 'de.thetaphi.forbiddenapis' version "${getProperty("plugin.forbiddenapis.version")}"
+        id 'com.github.sgtsilvio.gradle.metadata' version "${getProperty("plugin.metadata.version")}"
     }
 }
 
