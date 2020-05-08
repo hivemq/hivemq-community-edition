@@ -20,10 +20,11 @@ import com.google.inject.CreationException;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Message;
 import com.hivemq.exceptions.UnrecoverableException;
-import org.assertj.core.util.Lists;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+
+import java.util.Collections;
 
 /**
  * @author Christoph Schäbel
@@ -34,38 +35,44 @@ public class HiveMQExceptionHandlerBootstrapTest {
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     @Test
-    public void test_creationException() throws Exception {
+    public void test_creationException() {
         exit.expectSystemExitWithStatus(1);
-        final CreationException creationException = new CreationException(Lists.newArrayList(new Message("test", new UnrecoverableException(false))));
+        final CreationException creationException = new CreationException(Collections.singletonList(new Message("test",
+                new UnrecoverableException(false))));
 
         HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(), creationException);
     }
 
     @Test
-    public void test_provisionException() throws Exception {
+    public void test_provisionException() {
         exit.expectSystemExitWithStatus(1);
-        final ProvisionException provisionException = new ProvisionException(Lists.newArrayList(new Message("test", new UnrecoverableException(false))));
+        final ProvisionException provisionException = new ProvisionException(Collections.singletonList(new Message(
+                "test",
+                new UnrecoverableException(false))));
 
         HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(), provisionException);
     }
 
     @Test
-    public void test_unrecoverableException_false() throws Exception {
+    public void test_unrecoverableException_false() {
         exit.expectSystemExitWithStatus(1);
 
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(), new UnrecoverableException(false));
+        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
+                new UnrecoverableException(false));
     }
 
     @Test
-    public void test_unrecoverableException_true() throws Exception {
+    public void test_unrecoverableException_true() {
         exit.expectSystemExitWithStatus(1);
 
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(), new UnrecoverableException(true));
+        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
+                new UnrecoverableException(true));
     }
 
     @Test
-    public void test_unrecoverableException_wrapped() throws Exception {
+    public void test_unrecoverableException_wrapped() {
 
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(), new RuntimeException("test", new UnrecoverableException(true)));
+        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
+                new RuntimeException("test", new UnrecoverableException(true)));
     }
 }

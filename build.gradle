@@ -202,13 +202,6 @@ dependencies {
     /* shrinkwrap api for creating jar archives on the fly */
     testImplementation(group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-api', version: property('shrinkwrap.version'))
     testImplementation(group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.4')
-    testImplementation(group: 'org.assertj', name: 'assertj-core', version: '2.0.0')
-
-    /* Hamcrest Matcher */
-    testImplementation(group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0')
-
-    //additional reflection possibilities
-    testImplementation(group: 'org.reflections', name: 'reflections', version: '0.9.11')
 
     // wiremock
     testImplementation(group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0')
