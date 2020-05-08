@@ -16,16 +16,14 @@
 
 package com.hivemq.codec.encoder;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.codec.encoder.mqtt3.Mqtt3UnsubscribeEncoder;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,13 +38,14 @@ public class Mqtt3UnsubscribeEncoderTest {
     }
 
     @Test
-    public void test_one_topic() throws Exception {
+    public void test_one_topic() {
 
-        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList("topic"), 1);
+        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(ImmutableList.of("topic"), 1);
 
         channel.writeOutbound(unsubscribe);
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder), unsubscribe), buf.readableBytes());
+        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder),
+                unsubscribe), buf.readableBytes());
 
         assertEquals((byte) 0b1010_0010, buf.readByte());      //header
         assertEquals(9, buf.readByte());                      //length
@@ -55,13 +54,14 @@ public class Mqtt3UnsubscribeEncoderTest {
     }
 
     @Test
-    public void test_one_topic_utf_8() throws Exception {
+    public void test_one_topic_utf_8() {
 
-        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList("topié"), 1);
+        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(ImmutableList.of("topié"), 1);
 
         channel.writeOutbound(unsubscribe);
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder), unsubscribe), buf.readableBytes());
+        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder),
+                unsubscribe), buf.readableBytes());
 
         assertEquals((byte) 0b1010_0010, buf.readByte());      //header
         assertEquals(10, buf.readByte());                      //length
@@ -71,13 +71,14 @@ public class Mqtt3UnsubscribeEncoderTest {
     }
 
     @Test
-    public void test_many_topic() throws Exception {
+    public void test_many_topic() {
 
-        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Arrays.asList("topic1", "topic2", "topic3"), 1);
+        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(ImmutableList.of("topic1", "topic2", "topic3"), 1);
 
         channel.writeOutbound(unsubscribe);
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder), unsubscribe), buf.readableBytes());
+        assertEquals(mqtt3UnsubscribeEncoder.bufferSize(channel.pipeline().context(mqtt3UnsubscribeEncoder),
+                unsubscribe), buf.readableBytes());
 
         assertEquals((byte) 0b1010_0010, buf.readByte());      //header
         assertEquals(26, buf.readByte());                      //length

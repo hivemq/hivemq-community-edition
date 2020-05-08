@@ -15,12 +15,12 @@
  */
 package com.hivemq.extensions.iteration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -32,12 +32,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Christoph Schäbel
  */
-@SuppressWarnings({"NullabilityAnnotations", "unchecked"})
+@SuppressWarnings({"NullabilityAnnotations"})
 public class AsyncLocalChunkIteratorTest {
 
     private AsyncLocalChunkIterator<String, String> asyncIterator;
@@ -100,20 +101,20 @@ public class AsyncLocalChunkIteratorTest {
     @Test(timeout = 15_000)
     public void test_iterate_multiple() throws Exception {
 
-        fetchCallback.setChunks(new ArrayDeque(List.of(List.of("a1", "b", "c1"), List.of("a2", "b", "d", "e"))));
+        fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of("a1", "b", "c1"), List.of("a2", "b", "d", "e"))));
 
         asyncIterator.fetchAndIterate();
 
         asyncIterator.getFinishedFuture().get();
 
         assertEquals(7, itemCallback.getItems().size());
-        assertThat(itemCallback.getItems(), Matchers.containsInAnyOrder("a1", "b", "b", "c1", "a2", "d", "e"));
+        assertEquals(itemCallback.getItems(), ImmutableList.of("a1", "b", "c1", "a2", "b", "d", "e"));
     }
 
     @Test(timeout = 15_000)
     public void test_iterate_emtpy_result() throws Exception {
 
-        fetchCallback.setChunks(new ArrayDeque(List.of(List.of())));
+        fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of())));
 
         asyncIterator.fetchAndIterate();
 
@@ -126,7 +127,7 @@ public class AsyncLocalChunkIteratorTest {
     @Test(timeout = 15_000)
     public void test_abort_on_first_item() throws Exception {
 
-        fetchCallback.setChunks(new ArrayDeque(List.of(List.of("a1", "b", "c1"), List.of("d", "e"))));
+        fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of("a1", "b", "c1"), List.of("d", "e"))));
 
         itemCallback.setAbort(true);
 
@@ -159,7 +160,7 @@ public class AsyncLocalChunkIteratorTest {
         }
     }
 
-    private class TestFetchCallback implements FetchCallback<String, String> {
+    private static class TestFetchCallback implements FetchCallback<String, String> {
 
         private final AtomicReference<Queue<Collection<String>>> chunks = new AtomicReference<>();
         private final AtomicBoolean block = new AtomicBoolean(false);

@@ -16,8 +16,9 @@
 
 package com.hivemq.persistence.util;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,10 +28,10 @@ import static org.junit.Assert.assertEquals;
 public class BatchedExceptionTest {
 
     @Test
-    public void test_get_stack_trace() throws Exception {
+    public void test_get_stack_trace() {
         final RuntimeException exception1 = new RuntimeException();
         final RuntimeException exception2 = new RuntimeException();
-        final BatchedException batchedException = new BatchedException(Lists.newArrayList(exception1, exception2));
+        final BatchedException batchedException = new BatchedException(Arrays.asList(exception1, exception2));
         final StackTraceElement[] stackTrace = batchedException.getStackTrace();
         final int totalLength = exception1.getStackTrace().length + exception2.getStackTrace().length;
         assertEquals(totalLength, stackTrace.length);
