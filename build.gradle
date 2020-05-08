@@ -194,30 +194,20 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
     }
 
-
     testImplementation(group: 'junit', name: 'junit', version: property('junit.version'))
     testImplementation(group: 'org.mockito', name: 'mockito-core', version: property('mockito.version'))
-    testImplementation(group: 'net.jodah', name: 'concurrentunit', version: '0.4.2')
-
-    /* shrinkwrap api for creating jar archives on the fly */
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: property('equalsverifier.version'))
+    testImplementation(group: 'net.jodah', name: 'concurrentunit', version: property('concurrentunit.version'))
     testImplementation(group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-api', version: property('shrinkwrap.version'))
-    testImplementation(group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.4')
-
-    // wiremock
-    testImplementation(group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.8.0')
-
-    testImplementation(group: 'org.javassist', name: 'javassist', version: '3.26.0-GA')
-
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.1.13')
-
-    testImplementation([group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0']) {
+    testImplementation(group: 'net.bytebuddy', name: 'byte-buddy', version: property('bytebuddy.version'))
+    testImplementation(group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: property('wiremock.version'))
+    testImplementation([group: 'com.github.stefanbirkner', name: 'system-rules', version: property('system-rules.version')]) {
         exclude group: 'junit', module: 'junit-dep'
     }
 
     /* We need some HotSpot methods to generate heapdumps from code */
     testImplementation files("${System.getProperty('java.home')}/../lib/sa-jdi.jar")
 
-    /* shrinkwrap implementation for creating jar archives on the fly */
     testRuntimeOnly(group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-impl-base', version: property('shrinkwrap.version'))
 
     //plugins for spotbugs
