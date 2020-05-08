@@ -40,7 +40,7 @@ public interface EmbeddedHiveMQBuilder {
      * @param configFolder the used configuration folder.
      * @return this builder.
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
-     *         Folders</a>
+     *         folders</a>
      */
     @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@NotNull Path configFolder);
 
@@ -48,10 +48,10 @@ public interface EmbeddedHiveMQBuilder {
      * This sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure
      * it.
      *
-     * @param dataFolder the used configuration folder.
+     * @param dataFolder the used data folder.
      * @return this builder.
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
-     *         Folders</a>
+     *         folders</a>
      */
     @NotNull EmbeddedHiveMQBuilder withDataFolder(@Nullable Path dataFolder);
 
@@ -62,12 +62,12 @@ public interface EmbeddedHiveMQBuilder {
      * @param extensionsFolder the used extensions folder.
      * @return this builder.
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
-     *         Folders</a>
+     *         folders</a>
      */
     @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionsFolder);
 
     /**
-     * @return a new EmbeddedHiveQM with the configured HiveMQ folders.
+     * @return a new EmbeddedHiveMQ with the configured HiveMQ folders.
      */
     @NotNull EmbeddedHiveMQ build();
 }

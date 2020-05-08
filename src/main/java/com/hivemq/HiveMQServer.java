@@ -19,8 +19,6 @@ package com.hivemq;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Injector;
-import com.hivemq.configuration.service.entity.Listener;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.*;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
 import com.hivemq.common.shutdown.ShutdownHooks;
@@ -29,6 +27,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
@@ -45,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -64,10 +62,11 @@ public class HiveMQServer {
     private final @NotNull AdminService adminService;
 
     @Inject
-    HiveMQServer(final @NotNull HiveMQNettyBootstrap nettyBootstrap,
-                 final @NotNull PublishPayloadPersistence payloadPersistence,
-                 final @NotNull PluginBootstrap pluginBootstrap,
-                 final @NotNull AdminService adminService) {
+    HiveMQServer(
+            final @NotNull HiveMQNettyBootstrap nettyBootstrap,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull PluginBootstrap pluginBootstrap,
+            final @NotNull AdminService adminService) {
 
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
@@ -147,9 +146,11 @@ public class HiveMQServer {
         Migrations.afterMigration(systemInformation);
 
         log.trace("Initializing Guice");
-        final Injector injector =
-                GuiceBootstrap.bootstrapInjector(systemInformation, metricRegistry, hiveMQId, configService,
-                        persistenceInjector);
+        final Injector injector = GuiceBootstrap.bootstrapInjector(systemInformation,
+                metricRegistry,
+                hiveMQId,
+                configService,
+                persistenceInjector);
         if (injector == null) {
             return;
         }

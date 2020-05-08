@@ -29,10 +29,6 @@ import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
-import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extensions.executor.PluginOutPutAsyncer;
-import com.hivemq.extensions.executor.PluginTaskExecutorService;
-import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.ioc.MQTTServiceModule;
@@ -47,9 +43,6 @@ import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import com.hivemq.persistence.ioc.annotation.Persistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
-import com.hivemq.security.ioc.Security;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.payload.*;
@@ -145,12 +138,24 @@ public class LocalPersistenceModuleTest {
 
         final Injector injector = createInjector(new LocalPersistenceModule(persistenceInjector));
 
-        assertSame(injector.getInstance(RetainedMessageLocalPersistence.class), injector.getInstance(RetainedMessageLocalPersistence.class));
-        assertSame(injector.getInstance(ClientSessionLocalPersistence.class), injector.getInstance(ClientSessionLocalPersistence.class));
-        assertSame(injector.getInstance(ClientSessionSubscriptionLocalPersistence.class), injector.getInstance(ClientSessionSubscriptionLocalPersistence.class));
-        assertSame(injector.getInstance(ClientQueueLocalPersistence.class), injector.getInstance(ClientQueueLocalPersistence.class));
-        assertSame(injector.getInstance(PublishPayloadPersistence.class), injector.getInstance(PublishPayloadPersistence.class));
-        assertSame(injector.getInstance(PublishPayloadPersistenceImpl.class), injector.getInstance(PublishPayloadPersistenceImpl.class));
+        assertSame(
+                injector.getInstance(RetainedMessageLocalPersistence.class),
+                injector.getInstance(RetainedMessageLocalPersistence.class));
+        assertSame(
+                injector.getInstance(ClientSessionLocalPersistence.class),
+                injector.getInstance(ClientSessionLocalPersistence.class));
+        assertSame(
+                injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
+                injector.getInstance(ClientSessionSubscriptionLocalPersistence.class));
+        assertSame(
+                injector.getInstance(ClientQueueLocalPersistence.class),
+                injector.getInstance(ClientQueueLocalPersistence.class));
+        assertSame(
+                injector.getInstance(PublishPayloadPersistence.class),
+                injector.getInstance(PublishPayloadPersistence.class));
+        assertSame(
+                injector.getInstance(PublishPayloadPersistenceImpl.class),
+                injector.getInstance(PublishPayloadPersistenceImpl.class));
     }
 
     @Test
@@ -159,8 +164,10 @@ public class LocalPersistenceModuleTest {
 
         final Injector injector = createInjector(new LocalPersistenceModule(persistenceInjector));
 
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
-        assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
+        assertTrue(injector.getInstance(
+                PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
+        assertTrue(injector.getInstance(
+                RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
     }
 
     @Test
@@ -171,31 +178,38 @@ public class LocalPersistenceModuleTest {
 
         final Injector injector = createInjector(new LocalPersistenceModule(persistenceInjector));
 
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
-        assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
+        assertTrue(injector.getInstance(
+                PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
+        assertTrue(injector.getInstance(
+                RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
 
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(FILE_NATIVE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(FILE_NATIVE);
     }
 
     private Injector createInjector(final LocalPersistenceModule localPersistenceModule) {
-        return Guice.createInjector(localPersistenceModule, new LazySingletonModule(), new ThrottlingModule(), new MQTTServiceModule(),
+        return Guice.createInjector(localPersistenceModule, new LazySingletonModule(), new ThrottlingModule(),
+                new MQTTServiceModule(),
                 new AbstractModule() {
                     @Override
                     protected void configure() {
                         bind(FullConfigurationService.class).toInstance(configurationService);
                         bind(TopicMatcher.class).toInstance(topicMatcher);
                         bind(SystemInformation.class).toInstance(systemInformation);
-                        bind(ListeningExecutorService.class).annotatedWith(Persistence.class).toInstance(listeningExecutorService);
-                        bind(ListeningScheduledExecutorService.class).annotatedWith(Persistence.class).toInstance(listeningScheduledExecutorService);
-                        bind(ListeningScheduledExecutorService.class).annotatedWith(PayloadPersistence.class).toInstance(listeningScheduledExecutorService);
+                        bind(ListeningExecutorService.class).annotatedWith(Persistence.class)
+                                .toInstance(listeningExecutorService);
+                        bind(ListeningScheduledExecutorService.class).annotatedWith(Persistence.class)
+                                .toInstance(listeningScheduledExecutorService);
+                        bind(ListeningScheduledExecutorService.class).annotatedWith(PayloadPersistence.class)
+                                .toInstance(listeningScheduledExecutorService);
                         bind(MessageIDPools.class).toInstance(messageIDProducers);
                         bind(MetricsHolder.class).toInstance(metricsHolder);
                         bind(MetricRegistry.class).toInstance(new MetricRegistry());
                         bind(SingleWriterService.class).toInstance(singleWriterService);
                         bind(EventLog.class).toInstance(eventLog);
                         bind(MessageDroppedService.class).toInstance(messageDroppedService);
-                        bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
+                        bind(RestrictionsConfigurationService.class).toInstance(
+                                new RestrictionsConfigurationServiceImpl());
                         bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
                     }
                 });
