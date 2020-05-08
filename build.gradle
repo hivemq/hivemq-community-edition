@@ -90,50 +90,50 @@ repositories {
 
 dependencies {
 
-    implementation "com.hivemq:hivemq-extension-sdk:${property('hivemq-extension-sdk.version')}"
+    implementation("com.hivemq:hivemq-extension-sdk:${property('hivemq-extension-sdk.version')}")
 
     /* netty */
-    implementation(group: 'io.netty', name: 'netty-handler', version: property('netty.version'))
-    implementation(group: 'io.netty', name: 'netty-codec-http', version: property('netty.version'))
+    implementation("io.netty:netty-handler:${property('netty.version')}")
+    implementation("io.netty:netty-codec-http:${property('netty.version')}")
 
     /* logging */
-    implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: property('slf4j.version'))
-    implementation([group: 'ch.qos.logback', name: 'logback-classic', version: property('logback.version')]) {
+    implementation("org.slf4j:jul-to-slf4j:${property('slf4j.version')}")
+    implementation("ch.qos.logback:logback-classic:${property('logback.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
     /* bouncycastles */
-    implementation(group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: property('bouncycastles.version'))
-    implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: property('bouncycastles.version'))
+    implementation("org.bouncycastle:bcprov-jdk15on:${property('bouncycastles.version')}")
+    implementation("org.bouncycastle:bcpkix-jdk15on:${property('bouncycastles.version')}")
 
     /* rocksdb */
-    implementation(group: 'org.rocksdb', name: 'rocksdbjni', version: property('rocksdb.version'))
+    implementation("org.rocksdb:rocksdbjni:${property('rocksdb.version')}")
 
     /* apache commons */
-    implementation(group: 'commons-io', name: 'commons-io', version: property('commons-io.version'))
-    implementation(group: 'commons-codec', name: 'commons-codec', version: property('commons-codec.version'))
-    implementation(group: 'commons-collections', name: 'commons-collections', version: property('commons-collections.version'))
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: property('commons-lang.version'))
+    implementation("commons-io:commons-io:${property('commons-io.version')}")
+    implementation("commons-codec:commons-codec:${property('commons-codec.version')}")
+    implementation("commons-collections:commons-collections:${property('commons-collections.version')}")
+    implementation("org.apache.commons:commons-lang3:${property('commons-lang.version')}")
 
     /* xml */
-    implementation(group: 'com.sun.xml.bind', name: 'jaxb-core', version: property('jaxb-core.version'))
-    implementation(group: 'com.sun.xml.bind', name: 'jaxb-impl', version: property('jaxb-impl.version'))
-    implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: property('jaxb-api.version'))
+    implementation("com.sun.xml.bind:jaxb-core:${property('jaxb-core.version')}")
+    implementation("com.sun.xml.bind:jaxb-impl:${property('jaxb-impl.version')}")
+    implementation("javax.xml.bind:jaxb-api:${property('jaxb-api.version')}")
 
     /* javax */
-    implementation(group: 'javax.activation', name: 'activation', version: property('javax.activation.version'))
-    implementation(group: 'javax.validation', name: 'validation-api', version: property('javax.validation.version'))
-    implementation(group: 'javax.annotation', name: 'javax.annotation-api', version: property('javax.annotation.version'))
+    implementation("javax.activation:activation:${property('javax.activation.version')}")
+    implementation("javax.validation:validation-api:${property('javax.validation.version')}")
+    implementation("javax.annotation:javax.annotation-api:${property('javax.annotation.version')}")
 
     /* hashing */
-    implementation(group: 'net.openhft', name: 'zero-allocation-hashing', version: property('zero-allocation-hashing.version'))
+    implementation("net.openhft:zero-allocation-hashing:${property('zero-allocation-hashing.version')}")
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities*/
-    implementation(group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.3.71')
-    implementation(group: 'org.apache.commons', name: 'commons-compress', version: '1.20')
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.3.71")
+    implementation("org.apache.commons:commons-compress:1.20")
 
     /* guava */
-    implementation([group: 'com.google.guava', name: 'guava', version: property('guava.version')]) {
+    implementation("com.google.guava:guava:${property('guava.version')}") {
         //We don't need the HTTP Client since we are only interested in the server version
         exclude group: 'org.checkerframework', module: 'checker-qual'
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
@@ -141,77 +141,77 @@ dependencies {
     }
 
     /* oshi */
-    implementation([group: 'com.github.oshi', name: 'oshi-core', version: property('oshi.version')]) {
+    implementation("com.github.oshi:oshi-core:${property('oshi.version')}") {
         //We don't need the HTTP Client since we are only interested in the server version
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
     /* metrics */
-    implementation([group: 'io.dropwizard.metrics', name: 'metrics-logback', version: property('metrics.version')]) {
+    implementation("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'ch.qos.logback', module: 'logback-classic'
     }
-    implementation([group: 'io.dropwizard.metrics', name: 'metrics-core', version: property('metrics.version')]) {
+    implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
-    implementation([group: 'io.dropwizard.metrics', name: 'metrics-jmx', version: property('metrics.version')]) {
+    implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
 
     /* xodus */
-    implementation([group: 'org.jetbrains.xodus', name: 'xodus-environment', version: property('xodus.version')]) {
+    implementation("org.jetbrains.xodus:xodus-environment:${property('xodus.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
-    implementation([group: 'org.jetbrains.xodus', name: 'xodus-openAPI', version: property('xodus.version')]) {
+    implementation("org.jetbrains.xodus:xodus-openAPI:${property('xodus.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
-    implementation([group: 'org.jetbrains.xodus', name: 'xodus-entity-store', version: property('xodus.version')]) {
+    implementation("org.jetbrains.xodus:xodus-entity-store:${property('xodus.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
-    implementation([group: 'org.jetbrains.xodus', name: 'xodus-utils', version: property('xodus.version')]) {
+    implementation("org.jetbrains.xodus:xodus-utils:${property('xodus.version')}") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
 
     /* jackson */
-    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: property('jackson.version'))
-    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: property('jackson.version'))
-    implementation([group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: property('jackson.version')]) {
+    implementation("com.fasterxml.jackson.core:jackson-core:${property('jackson.version')}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${property('jackson.version')}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${property('jackson.version')}") {
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
     }
-    implementation([group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: property('jackson.version')]) {
+    implementation("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}") {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
     }
 
     /* dependency injection */
-    implementation([group: 'com.google.inject', name: 'guice', version: property('guice.version')]) {
+    implementation("com.google.inject:guice:${property('guice.version')}") {
         exclude group: 'com.google.guava', module: 'guava'
     }
 
-    testImplementation(group: 'junit', name: 'junit', version: property('junit.version'))
-    testImplementation(group: 'org.mockito', name: 'mockito-core', version: property('mockito.version'))
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: property('equalsverifier.version'))
-    testImplementation(group: 'net.jodah', name: 'concurrentunit', version: property('concurrentunit.version'))
-    testImplementation(group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-api', version: property('shrinkwrap.version'))
-    testImplementation(group: 'net.bytebuddy', name: 'byte-buddy', version: property('bytebuddy.version'))
-    testImplementation(group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: property('wiremock.version'))
-    testImplementation([group: 'com.github.stefanbirkner', name: 'system-rules', version: property('system-rules.version')]) {
+    testImplementation("junit:junit:${property('junit.version')}")
+    testImplementation("org.mockito:mockito-core:${property('mockito.version')}")
+    testImplementation("nl.jqno.equalsverifier:equalsverifier:${property('equalsverifier.version')}")
+    testImplementation("net.jodah:concurrentunit:${property('concurrentunit.version')}")
+    testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property('shrinkwrap.version')}")
+    testImplementation("net.bytebuddy:byte-buddy:${property('bytebuddy.version')}")
+    testImplementation("com.github.tomakehurst:wiremock-standalone:${property('wiremock.version')}")
+    testImplementation("com.github.stefanbirkner:system-rules:${property('system-rules.version')}") {
         exclude group: 'junit', module: 'junit-dep'
     }
 
     /* We need some HotSpot methods to generate heapdumps from code */
     testImplementation files("${System.getProperty('java.home')}/../lib/sa-jdi.jar")
 
-    testRuntimeOnly(group: 'org.jboss.shrinkwrap', name: 'shrinkwrap-impl-base', version: property('shrinkwrap.version'))
+    testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property('shrinkwrap.version')}")
 
     //plugins for spotbugs
-    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0'
+    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0")
 }
 
 
