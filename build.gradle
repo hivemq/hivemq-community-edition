@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'application'
     id 'java-library'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow'
@@ -23,7 +22,7 @@ group 'com.hivemq'
 version = '2020.3-SNAPSHOT'
 description = 'HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5'
 
-mainClassName = 'com.hivemq.HiveMQServer'
+ext.mainClassName = 'com.hivemq.HiveMQServer'
 
 metadata {
     readableName = "HiveMQ Community Edition"
