@@ -30,7 +30,7 @@ public interface EmbeddedHiveMQ {
     /**
      * Start an EmbeddedHiveMQ.
      * <p>
-     * This method is idempotent. Calling start again on an already started cluster has no effect.
+     * This method is idempotent. Calling start again on an already started EmbeddedHiveMQ has no effect.
      * <p>
      * A {@link #stop()}ed EmbeddedHiveMQ can be restarted with this method. If no enduring persistence type, like a
      * file persistence, is configured, the restarted EmbeddedHiveMQ does not retain its state.
@@ -42,7 +42,7 @@ public interface EmbeddedHiveMQ {
     /**
      * Stop an EmbeddedHiveMQ. Calling stop clears the metric registry returned by {@link #getMetricRegistry()}.
      * <p>
-     * This method is idempotent. Calling stop again on an already stopped cluster has no effect.
+     * This method is idempotent. Calling stop again on an already stopped EmbeddedHiveMQ has no effect.
      * <p>
      * A stopped EmbeddedHiveMQ can be restarted with the {@link #start()} method. If no enduring persistence type, like
      * a file persistence, is configured, the restarted EmbeddedHiveMQ does not retain its state.
