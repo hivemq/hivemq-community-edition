@@ -42,7 +42,7 @@ public interface EmbeddedHiveMQBuilder {
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
      *         folders</a>
      */
-    @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@NotNull Path configFolder);
+    @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@Nullable Path configFolder);
 
     /**
      * This sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure
@@ -64,7 +64,7 @@ public interface EmbeddedHiveMQBuilder {
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
      *         folders</a>
      */
-    @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@NotNull Path extensionsFolder);
+    @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@Nullable Path extensionsFolder);
 
     /**
      * @return a new EmbeddedHiveMQ with the configured HiveMQ folders.
