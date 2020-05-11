@@ -96,10 +96,9 @@ dependencies {
     implementation("io.netty:netty-codec-http:${property('netty.version')}")
 
     /* logging */
+    implementation("org.slf4j:slf4j-api:${property('slf4j.version')}")
     implementation("org.slf4j:jul-to-slf4j:${property('slf4j.version')}")
-    implementation("ch.qos.logback:logback-classic:${property('logback.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+    implementation("ch.qos.logback:logback-classic:${property('logback.version')}")
 
     /* bouncycastles */
     implementation("org.bouncycastle:bcprov-jdk15on:${property('bouncycastles.version')}")
@@ -119,9 +118,6 @@ dependencies {
     runtimeOnly("com.sun.xml.bind:jaxb-core:${property('jaxb-core.version')}")
     runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb-impl.version')}")
 
-    /* javax */
-    implementation("javax.annotation:javax.annotation-api:${property('javax.annotation.version')}")
-
     /* hashing */
     implementation("net.openhft:zero-allocation-hashing:${property('zero-allocation-hashing.version')}")
 
@@ -134,30 +130,20 @@ dependencies {
     }
 
     /* oshi */
-    implementation("com.github.oshi:oshi-core:${property('oshi.version')}") {
-        //We don't need the HTTP Client since we are only interested in the server version
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+    implementation("com.github.oshi:oshi-core:${property('oshi.version')}")
 
     /* metrics */
-    implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
-    implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+    implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
+    implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}")
     runtimeOnly("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'ch.qos.logback', module: 'logback-classic'
     }
 
     /* xodus */
     implementation("org.jetbrains.xodus:xodus-openAPI:${property('xodus.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
     implementation("org.jetbrains.xodus:xodus-environment:${property('xodus.version')}") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.jetbrains', module: 'annotations'
     }
 
@@ -178,6 +164,7 @@ dependencies {
     implementation("com.google.inject:guice:${property('guice.version')}") {
         exclude group: 'com.google.guava', module: 'guava'
     }
+    implementation("javax.annotation:javax.annotation-api:${property('javax.annotation.version')}")
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
