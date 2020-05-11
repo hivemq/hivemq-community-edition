@@ -25,7 +25,6 @@ Library                                                            | License    
  com.fasterxml.jackson.core:jackson-annotations                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.core:jackson-core                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.core:jackson-databind                       | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
- com.fasterxml.jackson.datatype:jackson-datatype-guava             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.jaxrs:jackson-jaxrs-base                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.module:jackson-module-jaxb-annotations      | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
