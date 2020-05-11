@@ -148,12 +148,8 @@ dependencies {
     }
 
     /* jackson */
-    implementation("com.fasterxml.jackson.core:jackson-core:${property('jackson.version')}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${property('jackson.version')}")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${property('jackson.version')}") {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    implementation("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${property('jackson.version')}")
+    runtimeOnly("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}")
 
     /* dependency injection */
     implementation("com.google.inject:guice:${property('guice.version')}") {
