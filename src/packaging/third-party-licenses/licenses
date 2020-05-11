@@ -54,10 +54,8 @@ Library                                                            | License    
  io.netty:netty-transport                                          | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  jakarta.activation:jakarta.activation-api                         | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
  jakarta.xml.bind:jakarta.xml.bind-api                             | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
- javax.activation:activation                                       | CDDL, Version 1.0                          | https://opensource.org/licenses/CDDL-1.0                          | 
  javax.annotation:javax.annotation-api                             | CDDL, Version 1.1                          | https://oss.oracle.com/licenses/CDDL+GPL-1.1                      | 
  javax.inject:javax.inject                                         | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
- javax.validation:validation-api                                   | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  javax.xml.bind:jaxb-api                                           | CDDL, Version 1.1                          | https://oss.oracle.com/licenses/CDDL+GPL-1.1                      | 
  net.java.dev.jna:jna                                              | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
  net.java.dev.jna:jna-platform                                     | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 

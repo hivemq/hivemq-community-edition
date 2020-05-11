@@ -121,8 +121,6 @@ dependencies {
 
     /* javax */
     implementation("javax.annotation:javax.annotation-api:${property('javax.annotation.version')}")
-    runtimeOnly("javax.activation:activation:${property('javax.activation.version')}")
-    runtimeOnly("javax.validation:validation-api:${property('javax.validation.version')}")
 
     /* hashing */
     implementation("net.openhft:zero-allocation-hashing:${property('zero-allocation-hashing.version')}")
