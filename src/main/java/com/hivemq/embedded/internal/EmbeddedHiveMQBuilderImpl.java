@@ -29,27 +29,27 @@ import java.nio.file.Path;
  */
 public class EmbeddedHiveMQBuilderImpl implements EmbeddedHiveMQBuilder {
 
-    private @Nullable Path conf = null;
-    private @Nullable Path data = null;
-    private @Nullable Path extensions = null;
+    private @Nullable Path configFolder = null;
+    private @Nullable Path dataFolder = null;
+    private @Nullable Path extensionsFolder = null;
 
     @Override
     public @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(final @Nullable Path configFolder) {
-        conf = configFolder;
+        this.configFolder = configFolder;
 
         return this;
     }
 
     @Override
     public @NotNull EmbeddedHiveMQBuilder withDataFolder(final @Nullable Path dataFolder) {
-        data = dataFolder;
+        this.dataFolder = dataFolder;
 
         return this;
     }
 
     @Override
-    public @NotNull EmbeddedHiveMQBuilder withExtensionFolder(final @Nullable Path extensionsFolder) {
-        extensions = extensionsFolder;
+    public @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(final @Nullable Path extensionsFolder) {
+        this.extensionsFolder = extensionsFolder;
 
         return this;
     }
@@ -57,9 +57,9 @@ public class EmbeddedHiveMQBuilderImpl implements EmbeddedHiveMQBuilder {
     @Override
     public @NotNull EmbeddedHiveMQ build() {
         // Shim for the old API
-        final File confFile = conf == null ? null : conf.toFile();
-        final File dataFile = data == null ? null : data.toFile();
-        final File extensionsFile = extensions == null ? null : extensions.toFile();
+        final File confFile = configFolder == null ? null : configFolder.toFile();
+        final File dataFile = dataFolder == null ? null : dataFolder.toFile();
+        final File extensionsFile = extensionsFolder == null ? null : extensionsFolder.toFile();
 
         return new EmbeddedHiveMQImpl(confFile, dataFile, extensionsFile);
     }

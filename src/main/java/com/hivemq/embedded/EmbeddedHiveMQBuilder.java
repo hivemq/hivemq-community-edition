@@ -29,7 +29,7 @@ public interface EmbeddedHiveMQBuilder {
     /**
      * @return a new EmbeddedHiveMQBuilder.
      */
-    static @NotNull EmbeddedHiveMQBuilder newBuilder() {
+    static @NotNull EmbeddedHiveMQBuilder builder() {
         return new EmbeddedHiveMQBuilderImpl();
     }
 
@@ -64,7 +64,7 @@ public interface EmbeddedHiveMQBuilder {
      * @see <a href="https://www.hivemq.com/docs/hivemq/latest/user-guide/configuration.html#folders">HiveMQ
      *         folders</a>
      */
-    @NotNull EmbeddedHiveMQBuilder withExtensionFolder(@NotNull Path extensionsFolder);
+    @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@NotNull Path extensionsFolder);
 
     /**
      * @return a new EmbeddedHiveMQ with the configured HiveMQ folders.
