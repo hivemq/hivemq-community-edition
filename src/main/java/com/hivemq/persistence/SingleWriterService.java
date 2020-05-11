@@ -235,7 +235,7 @@ public class SingleWriterService {
             //ignore
         }
         singleWriterExecutor.shutdownNow();
-        for (final @NotNull ExecutorService callbackExecutor : callbackExecutors) {
+        for (final ExecutorService callbackExecutor : callbackExecutors) {
             callbackExecutor.shutdownNow();
         }
         checkScheduler.shutdownNow();
