@@ -20,62 +20,62 @@ HiveMQ uses the following third party libraries:
 Library                                                            | License                                    | License text                                                      | Notes
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  aopalliance:aopalliance                                           | Public Domain                              | https://creativecommons.org/publicdomain/zero/1.0/                | 
- ch.qos.logback:logback-classic                                    | EPL, Version 1.0                           | http://www.eclipse.org/legal/epl-v10.html                         | 
- ch.qos.logback:logback-core                                       | EPL, Version 1.0                           | http://www.eclipse.org/legal/epl-v10.html                         | 
- com.fasterxml.jackson.core:jackson-annotations                    | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.core:jackson-core                           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.core:jackson-databind                       | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.datatype:jackson-datatype-guava             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.jaxrs:jackson-jaxrs-base                    | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.fasterxml.jackson.module:jackson-module-jaxb-annotations      | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.github.oshi:oshi-core                                         | EPL, Version 1.0                           | http://www.eclipse.org/legal/epl-v10.html                         | 
- com.google.code.findbugs:jsr305                                   | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.google.guava:failureaccess                                    | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.google.guava:guava                                            | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.google.guava:listenablefuture                                 | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.google.inject:guice                                           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.google.j2objc:j2objc-annotations                              | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- com.sun.xml.bind:jaxb-core                                        | CDDL, Version 1.1                          | https://javaee.github.io/glassfish/LICENSE                        | 
- com.sun.xml.bind:jaxb-impl                                        | CDDL, Version 1.1                          | https://javaee.github.io/glassfish/LICENSE                        | 
- commons-codec:commons-codec                                       | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- commons-collections:commons-collections                           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- commons-io:commons-io                                             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.dropwizard.metrics:metrics-core                                | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.dropwizard.metrics:metrics-jmx                                 | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.dropwizard.metrics:metrics-logback                             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.github.microutils:kotlin-logging                               | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-buffer                                             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-codec                                              | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-codec-http                                         | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-common                                             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-handler                                            | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-resolver                                           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- io.netty:netty-transport                                          | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- javax.activation:activation                                       | CDDL, Version 1.0                          | http://glassfish.java.net/public/CDDLv1.0.html                    | 
- javax.annotation:javax.annotation-api                             | CDDL, Version 1.1                          | https://javaee.github.io/glassfish/LICENSE                        | 
- javax.inject:javax.inject                                         | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- javax.validation:validation-api                                   | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- javax.xml.bind:jaxb-api                                           | CDDL, Version 1.1                          | http://glassfish.java.net/public/CDDL+GPL_1_1.html                | 
+ ch.qos.logback:logback-classic                                    | EPL, Version 1.0                           | https://www.eclipse.org/legal/epl-v10.html                        | 
+ ch.qos.logback:logback-core                                       | EPL, Version 1.0                           | https://www.eclipse.org/legal/epl-v10.html                        | 
+ com.fasterxml.jackson.core:jackson-annotations                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.core:jackson-core                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.core:jackson-databind                       | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.datatype:jackson-datatype-guava             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.jaxrs:jackson-jaxrs-base                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.fasterxml.jackson.module:jackson-module-jaxb-annotations      | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.github.oshi:oshi-core                                         | EPL, Version 1.0                           | https://www.eclipse.org/legal/epl-v10.html                        | 
+ com.google.code.findbugs:jsr305                                   | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.guava:failureaccess                                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.guava:guava                                            | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.guava:listenablefuture                                 | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.inject:guice                                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.j2objc:j2objc-annotations                              | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.sun.xml.bind:jaxb-core                                        | CDDL, Version 1.1                          | https://oss.oracle.com/licenses/CDDL+GPL-1.1                      | 
+ com.sun.xml.bind:jaxb-impl                                        | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
+ commons-codec:commons-codec                                       | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ commons-collections:commons-collections                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ commons-io:commons-io                                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.dropwizard.metrics:metrics-core                                | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.dropwizard.metrics:metrics-jmx                                 | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.dropwizard.metrics:metrics-logback                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.github.microutils:kotlin-logging                               | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-buffer                                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-codec                                              | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-codec-http                                         | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-common                                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-handler                                            | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-resolver                                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ io.netty:netty-transport                                          | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ jakarta.activation:jakarta.activation-api                         | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
+ jakarta.xml.bind:jakarta.xml.bind-api                             | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
+ javax.activation:activation                                       | CDDL, Version 1.0                          | https://opensource.org/licenses/CDDL-1.0                          | 
+ javax.annotation:javax.annotation-api                             | CDDL, Version 1.1                          | https://oss.oracle.com/licenses/CDDL+GPL-1.1                      | 
+ javax.inject:javax.inject                                         | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ javax.validation:validation-api                                   | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ javax.xml.bind:jaxb-api                                           | CDDL, Version 1.1                          | https://oss.oracle.com/licenses/CDDL+GPL-1.1                      | 
  net.java.dev.jna:jna                                              | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
  net.java.dev.jna:jna-platform                                     | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- net.openhft:zero-allocation-hashing                               | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.apache.commons:commons-compress                               | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.apache.commons:commons-lang3                                  | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.bouncycastle:bcpkix-jdk15on                                   | Bouncy Castle Licence                      | http://www.bouncycastle.org/licence.html                          | 
- org.bouncycastle:bcprov-jdk15on                                   | Bouncy Castle Licence                      | http://www.bouncycastle.org/licence.html                          | 
- org.javassist:javassist                                           | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.kotlin:kotlin-stdlib                                | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-compress                                | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-entity-store                            | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-environment                             | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-openAPI                                 | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-utils                                   | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.jetbrains.xodus:xodus-vfs                                     | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.rocksdb:rocksdbjni                                            | Apache License, Version 2.0                | http://opensource.org/licenses/Apache-2.0                         | 
- org.slf4j:jul-to-slf4j                                            | MIT License                                | http://www.opensource.org/licenses/mit-license.php                | 
- org.slf4j:slf4j-api                                               | MIT License                                | http://www.opensource.org/licenses/mit-license.php                | 
- org.threeten:threetenbp                                           | BSD 3-clause                               | https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt | 
+ net.openhft:zero-allocation-hashing                               | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.apache.commons:commons-compress                               | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.apache.commons:commons-lang3                                  | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.bouncycastle:bcpkix-jdk15on                                   | Bouncy Castle Licence                      | https://www.bouncycastle.org/licence.html                         | 
+ org.bouncycastle:bcprov-jdk15on                                   | Bouncy Castle Licence                      | https://www.bouncycastle.org/licence.html                         | 
+ org.jetbrains.kotlin:kotlin-stdlib                                | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.jetbrains.kotlin:kotlin-stdlib-common                         | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.jetbrains.xodus:xodus-compress                                | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.jetbrains.xodus:xodus-environment                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.jetbrains.xodus:xodus-openAPI                                 | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.jetbrains.xodus:xodus-utils                                   | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.rocksdb:rocksdbjni                                            | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ org.slf4j:jul-to-slf4j                                            | MIT License                                | https://opensource.org/licenses/MIT                               | 
+ org.slf4j:slf4j-api                                               | MIT License                                | https://opensource.org/licenses/MIT                               | 
+ org.threeten:threetenbp                                           | BSD 3-Clause License                       | https://opensource.org/licenses/BSD-3-Clause                      | 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

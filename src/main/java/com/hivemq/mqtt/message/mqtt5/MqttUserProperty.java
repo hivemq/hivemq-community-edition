@@ -19,12 +19,12 @@ package com.hivemq.mqtt.message.mqtt5;
 import com.google.common.base.Preconditions;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.UserProperty;
 import io.netty.buffer.ByteBuf;
 
-import javax.annotation.concurrent.Immutable;
 import java.nio.charset.StandardCharsets;
 
 /**
