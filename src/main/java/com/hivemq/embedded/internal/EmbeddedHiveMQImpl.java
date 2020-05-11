@@ -75,15 +75,10 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         private boolean isHigher(final @NotNull State other) {
             return this.ordinal() > other.ordinal();
         }
-
-        private boolean isLower(final @NotNull State other) {
-            return this.ordinal() < other.ordinal();
-        }
     }
 
     private synchronized void advanceState(final @NotNull State newState) {
-        if ((currentState == State.STOPPED && newState == State.NOT_STARTED)
-                || newState.isHigher(currentState)) {
+        if ((currentState == State.STOPPED && newState == State.NOT_STARTED) || newState.isHigher(currentState)) {
             log.debug("Advancing EmbeddedHiveMQState from \"{}\" to \"{}\"", currentState, newState);
             currentState = newState;
         }
@@ -91,6 +86,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     @Override
     public synchronized @NotNull CompletableFuture<Void> start() {
+        // we allow the restart of a stopped cluster
         advanceState(State.NOT_STARTED);
         if (currentState == State.NOT_STARTED) {
             advanceState(State.STARTING);
@@ -111,7 +107,7 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 advanceState(State.RUNNING);
             }).whenComplete(HiveMQServerException.handler(startFuture));
         } else {
-            log.warn("Could not start EmbeddedHiveMQ. Reason: \"Already started\"");
+            log.info("Could not start EmbeddedHiveMQ. Reason: \"Already started\"");
         }
         return startFuture;
     }
@@ -119,9 +115,10 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private void bootstrapInjector() {
         if (injector == null) {
             final HivemqId hiveMQId = new HivemqId();
-            final Injector persistenceInjector =
-                    GuiceBootstrap.persistenceInjector(
-                            systemInformation, metricRegistry, hiveMQId, configurationService);
+            final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+                    metricRegistry,
+                    hiveMQId,
+                    configurationService);
 
             try {
                 persistenceInjector.getInstance(PersistenceStartup.class).finish();
@@ -129,43 +126,52 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 log.error("EmbeddedHiveMQ persistence Startup interrupted.");
             }
 
-            injector =
-                    GuiceBootstrap.bootstrapInjector(systemInformation, metricRegistry, hiveMQId, configurationService,
-                            persistenceInjector);
+            injector = GuiceBootstrap.bootstrapInjector(systemInformation,
+                    metricRegistry,
+                    hiveMQId,
+                    configurationService,
+                    persistenceInjector);
         }
     }
 
     @Override
     public synchronized @NotNull CompletableFuture<Void> stop() {
-        if (currentState == State.NOT_STARTED) {
-            log.warn("Could not stop EmbeddedHiveMQ. Reason: \"Not started\"");
-            stopFuture = CompletableFuture.completedFuture(null);
+        switch (currentState) {
+            case NOT_STARTED:
+                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Not started\"");
+                stopFuture = CompletableFuture.completedFuture(null);
+                break;
+            case STARTING:
+            case RUNNING:
+                advanceState(State.STOPPING);
+                log.info("Stopping EmbeddedHiveMQ.");
 
-        } else if (currentState.isLower(State.STOPPING)) {
-            advanceState(State.STOPPING);
-            log.info("Stopping EmbeddedHiveMQ.");
+                stopFuture = startFuture.thenRunAsync(() -> {
+                    final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
 
-            stopFuture = startFuture.thenRunAsync(() -> {
-                final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
+                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
+                        // We call run, as we want to execute the hooks now, in this thread
+                        //noinspection CallToThreadRun
+                        hiveMQShutdownHook.run();
+                    }
+                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
+                        // We call run, as we want to execute the hooks now, in this thread
+                        //noinspection CallToThreadRun
+                        hiveMQShutdownHook.run();
+                    }
 
-                for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
-                    // We call run, as we want to execute the hooks now, in this thread
-                    //noinspection CallToThreadRun
-                    hiveMQShutdownHook.run();
-                }
-                for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
-                    // We call run, as we want to execute the hooks now, in this thread
-                    //noinspection CallToThreadRun
-                    hiveMQShutdownHook.run();
-                }
-
-                shutdownHooks.clearRuntime();
-                metricRegistry.removeMatching(MetricFilter.ALL);
-                injector = null;
-                advanceState(State.STOPPED);
-            });
-        } else {
-            log.warn("Could not stop EmbeddedHiveMQ. Reason: \"Already stopping\"");
+                    shutdownHooks.clearRuntime();
+                    metricRegistry.removeMatching(MetricFilter.ALL);
+                    injector = null;
+                    advanceState(State.STOPPED);
+                });
+                break;
+            case STOPPING:
+                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Already stopping\"");
+                break;
+            case STOPPED:
+                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Already stopped\"");
+                break;
         }
         return stopFuture;
     }
