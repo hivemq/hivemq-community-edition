@@ -6,6 +6,7 @@ pluginManagement {
         id 'org.owasp.dependencycheck' version '5.3.2'
         id 'com.github.spotbugs' version '3.0.0'
         id 'de.thetaphi.forbiddenapis' version '2.6'
+        id 'com.github.sgtsilvio.gradle.metadata' version '0.1.1'
     }
 }
 
