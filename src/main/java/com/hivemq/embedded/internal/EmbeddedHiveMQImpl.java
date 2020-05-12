@@ -32,84 +32,157 @@ import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
+import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Georg Held
  */
-public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
+class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(EmbeddedHiveMQImpl.class);
 
     private final @NotNull SystemInformationImpl systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
+    private final @NotNull ExecutorService stateChangeExecutor;
     private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
-    private volatile @NotNull State currentState;
-    private volatile @Nullable CompletableFuture<Void> startFuture;
-    private volatile @Nullable CompletableFuture<Void> stopFuture;
+    private @NotNull State currentState = State.STOPPED;
+    private @NotNull State desiredState = State.STOPPED;
+    private @Nullable Exception failedException;
+
+    private @NotNull LinkedList<CompletableFuture<Void>> startFutures = new LinkedList<>();
+    private @NotNull LinkedList<CompletableFuture<Void>> stopFutures = new LinkedList<>();
 
     EmbeddedHiveMQImpl(
             final @Nullable File conf, final @Nullable File data, final @Nullable File extensions) {
 
-        currentState = State.NOT_STARTED;
         systemInformation = new SystemInformationImpl(true, true, conf, data, extensions);
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
+
+        stateChangeExecutor =
+                Executors.newSingleThreadExecutor(ThreadFactoryUtil.create("embedded-hivemq-state-change-executor"));
     }
 
     private enum State {
 
-        NOT_STARTED,
-        STARTING,
         RUNNING,
-        STOPPING,
-        STOPPED;
-
-        private boolean isHigher(final @NotNull State other) {
-            return this.ordinal() > other.ordinal();
-        }
+        STOPPED,
+        FAILED;
     }
 
-    private synchronized void advanceState(final @NotNull State newState) {
-        if ((currentState == State.STOPPED && newState == State.NOT_STARTED) || newState.isHigher(currentState)) {
-            log.debug("Advancing EmbeddedHiveMQState from \"{}\" to \"{}\"", currentState, newState);
-            currentState = newState;
+    private void stateChange() {
+        final List<CompletableFuture<Void>> localStartFutures;
+        final List<CompletableFuture<Void>> localStopFutures;
+        final State localDesiredState;
+
+        synchronized (this) {
+            localStartFutures = startFutures;
+            localStopFutures = stopFutures;
+            localDesiredState = desiredState;
+            startFutures = new LinkedList<>();
+            stopFutures = new LinkedList<>();
         }
-    }
 
-    @Override
-    public synchronized @NotNull CompletableFuture<Void> start() {
-        // we allow the restart of a stopped cluster
-        advanceState(State.NOT_STARTED);
-        if (currentState == State.NOT_STARTED) {
-            advanceState(State.STARTING);
-            log.info("Starting EmbeddedHiveMQ.");
 
-            startFuture = new CompletableFuture<>();
-            CompletableFuture.runAsync(() -> {
-
-                configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
-
-                bootstrapInjector();
-                final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
+        if (currentState == State.FAILED) {
+            if (failedException != null) {
+                failFutureLists(failedException, localStartFutures, localStopFutures);
+                return;
+            } else {
+                log.error("Encountered a FAILED EmbeddedHiveMQ state without a reason present.");
+                failFutureLists(
+                        new IllegalStateException("FAILED EmbeddedHiveMQ state without a reason present"),
+                        localStartFutures,
+                        localStopFutures);
+            }
+        } else if (currentState == State.STOPPED) {
+            if (localDesiredState == State.STOPPED) {
+                succeedFutureList(localStopFutures);
+                failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), localStartFutures);
+            } else if (localDesiredState == State.RUNNING) {
+                log.info("Starting EmbeddedHiveMQ.");
                 try {
+                    configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+
+                    bootstrapInjector();
+                    final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
                     hiveMQServer.start();
-                } catch (final Exception e) {
-                    throw new HiveMQServerException(e);
+
+                    succeedFutureList(localStartFutures);
+                    failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
+                    currentState = State.RUNNING;
+                } catch (final Exception ex) {
+                    currentState = State.FAILED;
+                    failedException = ex;
+                    failFutureLists(ex, localStartFutures, localStopFutures);
                 }
-                advanceState(State.RUNNING);
-            }).whenComplete(HiveMQServerException.handler(startFuture));
-        } else {
-            log.info("Could not start EmbeddedHiveMQ. Reason: \"Already started\"");
+            }
+        } else if (currentState == State.RUNNING) {
+            if (localDesiredState == State.RUNNING) {
+                succeedFutureList(localStartFutures);
+                failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
+            } else if (localDesiredState == State.STOPPED) {
+                log.info("Stopping EmbeddedHiveMQ.");
+
+                try {
+
+                    final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
+
+                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
+                        // We call run, as we want to execute the hooks now, in this thread
+                        //noinspection CallToThreadRun
+                        hiveMQShutdownHook.run();
+                    }
+                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
+                        // We call run, as we want to execute the hooks now, in this thread
+                        //noinspection CallToThreadRun
+                        hiveMQShutdownHook.run();
+                    }
+
+                    shutdownHooks.clearRuntime();
+                    metricRegistry.removeMatching(MetricFilter.ALL);
+                    injector = null;
+
+                    currentState = State.STOPPED;
+                } catch (final Exception ex) {
+                    currentState = State.FAILED;
+                    failedException = ex;
+                    failFutureLists(ex, localStartFutures, localStopFutures);
+                }
+            }
         }
-        return startFuture;
+    }
+
+    private void failFutureLists(
+            final @NotNull Exception exception,
+            final @NotNull List<CompletableFuture<Void>> startFutures,
+            final @NotNull List<CompletableFuture<Void>> stopFutures) {
+        failFutureList(exception, startFutures);
+        failFutureList(exception, stopFutures);
+    }
+
+    private void failFutureList(
+            final @NotNull Exception exception, final @NotNull List<CompletableFuture<Void>> futures) {
+        for (final CompletableFuture<Void> future : futures) {
+            future.completeExceptionally(exception);
+        }
+    }
+
+    private void succeedFutureList(final @NotNull List<CompletableFuture<Void>> futures) {
+        for (final CompletableFuture<Void> future : futures) {
+            future.complete(null);
+        }
     }
 
     private void bootstrapInjector() {
@@ -135,45 +208,25 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     }
 
     @Override
-    public synchronized @NotNull CompletableFuture<Void> stop() {
-        switch (currentState) {
-            case NOT_STARTED:
-                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Not started\"");
-                stopFuture = CompletableFuture.completedFuture(null);
-                break;
-            case STARTING:
-            case RUNNING:
-                advanceState(State.STOPPING);
-                log.info("Stopping EmbeddedHiveMQ.");
-
-                stopFuture = startFuture.thenRunAsync(() -> {
-                    final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
-
-                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
-                        // We call run, as we want to execute the hooks now, in this thread
-                        //noinspection CallToThreadRun
-                        hiveMQShutdownHook.run();
-                    }
-                    for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
-                        // We call run, as we want to execute the hooks now, in this thread
-                        //noinspection CallToThreadRun
-                        hiveMQShutdownHook.run();
-                    }
-
-                    shutdownHooks.clearRuntime();
-                    metricRegistry.removeMatching(MetricFilter.ALL);
-                    injector = null;
-                    advanceState(State.STOPPED);
-                });
-                break;
-            case STOPPING:
-                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Already stopping\"");
-                break;
-            case STOPPED:
-                log.info("Could not stop EmbeddedHiveMQ. Reason: \"Already stopped\"");
-                break;
+    public @NotNull CompletableFuture<Void> start() {
+        synchronized (this) {
+            desiredState = State.RUNNING;
+            final CompletableFuture<Void> future = new CompletableFuture<>();
+            startFutures.add(future);
+            stateChangeExecutor.execute(this::stateChange);
+            return future;
         }
-        return stopFuture;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> stop() {
+        synchronized (this) {
+            desiredState = State.STOPPED;
+            final CompletableFuture<Void> future = new CompletableFuture<>();
+            stopFutures.add(future);
+            stateChangeExecutor.execute(this::stateChange);
+            return future;
+        }
     }
 
     @Override
@@ -181,29 +234,15 @@ public class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         return metricRegistry;
     }
 
-    private static class HiveMQServerException extends RuntimeException {
-
-        private HiveMQServerException(final Throwable cause) {
-            super(cause);
-        }
-
-        private static <V, T extends Throwable> @NotNull BiConsumer<V, T> handler(
-                final @NotNull CompletableFuture<V> result) {
-            return (value, throwable) -> {
-                if (throwable != null) {
-                    if (throwable instanceof HiveMQServerException) {
-                        result.completeExceptionally(throwable.getCause());
-                        return;
-                    }
-                    result.completeExceptionally(throwable);
-                }
-                result.complete(value);
-            };
-        }
-    }
-
     @VisibleForTesting
     @Nullable Injector getInjector() {
         return injector;
+    }
+
+    private static class AbortedStateChangeException extends Exception {
+
+        public AbortedStateChangeException(final @NotNull String message) {
+            super(message);
+        }
     }
 }
