@@ -29,6 +29,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.embedded.EmbeddedHiveMQ;
+import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
@@ -52,7 +53,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     private final @NotNull SystemInformationImpl systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
-    private final @NotNull ExecutorService stateChangeExecutor;
+    @VisibleForTesting
+    final @NotNull ExecutorService stateChangeExecutor;
     private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
@@ -70,6 +72,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
 
+        // Once the EmbeddedHiveMQ gets garbage collected this gets automatically shut down
         stateChangeExecutor =
                 Executors.newSingleThreadExecutor(ThreadFactoryUtil.create("embedded-hivemq-state-change-executor"));
     }
@@ -108,8 +111,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             }
         } else if (currentState == State.STOPPED) {
             if (localDesiredState == State.STOPPED) {
-                succeedFutureList(localStopFutures);
                 failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), localStartFutures);
+                succeedFutureList(localStopFutures);
             } else if (localDesiredState == State.RUNNING) {
                 log.info("Starting EmbeddedHiveMQ.");
                 try {
@@ -119,8 +122,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
                     hiveMQServer.start();
 
-                    succeedFutureList(localStartFutures);
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
+                    succeedFutureList(localStartFutures);
                     currentState = State.RUNNING;
                 } catch (final Exception ex) {
                     currentState = State.FAILED;
@@ -130,8 +133,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             }
         } else if (currentState == State.RUNNING) {
             if (localDesiredState == State.RUNNING) {
-                succeedFutureList(localStartFutures);
                 failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
+                succeedFutureList(localStartFutures);
             } else if (localDesiredState == State.STOPPED) {
                 log.info("Stopping EmbeddedHiveMQ.");
 
@@ -153,7 +156,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     shutdownHooks.clearRuntime();
                     metricRegistry.removeMatching(MetricFilter.ALL);
                     injector = null;
-
+                    failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), localStartFutures);
+                    succeedFutureList(localStopFutures);
                     currentState = State.STOPPED;
                 } catch (final Exception ex) {
                     currentState = State.FAILED;

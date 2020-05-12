@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded.internal;
 
 import com.google.inject.Injector;
@@ -37,9 +38,10 @@ import util.TestExtensionUtil;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class EmbeddedHiveMQImplTest {
 
@@ -59,15 +61,10 @@ public class EmbeddedHiveMQImplTest {
         conf = tmp.newFolder("conf");
         randomPort = RandomPortGenerator.get();
 
-        final String noListenerConfig = "" +
-                "<hivemq>\n" +
-                "    <listeners>\n" +
-                "        <tcp-listener>\n" +
-                "            <port>" + randomPort + "</port>\n" +
-                "            <bind-address>0.0.0.0</bind-address>\n" +
-                "        </tcp-listener>\n" +
-                "    </listeners>\n" +
-                "</hivemq>";
+        final String noListenerConfig =
+                "" + "<hivemq>\n" + "    <listeners>\n" + "        <tcp-listener>\n" + "            <port>" +
+                        randomPort + "</port>\n" + "            <bind-address>0.0.0.0</bind-address>\n" +
+                        "        </tcp-listener>\n" + "    </listeners>\n" + "</hivemq>";
         FileUtils.write(new File(conf, "config.xml"), noListenerConfig, StandardCharsets.UTF_8);
 
         TestExtensionUtil.shrinkwrapExtension(extensions, extensionName, Main.class, true);
@@ -111,6 +108,84 @@ public class EmbeddedHiveMQImplTest {
         assertNotNull(extension);
 
         embeddedHiveMQ.stop().join();
+    }
+
+    @Test
+    public void start_multipleStartsAreIdempotent() {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+
+        embeddedHiveMQ.stateChangeExecutor.submit(() -> {
+            blockingLatch.await();
+            return null;
+        });
+
+        embeddedHiveMQ.start();
+        final CompletableFuture<Void> future = embeddedHiveMQ.start();
+
+        blockingLatch.countDown();
+        future.join();
+        embeddedHiveMQ.stop().join();
+    }
+
+    @Test
+    public void stop_multipleStopsAreIdempotent() {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+        embeddedHiveMQ.start().join();
+
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+
+        embeddedHiveMQ.stateChangeExecutor.submit(() -> {
+            blockingLatch.await();
+            return null;
+        });
+
+        embeddedHiveMQ.stop();
+        final CompletableFuture<Void> future = embeddedHiveMQ.stop();
+
+        blockingLatch.countDown();
+        future.join();
+    }
+
+    @Test
+    public void start_startCancelsStop() {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+        embeddedHiveMQ.start().join();
+
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+
+        embeddedHiveMQ.stateChangeExecutor.submit(() -> {
+            blockingLatch.await();
+            return null;
+        });
+
+         final CompletableFuture<Void> stop = embeddedHiveMQ.stop();
+        final CompletableFuture<Void> start = embeddedHiveMQ.start();
+
+        blockingLatch.countDown();
+        start.join();
+
+        assertTrue(stop.isCompletedExceptionally());
+    }
+
+    @Test
+    public void stop_stopCancelsStart() {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+
+        embeddedHiveMQ.stateChangeExecutor.submit(() -> {
+            blockingLatch.await();
+            return null;
+        });
+
+        final CompletableFuture<Void> start = embeddedHiveMQ.start();
+        final CompletableFuture<Void> stop = embeddedHiveMQ.stop();
+
+        blockingLatch.countDown();
+        stop.join();
+
+        assertTrue(start.isCompletedExceptionally());
     }
 
     public static class Main implements ExtensionMain {
