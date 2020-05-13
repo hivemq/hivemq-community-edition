@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 
@@ -159,7 +160,7 @@ public class EmbeddedHiveMQImplTest {
             return null;
         });
 
-         final CompletableFuture<Void> stop = embeddedHiveMQ.stop();
+        final CompletableFuture<Void> stop = embeddedHiveMQ.stop();
         final CompletableFuture<Void> start = embeddedHiveMQ.start();
 
         blockingLatch.countDown();
@@ -186,6 +187,26 @@ public class EmbeddedHiveMQImplTest {
         stop.join();
 
         assertTrue(start.isCompletedExceptionally());
+    }
+
+    @Test
+    public void close_preventsStart() throws ExecutionException, InterruptedException {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+
+        embeddedHiveMQ.close();
+        final CompletableFuture<Void> start = embeddedHiveMQ.start();
+
+        assertTrue(start.isCompletedExceptionally());
+    }
+
+    @Test
+    public void close_preventsStop() throws ExecutionException, InterruptedException {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+
+        embeddedHiveMQ.close();
+        final CompletableFuture<Void> stop = embeddedHiveMQ.stop();
+
+        assertTrue(stop.isCompletedExceptionally());
     }
 
     public static class Main implements ExtensionMain {
