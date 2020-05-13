@@ -29,7 +29,6 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.embedded.EmbeddedHiveMQ;
-import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.PersistenceStartup;
@@ -41,6 +40,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,6 +58,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
+    private boolean closed = false;
     private @NotNull State currentState = State.STOPPED;
     private @NotNull State desiredState = State.STOPPED;
     private @Nullable Exception failedException;
@@ -75,6 +76,17 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         // Once the EmbeddedHiveMQ gets garbage collected this gets automatically shut down
         stateChangeExecutor =
                 Executors.newSingleThreadExecutor(ThreadFactoryUtil.create("embedded-hivemq-state-change-executor"));
+    }
+
+    @Override
+    public void close() throws ExecutionException, InterruptedException {
+        final CompletableFuture<Void> stop;
+        synchronized (this) {
+            stop = stop();
+            closed = true;
+            stateChangeExecutor.submit(stateChangeExecutor::shutdown);
+        }
+        stop.get();
     }
 
     private enum State {
@@ -214,6 +226,9 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     @Override
     public @NotNull CompletableFuture<Void> start() {
         synchronized (this) {
+            if (closed) {
+                return CompletableFuture.failedFuture(new IllegalStateException("EmbeddedHiveMQ was already closed"));
+            }
             desiredState = State.RUNNING;
             final CompletableFuture<Void> future = new CompletableFuture<>();
             startFutures.add(future);
@@ -225,6 +240,9 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     @Override
     public @NotNull CompletableFuture<Void> stop() {
         synchronized (this) {
+            if (closed) {
+                return CompletableFuture.failedFuture(new IllegalStateException("EmbeddedHiveMQ was already closed"));
+            }
             desiredState = State.STOPPED;
             final CompletableFuture<Void> future = new CompletableFuture<>();
             stopFutures.add(future);
