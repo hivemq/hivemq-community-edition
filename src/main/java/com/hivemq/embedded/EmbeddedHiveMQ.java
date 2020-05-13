@@ -22,10 +22,11 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @DoNotImplement
 @ThreadSafe
-public interface EmbeddedHiveMQ {
+public interface EmbeddedHiveMQ extends AutoCloseable {
 
     /**
      * Start an EmbeddedHiveMQ.
@@ -57,4 +58,10 @@ public interface EmbeddedHiveMQ {
      * @return the {@link MetricRegistry} containing all HiveMQ metrics
      */
     @NotNull MetricRegistry getMetricRegistry();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void close() throws ExecutionException, InterruptedException;
 }
