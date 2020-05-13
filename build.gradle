@@ -65,7 +65,6 @@ metadata {
         org = "hivemq"
         repo = "hivemq-community-edition"
         issues()
-        pages()
     }
 }
 
