@@ -134,9 +134,7 @@ dependencies {
     /* metrics */
     implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
     implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}")
-    runtimeOnly("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}") {
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-    }
+    runtimeOnly("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}")
 
     /* xodus */
     implementation("org.jetbrains.xodus:xodus-openAPI:${property('xodus.version')}") {
