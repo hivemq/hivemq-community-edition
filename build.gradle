@@ -123,7 +123,6 @@ dependencies {
 
     /* guava */
     implementation("com.google.guava:guava:${property('guava.version')}") {
-        //We don't need the HTTP Client since we are only interested in the server version
         exclude group: 'org.checkerframework', module: 'checker-qual'
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
         exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
@@ -173,9 +172,6 @@ dependencies {
     testImplementation("com.github.stefanbirkner:system-rules:${property('system-rules.version')}") {
         exclude group: 'junit', module: 'junit-dep'
     }
-
-    /* We need some HotSpot methods to generate heapdumps from code */
-    testImplementation files("${System.getProperty('java.home')}/../lib/sa-jdi.jar")
 
     testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property('shrinkwrap.version')}")
 
