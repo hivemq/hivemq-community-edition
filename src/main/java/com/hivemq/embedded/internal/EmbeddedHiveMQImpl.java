@@ -39,10 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * @author Georg Held
@@ -80,13 +77,14 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     @Override
     public void close() throws ExecutionException, InterruptedException {
-        final CompletableFuture<Void> stop;
+        final Future<?> shutDownFuture;
         synchronized (this) {
-            stop = stop();
             closed = true;
-            stateChangeExecutor.submit(stateChangeExecutor::shutdown);
+            this.desiredState = State.STOPPED;
+            stateChangeExecutor.submit(this::stateChange);
+            shutDownFuture = stateChangeExecutor.submit(stateChangeExecutor::shutdown);
         }
-        stop.get();
+        shutDownFuture.get();
     }
 
     private enum State {
@@ -109,8 +107,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             stopFutures = new LinkedList<>();
         }
 
-
-        if (currentState == State.FAILED) {
+        // ignoring failed state during close and desired state stopped
+        if (currentState == State.FAILED && !(closed && desiredState == State.STOPPED)) {
             if (failedException != null) {
                 failFutureLists(failedException, localStartFutures, localStopFutures);
                 return;
@@ -155,14 +153,33 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
 
                     for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
-                        // We call run, as we want to execute the hooks now, in this thread
-                        //noinspection CallToThreadRun
-                        hiveMQShutdownHook.run();
+                        try {
+                            // We call run, as we want to execute the hooks now, in this thread
+                            //noinspection CallToThreadRun
+                            hiveMQShutdownHook.run();
+                        } catch (final Exception ex) {
+                            if (closed) {
+                                // during close we try to shut down as much as possible
+                                log.error("Exception during shutdown hook \"{}\".", hiveMQShutdownHook.name());
+                            } else {
+                                throw ex;
+                            }
+                        }
                     }
+
                     for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
-                        // We call run, as we want to execute the hooks now, in this thread
-                        //noinspection CallToThreadRun
-                        hiveMQShutdownHook.run();
+                        try {
+                            // We call run, as we want to execute the hooks now, in this thread
+                            //noinspection CallToThreadRun
+                            hiveMQShutdownHook.run();
+                        } catch (final Exception ex) {
+                            if (closed) {
+                                // during close we try to shut down as much as possible
+                                log.error("Exception during shutdown hook \"{}\".", hiveMQShutdownHook.name());
+                            } else {
+                                throw ex;
+                            }
+                        }
                     }
 
                     shutdownHooks.clearRuntime();
