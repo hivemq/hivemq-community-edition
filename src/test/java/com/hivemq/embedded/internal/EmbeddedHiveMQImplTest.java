@@ -71,7 +71,7 @@ public class EmbeddedHiveMQImplTest {
         TestExtensionUtil.shrinkwrapExtension(extensions, extensionName, Main.class, true);
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void embeddedHiveMQ_readsConfig() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -87,7 +87,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void embeddedHiveMQ_usesDataFolder() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -97,7 +97,7 @@ public class EmbeddedHiveMQImplTest {
         assertEquals(1, files.length);
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void embeddedHiveMQ_usesExtensionsFolder() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -111,7 +111,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void start_multipleStartsAreIdempotent() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         final CountDownLatch blockingLatch = new CountDownLatch(1);
@@ -129,7 +129,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void stop_multipleStopsAreIdempotent() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -148,7 +148,7 @@ public class EmbeddedHiveMQImplTest {
         future.join();
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void start_startCancelsStop() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -169,7 +169,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(stop.isCompletedExceptionally());
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void stop_stopCancelsStart() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -189,7 +189,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(start.isCompletedExceptionally());
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void close_preventsStart() throws ExecutionException, InterruptedException {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -199,7 +199,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(start.isCompletedExceptionally());
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void close_preventsStop() throws ExecutionException, InterruptedException {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -209,17 +209,52 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(stop.isCompletedExceptionally());
     }
 
+    @Test(timeout = 10000L)
+    public void close_calledMultipleTimes() throws InterruptedException {
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+
+        embeddedHiveMQ.stateChangeExecutor.submit(() -> {
+            blockingLatch.await();
+            return null;
+        });
+
+        new Thread(() -> {
+            try {
+                embeddedHiveMQ.close();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        new Thread(() -> {
+            try {
+                embeddedHiveMQ.close();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        Thread.sleep(100);
+
+        final List<Runnable> runnableList = embeddedHiveMQ.stateChangeExecutor.shutdownNow();
+
+        // the blocking Latch callable is already executed, so one embeddedHiveMQ.stateChange and one executor.shutdown
+        // are expect
+        assertEquals(2, runnableList.size());
+    }
+
     public static class Main implements ExtensionMain {
 
         @Override
         public void extensionStart(
-                @NotNull ExtensionStartInput extensionStartInput, @NotNull ExtensionStartOutput extensionStartOutput) {
+               final  @NotNull ExtensionStartInput extensionStartInput, final  @NotNull ExtensionStartOutput extensionStartOutput) {
 
         }
 
         @Override
         public void extensionStop(
-                @NotNull ExtensionStopInput extensionStopInput, @NotNull ExtensionStopOutput extensionStopOutput) {
+                final @NotNull ExtensionStopInput extensionStopInput,final  @NotNull ExtensionStopOutput extensionStopOutput) {
 
         }
     }

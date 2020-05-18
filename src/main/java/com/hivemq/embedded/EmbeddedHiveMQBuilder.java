@@ -58,6 +58,11 @@ public interface EmbeddedHiveMQBuilder {
     /**
      * This sets the HIVEMQ_EXTENSION_FOLDER to the given argument. Using this method overrides all other ways to
      * configure it.
+     * <p>
+     * Without an extension that determines the authentication status of new MQTT clients, no client will be able to
+     * successfully connect to an EmbeddedHiveMQ.
+     * <p>
+     * To change this behavior modify {@link com.hivemq.configuration.service.InternalConfigurations#AUTH_DENY_UNAUTHENTICATED_CONNECTIONS}.
      *
      * @param extensionsFolder the used extensions folder.
      * @return this builder.
