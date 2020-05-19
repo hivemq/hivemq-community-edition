@@ -313,7 +313,7 @@ public class PluginLoaderImpl implements PluginLoader {
             return null;
         } catch (final Exception e) {
             log.warn("Extension {} cannot be loaded. The class {} cannot be instantiated, reason: {}",
-                    pluginFolder.toAbsolutePath().toString(), desiredClass.getCanonicalName(),
+                    pluginFolder.toAbsolutePath().toString(),
                     pluginMainClass.getCanonicalName(), e.getMessage());
             log.debug("Original exception:", e);
             return null;
