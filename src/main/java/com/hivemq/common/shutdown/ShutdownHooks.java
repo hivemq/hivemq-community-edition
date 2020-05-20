@@ -41,11 +41,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A implementation for all shutdown hooks.
  * <p>
- * If you are adding a synchronous shutdown hook, the Shutdown Hook will be added to the registry. Please note, such a
- * synchronous shutdown hook  will <b>not</b> be executed by itself when HiveMQ is shutting down.
+ * If you add a synchronous shutdown hook, the shutdown hook is added to the registry. Please note that the
+ * synchronous shutdown hook is <b>not</b> executed by itself when HiveMQ is shutting down.
  * <p>
- * If you are adding an asynchronous Shutdown Hook, <b>it will be immediately registered to the JVM</b>. You can get a
- * read-only collection of all asynchronous Shutdown Hooks for further reference, though.
+ *When you add an asynchronous shutdown hook, <b>the shutdown hook is immediately registered to the JVM</b>. You can get a
+ * read-only collection of all asynchronous shutdown hooks for further reference, though.
  *
  * @author Dominik Obermaier
  */
@@ -167,7 +167,7 @@ public class ShutdownHooks {
     }
 
     /**
-     * Returns the registry with all Shutdown Hooks. Note, that the registry only contains all synchronous shutdown
+     * Returns the registry with all shutdown hooks. Note that the registry only contains all of the synchronous shutdown
      * hooks.
      *
      * @return A registry of all synchronous Shutdown Hooks.

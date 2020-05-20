@@ -1,19 +1,19 @@
 = HiveMQ Community Edition
 
-image:https://www.hivemq.com/img/svg/hivemq-ce.svg[HiveMQ Community ,500, align="left"]
+image:https://www.hivemq.com/img/svg/hivemq-ce.svg[HiveMQ Community,500,align="left"]
 
-image:https://travis-ci.com/hivemq/hivemq-community-edition.svg?token=2JEoSXzFpviQH47MBPSm&branch=master["Build Status", link="https://travis-ci.com/hivemq/hivemq-community-edition"]
+image:https://travis-ci.com/hivemq/hivemq-community-edition.svg?token=2JEoSXzFpviQH47MBPSm&branch=master["Build Status",link="https://travis-ci.com/hivemq/hivemq-community-edition"]
 
-HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5. 
+HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5.
 
-It is the foundation of the HiveMQ Enterprise Connectivity and Messaging Platform and implements all MQTT features. This project is the technical core of many of the largest MQTT deployments and is now available as Open Source Software under the Apache 2 license.
+HiveMQ CE is the foundation of the HiveMQ enterprise-connectivity and messaging platform and implements all MQTT features.
+This project is the technical core of many large MQTT deployments and is now available as open source software under the Apache 2 license.
 
 * Web Site: https://www.hivemq.com/
 * Documentation: https://github.com/hivemq/hivemq-community-edition/wiki
 * Community Forum: https://community.hivemq.com/
 * Contribution Guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
 * License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
-
 
 = Features
 
@@ -26,6 +26,7 @@ It is the foundation of the HiveMQ Enterprise Connectivity and Messaging Platfor
 ** MQTT Packet Interceptors
 ** Interacting with Publishes, Retained Messages, Clients and Subscriptions
 * Running on Windows, Linux and MacOS (Linux is recommended)
+* Embedded Mode
 
 HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client].
 
@@ -124,9 +125,9 @@ The Docker image `hivemq/hivemq-ce` is created locally.
 
 You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
 
-== Start
+=== Start
 
-Unzip the created binary package 
+Unzip the created binary package
 
 [source,bash]
 ----
@@ -137,10 +138,187 @@ cd hivemq-ce-<version>
 
 For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
 
+== Embedded Mode
+
+HiveMQ Community Edition offers an embedded mode and a programmatic API for integrating with Java/Java EE software.
+
+=== Dependency
+
+==== Gradle
+
+If you use Gradle, include the following code in your `build.gradle` file.
+
+[source,groovy]
+----
+dependencies {
+    implementation group: 'com.hivemq', name: 'hivemq-community-edition-embedded', version: '2020.3'
+}
+----
+
+==== Maven
+
+If you use Maven, include the following code in your `pom.xml` file.
+
+[source,xml]
+----
+<project>
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>com.hivemq</groupId>
+            <artifactId>hivemq-community-edition-embedded</artifactId>
+            <version>2020.3</version>
+        </dependency>
+    </dependencies>
+    ...
+</project>
+----
+
+NOTE: You must set the compiler version to `11` or higher.
+
+=== Usage
+
+Entry into the embedded mode is done with the `com.hivemq.embedded.EmbeddedHiveMQBuilder`.
+
+[source,java]
+----
+public class Main {
+
+    public static void main(String[] args) {
+
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder()
+            .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
+            .withDataFolder(Path.of("/path/to/embedded-data-folder"))
+            .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"));
+        ...
+    }
+}
+----
+
+Once built, an EmbeddedHiveMQ can be started with `start()`.
+
+[source,java]
+----
+public class Main {
+
+    public static void main(String[] args) {
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder()
+        ...;
+
+        try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
+            hiveMQ.start().join();
+            ...
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
+----
+
+A running EmbeddedHiveMQ can be stopped with `stop()`.
+
+[source,java]
+----
+public class Main {
+
+    public static void main(String[] args) {
+
+        ...
+
+        try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
+            ...
+            hiveMQ.stop().join();
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
+----
+
+NOTE: An EmbeddedHiveMQ is a resource that is similar to a network connection and implements the `java.lang.AutoCloseable` interface.
+Always use ARM (_try with resources_) or ensure a call to `close()`.
+
+=== Exclusions
+
+When you deploy an application that includes EmbeddedHiveMQ, it can be useful to exclude some dependencies.
+One way to exclude dependencies is with the  link:https://maven.apache.org/plugins/maven-shade-plugin/[maven shade plugin].
+
+[source,xml]
+----
+<project>
+...
+ <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <!--Exclude the undesired dependencies-->
+                                    <exclude>org.rocksdb:rocksdbjni</exclude>
+                                    <exclude>ch.qos.logback:logback-classic</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+...
+</project>
+----
+
+==== RocksDB Exclusion
+
+To exclude the `org.rocksdb:rocksdbjni` dependency, two internal configurations must be changed before you call `start()`.
+
+[source,java]
+----
+public class Main {
+
+    public static void main(String[] args) {
+
+        ...
+
+        try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
+
+            InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
+            InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE);
+
+            hiveMQ.start().join();
+
+            ...
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
+----
+
 = Contributing
 
 If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.adoc[contribution guidelines].
 
 = License
 
-HiveMQ Community Edition is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
+HiveMQ Community Edition is licensed under the `APACHE LICENSE, VERSION 2.0`.
+A copy of the license can be found link:LICENSE[here].
