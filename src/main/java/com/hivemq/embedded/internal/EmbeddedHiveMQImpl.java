@@ -30,17 +30,14 @@ import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.embedded.EmbeddedHiveMQ;
-import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -69,6 +66,10 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     EmbeddedHiveMQImpl(
             final @Nullable File conf, final @Nullable File data, final @Nullable File extensions) {
+
+
+        log.info("Setting default authentication behavior to ALLOW ALL");
+        InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
 
         systemInformation = new SystemInformationImpl(true, true, conf, data, extensions);
         // we create the metric registry here to make it accessible before start
@@ -114,6 +115,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
         // Try to perform a stop regardless
         if (localDesiredState == State.CLOSED) {
+            log.info("Closing EmbeddedHiveMQ.");
             performStop(localDesiredState, localStartFutures, localStopFutures);
 
         } else if (currentState == State.FAILED) {
@@ -153,6 +155,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
                 succeedFutureList(localStartFutures);
             } else if (localDesiredState == State.STOPPED) {
+                log.info("Stopping EmbeddedHiveMQ.");
                 performStop(localDesiredState, localStartFutures, localStopFutures);
             }
         }
@@ -162,7 +165,6 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             final @NotNull State desiredState,
             final @NotNull List<CompletableFuture<Void>> startFutures,
             final @NotNull List<CompletableFuture<Void>> stopFutures) {
-        log.info("Stopping EmbeddedHiveMQ.");
 
         try {
 

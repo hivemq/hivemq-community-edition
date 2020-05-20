@@ -34,8 +34,7 @@ public interface EmbeddedHiveMQBuilder {
     }
 
     /**
-     * This sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure
-     * it.
+     * Sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure it.
      *
      * @param configFolder the used configuration folder.
      * @return this builder.
@@ -45,8 +44,7 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@Nullable Path configFolder);
 
     /**
-     * This sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure
-     * it.
+     * Sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure it.
      *
      * @param dataFolder the used data folder.
      * @return this builder.
@@ -56,13 +54,8 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withDataFolder(@Nullable Path dataFolder);
 
     /**
-     * This sets the HIVEMQ_EXTENSION_FOLDER to the given argument. Using this method overrides all other ways to
-     * configure it.
-     * <p>
-     * Without an extension that determines the authentication status of new MQTT clients, no client will be able to
-     * successfully connect to an EmbeddedHiveMQ.
-     * <p>
-     * To change this behavior modify {@link com.hivemq.configuration.service.InternalConfigurations#AUTH_DENY_UNAUTHENTICATED_CONNECTIONS}.
+     * Sets the HIVEMQ_EXTENSION_FOLDER to the given argument. Using this method overrides all other ways to configure
+     * it.
      *
      * @param extensionsFolder the used extensions folder.
      * @return this builder.
@@ -72,6 +65,12 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@Nullable Path extensionsFolder);
 
     /**
+     * Concludes the EmbeddedHiveMQ build process.
+     * <p>
+     * Beware that this method sets the {@link com.hivemq.configuration.service.InternalConfigurations#AUTH_DENY_UNAUTHENTICATED_CONNECTIONS}
+     * to false. If you do not want to start EmbeddedHiveMQ in this permissive mode, reset it to true before calling
+     * {@link EmbeddedHiveMQ#start()}.
+     *
      * @return a new EmbeddedHiveMQ with the configured HiveMQ folders.
      */
     @NotNull EmbeddedHiveMQ build();
