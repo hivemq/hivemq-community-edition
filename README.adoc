@@ -235,7 +235,7 @@ public class Main {
 }
 ----
 
-NOTE: An EmbeddedHiveMQ is a resource that is similar to a network connection and implements the `java.lang.AutoCloseable` interface.
+NOTE: An EmbeddedHiveMQ is a resource that is similar to a e.g. network connection and implements the `java.lang.AutoCloseable` interface.
 Always use ARM (_try with resources_) or ensure a call to `close()`.
 
 === Exclusions
