@@ -39,7 +39,6 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     @Nullable
     @Override
     public Channel get(final @NotNull String clientId) {
-
         return channelMap.get(clientId);
     }
 
