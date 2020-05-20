@@ -144,14 +144,23 @@ HiveMQ Community Edition offers an embedded mode and a programmatic API for inte
 
 === Dependency
 
+IMPORTANT: Until HiveMQ Community Edition 2020.3 is released embedded mode is only available from link:https://jitpack.io/#hivemq/hivemq-community-edition-embedded[jitpack.io].
+
 ==== Gradle
 
 If you use Gradle, include the following code in your `build.gradle` file.
 
 [source,groovy]
 ----
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
 dependencies {
-    implementation group: 'com.hivemq', name: 'hivemq-community-edition-embedded', version: '2020.3'
+    implementation 'com.github.hivemq:hivemq-community-edition-embedded:master-SNAPSHOT'
 }
 ----
 
@@ -163,12 +172,19 @@ If you use Maven, include the following code in your `pom.xml` file.
 ----
 <project>
     ...
+    <repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
     <dependencies>
-        <dependency>
-            <groupId>com.hivemq</groupId>
-            <artifactId>hivemq-community-edition-embedded</artifactId>
-            <version>2020.3</version>
-        </dependency>
+	    <dependency>
+	        <groupId>com.github.hivemq</groupId>
+	        <artifactId>hivemq-community-edition-embedded</artifactId>
+	        <version>master-SNAPSHOT</version>
+	    </dependency>
     </dependencies>
     ...
 </project>
