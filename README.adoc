@@ -152,12 +152,10 @@ If you use Gradle, include the following code in your `build.gradle` file.
 
 [source,groovy]
 ----
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
+repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+}
 
 dependencies {
     implementation 'com.github.hivemq.hivemq-community-edition:hivemq-community-edition-embedded:master-SNAPSHOT'
