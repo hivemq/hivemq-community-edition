@@ -33,7 +33,7 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
      * <p>
      * This method is idempotent. Calling start again on an already started EmbeddedHiveMQ has no effect.
      * <p>
-     * A {@link #stop()}ed EmbeddedHiveMQ can be restarted with this method. If no enduring persistence type, like a
+     * A {@link #stop()}ed EmbeddedHiveMQ can be restarted with this method. If no enduring persistence type such as 
      * file persistence, is configured, the restarted EmbeddedHiveMQ does not retain its state.
      *
      * @return a {@link CompletableFuture} that completes when HiveMQ is started and ready
@@ -45,17 +45,17 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
      * <p>
      * This method is idempotent. Calling stop again on an already stopped EmbeddedHiveMQ has no effect.
      * <p>
-     * A stopped EmbeddedHiveMQ can be restarted with the {@link #start()} method. If no enduring persistence type, like
-     * a file persistence, is configured, the restarted EmbeddedHiveMQ does not retain its state.
+     * A stopped EmbeddedHiveMQ can be restarted with the {@link #start()} method. If no enduring persistence type such as
+     * a file persistence is configured, the restarted EmbeddedHiveMQ does not retain its state.
      *
      * @return a {@link CompletableFuture} that completes when HiveMQ is stopped
      */
     @NotNull CompletableFuture<Void> stop();
 
     /**
-     * Access HiveMQ's metric registry. The metric registry can be accessed before EmbeddedHiveMQ is started.
+     * Access the metric registry of HiveMQ. The metric registry can be accessed before EmbeddedHiveMQ is started.
      *
-     * @return the {@link MetricRegistry} containing all HiveMQ metrics
+     * @return the {@link MetricRegistry} that contains all HiveMQ metrics
      */
     @NotNull MetricRegistry getMetricRegistry();
 

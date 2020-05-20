@@ -34,7 +34,7 @@ public interface EmbeddedHiveMQBuilder {
     }
 
     /**
-     * Sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure it.
+     * Sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure the HIVEMQ_CONFIG_FOLDER.
      *
      * @param configFolder the used configuration folder.
      * @return this builder.
@@ -44,7 +44,7 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@Nullable Path configFolder);
 
     /**
-     * Sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure it.
+     * Sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure the HIVEMQ_DATA_FOLDER.
      *
      * @param dataFolder the used data folder.
      * @return this builder.
