@@ -19,17 +19,18 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
@@ -37,7 +38,6 @@ import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillRe
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
-import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
@@ -609,8 +609,12 @@ public class ConnectHandlerTest {
         final Waiter disconnectMessageWaiter = new Waiter();
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, false);
 
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        final EmbeddedChannel oldChannel =
+                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+        disconnectFuture.set(null);
+        oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
         when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
 
@@ -641,8 +645,12 @@ public class ConnectHandlerTest {
         final Waiter disconnectMessageWaiter = new Waiter();
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, true);
 
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        final EmbeddedChannel oldChannel =
+                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+        disconnectFuture.set(null);
+        oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
         when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
 
