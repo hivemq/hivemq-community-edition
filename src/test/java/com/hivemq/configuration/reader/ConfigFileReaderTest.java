@@ -19,6 +19,7 @@ package com.hivemq.configuration.reader;
 import com.hivemq.configuration.entity.MqttConfigEntity;
 import com.hivemq.configuration.entity.RestrictionsEntity;
 import com.hivemq.configuration.entity.SecurityConfigEntity;
+import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -52,6 +53,9 @@ public class ConfigFileReaderTest {
     @Mock
     private EnvVarUtil envVarUtil;
 
+    @Mock
+    private SystemInformation systemInformation;
+
     private ListenerConfigurationService listenerConfigurationService;
 
     ConfigFileReader reader;
@@ -69,7 +73,7 @@ public class ConfigFileReaderTest {
                 envVarUtil,
                 new UsageStatisticsConfigurator(usageStatisticsConfig),
                 new MqttConfigurator(mqttConfigurationService),
-                new ListenerConfigurator(listenerConfigurationService));
+                new ListenerConfigurator(listenerConfigurationService, systemInformation));
     }
 
     @Test

@@ -17,15 +17,17 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.entity.listener.*;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
+import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +38,14 @@ public class ListenerConfigurator {
     private static final String JKS = "JKS";
 
     private final @NotNull ListenerConfigurationService listenerConfigurationService;
+    private final @NotNull SystemInformation systemInformation;
 
     private final @NotNull List<String> chosenNames;
 
-    public ListenerConfigurator(@NotNull final ListenerConfigurationService listenerConfigurationService) {
+    public ListenerConfigurator(final @NotNull ListenerConfigurationService listenerConfigurationService,
+                                final @NotNull SystemInformation systemInformation) {
         this.listenerConfigurationService = listenerConfigurationService;
+        this.systemInformation = systemInformation;
         this.chosenNames = new ArrayList<>();
     }
 
@@ -139,14 +144,17 @@ public class ListenerConfigurator {
     }
 
     @NotNull Tls convertTls(final @NotNull TLSEntity entity) {
-        return new Tls.Builder().withKeystorePath(entity.getKeystoreEntity().getPath())
+        final String keystorePath = findAbsoluteAndRelative(entity.getKeystoreEntity().getPath()).getAbsolutePath();
+        final String truststorePath = findAbsoluteAndRelative(entity.getTruststoreEntity().getPath()).getAbsolutePath();
+
+        return new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType(JKS)
                 .withKeystorePassword(entity.getKeystoreEntity().getPassword())
                 .withPrivateKeyPassword(entity.getKeystoreEntity().getPrivateKeyPassword())
 
                 .withProtocols(entity.getProtocols())
 
-                .withTruststorePath(entity.getTruststoreEntity().getPath())
+                .withTruststorePath(truststorePath)
                 .withTruststoreType(JKS)
                 .withTruststorePassword(entity.getTruststoreEntity().getPassword())
 
@@ -156,6 +164,21 @@ public class ListenerConfigurator {
                 .withHandshakeTimeout(entity.getHandshakeTimeout())
 
                 .build();
+    }
+
+    /**
+     * Tries to find a file in the given absolute path or relative to the HiveMQ home folder.
+     *
+     * @param fileLocation The absolute or relative path
+     * @return a file
+     */
+    private @NotNull File findAbsoluteAndRelative(final @NotNull String fileLocation) {
+        final File file = new File(fileLocation);
+        if (file.isAbsolute()) {
+            return file;
+        } else {
+            return new File(systemInformation.getHiveMQHomeFolder(), fileLocation);
+        }
     }
 
     @NotNull Tls.ClientAuthMode getClientAuthMode(final @NotNull ClientAuthenticationModeEntity entity) {
