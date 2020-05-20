@@ -20,10 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.security.ioc.Security;
 import io.netty.handler.ssl.SslContext;
@@ -52,53 +52,54 @@ import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD
  */
 public class SslContextStore {
 
-    private static final Logger log = LoggerFactory.getLogger(SslContextStore.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(SslContextStore.class);
 
     private static final int BUF_LEN = 1024;
-    final Map<Tls, SslContext> sslContextMap;
-    final Map<Tls, HashCode> checksumMap;
-    final ScheduledExecutorService executorService;
-    final SslUtil sslUtil;
+    final @NotNull Map<Tls, SslContext> sslContextMap;
+    final @NotNull Map<Tls, HashCode> checksumMap;
+    final @NotNull ScheduledExecutorService executorService;
+    final @NotNull SslUtil sslUtil;
 
     @Inject
-    public SslContextStore(@Security final ListeningScheduledExecutorService executorService, final SslUtil sslUtil) {
+    public SslContextStore(
+            @Security final @NotNull ScheduledExecutorService executorService, final @NotNull SslUtil sslUtil) {
         this.executorService = executorService;
         this.sslUtil = sslUtil;
         sslContextMap = new ConcurrentHashMap<>();
         checksumMap = new ConcurrentHashMap<>();
     }
 
-    public boolean contains(final Tls tls) {
+    public boolean contains(final @NotNull Tls tls) {
         return sslContextMap.containsKey(tls);
     }
 
-    public boolean contains(final SslContext sslContext) {
+    public boolean contains(final @NotNull SslContext sslContext) {
         return sslContextMap.containsValue(sslContext);
     }
 
-    public SslContext get(final Tls tls) {
+    public SslContext get(final @NotNull Tls tls) {
         return sslContextMap.get(tls);
     }
 
-
-    public void put(final Tls tls, final SslContext sslContext) {
+    public void put(final @NotNull Tls tls, final @NotNull SslContext sslContext) {
         sslContextMap.put(tls, sslContext);
         if (SSL_RELOAD_ENABLED) {
-            executorService.schedule(
-                    new SslContextFirstTimeRunnable(tls,
+            executorService.schedule(new SslContextFirstTimeRunnable(tls,
                             sslContextMap,
                             checksumMap,
                             SSL_RELOAD_INTERVAL,
                             executorService,
-                            sslUtil), 0, TimeUnit.SECONDS);
+                            sslUtil),
+                    0,
+                    TimeUnit.SECONDS);
         }
     }
 
-    public void remove(final Tls tls) {
+    public void remove(final @NotNull Tls tls) {
         sslContextMap.remove(tls);
     }
 
-    public void putAtStart(final Tls tls, final SslContext sslContext) {
+    public void putAtStart(final @NotNull Tls tls, final @NotNull SslContext sslContext) {
         sslContextMap.put(tls, sslContext);
         if (SSL_RELOAD_ENABLED) {
             new SslContextFirstTimeRunnable(tls,
@@ -111,7 +112,7 @@ public class SslContextStore {
     }
 
     @VisibleForTesting
-    static HashCode hashTrustAndKeyStore(final Tls tls) throws IOException {
+    static HashCode hashTrustAndKeyStore(final @NotNull Tls tls) throws IOException {
         final Hasher hasher = Hashing.md5().newHasher();
         final File keyStore = new File(tls.getKeystorePath());
         hashStore(keyStore, hasher);
@@ -125,7 +126,7 @@ public class SslContextStore {
     }
 
     @VisibleForTesting
-    static void hashStore(final File keyStore, final Hasher hasher) throws IOException {
+    static void hashStore(final @NotNull File keyStore, final @NotNull Hasher hasher) throws IOException {
         try (final FileInputStream fileInputStream = new FileInputStream(keyStore)) {
             final byte[] buffer = new byte[BUF_LEN];
             while (fileInputStream.read(buffer) != -1) {
@@ -135,22 +136,23 @@ public class SslContextStore {
         }
     }
 
-
     @VisibleForTesting
     static class SslContextFirstTimeRunnable implements Runnable {
-        private final Tls tls;
-        private final Map<Tls, SslContext> sslContextMap;
-        private final Map<Tls, HashCode> checksumMap;
-        private final int interval;
-        private final ScheduledExecutorService executorService;
-        private final SslUtil sslUtil;
 
-        SslContextFirstTimeRunnable(final Tls tls,
-                                    final Map<Tls, SslContext> sslContextMap,
-                                    final Map<Tls, HashCode> checksumMap,
-                                    final int interval,
-                                    final ScheduledExecutorService executorService,
-                                    final SslUtil sslUtil) {
+        private final @NotNull Tls tls;
+        private final @NotNull Map<Tls, SslContext> sslContextMap;
+        private final @NotNull Map<Tls, HashCode> checksumMap;
+        private final int interval;
+        private final @NotNull ScheduledExecutorService executorService;
+        private final @NotNull SslUtil sslUtil;
+
+        SslContextFirstTimeRunnable(
+                final @NotNull Tls tls,
+                final @NotNull Map<Tls, SslContext> sslContextMap,
+                final @NotNull Map<Tls, HashCode> checksumMap,
+                final int interval,
+                final @NotNull ScheduledExecutorService executorService,
+                final @NotNull SslUtil sslUtil) {
             this.tls = tls;
             this.sslContextMap = sslContextMap;
             this.checksumMap = checksumMap;
@@ -169,31 +171,32 @@ public class SslContextStore {
                 throw new UnrecoverableException();
             }
             //only start scheduled execution if first hash went through
-            executorService.schedule(
-                    new SslContextScheduledRunnable(tls,
-                            sslContextMap,
-                            checksumMap,
-                            interval,
-                            executorService,
-                            sslUtil), interval, TimeUnit.SECONDS);
+            executorService.schedule(new SslContextScheduledRunnable(tls,
+                    sslContextMap,
+                    checksumMap,
+                    interval,
+                    executorService,
+                    sslUtil), interval, TimeUnit.SECONDS);
         }
     }
 
     @VisibleForTesting
     static class SslContextScheduledRunnable implements Runnable {
-        private final Tls tls;
-        private final Map<Tls, SslContext> sslContextMap;
-        private final Map<Tls, HashCode> checksumMap;
-        private final int interval;
-        private final ScheduledExecutorService executorService;
-        private final SslUtil sslUtil;
 
-        SslContextScheduledRunnable(final Tls tls,
-                                    final Map<Tls, SslContext> sslContextMap,
-                                    final Map<Tls, HashCode> checksumMap,
-                                    final int interval,
-                                    final ScheduledExecutorService executorService,
-                                    final SslUtil sslUtil) {
+        private final @NotNull Tls tls;
+        private final @NotNull Map<Tls, SslContext> sslContextMap;
+        private final @NotNull Map<Tls, HashCode> checksumMap;
+        private final int interval;
+        private final @NotNull ScheduledExecutorService executorService;
+        private final @NotNull SslUtil sslUtil;
+
+        SslContextScheduledRunnable(
+                final @NotNull Tls tls,
+                final @NotNull Map<Tls, SslContext> sslContextMap,
+                final @NotNull Map<Tls, HashCode> checksumMap,
+                final int interval,
+                final @NotNull ScheduledExecutorService executorService,
+                final @NotNull SslUtil sslUtil) {
             this.tls = tls;
             this.sslContextMap = sslContextMap;
             this.checksumMap = checksumMap;
@@ -208,15 +211,21 @@ public class SslContextStore {
                 final HashCode hash = hashTrustAndKeyStore(tls);
                 final HashCode oldHash = checksumMap.get(tls);
                 if (!hash.equals(oldHash)) {
-                    final KeyManagerFactory kmf = sslUtil.createKeyManagerFactory(tls.getKeystoreType(), tls.getKeystorePath(), tls.getKeystorePassword(), tls.getPrivateKeyPassword());
+                    final KeyManagerFactory kmf = sslUtil.createKeyManagerFactory(tls.getKeystoreType(),
+                            tls.getKeystorePath(),
+                            tls.getKeystorePassword(),
+                            tls.getPrivateKeyPassword());
                     final TrustManagerFactory tmf;
                     if (tls.getTruststorePath() != null && !StringUtils.isBlank(tls.getTruststorePath())) {
-                        tmf = sslUtil.createTrustManagerFactory(tls.getTruststoreType(), tls.getTruststorePath(), tls.getTruststorePassword());
+                        tmf = sslUtil.createTrustManagerFactory(tls.getTruststoreType(),
+                                tls.getTruststorePath(),
+                                tls.getTruststorePassword());
                     } else {
                         tmf = null;
                     }
 
-                    final SslContext context = sslUtil.createSslServerContext(kmf, tmf, tls.getCipherSuites(), tls.getProtocols());
+                    final SslContext context =
+                            sslUtil.createSslServerContext(kmf, tmf, tls.getCipherSuites(), tls.getProtocols());
                     sslContextMap.put(tls, context);
                     checksumMap.put(tls, hash);
                     log.info("Successfully updated changed SSL Context");
@@ -229,13 +238,14 @@ public class SslContextStore {
             } catch (final Exception e) {
                 log.warn("Scheduled SSL Context check failed", e);
             } finally {
-                executorService.schedule(
-                        new SslContextScheduledRunnable(tls,
+                executorService.schedule(new SslContextScheduledRunnable(tls,
                                 sslContextMap,
                                 checksumMap,
                                 interval,
                                 executorService,
-                                sslUtil), interval, TimeUnit.SECONDS);
+                                sslUtil),
+                        interval,
+                        TimeUnit.SECONDS);
             }
         }
     }

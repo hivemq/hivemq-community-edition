@@ -58,6 +58,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
@@ -80,7 +82,7 @@ public class NettyModuleTest {
             protected void configure() {
                 install(new NettyModule());
                 bind(LifecycleEventListeners.class).toInstance(mock(LifecycleEventListeners.class));
-                bind(ListeningScheduledExecutorService.class).annotatedWith(Security.class).toInstance(mock(ListeningScheduledExecutorService.class));
+                bind(ScheduledExecutorService.class).annotatedWith(Security.class).toInstance(mock(ListeningScheduledExecutorService.class));
                 bind(RestrictionsConfigurationService.class).toInstance(mock(RestrictionsConfigurationService.class));
                 bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));
                 bind(Authorizers.class).toInstance(mock(Authorizers.class));
