@@ -17,8 +17,9 @@
 package com.hivemq.persistence;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Lukas Brandl
@@ -45,9 +47,14 @@ public class SingleWriterServiceTest {
         singleWriterService = new SingleWriterService();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        singleWriterService.stop();
+    }
+
     @Test
     public void test_increment_non_empty_queue_count() throws Exception {
-        singleWriterService.executorService = new NoOpExecutor();
+        singleWriterService.singleWriterExecutor = new NoOpExecutor();
 
         assertEquals(0, singleWriterService.getNonemptyQueueCounter().get());
         assertEquals(0, singleWriterService.getRunningThreadsCount().get());
@@ -83,6 +90,17 @@ public class SingleWriterServiceTest {
         assertEquals(8, singleWriterService.validAmountOfQueues(5, 64));
         assertEquals(8, singleWriterService.validAmountOfQueues(8, 64));
         assertEquals(64, singleWriterService.validAmountOfQueues(64, 64));
+    }
+
+    @Test
+    public void stop_shutdownAllThreads() {
+        singleWriterService.stop();
+        assertTrue(singleWriterService.checkScheduler.isShutdown());
+        assertTrue(singleWriterService.singleWriterExecutor.isShutdown());
+
+        for (final ExecutorService callbackExecutor : singleWriterService.callbackExecutors) {
+            assertTrue(callbackExecutor.isShutdown());
+        }
     }
 
     private static class NoOpExecutor implements ExecutorService {

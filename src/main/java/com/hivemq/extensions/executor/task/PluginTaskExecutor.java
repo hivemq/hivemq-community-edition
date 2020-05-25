@@ -82,7 +82,7 @@ public class PluginTaskExecutor {
 
     public void stop() {
         running.set(false);
-        executorService.shutdown();
+        executorService.shutdownNow();
     }
 
     public void handlePluginTaskExecution(@NotNull final PluginTaskExecution pluginTaskExecution) {

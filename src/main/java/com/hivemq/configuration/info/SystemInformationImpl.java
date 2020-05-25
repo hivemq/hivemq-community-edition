@@ -18,10 +18,10 @@ package com.hivemq.configuration.info;
 
 import com.google.common.io.Files;
 import com.hivemq.HiveMQServer;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.EnvironmentVariables;
 import com.hivemq.configuration.SystemProperties;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.ManifestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +30,7 @@ import oshi.SystemInfo;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * @author Christoph Schäbel
@@ -40,14 +41,14 @@ public class SystemInformationImpl implements SystemInformation {
     private static final Logger log = LoggerFactory.getLogger(SystemInformationImpl.class);
     public static final String DEVELOPMENT_VERSION = "Development Snapshot";
 
-    private File homeFolder;
-    private File configFolder;
-    private File logFolder;
-    private File dataFolder;
-    private File pluginFolder;
-    private String hivemqVersion;
+    private @NotNull File homeFolder;
+    private @NotNull File configFolder;
+    private @NotNull File logFolder;
+    private @NotNull File dataFolder;
+    private @NotNull File pluginFolder;
+    private @NotNull String hivemqVersion;
     private final long runningSince;
-    private boolean embedded = false;
+    private final boolean embedded;
     private final int processorCount;
 
     private final boolean usePathOfRunningJar;
@@ -57,7 +58,22 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     public SystemInformationImpl(final boolean usePathOfRunningJar) {
+        this(usePathOfRunningJar, false, null, null, null);
+    }
+
+    public SystemInformationImpl(
+            final boolean usePathOfRunningJar,
+            final boolean embedded,
+            final @Nullable File configFolder,
+            final @Nullable File dataFolder,
+            final @Nullable File pluginFolder) {
         this.usePathOfRunningJar = usePathOfRunningJar;
+        this.embedded = embedded;
+        this.configFolder = configFolder;
+        this.dataFolder = dataFolder;
+        this.pluginFolder = pluginFolder;
+
+
         this.runningSince = System.currentTimeMillis();
         setHiveMQVersion();
         setFolders();
@@ -84,16 +100,24 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false);
-        logFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", true);
+        configFolder = Objects.requireNonNullElse(
+                configFolder,
+                setUpHiveMQFolder(SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false));
+
+        logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
-        dataFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true);
-        pluginFolder = getFolderWithOptionalSystemPropertyOrEnvironmentVariable(
-                SystemProperties.EXTENSIONS_FOLDER, EnvironmentVariables.EXTENSION_FOLDER, "extensions", true);
+
+        dataFolder = Objects.requireNonNullElse(
+                dataFolder,
+                setUpHiveMQFolder(SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
+
+        pluginFolder = Objects.requireNonNullElse(
+                pluginFolder,
+                setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
+                        EnvironmentVariables.EXTENSION_FOLDER,
+                        "extensions",
+                        !embedded));
     }
 
     private void setHiveMQVersion() {
@@ -111,39 +135,33 @@ public class SystemInformationImpl implements SystemInformation {
         this.hivemqVersion = hivemqVersion;
     }
 
-    @NotNull
     @Override
-    public String getHiveMQVersion() {
+    public @NotNull String getHiveMQVersion() {
         return hivemqVersion;
     }
 
-    @NotNull
     @Override
-    public File getHiveMQHomeFolder() {
+    public @NotNull File getHiveMQHomeFolder() {
         return homeFolder;
     }
 
-    @NotNull
     @Override
-    public File getConfigFolder() {
+    public @NotNull File getConfigFolder() {
         return configFolder;
     }
 
-    @NotNull
     @Override
-    public File getLogFolder() {
+    public @NotNull File getLogFolder() {
         return logFolder;
     }
 
-    @NotNull
     @Override
-    public File getDataFolder() {
+    public @NotNull File getDataFolder() {
         return dataFolder;
     }
 
-    @NotNull
     @Override
-    public File getExtensionsFolder() {
+    public @NotNull File getExtensionsFolder() {
         return this.pluginFolder;
     }
 
@@ -158,7 +176,7 @@ public class SystemInformationImpl implements SystemInformation {
      * @param fileLocation the absolute or relative path
      * @return a file
      */
-    private File findAbsoluteAndRelative(final String fileLocation) {
+    private @NotNull File findAbsoluteAndRelative(final String fileLocation) {
         final File file = new File(fileLocation);
         if (file.isAbsolute()) {
             return file;
@@ -167,7 +185,11 @@ public class SystemInformationImpl implements SystemInformation {
         }
     }
 
-    private File getFolderWithOptionalSystemPropertyOrEnvironmentVariable(final String propertyName, final String variableName, final String defaultFolder, final boolean createFolderIfNotExists) {
+    private @NotNull File setUpHiveMQFolder(
+            final String propertyName,
+            final String variableName,
+            final String defaultFolder,
+            final boolean createFolderIfNotExists) {
         final String folderName = getSystemPropertyOrEnvironmentVariable(propertyName, variableName);
         final File folder;
         if (folderName != null) {
@@ -193,8 +215,9 @@ public class SystemInformationImpl implements SystemInformation {
      * @param variableName the name of the environment variable
      * @return value of the system property, if not present value of the environment variable, if not present null
      */
-    @Nullable
-    private String getSystemPropertyOrEnvironmentVariable(final String propertyName, final String variableName) {
+    private @Nullable String getSystemPropertyOrEnvironmentVariable(
+            final String propertyName,
+            final String variableName) {
         final String systemProperty = System.getProperty(propertyName);
         if (systemProperty != null) {
             return systemProperty;
@@ -205,7 +228,8 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     private void setHomeFolder() {
-        final String home = getSystemPropertyOrEnvironmentVariable(SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME);
+        final String home =
+                getSystemPropertyOrEnvironmentVariable(SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME);
 
         if (home != null) {
             homeFolder = findAbsoluteAndRelative(home);
@@ -224,21 +248,29 @@ public class SystemInformationImpl implements SystemInformation {
     private void useTemporaryHomeFolder() {
         final File tempDir = Files.createTempDir();
         tempDir.deleteOnExit();
-        log.warn("No {} property or {} environment variable was set. Using a temporary directory ({}) HiveMQ will behave unexpectedly!",
-                SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME, tempDir.getAbsolutePath());
+        log.warn(
+                "No {} property or {} environment variable was set. Using a temporary directory ({}) HiveMQ will behave unexpectedly!",
+                SystemProperties.HIVEMQ_HOME,
+                EnvironmentVariables.HIVEMQ_HOME,
+                tempDir.getAbsolutePath());
         homeFolder = tempDir;
     }
 
     private void usePathOfRunningJarAsHomeFolder() {
         final File pathOfRunningJar = getPathOfRunningJar();
-        log.warn("No {} property or {} environment variable was set. Using {}",
-                SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME, pathOfRunningJar.getAbsolutePath());
+        if (!embedded) {
+            log.warn("No {} property or {} environment variable was set. Using {}",
+                    SystemProperties.HIVEMQ_HOME,
+                    EnvironmentVariables.HIVEMQ_HOME,
+                    pathOfRunningJar.getAbsolutePath());
+        }
         homeFolder = pathOfRunningJar;
     }
 
-    private File getPathOfRunningJar() {
-        final String decode = URLDecoder.decode(HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
-                StandardCharsets.UTF_8);
+    private @NotNull File getPathOfRunningJar() {
+        final String decode =
+                URLDecoder.decode(HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+                        StandardCharsets.UTF_8);
         final String path = decode.substring(0, decode.lastIndexOf('/') + 1);
         return new File(path);
     }
@@ -250,9 +282,5 @@ public class SystemInformationImpl implements SystemInformation {
 
     public boolean isEmbedded() {
         return embedded;
-    }
-
-    public void setEmbedded(final boolean embedded) {
-        this.embedded = embedded;
     }
 }

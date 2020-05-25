@@ -87,7 +87,7 @@ public class PluginBootstrapImplTest {
     @Test
     public void test_startPluginSystem_shutdown_hook_registered() {
 
-        when(pluginLoader.loadPlugins(any(Path.class), any(Class.class))).thenReturn(ImmutableList.of());
+        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
         pluginBootstrap.startPluginSystem();
 
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));

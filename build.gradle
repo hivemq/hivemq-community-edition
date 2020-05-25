@@ -1,11 +1,13 @@
 plugins {
     id 'java'
     id 'application'
+    id 'java-library'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow'
     id 'com.github.hierynomus.license'
     id 'org.owasp.dependencycheck'
     id 'idea'
+    id 'com.github.sgtsilvio.gradle.metadata'
 
     /* Code Quality Plugins */
     id 'jacoco'
@@ -23,23 +25,56 @@ description = 'HiveMQ CE is a Java-based open source MQTT broker that fully supp
 
 mainClassName = 'com.hivemq.HiveMQServer'
 
-ext {
-    readableName = 'HiveMQ Community Edition'
-    url = 'https://www.hivemq.com/'
-    vendor = 'dc-square GmbH'
-    githubOrg = 'hivemq'
-    githubRepo = 'hivemq-community-edition'
-    githubUrl = 'https://github.com/' + githubOrg + '/' + githubRepo
-    scmConnection = 'scm:git:git://github.com/' + githubOrg + '/' + githubRepo + '.git'
-    scmDeveloperConnection = 'scm:git:ssh://git@github.com/' + githubOrg + '/' + githubRepo + '.git'
-    issuesUrl = githubUrl + '/issues'
-    licenseShortName = 'Apache-2.0'
-    licenseReadableName = 'The Apache License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+metadata {
+    readableName = "HiveMQ Community Edition"
+    organization {
+        name = "dc-square GmbH"
+        url = "https://www.hivemq.com/"
+    }
+    license {
+        apache2()
+    }
+    developers {
+        developer {
+            it.id = "cschaebe"
+            it.name = "Christoph Schaebel"
+            it.email = "christoph.schaebel@hivemq.com"
+        }
+        developer {
+            it.id = "lbrandl"
+            it.name = "Lukas Brandl"
+            it.email = "lukas.brandl@hivemq.com"
+        }
+        developer {
+            it.id = "flimpoeck"
+            it.name = "Florian Limpoeck"
+            it.email = "florian.limpoeck@hivemq.com"
+        }
+        developer {
+            it.id = "sauroter"
+            it.name = "Georg Held"
+            it.email = "georg.held@hivemq.com"
+        }
+        developer {
+            it.id = "SgtSilvio"
+            it.name = "Silvio Giebl"
+            it.email = "silvio.giebl@hivemq.com"
+        }
+    }
+    github {
+        org = "hivemq"
+        repo = "hivemq-community-edition"
+        issues()
+    }
 }
 
 
 /* ******************** java ******************** */
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 allprojects {
     plugins.withType(JavaPlugin) {
@@ -274,7 +309,7 @@ ext {
 jar {
     manifest {
         attributes 'Implementation-Title': 'HiveMQ'
-        attributes 'Implementation-Vendor': project.vendor
+        attributes 'Implementation-Vendor': metadata.organization.name
         attributes 'Implementation-Version': project.version
         attributes 'HiveMQ-Version': project.version
         attributes 'Main-Class': project.mainClassName
@@ -468,55 +503,18 @@ task updateThirdPartyLicenses {
 publishing {
     publications {
         distribution(MavenPublication) {
-
             artifact tasks.packaging
 
-            pom {
-                name = project.readableName
-                description = project.description
-                url = project.url
-                licenses {
-                    license {
-                        name = project.licenseReadableName
-                        url = project.licenseUrl
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'cschaebe'
-                        name = 'Christoph Schaebel'
-                        email = 'christoph.schaebel@hivemq.com'
-                        organization = project.vendor
-                        organizationUrl = project.url
-                    }
-                    developer {
-                        id = 'lbrandl'
-                        name = 'Lukas Brandl'
-                        email = 'lukas.brandl@hivemq.com'
-                        organization = project.vendor
-                        organizationUrl = project.url
-                    }
-                    developer {
-                        id = 'flimpoeck'
-                        name = 'Florian Limpoeck'
-                        email = 'florian.limpoeck@hivemq.com'
-                        organization = project.vendor
-                        organizationUrl = project.url
-                    }
-                }
-                scm {
-                    connection = project.scmConnection
-                    developerConnection = project.scmDeveloperConnection
-                    url = project.githubUrl
-                }
-                issueManagement {
-                    system = 'github'
-                    url = project.issuesUrl
-                }
+            artifactId 'hivemq-community-edition'
+        }
+
+        embedded(MavenPublication) {
+            from components.java
+
+            artifactId 'hivemq-community-edition-embedded'
             }
         }
     }
-}
 
 
 /* ******************** ide ******************** */

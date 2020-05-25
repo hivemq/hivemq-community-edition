@@ -19,11 +19,11 @@ package com.hivemq.util;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SystemInformationModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -142,6 +142,11 @@ public class LocalPersistenceFileUtilTest {
             @Override
             public int getProcessorCount() {
                 return -1;
+            }
+
+            @Override
+            public boolean isEmbedded() {
+                return false;
             }
         };
     }

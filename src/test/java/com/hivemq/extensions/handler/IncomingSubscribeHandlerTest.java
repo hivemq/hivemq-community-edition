@@ -76,6 +76,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -124,7 +125,7 @@ public class IncomingSubscribeHandlerTest {
         messageAtomicReference = new AtomicReference<>();
         pluginAuthorizerService = new TestAuthService(messageAtomicReference);
 
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         incomingSubscribeHandler = new IncomingSubscribeHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions, pluginAuthorizerService, configurationService);
 
         createChannel();

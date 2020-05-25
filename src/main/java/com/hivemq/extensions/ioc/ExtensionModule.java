@@ -16,9 +16,9 @@
 
 package com.hivemq.extensions.ioc;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
@@ -92,7 +92,9 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
         bind(Authorizers.class).to(AuthorizersImpl.class);
         bind(SecurityRegistry.class).to(SecurityRegistryImpl.class);
 
-        bind(ExecutorService.class).annotatedWith(PluginStartStop.class).toInstance(getPluginStartStopExecutor());
+        bind(ExecutorService.class).annotatedWith(PluginStartStop.class)
+                .toProvider(ExtensionStartStopExecutorProvider.class)
+                .in(LazySingleton.class);
 
         bind(PluginTaskExecutorService.class).to(PluginTaskExecutorServiceImpl.class);
         bind(PluginOutPutAsyncer.class).to(PluginOutputAsyncerImpl.class);
@@ -129,10 +131,5 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
         bind(GlobalInterceptorRegistry.class).to(GlobalInterceptorRegistryImpl.class).in(LazySingleton.class);
         bind(Interceptors.class).to(InterceptorsImpl.class).in(LazySingleton.class);
         bind(AdminService.class).to(AdminServiceImpl.class).in(LazySingleton.class);
-    }
-
-    private @NotNull ExecutorService getPluginStartStopExecutor() {
-        final ThreadFactory threadFactory = ThreadFactoryUtil.create("extension-start-stop-executor");
-        return Executors.newSingleThreadExecutor(threadFactory);
     }
 }

@@ -78,8 +78,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Florian Limpöck
@@ -141,7 +140,7 @@ public class IncomingPublishHandlerTest {
         messageAtomicReference = new AtomicReference<>();
         pluginAuthorizerService = new TestAuthService(messageAtomicReference);
 
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1);
+        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         incomingPublishHandler =
                 new IncomingPublishHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions, messageDroppedService,
                         pluginAuthorizerService, mqtt3ServerDisconnector, configurationService);

@@ -58,11 +58,7 @@ public class PersistenceShutdownHookTest {
     @Mock
     private SingleWriterService singleWriterService;
     @Mock
-    private ListeningExecutorService singleWriterExecutorService;
-    @Mock
     private PublishPayloadPersistence payloadPersistence;
-    @Mock
-    private ProducerQueues producerQueues;
     @Mock
     private ListeningScheduledExecutorService payloadPersistenceExecutor;
     @Mock
@@ -78,7 +74,6 @@ public class PersistenceShutdownHookTest {
                 clientQueuePersistence, persistenceExecutorService, persistenceScheduledExecutorService,
                 payloadPersistenceExecutor, singleWriterService);
 
-        when(singleWriterService.getExecutorService()).thenReturn(singleWriterExecutorService);
         when(clientSessionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(retainedMessagePersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
@@ -95,7 +90,7 @@ public class PersistenceShutdownHookTest {
         verify(payloadPersistence).closeDB();
         verify(persistenceExecutorService).shutdown();
         verify(persistenceScheduledExecutorService).shutdownNow();
-        verify(singleWriterExecutorService).shutdown();
+        verify(singleWriterService).stop();
     }
 
     @Test(timeout = 15000)

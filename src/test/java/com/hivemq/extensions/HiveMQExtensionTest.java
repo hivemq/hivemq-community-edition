@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
+import util.TestExtensionUtil;
 
 import java.io.File;
 import java.util.Collections;
@@ -64,15 +65,17 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
     @Before
     public void setUp() throws Exception {
 
-        validPluginFolder = createValidPlugin(tmpFolder, "extension", "id");
+        validPluginFolder = TestExtensionUtil.createValidExtension(tmpFolder.newFolder("extension"), "id");
         pluginEntityFromXML = HiveMQPluginXMLReader.getPluginEntityFromXML(validPluginFolder.toPath(), true).get();
 
         enabledStartPlugin =
-                new HiveMQExtensionImpl(pluginEntityFromXML, validPluginFolder.toPath(), new StartTestExtension(), true);
+                new HiveMQExtensionImpl(
+                        pluginEntityFromXML, validPluginFolder.toPath(), new StartTestExtension(), true);
         enabledStopPlugin =
                 new HiveMQExtensionImpl(pluginEntityFromXML, validPluginFolder.toPath(), new StopTestExtension(), true);
         enabledReasonPlugin =
-                new HiveMQExtensionImpl(pluginEntityFromXML, validPluginFolder.toPath(), new ReasonTestExtension(), true);
+                new HiveMQExtensionImpl(
+                        pluginEntityFromXML, validPluginFolder.toPath(), new ReasonTestExtension(), true);
 
 
         enabledPlugins = Collections.singletonMap(enabledStartPlugin.getId(), enabledStartPlugin);
@@ -109,7 +112,8 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
         private static boolean start = false;
 
         @Override
-        public void extensionStart(final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+        public void extensionStart(
+                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
             start = true;
         }
 
@@ -123,7 +127,8 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
         private static boolean stop = false;
 
         @Override
-        public void extensionStart(final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+        public void extensionStart(
+                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
         }
 
         @Override
@@ -137,7 +142,8 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
         private static final String reason = "REASON";
 
         @Override
-        public void extensionStart(final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+        public void extensionStart(
+                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
             output.preventExtensionStartup(reason);
         }
 
