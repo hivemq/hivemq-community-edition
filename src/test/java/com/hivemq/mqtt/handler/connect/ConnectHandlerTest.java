@@ -616,7 +616,9 @@ public class ConnectHandlerTest {
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
-        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
+        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
 
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
@@ -652,7 +654,9 @@ public class ConnectHandlerTest {
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
-        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
+        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
 
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
@@ -685,19 +689,20 @@ public class ConnectHandlerTest {
         final Waiter disconnectMessageWaiter = new Waiter();
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, true);
 
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        final EmbeddedChannel oldChannel =
+                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
+        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
 
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
-                .withClientIdentifier("sameClientId")
-                .build();
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("sameClientId").build();
 
         embeddedChannel.writeInbound(connect1);
 
@@ -731,19 +736,20 @@ public class ConnectHandlerTest {
         final Waiter disconnectMessageWaiter = new Waiter();
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, false);
 
-        final EmbeddedChannel oldChannel = new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        final EmbeddedChannel oldChannel =
+                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(channelPersistence.get(eq("sameClientId"))).thenReturn(oldChannel);
+        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
+        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
 
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        final CONNECT connect1 = new CONNECT.Mqtt5Builder()
-                .withClientIdentifier("sameClientId")
-                .build();
+        final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("sameClientId").build();
 
         embeddedChannel.writeInbound(connect1);
 
