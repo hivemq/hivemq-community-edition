@@ -16,16 +16,12 @@
 
 package com.hivemq.configuration.entity.listener.tls;
 
-import com.google.common.io.Files;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.configuration.SystemProperties;
 
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.File;
 
 /**
  * @author Georg Held
@@ -54,40 +50,6 @@ public class KeystoreEntity {
 
     public @NotNull String getPrivateKeyPassword() {
         return privateKeyPassword;
-    }
-
-    /*
-     * This is a JAXB callback, don't touch the signature!
-     */
-    @SuppressWarnings({"UnusedParameters", "unused"})
-    void afterUnmarshal(final @NotNull Unmarshaller unmarshaller, final @NotNull Object parent) {
-        path = findAbsoluteAndRelative(path).getAbsolutePath();
-    }
-
-    /**
-     * Tries to find a file in the given absolute path or
-     * relative to the HiveMQ home folder
-     *
-     * @param fileLocation the absolute or relative path
-     * @return a file
-     */
-    private @NotNull File findAbsoluteAndRelative(final @NotNull String fileLocation) {
-        final File file = new File(fileLocation);
-        if (file.isAbsolute()) {
-            return file;
-        } else {
-            return new File(getHiveMQHomeFolder(), fileLocation);
-        }
-    }
-
-    private @NotNull File getHiveMQHomeFolder() {
-
-        final String homeFolder = System.getProperty(SystemProperties.HIVEMQ_HOME);
-
-        if (homeFolder == null) {
-            return Files.createTempDir();
-        }
-        return new File(homeFolder);
     }
 
 }

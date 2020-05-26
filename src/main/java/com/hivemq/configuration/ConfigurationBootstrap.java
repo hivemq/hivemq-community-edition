@@ -52,7 +52,7 @@ public class ConfigurationBootstrap {
                 new EnvVarUtil(),
                 new UsageStatisticsConfigurator(configurationService.usageStatisticsConfiguration()),
                 new MqttConfigurator(configurationService.mqttConfiguration()),
-                new ListenerConfigurator(configurationService.listenerConfiguration()));
+                new ListenerConfigurator(configurationService.listenerConfiguration(), systemInformation));
 
         configFileReader.applyConfig();
 
