@@ -440,6 +440,6 @@ publishing {
             from components.java
 
             artifactId 'hivemq-community-edition-embedded'
-            }
         }
     }
+}
