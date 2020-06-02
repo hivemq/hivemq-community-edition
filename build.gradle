@@ -374,34 +374,72 @@ downloadLicenses {
     ext.mit = license('MIT License', 'https://opensource.org/licenses/MIT')
     ext.cddl_1_0 = license('CDDL, Version 1.0', 'https://opensource.org/licenses/CDDL-1.0')
     ext.cddl_1_1 = license('CDDL, Version 1.1', 'https://oss.oracle.com/licenses/CDDL+GPL-1.1')
-    ext.epl_1_0 = license('EPL, Version 1.0', 'https://www.eclipse.org/legal/epl-v10.html')
+    ext.lgpl_2_0 = license('LGPL, Version 2.0', 'https://opensource.org/licenses/LGPL-2.0')
+    ext.lgpl_2_1 = license('LGPL, Version 2.1', 'https://opensource.org/licenses/LGPL-2.1')
+    ext.lgpl_3_0 = license('LGPL, Version 3.0', 'https://opensource.org/licenses/LGPL-3.0')
+    ext.epl_1_0 = license('EPL, Version 1.0', 'https://opensource.org/licenses/EPL-1.0')
+    ext.epl_2_0 = license('EPL, Version 2.0', 'https://opensource.org/licenses/EPL-2.0')
     ext.edl_1_0 = license('EDL, Version 1.0', 'https://www.eclipse.org/org/documents/edl-v10.php')
     ext.bsd_3clause = license('BSD 3-Clause License', 'https://opensource.org/licenses/BSD-3-Clause')
     ext.bouncycastle = license('Bouncy Castle Licence', 'https://www.bouncycastle.org/licence.html')
+    ext.w3c = license('W3C License', 'https://opensource.org/licenses/W3C')
+    ext.cc0 = license('CC0', 'https://creativecommons.org/publicdomain/zero/1.0/')
 
     aliases = [
-            (apache_2)    : ['Apache License 2.0',
+            (apache_2)    : ['Apache 2',
+                             'Apache 2.0',
+                             'Apache License 2.0',
                              'Apache License v2.0',
+                             'Apache License Version 2.0',
                              'Apache License, Version 2.0',
+                             'Apache License, version 2.0',
                              'The Apache License, Version 2.0',
+                             'Apache Software License - Version 2.0',
+                             'Apache Software License, version 2.0',
                              'The Apache Software License, Version 2.0'],
-            (mit)         : ['MIT License'],
+            (mit)         : ['MIT License',
+                             'MIT license',
+                             'The MIT License'],
             (cddl_1_0)    : ['CDDL, Version 1.0',
-                             'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0'],
+                             'Common Development and Distribution License 1.0',
+                             'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0',
+                             license('CDDL', 'https://glassfish.dev.java.net/public/CDDLv1.0.html')],
             (cddl_1_1)    : ['CDDL 1.1',
                              'CDDL, Version 1.1',
+                             'Common Development And Distribution License 1.1',
                              'CDDL+GPL License',
                              'CDDL + GPLv2 with classpath exception',
-                             'GPL2 w/ CPE'],
+                             'Dual license consisting of the CDDL v1.1 and GPL v2',
+                             'CDDL or GPLv2 with exceptions',
+                             'CDDL/GPLv2+CE'],
+            (lgpl_2_0)    : ['LGPL, Version 2.0',
+                             'GNU General Public License, version 2'],
+            (lgpl_2_1)    : ['LGPL, Version 2.1',
+                             'LGPL, version 2.1',
+                             license('GNU Lesser General Public License', 'http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html')],
+            (lgpl_3_0)    : ['LGPL, Version 3.0',
+                             'Lesser General Public License, version 3 or greater'],
             (epl_1_0)     : ['EPL, Version 1.0',
                              'Eclipse Public License - v 1.0',
+                             'Eclipse Public License - Version 1.0',
                              license('Eclipse Public License', 'http://www.eclipse.org/legal/epl-v10.html')],
+            (epl_2_0)     : ['EPL 2.0',
+                             'EPL, Version 2.0'],
             (edl_1_0)     : ['EDL 1.0',
                              'EDL, Version 1.0',
                              'Eclipse Distribution License - v 1.0'],
             (bsd_3clause) : ['BSD 3-clause',
-                             'BSD 3-Clause License'],
-            (bouncycastle): ['Bouncy Castle Licence']
+                             'BSD-3-Clause',
+                             'BSD 3-Clause License',
+                             '3-Clause BSD License',
+                             'New BSD License',
+                             license('BSD', 'http://asm.ow2.org/license.html')],
+            (bouncycastle): ['Bouncy Castle Licence'],
+            (w3c)         : ['W3C License',
+                             'W3C Software Copyright Notice and License',
+                             'The W3C Software License'],
+            (cc0)         : ['CC0',
+                             'Public Domain']
     ]
 
     dependencyConfiguration = 'runtimeClasspath'
@@ -414,7 +452,7 @@ tasks.register('updateThirdPartyLicenses') {
     doLast {
         javaexec {
             main = '-jar'
-            args = ["${projectDir}/gradle/tools/license-third-party-tool-1.0.jar",
+            args = ["${projectDir}/gradle/tools/license-third-party-tool-2.0.jar",
                     "${buildDir}/reports/license/dependency-license.xml",
                     "${projectDir}/src/packaging/third-party-licenses/licenses",
                     "${projectDir}/src/packaging/third-party-licenses/licenses.html"
