@@ -109,8 +109,6 @@ dependencies {
 
     /* apache commons */
     implementation("commons-io:commons-io:${property('commons-io.version')}")
-    implementation("commons-codec:commons-codec:${property('commons-codec.version')}")
-    implementation("commons-collections:commons-collections:${property('commons-collections.version')}")
     implementation("org.apache.commons:commons-lang3:${property('commons-lang.version')}")
 
     /* xml */
