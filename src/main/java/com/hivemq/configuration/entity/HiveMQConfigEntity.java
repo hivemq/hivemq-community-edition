@@ -16,8 +16,8 @@
 
 package com.hivemq.configuration.entity;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.listener.ListenerEntity;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import java.util.List;
 
 /**
  * @author Dominik Obermaier
+ * @author Lukas brandl
  */
 @XmlRootElement(name = "hivemq")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -47,6 +48,9 @@ public class HiveMQConfigEntity {
     @XmlElementRef(required = false)
     private @NotNull UsageStatisticsEntity usageStatistics = new UsageStatisticsEntity();
 
+    @XmlElementRef(required = false)
+    private @NotNull PersistenceEntity persistence = new PersistenceEntity();
+
     public @NotNull List<ListenerEntity> getListenerConfig() {
         return listeners;
     }
@@ -65,5 +69,9 @@ public class HiveMQConfigEntity {
 
     public @NotNull UsageStatisticsEntity getUsageStatisticsConfig() {
         return usageStatistics;
+    }
+
+    public @NotNull PersistenceEntity getPersistenceConfig() {
+        return persistence;
     }
 }

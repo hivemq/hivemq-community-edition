@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.hivemq.configuration.service.impl;
 
-package com.hivemq.configuration.service;
-
-import com.hivemq.statistics.UsageStatisticsConfig;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * @author Christoph Schäbel
+ * @author Lukas Brandl
  */
-public interface FullConfigurationService extends ConfigurationService {
+public class PersistenceConfigurationServiceImpl implements PersistenceConfigurationService {
+    @NotNull
+    private PersistenceMode mode = PersistenceMode.FILE;
 
-    UsageStatisticsConfig usageStatisticsConfiguration();
+    @Override
+    public @NotNull PersistenceMode getMode() {
+        return mode;
+    }
 
-    SecurityConfigurationService securityConfiguration();
-
-    PersistenceConfigurationService persistenceConfigurationService();
-
+    @Override
+    public void setMode(final PersistenceMode mode) {
+        this.mode = mode;
+    }
 }

@@ -203,12 +203,6 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
     @Nullable
     @Override
-    public RetainedMessage get(@NotNull final String topic) {
-        return get(topic, BucketUtils.getBucket(topic, getBucketCount()));
-    }
-
-    @Nullable
-    @Override
     public RetainedMessage get(@NotNull final String topic, final int bucketIndex) {
         return tryGetLocally(topic, 0, bucketIndex);
     }
