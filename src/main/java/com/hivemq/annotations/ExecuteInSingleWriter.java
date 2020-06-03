@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.hivemq.annotations;
 
-package com.hivemq.configuration.service;
-
-import com.hivemq.statistics.UsageStatisticsConfig;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Christoph Schäbel
+ * This annotation indicates that a method must be executed by the SingleWriterService.
+ *
+ * @author Lukas Brandl
  */
-public interface FullConfigurationService extends ConfigurationService {
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.METHOD)
+public @interface ExecuteInSingleWriter {
 
-    UsageStatisticsConfig usageStatisticsConfiguration();
-
-    SecurityConfigurationService securityConfiguration();
-
-    PersistenceConfigurationService persistenceConfigurationService();
-
+    String value() default "";
 }

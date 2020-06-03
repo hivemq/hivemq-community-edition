@@ -33,6 +33,8 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     String PERSISTENCE_NAME = "retained_messages";
 
     /**
+     * Due to concurrent access to the persistence, this value may not be correct.
+     *
      * @return The amount of all retained messages stored in the persistence.
      */
     long size();
@@ -51,14 +53,6 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param bucketIndex The index of the bucket in which the retained messages are stored.
      */
     void remove(@NotNull String topic, int bucketIndex);
-
-    /**
-     * Get a retained message for a given topic from a persistence bucket.
-     *
-     * @param topic       the topic of the retained message.
-     * @return the {@link RetainedMessage} or <null> if no retained message found.
-     */
-    @Nullable RetainedMessage get(@NotNull String topic);
 
     /**
      * Get a retained message for a given topic from a persistence bucket.

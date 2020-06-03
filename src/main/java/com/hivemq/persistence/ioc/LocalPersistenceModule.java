@@ -19,10 +19,9 @@ package com.hivemq.persistence.ioc;
 import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.ChannelPersistence;
@@ -39,13 +38,13 @@ import com.hivemq.persistence.ioc.provider.local.IncomingMessageFlowPersistenceL
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
-import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
+import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
+import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
-import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistenceImpl;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
@@ -60,39 +59,36 @@ import javax.inject.Singleton;
 class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModule>> {
 
     private final @NotNull Injector persistenceInjector;
-    private final @NotNull PersistenceType payloadPersistenceType;
-    private final @NotNull PersistenceType retainedPersistenceType;
+    private final PersistenceConfigurationService persistenceConfigurationService;
 
-    public LocalPersistenceModule(@NotNull final Injector persistenceInjector) {
+    public LocalPersistenceModule(
+            @NotNull final Injector persistenceInjector,
+            @NotNull final PersistenceConfigurationService persistenceConfigurationService) {
         super(LocalPersistenceModule.class);
         this.persistenceInjector = persistenceInjector;
-        this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
-        this.retainedPersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
+        this.persistenceConfigurationService = persistenceConfigurationService;
     }
 
     @Override
     protected void configure() {
 
         /* Local */
-        if (payloadPersistenceType == PersistenceType.FILE) {
-            bindLocalPersistence(
-                    PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class, null);
-        }
-        if (retainedPersistenceType == PersistenceType.FILE) {
-            bindLocalPersistence(
-                    RetainedMessageLocalPersistence.class, RetainedMessageXodusLocalPersistence.class, null);
-        }
-
-        if (payloadPersistenceType == PersistenceType.FILE_NATIVE ||
-                retainedPersistenceType == PersistenceType.FILE_NATIVE) {
-            install(new LocalPersistenceRocksDBModule(persistenceInjector));
+        if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.FILE) {
+            install(new LocalPersistenceFileModule(persistenceInjector));
+        } else {
+            bindLocalPersistence(PublishPayloadLocalPersistence.class,
+                    PublishPayloadMemoryLocalPersistence.class,
+                    null);
+            bindLocalPersistence(RetainedMessageLocalPersistence.class,
+                    RetainedMessageMemoryLocalPersistence.class,
+                    null);
         }
 
-        bindLocalPersistence(
-                ClientSessionLocalPersistence.class, ClientSessionXodusLocalPersistence.class,
+        bindLocalPersistence(ClientSessionLocalPersistence.class,
+                ClientSessionXodusLocalPersistence.class,
                 ClientSessionLocalProvider.class);
-        bindLocalPersistence(
-                ClientSessionSubscriptionLocalPersistence.class, ClientSessionSubscriptionXodusLocalPersistence.class,
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
+                ClientSessionSubscriptionXodusLocalPersistence.class,
                 ClientSessionSubscriptionLocalProvider.class);
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);
 
@@ -123,10 +119,9 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bind(ClientQueuePersistence.class).to(ClientQueuePersistenceImpl.class).in(LazySingleton.class);
 
         /* Payload Persistence */
-        bind(PublishPayloadPersistence.class).toInstance(
-                persistenceInjector.getInstance(PublishPayloadPersistence.class));
-        bind(PublishPayloadPersistenceImpl.class).toInstance(
-                persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class));
+        bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
+        bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
+                PublishPayloadPersistenceImpl.class));
 
         /* Startup */
         bind(PersistenceStartup.class).toInstance(persistenceInjector.getInstance(PersistenceStartup.class));
@@ -134,16 +129,19 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
     }
 
     private void bindLocalPersistence(
-            final @NotNull Class localPersistenceClass, final @NotNull Class filePersistenceClass,
+            final @NotNull Class localPersistenceClass,
+            final @NotNull Class localPersistenceImplClass,
             final @Nullable Class localPersistenceProviderClass) {
 
-        final Object instance = persistenceInjector.getInstance(filePersistenceClass);
+        final Object instance = persistenceInjector.getInstance(localPersistenceImplClass);
         if (instance != null) {
-            bind(filePersistenceClass).toInstance(instance);
+            bind(localPersistenceImplClass).toInstance(instance);
             bind(localPersistenceClass).toInstance(instance);
         } else {
             if (localPersistenceProviderClass != null) {
                 bind(localPersistenceClass).toProvider(localPersistenceProviderClass).in(Singleton.class);
+            } else {
+                bind(localPersistenceClass).to(localPersistenceImplClass).in(Singleton.class);
             }
         }
     }

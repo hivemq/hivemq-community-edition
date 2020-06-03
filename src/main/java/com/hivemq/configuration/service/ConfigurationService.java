@@ -19,8 +19,7 @@ package com.hivemq.configuration.service;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 
 /**
- * The Configuration Service interface which allows to change HiveMQ configuration
- * programmatically.
+ * The Configuration Service interface which allows to change HiveMQ configuration programmatically.
  *
  * @author Dominik Obermaier
  * @since 3.0
@@ -48,7 +47,6 @@ public interface ConfigurationService {
      * @return the global throttling service
      */
     RestrictionsConfigurationService restrictionsConfiguration();
-
 }
 
 

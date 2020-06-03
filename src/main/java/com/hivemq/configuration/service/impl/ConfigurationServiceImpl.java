@@ -16,10 +16,7 @@
 
 package com.hivemq.configuration.service.impl;
 
-import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.configuration.service.MqttConfigurationService;
-import com.hivemq.configuration.service.RestrictionsConfigurationService;
-import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.configuration.service.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.statistics.UsageStatisticsConfig;
 
@@ -36,17 +33,21 @@ public class ConfigurationServiceImpl implements FullConfigurationService {
     private final RestrictionsConfigurationService restrictionsConfigurationService;
     private final SecurityConfigurationService securityConfigurationService;
     private final UsageStatisticsConfig usageStatisticsConfig;
+    private final PersistenceConfigurationService persistenceConfigurationService;
 
-    public ConfigurationServiceImpl(final ListenerConfigurationService listenerConfigurationService,
-                                    final MqttConfigurationService mqttConfigurationService,
-                                    final RestrictionsConfigurationService restrictionsConfigurationService,
-                                    final SecurityConfigurationService securityConfigurationService,
-                                    final UsageStatisticsConfig usageStatisticsConfig) {
+    public ConfigurationServiceImpl(
+            final ListenerConfigurationService listenerConfigurationService,
+            final MqttConfigurationService mqttConfigurationService,
+            final RestrictionsConfigurationService restrictionsConfigurationService,
+            final SecurityConfigurationService securityConfigurationService,
+            final UsageStatisticsConfig usageStatisticsConfig,
+            final PersistenceConfigurationService persistenceConfigurationService) {
         this.listenerConfigurationService = listenerConfigurationService;
         this.mqttConfigurationService = mqttConfigurationService;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.securityConfigurationService = securityConfigurationService;
         this.usageStatisticsConfig = usageStatisticsConfig;
+        this.persistenceConfigurationService = persistenceConfigurationService;
     }
 
     @Override
@@ -74,5 +75,8 @@ public class ConfigurationServiceImpl implements FullConfigurationService {
         return securityConfigurationService;
     }
 
-
+    @Override
+    public PersistenceConfigurationService persistenceConfigurationService() {
+        return persistenceConfigurationService;
+    }
 }

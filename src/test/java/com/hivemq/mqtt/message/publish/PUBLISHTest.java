@@ -40,7 +40,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class PUBLISHTest {
 
-    private static final int GENERAL_OVERHEAD = 24 + 64 + 48 + 24 + 16 + 35;
+    private static final int GENERAL_OVERHEAD = 4 + 64 + 48 + 24 + 16 + 35;
 
     @Test(expected = IllegalArgumentException.class)
     public void test_publish_with_payload_id_null_persistence() {
@@ -205,10 +205,10 @@ public class PUBLISHTest {
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
-                .withTopic("topic") // 10+38 = 48 bytes
-                .withResponseTopic("response") // 16+38 = 54 bytes
+                .withTopic("topic") // 5+38 = 43 bytes
+                .withResponseTopic("response") // 8+38 = 46 bytes
                 .withCorrelationData("correlation".getBytes()) // 11+12 = 23 bytes
-                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value"))) // 18 + 8 + 38 + 38 = 102
+                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value"))) //   4 + 5 + 24 + 38 + 38 = 109
                 .build();
 
         final List<Thread> threadList = new ArrayList<>();
@@ -228,8 +228,8 @@ public class PUBLISHTest {
         }
 
         for (final int size : sizeList) {
-            //19 + 48 + 54 + 23 + 102 = 246
-            assertEquals(246 + GENERAL_OVERHEAD, size);
+            //19 + 43 + 46 + 23 + 109 = 240
+            assertEquals(240 + GENERAL_OVERHEAD, size);
         }
 
     }
@@ -241,10 +241,10 @@ public class PUBLISHTest {
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
-                .withTopic("topic") // 10+38 = 48 bytes
+                .withTopic("topic") // 5+38 = 43 bytes
                 .build();
 
-        assertEquals(67 + GENERAL_OVERHEAD, publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(62 + GENERAL_OVERHEAD, publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
@@ -256,10 +256,10 @@ public class PUBLISHTest {
                 .withHivemqId("hivemqId")
                 .withPayloadId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
-                .withTopic("topic") // 10+38 = 48 bytes
+                .withTopic("topic") // 5+38 = 43 bytes
                 .build();
 
-        assertEquals(48 + GENERAL_OVERHEAD, publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(43 + GENERAL_OVERHEAD, publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
@@ -273,11 +273,10 @@ public class PUBLISHTest {
                 .withCorrelationData(new byte[1024 * 1024 * 5])  // 5MB + 12 bytes
                 .withResponseTopic(RandomStringUtils.randomAlphanumeric(65000)) // 130.038 bytes
                 .withTopic(RandomStringUtils.randomAlphanumeric(65000)) // 130.038 bytes
-                .withUserProperties(getManyProperties()) // (9*104) + (90*106) + (900*108) + (9000*110) + (90000*112) + (1*114) = 11.177.790 bytes
+                .withUserProperties(getManyProperties()) // (9*110) + (90*111) + (900*112) + (9000*113) + (90000*114) + (1*115) = 11.388.895 bytes
                 .build();
 
-        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 24 + (130_038 * 2) + 11_177_790 + GENERAL_OVERHEAD; // 21.923.650 bytes
-
+        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 24 + (65038 * 2) + 11_388_895 + GENERAL_OVERHEAD; // 22.004.946 bytes
         assertEquals(estimatedSize, publishMqtt5.getEstimatedSizeInMemory());
 
     }

@@ -208,12 +208,6 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     @Nullable
     @Override
-    public RetainedMessage get(@NotNull final String topic) {
-        return get(topic, BucketUtils.getBucket(topic, getBucketCount()));
-    }
-
-    @Nullable
-    @Override
     public RetainedMessage get(@NotNull final String topic, final int bucketIndex) {
         try {
             return tryGetLocally(topic, 0, bucketIndex);
