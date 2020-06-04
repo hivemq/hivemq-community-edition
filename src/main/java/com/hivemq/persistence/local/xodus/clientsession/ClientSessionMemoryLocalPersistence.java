@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Georg Held
@@ -150,7 +151,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         final Map<String, StoredSession> bucket = getBucket(bucketIndex);
 
         final StoredSession storedSession = bucket.get(clientId);
-        if (storedSession != null){
+        if (storedSession != null) {
             return storedSession.getTimestamp();
         }
         return null;
@@ -169,7 +170,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         final Map<String, StoredSession> sessions = getBucket(bucketIndex);
         final boolean isPersistent = persistent(clientSession);
 
-        sessions.compute(clientId, (id, storedSession) -> {
+        sessions.compute(clientId, (ignored, storedSession) -> {
 
             if (storedSession != null) {
                 final ClientSession oldSession = storedSession.getClientSession();
@@ -188,6 +189,14 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             } else if (isPersistent || clientSession.isConnected()) {
                 sessionsCount.incrementAndGet();
+            }
+
+            // We remove the payload of the MqttWillPublish for storage.
+            // It was already put into the PayloadPersistence in
+            // ClientSessionPersistence.clientConnected().
+            final ClientSessionWill willPublish = clientSession.getWillPublish();
+            if (willPublish != null) {
+                willPublish.getMqttWillPublish().setPayload(null);
             }
 
             return new StoredSession(clientSession, timestamp);
@@ -258,7 +267,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     }
 
-    private void removeWillReference(final ClientSession clientSession) {
+    private void removeWillReference(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -266,7 +275,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         payloadPersistence.decrementReferenceCounter(willPublish.getPayloadId());
     }
 
-    private void dereferenceWillPayload(final ClientSession clientSession) {
+    private void dereferenceWillPayload(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -284,7 +293,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         willPublish.getMqttWillPublish().setPayload(payload);
     }
 
-    private boolean persistent(final ClientSession clientSession) {
+    private boolean persistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
     }
 
