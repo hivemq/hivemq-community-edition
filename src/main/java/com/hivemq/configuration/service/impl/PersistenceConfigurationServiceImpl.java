@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 dc-square GmbH
+ * Copyright 2020 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package com.hivemq.configuration.service;
+package com.hivemq.configuration.service.impl;
 
-import com.hivemq.statistics.UsageStatisticsConfig;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * @author Christoph Schäbel
+ * @author Lukas Brandl
  */
-public interface FullConfigurationService extends ConfigurationService {
+public class PersistenceConfigurationServiceImpl implements PersistenceConfigurationService {
 
-    UsageStatisticsConfig usageStatisticsConfiguration();
+    private PersistenceMode mode;
 
-    SecurityConfigurationService securityConfiguration();
-
-    PersistenceConfigurationService persistenceConfigurationService();
-
+    @Override
+    public @NotNull PersistenceMode getMode() {
+        return mode;
+    }
+    @Override
+    public void setMode(final PersistenceMode mode) {
+        this.mode = mode;
+    }
 }

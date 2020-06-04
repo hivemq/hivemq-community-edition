@@ -248,13 +248,15 @@ public class EmbeddedHiveMQImplTest {
 
         @Override
         public void extensionStart(
-               final  @NotNull ExtensionStartInput extensionStartInput, final  @NotNull ExtensionStartOutput extensionStartOutput) {
+                final @NotNull ExtensionStartInput extensionStartInput,
+                final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         }
 
         @Override
         public void extensionStop(
-                final @NotNull ExtensionStopInput extensionStopInput,final  @NotNull ExtensionStopOutput extensionStopOutput) {
+                final @NotNull ExtensionStopInput extensionStopInput,
+                final @NotNull ExtensionStopOutput extensionStopOutput) {
 
         }
     }
