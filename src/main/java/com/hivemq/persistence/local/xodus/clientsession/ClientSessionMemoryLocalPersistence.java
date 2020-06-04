@@ -205,8 +205,44 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     @Override
     public @NotNull ClientSession disconnect(
-            @NotNull String clientId, long timestamp, boolean sendWill, int bucketIndex, long expiry) {
-        return null;
+            final @NotNull String clientId,
+            final long timestamp,
+            final boolean sendWill,
+            final int bucketIndex,
+            final long expiry) {
+
+        final Map<String, StoredSession> bucket = getBucket(bucketIndex);
+
+        final StoredSession storedSession = bucket.compute(clientId, (ignored, oldSession) -> {
+
+            if (oldSession == null) {
+                // we create a tombstone here
+                final ClientSession clientSession = new ClientSession(false, configuredSessionExpiryInterval);
+                return new StoredSession(clientSession, timestamp);
+            }
+
+            final ClientSession clientSession = oldSession.getClientSession();
+
+            if (expiry != SESSION_EXPIRY_NOT_SET) {
+                clientSession.setSessionExpiryInterval(expiry);
+            }
+
+            if (clientSession.isConnected() && !persistent(clientSession)) {
+                sessionsCount.decrementAndGet();
+            }
+
+            clientSession.setConnected(false);
+
+            if (!sendWill) {
+                removeWillReference(clientSession);
+                clientSession.setWillPublish(null);
+            }
+
+            dereferenceWillPayload(clientSession);
+            return oldSession;
+        });
+
+        return storedSession.getClientSession();
     }
 
     @Override
