@@ -56,14 +56,6 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * Get a retained message for a given topic from a persistence bucket.
      *
      * @param topic       the topic of the retained message.
-     * @return the {@link RetainedMessage} or <null> if no retained message found.
-     */
-    @Nullable RetainedMessage get(@NotNull String topic);
-
-    /**
-     * Get a retained message for a given topic from a persistence bucket.
-     *
-     * @param topic       the topic of the retained message.
      * @param bucketIndex The index of the bucket in which the retained messages are stored.
      * @return the {@link RetainedMessage} or <null> if no retained message found.
      */
