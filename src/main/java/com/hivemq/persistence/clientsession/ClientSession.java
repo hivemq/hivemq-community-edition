@@ -17,6 +17,7 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.Sizable;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
@@ -26,22 +27,24 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DIS
  */
 public class ClientSession implements Sizable {
 
-    private boolean connected;
+    private volatile boolean connected;
 
-    private long sessionExpiryInterval;
+    private volatile long sessionExpiryInterval;
 
     private ClientSessionWill willPublish;
 
-    public ClientSession(final boolean connected,
-                         final long sessionExpiryInterval) {
+    public ClientSession(final boolean connected, final long sessionExpiryInterval) {
 
-        Preconditions.checkArgument(sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT, "Session expiry interval must never be less than zero");
+        Preconditions.checkArgument(
+                sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
+                "Session expiry interval must never be less than zero");
 
         this.connected = connected;
         this.sessionExpiryInterval = sessionExpiryInterval;
     }
 
-    public ClientSession(final boolean connected, final long sessionExpiryInterval, final ClientSessionWill willPublish) {
+    public ClientSession(
+            final boolean connected, final long sessionExpiryInterval, final ClientSessionWill willPublish) {
         this.connected = connected;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.willPublish = willPublish;
@@ -74,5 +77,11 @@ public class ClientSession implements Sizable {
     @Override
     public int getEstimatedSize() {
         return 0;
+    }
+
+    public @NotNull ClientSession deepCopyWithoutPayload() {
+        return new ClientSession(this.connected,
+                this.sessionExpiryInterval,
+                this.getWillPublish().deepCopyWithoutPayload());
     }
 }

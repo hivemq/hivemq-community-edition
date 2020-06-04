@@ -193,18 +193,6 @@ public class ClientSessionMemoryLocalPersistenceTest {
     }
 
     @Test
-    public void test_removeWithTimestamp_single_client() throws Exception {
-        persistence.put("clientid",
-                new ClientSession(false, SESSION_EXPIRY_MAX),
-                123L,
-                BucketUtils.getBucket("clientid", BUCKET_COUNT));
-        persistence.removeWithTimestamp("clientid", BucketUtils.getBucket("clientid", BUCKET_COUNT));
-
-        assertEquals(0, persistence.getSessionsCount());
-        assertNull(persistence.getSession("clientid", BucketUtils.getBucket("clientid", BUCKET_COUNT)));
-    }
-
-    @Test
     public void test_clean_up_expired_sessions() {
 
         persistence.put("clientid1",
@@ -325,11 +313,6 @@ public class ClientSessionMemoryLocalPersistenceTest {
         persistence.setSessionExpiryInterval(null, 12345, BucketUtils.getBucket("clientid", BUCKET_COUNT));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void test_get_ttl_client_null() {
-        persistence.getSessionExpiryInterval(null);
-    }
-
     @Test(expected = InvalidSessionExpiryIntervalException.class)
     public void test_invalid_ttl() {
         final String clientid = "myClient";
@@ -362,19 +345,6 @@ public class ClientSessionMemoryLocalPersistenceTest {
         final String clientid = "myClient";
         persistence.put(clientid, new ClientSession(false, 0), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         persistence.setSessionExpiryInterval(clientid, 123, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-    }
-
-    @Test(expected = NoSessionException.class)
-    public void test_get_ttl_no_session() {
-        final String clientid = "myClient";
-        persistence.getSessionExpiryInterval(clientid);
-    }
-
-    @Test(expected = NoSessionException.class)
-    public void test_get_ttl_no_session_persisted_and_connected() {
-        final String clientid = "myClient";
-        persistence.put(clientid, new ClientSession(false, 0), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        persistence.getSessionExpiryInterval(clientid);
     }
 
     @Test

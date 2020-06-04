@@ -16,8 +16,9 @@
 
 package com.hivemq.persistence.clientsession;
 
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -89,5 +90,11 @@ public class ClientSessionWill {
 
     public Mqtt5UserProperties getUserProperties() {
         return mqttWillPublish.getUserProperties();
+    }
+
+    public  @NotNull ClientSessionWill deepCopyWithoutPayload() {
+        return new ClientSessionWill(
+                this.getMqttWillPublish().deepCopyWithoutPayload(),
+                this.payloadId);
     }
 }

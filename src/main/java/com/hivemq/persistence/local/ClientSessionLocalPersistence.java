@@ -16,6 +16,7 @@
 
 package com.hivemq.persistence.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.LocalPersistence;
@@ -142,6 +143,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
     /**
      * Completely remove the session for the client. This will not create a tombstone.
      */
+    @VisibleForTesting
     void removeWithTimestamp(@NotNull String client, int bucketIdx);
 
     /**
@@ -160,6 +162,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return A set of strings containing all client identifiers of the found disconnected client sessions.
      */
     @NotNull
+    @VisibleForTesting
     Set<String> getDisconnectedClients(int bucketIndex);
 
     /**
@@ -175,17 +178,6 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @throws InvalidSessionExpiryIntervalException when interval < 0
      */
     void setSessionExpiryInterval(@NotNull String clientId, long sessionExpiryInterval, int bucketIndex);
-
-    /**
-     * Returns the session expiry interval for a client in seconds.
-     * <br>
-     * 0 = Session removed on disconnect
-     *
-     * @param clientId the client identifier of the client
-     * @return {@link Long} session expiry interval in seconds.
-     */
-    @NotNull
-    Long getSessionExpiryInterval(@NotNull String clientId);
 
     /**
      * @return the delay of all wills of disconnected clients that have not been sent yet. The key is the client id

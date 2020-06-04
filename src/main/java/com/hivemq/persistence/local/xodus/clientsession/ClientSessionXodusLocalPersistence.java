@@ -517,33 +517,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
      */
     @Override
     @NotNull
-    public Long getSessionExpiryInterval(@NotNull final String clientId) {
-        checkNotNull(clientId, "Client Id must not be null");
-
-        final Bucket bucket = getBucket(clientId);
-        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-
-            final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
-            if (byteIterable == null) {
-                throw NoSessionException.INSTANCE;
-            }
-
-            final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
-
-            // is tombstone?
-            if (!clientSession.isConnected() && !persistent(clientSession)) {
-                throw NoSessionException.INSTANCE;
-            }
-
-            return clientSession.getSessionExpiryInterval();
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @NotNull
     public Set<String> cleanUp(final int bucketIndex) {
 
         final ImmutableSet.Builder<String> expiredSessionsBuilder = ImmutableSet.builder();
