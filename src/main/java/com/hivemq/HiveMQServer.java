@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.hivemq.configuration.service.PersistenceConfigurationService.PersistenceMode;
+
 /**
  * @author Dominik Obermaier
  * @author Florian Limpöck
@@ -125,7 +127,7 @@ public class HiveMQServer {
         log.trace("Checking for migrations");
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
 
-        log.trace("Initializing file persistences");
+        log.trace("Initializing persistences");
         final Injector persistenceInjector =
                 GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hiveMQId, configService);
         //blocks until all persistences started
@@ -134,16 +136,18 @@ public class HiveMQServer {
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;
         }
+        if (configService.persistenceConfigurationService().getMode() == PersistenceMode.IN_MEMORY) {
 
-        if (migrations.size() > 0) {
-            log.info("Persistence types has been changed, migrating persistent data.");
-            for (final MigrationUnit migrationUnit : migrations.keySet()) {
-                log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
+            if (migrations.size() > 0) {
+                log.info("Persistence types has been changed, migrating persistent data.");
+                for (final MigrationUnit migrationUnit : migrations.keySet()) {
+                    log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
+                }
+                Migrations.migrate(persistenceInjector, migrations);
             }
-            Migrations.migrate(persistenceInjector, migrations);
-        }
 
-        Migrations.afterMigration(systemInformation);
+            Migrations.afterMigration(systemInformation);
+        }
 
         log.trace("Initializing Guice");
         final Injector injector = GuiceBootstrap.bootstrapInjector(systemInformation,

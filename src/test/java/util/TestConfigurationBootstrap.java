@@ -94,4 +94,8 @@ public class TestConfigurationBootstrap {
     public void setConfigurationService(final ConfigurationServiceImpl configurationService) {
         this.configurationService = configurationService;
     }
+
+    public PersistenceConfigurationService getPersistenceConfigurationService() {
+        return persistenceConfigurationService;
+    }
 }

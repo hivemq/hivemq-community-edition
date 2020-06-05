@@ -29,13 +29,13 @@ import javax.inject.Singleton;
 /**
  * @author Georg Held
  */
-class FilePersistenceRocksDBModule extends SingletonModule<Class<FilePersistenceRocksDBModule>> {
+class PersistenceMigrationRocksDBModule extends SingletonModule<Class<PersistenceMigrationRocksDBModule>> {
 
     private final @NotNull PersistenceType payloadPersistenceType;
     private final @NotNull PersistenceType retainedPersistenceType;
 
-    FilePersistenceRocksDBModule() {
-        super(FilePersistenceRocksDBModule.class);
+    PersistenceMigrationRocksDBModule() {
+        super(PersistenceMigrationRocksDBModule.class);
 
         this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
         this.retainedPersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();

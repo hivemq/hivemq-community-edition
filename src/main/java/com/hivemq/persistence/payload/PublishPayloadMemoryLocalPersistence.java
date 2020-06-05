@@ -17,6 +17,7 @@
 package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
@@ -38,6 +39,7 @@ public class PublishPayloadMemoryLocalPersistence implements PublishPayloadLocal
         // noop
     }
 
+    @GuardedBy("PublishPayloadPersistenceImpl.bucketLock")
     @Override
     public void put(final long id, final @NotNull byte[] payload) {
         currentSize.addAndGet(payload.length);
@@ -49,6 +51,7 @@ public class PublishPayloadMemoryLocalPersistence implements PublishPayloadLocal
         return payloads.get(id);
     }
 
+    @GuardedBy("PublishPayloadPersistenceImpl.bucketLock")
     @Override
     public void remove(final long id) {
         final byte[] payload = payloads.remove(id);

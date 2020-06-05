@@ -23,13 +23,14 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  * @author Lukas Brandl
  */
 public class PersistenceConfigurationServiceImpl implements PersistenceConfigurationService {
-
-    private PersistenceMode mode;
+    @NotNull
+    private PersistenceMode mode = PersistenceMode.FILE;
 
     @Override
     public @NotNull PersistenceMode getMode() {
         return mode;
     }
+
     @Override
     public void setMode(final PersistenceMode mode) {
         this.mode = mode;
