@@ -18,18 +18,18 @@
 package com.hivemq.mqtt.message.publish;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -78,7 +78,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     private int sizeInMemory = SIZE_NOT_CALCULATED;
 
     //MQTT 5
-    PUBLISH(@NotNull final String hivemqId,
+    PUBLISH(
+            @NotNull final String hivemqId,
             @NotNull final String topic,
             @Nullable final byte[] payload,
             @NotNull final QoS qos,
@@ -104,7 +105,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         Preconditions.checkNotNull(topic, "Topic may never be null");
         Preconditions.checkNotNull(qos, "Quality of service may never be null");
 
-        Preconditions.checkArgument(payloadId != null || payload != null, "Payload and Payload ID must never be null at the same time");
+        Preconditions.checkArgument(payloadId != null || payload != null,
+                "Payload and Payload ID must never be null at the same time");
         if (payloadId != null) {
             Preconditions.checkArgument(persistence != null, "Persistence must be present if Payload ID is present");
         }
@@ -143,7 +145,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     }
 
     //MQTT 3
-    PUBLISH(@NotNull final String hivemqId,
+    PUBLISH(
+            @NotNull final String hivemqId,
             @NotNull final String topic,
             @Nullable final byte[] payload,
             @NotNull final QoS qos,
@@ -162,9 +165,11 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         Preconditions.checkNotNull(topic, "Topic may never be null");
         Preconditions.checkNotNull(qos, "Quality of service may never be null");
 
-        Preconditions.checkArgument(payloadId != null || payload != null, "Payload and Payload ID must never be null at the same time");
+        Preconditions.checkArgument(payloadId != null || payload != null,
+                "Payload and Payload ID must never be null at the same time");
         if (payloadId != null) {
-            Preconditions.checkArgument(publishPayloadPersistence != null, "Persistence must be present if Payload ID is present");
+            Preconditions.checkArgument(publishPayloadPersistence != null,
+                    "Persistence must be present if Payload ID is present");
         }
         this.hivemqId = hivemqId;
         this.topic = topic;
@@ -200,15 +205,30 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.correlationData = null;
     }
 
-    PUBLISH(@NotNull final PUBLISH publish,
+    PUBLISH(
+            @NotNull final PUBLISH publish,
             @Nullable final Long payloadId,
             @Nullable final PublishPayloadPersistence persistence) {
 
-        this(publish.getHivemqId(), publish.getTopic(), publish.getPayload(), publish.getQoS(), publish.isRetain(),
-                publish.getMessageExpiryInterval(), publish.getPayloadFormatIndicator(), publish.getContentType(),
-                publish.getResponseTopic(), publish.getCorrelationData(), publish.getUserProperties(),
-                publish.getPacketIdentifier(), publish.isDuplicateDelivery(), publish.isNewTopicAlias(),
-                publish.getSubscriptionIdentifiers(), persistence, payloadId, publish.getTimestamp(), publish.getLocalPublishId());
+        this(publish.getHivemqId(),
+                publish.getTopic(),
+                publish.getPayload(),
+                publish.getQoS(),
+                publish.isRetain(),
+                publish.getMessageExpiryInterval(),
+                publish.getPayloadFormatIndicator(),
+                publish.getContentType(),
+                publish.getResponseTopic(),
+                publish.getCorrelationData(),
+                publish.getUserProperties(),
+                publish.getPacketIdentifier(),
+                publish.isDuplicateDelivery(),
+                publish.isNewTopicAlias(),
+                publish.getSubscriptionIdentifiers(),
+                persistence,
+                payloadId,
+                publish.getTimestamp(),
+                publish.getLocalPublishId());
     }
 
     @NotNull
@@ -332,27 +352,23 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     @Override
     public @NotNull String toString() {
-        return "PUBLISH{uniqueId=" + uniqueId +
-                ", timestamp=" + timestamp +
-                '}';
+        return "PUBLISH{uniqueId=" + uniqueId + ", timestamp=" + timestamp + '}';
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final PUBLISH publish = (PUBLISH) o;
-        return timestamp == publish.timestamp &&
-                duplicateDelivery == publish.duplicateDelivery &&
-                retain == publish.retain &&
-                messageExpiryInterval == publish.messageExpiryInterval &&
-                publishId == publish.publishId &&
-                isNewTopicAlias == publish.isNewTopicAlias &&
-                Arrays.equals(payload, publish.payload) &&
-                Objects.equals(topic, publish.topic) &&
-                qoS == publish.qoS &&
-                Objects.equals(hivemqId, publish.hivemqId) &&
-                Objects.equals(uniqueId, publish.uniqueId) &&
+        return timestamp == publish.timestamp && duplicateDelivery == publish.duplicateDelivery &&
+                retain == publish.retain && messageExpiryInterval == publish.messageExpiryInterval &&
+                publishId == publish.publishId && isNewTopicAlias == publish.isNewTopicAlias &&
+                Arrays.equals(payload, publish.payload) && Objects.equals(topic, publish.topic) && qoS == publish.qoS &&
+                Objects.equals(hivemqId, publish.hivemqId) && Objects.equals(uniqueId, publish.uniqueId) &&
                 Objects.equals(payloadId, publish.payloadId) &&
                 payloadFormatIndicator == publish.payloadFormatIndicator &&
                 Objects.equals(contentType, publish.contentType) &&
@@ -365,10 +381,22 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     @Override
     public int hashCode() {
 
-        int result = Objects.hash(timestamp, topic, duplicateDelivery, retain, qoS,
-                messageExpiryInterval, publishId, hivemqId, uniqueId, payloadId,
-                payloadFormatIndicator, contentType, responseTopic,
-                isNewTopicAlias, subscriptionIdentifiers, persistence);
+        int result = Objects.hash(timestamp,
+                topic,
+                duplicateDelivery,
+                retain,
+                qoS,
+                messageExpiryInterval,
+                publishId,
+                hivemqId,
+                uniqueId,
+                payloadId,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                isNewTopicAlias,
+                subscriptionIdentifiers,
+                persistence);
         result = 31 * result + Arrays.hashCode(payload);
         result = 31 * result + Arrays.hashCode(correlationData);
         return result;
@@ -400,33 +428,22 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         if (sizeInMemory != SIZE_NOT_CALCULATED) {
             return sizeInMemory;
         }
-        int size = (topic.length() * 2);
-        size += 38; //String Object Overhead
-        if (payload != null) {
-            size += payload.length;
-            size += 12; //byte[] Object Overhead
-        }
-        if (correlationData != null) {
-            size += correlationData.length;
-            size += 12; //byte[] Object Overhead
-        }
-        if (responseTopic != null) {
-            size += (responseTopic.length() * 2);
-            size += 38; //String Object Overhead
-        }
+        int size = 0;
+        size += ObjectMemoryEstimation.stringSize(topic);
+        size += ObjectMemoryEstimation.byteArraySize(payload);
+        size += ObjectMemoryEstimation.byteArraySize(correlationData);
+        size += ObjectMemoryEstimation.stringSize(responseTopic);
 
         size += 24; //User Properties Overhead
         for (final MqttUserProperty userProperty : getUserProperties().asList()) {
             size += 8; //UserProperty Object Overhead
-            size += (userProperty.getName().length() * 2);
-            size += 38; //String Object Overhead
-            size += (userProperty.getValue().length() * 2);
-            size += 38; //String Object Overhead
+            size += ObjectMemoryEstimation.stringSize(userProperty.getName());
+            size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
         }
 
         size += 64; // Unique ID
         size += 48; // HiveMQ ID
-        size += 24; // QoS
+        size += ObjectMemoryEstimation.enumSize(); // QoS
         size += 16; // Subscriptions Identifiers Overhead
         size += 35; // General Overhead
 

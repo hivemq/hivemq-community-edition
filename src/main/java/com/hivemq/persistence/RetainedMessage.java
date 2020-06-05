@@ -22,7 +22,9 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,6 +33,8 @@ import java.util.Objects;
  * @author Dominik Obermaier
  */
 public class RetainedMessage {
+
+    private static final int SIZE_NOT_CALCULATED = -1;
 
     private @Nullable byte[] message;
 
@@ -51,6 +55,8 @@ public class RetainedMessage {
     private final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
 
     private final long timestamp;
+
+    private int sizeInMemory = SIZE_NOT_CALCULATED;
 
     public RetainedMessage(
             @Nullable final byte[] message,
@@ -95,9 +101,7 @@ public class RetainedMessage {
     }
 
     public RetainedMessage(
-            @NotNull final PUBLISH publish,
-            @Nullable final Long payloadId,
-            final long messageExpiryInterval) {
+            @NotNull final PUBLISH publish, @Nullable final Long payloadId, final long messageExpiryInterval) {
         this.message = publish.getPayload();
         this.qos = publish.getQoS();
         this.payloadId = payloadId;
@@ -111,7 +115,8 @@ public class RetainedMessage {
     }
 
     public RetainedMessage copyWithoutPayload() {
-        return new RetainedMessage(null,
+        return new RetainedMessage(
+                null,
                 qos,
                 payloadId,
                 messageExpiryInterval,
@@ -121,6 +126,38 @@ public class RetainedMessage {
                 correlationData,
                 payloadFormatIndicator,
                 timestamp);
+    }
+
+    public int getEstimatedSizeInMemory() {
+
+        if (sizeInMemory != SIZE_NOT_CALCULATED) {
+            return sizeInMemory;
+        }
+        int size = 0;
+        if (message != null) {
+            size += message.length;
+        }
+        size += ObjectMemoryEstimation.enumSize(); // QoS
+        size += ObjectMemoryEstimation.longWrapperSize(); // Payload ID
+        size += ObjectMemoryEstimation.longSize(); // expiry interval
+
+        size += 24; //User Properties Overhead
+        for (final MqttUserProperty userProperty : getUserProperties().asList()) {
+            size += 8; //UserProperty Object Overhead
+            size += ObjectMemoryEstimation.stringSize(userProperty.getName());
+            size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
+        }
+
+        size += ObjectMemoryEstimation.stringSize(responseTopic);
+        size += ObjectMemoryEstimation.stringSize(contentType);
+        size += ObjectMemoryEstimation.byteArraySize(correlationData);
+
+        size += ObjectMemoryEstimation.enumSize(); // Payload format indicator
+        size += ObjectMemoryEstimation.longSize(); // timestamp
+        size += ObjectMemoryEstimation.intSize(); // size
+
+        sizeInMemory = size;
+        return sizeInMemory;
     }
 
     public @NotNull Mqtt5UserProperties getUserProperties() {

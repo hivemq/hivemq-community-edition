@@ -16,22 +16,22 @@
 
 package com.hivemq.persistence.payload;
 
+import com.codahale.metrics.MetricRegistry;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class PublishPayloadLocalPersistenceTest {
+public class PublishPayloadMemoryLocalPersistenceTest {
 
-    private PublishPayloadLocalPersistence persistence;
+    private PublishPayloadMemoryLocalPersistence persistence;
 
     @Before
     public void before() {
-        persistence = new PublishPayloadMemoryLocalPersistence();
+        persistence = new PublishPayloadMemoryLocalPersistence(new MetricRegistry());
     }
 
     @Test
@@ -41,7 +41,11 @@ public class PublishPayloadLocalPersistenceTest {
         final byte[] payload2 = "payload".getBytes();
 
         persistence.put(0L, payload1);
+        final long size1 = persistence.currentMemorySize.get();
+        assertTrue(size1 > 0);
         persistence.put(1L, payload2);
+        final long size2 = persistence.currentMemorySize.get();
+        assertTrue(size1 < size2);
 
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);
@@ -57,9 +61,12 @@ public class PublishPayloadLocalPersistenceTest {
         final byte[] payload2 = "payload".getBytes();
 
         persistence.put(0L, payload1);
+        final long size1 = persistence.currentMemorySize.get();
         persistence.put(1L, payload2);
 
         persistence.remove(1L);
+        final long size2 = persistence.currentMemorySize.get();
+        assertEquals(size1, size2);
 
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);

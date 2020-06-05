@@ -16,12 +16,15 @@
 
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.PublishTopicTree;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,15 +53,20 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageMemoryLocalPersistence.class);
 
     @VisibleForTesting
+    final @NotNull AtomicLong currentMemorySize = new AtomicLong();
+
+    @VisibleForTesting
     @NotNull
     final ConcurrentHashMap<Integer, PublishTopicTree> topicTrees = new ConcurrentHashMap<>();
 
     private final @NotNull ConcurrentHashMap<Integer, Map<String, RetainedMessage>> buckets = new ConcurrentHashMap<>();
     private final @NotNull PublishPayloadPersistence payloadPersistence;
-    private final @NotNull int bucketCount;
+
+    private final int bucketCount;
 
     @Inject
-    public RetainedMessageMemoryLocalPersistence(@NotNull final PublishPayloadPersistence payloadPersistence) {
+    public RetainedMessageMemoryLocalPersistence(
+            @NotNull final PublishPayloadPersistence payloadPersistence, @NotNull final MetricRegistry metricRegistry) {
         this.payloadPersistence = payloadPersistence;
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         for (int i = 0; i < bucketCount; i++) {
@@ -66,6 +75,10 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         for (int i = 0; i < bucketCount; i++) {
             topicTrees.put(i, new PublishTopicTree());
         }
+
+        metricRegistry.register(
+                HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+                (Gauge<Long>) currentMemorySize::get);
     }
 
     @Override
@@ -86,6 +99,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
         for (final RetainedMessage retainedMessage : bucket.values()) {
             payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+            currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
         }
         bucket.clear();
     }
@@ -102,6 +116,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         if (retainedMessage != null) {
             topicTrees.get(bucketIndex).remove(topic);
             payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+            currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
         }
         bucket.remove(topic);
     }
@@ -146,7 +161,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         final RetainedMessage previousMessage = bucket.get(topic);
         if (previousMessage != null) {
             payloadPersistence.decrementReferenceCounter(previousMessage.getPayloadId());
+            currentMemorySize.addAndGet(-previousMessage.getEstimatedSizeInMemory());
         }
+        currentMemorySize.addAndGet(retainedMessage.getEstimatedSizeInMemory());
         topicTrees.get(bucketIndex).add(topic);
         bucket.put(topic, copy);
     }
@@ -172,10 +189,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             if (entry == null) {
                 return false;
             }
-            final RetainedMessage message = entry.getValue();
+            final RetainedMessage retainedMessage = entry.getValue();
             final String topic = entry.getKey();
-            if (PublishUtil.isExpired(message.getTimestamp(), message.getMessageExpiryInterval())) {
-                payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+            if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+                payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+                currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
                 topicTrees.get(bucketIndex).remove(topic);
                 return true;
             }

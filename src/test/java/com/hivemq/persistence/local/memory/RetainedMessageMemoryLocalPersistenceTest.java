@@ -16,6 +16,7 @@
 
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -62,7 +63,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
         when(payloadPersistence.getPayloadOrNull(4)).thenReturn("message4".getBytes());
         when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
 
-        persistence = new RetainedMessageMemoryLocalPersistence(payloadPersistence);
+        persistence = new RetainedMessageMemoryLocalPersistence(payloadPersistence, new MetricRegistry());
     }
 
     @Test
@@ -83,9 +84,13 @@ public class RetainedMessageMemoryLocalPersistenceTest {
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
+        final long firstMessageSize = persistence.currentMemorySize.get();
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
+        final long secondMessageSize = persistence.currentMemorySize.get();
+        assertTrue(firstMessageSize > 0);
+        assertEquals(firstMessageSize, secondMessageSize);
 
         //existing entry has newer timestamp, so we expect the "old" value
         assertEquals("message0",
@@ -144,10 +149,13 @@ public class RetainedMessageMemoryLocalPersistenceTest {
                 new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/1",
                 0);
+        assertTrue(persistence.currentMemorySize.get() > 0);
 
         persistence.remove("topic/0", 0);
         persistence.remove("topic/1", 0);
         persistence.remove("topic/2", 0);
+
+        assertEquals(0, persistence.currentMemorySize.get());
 
         verify(payloadPersistence).decrementReferenceCounter(0);
         verify(payloadPersistence).decrementReferenceCounter(1);
@@ -209,7 +217,13 @@ public class RetainedMessageMemoryLocalPersistenceTest {
                 null,
                 System.currentTimeMillis()), "topic2", 0);
 
+        final long sizeBeforeExpiry = persistence.currentMemorySize.get();
+        assertTrue(sizeBeforeExpiry > 0);
+
         persistence.cleanUp(0);
+
+        final long sizeAfterExpiry = persistence.currentMemorySize.get();
+        assertTrue(sizeAfterExpiry < sizeBeforeExpiry);
 
         assertNull(persistence.get("topic", 0));
         assertNotNull(persistence.get("topic2", 0));
@@ -285,6 +299,8 @@ public class RetainedMessageMemoryLocalPersistenceTest {
         assertEquals(0, allEntries.size());
 
         verify(payloadPersistence, times(10)).decrementReferenceCounter(anyLong());
+
+        assertEquals(0, persistence.currentMemorySize.get());
     }
 
     @Test

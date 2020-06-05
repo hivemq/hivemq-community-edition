@@ -16,12 +16,16 @@
 
 package com.hivemq.persistence.payload;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
+import com.hivemq.metrics.HiveMQMetrics;
 
+import javax.inject.Inject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,18 +35,24 @@ import java.util.concurrent.atomic.AtomicLong;
 @ThreadSafe
 public class PublishPayloadMemoryLocalPersistence implements PublishPayloadLocalPersistence {
 
-    private final @NotNull AtomicLong currentSize = new AtomicLong();
+    @VisibleForTesting
+    final @NotNull AtomicLong currentMemorySize = new AtomicLong();
     private final @NotNull ConcurrentHashMap<Long, @NotNull byte[]> payloads = new ConcurrentHashMap<>();
+
+    @Inject
+    public PublishPayloadMemoryLocalPersistence(@NotNull final MetricRegistry metricRegistry) {
+        metricRegistry.register(HiveMQMetrics.PAYLOAD_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+                (Gauge<Long>) currentMemorySize::get);
+    }
 
     @Override
     public void init() {
         // noop
     }
 
-    @GuardedBy("PublishPayloadPersistenceImpl.bucketLock")
     @Override
     public void put(final long id, final @NotNull byte[] payload) {
-        currentSize.addAndGet(payload.length);
+        currentMemorySize.addAndGet(payload.length);
         payloads.put(id, payload);
     }
 
@@ -51,12 +61,11 @@ public class PublishPayloadMemoryLocalPersistence implements PublishPayloadLocal
         return payloads.get(id);
     }
 
-    @GuardedBy("PublishPayloadPersistenceImpl.bucketLock")
     @Override
     public void remove(final long id) {
         final byte[] payload = payloads.remove(id);
         if (payload != null) {
-            currentSize.addAndGet(-payload.length);
+            currentMemorySize.addAndGet(-payload.length);
         }
     }
 
