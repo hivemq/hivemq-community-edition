@@ -69,7 +69,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     @Test
     public void test_persist_get_no_payload_found() {
 
-        persistence.put(new RetainedMessage(new byte[0],
+        persistence.put(new RetainedMessage(new byte[]{1,2,3},
                         QoS.AT_MOST_ONCE,
                         100L,
                         MqttConfigurationDefaults.TTL_DISABLED),
@@ -81,11 +81,11 @@ public class RetainedMessageMemoryLocalPersistenceTest {
 
     @Test
     public void test_persist_same_topic() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+        persistence.put(new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
         final long firstMessageSize = persistence.currentMemorySize.get();
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+        persistence.put(new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
         final long secondMessageSize = persistence.currentMemorySize.get();
@@ -96,14 +96,14 @@ public class RetainedMessageMemoryLocalPersistenceTest {
         assertEquals("message0",
                 new String(persistence.get("topic", BucketUtils.getBucket("topic", bucketCount)).getMessage()));
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED),
+        persistence.put(new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
 
         assertEquals("message3",
                 new String(persistence.get("topic", BucketUtils.getBucket("topic", bucketCount)).getMessage()));
 
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 4L, MqttConfigurationDefaults.TTL_DISABLED),
+        persistence.put(new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 4L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 BucketUtils.getBucket("topic", bucketCount));
 
@@ -115,18 +115,18 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     public void test_getAllTopics() {
 
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/0",
                 0);
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/1",
                 0);
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.EXACTLY_ONCE, 2L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.EXACTLY_ONCE, 2L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/2",
                 0);
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED),
+        persistence.put(new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 3L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic",
                 0);
 
@@ -142,11 +142,11 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     @Test
     public void decrement_payload_reference_count_remove() {
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/0",
                 0);
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/1",
                 0);
         assertTrue(persistence.currentMemorySize.get() > 0);
@@ -167,20 +167,20 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     @Test
     public void decrement_payload_reference_count_put() {
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/0",
                 0);
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/1",
                 0);
 
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 0L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/0",
                 0);
         persistence.put(
-                new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
+                new RetainedMessage(new byte[]{1,2,3}, QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED),
                 "topic/1",
                 0);
 
@@ -196,7 +196,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     @Test
     public void test_clean_up_expiry() {
 
-        persistence.put(new RetainedMessage(new byte[0],
+        persistence.put(new RetainedMessage(new byte[]{1,2,3},
                 QoS.AT_MOST_ONCE,
                 1L,
                 1,
@@ -234,7 +234,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
 
     @Test
     public void test_expiry() {
-        persistence.put(new RetainedMessage(new byte[0],
+        persistence.put(new RetainedMessage(new byte[]{1,2,3},
                 QoS.AT_MOST_ONCE,
                 1L,
                 1,
@@ -252,7 +252,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
     @Test
     public void test_read_user_properties_stored() {
 
-        persistence.put(new RetainedMessage(new byte[0],
+        persistence.put(new RetainedMessage(new byte[]{1,2,3},
                 QoS.AT_MOST_ONCE,
                 0L,
                 MqttConfigurationDefaults.TTL_DISABLED,
@@ -282,7 +282,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
 
         for (int i = 0; i < 10; i++) {
             persistence.put(
-                    new RetainedMessage(new byte[0],
+                    new RetainedMessage(new byte[]{1,2,3},
                             QoS.AT_LEAST_ONCE,
                             (long) i + 1,
                             MqttConfigurationDefaults.TTL_DISABLED),
@@ -305,7 +305,7 @@ public class RetainedMessageMemoryLocalPersistenceTest {
 
     @Test
     public void test_entry_immutable() {
-        final RetainedMessage originalMessage = new RetainedMessage(new byte[0],
+        final RetainedMessage originalMessage = new RetainedMessage(new byte[]{1,2,3},
                 QoS.AT_MOST_ONCE,
                 0L,
                 MqttConfigurationDefaults.TTL_DISABLED,

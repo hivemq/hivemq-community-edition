@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,7 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 /**
  * @author Lukas Brandl
  */
+@Singleton
 public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageMemoryLocalPersistence.class);
@@ -163,7 +165,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             payloadPersistence.decrementReferenceCounter(previousMessage.getPayloadId());
             currentMemorySize.addAndGet(-previousMessage.getEstimatedSizeInMemory());
         }
-        currentMemorySize.addAndGet(retainedMessage.getEstimatedSizeInMemory());
+        currentMemorySize.addAndGet(copy.getEstimatedSizeInMemory());
         topicTrees.get(bucketIndex).add(topic);
         bucket.put(topic, copy);
     }

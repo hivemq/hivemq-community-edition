@@ -26,6 +26,7 @@ import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.metrics.HiveMQMetrics;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Georg Held
  */
 @ThreadSafe
+@Singleton
 public class PublishPayloadMemoryLocalPersistence implements PublishPayloadLocalPersistence {
 
     @VisibleForTesting
