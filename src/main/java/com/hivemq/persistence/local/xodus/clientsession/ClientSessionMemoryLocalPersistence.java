@@ -34,22 +34,20 @@ import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
-import jetbrains.exodus.env.Cursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 
 /**
  * @author Georg Held
@@ -336,8 +334,26 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     @Override
     public @NotNull Map<String, PendingWillMessages.PendingWill> getPendingWills(
-            int bucketIndex) {
-        return null;
+            final int bucketIndex) {
+
+
+        final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
+
+        return bucket.entrySet()
+                .stream()
+                .filter(entry -> !entry.getValue().getObject().isConnected())
+                .filter(entry -> entry.getValue().getObject().getWillPublish() != null)
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> {
+
+                    final PersistenceEntry<ClientSession> storedSession = entry.getValue();
+                    final ClientSessionWill willPublish = storedSession.getObject().getWillPublish();
+
+                    return new PendingWillMessages.PendingWill(
+                            Math.min(
+                                    willPublish.getDelayInterval(),
+                                    storedSession.getObject().getSessionExpiryInterval()),
+                            willPublish.getDelayInterval());
+                }));
     }
 
     @Override
