@@ -28,10 +28,10 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
  */
 public class ClientSessionWill {
 
-    private final MqttWillPublish mqttWillPublish;
-    private final Long payloadId;
+    private final @NotNull MqttWillPublish mqttWillPublish;
+    private final @Nullable Long payloadId;
 
-    public ClientSessionWill(final MqttWillPublish mqttWillPublish, @Nullable final Long payloadId) {
+    public ClientSessionWill(final @NotNull MqttWillPublish mqttWillPublish, final @NotNull Long payloadId) {
         this.mqttWillPublish = mqttWillPublish;
         this.payloadId = payloadId;
     }
@@ -92,9 +92,7 @@ public class ClientSessionWill {
         return mqttWillPublish.getUserProperties();
     }
 
-    public  @NotNull ClientSessionWill deepCopyWithoutPayload() {
-        return new ClientSessionWill(
-                this.getMqttWillPublish().deepCopyWithoutPayload(),
-                this.payloadId);
+    public @NotNull ClientSessionWill deepCopyWithoutPayload() {
+        return new ClientSessionWill(this.getMqttWillPublish().deepCopyWithoutPayload(), this.payloadId);
     }
 }
