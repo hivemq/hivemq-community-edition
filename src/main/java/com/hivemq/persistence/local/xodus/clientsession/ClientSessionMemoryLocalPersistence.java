@@ -17,6 +17,7 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -31,9 +32,12 @@ import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
+import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Cursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +52,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
+import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 
 /**
  * @author Georg Held
@@ -357,14 +363,96 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     }
 
     @Override
-    public @Nullable PersistenceEntry<ClientSession> removeWill(
-            @NotNull String clientId, int bucketIndex) {
-        return null;
+    public @Nullable PersistenceEntry<ClientSession> removeWill(final @NotNull String clientId, final int bucketIndex) {
+
+        final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
+
+        final PersistenceEntry<ClientSession> persistenceEntry =
+                bucket.computeIfPresent(clientId, (ignored, storedSession) -> {
+                    final ClientSession clientSession = storedSession.getObject();
+
+                    // Just to be save, we do nothing
+                    if (clientSession.isConnected()) {
+                        return storedSession;
+                    }
+
+                    removeWillReference(clientSession);
+                    clientSession.setWillPublish(null);
+
+                    return storedSession;
+                });
+
+        final ClientSession session = persistenceEntry.getObject();
+        if (session.isConnected()) {
+            return null;
+        }
+        return new PersistenceEntry<>(session.deepCopyWithoutPayload(), persistenceEntry.getTimestamp());
     }
 
     @Override
     public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
-            @NotNull PersistenceFilter filter, int bucketIndex, @Nullable String lastClientId, int maxResults) {
+           final  @NotNull PersistenceFilter filter, final int bucketIndex, final @Nullable String lastClientId,final int maxResults) {
+//        final Bucket bucket = buckets[bucketIndex];
+//        return bucket.getEnvironment().computeInTransaction(txn -> {
+//            final Map<String, ClientSession> resultMap = Maps.newHashMap();
+//
+//            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+//                int counter = 0;
+//
+//                //determine starting point
+//                if (lastClientId != null) {
+//                    final ByteIterable lastClientKey = bytesToByteIterable(serializer.serializeKey(lastClientId));
+//                    final ByteIterable foundKey = cursor.getSearchKeyRange(lastClientKey);
+//                    if (foundKey == null) {
+//                        //this key is not in the persistence and no key larger than this key is there anymore
+//                        return new BucketChunkResult<>(resultMap, true, lastClientId, bucketIndex);
+//                    } else {
+//                        if (cursor.getKey().equals(lastClientKey)) {
+//                            //jump to the next key
+//                            cursor.getNext();
+//                        }
+//                    }
+//                } else {
+//                    cursor.getNext();
+//                }
+//
+//                String lastKey = lastClientId;
+//
+//                do {
+//
+//                    if (cursor.getKey() == ByteIterable.EMPTY) {
+//                        continue;
+//                    }
+//
+//                    final String key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+//                    lastKey = key;
+//
+//                    if (!filter.match(key)) {
+//                        continue;
+//                    }
+//
+//                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+//
+//                    final ClientSession clientSession = serializer.deserializeValueWithoutWill(valueBytes);
+//                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
+//
+//                    final boolean expired = ClientSessions.isExpired(clientSession, System.currentTimeMillis() - timestamp);
+//                    if (expired) {
+//                        continue;
+//                    }
+//
+//                    resultMap.put(key, clientSession);
+//                    counter++;
+//
+//                    if (counter >= maxResults) {
+//                        return new BucketChunkResult<>(resultMap, !cursor.getNext(), lastKey, bucketIndex);
+//                    }
+//
+//                } while (cursor.getNext());
+//
+//                return new BucketChunkResult<>(resultMap, true, lastKey, bucketIndex);
+//            }
+//        });
         return null;
     }
 
