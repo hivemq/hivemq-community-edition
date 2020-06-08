@@ -31,15 +31,15 @@ import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
-import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
-import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Cursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,7 +50,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
-import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 
 /**
  * @author Georg Held
@@ -280,20 +279,33 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     }
 
     @Override
-    public @NotNull Set<String> getDisconnectedClients(int bucketIndex) {
-        return null;
+    public @NotNull Set<String> getDisconnectedClients(final int bucketIndex) {
+
+        final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
+
+        return bucket.entrySet()
+                .stream()
+                .filter(entry -> !entry.getValue().getObject().isConnected())
+                .filter(entry -> entry.getValue().getObject().getSessionExpiryInterval() > 0)
+                .filter(entry -> {
+                    final PersistenceEntry<ClientSession> storedSession = entry.getValue();
+                    final long timeSinceDisconnect = System.currentTimeMillis() - storedSession.getTimestamp();
+                    final long sessionExpiryIntervalInMillis =
+                            storedSession.getObject().getSessionExpiryInterval() * 1000L;
+                    return timeSinceDisconnect < sessionExpiryIntervalInMillis;
+                })
+                .map(Map.Entry::getKey)
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
     public int getSessionsCount() {
-        return 0;
+        return sessionsCount.get();
     }
 
     @Override
     public void setSessionExpiryInterval(
-            final @NotNull String clientId,
-            final long sessionExpiryInterval,
-            final int bucketIndex) {
+            final @NotNull String clientId, final long sessionExpiryInterval, final int bucketIndex) {
         checkNotNull(clientId, "Client Id must not be null");
 
         if (sessionExpiryInterval < 0) {
