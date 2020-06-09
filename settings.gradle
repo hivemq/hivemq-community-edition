@@ -6,6 +6,7 @@ pluginManagement {
         id 'org.owasp.dependencycheck' version "${getProperty("plugin.dependencycheck.version")}"
         id 'com.github.spotbugs' version "${getProperty("plugin.spotbugs.version")}"
         id 'de.thetaphi.forbiddenapis' version "${getProperty("plugin.forbiddenapis.version")}"
+        id("com.github.sgtsilvio.gradle.utf8") version "${getProperty("plugin.utf8.version")}"
         id 'com.github.sgtsilvio.gradle.metadata' version "${getProperty("plugin.metadata.version")}"
     }
 }
