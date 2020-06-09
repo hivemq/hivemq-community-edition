@@ -333,8 +333,10 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 removeWillReference(clientSession);
                 clientSession.setWillPublish(null);
             }
-            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            // We check the payload persistence if we have a payload before we serialize the payloadId.
+            // Its better to have no will than to have a will without payload in the persistence.
             dereferenceWillPayload(clientSession);
+            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
             return clientSession;
         });
     }

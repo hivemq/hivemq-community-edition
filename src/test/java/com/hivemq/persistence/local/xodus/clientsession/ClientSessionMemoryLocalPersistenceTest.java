@@ -415,7 +415,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
     @Test
     public void test_remove_will() {
 
-        when(payloadPersistence.getPayloadOrNull(anyInt())).thenReturn(new byte[]{});
+        when(payloadPersistence.getPayloadOrNull(anyLong())).thenReturn(new byte[]{});
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
         persistence.put(client1, new ClientSession(true,
@@ -569,6 +569,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(100, clientIds.size());
     }
 
+    @Ignore("currently not relevant as everything is already in memory")
     @Test(timeout = 10_000)
     public void test_get_chunk_empty_between_iterations() {
 

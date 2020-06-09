@@ -131,7 +131,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             return null;
         }
 
-        final ClientSession clientSession = storedSession.getObject();
+        final ClientSession clientSession = storedSession.getObject().deepCopyWithoutPayload();
 
         if (checkExpired &&
                 ClientSessions.isExpired(clientSession, System.currentTimeMillis() - storedSession.getTimestamp())) {
@@ -140,7 +140,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (includeWill) {
             dereferenceWillPayload(clientSession);
         }
-        return clientSession.deepCopyWithoutPayload();
+        return clientSession;
     }
 
     @Override
@@ -244,7 +244,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             }
 
             dereferenceWillPayload(clientSession);
-            return oldSession;
+            return new PersistenceEntry<>(clientSession, timestamp);
         });
 
         return storedSession.getObject();
@@ -359,7 +359,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             clientSession.setSessionExpiryInterval(sessionExpiryInterval);
 
-            return storedSession;
+            return new PersistenceEntry<>(clientSession, System.currentTimeMillis());
         });
     }
 
@@ -404,6 +404,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
                     return storedSession;
                 });
+
+        if (persistenceEntry == null) {
+            return null;
+        }
 
         final ClientSession session = persistenceEntry.getObject();
         if (session.isConnected()) {
