@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 dc-square GmbH
+ * Copyright 2019 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.hivemq.persistence.local.xodus.clientsession;
+package com.hivemq.persistence.local.memory;
 
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.configuration.service.InternalConfigurations;
