@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.persistence.local.memory;
 
 import com.google.common.collect.ImmutableSet;
@@ -217,7 +218,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
-        final PersistenceEntry<ClientSession> storedSession = bucket.compute(clientId, (ignored, oldSession) -> {
+        final ClientSession storedSession = bucket.compute(clientId, (ignored, oldSession) -> {
 
             if (oldSession == null) {
                 // we create a tombstone here
@@ -242,11 +243,13 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 clientSession.setWillPublish(null);
             }
 
-            dereferenceWillPayload(clientSession);
+            checkForPayloadExistence(clientSession, false);
             return new PersistenceEntry<>(clientSession, timestamp);
-        });
+        }).getObject().deepCopyWithoutPayload();
 
-        return storedSession.getObject();
+
+        dereferenceWillPayload(storedSession);
+        return storedSession;
     }
 
     @Override
@@ -299,9 +302,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 expiredClientIds.add(entry.getKey());
                 iterator.remove();
             }
-
         }
-
         return expiredClientIds.build();
     }
 
@@ -454,7 +455,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         payloadPersistence.decrementReferenceCounter(willPublish.getPayloadId());
     }
 
-    private void dereferenceWillPayload(final @NotNull ClientSession clientSession) {
+    private void checkForPayloadExistence(final @NotNull ClientSession clientSession, final boolean dereference) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -469,7 +470,13 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             log.warn("Will Payload for payloadid {} not found", payloadId);
             return;
         }
-        willPublish.getMqttWillPublish().setPayload(payload);
+        if (dereference) {
+            willPublish.getMqttWillPublish().setPayload(payload);
+        }
+    }
+
+    private void dereferenceWillPayload(final @NotNull ClientSession clientSession) {
+        checkForPayloadExistence(clientSession, true);
     }
 
     private boolean persistent(final @NotNull ClientSession clientSession) {
