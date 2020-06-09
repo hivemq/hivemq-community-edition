@@ -5,6 +5,7 @@ plugins {
     id 'com.github.johnrengelman.shadow'
     id 'com.github.hierynomus.license'
     id 'org.owasp.dependencycheck'
+    id 'com.github.sgtsilvio.gradle.utf8'
     id 'com.github.sgtsilvio.gradle.metadata'
 
     /* Code Quality Plugins */
@@ -74,10 +75,6 @@ java {
 
     withJavadocJar()
     withSourcesJar()
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
 }
 
 
@@ -291,9 +288,6 @@ tasks.register('packaging', Zip) {
 defaultTasks 'clean', 'packaging'
 
 tasks.javadoc {
-    options.charSet = 'UTF-8'
-    options.encoding = 'UTF-8'
-
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
     options.addBooleanOption '-no-module-directories', true
