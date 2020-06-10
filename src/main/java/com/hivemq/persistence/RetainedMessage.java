@@ -134,9 +134,7 @@ public class RetainedMessage {
             return sizeInMemory;
         }
         int size = 0;
-        if (message != null) {
-            size += message.length;
-        }
+        // The payload size is not calculated because the payload is removed before the message is stored
         size += ObjectMemoryEstimation.enumSize(); // QoS
         size += ObjectMemoryEstimation.longWrapperSize(); // Payload ID
         size += ObjectMemoryEstimation.longSize(); // expiry interval

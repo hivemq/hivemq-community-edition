@@ -38,7 +38,6 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -58,9 +57,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     @VisibleForTesting
     @NotNull
-    final ConcurrentHashMap<Integer, PublishTopicTree> topicTrees = new ConcurrentHashMap<>();
+    PublishTopicTree[] topicTrees;
 
-    private final @NotNull ConcurrentHashMap<Integer, Map<String, RetainedMessage>> buckets = new ConcurrentHashMap<>();
+    private @NotNull Map<String, RetainedMessage>[] buckets;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
 
     private final int bucketCount;
@@ -70,11 +69,15 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             @NotNull final PublishPayloadPersistence payloadPersistence, @NotNull final MetricRegistry metricRegistry) {
         this.payloadPersistence = payloadPersistence;
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
+
+        //noinspection unchecked
+        buckets = new HashMap[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
-            buckets.put(i, new HashMap<>());
+            buckets[i] = new HashMap<>();
         }
+        topicTrees = new PublishTopicTree[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
-            topicTrees.put(i, new PublishTopicTree());
+            topicTrees[i] = new PublishTopicTree();
         }
 
         metricRegistry.register(
@@ -85,7 +88,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     @Override
     public long size() {
         int sum = 0;
-        for (final Map<String, RetainedMessage> bucket : buckets.values()) {
+        for (final Map<String, RetainedMessage> bucket : buckets) {
             sum += bucket.size();
         }
         return sum;
@@ -95,9 +98,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     @Override
     public void clear(final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-        topicTrees.put(bucketIndex, new PublishTopicTree());
+        topicTrees[bucketIndex] = new PublishTopicTree();
 
-        final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
+        final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         for (final RetainedMessage retainedMessage : bucket.values()) {
             payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
@@ -111,11 +114,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
-        topicTrees.get(bucketIndex).remove(topic);
-        final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
+        topicTrees[bucketIndex].remove(topic);
+        final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage retainedMessage = bucket.get(topic);
         if (retainedMessage != null) {
-            topicTrees.get(bucketIndex).remove(topic);
+            topicTrees[bucketIndex].remove(topic);
             payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
         }
@@ -128,7 +131,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
-        final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
+        final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage retainedMessage = bucket.get(topic);
         if (retainedMessage == null) {
             return null;
@@ -158,14 +161,14 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final RetainedMessage copy = retainedMessage.copyWithoutPayload();
-        final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
+        final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage previousMessage = bucket.get(topic);
         if (previousMessage != null) {
             payloadPersistence.decrementReferenceCounter(previousMessage.getPayloadId());
             currentMemorySize.addAndGet(-previousMessage.getEstimatedSizeInMemory());
         }
         currentMemorySize.addAndGet(copy.getEstimatedSizeInMemory());
-        topicTrees.get(bucketIndex).add(topic);
+        topicTrees[bucketIndex].add(topic);
         bucket.put(topic, copy);
     }
 
@@ -176,7 +179,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         checkArgument(bucketIndex >= 0 && bucketIndex < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
-        return topicTrees.get(bucketIndex).get(subscription);
+        return topicTrees[bucketIndex].get(subscription);
     }
 
     @ExecuteInSingleWriter
@@ -185,7 +188,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         checkArgument(bucketIndex >= 0 && bucketIndex < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
-        final Map<String, RetainedMessage> bucket = buckets.get(bucketIndex);
+        final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         bucket.entrySet().removeIf((Predicate<Map.Entry<String, RetainedMessage>>) entry -> {
             if (entry == null) {
                 return false;
@@ -195,7 +198,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
                 payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
                 currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
-                topicTrees.get(bucketIndex).remove(topic);
+                topicTrees[bucketIndex].remove(topic);
                 return true;
             }
             return false;
