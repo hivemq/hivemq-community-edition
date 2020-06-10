@@ -151,5 +151,12 @@ public class HiveMQMetrics {
      */
     public static final HiveMQMetric<Gauge<Number>> CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE =
             HiveMQMetric.gaugeValue("com.hivemq.persistence.client-session.subscriptions.in-memory.total-size");
+
+    /**
+     * represents a {@link Gauge}, which measures the approximate memory usage of the client session persistence if
+     * the memory persistence is used.
+     */
+    public static final HiveMQMetric<Gauge<Number>> CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE =
+            HiveMQMetric.gaugeValue("com.hivemq.persistence.client-sessions.in-memory.total-size");
 }
 

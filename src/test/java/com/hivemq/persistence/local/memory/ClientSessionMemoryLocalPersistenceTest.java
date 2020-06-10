@@ -15,11 +15,14 @@
  */
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -71,6 +74,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
     @Mock
     private EventLog eventLog;
+    private MetricRegistry metricRegistry;
+    private Gauge memoryGauge;
 
     @Before
     public void before() throws Exception {
@@ -82,7 +87,9 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
                 temporaryFolder.newFolder());
 
-        persistence = new ClientSessionMemoryLocalPersistence(mqttConfigurationService, payloadPersistence, eventLog);
+        metricRegistry = new MetricRegistry();
+        persistence = new ClientSessionMemoryLocalPersistence(mqttConfigurationService, payloadPersistence, metricRegistry, eventLog);
+        memoryGauge = metricRegistry.gauge(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(), null);
     }
 
     @Test
@@ -102,6 +109,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertNotNull(session);
 
         assertEquals(123L, persistence.getTimestamp("clientid").longValue());
+        assertTrue((long) memoryGauge.getValue() > 0);
     }
 
     @Test
@@ -115,11 +123,14 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         persistence.disconnect(client2, 124L, false, 1, SESSION_EXPIRY_MAX);
 
+        final long memory = (long) memoryGauge.getValue();
+        assertTrue(memory > 0);
 
         final Set<String> disconnectedClients = persistence.getDisconnectedClients(1);
 
         assertEquals(1, disconnectedClients.size());
         assertTrue(disconnectedClients.contains(client2));
+        assertEquals(memory, (long) memoryGauge.getValue());
     }
 
     @Test
@@ -213,6 +224,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 new ClientSession(true, 10),
                 System.currentTimeMillis() - 100000,
                 BucketUtils.getBucket("clientid3", BUCKET_COUNT));
+
+
         final Set<String> result3 = persistence.cleanUp(BucketUtils.getBucket("clientid3", BUCKET_COUNT));
         assertFalse(result3.contains("clientid3"));
 
@@ -678,6 +691,51 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(100, clientIds.size());
     }
 
+    @Test
+    public void cleanUp_usedMemoryReturnsToZero() {
+        assertEquals(0L, (long) memoryGauge.getValue());
+
+        final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt3Builder().withTopic("topic")
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_LEAST_ONCE)
+                .withRetain(true)
+                .withHivemqId("hivemqId")
+                .build();
+
+        final ClientSession clientSession = new ClientSession(true, 10, new ClientSessionWill(mqttWillPublish, 1L));
+        persistence.put("client", clientSession, System.currentTimeMillis(), 1);
+        final long peak = (long) memoryGauge.getValue();
+        assertTrue(peak > 0);
+        persistence.disconnect("client", System.currentTimeMillis() - 20000, true, 1, 10);
+        assertEquals(peak, (long) memoryGauge.getValue());
+        persistence.removeWill("client", 1);
+        final long reduced = (long) memoryGauge.getValue();
+        assertTrue(reduced > 0);
+
+        assertTrue(peak > reduced);
+        persistence.cleanUp(1);
+        assertEquals(0L, (long) memoryGauge.getValue());
+    }
+
+    @Test
+    public void removeWithTimestamp_usedMemoryReturnsToZero() {
+        assertEquals(0L, (long) memoryGauge.getValue());
+
+        final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt3Builder().withTopic("topic")
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_LEAST_ONCE)
+                .withRetain(true)
+                .withHivemqId("hivemqId")
+                .build();
+
+        final ClientSession clientSession = new ClientSession(true, 10, new ClientSessionWill(mqttWillPublish, 1L));
+        persistence.put("client", clientSession, System.currentTimeMillis(), 1);
+        final long peak = (long) memoryGauge.getValue();
+        assertTrue(peak > 0);
+        persistence.removeWithTimestamp("client", 1);
+        assertEquals(0L, (long) memoryGauge.getValue());
+    }
+
     @NotNull
     public ArrayList<String> getRandomUniqueIds() {
         final Set<String> clientIdSet = new HashSet<>();
@@ -687,10 +745,6 @@ public class ClientSessionMemoryLocalPersistenceTest {
             clientIdSet.add(RandomStringUtils.randomAlphanumeric(random.nextInt(100)));
         }
         return new ArrayList<>(clientIdSet);
-    }
-
-    private ClientSession getSessionWithInterval(final long interval) {
-        return new ClientSession(true, interval);
     }
 
     private static class ClientIdPersistenceFilter implements PersistenceFilter {

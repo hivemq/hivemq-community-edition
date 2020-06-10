@@ -19,6 +19,7 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.Sizable;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
@@ -27,9 +28,10 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DIS
  */
 public class ClientSession implements Sizable {
 
-    private volatile boolean connected;
+    private boolean connected;
+    private long sessionExpiryInterval;
 
-    private volatile long sessionExpiryInterval;
+    private volatile int inMemorySize = SIZE_NOT_CALCULATED;
 
     private ClientSessionWill willPublish;
 
@@ -74,11 +76,6 @@ public class ClientSession implements Sizable {
         this.willPublish = willPublish;
     }
 
-    @Override
-    public int getEstimatedSize() {
-        return 0;
-    }
-
     public @NotNull ClientSession deepCopyWithoutPayload() {
         return new ClientSession(
                 this.connected,
@@ -88,5 +85,26 @@ public class ClientSession implements Sizable {
 
     public @NotNull ClientSession copyWithoutWill() {
         return new ClientSession(this.connected, this.sessionExpiryInterval, null);
+    }
+
+    @Override
+    public int getEstimatedSize() {
+
+        if (inMemorySize != SIZE_NOT_CALCULATED) {
+            return inMemorySize;
+        }
+
+        int size = ObjectMemoryEstimation.objectShellSize();
+        size += ObjectMemoryEstimation.booleanSize(); // connected
+        size += ObjectMemoryEstimation.longSize(); // sessionExpiryInterval
+
+        size += ObjectMemoryEstimation.objectRefSize(); // reference to will
+        if (willPublish != null) {
+            size += willPublish.getEstimatedSize();
+        }
+
+        inMemorySize = size;
+
+        return inMemorySize;
     }
 }

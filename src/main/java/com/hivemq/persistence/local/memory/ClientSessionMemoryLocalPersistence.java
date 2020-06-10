@@ -16,12 +16,15 @@
 
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.PersistenceFilter;
@@ -43,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -57,6 +61,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ClientSessionMemoryLocalPersistence.class);
 
+    final @NotNull AtomicLong currentMemorySize = new AtomicLong();
+
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
 
@@ -70,6 +76,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     ClientSessionMemoryLocalPersistence(
             final @NotNull MqttConfigurationService mqttConfigurationService,
             final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull MetricRegistry metricRegistry,
             final @NotNull EventLog eventLog) {
 
         this.payloadPersistence = payloadPersistence;
@@ -81,6 +88,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new ConcurrentHashMap<>();
         }
+
+        metricRegistry.register(
+                HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+                (Gauge<Long>) currentMemorySize::get);
     }
 
     private @NotNull Map<String, PersistenceEntry<ClientSession>> getBucket(final int bucketIndex) {
@@ -179,6 +190,9 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             if (storedSession != null) {
                 final ClientSession oldSession = storedSession.getObject();
+
+                currentMemorySize.addAndGet(-storedSession.getEstimatedSize());
+
                 if (oldSession.getWillPublish() != null) {
                     removeWillReference(oldSession);
                 }
@@ -204,7 +218,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 willPublish.getMqttWillPublish().setPayload(null);
             }
 
-            return new PersistenceEntry<>(usedSession, timestamp);
+            final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);
+            currentMemorySize.addAndGet(newEntry.getEstimatedSize());
+
+            return newEntry;
         });
     }
 
@@ -218,33 +235,40 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
-        final ClientSession storedSession = bucket.compute(clientId, (ignored, oldSession) -> {
+        final ClientSession storedSession = bucket.compute(clientId, (ignored, oldEntry) -> {
 
-            if (oldSession == null) {
+            if (oldEntry == null) {
                 // we create a tombstone here
                 final ClientSession clientSession = new ClientSession(false, configuredSessionExpiryInterval);
-                return new PersistenceEntry<>(clientSession, timestamp);
+                final PersistenceEntry<ClientSession> persistenceEntry = new PersistenceEntry<>(clientSession, timestamp);
+                currentMemorySize.addAndGet(persistenceEntry.getEstimatedSize());
+                return persistenceEntry;
             }
 
-            final ClientSession clientSession = oldSession.getObject();
+            currentMemorySize.addAndGet(-oldEntry.getEstimatedSize());
+            final ClientSession oldSession = oldEntry.getObject();
+            final ClientSession newSession;
+            if (sendWill) {
+                newSession = oldSession;
+            } else {
+                removeWillReference(oldSession);
+                newSession = oldSession.copyWithoutWill();
+            }
 
             if (expiry != SESSION_EXPIRY_NOT_SET) {
-                clientSession.setSessionExpiryInterval(expiry);
+                newSession.setSessionExpiryInterval(expiry);
             }
 
-            if (clientSession.isConnected() && !persistent(clientSession)) {
+            if (newSession.isConnected() && !persistent(newSession)) {
                 sessionsCount.decrementAndGet();
             }
 
-            clientSession.setConnected(false);
+            newSession.setConnected(false);
+            checkForPayloadExistence(newSession, false);
 
-            if (!sendWill) {
-                removeWillReference(clientSession);
-                clientSession.setWillPublish(null);
-            }
-
-            checkForPayloadExistence(clientSession, false);
-            return new PersistenceEntry<>(clientSession, timestamp);
+            final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(newSession, timestamp);
+            currentMemorySize.addAndGet(newEntry.getEstimatedSize());
+            return newEntry;
         }).getObject().deepCopyWithoutPayload();
 
 
@@ -271,6 +295,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 sessionsCount.decrementAndGet();
             }
             removeWillReference(clientSession);
+            currentMemorySize.addAndGet(-remove.getEstimatedSize());
         }
     }
 
@@ -286,10 +311,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
         while (iterator.hasNext()) {
             final Map.Entry<String, PersistenceEntry<ClientSession>> entry = iterator.next();
-            final PersistenceEntry<ClientSession> storedSession = entry.getValue();
+            final PersistenceEntry<ClientSession> storedEntry = entry.getValue();
 
-            final long timestamp = storedSession.getTimestamp();
-            final ClientSession clientSession = storedSession.getObject();
+            final long timestamp = storedEntry.getTimestamp();
+            final ClientSession clientSession = storedEntry.getObject();
 
             final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
 
@@ -300,6 +325,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 }
                 eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, entry.getKey());
                 expiredClientIds.add(entry.getKey());
+                currentMemorySize.addAndGet(-storedEntry.getEstimatedSize());
                 iterator.remove();
             }
         }
@@ -391,18 +417,20 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
         final PersistenceEntry<ClientSession> persistenceEntry =
-                bucket.computeIfPresent(clientId, (ignored, storedSession) -> {
-                    final ClientSession clientSession = storedSession.getObject();
+                bucket.computeIfPresent(clientId, (ignored, oldEntry) -> {
+                    final ClientSession oldSession = oldEntry.getObject();
 
                     // Just to be save, we do nothing
-                    if (clientSession.isConnected()) {
-                        return storedSession;
+                    if (oldSession.isConnected()) {
+                        return oldEntry;
                     }
+                    currentMemorySize.addAndGet(-oldEntry.getEstimatedSize());
 
-                    removeWillReference(clientSession);
-                    clientSession.setWillPublish(null);
+                    removeWillReference(oldSession);
 
-                    return storedSession;
+                    final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(oldSession.copyWithoutWill(), oldEntry.getTimestamp());
+                    currentMemorySize.addAndGet(newEntry.getEstimatedSize());
+                    return newEntry;
                 });
 
         if (persistenceEntry == null) {

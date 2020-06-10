@@ -44,7 +44,7 @@ public class ObjectMemoryEstimation {
         }
 
         int size = STRING_OVERHEAD;
-        size += string.length();
+        size += string.length() * 2;
         return size;
     }
 
