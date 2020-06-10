@@ -19,6 +19,7 @@ package com.hivemq.persistence.local.memory;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
+import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -37,6 +38,7 @@ import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
+import com.hivemq.util.ThreadPreConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
  * @author Georg Held
@@ -84,6 +87,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         this.configuredSessionExpiryInterval = mqttConfigurationService.maxSessionExpiryInterval();
 
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
+
+        //noinspection unchecked
         buckets = new ConcurrentHashMap[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new ConcurrentHashMap<>();
@@ -173,6 +178,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     }
 
     @Override
+    @ExecuteInSingleWriter
     public void put(
             final @NotNull String clientId,
             final @NotNull ClientSession clientSession,
@@ -181,6 +187,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         checkNotNull(clientId, "Client id must not be null");
         checkNotNull(clientSession, "Client session must not be null");
         checkArgument(timestamp > 0, "Timestamp must be greater than 0");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
 
         final Map<String, PersistenceEntry<ClientSession>> sessions = getBucket(bucketIndex);
         final ClientSession usedSession = clientSession.deepCopyWithoutPayload();
@@ -233,6 +241,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final int bucketIndex,
             final long expiry) {
 
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
         final ClientSession storedSession = bucket.compute(clientId, (ignored, oldEntry) -> {
@@ -284,6 +294,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         return ImmutableSet.copyOf(bucket.keySet());
     }
 
+    @ExecuteInSingleWriter
     @Override
     public void removeWithTimestamp(final @NotNull String clientId, final int bucketIndex) {
 
@@ -299,8 +310,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         }
     }
 
+    @ExecuteInSingleWriter
     @Override
     public @NotNull Set<String> cleanUp(final int bucketIndex) {
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
@@ -358,10 +371,13 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         return sessionsCount.get();
     }
 
+    @ExecuteInSingleWriter
     @Override
     public void setSessionExpiryInterval(
             final @NotNull String clientId, final long sessionExpiryInterval, final int bucketIndex) {
         checkNotNull(clientId, "Client Id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
 
         if (sessionExpiryInterval < 0) {
             throw new InvalidSessionExpiryIntervalException("Invalid session expiry interval " + sessionExpiryInterval);
@@ -411,8 +427,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 }));
     }
 
+    @ExecuteInSingleWriter
     @Override
     public @Nullable PersistenceEntry<ClientSession> removeWill(final @NotNull String clientId, final int bucketIndex) {
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
