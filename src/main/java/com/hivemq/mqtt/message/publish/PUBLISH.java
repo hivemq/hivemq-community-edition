@@ -436,7 +436,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
         size += 24; //User Properties Overhead
         for (final MqttUserProperty userProperty : getUserProperties().asList()) {
-            size += 12; //UserProperty Object Overhead
+            size += 24; //UserProperty Object Overhead
             size += ObjectMemoryEstimation.stringSize(userProperty.getName());
             size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
         }

@@ -208,7 +208,7 @@ public class PUBLISHTest {
                 .withTopic("topic") // 5+38 = 43 bytes
                 .withResponseTopic("response") // 8+38 = 46 bytes
                 .withCorrelationData("correlation".getBytes()) // 11+12 = 23 bytes
-                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value"))) //   4 + 5 + 12 + 38 + 38 = 97
+                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value"))) //   4 + 5 + 24 + 38 + 38 = 109
                 .build();
 
         final List<Thread> threadList = new ArrayList<>();
@@ -228,8 +228,8 @@ public class PUBLISHTest {
         }
 
         for (final int size : sizeList) {
-            //19 + 43 + 46 + 23 + 97 = 228
-            assertEquals(228 + GENERAL_OVERHEAD, size);
+            //19 + 43 + 46 + 23 + 109 = 240
+            assertEquals(240 + GENERAL_OVERHEAD, size);
         }
 
     }
@@ -273,10 +273,10 @@ public class PUBLISHTest {
                 .withCorrelationData(new byte[1024 * 1024 * 5])  // 5MB + 12 bytes
                 .withResponseTopic(RandomStringUtils.randomAlphanumeric(65000)) // 130.038 bytes
                 .withTopic(RandomStringUtils.randomAlphanumeric(65000)) // 130.038 bytes
-                .withUserProperties(getManyProperties()) // (9*98) + (90*99) + (900*100) + (9000*101) + (90000*102) + (1*103) = 10.188.895 bytes
+                .withUserProperties(getManyProperties()) // (9*110) + (90*111) + (900*112) + (9000*113) + (90000*114) + (1*115) = 11.388.895 bytes
                 .build();
 
-        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 24 + (65038 * 2) + 10_188_895 + GENERAL_OVERHEAD; // 20.804.946 bytes
+        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 24 + (65038 * 2) + 11_388_895 + GENERAL_OVERHEAD; // 22.004.946 bytes
         assertEquals(estimatedSize, publishMqtt5.getEstimatedSizeInMemory());
 
     }
