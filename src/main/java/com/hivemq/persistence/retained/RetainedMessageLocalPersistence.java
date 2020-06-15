@@ -33,6 +33,8 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     String PERSISTENCE_NAME = "retained_messages";
 
     /**
+     * Due to concurrent access to the persistence, this value may not be correct.
+     *
      * @return The amount of all retained messages stored in the persistence.
      */
     long size();

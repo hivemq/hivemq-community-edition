@@ -22,7 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
  */
 public class ObjectMemoryEstimation {
 
-    public static final int ENUM_OVERHEAD = 24;
+    public static final int ENUM_OVERHEAD = 4;
     public static final int STRING_OVERHEAD = 38;
     public static final int ARRAY_OVERHEAD = 12;
     public static final int LONG_WRAPPER_SIZE = 16;
@@ -40,7 +40,7 @@ public class ObjectMemoryEstimation {
         }
 
         int size = STRING_OVERHEAD;
-        size += string.length() * 2;
+        size += string.length();
         return size;
     }
 

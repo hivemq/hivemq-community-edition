@@ -141,7 +141,7 @@ public class RetainedMessage {
 
         size += 24; //User Properties Overhead
         for (final MqttUserProperty userProperty : getUserProperties().asList()) {
-            size += 8; //UserProperty Object Overhead
+            size += 12; //UserProperty Object Overhead
             size += ObjectMemoryEstimation.stringSize(userProperty.getName());
             size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
         }

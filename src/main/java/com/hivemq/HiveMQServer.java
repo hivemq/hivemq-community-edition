@@ -136,7 +136,7 @@ public class HiveMQServer {
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;
         }
-        if (configService.persistenceConfigurationService().getMode() == PersistenceMode.IN_MEMORY) {
+        if (configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
 
             if (migrations.size() > 0) {
                 log.info("Persistence types has been changed, migrating persistent data.");

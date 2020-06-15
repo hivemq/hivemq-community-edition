@@ -18,7 +18,6 @@ package com.hivemq.persistence.local.memory;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -57,9 +56,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     @VisibleForTesting
     @NotNull
-    PublishTopicTree[] topicTrees;
+    final PublishTopicTree[] topicTrees;
 
-    private @NotNull Map<String, RetainedMessage>[] buckets;
+    final private @NotNull Map<String, RetainedMessage>[] buckets;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
 
     private final int bucketCount;
@@ -116,13 +115,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
         topicTrees[bucketIndex].remove(topic);
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
-        final RetainedMessage retainedMessage = bucket.get(topic);
+        final RetainedMessage retainedMessage = bucket.remove(topic);
         if (retainedMessage != null) {
-            topicTrees[bucketIndex].remove(topic);
-            payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
+            payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
         }
-        bucket.remove(topic);
     }
 
     @ExecuteInSingleWriter
@@ -162,14 +159,13 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
         final RetainedMessage copy = retainedMessage.copyWithoutPayload();
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
-        final RetainedMessage previousMessage = bucket.get(topic);
+        final RetainedMessage previousMessage = bucket.put(topic, copy);
         if (previousMessage != null) {
             payloadPersistence.decrementReferenceCounter(previousMessage.getPayloadId());
             currentMemorySize.addAndGet(-previousMessage.getEstimatedSizeInMemory());
         }
         currentMemorySize.addAndGet(copy.getEstimatedSizeInMemory());
         topicTrees[bucketIndex].add(topic);
-        bucket.put(topic, copy);
     }
 
     @NotNull
@@ -189,7 +185,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
-        bucket.entrySet().removeIf((Predicate<Map.Entry<String, RetainedMessage>>) entry -> {
+        bucket.entrySet().removeIf(entry -> {
             if (entry == null) {
                 return false;
             }
