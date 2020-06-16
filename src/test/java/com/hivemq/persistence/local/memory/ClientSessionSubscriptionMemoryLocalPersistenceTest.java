@@ -30,10 +30,8 @@ import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ObjectMemoryEstimation;
-import com.hivemq.util.ThreadPreConditions;
 import net.jodah.concurrentunit.Waiter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,14 +71,8 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
         metricRegistry = new MetricRegistry();
-        ThreadPreConditions.disable();
 
         persistence = new ClientSessionSubscriptionMemoryLocalPersistence(metricRegistry);
-    }
-
-    @After
-    public void cleanUp() {
-        ThreadPreConditions.enable();
     }
 
     @Test
