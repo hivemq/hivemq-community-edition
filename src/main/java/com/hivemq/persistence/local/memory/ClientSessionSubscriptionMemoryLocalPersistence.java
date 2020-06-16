@@ -211,6 +211,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
 
     @Override
     public void closeDB(final int bucketIndex) {
-        //noop because closing is JVMs job
+        buckets[bucketIndex].clear();
+        currentMemorySize.set(0);
     }
 }

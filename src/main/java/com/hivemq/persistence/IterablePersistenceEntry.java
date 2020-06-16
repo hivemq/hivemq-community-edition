@@ -54,7 +54,7 @@ public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> i
     }
 
     public static int getFixedSize(){
-        int size = ObjectMemoryEstimation.objectOverheadSize(); // object overhead
+        int size = ObjectMemoryEstimation.objectShellSize(); // object overhead
         size += ObjectMemoryEstimation.longSize(); // timestamp
         size += ObjectMemoryEstimation.intSize(); // sizeInMemory
         size += ObjectMemoryEstimation.collectionOverhead(); // collection overhead

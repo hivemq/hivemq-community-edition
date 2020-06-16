@@ -45,12 +45,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Christoph Schäbel
+ * @author Florian Limpöck
  */
+@SuppressWarnings("NullabilityAnnotations")
 public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Rule
@@ -353,7 +354,57 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     }
 
     @Test
-    public void test_remove_subscriptions_non_existet() {
+    public void test_add_after_closeDB() {
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+
+        for (int i = 0; i < bucketCount; i++) {
+            persistence.closeDB(i);
+        }
+
+        Long value = (Long) metricRegistry.getGauges()
+                .get(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name())
+                .getValue();
+        assertEquals(0, value.intValue());
+
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+
+        assertEquals(3, persistence.getSubscriptions("clientid").size());
+
+        value = (Long) metricRegistry.getGauges()
+                .get(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name())
+                .getValue();
+
+        assertTrue(value > 0L);
+
+
+    }
+
+    @Test
+    public void test_closeDB() {
+        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+
+        for (int i = 0; i < bucketCount; i++) {
+            persistence.closeDB(i);
+        }
+
+        final Long value = (Long) metricRegistry.getGauges()
+                .get(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name())
+                .getValue();
+        assertEquals(0, value.intValue());
+
+    }
+
+    @Test
+    public void test_remove_subscriptions_non_existent() {
         assertEquals(0, persistence.getSubscriptions("clientid").size());
 
         persistence.removeSubscriptions("clientid", ImmutableSet.of("topic"), 12345678901L, BucketUtils.getBucket("clientid", bucketCount));
@@ -370,35 +421,29 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     public void test_concurrent_access() throws Exception {
         final Waiter waiter = new Waiter();
         final AtomicBoolean adding = new AtomicBoolean(true);
-        final Thread thread1 = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    for (int i = 0; i < 10000; i++) {
-                        persistence.addSubscription("client", new Topic("topic" + i, QoS.AT_LEAST_ONCE), System.currentTimeMillis(), BucketUtils.getBucket("client", bucketCount));
-                        waiter.resume();
-                    }
-                    adding.set(false);
-                } catch (final Throwable t) {
-                    t.printStackTrace();
-                    waiter.fail();
+        final Thread thread1 = new Thread(() -> {
+            try {
+                for (int i = 0; i < 10000; i++) {
+                    persistence.addSubscription("client", new Topic("topic" + i, QoS.AT_LEAST_ONCE), System.currentTimeMillis(), BucketUtils.getBucket("client", bucketCount));
+                    waiter.resume();
                 }
+                adding.set(false);
+            } catch (final Throwable t) {
+                t.printStackTrace();
+                waiter.fail();
             }
-        };
+        });
 
-        final Thread thread2 = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    while (adding.get()) {
-                        persistence.getSubscriptions("client");
-                    }
-                } catch (final Throwable t) {
-                    t.printStackTrace();
-                    waiter.fail();
+        final Thread thread2 = new Thread(() -> {
+            try {
+                while (adding.get()) {
+                    persistence.getSubscriptions("client");
                 }
+            } catch (final Throwable t) {
+                t.printStackTrace();
+                waiter.fail();
             }
-        };
+        });
         thread1.start();
         thread2.start();
 
@@ -444,15 +489,19 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
         int found = 0;
         for (final Topic subscription : subscriptions) {
-            if (subscription.getTopic().equals("topic/a")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 1);
-                found++;
-            } else if (subscription.getTopic().equals("topic/#")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 2);
-                found++;
-            } else if (subscription.getTopic().equals("topic/+")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 3);
-                found++;
+            switch (subscription.getTopic()) {
+                case "topic/a":
+                    assertEquals(Objects.requireNonNull(subscription.getSubscriptionIdentifier()).intValue(), 1);
+                    found++;
+                    break;
+                case "topic/#":
+                    assertEquals(Objects.requireNonNull(subscription.getSubscriptionIdentifier()).intValue(), 2);
+                    found++;
+                    break;
+                case "topic/+":
+                    assertEquals(Objects.requireNonNull(subscription.getSubscriptionIdentifier()).intValue(), 3);
+                    found++;
+                    break;
             }
         }
         assertEquals(3, found);
@@ -478,7 +527,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     }
 
     @Test
-    public void test_get_chunk_multiple_subscriptions() throws InterruptedException {
+    public void test_get_chunk_multiple_subscriptions() {
         for (int i = 0; i < 60; i++) {
             persistence.addSubscription("client" + i, new Topic("A" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));
             persistence.addSubscription("client" + i, new Topic("B" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));

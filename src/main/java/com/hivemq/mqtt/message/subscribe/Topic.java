@@ -191,6 +191,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
         }
         int size = 0;
 
+        size += ObjectMemoryEstimation.objectShellSize();
         size += ObjectMemoryEstimation.stringSize(topic);
         size += ObjectMemoryEstimation.enumSize(); // QoS
         size += ObjectMemoryEstimation.booleanSize(); // no local
