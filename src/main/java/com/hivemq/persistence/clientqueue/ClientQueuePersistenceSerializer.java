@@ -16,7 +16,6 @@
 
 package com.hivemq.persistence.clientqueue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -44,14 +43,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Lukas Brandl
  * @author Silvio Giebl
  */
-class ClientQueuePersistenceSerializer {
+public class ClientQueuePersistenceSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientQueuePersistenceSerializer.class);
 
-    static final int NO_PACKET_ID = 0;
-    static final int CLIENT_ID_MATCH = 0;
-    static final int CLIENT_ID_SAME_PREFIX = 1;
-    static final int CLIENT_ID_NO_MATCH = 2;
+    public static final int NO_PACKET_ID = 0;
+    public static final int CLIENT_ID_MATCH = 0;
+    public static final int CLIENT_ID_SAME_PREFIX = 1;
+    public static final int CLIENT_ID_NO_MATCH = 2;
 
     private static final byte PUBLISH_BIT = (byte) 0b1000_0000;
     private static final byte PUBREL_BIT = (byte) 0b0100_0000;

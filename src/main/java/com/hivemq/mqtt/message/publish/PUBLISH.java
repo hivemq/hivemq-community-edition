@@ -205,7 +205,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.correlationData = null;
     }
 
-    PUBLISH(
+    public PUBLISH(
             @NotNull final PUBLISH publish,
             @Nullable final Long payloadId,
             @Nullable final PublishPayloadPersistence persistence) {

@@ -21,12 +21,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.configuration.service.InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR;
-import static com.hivemq.configuration.service.InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT;
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
@@ -102,7 +101,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     private final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap;
 
     @Inject
-    ClientQueueXodusLocalPersistence(
+    public ClientQueueXodusLocalPersistence(
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,

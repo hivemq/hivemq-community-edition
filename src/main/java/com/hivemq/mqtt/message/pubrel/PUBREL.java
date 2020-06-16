@@ -22,7 +22,9 @@ import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 /**
  * The MQTT PUBREL message
@@ -34,10 +36,14 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubRelReasonCode>
         implements Mqtt3PUBREL, Mqtt5PUBREL {
 
+    private static final int SIZE_NOT_CALCULATED = -1;
+
     @Nullable
     private Long publishTimestamp;
     @Nullable
     private Long expiryInterval;
+
+    private int sizeInMemory = SIZE_NOT_CALCULATED;
 
     //MQTT 3
     public PUBREL(final int packetIdentifier) {
@@ -100,5 +106,30 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
                 Mqtt5PubRelReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
+    }
+
+    /**
+     * @return an approximately size of the pubrel object in bytes.
+     */
+    public int getEstimatedSizeInMemory() {
+        if (sizeInMemory != SIZE_NOT_CALCULATED) {
+            return sizeInMemory;
+        }
+        int size = 0;
+        size += ObjectMemoryEstimation.intSize(); // packet id
+        size += ObjectMemoryEstimation.enumSize(); // reason code
+        size += ObjectMemoryEstimation.stringSize(getReasonString()); // reason code
+        size += ObjectMemoryEstimation.longWrapperSize(); //publish timestamp
+        size += ObjectMemoryEstimation.longWrapperSize(); //expiry interval
+
+        size += 24; //User Properties Overhead
+        for (final MqttUserProperty userProperty : getUserProperties().asList()) {
+            size += 24; //UserProperty Object Overhead
+            size += ObjectMemoryEstimation.stringSize(userProperty.getName());
+            size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
+        }
+
+        sizeInMemory = size;
+        return sizeInMemory;
     }
 }
