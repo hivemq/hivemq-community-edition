@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 dc-square GmbH
+ * Copyright 2020 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.persistence;
 
 /**
- * @author Lukas Brandl
+ * Allows the estimation of the in memory size of an object.
+ *
+ * @author Georg Held
  */
-public interface PersistenceFilter {
+public interface Sizable {
 
-    /**
-     * Verify that a specific filter key matches something in the persistence.
-     *
-     * @param key The filter key to match.
-     * @return true if it matches, else false.
-     */
-    boolean match(String key);
+    int SIZE_NOT_CALCULATED = -1;
 
+    int getEstimatedSize();
 }

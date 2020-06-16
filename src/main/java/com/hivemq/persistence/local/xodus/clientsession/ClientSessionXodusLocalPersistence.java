@@ -18,16 +18,15 @@ package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.logging.EventLog;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
@@ -371,12 +370,10 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     }
 
     @Override
-    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(@NotNull final PersistenceFilter filter,
-                                                                                     final int bucketIndex,
+    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(final int bucketIndex,
                                                                                      @Nullable final String lastClientId,
                                                                                      final int maxResults) {
 
-        checkNotNull(filter, "Filter must not be null");
         checkBucketIndex(bucketIndex);
 
         final Bucket bucket = buckets[bucketIndex];
@@ -413,10 +410,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
                     final String key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
                     lastKey = key;
-
-                    if (!filter.match(key)) {
-                        continue;
-                    }
 
                     final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
 

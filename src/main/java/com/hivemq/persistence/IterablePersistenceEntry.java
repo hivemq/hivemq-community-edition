@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 dc-square GmbH
+ * Copyright 2020 dc-square GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,20 @@ import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.ObjectMemoryEstimation;
 
+import java.util.Collection;
+
 /**
- * @author Lukas Brandl
+ * @author Florian Limpöck
  */
 @Immutable
-public class PersistenceEntry<T extends Sizable> implements Sizable{
+public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> implements Sizable {
 
     private final long timestamp;
     private final @NotNull T object;
 
     private int sizeInMemory = SIZE_NOT_CALCULATED;
 
-    public PersistenceEntry(@NotNull final T object, final long timestamp) {
+    public IterablePersistenceEntry(@NotNull final T object, final long timestamp) {
         this.timestamp = timestamp;
         this.object = object;
     }
@@ -51,6 +53,14 @@ public class PersistenceEntry<T extends Sizable> implements Sizable{
         return object.toString();
     }
 
+    public static int getFixedSize(){
+        int size = ObjectMemoryEstimation.objectOverheadSize(); // object overhead
+        size += ObjectMemoryEstimation.longSize(); // timestamp
+        size += ObjectMemoryEstimation.intSize(); // sizeInMemory
+        size += ObjectMemoryEstimation.collectionOverhead(); // collection overhead
+        return size;
+    }
+
     @Override
     public int getEstimatedSize() {
 
@@ -58,13 +68,10 @@ public class PersistenceEntry<T extends Sizable> implements Sizable{
             return sizeInMemory;
         }
 
-        int size = ObjectMemoryEstimation.objectOverheadSize(); // object overhead
-        size += ObjectMemoryEstimation.longSize(); // timestamp
-        size += ObjectMemoryEstimation.intSize(); // sizeInMemory
-
-        // contained object
-        size += ObjectMemoryEstimation.objectOverheadSize();
-        size += object.getEstimatedSize();
+        int size = getFixedSize();
+        for (final Sizable item : object) {
+            size += item.getEstimatedSize();
+        }
 
         sizeInMemory = size;
         return sizeInMemory;
