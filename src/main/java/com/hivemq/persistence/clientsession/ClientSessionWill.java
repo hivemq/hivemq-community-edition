@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.persistence.Sizable;
 import com.hivemq.util.ObjectMemoryEstimation;
 
@@ -32,19 +31,21 @@ import com.hivemq.util.ObjectMemoryEstimation;
 public class ClientSessionWill implements Sizable {
 
     private final @NotNull MqttWillPublish mqttWillPublish;
-    private final @Nullable Long payloadId;
+    private final @NotNull Long payloadId;
 
-    private volatile int inMemorySize = SIZE_NOT_CALCULATED;
+    private int inMemorySize = SIZE_NOT_CALCULATED;
 
     public ClientSessionWill(final @NotNull MqttWillPublish mqttWillPublish, final @NotNull Long payloadId) {
         this.mqttWillPublish = mqttWillPublish;
         this.payloadId = payloadId;
     }
 
+    @NotNull
     public MqttWillPublish getMqttWillPublish() {
         return mqttWillPublish;
     }
 
+    @NotNull
     public Long getPayloadId() {
         return payloadId;
     }
@@ -53,18 +54,21 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getDelayInterval();
     }
 
+    @NotNull
     public String getHivemqId() {
         return mqttWillPublish.getHivemqId();
     }
 
+    @NotNull
     public String getTopic() {
         return mqttWillPublish.getTopic();
     }
 
-    public byte[] getPayload() {
+    public byte @Nullable[] getPayload() {
         return mqttWillPublish.getPayload();
     }
 
+    @NotNull
     public QoS getQos() {
         return mqttWillPublish.getQos();
     }
@@ -77,22 +81,27 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getMessageExpiryInterval();
     }
 
+    @Nullable
     public Mqtt5PayloadFormatIndicator getPayloadFormatIndicator() {
         return mqttWillPublish.getPayloadFormatIndicator();
     }
 
+    @Nullable
     public String getContentType() {
         return mqttWillPublish.getContentType();
     }
 
+    @Nullable
     public String getResponseTopic() {
         return mqttWillPublish.getResponseTopic();
     }
 
-    public byte[] getCorrelationData() {
+    @Nullable
+    public byte @Nullable[] getCorrelationData() {
         return mqttWillPublish.getCorrelationData();
     }
 
+    @NotNull
     public Mqtt5UserProperties getUserProperties() {
         return mqttWillPublish.getUserProperties();
     }
@@ -107,30 +116,12 @@ public class ClientSessionWill implements Sizable {
             return inMemorySize;
         }
 
-        int size = ObjectMemoryEstimation.objectShellSize();
+        int size = ObjectMemoryEstimation.objectShellSize(); // will himself
+        size += ObjectMemoryEstimation.intSize(); // inMemorySize
 
         size += ObjectMemoryEstimation.longWrapperSize(); //payload id
-        size += ObjectMemoryEstimation.objectRefSize();
-        size += ObjectMemoryEstimation.intSize(); // size
-
-        size += ObjectMemoryEstimation.enumSize(); // QoS
-        size += ObjectMemoryEstimation.longSize(); // expiry interval
-
-        size += 24; //User Properties Overhead
-        for (final MqttUserProperty userProperty : getUserProperties().asList()) {
-            size += 8; //UserProperty Object Overhead
-            size += ObjectMemoryEstimation.stringSize(userProperty.getName());
-            size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
-        }
-
-        size += ObjectMemoryEstimation.longSize(); //delay interval
-        size += ObjectMemoryEstimation.stringSize(mqttWillPublish.getResponseTopic());
-        size += ObjectMemoryEstimation.stringSize(mqttWillPublish.getContentType());
-        size += ObjectMemoryEstimation.byteArraySize(mqttWillPublish.getCorrelationData());
-
-        size += ObjectMemoryEstimation.enumSize(); // Payload format indicator
-        size += ObjectMemoryEstimation.longSize(); // timestamp
-        size += ObjectMemoryEstimation.booleanSize(); // isRetain
+        size += ObjectMemoryEstimation.objectRefSize(); // will publish reference
+        size += mqttWillPublish.getEstimatedSize();
 
         inMemorySize = size;
         return inMemorySize;

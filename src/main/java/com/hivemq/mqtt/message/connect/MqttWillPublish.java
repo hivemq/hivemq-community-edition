@@ -27,17 +27,21 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.persistence.Sizable;
 import com.hivemq.util.Bytes;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 /**
  * @author Silvio Giebl
  * @author Florian Limpöck
  */
-public class MqttWillPublish {
+public class MqttWillPublish implements Sizable {
 
     public static final long WILL_DELAY_INTERVAL_NOT_SET = Long.MAX_VALUE;
     public static final long WILL_DELAY_INTERVAL_DEFAULT = 0;
 
+    private int sizeInMemory = SIZE_NOT_CALCULATED;
+    
     //MQTT 5 and 3
     private final String topic;
     private byte[] payload;
@@ -215,6 +219,36 @@ public class MqttWillPublish {
                 this.correlationData,
                 this.userProperties,
                 this.delayInterval);
+    }
+
+    @Override
+    public int getEstimatedSize() {
+        if (sizeInMemory != SIZE_NOT_CALCULATED) {
+            return sizeInMemory;
+        }
+        int size = 0;
+        size += ObjectMemoryEstimation.objectShellSize(); // the will himself
+        size += ObjectMemoryEstimation.intSize(); // sizeInMemory
+        size += ObjectMemoryEstimation.stringSize(topic);
+        size += ObjectMemoryEstimation.byteArraySize(payload);
+        size += ObjectMemoryEstimation.byteArraySize(correlationData);
+        size += ObjectMemoryEstimation.stringSize(responseTopic);
+        size += ObjectMemoryEstimation.stringSize(hivemqId);
+        size += ObjectMemoryEstimation.stringSize(contentType);
+
+        size += 24; //User Properties Overhead
+        for (final MqttUserProperty userProperty : getUserProperties().asList()) {
+            size += 24; //UserProperty Object Overhead
+            size += ObjectMemoryEstimation.stringSize(userProperty.getName());
+            size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
+        }
+        size += ObjectMemoryEstimation.longSize(); // messageExpiryInterval
+        size += ObjectMemoryEstimation.enumSize(); // QoS
+        size += ObjectMemoryEstimation.enumSize(); // payloadFormatIndicator
+        size += ObjectMemoryEstimation.longSize(); // will delay interval
+
+        sizeInMemory = size;
+        return sizeInMemory;
     }
 
     public static class Mqtt3Builder {

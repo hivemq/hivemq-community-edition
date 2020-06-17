@@ -18,6 +18,7 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.Sizable;
 import com.hivemq.util.ObjectMemoryEstimation;
 
@@ -31,22 +32,22 @@ public class ClientSession implements Sizable {
     private boolean connected;
     private long sessionExpiryInterval;
 
-    private volatile int inMemorySize = SIZE_NOT_CALCULATED;
+    private int inMemorySize = SIZE_NOT_CALCULATED;
 
-    private ClientSessionWill willPublish;
+    private @Nullable ClientSessionWill willPublish;
 
     public ClientSession(final boolean connected, final long sessionExpiryInterval) {
+        this(connected, sessionExpiryInterval, null);
+    }
+
+    public ClientSession(final boolean connected,
+                         final long sessionExpiryInterval,
+                         final @Nullable ClientSessionWill willPublish) {
 
         Preconditions.checkArgument(
                 sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
                 "Session expiry interval must never be less than zero");
 
-        this.connected = connected;
-        this.sessionExpiryInterval = sessionExpiryInterval;
-    }
-
-    public ClientSession(
-            final boolean connected, final long sessionExpiryInterval, final ClientSessionWill willPublish) {
         this.connected = connected;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.willPublish = willPublish;
@@ -68,11 +69,12 @@ public class ClientSession implements Sizable {
         this.sessionExpiryInterval = sessionExpiryInterval;
     }
 
+    @Nullable
     public ClientSessionWill getWillPublish() {
         return willPublish;
     }
 
-    public void setWillPublish(final ClientSessionWill willPublish) {
+    public void setWillPublish(final @Nullable ClientSessionWill willPublish) {
         this.willPublish = willPublish;
     }
 
@@ -95,6 +97,7 @@ public class ClientSession implements Sizable {
         }
 
         int size = ObjectMemoryEstimation.objectShellSize();
+        size += ObjectMemoryEstimation.intSize(); // inMemorySize
         size += ObjectMemoryEstimation.booleanSize(); // connected
         size += ObjectMemoryEstimation.longSize(); // sessionExpiryInterval
 

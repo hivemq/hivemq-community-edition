@@ -161,6 +161,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
             final long willPayloadId = publishPayloadPersistence.add(willPublish.getPayload(), 1);
+            willPublish.setPayload(null);
             sessionWill = new ClientSessionWill(willPublish, willPayloadId);
         }
         final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill);
