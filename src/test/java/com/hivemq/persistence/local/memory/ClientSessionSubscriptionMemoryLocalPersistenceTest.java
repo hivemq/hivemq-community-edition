@@ -92,6 +92,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
         int size = 0;
         for (final Topic subscription : subscriptions) {
+            size += ObjectMemoryEstimation.objectRefSize();
             size += subscription.getEstimatedSize();
         }
         size += ObjectMemoryEstimation.stringSize("clientid");
@@ -134,6 +135,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
         int size = 0;
         for (final Topic subscription : subscriptions) {
+            size += ObjectMemoryEstimation.objectRefSize();
             size += subscription.getEstimatedSize();
         }
         size += ObjectMemoryEstimation.stringSize("clientid");
@@ -462,6 +464,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
         int size = 0;
         for (final Topic subscription : subs) {
+            size += ObjectMemoryEstimation.objectRefSize();
             size += subscription.getEstimatedSize();
         }
         size += ObjectMemoryEstimation.stringSize("client");
@@ -542,6 +545,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         for (final Map.Entry<String, Set<Topic>> entry : all.entrySet()) {
             assertEquals(2, entry.getValue().size());
             for (final Topic topic : entry.getValue()) {
+                size += ObjectMemoryEstimation.objectRefSize();
                 size +=  topic.getEstimatedSize();
             }
             size += ObjectMemoryEstimation.stringSize(entry.getKey());

@@ -143,7 +143,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
             boolean remaining = false;
             for (final Topic topic : entry.getObject()) {
                 if (topics.contains(topic.getTopic())) {
-                    currentMemorySize.addAndGet(-topic.getEstimatedSize());
+                    currentMemorySize.addAndGet(-(topic.getEstimatedSize() + ObjectMemoryEstimation.objectRefSize()));
                     continue;
                 }
                 remaining = true;
