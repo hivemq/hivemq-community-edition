@@ -35,7 +35,6 @@ import com.hivemq.persistence.clientsession.*;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionSubscriptionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.IncomingMessageFlowPersistenceLocalProvider;
-import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
@@ -43,13 +42,10 @@ import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistenceImpl;
-import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistenceProvider;
 
@@ -78,18 +74,7 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.FILE) {
             install(new LocalPersistenceFileModule(persistenceInjector));
         } else {
-            bindLocalPersistence(PublishPayloadLocalPersistence.class,
-                    PublishPayloadMemoryLocalPersistence.class,
-                    null);
-            bindLocalPersistence(RetainedMessageLocalPersistence.class,
-                    RetainedMessageMemoryLocalPersistence.class,
-                    null);
-            bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
-                    ClientSessionSubscriptionMemoryLocalPersistence.class,
-                    null);
-            bindLocalPersistence(ClientSessionLocalPersistence.class,
-                    ClientSessionMemoryLocalPersistence.class,
-                    null);
+            install(new LocalPersistenceMemoryModule(persistenceInjector));
         }
 
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);
