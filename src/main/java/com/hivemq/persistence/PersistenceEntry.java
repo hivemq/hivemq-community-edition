@@ -63,6 +63,7 @@ public class PersistenceEntry<T extends Sizable> implements Sizable{
         size += ObjectMemoryEstimation.intSize(); // sizeInMemory
 
         // contained object
+        size += ObjectMemoryEstimation.objectRefSize();
         size += object.getEstimatedSize();
 
         sizeInMemory = size;

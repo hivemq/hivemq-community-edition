@@ -70,6 +70,7 @@ public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> i
 
         int size = getFixedSize();
         for (final Sizable item : object) {
+            size += ObjectMemoryEstimation.objectRefSize();
             size += item.getEstimatedSize();
         }
 
