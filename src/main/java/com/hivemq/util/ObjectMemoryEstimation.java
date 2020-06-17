@@ -15,6 +15,7 @@
  */
 package com.hivemq.util;
 
+import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
@@ -29,9 +30,11 @@ public class ObjectMemoryEstimation {
     public static final int ARRAY_OVERHEAD = 12;
     public static final int COLLECTION_OVERHEAD = 12;
     public static final int LONG_WRAPPER_SIZE = 24;
+    public static final int LINKED_LIST_NODE_OVERHEAD = 24;
     public static final int INT_WRAPPER_SIZE = 16;
     public static final int LONG_SIZE = 8;
     public static final int INT_SIZE = 4;
+    public static final int CHAR_SIZE = 2;
     public static final int BOOLEAN_SIZE = 1;
 
     public static int enumSize() {
@@ -44,7 +47,7 @@ public class ObjectMemoryEstimation {
         }
 
         int size = STRING_OVERHEAD;
-        size += string.length() * 2;
+        size += string.length() * CHAR_SIZE;
         return size;
     }
 
@@ -55,6 +58,18 @@ public class ObjectMemoryEstimation {
 
         int size = ARRAY_OVERHEAD;
         size += array.length;
+        return size;
+    }
+
+    public static int immutableIntArraySize(@Nullable final ImmutableIntArray array) {
+        if (array == null) {
+            return 0;
+        }
+
+        int size = ARRAY_OVERHEAD;
+        size += intSize(); // start;
+        size += intSize(); // end;
+        size += array.length() * INT_SIZE;
         return size;
     }
 
@@ -74,6 +89,10 @@ public class ObjectMemoryEstimation {
         return INT_SIZE;
     }
 
+    public static int booleanSize() {
+        return BOOLEAN_SIZE;
+    }
+
     public static int objectShellSize() {
         return OBJECT_SHELL_SIZE;
     }
@@ -82,15 +101,11 @@ public class ObjectMemoryEstimation {
         return OBJECT_REF_SIZE;
     }
 
-    public static int objectOverheadSize() {
-        return OBJECT_REF_SIZE + OBJECT_SHELL_SIZE;
-    }
-
     public static int collectionOverhead() {
         return COLLECTION_OVERHEAD;
     }
 
-    public static int booleanSize() {
-        return BOOLEAN_SIZE;
+    public static int linkedListNodeOverhead() {
+        return LINKED_LIST_NODE_OVERHEAD;
     }
 }

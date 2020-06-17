@@ -16,21 +16,25 @@
 
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
+import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence.PublishWithRetained;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.LocalPersistenceFileUtil;
+import com.hivemq.util.ObjectMemoryEstimation;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,9 +65,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
-    private LocalPersistenceFileUtil localPersistenceFileUtil;
-
-    @Mock
     private PublishPayloadPersistence payloadPersistence;
 
     @Mock
@@ -81,11 +82,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         MockitoAnnotations.initMocks(this);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
-        InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
-        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
-        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString()))
-                .thenReturn(temporaryFolder.newFolder());
-
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024);
         InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
@@ -94,6 +90,11 @@ public class ClientQueueMemoryLocalPersistenceTest {
         persistence = new ClientQueueMemoryLocalPersistence(
                 payloadPersistence,
                 messageDroppedService, metricRegistry);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS = false;
     }
 
     @Test
@@ -349,6 +350,20 @@ public class ClientQueueMemoryLocalPersistenceTest {
         persistence.readNew("client", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
         final String uniqueId = persistence.replace("client", new PUBREL(4), 0);
         assertEquals("hivemqId_pub_2", uniqueId);
+        final ImmutableList<MessageWithID> messages = persistence.readInflight("client", false, 10, byteLimit, 0);
+        assertTrue(messages.get(2) instanceof PUBREL);
+    }
+
+    @Test
+    public void test_replace_pubrel() {
+        for (int i = 0; i < 3; i++) {
+            persistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic", i), 100L, DISCARD, false, 0);
+        }
+        persistence.readNew("client", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
+        String uniqueId = persistence.replace("client", new PUBREL(4), 0);
+        assertEquals("hivemqId_pub_2", uniqueId);
+        uniqueId = persistence.replace("client", new PUBREL(4), 0);
+        assertNull(uniqueId);
         final ImmutableList<MessageWithID> messages = persistence.readInflight("client", false, 10, byteLimit, 0);
         assertTrue(messages.get(2) instanceof PUBREL);
     }
@@ -627,6 +642,101 @@ public class ClientQueueMemoryLocalPersistenceTest {
     }
 
     @Test
+    public void test_clean_up_expired_qos0() {
+
+        persistence.add(
+                "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
+                DISCARD, false, 0);
+        persistence.add(
+                "client1", false, createPublish(0, QoS.AT_MOST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
+                DISCARD, false, 0);
+
+        final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
+
+        assertTrue(sharedQueues.isEmpty());
+        verify(payloadPersistence, times(2)).decrementReferenceCounter(
+                anyLong()); // 2 expired
+        assertEquals(0, persistence.size("client1", false, 0));
+    }
+
+    @Test
+    public void test_clean_up_expired_qos1() {
+
+        persistence.add(
+                "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
+                DISCARD, false, 0);
+        persistence.add(
+                "client1", false, createPublish(0, QoS.AT_LEAST_ONCE, 10, System.currentTimeMillis() - 10000), 10,
+                DISCARD, false, 0);
+
+        final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
+
+        assertTrue(sharedQueues.isEmpty());
+        verify(payloadPersistence, times(2)).decrementReferenceCounter(
+                anyLong()); // 2 expired
+        assertEquals(0, persistence.size("client1", false, 0));
+    }
+
+    @Test
+    public void test_clean_up_expired_pubrels_not_configured() throws InterruptedException {
+
+        persistence.add(
+                "client1", false, createPublish(1, QoS.EXACTLY_ONCE, 2, System.currentTimeMillis()), 10,
+                DISCARD, false, 0);
+        persistence.add(
+                "client1", false, createPublish(2, QoS.EXACTLY_ONCE, 2, System.currentTimeMillis()), 10,
+                DISCARD, false, 0);
+
+        persistence.readNew("client1", false, createPacketIds(1, 2), byteLimit, 0);
+
+        //let them expire
+        Thread.sleep(3000);
+
+        persistence.replace("client1", new PUBREL(1), 0);
+        persistence.replace("client1", new PUBREL(2), 0);
+
+        final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
+
+        assertTrue(sharedQueues.isEmpty());
+        verify(payloadPersistence, times(2)).decrementReferenceCounter(
+                anyLong()); // 2 replaces
+        assertEquals(2, persistence.size("client1", false, 0));
+    }
+
+    @Test
+    public void test_clean_up_expired_pubrels_configured() throws InterruptedException {
+
+        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS = true;
+
+        metricRegistry = new MetricRegistry();
+        persistence = new ClientQueueMemoryLocalPersistence(
+                payloadPersistence,
+                messageDroppedService, metricRegistry);
+
+        persistence.add(
+                "client1", false, createPublish(1, QoS.EXACTLY_ONCE, 2, System.currentTimeMillis()), 10,
+                DISCARD, false, 0);
+        persistence.add(
+                "client1", false, createPublish(2, QoS.EXACTLY_ONCE, 2, System.currentTimeMillis()), 10,
+                DISCARD, false, 0);
+
+        persistence.readNew("client1", false, createPacketIds(1, 2), byteLimit, 0);
+
+        //let them expire
+        Thread.sleep(3000);
+
+        persistence.replace("client1", new PUBREL(1), 0);
+        persistence.replace("client1", new PUBREL(2), 0);
+
+        final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
+
+        assertTrue(sharedQueues.isEmpty());
+        verify(payloadPersistence, times(2)).decrementReferenceCounter(
+                anyLong()); // 2 replaces
+        assertEquals(0, persistence.size("client1", false, 0));
+    }
+
+    @Test
     public void test_clean_up_shared() {
         persistence.add(
                 "name/topic1", true, createPublish(0, QoS.AT_LEAST_ONCE, 1000, System.currentTimeMillis()), 10, DISCARD,
@@ -709,9 +819,22 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
     @Test
     public void test_remove_all_qos_0_messages() {
-        persistence.add("client1", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic1", 1), 100L, DISCARD, false, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic2", 1), 100L, DISCARD, false, 0);
-        persistence.add("client1", false, createPublish(0, QoS.AT_MOST_ONCE, "topic3", 1), 100L, DISCARD, false, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+
+        final PUBLISH publish1 = createPublish(1, QoS.AT_LEAST_ONCE, "topic1", 1);
+        final PUBLISH publish2 = createPublish(0, QoS.AT_MOST_ONCE, "topic2", 1);
+        final PUBLISH publish3 = createPublish(0, QoS.AT_MOST_ONCE, "topic3", 1);
+
+        persistence.add("client1", false, publish1, 100L, DISCARD, false, 0);
+        persistence.add("client1", false, publish2, 100L, DISCARD, false, 0);
+        persistence.add("client1", false, publish3, 100L, DISCARD, false, 0);
+
+        final int size = new PublishWithRetained(publish1, false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead() +
+                new PublishWithRetained(publish2, false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead() +
+                new PublishWithRetained(publish3, false).getEstimatedSize() +  ObjectMemoryEstimation.linkedListNodeOverhead();
+
+        assertEquals(size, gauge.getValue().longValue());
 
         persistence.removeAllQos0Messages("client1", false, 0);
 
@@ -720,6 +843,9 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertEquals(1, messages.size());
 
         verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong());
+
+        assertTrue(gauge.getValue() > 0);
+        assertEquals(new PublishWithRetained(messages.get(0), false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead(), gauge.getValue().longValue());
     }
 
     @Test
@@ -836,13 +962,27 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
     @Test
     public void test_batched_add_retained_discard_over_retained_limit() {
-        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        final ImmutableList.Builder<PUBLISH> publishes1 = ImmutableList.builder();
+        final ImmutableList.Builder<PUBLISH> publishes2 = ImmutableList.builder();
         for (int i = 0; i < 10; i++) {
-            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+            if(i < 5) {
+                publishes1.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+            } else {
+                publishes2.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+            }
         }
-        persistence.add("client", false, publishes.build(), 2, DISCARD, true, 0);
+        persistence.add("client", false, publishes1.build(), 2, DISCARD, true, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        final Long value = gauge.getValue();
+        assertTrue(value > 0);
 
         assertEquals(5, persistence.size("client", false, 0));
+
+        persistence.add("client", false, publishes2.build(), 2, DISCARD, true, 0);
+
+        assertEquals(5, persistence.size("client", false, 0));
+        assertEquals(value, gauge.getValue());
 
         final ImmutableList<PUBLISH> all =
                 persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 10000L, 0);
@@ -854,13 +994,8 @@ public class ClientQueueMemoryLocalPersistenceTest {
     @Test
     public void add_and_poll_mixture_retained() {
         for (int i = 0; i < 12; i++) {
-            if (i % 2 == 0) {
-                persistence.add(
-                        "client", false, createPublish(1, QoS.EXACTLY_ONCE, "topic" + i), 5, DISCARD_OLDEST, false, 0);
-            } else {
-                persistence.add(
-                        "client", false, createPublish(1, QoS.EXACTLY_ONCE, "topic" + i), 5, DISCARD_OLDEST, true, 0);
-            }
+            persistence.add(
+                    "client", false, createPublish(1, QoS.EXACTLY_ONCE, "topic" + i), 5, DISCARD_OLDEST, i % 2 != 0, 0);
         }
         final ImmutableList<PUBLISH> all = persistence.readNew("client", false, ImmutableIntArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 10000L, 0);
         assertEquals(10, persistence.size("client", false, 0));
@@ -870,6 +1005,9 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .filter(publish -> publish.getTopic().equals("10") || publish.getTopic().equals("11"))
                 .collect(Collectors.toSet());
         assertTrue(notExpectedMessages.isEmpty());
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
     }
 
     @Test(timeout = 5000)
@@ -941,13 +1079,16 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
         assertNotNull(clientQos0MemoryMap.get("client"));
 
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
     }
 
     @Test(timeout = 5000)
     public void test_add_qos_0_per_client_exactly_exceeded() {
 
 
-        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[778]);
+        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[757]);
 
         assertEquals(1024, exactly1024bytesPublish.getEstimatedSizeInMemory());
 
@@ -960,6 +1101,157 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
         assertNotNull(clientQos0MemoryMap.get("client"));
 
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
+    }
+
+    @Test
+    public void test_add_close_add() {
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        for (int i = 0; i < 100; i++) {
+            publishes.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
+        }
+        persistence.add("client", false, publishes.build(), 2, DISCARD, true, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
+        for (int i = 0; i < bucketCount; i++) {
+            persistence.closeDB(i);
+        }
+
+        assertEquals(0, gauge.getValue().longValue());
+
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos0() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        metricRegistry = new MetricRegistry();
+        persistence = new ClientQueueMemoryLocalPersistence(
+                payloadPersistence,
+                messageDroppedService, metricRegistry);
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.AT_MOST_ONCE, "topic" + i);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 2, DISCARD, false, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
+        int byteLimit = totalPublishBytes / 2;
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52, 100), byteLimit, 0);
+        assertEquals(49, allReadPublishes2.size());
+
+        assertEquals(0, gauge.getValue().longValue());
+
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos1() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        metricRegistry = new MetricRegistry();
+        persistence = new ClientQueueMemoryLocalPersistence(
+                payloadPersistence,
+                messageDroppedService, metricRegistry);
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.AT_LEAST_ONCE, "topic" + i);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 100, DISCARD, false, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
+        int byteLimit = totalPublishBytes / 2;
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        assertEquals(49, allReadPublishes2.size());
+
+        assertTrue(gauge.getValue() > 0);
+
+        for (final PUBLISH pub : allReadPublishes) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+        for (final PUBLISH pub : allReadPublishes2) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        assertEquals(0, gauge.getValue().longValue());
+
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos0_and_qos1() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        metricRegistry = new MetricRegistry();
+        persistence = new ClientQueueMemoryLocalPersistence(
+                payloadPersistence,
+                messageDroppedService, metricRegistry);
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.valueOf(i % 2), "topic" + i);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 100, DISCARD, false, 0);
+
+        final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
+        assertTrue(gauge.getValue() > 0);
+
+        int byteLimit = totalPublishBytes / 2;
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        for (final PUBLISH pub : allReadPublishes) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        assertEquals(48, allReadPublishes2.size());
+        assertTrue(gauge.getValue() > 0);
+
+        for (final PUBLISH pub : allReadPublishes2) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        //last qos0 message
+        final ImmutableList<PUBLISH> allReadPublishes3 = persistence.readNew("client", false, createPacketIds(100,100), byteLimit, 0);
+        assertEquals(1, allReadPublishes3.size());
+        assertEquals(0, gauge.getValue().longValue());
+
+    }
+
+    private ImmutableIntArray createPacketIds(final int start, final int size) {
+        final ImmutableIntArray.Builder builder = ImmutableIntArray.builder();
+        for (int i = start; i < (size + start); i++) {
+            builder.add(i);
+        }
+        return builder.build();
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos) {

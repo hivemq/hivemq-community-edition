@@ -116,6 +116,8 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
             return sizeInMemory;
         }
         int size = 0;
+        size += ObjectMemoryEstimation.objectShellSize();
+        size += ObjectMemoryEstimation.intSize(); // sizeInMemory
         size += ObjectMemoryEstimation.intSize(); // packet id
         size += ObjectMemoryEstimation.enumSize(); // reason code
         size += ObjectMemoryEstimation.stringSize(getReasonString()); // reason code

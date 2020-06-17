@@ -544,11 +544,13 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             // In case there are only qos 0 messages
             final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
             int qos0MessagesFound = 0;
-            while (qos0MessagesFound < packetIds.length()) {
+            int qos0Bytes = 0;
+            while (qos0MessagesFound < packetIds.length() && bytesLimit > qos0Bytes) {
                 final PUBLISH qos0Publish = pollQos0Message(key, bucketIndex);
                 if (!PublishUtil.isExpired(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
                     publishes.add(qos0Publish);
                     qos0MessagesFound++;
+                    qos0Bytes += qos0Publish.getEstimatedSizeInMemory();
                 }
                 if (qos0Messages.isEmpty()) {
                     break;

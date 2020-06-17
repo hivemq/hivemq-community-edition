@@ -429,10 +429,16 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             return sizeInMemory;
         }
         int size = 0;
+        size += ObjectMemoryEstimation.objectShellSize(); // the publish himself
+        size += ObjectMemoryEstimation.intSize(); // sizeInMemory
+        size += ObjectMemoryEstimation.longSize(); // timestamp
         size += ObjectMemoryEstimation.stringSize(topic);
         size += ObjectMemoryEstimation.byteArraySize(payload);
         size += ObjectMemoryEstimation.byteArraySize(correlationData);
         size += ObjectMemoryEstimation.stringSize(responseTopic);
+        size += ObjectMemoryEstimation.stringSize(uniqueId);
+        size += ObjectMemoryEstimation.stringSize(hivemqId);
+        size += ObjectMemoryEstimation.stringSize(contentType);
 
         size += 24; //User Properties Overhead
         for (final MqttUserProperty userProperty : getUserProperties().asList()) {
@@ -440,12 +446,15 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             size += ObjectMemoryEstimation.stringSize(userProperty.getName());
             size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
         }
-
-        size += 64; // Unique ID
-        size += 48; // HiveMQ ID
+        size += ObjectMemoryEstimation.booleanSize(); // duplicateDelivery
+        size += ObjectMemoryEstimation.booleanSize(); // retain
+        size += ObjectMemoryEstimation.booleanSize(); // isNewTopicAlias
+        size += ObjectMemoryEstimation.longSize(); // messageExpiryInterval
+        size += ObjectMemoryEstimation.longSize(); // publishId
+        size += ObjectMemoryEstimation.longWrapperSize(); // payloadId
         size += ObjectMemoryEstimation.enumSize(); // QoS
-        size += 16; // Subscriptions Identifiers Overhead
-        size += 35; // General Overhead
+        size += ObjectMemoryEstimation.enumSize(); // payloadFormatIndicator
+        size += ObjectMemoryEstimation.immutableIntArraySize(subscriptionIdentifiers);
 
         sizeInMemory = size;
         return sizeInMemory;
