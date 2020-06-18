@@ -45,7 +45,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -98,7 +97,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         final Topic topic2 = new Topic("topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
         verify(topicTree, times(2)).addTopic(eq("client"), any(Topic.class), anyByte(), any());
-        verify(localPersistence).addSubscriptions(eq("client"), anySet(), anyLong(), anyInt());
+        verify(localPersistence).addSubscriptions(eq("client"), any(ImmutableSet.class), anyLong(), anyInt());
     }
 
     @Test(timeout = 60000)
@@ -109,7 +108,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         final Topic topic2 = new Topic("topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
         verify(topicTree, never()).addTopic(anyString(), any(Topic.class), anyByte(), anyString());
-        verify(localPersistence, never()).addSubscriptions(eq("client"), anySet(), anyLong(), anyInt());
+        verify(localPersistence, never()).addSubscriptions(eq("client"), any(ImmutableSet.class), anyLong(), anyInt());
     }
 
     @Test(timeout = 60000)
@@ -122,7 +121,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(sharedSubscriptionService.checkForSharedSubscription("topic2")).thenReturn(new SharedSubscriptionServiceImpl.SharedSubscription("topic2", "group"));
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
         verify(topicTree, times(2)).addTopic(eq("client"), any(Topic.class), anyByte(), anyString());
-        verify(localPersistence).addSubscriptions(eq("client"), anySet(), anyLong(), anyInt());
+        verify(localPersistence).addSubscriptions(eq("client"), any(ImmutableSet.class), anyLong(), anyInt());
 
     }
 

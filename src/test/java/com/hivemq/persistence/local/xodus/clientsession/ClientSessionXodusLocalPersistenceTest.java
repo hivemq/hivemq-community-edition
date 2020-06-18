@@ -17,14 +17,16 @@
 package com.hivemq.persistence.local.xodus.clientsession;
 
 import com.google.common.collect.Lists;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.persistence.*;
+import com.hivemq.persistence.NoSessionException;
+import com.hivemq.persistence.PersistenceEntry;
+import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
@@ -459,13 +461,13 @@ public class ClientSessionXodusLocalPersistenceTest {
         persistence.put("clientid2", new ClientSession(true, 1000), 123L, 1);
 
 
-        final Map<String, ClientSession> client1Entries = persistence.getAllClientsChunk(new ClientIdPersistenceFilter("clientid"), 1, null, 10).getValue();
-        final Map<String, ClientSession> client2Entries = persistence.getAllClientsChunk(new ClientIdPersistenceFilter("clientid2"), 1, null, 10).getValue();
+        final Map<String, ClientSession> client1Entries = persistence.getAllClientsChunk(1, null, 10).getValue();
+        final Map<String, ClientSession> client2Entries = persistence.getAllClientsChunk(1, null, 10).getValue();
 
         assertNotNull(client1Entries.get("clientid"));
-        assertNull(client1Entries.get("clientid2"));
+        assertNotNull(client1Entries.get("clientid2"));
 
-        assertNull(client2Entries.get("clientid"));
+        assertNotNull(client2Entries.get("clientid"));
         assertNotNull(client2Entries.get("clientid2"));
     }
 
@@ -480,7 +482,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 16);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -510,7 +512,7 @@ public class ClientSessionXodusLocalPersistenceTest {
             if (chunk != null && chunk.getLastKey() != null) {
                 persistence.removeWithTimestamp(chunk.getLastKey(), 1);
             }
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -544,7 +546,7 @@ public class ClientSessionXodusLocalPersistenceTest {
                     persistence.removeWithTimestamp("client3", 1);
                 }
             }
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -564,7 +566,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -584,7 +586,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -606,7 +608,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, 1, chunk != null ? chunk.getLastKey() : null, 16);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 16);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -631,24 +633,6 @@ public class ClientSessionXodusLocalPersistenceTest {
             clientIdSet.add(RandomStringUtils.randomAlphanumeric(random.nextInt(100)));
         }
         return new ArrayList<>(clientIdSet);
-    }
-
-    private ClientSession getSessionWithInterval(final long interval) {
-        return new ClientSession(true, interval);
-    }
-
-    private static class ClientIdPersistenceFilter implements PersistenceFilter {
-        private final String clientid;
-
-        public ClientIdPersistenceFilter(final String clientid) {
-
-            this.clientid = clientid;
-        }
-
-        @Override
-        public boolean match(@NotNull final String key) {
-            return key.equals(clientid);
-        }
     }
 
 }

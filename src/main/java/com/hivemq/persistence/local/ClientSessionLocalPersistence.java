@@ -20,7 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceEntry;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
@@ -205,12 +204,11 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * <p>
      * The session do not include the will message. It is always set to <code>null</code> in the returned sessions.
      *
-     * @param filter       the persistence filter to match. Usually a master filter.
      * @param bucketIndex  the bucket index
      * @param lastClientId the last client identifier for this chunk. Pass <code>null</code> to start at the beginning.
      * @param maxResults   the max amount of results contained in the chunk.
      * @return a {@link BucketChunkResult} with the entries and the information if more chunks are available
      */
     @NotNull
-    BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(@NotNull PersistenceFilter filter, int bucketIndex, @Nullable String lastClientId, int maxResults);
+    BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(int bucketIndex, @Nullable String lastClientId, int maxResults);
 }

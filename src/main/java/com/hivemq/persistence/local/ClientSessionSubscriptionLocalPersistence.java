@@ -17,16 +17,15 @@
 package com.hivemq.persistence.local;
 
 import com.google.common.collect.ImmutableSet;
+import com.hivemq.annotations.ExecuteInSingleWriter;
+import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.annotations.ReadOnly;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.LocalPersistence;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Dominik Obermaier
@@ -42,6 +41,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param timestamp   The timestamp when the subscription is added.
      * @param bucketIndex The index of the bucket in which the subscription is stored.
      */
+    @ExecuteInSingleWriter
     void addSubscription(@NotNull final String client, @NotNull final Topic topic, long timestamp, int bucketIndex);
 
     /**
@@ -52,7 +52,8 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param timestamp   The timestamp when the subscriptions are added.
      * @param bucketIndex The index of the bucket in which the subscriptions are stored.
      */
-    void addSubscriptions(@NotNull String clientId, @NotNull Set<Topic> topics, long timestamp, int bucketIndex);
+    @ExecuteInSingleWriter
+    void addSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<Topic> topics, long timestamp, int bucketIndex);
 
     /**
      * Remove a subscription of specific topic for a specific client from a persistence bucket.
@@ -62,6 +63,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param timestamp   The timestamp when the subscription is removed.
      * @param bucketIndex The index of the bucket in which the subscription is stored.
      */
+    @ExecuteInSingleWriter
     void remove(@NotNull final String client, @NotNull final String topic, long timestamp, int bucketIndex);
 
     /**
@@ -72,6 +74,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param timestamp   The timestamp when the subscriptions are removed.
      * @param bucketIndex The index of the bucket in which the subscriptions are stored.
      */
+    @ExecuteInSingleWriter
     void removeSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<String> topics, long timestamp, int bucketIndex);
 
     /**
@@ -81,6 +84,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param timestamp   The timestamp when the subscriptions are removed.
      * @param bucketIndex The index of the bucket in which the subscriptions are stored.
      */
+    @ExecuteInSingleWriter
     void removeAll(@NotNull final String client, long timestamp, int bucketIndex);
 
     /**
@@ -88,6 +92,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      *
      * @param bucket The index of the bucket in which the subscriptions are stored.
      */
+    @ExecuteInSingleWriter
     void cleanUp(int bucket);
 
     /**
@@ -103,7 +108,6 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
     /**
      * Get a chunk of subscriptions.
      *
-     * @param filter       the persistence filter to match. Usually a master filter.
      * @param bucketIndex  the bucket index
      * @param lastClientId the last client identifier for this chunk. Pass <code>null</code> to start at the beginning.
      * @param maxResults   the max amount of results contained in the chunk (can be exceeded). Subscriptions (not
@@ -112,7 +116,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @return a {@link BucketChunkResult} with the entries and the information if more chunks are available
      */
     @NotNull
-    BucketChunkResult<Map<String, Set<Topic>>> getAllSubscribersChunk(@NotNull PersistenceFilter filter, int bucketIndex, @Nullable String lastClientId, int maxResults);
+    BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(int bucketIndex, @Nullable String lastClientId, int maxResults);
 
 
 }

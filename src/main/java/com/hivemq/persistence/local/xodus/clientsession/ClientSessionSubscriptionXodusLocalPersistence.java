@@ -19,13 +19,12 @@ package com.hivemq.persistence.local.xodus.clientsession;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
@@ -45,7 +44,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -163,7 +161,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    public void addSubscriptions(@NotNull final String client, @NotNull final Set<Topic> topics, final long timestamp, final int bucketIndex) {
+    public void addSubscriptions(@NotNull final String client, @NotNull final ImmutableSet<Topic> topics, final long timestamp, final int bucketIndex) {
         checkNotNull(client, "Client id must not be null");
         checkNotNull(topics, "Topics must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
@@ -288,11 +286,10 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
 
     @Override
     @NotNull
-    public BucketChunkResult<Map<String, Set<Topic>>> getAllSubscribersChunk(@NotNull final PersistenceFilter filter, final int bucketIndex, @Nullable final String lastClientId, final int maxResults) {
-        checkNotNull(filter, "Filter must not be null");
+    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(final int bucketIndex, @Nullable final String lastClientId, final int maxResults) {
         checkArgument(maxResults > 0, "max results must be greater than 0");
 
-        final ImmutableMap.Builder<String, Set<Topic>> resultBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, ImmutableSet<Topic>> resultBuilder = ImmutableMap.builder();
 
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
@@ -330,9 +327,6 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
                     }
 
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(key));
-                    if (!filter.match(clientId)) {
-                        continue;
-                    }
 
                     final Map<Topic, Long> topicMap = new HashMap<>();
                     //read all subscriptions for this clientId
@@ -353,7 +347,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
 
                     lastKey = clientId;
                     if (topicMap.size() > 0) {
-                        final Set<Topic> topicSet = topicMap.keySet();
+                        final ImmutableSet<Topic> topicSet = ImmutableSet.copyOf(topicMap.keySet());
                         containedItemCount += topicSet.size();
                         resultBuilder.put(clientId, topicSet);
 
