@@ -28,7 +28,7 @@ public class ObjectMemoryEstimation {
     public static final int STRING_OVERHEAD = 38;
     public static final int ARRAY_OVERHEAD = 12;
     public static final int COLLECTION_OVERHEAD = 12;
-    public static final int LONG_WRAPPER_SIZE = 20;
+    public static final int LONG_WRAPPER_SIZE = 24;
     public static final int INT_WRAPPER_SIZE = 16;
     public static final int LONG_SIZE = 8;
     public static final int INT_SIZE = 4;
