@@ -20,15 +20,14 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.ExecuteInSingleWriter;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
-import com.hivemq.persistence.PersistenceFilter;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
@@ -61,6 +60,7 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 /**
  * @author Georg Held
  */
+@LazySingleton
 public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPersistence {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ClientSessionMemoryLocalPersistence.class);
@@ -70,7 +70,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     private final @NotNull Map<String, PersistenceEntry<ClientSession>> @NotNull[] buckets;
 
-    private final long maxSessionExpiryInterval;
     private final int bucketCount;
 
     private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
@@ -78,14 +77,12 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     @Inject
     ClientSessionMemoryLocalPersistence(
-            final @NotNull MqttConfigurationService mqttConfigurationService,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull EventLog eventLog) {
 
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
-        this.maxSessionExpiryInterval = mqttConfigurationService.maxSessionExpiryInterval();
 
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
 
@@ -451,9 +448,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
     @Override
-    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
-            final @NotNull PersistenceFilter filter,
-            final int bucketIndex,
+    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(final int bucketIndex,
             final @Nullable String ignored,
             final int alsoIgnored) {
 
@@ -463,7 +458,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         final Map<String, ClientSession> sessions =
                 bucket.entrySet()
                         .stream()
-                        .filter(entry -> filter.match(entry.getKey()))
                         .filter(entry -> {
                             final PersistenceEntry<ClientSession> value = entry.getValue();
                             return !ClientSessions.isExpired(value.getObject(),

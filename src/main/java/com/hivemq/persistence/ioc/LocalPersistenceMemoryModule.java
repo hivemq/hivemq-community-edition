@@ -20,7 +20,9 @@ import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
+import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
@@ -48,6 +50,9 @@ class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenc
 
         bindLocalPersistence(RetainedMessageLocalPersistence.class,
                 RetainedMessageMemoryLocalPersistence.class);
+
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
+                ClientSessionSubscriptionMemoryLocalPersistence.class);
 
         bindLocalPersistence(ClientSessionLocalPersistence.class,
                 ClientSessionMemoryLocalPersistence.class);
