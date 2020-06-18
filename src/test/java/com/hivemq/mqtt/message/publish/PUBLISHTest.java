@@ -40,7 +40,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class PUBLISHTest {
 
-    private static final int GENERAL_OVERHEAD = 4 + 64 + 48 + 24 + 16 + 35;
+    private static final int GENERAL_OVERHEAD = 4 + 64 + 48 + 24 + 16 + 35 + 16;
 
     @Test(expected = IllegalArgumentException.class)
     public void test_publish_with_payload_id_null_persistence() {

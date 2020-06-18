@@ -984,7 +984,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_add_qos_0_per_client_exactly_exceeded() {
 
 
-        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[773]);
+        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[757]);
 
         assertEquals(1024, exactly1024bytesPublish.getEstimatedSizeInMemory());
 
