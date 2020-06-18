@@ -30,7 +30,6 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedServiceProvider;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.PersistenceStartupShutdownHookInstaller;
 import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
-import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.ClientSessionSubscriptionLocalProvider;
@@ -39,6 +38,7 @@ import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
+import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
@@ -74,13 +74,13 @@ public class PersistenceMigrationModule extends SingletonModule<Class<Persistenc
         bind(PersistenceStartupShutdownHookInstaller.class).asEagerSingleton();
 
 
-        bind(ClientQueueLocalPersistence.class).to(ClientQueueXodusLocalPersistence.class).in(Singleton.class);
 
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.FILE) {
             install(new PersistenceMigrationFileModule());
             bind(ClientSessionLocalPersistence.class).toProvider(ClientSessionLocalProvider.class).in(Singleton.class);
             bind(ClientSessionSubscriptionLocalPersistence.class).toProvider(ClientSessionSubscriptionLocalProvider.class)
                     .in(Singleton.class);
+            bind(ClientQueueLocalPersistence.class).to(ClientQueueXodusLocalPersistence.class).in(Singleton.class);
         } else {
             bind(PublishPayloadLocalPersistence.class).to(PublishPayloadMemoryLocalPersistence.class)
                     .in(Singleton.class);
@@ -89,6 +89,8 @@ public class PersistenceMigrationModule extends SingletonModule<Class<Persistenc
             bind(ClientSessionLocalPersistence.class).to(ClientSessionMemoryLocalPersistence.class)
                     .in(Singleton.class);
             bind(ClientSessionSubscriptionLocalPersistence.class).to(ClientSessionSubscriptionMemoryLocalPersistence.class)
+                    .in(Singleton.class);
+            bind(ClientQueueLocalPersistence.class).to(ClientQueueMemoryLocalPersistence.class)
                     .in(Singleton.class);
         }
 

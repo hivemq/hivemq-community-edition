@@ -19,6 +19,8 @@ import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.meta.PersistenceType;
+import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
+import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
@@ -28,7 +30,6 @@ import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
  */
 public class PersistenceMigrationFileModule extends SingletonModule<Class<PersistenceMigrationFileModule>> {
 
@@ -57,5 +58,7 @@ public class PersistenceMigrationFileModule extends SingletonModule<Class<Persis
                 payloadPersistenceType == PersistenceType.FILE_NATIVE) {
             install(new PersistenceMigrationRocksDBModule());
         }
+
+        bind(ClientQueueLocalPersistence.class).to(ClientQueueXodusLocalPersistence.class).in(Singleton.class);
     }
 }
