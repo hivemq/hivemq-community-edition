@@ -17,13 +17,14 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.persistence.Sizable;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
 /**
  * @author Lukas Brandl
  */
-public class ClientSession {
+public class ClientSession implements Sizable {
 
     private boolean connected;
 
@@ -68,5 +69,10 @@ public class ClientSession {
 
     public void setWillPublish(final ClientSessionWill willPublish) {
         this.willPublish = willPublish;
+    }
+
+    @Override
+    public int getEstimatedSize() {
+        return 0;
     }
 }

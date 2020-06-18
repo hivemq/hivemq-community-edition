@@ -20,17 +20,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.*;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.*;
+import com.hivemq.persistence.AbstractPersistence;
+import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ProducerQueues;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
@@ -482,7 +485,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 if (!cursor.getFinishedBuckets().contains(i)) {
                     final String lastKey = cursor.getLastKeys().get(i);
                     builder.add(singleWriter.submit(i, (bucketIndex1, queueBuckets, queueIndex) -> {
-                        return localPersistence.getAllClientsChunk(MatchAllPersistenceFilter.INSTANCE, bucketIndex1, lastKey, maxResults);
+                        return localPersistence.getAllClientsChunk(bucketIndex1, lastKey, maxResults);
                     }));
                 }
             }

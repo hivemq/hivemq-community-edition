@@ -24,15 +24,14 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
-import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
+import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
 import com.hivemq.extensions.iteration.AsyncIterator;
 import com.hivemq.extensions.iteration.AsyncIteratorFactory;
@@ -53,7 +52,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.TestConfigurationBootstrap;
 import util.TestException;
 
 import java.util.*;
@@ -849,17 +847,17 @@ public class SubscriptionStoreImplTest {
 
         final SubscriptionStoreImpl.AllSubscribersFetchCallback fetchCallback = new SubscriptionStoreImpl.AllSubscribersFetchCallback(null);
 
-        final ChunkResult<ChunkCursor, SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, Set<Topic>>>(
+        final ChunkResult<ChunkCursor, SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ImmutableSet<Topic>>>(
                 Map.of(
                         1, new BucketChunkResult<>(Map.of(
-                                "client1", Set.of(
+                                "client1", ImmutableSet.of(
                                         new Topic("topic1", QoS.AT_LEAST_ONCE)
                                 )), true, "client1", 1),
                         2, new BucketChunkResult<>(Map.of(
-                                "client2", Set.of(
+                                "client2", ImmutableSet.of(
                                         new Topic("topic2", QoS.AT_LEAST_ONCE), new Topic("topic3", QoS.AT_LEAST_ONCE)
                                 ),
-                                "client3", Set.of(
+                                "client3", ImmutableSet.of(
                                         new Topic("topic4", QoS.AT_LEAST_ONCE)
                                 )
                         ), false, "client3", 2)

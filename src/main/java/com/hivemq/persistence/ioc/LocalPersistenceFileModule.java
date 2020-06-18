@@ -19,8 +19,12 @@ import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.migration.meta.PersistenceType;
+import com.hivemq.persistence.ioc.provider.local.ClientSessionSubscriptionLocalProvider;
+import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
+import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
@@ -48,29 +52,37 @@ class LocalPersistenceFileModule extends SingletonModule<Class<LocalPersistenceF
 
         /* Local */
         if (payloadPersistenceType == PersistenceType.FILE) {
-            bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class);
+            bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class, null);
         }
         if (retainedPersistenceType == PersistenceType.FILE) {
             bindLocalPersistence(RetainedMessageLocalPersistence.class,
-                    RetainedMessageXodusLocalPersistence.class);
+                    RetainedMessageXodusLocalPersistence.class,
+                    null);
         }
 
         if (payloadPersistenceType == PersistenceType.FILE_NATIVE ||
                 retainedPersistenceType == PersistenceType.FILE_NATIVE) {
             install(new LocalPersistenceRocksDBModule(persistenceInjector));
         }
+
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class, ClientSessionSubscriptionXodusLocalPersistence.class, ClientSessionSubscriptionLocalProvider.class);
     }
 
     private void bindLocalPersistence(
             final @NotNull Class localPersistenceClass,
-            final @NotNull Class localPersistenceImplClass) {
+            final @NotNull Class localPersistenceImplClass,
+            final @Nullable Class localPersistenceProviderClass) {
 
         final Object instance = persistenceInjector.getInstance(localPersistenceImplClass);
         if (instance != null) {
             bind(localPersistenceImplClass).toInstance(instance);
             bind(localPersistenceClass).toInstance(instance);
         } else {
-            bind(localPersistenceClass).to(localPersistenceImplClass).in(Singleton.class);
+            if (localPersistenceProviderClass != null) {
+                bind(localPersistenceClass).toProvider(localPersistenceProviderClass).in(Singleton.class);
+            } else {
+                bind(localPersistenceClass).to(localPersistenceImplClass).in(Singleton.class);
+            }
         }
     }
 }

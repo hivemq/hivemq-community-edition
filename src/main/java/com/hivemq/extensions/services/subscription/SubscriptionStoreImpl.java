@@ -21,9 +21,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.*;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.InvalidTopicException;
 import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
@@ -465,7 +465,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         @Override
         public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SubscriptionsForClientResult>> fetchNextResults(@Nullable final ChunkCursor cursor) {
 
-            final ListenableFuture<MultipleChunkResult<Map<String, Set<Topic>>>> persistenceFuture =
+            final ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> persistenceFuture =
                     subscriptionPersistence.getAllLocalSubscribersChunk(cursor != null ? cursor : new ChunkCursor());
 
             return Futures.transform(persistenceFuture, input -> {
@@ -475,14 +475,14 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
 
         @NotNull
-        ChunkResult<ChunkCursor, SubscriptionsForClientResult> convertToChunkResult(@NotNull final MultipleChunkResult<Map<String, Set<Topic>>> input) {
+        ChunkResult<ChunkCursor, SubscriptionsForClientResult> convertToChunkResult(@NotNull final MultipleChunkResult<Map<String, ImmutableSet<Topic>>> input) {
             final ImmutableList.Builder<SubscriptionsForClientResult> results = ImmutableList.builder();
             final ImmutableMap.Builder<Integer, String> lastKeys = ImmutableMap.builder();
             final ImmutableSet.Builder<Integer> finishedBuckets = ImmutableSet.builder();
 
             boolean finished = true;
-            for (final Map.Entry<Integer, BucketChunkResult<Map<String, Set<Topic>>>> bucketResult : input.getValues().entrySet()) {
-                final BucketChunkResult<Map<String, Set<Topic>>> bucketChunkResult = bucketResult.getValue();
+            for (final Map.Entry<Integer, BucketChunkResult<Map<String, ImmutableSet<Topic>>>> bucketResult : input.getValues().entrySet()) {
+                final BucketChunkResult<Map<String, ImmutableSet<Topic>>> bucketChunkResult = bucketResult.getValue();
 
                 if (bucketChunkResult.isFinished()) {
                     finishedBuckets.add(bucketChunkResult.getBucketIndex());
@@ -494,7 +494,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
                     lastKeys.put(bucketChunkResult.getBucketIndex(), bucketChunkResult.getLastKey());
                 }
 
-                for (final Map.Entry<String, Set<Topic>> entry : bucketChunkResult.getValue().entrySet()) {
+                for (final Map.Entry<String, ImmutableSet<Topic>> entry : bucketChunkResult.getValue().entrySet()) {
                     results.add(new SubscriptionsForClientResultImpl(entry.getKey(),
                             entry.getValue().stream().map(topic -> new TopicSubscriptionImpl(topic)).collect(Collectors.toSet())));
                 }

@@ -19,14 +19,13 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Dominik Obermaier
@@ -61,7 +60,7 @@ public interface ClientSessionSubscriptionPersistence {
      * @return a result containing the new cursor and a map of clientIds to their subscriptions
      */
     @NotNull
-    ListenableFuture<MultipleChunkResult<Map<String, Set<Topic>>>> getAllLocalSubscribersChunk(@NotNull ChunkCursor cursor);
+    ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> getAllLocalSubscribersChunk(@NotNull ChunkCursor cursor);
 
 
     /**
