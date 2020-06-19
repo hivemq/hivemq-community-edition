@@ -35,7 +35,6 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
-import com.hivemq.persistence.clientqueue.ClientQueuePersistenceSerializer;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ObjectMemoryEstimation;
 import com.hivemq.util.PublishUtil;
@@ -62,6 +61,8 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
     @NotNull
     private static final Logger log = LoggerFactory.getLogger(ClientQueueMemoryLocalPersistence.class);
+
+    private static final int NO_PACKET_ID = 0;
     
     private final @NotNull MessageDroppedService messageDroppedService;
 
@@ -212,7 +213,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     }
                 }
 
-                publishWithRetained.setPacketIdentifier(ClientQueuePersistenceSerializer.NO_PACKET_ID);
+                publishWithRetained.setPacketIdentifier(NO_PACKET_ID);
                 getOrPutMessageQueue(key, bucket).add(publishWithRetained);
                 increaseMessagesMemory(publishWithRetained.getEstimatedSize());
             }
@@ -299,7 +300,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 continue;
             }
             final PublishWithRetained publishWithRetained = (PublishWithRetained) messageWithID;
-            if(publishWithRetained.getPacketIdentifier() != ClientQueuePersistenceSerializer.NO_PACKET_ID){
+            if(publishWithRetained.getPacketIdentifier() != NO_PACKET_ID){
                 //already inflight
                 continue;
             }
@@ -320,6 +321,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 publishes.add(publishWithRetained);
                 packetIdIndex++;
                 messageCount++;
+                System.out.println(publishWithRetained.getEstimatedSizeInMemory());
                 bytes += publishWithRetained.getEstimatedSizeInMemory();
                 if ((messageCount == countLimit) || (bytes > bytesLimit)) {
                     break;
@@ -403,7 +405,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         for (final MessageWithID messageWithID : messageQueue) {
             // Stop at first non inflight message
             // This works because in-flight messages are always first in the queue
-            if (messageWithID.getPacketIdentifier() == ClientQueuePersistenceSerializer.NO_PACKET_ID) {
+            if (messageWithID.getPacketIdentifier() == NO_PACKET_ID) {
                 break;
             }
             messages.add(messageWithID);
@@ -447,7 +449,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         for (final MessageWithID messageWithID : messageQueue) {
             messageIndexInQueue++;
             final int packetId = messageWithID.getPacketIdentifier();
-            if (packetId == ClientQueuePersistenceSerializer.NO_PACKET_ID) {
+            if (packetId == NO_PACKET_ID) {
                 break;
             }
             if (packetId == pubrel.getPacketIdentifier()) {
@@ -689,7 +691,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (!uniqueId.equals(publish.getUniqueId())) {
                     continue;
                 }
-                publish.setPacketIdentifier(ClientQueuePersistenceSerializer.NO_PACKET_ID);
+                publish.setPacketIdentifier(NO_PACKET_ID);
                 break;
             }
         }
@@ -811,7 +813,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             }
             final PublishWithRetained publish = (PublishWithRetained) messageWithID;
             // we must no discard inflight messages
-            if(publish.getPacketIdentifier() != ClientQueuePersistenceSerializer.NO_PACKET_ID){
+            if(publish.getPacketIdentifier() != NO_PACKET_ID){
                 continue;
             }
             // Messages that are queued as retained messages are not discarded,

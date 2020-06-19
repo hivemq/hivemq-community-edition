@@ -64,5 +64,4 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
      */
     @Override
     void close() throws ExecutionException, InterruptedException;
-
 }

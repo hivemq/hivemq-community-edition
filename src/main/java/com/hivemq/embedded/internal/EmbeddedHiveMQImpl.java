@@ -133,7 +133,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), localStartFutures);
                 succeedFutureList(localStopFutures);
             } else if (localDesiredState == State.RUNNING) {
-                final long startTime = System.nanoTime();
+                final long startTime = System.currentTimeMillis();
                 log.info("Starting EmbeddedHiveMQ.");
                 try {
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
@@ -145,7 +145,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
                     succeedFutureList(localStartFutures);
                     currentState = State.RUNNING;
-                    log.info("Started EmbeddedHiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
+                    log.info("Started EmbeddedHiveMQ in {}ms", System.currentTimeMillis() - startTime);
                 } catch (final Exception ex) {
                     currentState = State.FAILED;
                     failedException = ex;
@@ -169,7 +169,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             final @NotNull List<CompletableFuture<Void>> stopFutures) {
 
         try {
-            final long startTime = System.nanoTime();
+            final long startTime = System.currentTimeMillis();
             final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
 
             for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
@@ -208,7 +208,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), startFutures);
             succeedFutureList(stopFutures);
             currentState = State.STOPPED;
-            log.info("Stopped EmbeddedHiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
+            log.info("Stopped EmbeddedHiveMQ in {}ms", System.currentTimeMillis() - startTime);
         } catch (final Exception ex) {
             currentState = State.FAILED;
             failedException = ex;

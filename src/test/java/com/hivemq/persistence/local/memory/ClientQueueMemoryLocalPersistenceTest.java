@@ -1088,7 +1088,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
     public void test_add_qos_0_per_client_exactly_exceeded() {
 
 
-        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[757]);
+        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[745]);
 
         assertEquals(1024, exactly1024bytesPublish.getEstimatedSizeInMemory());
 
@@ -1182,6 +1182,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertTrue(gauge.getValue() > 0);
 
         int byteLimit = totalPublishBytes / 2;
+        System.out.println(byteLimit);
         final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
 

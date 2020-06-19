@@ -101,7 +101,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     private final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap;
 
     @Inject
-    public ClientQueueXodusLocalPersistence(
+    ClientQueueXodusLocalPersistence(
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
@@ -592,6 +592,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         publishes.add(publish);
                         packetIdIndex[0]++;
                         messageCount[0]++;
+                        System.out.println(publish.getEstimatedSizeInMemory());
                         bytes[0] += publish.getEstimatedSizeInMemory();
                         if ((messageCount[0] == countLimit) || (bytes[0] > bytesLimit)) {
                             return false;

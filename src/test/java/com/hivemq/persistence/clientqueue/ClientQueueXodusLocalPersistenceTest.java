@@ -984,7 +984,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void test_add_qos_0_per_client_exactly_exceeded() {
 
 
-        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[757]);
+        final PUBLISH exactly1024bytesPublish = createPublish(1, QoS.AT_MOST_ONCE, "topic", 1, new byte[745]);
 
         assertEquals(1024, exactly1024bytesPublish.getEstimatedSizeInMemory());
 
@@ -997,6 +997,137 @@ public class ClientQueueXodusLocalPersistenceTest {
 
         assertNotNull(clientQos0MemoryMap.get("client"));
 
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos0() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        persistence.stop();
+        persistence = new ClientQueueXodusLocalPersistence(
+                payloadPersistence,
+                new EnvironmentUtil(),
+                localPersistenceFileUtil,
+                new PersistenceStartup(),
+                messageDroppedService);
+
+        persistence.start();
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.AT_MOST_ONCE, "topic" + i, i + 1, null);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 2, DISCARD, false, 0);
+
+        int byteLimit = totalPublishBytes / 2;
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52, 100), byteLimit, 0);
+        assertEquals(49, allReadPublishes2.size());
+
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos1() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        persistence.stop();
+        persistence = new ClientQueueXodusLocalPersistence(
+                payloadPersistence,
+                new EnvironmentUtil(),
+                localPersistenceFileUtil,
+                new PersistenceStartup(),
+                messageDroppedService);
+
+        persistence.start();
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.AT_LEAST_ONCE, "topic" + i, i+1, null);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 100, DISCARD, false, 0);
+
+
+        final int byteLimit = totalPublishBytes / 2;
+        System.out.println(byteLimit);
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        assertEquals(49, allReadPublishes2.size());
+
+        for (final PUBLISH pub : allReadPublishes) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+        for (final PUBLISH pub : allReadPublishes2) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        assertEquals(0, persistence.size("client", false, 0));
+
+    }
+
+    @Test
+    public void test_read_byte_limit_respected_qos0_and_qos1() {
+
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+
+        persistence.stop();
+        persistence = new ClientQueueXodusLocalPersistence(
+                payloadPersistence,
+                new EnvironmentUtil(),
+                localPersistenceFileUtil,
+                new PersistenceStartup(),
+                messageDroppedService);
+
+        persistence.start();
+
+        final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
+        int totalPublishBytes = 0;
+        for (int i = 0; i < 100; i++) {
+            final PUBLISH publish = createPublish(i + 1, QoS.valueOf(i % 2), "topic" + i, i + 1, null);
+            totalPublishBytes += publish.getEstimatedSizeInMemory();
+            publishes.add(publish);
+        }
+        persistence.add("client", false, publishes.build(), 100, DISCARD, false, 0);
+
+        int byteLimit = totalPublishBytes / 2;
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        assertEquals(51, allReadPublishes.size());
+
+        for (final PUBLISH pub : allReadPublishes) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        assertEquals(48, allReadPublishes2.size());
+
+        for (final PUBLISH pub : allReadPublishes2) {
+            persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
+        }
+
+        //last qos0 message
+        final ImmutableList<PUBLISH> allReadPublishes3 = persistence.readNew("client", false, createPacketIds(100,100), byteLimit, 0);
+        assertEquals(1, allReadPublishes3.size());
+        assertEquals(0, persistence.size("client", false, 0));
+
+    }
+
+    private ImmutableIntArray createPacketIds(final int start, final int size) {
+        final ImmutableIntArray.Builder builder = ImmutableIntArray.builder();
+        for (int i = start; i < (size + start); i++) {
+            builder.add(i);
+        }
+        return builder.build();
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos) {

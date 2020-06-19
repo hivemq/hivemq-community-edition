@@ -47,10 +47,10 @@ public class ClientQueuePersistenceSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientQueuePersistenceSerializer.class);
 
-    public static final int NO_PACKET_ID = 0;
-    public static final int CLIENT_ID_MATCH = 0;
-    public static final int CLIENT_ID_SAME_PREFIX = 1;
-    public static final int CLIENT_ID_NO_MATCH = 2;
+    static final int NO_PACKET_ID = 0;
+    static final int CLIENT_ID_MATCH = 0;
+    static final int CLIENT_ID_SAME_PREFIX = 1;
+    static final int CLIENT_ID_NO_MATCH = 2;
 
     private static final byte PUBLISH_BIT = (byte) 0b1000_0000;
     private static final byte PUBREL_BIT = (byte) 0b0100_0000;
