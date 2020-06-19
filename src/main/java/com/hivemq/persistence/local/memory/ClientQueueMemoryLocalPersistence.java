@@ -321,7 +321,6 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 publishes.add(publishWithRetained);
                 packetIdIndex++;
                 messageCount++;
-                System.out.println(publishWithRetained.getEstimatedSizeInMemory());
                 bytes += publishWithRetained.getEstimatedSizeInMemory();
                 if ((messageCount == countLimit) || (bytes > bytesLimit)) {
                     break;
