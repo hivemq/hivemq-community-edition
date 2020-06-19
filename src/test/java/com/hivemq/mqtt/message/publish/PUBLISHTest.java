@@ -41,19 +41,19 @@ import static org.junit.Assert.assertNotNull;
  */
 public class PUBLISHTest {
 
-    private static final int GENERAL_OVERHEAD =
-            8 +  // shell size
-            4 +  // size size
-            8 +  // timestamp
+    private static final int FIXED_SIZE =
+            ObjectMemoryEstimation.objectShellSize() +  // shell size
+                    ObjectMemoryEstimation.intSize() +  // size size
+                    ObjectMemoryEstimation.longSize() +  // timestamp
             24 + // user props overhead
-            1 +  // duplicateDelivery
-            1 +  // retain
-            1 +  // isNewTopicAlias
-            8 +  // messageExpiryInterval
-            8 +  // publishId
-            16 + // payloadId
-            4 +  // QoS
-            4;   // payloadFormatIndicator
+            ObjectMemoryEstimation.booleanSize() +  // duplicateDelivery
+            ObjectMemoryEstimation.booleanSize() +  // retain
+            ObjectMemoryEstimation.booleanSize() +  // isNewTopicAlias
+            ObjectMemoryEstimation.longSize() +  // messageExpiryInterval
+            ObjectMemoryEstimation.longSize() +  // publishId
+            ObjectMemoryEstimation.longWrapperSize() + // payloadId
+            ObjectMemoryEstimation.enumSize() +  // QoS
+            ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
 
     @Test(expected = IllegalArgumentException.class)
     public void test_publish_with_payload_id_null_persistence() {
@@ -218,6 +218,7 @@ public class PUBLISHTest {
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
+                .withPublishId(1L)
                 .withTopic("topic") // 10+38 = 48 bytes
                 .withResponseTopic("response") // 16+38 = 54 bytes
                 .withCorrelationData("correlation".getBytes()) // 11+12 = 23 bytes
@@ -242,7 +243,7 @@ public class PUBLISHTest {
 
         for (final int size : sizeList) {
             //19 + 48 + 54 + 23 + 118 = 262
-            assertEquals(262 + 54 + GENERAL_OVERHEAD + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), size);
+            assertEquals(262 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), size);
         }
 
     }
@@ -257,7 +258,7 @@ public class PUBLISHTest {
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();
 
-        assertEquals(67 + 54 + GENERAL_OVERHEAD + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(67 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
@@ -272,7 +273,7 @@ public class PUBLISHTest {
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();
 
-        assertEquals(48 + 54 + GENERAL_OVERHEAD + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(48 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
@@ -289,7 +290,7 @@ public class PUBLISHTest {
                 .withUserProperties(getManyProperties()) // 12.777.790 bytes
                 .build();
 
-        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 54 + 24 + (130_038 * 2) + 12_777_790 + GENERAL_OVERHEAD + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()); // 23_523_857 bytes + UniqueID Bytes
+        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 54 + 24 + (130_038 * 2) + 12_777_790 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()); // 23_523_857 bytes + UniqueID Bytes
         assertEquals(estimatedSize, publishMqtt5.getEstimatedSizeInMemory());
 
     }
