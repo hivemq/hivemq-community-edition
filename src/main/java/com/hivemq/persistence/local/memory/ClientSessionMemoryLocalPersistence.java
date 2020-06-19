@@ -503,7 +503,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             return;
         }
         if (dereference) {
-            payloadPersistence.decrementReferenceCounter(payloadId);
             willPublish.getMqttWillPublish().setPayload(payload);
         }
     }
