@@ -84,8 +84,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
 
-    private final long configuredSessionExpiryInterval;
-
     private final AtomicInteger sessionsCount = new AtomicInteger(0);
 
     @Inject
@@ -102,7 +100,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
         this.serializer = new ClientSessionPersistenceSerializer();
-        this.configuredSessionExpiryInterval = mqttConfigurationService.maxSessionExpiryInterval();
 
     }
 
@@ -316,7 +313,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final ByteIterable byteIterable = bucket.getStore().get(txn, key);
 
             if (byteIterable == null) {
-                final ClientSession clientSession = new ClientSession(false, configuredSessionExpiryInterval);
+                // we create a tombstone here which will be removed at next cleanup
+                final ClientSession clientSession = new ClientSession(false, SESSION_EXPIRE_ON_DISCONNECT);
                 bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
                 return clientSession;
             }
