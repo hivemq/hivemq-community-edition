@@ -19,7 +19,6 @@ package com.hivemq.embedded.internal;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
 import com.hivemq.bootstrap.ioc.GuiceBootstrap;
@@ -291,14 +290,6 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     @Override
     public @NotNull MetricRegistry getMetricRegistry() {
         return metricRegistry;
-    }
-
-    @Override
-    public <T> @NotNull T getInjectableInstance(final @NotNull Class<T> clazz) {
-        Preconditions.checkState(currentState == State.RUNNING, "HiveMQ must run to use the injector");
-        Preconditions.checkNotNull(injector, "Injector must not be null");
-        Preconditions.checkNotNull(clazz, "Class must not be null");
-        return injector.getInstance(clazz);
     }
 
     @VisibleForTesting

@@ -65,12 +65,4 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
     @Override
     void close() throws ExecutionException, InterruptedException;
 
-    /**
-     * Get an instance of any injectable class from the embedded HiveMQ.
-     * 
-     * @param clazz the class you want an instance for.
-     * @return an instance of that class
-     */
-    @NotNull
-    <T> T getInjectableInstance(@NotNull Class<T> clazz);
 }
