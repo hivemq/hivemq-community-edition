@@ -39,6 +39,7 @@ import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence;
+import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;

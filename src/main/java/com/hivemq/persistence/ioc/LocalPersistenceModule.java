@@ -39,6 +39,7 @@ import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence;
+import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
