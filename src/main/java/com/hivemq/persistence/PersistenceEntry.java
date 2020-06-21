@@ -24,7 +24,7 @@ import com.hivemq.util.ObjectMemoryEstimation;
  * @author Lukas Brandl
  */
 @Immutable
-public class PersistenceEntry<T extends Sizable> implements Sizable{
+public class PersistenceEntry<T extends Sizable> implements Sizable {
 
     private final long timestamp;
     private final @NotNull T object;
@@ -58,7 +58,7 @@ public class PersistenceEntry<T extends Sizable> implements Sizable{
             return sizeInMemory;
         }
 
-        int size = ObjectMemoryEstimation.objectShellSize(); // object overhead
+        int size = ObjectMemoryEstimation.objectShellSize();
         size += ObjectMemoryEstimation.longSize(); // timestamp
         size += ObjectMemoryEstimation.intSize(); // sizeInMemory
 

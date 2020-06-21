@@ -41,6 +41,7 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Cursor;
 import jetbrains.exodus.env.StoreConfig;
@@ -61,6 +62,7 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DIS
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
+import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
  * An implementation of the ClientSessionLocalPersistence based on Xodus.
@@ -82,8 +84,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
 
-    private final long configuredSessionExpiryInterval;
-
     private final AtomicInteger sessionsCount = new AtomicInteger(0);
 
     @Inject
@@ -100,7 +100,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
         this.serializer = new ClientSessionPersistenceSerializer();
-        this.configuredSessionExpiryInterval = mqttConfigurationService.maxSessionExpiryInterval();
 
     }
 
@@ -314,7 +313,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final ByteIterable byteIterable = bucket.getStore().get(txn, key);
 
             if (byteIterable == null) {
-                final ClientSession clientSession = new ClientSession(false, configuredSessionExpiryInterval);
+                // we create a tombstone here which will be removed at next cleanup
+                final ClientSession clientSession = new ClientSession(false, SESSION_EXPIRE_ON_DISCONNECT);
                 bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
                 return clientSession;
             }
@@ -460,6 +460,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
      */
     @Override
     public void removeWithTimestamp(final @NotNull String client, final int bucketIndex) {
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
             final ByteIterable value = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(client)));
@@ -509,33 +511,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             bucket.getStore().put(txn, key, value);
 
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @NotNull
-    public Long getSessionExpiryInterval(@NotNull final String clientId) {
-        checkNotNull(clientId, "Client Id must not be null");
-
-        final Bucket bucket = getBucket(clientId);
-        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-
-            final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
-            if (byteIterable == null) {
-                throw NoSessionException.INSTANCE;
-            }
-
-            final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
-
-            // is tombstone?
-            if (!clientSession.isConnected() && !persistent(clientSession)) {
-                throw NoSessionException.INSTANCE;
-            }
-
-            return clientSession.getSessionExpiryInterval();
         });
     }
 
