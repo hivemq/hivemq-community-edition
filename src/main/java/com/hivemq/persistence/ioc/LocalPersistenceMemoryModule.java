@@ -19,8 +19,11 @@ package com.hivemq.persistence.ioc;
 import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
+import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
@@ -35,11 +38,11 @@ import javax.inject.Singleton;
  */
 class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenceMemoryModule>> {
 
-    private final @NotNull Injector persistenceInjector;
+    private final @Nullable Injector injector;
 
-    public LocalPersistenceMemoryModule(@NotNull final Injector persistenceInjector) {
+    public LocalPersistenceMemoryModule(@Nullable final Injector injector) {
         super(LocalPersistenceMemoryModule.class);
-        this.persistenceInjector = persistenceInjector;
+        this.injector = injector;
     }
 
     @Override
@@ -56,12 +59,16 @@ class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenc
 
         bindLocalPersistence(ClientSessionLocalPersistence.class,
                 ClientSessionMemoryLocalPersistence.class);
+
+        bindLocalPersistence(ClientQueueLocalPersistence.class,
+                ClientQueueMemoryLocalPersistence.class);
+
     }
 
     private void bindLocalPersistence(final @NotNull Class localPersistenceClass,
                                       final @NotNull Class localPersistenceImplClass) {
 
-        final Object instance = persistenceInjector.getInstance(localPersistenceImplClass);
+        final Object instance = injector == null ? null : injector.getInstance(localPersistenceImplClass);
         if (instance != null) {
             bind(localPersistenceImplClass).toInstance(instance);
             bind(localPersistenceClass).toInstance(instance);

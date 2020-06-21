@@ -29,23 +29,10 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedServiceProvider;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.PersistenceStartupShutdownHookInstaller;
-import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
-import com.hivemq.persistence.ioc.provider.local.ClientSessionLocalProvider;
-import com.hivemq.persistence.ioc.provider.local.ClientSessionSubscriptionLocalProvider;
 import com.hivemq.persistence.ioc.provider.local.PayloadPersistenceScheduledExecutorProvider;
-import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
-import com.hivemq.persistence.local.memory.ClientSessionMemoryLocalPersistence;
-import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
-import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence;
-import com.hivemq.persistence.local.memory.ClientSessionSubscriptionMemoryLocalPersistence;
-import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
-import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 
 import javax.inject.Singleton;
 
@@ -69,30 +56,13 @@ public class PersistenceMigrationModule extends SingletonModule<Class<Persistenc
     protected void configure() {
 
         bind(ShutdownHooks.class).asEagerSingleton();
-
         bind(PersistenceStartup.class).asEagerSingleton();
-
         bind(PersistenceStartupShutdownHookInstaller.class).asEagerSingleton();
-
-
 
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.FILE) {
             install(new PersistenceMigrationFileModule());
-            bind(ClientSessionLocalPersistence.class).toProvider(ClientSessionLocalProvider.class).in(Singleton.class);
-            bind(ClientSessionSubscriptionLocalPersistence.class).toProvider(ClientSessionSubscriptionLocalProvider.class)
-                    .in(Singleton.class);
-            bind(ClientQueueLocalPersistence.class).to(ClientQueueXodusLocalPersistence.class).in(Singleton.class);
         } else {
-            bind(PublishPayloadLocalPersistence.class).to(PublishPayloadMemoryLocalPersistence.class)
-                    .in(Singleton.class);
-            bind(RetainedMessageLocalPersistence.class).to(RetainedMessageMemoryLocalPersistence.class)
-                    .in(Singleton.class);
-            bind(ClientSessionLocalPersistence.class).to(ClientSessionMemoryLocalPersistence.class)
-                    .in(Singleton.class);
-            bind(ClientSessionSubscriptionLocalPersistence.class).to(ClientSessionSubscriptionMemoryLocalPersistence.class)
-                    .in(Singleton.class);
-            bind(ClientQueueLocalPersistence.class).to(ClientQueueMemoryLocalPersistence.class)
-                    .in(Singleton.class);
+            install(new LocalPersistenceMemoryModule(null));
         }
 
         bind(PublishPayloadPersistence.class).to(PublishPayloadPersistenceImpl.class).in(Singleton.class);
