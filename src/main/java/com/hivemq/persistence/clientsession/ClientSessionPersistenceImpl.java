@@ -161,19 +161,17 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
             final long willPayloadId = publishPayloadPersistence.add(willPublish.getPayload(), 1);
+            willPublish.setPayload(null);
             sessionWill = new ClientSessionWill(willPublish, willPayloadId);
         }
         final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill);
-        final ListenableFuture<ConnectResult> submitFuture = singleWriter.submit(client, new SingleWriterService.Task<>() {
-            @NotNull
-            @Override
-            public ConnectResult doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
-                final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
-                final ClientSession previousClientSession = localPersistence.getSession(client, bucketIndex, false);
-                localPersistence.put(client, clientSession, timestamp, bucketIndex);
-                return new ConnectResult(previousTimestamp, previousClientSession);
-            }
-        });
+        final ListenableFuture<ConnectResult> submitFuture =
+                singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+                    final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
+                    final ClientSession previousClientSession = localPersistence.getSession(client, bucketIndex, false);
+                    localPersistence.put(client, clientSession, timestamp, bucketIndex);
+                    return new ConnectResult(previousTimestamp, previousClientSession);
+                });
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         FutureUtils.addPersistenceCallback(submitFuture, new FutureCallback<>() {
@@ -308,21 +306,18 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     public ListenableFuture<Boolean> setSessionExpiryInterval(@NotNull final String clientId, final long sessionExpiryInterval) {
         checkNotNull(clientId, "Client id must not be null");
 
-        final ListenableFuture<Boolean> setTTlFuture = singleWriter.submit(clientId, new SingleWriterService.Task<>() {
+        final ListenableFuture<Boolean> setTTlFuture =
+                singleWriter.submit(clientId, (bucketIndex, queueBuckets, queueIndex) -> {
 
-            @Override
-            public @NotNull Boolean doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
+                    final boolean clientSessionExists = localPersistence.getSession(clientId) != null;
 
-                final boolean clientSessionExists = localPersistence.getSession(clientId) != null;
+                    if (!clientSessionExists) {
+                        return false;
+                    }
 
-                if (!clientSessionExists) {
-                    return false;
-                }
-
-                localPersistence.setSessionExpiryInterval(clientId, sessionExpiryInterval, bucketIndex);
-                return true;
-            }
-        });
+                    localPersistence.setSessionExpiryInterval(clientId, sessionExpiryInterval, bucketIndex);
+                    return true;
+                });
 
         final SettableFuture<Boolean> settableFuture = SettableFuture.create();
 
@@ -419,18 +414,17 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     @Override
     public ListenableFuture<Map<String, PendingWillMessages.PendingWill>> pendingWills() {
 
-        final ListenableFuture<List<Map<String, PendingWillMessages.PendingWill>>> singleWriterFutures = singleWriter.submitToAllQueuesAsList(new SingleWriterService.Task<Map<String, PendingWillMessages.PendingWill>>() {
-            @NotNull
-            @Override
-            public Map<String, PendingWillMessages.PendingWill> doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
-                final ImmutableMap.Builder<String, PendingWillMessages.PendingWill> queueWills = ImmutableMap.builder();
-                for (final Integer queueBucket : queueBuckets) {
-                    final Map<String, PendingWillMessages.PendingWill> bucketMap = localPersistence.getPendingWills(queueBucket);
-                    queueWills.putAll(bucketMap);
-                }
-                return queueWills.build();
-            }
-        });
+        final ListenableFuture<List<Map<String, PendingWillMessages.PendingWill>>> singleWriterFutures =
+                singleWriter.submitToAllQueuesAsList((bucketIndex, queueBuckets, queueIndex) -> {
+                    final ImmutableMap.Builder<String, PendingWillMessages.PendingWill> queueWills =
+                            ImmutableMap.builder();
+                    for (final Integer queueBucket : queueBuckets) {
+                        final Map<String, PendingWillMessages.PendingWill> bucketMap =
+                                localPersistence.getPendingWills(queueBucket);
+                        queueWills.putAll(bucketMap);
+                    }
+                    return queueWills.build();
+                });
 
         final SettableFuture<Map<String, PendingWillMessages.PendingWill>> settableFuture = SettableFuture.create();
         FutureUtils.addPersistenceCallback(singleWriterFutures, new FutureCallback<>() {
@@ -461,13 +455,9 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     @Override
     public ListenableFuture<Void> removeWill(@NotNull final String clientId) {
         checkNotNull(clientId, "Client id must not be null");
-        return singleWriter.submit(clientId, new SingleWriterService.Task<Void>() {
-            @NotNull
-            @Override
-            public Void doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
-                localPersistence.removeWill(clientId, bucketIndex);
-                return null;
-            }
+        return singleWriter.submit(clientId, (bucketIndex, queueBuckets, queueIndex) -> {
+            localPersistence.removeWill(clientId, bucketIndex);
+            return null;
         });
     }
 

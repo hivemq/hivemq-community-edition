@@ -240,7 +240,7 @@ public class EmbeddedHiveMQImplTest {
         final List<Runnable> runnableList = embeddedHiveMQ.stateChangeExecutor.shutdownNow();
 
         // the blocking Latch callable is already executed, so one embeddedHiveMQ.stateChange and one executor.shutdown
-        // are expect
+        // are expected
         assertEquals(2, runnableList.size());
     }
 
