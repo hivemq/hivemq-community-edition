@@ -17,7 +17,10 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.Sizable;
+import com.hivemq.util.ObjectMemoryEstimation;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
@@ -27,21 +30,24 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DIS
 public class ClientSession implements Sizable {
 
     private boolean connected;
-
     private long sessionExpiryInterval;
 
-    private ClientSessionWill willPublish;
+    private int inMemorySize = SIZE_NOT_CALCULATED;
 
-    public ClientSession(final boolean connected,
-                         final long sessionExpiryInterval) {
+    private @Nullable ClientSessionWill willPublish;
 
-        Preconditions.checkArgument(sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT, "Session expiry interval must never be less than zero");
-
-        this.connected = connected;
-        this.sessionExpiryInterval = sessionExpiryInterval;
+    public ClientSession(final boolean connected, final long sessionExpiryInterval) {
+        this(connected, sessionExpiryInterval, null);
     }
 
-    public ClientSession(final boolean connected, final long sessionExpiryInterval, final ClientSessionWill willPublish) {
+    public ClientSession(final boolean connected,
+                         final long sessionExpiryInterval,
+                         final @Nullable ClientSessionWill willPublish) {
+
+        Preconditions.checkArgument(
+                sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
+                "Session expiry interval must never be less than zero");
+
         this.connected = connected;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.willPublish = willPublish;
@@ -63,16 +69,45 @@ public class ClientSession implements Sizable {
         this.sessionExpiryInterval = sessionExpiryInterval;
     }
 
+    @Nullable
     public ClientSessionWill getWillPublish() {
         return willPublish;
     }
 
-    public void setWillPublish(final ClientSessionWill willPublish) {
+    public void setWillPublish(final @Nullable ClientSessionWill willPublish) {
         this.willPublish = willPublish;
+    }
+
+    public @NotNull ClientSession deepCopyWithoutPayload() {
+        return new ClientSession(
+                this.connected,
+                this.sessionExpiryInterval,
+                this.willPublish != null ? this.willPublish.deepCopyWithoutPayload() : null);
+    }
+
+    public @NotNull ClientSession copyWithoutWill() {
+        return new ClientSession(this.connected, this.sessionExpiryInterval, null);
     }
 
     @Override
     public int getEstimatedSize() {
-        return 0;
+
+        if (inMemorySize != SIZE_NOT_CALCULATED) {
+            return inMemorySize;
+        }
+
+        int size = ObjectMemoryEstimation.objectShellSize();
+        size += ObjectMemoryEstimation.intSize(); // inMemorySize
+        size += ObjectMemoryEstimation.booleanSize(); // connected
+        size += ObjectMemoryEstimation.longSize(); // sessionExpiryInterval
+
+        size += ObjectMemoryEstimation.objectRefSize(); // reference to will
+        if (willPublish != null) {
+            size += willPublish.getEstimatedSize();
+        }
+
+        inMemorySize = size;
+
+        return inMemorySize;
     }
 }

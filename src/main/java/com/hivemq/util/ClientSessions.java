@@ -40,13 +40,13 @@ public class ClientSessions {
             return false;
         }
 
-        final long timeToLiveMilliseconds = clientSession.getSessionExpiryInterval() * 1000L;
+        final long sessionExpiryInMillis = clientSession.getSessionExpiryInterval() * 1000L;
 
         //prevent accidental overflow
-        if (timeToLiveMilliseconds < 0) {
+        if (sessionExpiryInMillis < 0) {
             return false;
         }
 
-        return timeSinceDisconnect >= timeToLiveMilliseconds;
+        return timeSinceDisconnect >= sessionExpiryInMillis;
     }
 }
