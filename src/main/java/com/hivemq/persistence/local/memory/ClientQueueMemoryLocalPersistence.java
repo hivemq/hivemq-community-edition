@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -68,12 +69,13 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;
 
-    final private @NotNull Map<Key, LinkedList<MessageWithID>> @NotNull[] buckets;
+    final private @NotNull Map<Key, LinkedList<MessageWithID>> @NotNull[] qos12MessageBuckets;
     private final @NotNull Map<Key, LinkedList<PublishWithRetained>> @NotNull[] qos0MessageBuckets;
-    private final @NotNull Map<Integer, Map<Key, AtomicInteger>> queueSizeBuckets;
-    private final @NotNull Map<Integer, Map<Key, AtomicInteger>> retainedQueueSizeBuckets;
-    private final @NotNull Map<String, AtomicInteger> clientQos0MemoryMap;
+    private final @NotNull Map<Key, AtomicInteger> @NotNull[] queueSizeBuckets;
+    private final @NotNull Map<Key, AtomicInteger> @NotNull[] retainedQueueSizeBuckets;
 
+    //must be concurrent
+    private final @NotNull Map<String, AtomicInteger> clientQos0MemoryMap;
 
     private final int qos0ClientMemoryLimit;
     private final long qos0MemoryLimit;
@@ -93,27 +95,28 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         final int bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         this.messageDroppedService = messageDroppedService;
-        this.queueSizeBuckets = new HashMap<>();
-        this.retainedQueueSizeBuckets = new HashMap<>();
         this.payloadPersistence = payloadPersistence;
         this.qos0MemoryLimit = getQos0MemoryLimit();
-        this.clientQos0MemoryMap = new HashMap<>();
+
+        //must be concurrent as it is not protected by bucket access
+        this.clientQos0MemoryMap = new ConcurrentHashMap<>();
         this.totalMemorySize = new AtomicLong();
         this.qos0MessagesMemory = new AtomicLong();
 
         //noinspection unchecked
-        buckets = new HashMap[bucketCount];
-        for (int i = 0; i < bucketCount; i++) {
-            buckets[i] = new HashMap<>();
-        }
+        this.qos12MessageBuckets = new HashMap[bucketCount];
         //noinspection unchecked
-        qos0MessageBuckets = new HashMap[bucketCount];
+        this.qos0MessageBuckets = new HashMap[bucketCount];
+        //noinspection unchecked
+        this.queueSizeBuckets = new HashMap[bucketCount];
+        //noinspection unchecked
+        this.retainedQueueSizeBuckets = new HashMap[bucketCount];
+
         for (int i = 0; i < bucketCount; i++) {
+            qos12MessageBuckets[i] = new HashMap<>();
             qos0MessageBuckets[i] = new HashMap<>();
-        }
-        for (int i = 0; i < buckets.length; i++) {
-            queueSizeBuckets.put(i, new HashMap<>());
-            retainedQueueSizeBuckets.put(i, new HashMap<>());
+            queueSizeBuckets[i] = new HashMap<>();
+            retainedQueueSizeBuckets[i] = new HashMap<>();
         }
 
         metricRegistry.register(
@@ -170,7 +173,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         final Key key = new Key(queueId, shared);
 
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
 
         final AtomicInteger queueSize = getOrPutQueueSize(key, bucketIndex);
         final AtomicInteger retainedQueueSize = getOrPutRetainedQueueSize(key, bucketIndex);
@@ -284,7 +287,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             return getQos0Publishes(packetIds, bytesLimit, bucketIndex, key, qos0Messages);
         }
 
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
 
         final int countLimit = packetIds.length();
@@ -394,7 +397,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         final Key key = new Key(client, shared);
 
-        final @NotNull Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final @NotNull Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
 
         int messageCount = 0;
@@ -436,7 +439,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         final Key key = new Key(client, false);
 
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
 
         boolean packetIdFound = false;
@@ -503,7 +506,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Key key = new Key(client, false);
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         final Iterator<MessageWithID> iterator = messageQueue.iterator();
         while(iterator.hasNext()){
@@ -540,7 +543,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         checkNotNull(queueId, "Queue ID must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX); // QueueSizes are not thread save
         final Key key = new Key(queueId, shared);
-        final AtomicInteger queueSize = queueSizeBuckets.get(bucketIndex).get(key);
+        final AtomicInteger queueSize = queueSizeBuckets[bucketIndex].get(key);
         return (queueSize == null) ? 0 : queueSize.get();
     }
 
@@ -567,7 +570,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         final Key key = new Key(queueId, shared);
 
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         for (final MessageWithID messageWithID : messageQueue) {
             if (messageWithID instanceof PublishWithRetained) {
@@ -586,8 +589,8 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(qos0Message.getPayloadId()));
         }
         bucketMessages.remove(key);
-        queueSizeBuckets.get(bucketIndex).remove(key);
-        retainedQueueSizeBuckets.get(bucketIndex).remove(key);
+        queueSizeBuckets[bucketIndex].remove(key);
+        retainedQueueSizeBuckets[bucketIndex].remove(key);
     }
 
     /**
@@ -625,7 +628,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final ImmutableSet.Builder<String> sharedQueues = ImmutableSet.builder();
-        final Map<Key, AtomicInteger> bucketClients = queueSizeBuckets.get(bucketIndex);
+        final Map<Key, AtomicInteger> bucketClients = queueSizeBuckets[bucketIndex];
 
         for (final Key bucketKey : bucketClients.keySet()) {
             if (bucketKey.isShared()) {
@@ -649,7 +652,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Key key = new Key(sharedSubscription, true);
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         final Iterator<MessageWithID> iterator = messageQueue.iterator();
         while(iterator.hasNext()){
@@ -682,7 +685,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Key key = new Key(sharedSubscription, true);
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         for (final MessageWithID messageWithID : messageQueue) {
             if (messageWithID instanceof PublishWithRetained) {
@@ -702,12 +705,13 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     }
 
     @Override
+    @ExecuteInSingleWriter
     public void closeDB(final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         qos0MessageBuckets[bucketIndex].clear();
-        buckets[bucketIndex].clear();
-        queueSizeBuckets.get(bucketIndex).clear();
-        retainedQueueSizeBuckets.get(bucketIndex).clear();
+        qos12MessageBuckets[bucketIndex].clear();
+        queueSizeBuckets[bucketIndex].clear();
+        retainedQueueSizeBuckets[bucketIndex].clear();
         clientQos0MemoryMap.clear();
         totalMemorySize.set(0L);
         qos0MessagesMemory.set(0L);
@@ -856,7 +860,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             }
         }
 
-        final Map<Key, LinkedList<MessageWithID>> bucket = buckets[bucketIndex];
+        final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
 
         final Iterator<MessageWithID> qos12iterator = messageQueue.iterator();
@@ -901,12 +905,12 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
     @NotNull
     private AtomicInteger getOrPutQueueSize(@NotNull final Key key, final int bucketIndex) {
-        final Map<Key, AtomicInteger> queueSizeBucket = queueSizeBuckets.get(bucketIndex);
+        final Map<Key, AtomicInteger> queueSizeBucket = queueSizeBuckets[bucketIndex];
         return getOrPutQueueSizeFromBucket(key, queueSizeBucket);
     }
 
     private @NotNull AtomicInteger getOrPutRetainedQueueSize(@NotNull final Key key, final int bucketIndex) {
-        final Map<Key, AtomicInteger> queueSizeBucket = retainedQueueSizeBuckets.get(bucketIndex);
+        final Map<Key, AtomicInteger> queueSizeBucket = retainedQueueSizeBuckets[bucketIndex];
         return getOrPutQueueSizeFromBucket(key, queueSizeBucket);
     }
 
