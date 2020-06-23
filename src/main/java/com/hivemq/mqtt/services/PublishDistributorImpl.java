@@ -38,7 +38,6 @@ import com.hivemq.persistence.util.FutureUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -176,9 +175,9 @@ public class PublishDistributorImpl implements PublishDistributor {
             identifiers = subscriptionIdentifier;
         }
 
-        final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder()
-                .fromPublish(publish)
+        final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                 .withPayloadId(payloadId)
+                .withPayload(null) // not needed anymore as we just put it in the payload persistence.
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)
                 .withSubscriptionIdentifiers(identifiers);
