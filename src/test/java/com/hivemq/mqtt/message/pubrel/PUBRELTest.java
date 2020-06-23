@@ -20,6 +20,7 @@ import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
+import com.hivemq.util.ObjectMemoryEstimation;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -79,5 +80,56 @@ public class PUBRELTest {
         assertEquals(a.getReasonCode(), b.getReasonCode());
         assertEquals(a.getReasonString(), b.getReasonString());
         assertEquals(a.getUserProperties(), b.getUserProperties());
+    }
+
+    @Test
+    public void test_estimated_size() {
+
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
+                new MqttUserProperty("user1", "value1"),
+                new MqttUserProperty("user2", "value2"),
+                new MqttUserProperty("user3", "value3"));
+
+        final int userPropertiesSize =
+                3 * (
+                24 + // overhead
+                ObjectMemoryEstimation.stringSize("userx") +
+                ObjectMemoryEstimation.stringSize("valuex")
+                );
+
+        final String reasonString = "reasonString";
+        final int reasonStringSize = ObjectMemoryEstimation.stringSize(reasonString);
+
+        final PUBREL pubrel1 = new PUBREL(1);
+        final PUBREL pubrel2 = new PUBREL(1, 100L, 100L);
+        final PUBREL pubrel3 =
+                new PUBREL(1,
+                        Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                        reasonString,
+                        userProperties);
+
+        final PUBREL pubrel4 = new PUBREL(1,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                reasonString,
+                userProperties,
+                100L,
+                100L);
+
+        final int fixedSize = ObjectMemoryEstimation.objectShellSize() +
+                ObjectMemoryEstimation.intSize() + // sizeInMemory
+                ObjectMemoryEstimation.intSize() + // packet id
+                ObjectMemoryEstimation.enumSize() + // reason code
+                ObjectMemoryEstimation.longWrapperSize() + //publish timestamp
+                ObjectMemoryEstimation.longWrapperSize() + //expiry interval
+                24; //user props overhead
+
+        final int pubrel3Size = fixedSize + reasonStringSize + userPropertiesSize;
+        final int pubrel4Size = fixedSize + reasonStringSize + userPropertiesSize;
+
+        assertEquals(fixedSize, pubrel1.getEstimatedSizeInMemory());
+        assertEquals(fixedSize, pubrel2.getEstimatedSizeInMemory());
+        assertEquals(pubrel3Size, pubrel3.getEstimatedSizeInMemory());
+        assertEquals(pubrel4Size, pubrel4.getEstimatedSizeInMemory());
+
     }
 }
