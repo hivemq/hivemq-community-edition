@@ -16,7 +16,6 @@
 
 package com.hivemq.persistence.clientqueue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -44,7 +43,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Lukas Brandl
  * @author Silvio Giebl
  */
-class ClientQueuePersistenceSerializer {
+public class ClientQueuePersistenceSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientQueuePersistenceSerializer.class);
 

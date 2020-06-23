@@ -137,7 +137,7 @@ public class HiveMQServer {
             return;
         }
         if (configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
-
+            log.info("Starting with file persistences");
             if (migrations.size() > 0) {
                 log.info("Persistence types has been changed, migrating persistent data.");
                 for (final MigrationUnit migrationUnit : migrations.keySet()) {
@@ -147,6 +147,8 @@ public class HiveMQServer {
             }
 
             Migrations.afterMigration(systemInformation);
+        } else {
+            log.info("Starting with in memory persistences");
         }
 
         log.trace("Initializing Guice");
