@@ -17,6 +17,7 @@ package com.hivemq.mqtt.message.connect;
 
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.Message;
 
 /**
@@ -54,34 +55,32 @@ public interface Mqtt5CONNECT extends Message {
     boolean DEFAULT_RESPONSE_INFORMATION_REQUESTED = false;
     boolean DEFAULT_PROBLEM_INFORMATION_REQUESTED = true;
 
-    //Flags
     boolean isCleanStart();
-
-    boolean isResponseInformationRequested();
-
-    boolean isProblemInformationRequested();
 
     long getSessionExpiryInterval();
 
-    //Restrictions
+    // restrictions
     int getReceiveMaximum();
 
     int getTopicAliasMaximum();
 
     long getMaximumPacketSize();
 
-    //Enhanced Auth
-    String getAuthMethod();
+    boolean isResponseInformationRequested();
 
-    byte[] getAuthData();
+    boolean isProblemInformationRequested();
 
-    //Simple Auth
-    String getUsername();
+    // simple auth
+    @Nullable String getUsername();
 
-    byte[] getPassword();
+    byte @Nullable [] getPassword();
 
-    String getPasswordAsUTF8String();
+    @Nullable String getPasswordAsUTF8String();
 
-    MqttWillPublish getWillPublish();
+    // enhanced auth
+    @Nullable String getAuthMethod();
 
+    byte @Nullable [] getAuthData();
+
+    @Nullable MqttWillPublish getWillPublish();
 }

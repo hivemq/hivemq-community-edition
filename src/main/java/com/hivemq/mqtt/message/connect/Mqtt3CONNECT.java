@@ -25,30 +25,17 @@ import com.hivemq.mqtt.message.ProtocolVersion;
  */
 public interface Mqtt3CONNECT extends Message {
 
-    boolean isWill();
+    @NotNull ProtocolVersion getProtocolVersion();
 
-    boolean isPasswordRequired();
-
-    boolean isUsernameRequired();
+    @NotNull String getClientIdentifier();
 
     int getKeepAlive();
 
-    @NotNull
-    String getClientIdentifier();
+    @Nullable String getUsername();
 
-    @Nullable
-    String getUsername();
+    byte @Nullable [] getPassword();
 
-    @Nullable
-    byte[] getPassword();
+    @Nullable String getPasswordAsUTF8String();
 
-    @Nullable
-    String getPasswordAsUTF8String();
-
-    @NotNull
-    ProtocolVersion getProtocolVersion();
-
-    @Nullable
-    MqttWillPublish getWillPublish();
-
+    @Nullable MqttWillPublish getWillPublish();
 }

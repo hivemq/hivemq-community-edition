@@ -15,8 +15,8 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.Bytes;
@@ -59,14 +59,14 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
 
         Strings.createPrefixedBytesFromString(msg.getClientIdentifier(), out);
 
-        if (msg.isWill()) {
+        if (msg.getWillPublish() != null) {
             Strings.createPrefixedBytesFromString(msg.getWillPublish().getTopic(), out);
             Bytes.prefixBytes(msg.getWillPublish().getPayload(), out);
         }
-        if (msg.isUsernameRequired()) {
+        if (msg.getUsername() != null) {
             Strings.createPrefixedBytesFromString(msg.getUsername(), out);
         }
-        if (msg.isPasswordRequired()) {
+        if (msg.getPassword() != null) {
             Bytes.prefixBytes(msg.getPassword(), out);
         }
     }
@@ -83,14 +83,14 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
         length += 1; // connect flag
         length += 2; // keep alive time
         length += Utf8Utils.encodedLength(msg.getClientIdentifier()) + 2;
-        if (msg.isWill()) {
+        if (msg.getWillPublish() != null) {
             length += Utf8Utils.encodedLength(msg.getWillPublish().getTopic()) + 2;
             length += msg.getWillPublish().getPayload().length + 2;
         }
-        if (msg.isUsernameRequired()) {
+        if (msg.getUsername() != null) {
             length += Utf8Utils.encodedLength(msg.getUsername()) + 2;
         }
-        if (msg.isPasswordRequired()) {
+        if (msg.getPassword() != null) {
             length += msg.getPassword().length + 2;
         }
         return length;
@@ -105,13 +105,13 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
     private byte createConnectionFlag(final CONNECT message) {
         byte connectFlag = 0b0000_0000;
 
-        if (message.isUsernameRequired()) {
+        if (message.getUsername() != null) {
             connectFlag |= 0b1000_0000;
         }
-        if (message.isPasswordRequired()) {
+        if (message.getPassword() != null) {
             connectFlag |= 0b0100_0000;
         }
-        if (message.isWill()) {
+        if (message.getWillPublish() != null) {
 
             connectFlag |= 0b0000_0100;
 

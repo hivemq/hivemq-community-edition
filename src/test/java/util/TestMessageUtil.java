@@ -252,7 +252,7 @@ public class TestMessageUtil {
 
     public static CONNECT createFullMqtt5Connect() {
 
-        return new CONNECT.Mqtt5Builder().withMqtt5UserProperties(TEST_USER_PROPERTIES)
+        return new CONNECT.Mqtt5Builder().withUserProperties(TEST_USER_PROPERTIES)
                 .withClientIdentifier("clientid")
                 .withKeepAlive(60)
                 .withCleanStart(true)
@@ -266,7 +266,6 @@ public class TestMessageUtil {
                 .withPassword("password".getBytes())
                 .withAuthMethod("auth method")
                 .withAuthData("auth data".getBytes())
-                .withWill(true)
                 .withWillPublish(new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId1")
                         .withTopic("topic")
                         .withPayload("payload".getBytes())
@@ -280,8 +279,6 @@ public class TestMessageUtil {
                         .withUserProperties(TEST_USER_PROPERTIES)
                         .withDelayInterval(60)
                         .build())
-                .withPasswordRequired(true)
-                .withUsernameRequired(true)
                 .build();
 
     }

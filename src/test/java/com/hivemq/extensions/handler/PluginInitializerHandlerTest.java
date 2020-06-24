@@ -223,7 +223,6 @@ public class PluginInitializerHandlerTest {
                 .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
 
         final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("test-client")
-                .withWill(true)
                 .withWillPublish(willPublish)
                 .build();
 
@@ -253,7 +252,6 @@ public class PluginInitializerHandlerTest {
                 .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
 
         final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("test-client")
-                .withWill(true)
                 .withWillPublish(willPublish)
                 .build();
 
