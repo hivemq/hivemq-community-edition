@@ -60,8 +60,10 @@ public class ConnectPacketImplTest {
                 .withResponseInformationRequested(true)
                 .withProblemInformationRequested(true)
                 .withWillPublish(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                        .withPayload("payload".getBytes()).withQos(QoS.AT_LEAST_ONCE).build())
-                .withMqtt5UserProperties(Mqtt5UserProperties.of(new MqttUserProperty("one", "one")))
+                        .withPayload("payload".getBytes())
+                        .withQos(QoS.AT_LEAST_ONCE)
+                        .build())
+                .withUserProperties(Mqtt5UserProperties.of(new MqttUserProperty("one", "one")))
                 .build();
 
         final CONNECT empty = new CONNECT.Mqtt5Builder()

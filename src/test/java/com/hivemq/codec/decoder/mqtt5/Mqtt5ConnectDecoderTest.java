@@ -17,10 +17,10 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -128,10 +128,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(true, connect.isResponseInformationRequested());
         assertEquals(false, connect.isProblemInformationRequested());
         assertEquals("test", connect.getClientIdentifier());
-        assertEquals(true, connect.isWill());
 
-        assertEquals(true, connect.isPasswordRequired());
-        assertEquals(true, connect.isUsernameRequired());
         assertEquals("username", connect.getUsername());
         assertArrayEquals(new byte[]{'p', 'a', 's', 's'}, connect.getPassword());
         assertEquals("pass", connect.getPasswordAsUTF8String());
@@ -200,9 +197,6 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(0, connect.getKeepAlive());
         assertEquals("test", connect.getClientIdentifier());
         assertFalse(connect.isCleanStart());
-        assertFalse(connect.isPasswordRequired());
-        assertFalse(connect.isUsernameRequired());
-        assertFalse(connect.isWill());
         assertNull(connect.getWillPublish());
         assertEquals(MAXIMUM_PACKET_SIZE_NOT_SET, connect.getMaximumPacketSize());
         assertEquals(SESSION_EXPIRY_NOT_SET, connect.getSessionExpiryInterval());

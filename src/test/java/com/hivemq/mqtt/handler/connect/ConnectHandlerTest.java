@@ -183,10 +183,10 @@ public class ConnectHandlerTest {
     public void test_disconnect_after_second_connect_message_mqtt5() {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
         final CONNECT connect2 = new CONNECT.Mqtt5Builder().withClientIdentifier("2")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -207,7 +207,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withSessionExpiryInterval(0)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -225,7 +225,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withKeepAlive(0)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -248,7 +248,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withKeepAlive(0)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -271,7 +271,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withKeepAlive(1000)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         final AtomicLong keepAliveFromCONNACK = new AtomicLong();
@@ -311,7 +311,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withKeepAlive(360)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         final AtomicLong keepAliveFromCONNACK = new AtomicLong();
@@ -346,7 +346,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withMaximumPacketSize(300)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -368,7 +368,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRY_MAX)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -391,7 +391,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRY_MAX)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -413,7 +413,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRY_MAX)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         assertEquals(true, embeddedChannel.isOpen());
@@ -434,7 +434,7 @@ public class ConnectHandlerTest {
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRY_MAX)
                 .withClientIdentifier("1")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
 
@@ -474,7 +474,7 @@ public class ConnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(true);
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("assigned")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         final AtomicReference<String> clientID = new AtomicReference<>();
@@ -511,7 +511,7 @@ public class ConnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(false);
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("ownId")
-                .withMqtt5UserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
         final AtomicReference<String> clientID = new AtomicReference<>();
@@ -549,7 +549,7 @@ public class ConnectHandlerTest {
                 .set(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value")));
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("ownId")
-                .withMqtt5UserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("connect", "value")))
+                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("connect", "value")))
                 .build();
 
         final AtomicReference<Mqtt5UserProperties> userProps = new AtomicReference<>();

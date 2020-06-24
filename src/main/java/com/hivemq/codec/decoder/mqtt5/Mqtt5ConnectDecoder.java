@@ -17,8 +17,6 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -26,6 +24,8 @@ import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
@@ -183,10 +183,8 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withClientIdentifier(clientId)
                 .withCleanStart(cleanStart)
                 .withKeepAlive(keepAlive)
-                .withWill(will)
                 .withWillPublish(mqttWillPublish)
                 .build();
-
     }
 
     private ImmutableList.Builder<MqttUserProperty> readUserProperty(final Channel channel, final ByteBuf buf, ImmutableList.Builder<MqttUserProperty> userPropertiesBuilder) {
@@ -208,9 +206,8 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
 
     private boolean decodeAndValidateUsername(final Channel channel, final ByteBuf buf, final Mqtt5Builder connectBuilder, final boolean usernameRequired) {
-        final String username;
         if (usernameRequired) {
-            username = MqttBinaryData.decodeString(buf, validateUTF8);
+            final String username = MqttBinaryData.decodeString(buf, validateUTF8);
             if (username == null) {
                 mqttConnacker.connackError(channel,
                         "A client (IP: {}) sent a CONNECT with a malformed UTF-8 string for username. This is not allowed.",
@@ -221,18 +218,14 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 return false;
             }
             channel.attr(ChannelAttributes.AUTH_USERNAME).set(username);
-        } else {
-            username = null;
+            connectBuilder.withUsername(username);
         }
-
-        connectBuilder.withUsername(username).withUsernameRequired(usernameRequired);
         return true;
     }
 
     private boolean decodeAndValidatePassword(final Channel channel, final ByteBuf buf, final Mqtt5Builder connectBuilder, final boolean passwordRequired) {
-        final byte[] password;
         if (passwordRequired) {
-            password = MqttBinaryData.decode(buf);
+            final byte[] password = MqttBinaryData.decode(buf);
             if (password == null) {
                 mqttConnacker.connackError(channel,
                         "A client (IP: {}) sent a CONNECT with malformed password. This is not allowed.",
@@ -242,10 +235,8 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 return false;
             }
             channel.attr(ChannelAttributes.AUTH_PASSWORD).set(password);
-        } else {
-            password = null;
+            connectBuilder.withPassword(password);
         }
-        connectBuilder.withPassword(password).withPasswordRequired(passwordRequired);
         return true;
     }
 
@@ -362,18 +353,19 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         }
 
         channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(sessionExpiryInterval);
-        connectBuilder
-                .withAuthMethod(authMethod)
+        connectBuilder.withAuthMethod(authMethod)
                 .withAuthData(authData)
                 .withSessionExpiryInterval(sessionExpiryInterval)
                 .withReceiveMaximum(receiveMaximum)
                 .withMaximumPacketSize(maximumPacketSize)
                 .withTopicAliasMaximum(topicAliasMaximum)
-                .withResponseInformationRequested(requestResponseInformation == null ?
-                        DEFAULT_RESPONSE_INFORMATION_REQUESTED : requestResponseInformation)
-                .withProblemInformationRequested(requestProblemInformation == null ?
-                        DEFAULT_PROBLEM_INFORMATION_REQUESTED : requestProblemInformation)
-                .withMqtt5UserProperties(userProperties);
+                .withResponseInformationRequested(
+                        requestResponseInformation == null ? DEFAULT_RESPONSE_INFORMATION_REQUESTED :
+                                requestResponseInformation)
+                .withProblemInformationRequested(
+                        requestProblemInformation == null ? DEFAULT_PROBLEM_INFORMATION_REQUESTED :
+                                requestProblemInformation)
+                .withUserProperties(userProperties);
 
         return true;
 
