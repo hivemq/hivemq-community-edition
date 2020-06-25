@@ -85,7 +85,6 @@ repositories {
 }
 
 dependencies {
-
     implementation("com.hivemq:hivemq-extension-sdk:${property('hivemq-extension-sdk.version')}")
 
     /* netty */
@@ -101,47 +100,14 @@ dependencies {
     implementation("org.slf4j:jul-to-slf4j:${property('slf4j.version')}")
     implementation("ch.qos.logback:logback-classic:${property('logback.version')}")
 
-    /* bouncycastles */
-    implementation("org.bouncycastle:bcprov-jdk15on:${property('bouncycastles.version')}")
-    implementation("org.bouncycastle:bcpkix-jdk15on:${property('bouncycastles.version')}")
+    /* security - bouncycastle */
+    implementation("org.bouncycastle:bcprov-jdk15on:${property('bouncycastle.version')}")
+    implementation("org.bouncycastle:bcpkix-jdk15on:${property('bouncycastle.version')}")
 
-    /* rocksdb */
+    /* persistence - rocksdb */
     implementation("org.rocksdb:rocksdbjni:${property('rocksdb.version')}")
 
-    /* apache commons */
-    implementation("commons-io:commons-io:${property('commons-io.version')}")
-    implementation("org.apache.commons:commons-lang3:${property('commons-lang.version')}")
-
-    /* xml */
-    implementation("javax.xml.bind:jaxb-api:${property('jaxb-api.version')}")
-    runtimeOnly("com.sun.xml.bind:jaxb-core:${property('jaxb-core.version')}")
-    runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb-impl.version')}")
-
-    /* hashing */
-    implementation("net.openhft:zero-allocation-hashing:${property('zero-allocation-hashing.version')}")
-
-    /* guava */
-    implementation("com.google.guava:guava:${property('guava.version')}") {
-        exclude group: 'org.checkerframework', module: 'checker-qual'
-        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
-        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
-    }
-    implementation("com.google.code.findbugs:jsr305") {
-        because 'we use it as a transitive dependency of com.google.guava:guava'
-    }
-
-    /* oshi */
-    implementation("com.github.oshi:oshi-core:${property('oshi.version')}")
-    implementation("net.java.dev.jna:jna") {
-        because 'we use it as a transitive dependency of com.github.oshi:oshi-core'
-    }
-
-    /* metrics */
-    implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
-    implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}")
-    runtimeOnly("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}")
-
-    /* xodus */
+    /* persistence - xodus */
     implementation("org.jetbrains.xodus:xodus-openAPI:${property('xodus.version')}") {
         exclude group: 'org.jetbrains', module: 'annotations'
     }
@@ -149,9 +115,21 @@ dependencies {
         exclude group: 'org.jetbrains', module: 'annotations'
     }
 
-    /* jackson */
-    implementation("com.fasterxml.jackson.core:jackson-databind:${property('jackson.version')}")
-    runtimeOnly("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}")
+    /* config - xml */
+    implementation("javax.xml.bind:jaxb-api:${property('jaxb-api.version')}")
+    runtimeOnly("com.sun.xml.bind:jaxb-core:${property('jaxb-core.version')}")
+    runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb-impl.version')}")
+
+    /* metrics */
+    implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
+    implementation("io.dropwizard.metrics:metrics-jmx:${property('metrics.version')}")
+    runtimeOnly("io.dropwizard.metrics:metrics-logback:${property('metrics.version')}")
+
+    /* metrics - oshi */
+    implementation("com.github.oshi:oshi-core:${property('oshi.version')}")
+    implementation("net.java.dev.jna:jna") {
+        because 'we use it as a transitive dependency of com.github.oshi:oshi-core'
+    }
 
     /* dependency injection */
     implementation("com.google.inject:guice:${property('guice.version')}") {
@@ -161,6 +139,27 @@ dependencies {
     implementation("javax.inject:javax.inject") {
         because 'we use it as a transitive dependency of com.google.inject:guice'
     }
+
+    /* common - apache */
+    implementation("commons-io:commons-io:${property('commons-io.version')}")
+    implementation("org.apache.commons:commons-lang3:${property('commons-lang.version')}")
+
+    /* common - guava */
+    implementation("com.google.guava:guava:${property('guava.version')}") {
+        exclude group: 'org.checkerframework', module: 'checker-qual'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
+    }
+    implementation("com.google.code.findbugs:jsr305") {
+        because 'we use it as a transitive dependency of com.google.guava:guava'
+    }
+
+    /* hashing */
+    implementation("net.openhft:zero-allocation-hashing:${property('zero-allocation-hashing.version')}")
+
+    /* jackson */
+    implementation("com.fasterxml.jackson.core:jackson-databind:${property('jackson.version')}")
+    runtimeOnly("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}")
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
