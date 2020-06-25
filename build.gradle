@@ -26,7 +26,7 @@ ext.mainClassName = 'com.hivemq.HiveMQServer'
 metadata {
     readableName = "HiveMQ Community Edition"
     organization {
-        name = "dc-square GmbH"
+        name = "HiveMQ GmbH"
         url = "https://www.hivemq.com/"
     }
     license {
