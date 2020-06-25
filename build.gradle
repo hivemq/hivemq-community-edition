@@ -116,9 +116,8 @@ dependencies {
     }
 
     /* config - xml */
-    implementation("javax.xml.bind:jaxb-api:${property('jaxb-api.version')}")
-    runtimeOnly("com.sun.xml.bind:jaxb-core:${property('jaxb-core.version')}")
-    runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb-impl.version')}")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property('jaxb.version')}")
+    runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb.version')}")
 
     /* metrics */
     implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
