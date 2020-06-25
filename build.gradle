@@ -159,7 +159,6 @@ dependencies {
 
     /* jackson */
     implementation("com.fasterxml.jackson.core:jackson-databind:${property('jackson.version')}")
-    runtimeOnly("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${property('jackson.version')}")
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
