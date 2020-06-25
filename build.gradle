@@ -126,9 +126,15 @@ dependencies {
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
         exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
     }
+    implementation("com.google.code.findbugs:jsr305") {
+        because 'we use it as a transitive dependency of com.google.guava:guava'
+    }
 
     /* oshi */
     implementation("com.github.oshi:oshi-core:${property('oshi.version')}")
+    implementation("net.java.dev.jna:jna") {
+        because 'we use it as a transitive dependency of com.github.oshi:oshi-core'
+    }
 
     /* metrics */
     implementation("io.dropwizard.metrics:metrics-core:${property('metrics.version')}")
@@ -152,6 +158,9 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
     }
     implementation("javax.annotation:javax.annotation-api:${property('javax.annotation.version')}")
+    implementation("javax.inject:javax.inject") {
+        because 'we use it as a transitive dependency of com.google.inject:guice'
+    }
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
