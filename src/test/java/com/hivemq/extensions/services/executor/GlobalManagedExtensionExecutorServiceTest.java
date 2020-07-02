@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("NullabilityAnnotations")
 public class GlobalManagedExtensionExecutorServiceTest {
 
-    private GlobalManagedPluginExecutorService managedPluginExecutorService;
+    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     @Mock
     ShutdownHooks shutdownHooks;

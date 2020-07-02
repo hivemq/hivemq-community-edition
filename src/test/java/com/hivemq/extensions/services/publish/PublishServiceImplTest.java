@@ -29,7 +29,7 @@ import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishToClientResult;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.builder.PublishBuilderImpl;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.publish.PUBLISH;

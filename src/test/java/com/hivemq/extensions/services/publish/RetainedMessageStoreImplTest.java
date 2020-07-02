@@ -25,9 +25,10 @@ import com.hivemq.extension.sdk.api.services.exception.DoNotImplementException;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
+import com.hivemq.extensions.iteration.AsyncIteratorFactory;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
@@ -60,12 +61,15 @@ public class RetainedMessageStoreImplTest {
     @Mock
     private PluginServiceRateLimitService pluginServiceRateLimitService;
 
+    @Mock
+    private AsyncIteratorFactory asyncIteratorFactory;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         final GlobalManagedExtensionExecutorService managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
-        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService);
+        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService, asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 

@@ -17,7 +17,6 @@ package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
@@ -31,13 +30,9 @@ import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
-import com.hivemq.extensions.services.auth.AuthorizersImpl;
-import com.hivemq.extensions.services.auth.SecurityRegistryImpl;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.net.URL;

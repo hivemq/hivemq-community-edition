@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.persistence.local.xodus;
+package com.hivemq.extensions.iteration;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -21,15 +21,15 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 /**
  * @author Christoph Schäbel
  */
-public class BucketChunkResult<T> {
+public class BucketChunkResult<V> {
 
 
-    private final @NotNull T value;
+    private final @NotNull V value;
     private final boolean finished;
     private final @Nullable String lastKey;
     private final int bucketIndex;
 
-    public BucketChunkResult(@NotNull final T value, final boolean finished, @Nullable final String lastKey, final int bucketIndex) {
+    public BucketChunkResult(@NotNull final V value, final boolean finished, @Nullable final String lastKey, final int bucketIndex) {
         this.value = value;
         this.finished = finished;
         this.lastKey = lastKey;
@@ -37,7 +37,7 @@ public class BucketChunkResult<T> {
     }
 
     @NotNull
-    public T getValue() {
+    public V getValue() {
         return value;
     }
 
