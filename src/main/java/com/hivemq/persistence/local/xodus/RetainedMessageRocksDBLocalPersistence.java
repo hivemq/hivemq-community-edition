@@ -17,17 +17,17 @@ package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
-import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -61,7 +61,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
     public final @NotNull PublishTopicTree[] topicTrees;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull RetainedMessageXodusSerializer serializer;
-    private final AtomicLong retainMessageCounter = new AtomicLong(0);
+    private final @NotNull AtomicLong retainMessageCounter = new AtomicLong(0);
 
     @Inject
     public RetainedMessageRocksDBLocalPersistence(
@@ -329,9 +329,61 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
         }
     }
 
-    @Override
-    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults) {
-        return null;
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
+                                                                                                         final @Nullable String lastTopic,
+                                                                                                         final int maxResults) {
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+        final RocksDB bucket = buckets[bucketIndex];
+
+        try (final RocksIterator iterator = bucket.newIterator()) {
+            if (lastTopic == null) {
+                iterator.seekToFirst();
+            } else {
+                iterator.seek(serializer.serializeKey(lastTopic));
+                // we already have this one, lets look for the next
+                if (iterator.isValid()) {
+                    iterator.next();
+                }
+            }
+
+            int foundMessages = 0;
+            final ImmutableMap.Builder<String, RetainedMessage> retrievedMessages = ImmutableMap.builder();
+            String lastFoundTopic = null;
+
+            // we iterate either until the end of the persistence or until the maximum requested messages are found
+            while (iterator.isValid() && foundMessages < maxResults) {
+
+                final String deserializedTopic = serializer.deserializeKey(iterator.key());
+                final RetainedMessage deserializedMessage = serializer.deserializeValue(iterator.value());
+
+                // ignore messages with exceeded message expiry interval
+                if (PublishUtil.isExpired(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
+                    iterator.next();
+                    continue;
+                }
+
+                final Long payloadId = deserializedMessage.getPayloadId();
+                checkNotNull(payloadId, "Payload id must never be null");
+                final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPayloadId());
+
+                // ignore messages with no payload and log a warning for the fact
+                if (payload == null) {
+                    log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".", deserializedTopic, payloadId);
+                    iterator.next();
+                    continue;
+                }
+                deserializedMessage.setMessage(payload);
+
+                lastFoundTopic = deserializedTopic;
+                foundMessages++;
+
+                retrievedMessages.put(lastFoundTopic, deserializedMessage);
+                iterator.next();
+            }
+
+            // if the iterator is not valid any more we know that there is nothing more to get
+            return new BucketChunkResult<>(retrievedMessages.build(), !iterator.isValid(), lastFoundTopic, bucketIndex);
+        }
     }
 
     @Override

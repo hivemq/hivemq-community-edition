@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author Christoph Schäbel
  */
-public interface AsyncIterator<K, V> {
+public interface AsyncIterator<V> {
 
     /**
      * Start fetching chunks of data and iterate the results

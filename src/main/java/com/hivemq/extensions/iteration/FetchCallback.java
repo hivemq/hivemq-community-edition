@@ -22,8 +22,8 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 /**
  * @author Christoph Schäbel
  */
-public interface FetchCallback<K, V> {
+public interface FetchCallback<V> {
 
-    @NotNull ListenableFuture<ChunkResult<K, V>> fetchNextResults(@Nullable final K cursor);
+    @NotNull ListenableFuture<ChunkResult<V>> fetchNextResults(@Nullable final ChunkCursor cursor);
 
 }

@@ -17,17 +17,17 @@ package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
-import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -35,13 +35,13 @@ import com.hivemq.util.PublishUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.ExodusException;
-import jetbrains.exodus.env.*;
+import jetbrains.exodus.env.Cursor;
+import jetbrains.exodus.env.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.io.File;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -318,8 +318,70 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     }
 
     @Override
-    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults) {
-        return null;
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
+                                                                                                         final @Nullable String lastTopic,
+                                                                                                         final int maxResults) {
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+        final Bucket bucket = buckets[bucketIndex];
+
+        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
+            int foundMessages = 0;
+            final ImmutableMap.Builder<String, RetainedMessage> retrievedMessages = ImmutableMap.builder();
+            String lastFoundTopic = lastTopic;
+            boolean hasNext = true;
+
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                if (lastTopic == null) {
+                    hasNext = cursor.getNext();
+                } else {
+                    final ByteIterable lastTopicKey = bytesToByteIterable(serializer.serializeKey(lastFoundTopic));
+                    final ByteIterable foundKey = cursor.getSearchKeyRange(lastTopicKey);
+
+                    if (foundKey == null) {
+                        return new BucketChunkResult<>(retrievedMessages.build(), true, lastTopic, bucketIndex);
+                    }
+
+                    // we already have this one, lets look for the next
+                    if (cursor.getKey().equals(lastTopicKey)) {
+                        //jump to the next key
+                        hasNext = cursor.getNext();
+                    }
+                }
+
+                // we iterate either until the end of the persistence or until the maximum requested messages are found
+                while (hasNext && foundMessages < maxResults) {
+
+                    final String deserializedTopic = byteIterableToString(cursor.getKey());
+                    final RetainedMessage deserializedMessage = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
+
+                    // ignore messages with exceeded message expiry interval
+                    if (PublishUtil.isExpired(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
+                        hasNext = cursor.getNext();
+                        continue;
+                    }
+
+                    final Long payloadId = deserializedMessage.getPayloadId();
+                    checkNotNull(payloadId, "Payload id must never be null");
+                    final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPayloadId());
+
+                    // ignore messages with no payload and log a warning for the fact
+                    if (payload == null) {
+                        log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".", deserializedTopic, payloadId);
+                        hasNext = cursor.getNext();
+                        continue;
+                    }
+                    deserializedMessage.setMessage(payload);
+
+                    lastFoundTopic = deserializedTopic;
+                    foundMessages++;
+
+                    retrievedMessages.put(lastFoundTopic, deserializedMessage);
+                    hasNext = cursor.getNext();
+                }
+            }
+            // if the cursor has no next value any more we know that there is nothing more to get
+            return new BucketChunkResult<>(retrievedMessages.build(), !hasNext, lastFoundTopic, bucketIndex);
+        });
     }
 
     @Override

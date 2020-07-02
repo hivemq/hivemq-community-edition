@@ -24,7 +24,6 @@ import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
-import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
 import java.util.Map;
 

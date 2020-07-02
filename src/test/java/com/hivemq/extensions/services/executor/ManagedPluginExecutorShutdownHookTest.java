@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class ManagedPluginExecutorShutdownHookTest {
 
     @Mock
-    GlobalManagedPluginExecutorService executorService;
+    GlobalManagedExtensionExecutorService executorService;
 
     @Before
     public void before() {

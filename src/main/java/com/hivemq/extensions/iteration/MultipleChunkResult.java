@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.persistence.local.xodus;
+package com.hivemq.extensions.iteration;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 

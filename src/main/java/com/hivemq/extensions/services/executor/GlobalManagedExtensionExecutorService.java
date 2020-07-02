@@ -38,9 +38,9 @@ import static com.hivemq.configuration.service.InternalConfigurations.MANAGED_PL
  * @since 4.0.0
  */
 @Singleton
-public class GlobalManagedPluginExecutorService implements ScheduledExecutorService {
+public class GlobalManagedExtensionExecutorService implements ScheduledExecutorService {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalManagedPluginExecutorService.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalManagedExtensionExecutorService.class);
 
     private final @NotNull ShutdownHooks shutdownHooks;
 

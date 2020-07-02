@@ -31,20 +31,15 @@ import com.hivemq.extension.sdk.api.services.exception.NoSuchClientIdException;
 import com.hivemq.extension.sdk.api.services.general.IterationCallback;
 import com.hivemq.extension.sdk.api.services.subscription.*;
 import com.hivemq.extensions.ListenableFutureConverter;
-import com.hivemq.extensions.iteration.AsyncIterator;
-import com.hivemq.extensions.iteration.AsyncIteratorFactory;
-import com.hivemq.extensions.iteration.ChunkResult;
-import com.hivemq.extensions.iteration.FetchCallback;
+import com.hivemq.extensions.iteration.*;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.extensions.services.general.IterationContextImpl;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.SubscriptionTypeItemFilter;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
-import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import com.hivemq.util.Topics;
 
 import javax.inject.Inject;
@@ -64,7 +59,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence;
     private final @NotNull PluginServiceRateLimitService rateLimitService;
     private final @NotNull LocalTopicTree topicTree;
-    private final @NotNull GlobalManagedPluginExecutorService managedExtensionExecutorService;
+    private final @NotNull GlobalManagedExtensionExecutorService managedExtensionExecutorService;
     private final @NotNull AsyncIteratorFactory asyncIteratorFactory;
 
     @Inject
@@ -72,7 +67,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
             final @NotNull PluginServiceRateLimitService rateLimitService,
             final @NotNull LocalTopicTree topicTree,
-            final @NotNull GlobalManagedPluginExecutorService managedExtensionExecutorService,
+            final @NotNull GlobalManagedExtensionExecutorService managedExtensionExecutorService,
             final @NotNull AsyncIteratorFactory asyncIteratorFactory) {
         this.subscriptionPersistence = subscriptionPersistence;
         this.rateLimitService = rateLimitService;

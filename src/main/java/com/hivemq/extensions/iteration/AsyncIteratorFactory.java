@@ -15,8 +15,10 @@
  */
 package com.hivemq.extensions.iteration;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.ThreadFactoryUtil;
 
 import javax.inject.Inject;
@@ -29,19 +31,42 @@ import java.util.concurrent.Executors;
 @LazySingleton
 public class AsyncIteratorFactory {
 
-    private final @NotNull ExecutorService executorService;
+    private final @NotNull
+    ExecutorService executorService;
 
     @Inject
-    public AsyncIteratorFactory() {
+    public AsyncIteratorFactory(final @NotNull ShutdownHooks shutdownHooks) {
         executorService = Executors.newFixedThreadPool(4, ThreadFactoryUtil.create("async-iterator-executor-%d"));
+        shutdownHooks.add(new HiveMQShutdownHook() {
+            @Override
+            public @NotNull
+            String name() {
+                return "Async Iterator Executor Shutdown";
+            }
+
+            @Override
+            public @NotNull Priority priority() {
+                return Priority.MEDIUM;
+            }
+
+            @Override
+            public boolean isAsynchronous() {
+                return false;
+            }
+
+            @Override
+            public void run() {
+                executorService.shutdown();
+            }
+        });
     }
 
     @NotNull
-    public <K, V> AsyncIterator<K, V> createIterator(
-            @NotNull final FetchCallback<K, V> fetchCallback,
+    public <V> AsyncIterator<V> createIterator(
+            @NotNull final FetchCallback<V> fetchCallback,
             @NotNull final AsyncIterator.ItemCallback<V> iterationCallback) {
 
-        return new AsyncLocalChunkIterator<K, V>(fetchCallback, iterationCallback, executorService);
+        return new AsyncLocalChunkIterator<V>(fetchCallback, iterationCallback, executorService);
     }
 
 }
