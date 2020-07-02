@@ -18,6 +18,8 @@ package com.hivemq.persistence.local.xodus;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
@@ -26,7 +28,6 @@ import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import com.hivemq.util.ThreadPreConditions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,6 +36,7 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -275,5 +277,75 @@ public class RetainedMessageXodusLocalPersistenceTest {
         final Set<String> allEntries = persistence.getAllTopics("#", 1);
         assertEquals(0, allEntries.size());
 
+    }
+
+    @Test
+    public void getAllRetainedMessagesChunk_emptyPersistence() {
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 100);
+
+        assertEquals(1, chunk.getBucketIndex());
+        assertEquals(null, chunk.getLastKey());
+        assertTrue(chunk.isFinished());
+        assertTrue(chunk.getValue().isEmpty());
+    }
+
+    @Test
+    public void getAllRetainedMessagesChunk_partOfAPersistence() {
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
+
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk1 = persistence.getAllRetainedMessagesChunk(1, null, 1);
+
+        assertEquals(1, chunk1.getBucketIndex());
+        assertTrue(chunk1.getLastKey() != null);
+        assertFalse(chunk1.isFinished());
+        assertEquals(1, chunk1.getValue().size());
+
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk2 = persistence.getAllRetainedMessagesChunk(1, chunk1.getLastKey(), 1);
+
+        assertEquals(1, chunk2.getBucketIndex());
+        assertTrue(chunk2.getLastKey() != null);
+        assertTrue(chunk2.isFinished());
+        assertEquals(1, chunk2.getValue().size());
+    }
+
+    @Test
+    public void getAllRetainedMessagesChunk_everyThingInPersistence() {
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
+
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 2);
+
+        assertEquals(1, chunk.getBucketIndex());
+        assertTrue(chunk.getLastKey() != null);
+        assertTrue(chunk.isFinished());
+        assertEquals(2, chunk.getValue().size());
+    }
+
+    @Test
+    public void getAllRetainedMessagesChunk_noExpiredMessages() {
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 0), "topic", 1);
+
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 100);
+
+        assertEquals(1, chunk.getBucketIndex());
+        assertTrue(chunk.getLastKey() != null);
+        assertTrue(chunk.isFinished());
+        assertEquals(1, chunk.getValue().size());
+    }
+
+    @Test
+    public void getAllRetainedMessagesChunk_onlyMessagesWithPayload() {
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
+        when(payloadPersistence.getPayloadOrNull(2)).thenReturn(null);
+
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 100);
+
+        assertEquals(1, chunk.getBucketIndex());
+        assertTrue(chunk.getLastKey() != null);
+        assertTrue(chunk.isFinished());
+        assertEquals(1, chunk.getValue().size());
     }
 }
