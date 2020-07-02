@@ -19,12 +19,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
 
 import java.util.Map;
 import java.util.Set;

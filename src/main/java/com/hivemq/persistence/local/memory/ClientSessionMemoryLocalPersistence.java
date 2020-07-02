@@ -23,6 +23,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.NoSessionException;
@@ -32,7 +33,6 @@ import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ClientSessions;
@@ -67,7 +67,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
 
-    private final @NotNull Map<String, PersistenceEntry<ClientSession>> @NotNull[] buckets;
+    private final @NotNull Map<String, PersistenceEntry<ClientSession>> @NotNull [] buckets;
 
     private final int bucketCount;
 
@@ -212,7 +212,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);
             currentMemorySize.addAndGet(newEntry.getEstimatedSize());
-            if(addClientIdSize){
+            if (addClientIdSize) {
                 currentMemorySize.addAndGet(ObjectMemoryEstimation.stringSize(clientId));
             }
 
@@ -448,8 +448,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
     @Override
     public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(final int bucketIndex,
-            final @Nullable String ignored,
-            final int alsoIgnored) {
+                                                                                     final @Nullable String ignored,
+                                                                                     final int alsoIgnored) {
 
         final long currentTimeMillis = System.currentTimeMillis();
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);

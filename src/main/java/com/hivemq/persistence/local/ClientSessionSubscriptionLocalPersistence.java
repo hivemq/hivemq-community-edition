@@ -20,9 +20,9 @@ import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.LocalPersistence;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
 
 import java.util.Map;
 
@@ -116,6 +116,4 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      */
     @NotNull
     BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(int bucketIndex, @Nullable String lastClientId, int maxResults);
-
-
 }

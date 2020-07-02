@@ -58,7 +58,7 @@ public class PluginServicesDependenciesImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         pluginServicesDependencies = new PluginServicesDependenciesImpl(new MetricRegistry(), mock(InitializerRegistry.class), mock(RetainedMessageStore.class),
-                mock(ClientService.class), mock(SubscriptionStore.class), mock(GlobalManagedPluginExecutorService.class), mock(PublishService.class),
+                mock(ClientService.class), mock(SubscriptionStore.class), mock(GlobalManagedExtensionExecutorService.class), mock(PublishService.class),
                 mock(HiveMQExtensions.class), mock(SecurityRegistry.class), mock(EventRegistry.class), mock(ClusterService.class),
                 mock(GlobalInterceptorRegistry.class), mock(AdminService.class));
     }

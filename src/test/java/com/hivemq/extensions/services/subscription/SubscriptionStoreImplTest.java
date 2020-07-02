@@ -42,7 +42,6 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
@@ -846,7 +845,7 @@ public class SubscriptionStoreImplTest {
 
         final SubscriptionStoreImpl.AllSubscribersFetchCallback fetchCallback = new SubscriptionStoreImpl.AllSubscribersFetchCallback(null);
 
-        final ChunkResult<ChunkCursor, SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ImmutableSet<Topic>>>(
+        final ChunkResult<SubscriptionsForClientResult> chunkResult = fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ImmutableSet<Topic>>>(
                 Map.of(
                         1, new BucketChunkResult<>(Map.of(
                                 "client1", ImmutableSet.of(
@@ -900,9 +899,9 @@ public class SubscriptionStoreImplTest {
         }
     }
 
-    private GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
-        final GlobalManagedPluginExecutorService globalManagedPluginExecutorService =
-                new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+    private GlobalManagedExtensionExecutorService getManagedExtensionExecutorService() {
+        final GlobalManagedExtensionExecutorService globalManagedPluginExecutorService =
+                new GlobalManagedExtensionExecutorService(mock(ShutdownHooks.class));
         globalManagedPluginExecutorService.postConstruct();
         return globalManagedPluginExecutorService;
     }

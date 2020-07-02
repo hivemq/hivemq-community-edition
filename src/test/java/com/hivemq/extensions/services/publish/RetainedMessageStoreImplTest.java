@@ -63,7 +63,7 @@ public class RetainedMessageStoreImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        final GlobalManagedPluginExecutorService managedPluginExecutorService = new GlobalManagedPluginExecutorService(Mockito.mock(ShutdownHooks.class));
+        final GlobalManagedExtensionExecutorService managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
         retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
