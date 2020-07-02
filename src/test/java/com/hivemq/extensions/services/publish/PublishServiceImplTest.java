@@ -49,7 +49,6 @@ import util.TestConfigurationBootstrap;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
@@ -80,7 +79,7 @@ public class PublishServiceImplTest {
     @Mock
     TopicTreeImpl topicTree;
 
-    private GlobalManagedPluginExecutorService managedPluginExecutorService;
+    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     private final HivemqId hiveMQId = new HivemqId();
     private final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -90,7 +89,7 @@ public class PublishServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
-        managedPluginExecutorService = new GlobalManagedPluginExecutorService(shutdownHooks);
+        managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
         managedPluginExecutorService.postConstruct();
         publishService = new PublishServiceImpl(rateLimitService, managedPluginExecutorService, internalPublishService, publishDistributor, hiveMQId, topicTree);
     }

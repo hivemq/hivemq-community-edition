@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.RetainedMessage;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -313,6 +315,11 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                 }
             }
         });
+    }
+
+    @Override
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults) {
+        return null;
     }
 
     @Override

@@ -18,11 +18,17 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.ChunkCursor;
+import com.hivemq.extensions.iteration.Chunker;
+import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
@@ -36,8 +42,6 @@ import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
-import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
@@ -76,6 +80,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     private final @NotNull PendingWillMessages pendingWillMessages;
     private final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector;
     private final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector;
+    private final @NotNull Chunker chunker;
 
     @Inject
     public ClientSessionPersistenceImpl(final @NotNull ClientSessionLocalPersistence localPersistence,
@@ -87,7 +92,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                                         final @NotNull PublishPayloadPersistence publishPayloadPersistence,
                                         final @NotNull PendingWillMessages pendingWillMessages,
                                         final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector,
-                                        final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector) {
+                                        final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector,
+                                        final @NotNull Chunker chunker) {
 
 
         this.localPersistence = localPersistence;
@@ -102,6 +108,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         this.mqtt5ServerDisconnector = mqtt5ServerDisconnector;
         this.mqtt3ServerDisconnector = mqtt3ServerDisconnector;
+        this.chunker = chunker;
     }
 
     @Override
@@ -462,42 +469,15 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @Override
     public @NotNull ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(@NotNull final ChunkCursor cursor) {
-        try {
-            checkNotNull(cursor, "Cursor must not be null");
-
-            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, ClientSession>>>> builder = ImmutableList.builder();
-
-            final int bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
-            final int maxResults = InternalConfigurations.PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE / (bucketCount - cursor.getFinishedBuckets().size());
-            for (int i = 0; i < bucketCount; i++) {
-                //skip already finished buckets
-                if (!cursor.getFinishedBuckets().contains(i)) {
-                    final String lastKey = cursor.getLastKeys().get(i);
-                    builder.add(singleWriter.submit(i, (bucketIndex1, queueBuckets, queueIndex) -> {
-                        return localPersistence.getAllClientsChunk(bucketIndex1, lastKey, maxResults);
-                    }));
-                }
-            }
-
-            return Futures.transform(Futures.allAsList(builder.build()), allBucketsResult -> {
-                Preconditions.checkNotNull(allBucketsResult, "Iteration result from all buckets cannot be null");
-
-                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, ClientSession>>> resultBuilder = ImmutableMap.builder();
-                for (final BucketChunkResult<Map<String, ClientSession>> bucketResult : allBucketsResult) {
-                    resultBuilder.put(bucketResult.getBucketIndex(), bucketResult);
-                }
-
-                for (final Integer finishedBucketId : cursor.getFinishedBuckets()) {
-                    resultBuilder.put(finishedBucketId, new BucketChunkResult<>(Map.of(), true, cursor.getLastKeys().get(finishedBucketId), finishedBucketId));
-                }
-
-                return new MultipleChunkResult<>(resultBuilder.build());
-
-            }, MoreExecutors.directExecutor());
-
-        } catch (final Throwable throwable) {
-            return Futures.immediateFailedFuture(throwable);
-        }
+        return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE,
+                // Chunker.SingleWriterCall interface
+                (bucket, lastKey, maxResults) -> singleWriter.submit(bucket,
+                        // actual single writer call
+                        (bucketIndex, ignored1, ignored2) ->
+                                localPersistence.getAllClientsChunk(
+                                        bucketIndex,
+                                        lastKey,
+                                        maxResults)));
     }
 
     public enum DisconnectSource {

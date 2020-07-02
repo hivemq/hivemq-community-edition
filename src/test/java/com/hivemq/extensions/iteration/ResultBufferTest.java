@@ -59,12 +59,12 @@ public class ResultBufferTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ResultBuffer<String, String> prepareBuffer() {
-        final Queue<ChunkResult<String, String>> items =
-                new ArrayDeque<>(List.of(new ChunkResult<>(List.of("1", "2"), "2", false),
-                        new ChunkResult<>(List.of("3", "4"), "4", true)));
+    private ResultBuffer<String> prepareBuffer() {
+        final Queue<ChunkResult<String>> items =
+                new ArrayDeque<>(List.of(new ChunkResult<>(List.of("1", "2"), new ChunkCursor(), false),
+                        new ChunkResult<>(List.of("3", "4"), new ChunkCursor(), true)));
 
-        final ResultBuffer<String, String> resultBuffer = new ResultBuffer<>((cursor, resultBuffer1) -> {
+        final ResultBuffer<String> resultBuffer = new ResultBuffer<>((cursor, resultBuffer1) -> {
             resultBuffer1.addChunk(items.poll());
         });
         resultBuffer.addChunk(items.poll());

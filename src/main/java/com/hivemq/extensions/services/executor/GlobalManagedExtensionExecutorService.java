@@ -15,10 +15,10 @@
  */
 package com.hivemq.extensions.services.executor;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class GlobalManagedPluginExecutorService implements ScheduledExecutorServ
     private @Nullable ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     @Inject
-    public GlobalManagedPluginExecutorService(final @NotNull ShutdownHooks shutdownHooks) {
+    public GlobalManagedExtensionExecutorService(final @NotNull ShutdownHooks shutdownHooks) {
         this.shutdownHooks = shutdownHooks;
     }
 

@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
@@ -88,7 +89,7 @@ public class ClientSessionPersistenceImplTest {
         MockitoAnnotations.initMocks(this);
         clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence, clientQueuePersistence,
                 TestSingleWriterFactory.defaultSingleWriter(), channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
-                mqtt5ServerDisconnector, mqtt3ServerDisconnector);
+                mqtt5ServerDisconnector, mqtt3ServerDisconnector, new Chunker());
     }
 
     @Test

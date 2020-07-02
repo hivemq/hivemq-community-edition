@@ -17,9 +17,11 @@ package com.hivemq.extensions.services.subscription;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -39,7 +41,6 @@ import com.hivemq.extensions.services.general.IterationContextImpl;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.SubscriptionTypeItemFilter;
-import com.hivemq.persistence.clientsession.ChunkCursor;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.xodus.BucketChunkResult;
@@ -377,8 +378,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
 
-        final FetchCallback<ChunkCursor, SubscriptionsForClientResult> fetchCallback = new AllSubscribersFetchCallback(subscriptionPersistence);
-        final AsyncIterator<ChunkCursor, SubscriptionsForClientResult> asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllSubscribersResultItemCallback(callbackExecutor, callback));
+        final FetchCallback<SubscriptionsForClientResult> fetchCallback = new AllSubscribersFetchCallback(subscriptionPersistence);
+        final AsyncIterator<SubscriptionsForClientResult> asyncIterator = asyncIteratorFactory.createIterator(fetchCallback, new AllItemsItemCallback<>(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 
@@ -407,52 +408,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
     }
 
-    static class AllSubscribersResultItemCallback implements AsyncIterator.ItemCallback<SubscriptionsForClientResult> {
-        private @NotNull
-        final Executor callbackExecutor;
-        private @NotNull
-        final IterationCallback<SubscriptionsForClientResult> callback;
-
-        AllSubscribersResultItemCallback(@NotNull final Executor callbackExecutor, @NotNull final IterationCallback<SubscriptionsForClientResult> callback) {
-            this.callbackExecutor = callbackExecutor;
-            this.callback = callback;
-        }
-
-        @Override
-        public @NotNull ListenableFuture<Boolean> onItems(@NotNull final Collection<SubscriptionsForClientResult> items) {
-
-            final IterationContextImpl iterationContext = new IterationContextImpl();
-            final SettableFuture<Boolean> resultFuture = SettableFuture.create();
-
-            callbackExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-
-                    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                    try {
-                        Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
-                        for (final SubscriptionsForClientResult subscriptionsForClientResult : items) {
-                            callback.iterate(iterationContext, subscriptionsForClientResult);
-
-                            if (iterationContext.isAborted()) {
-                                resultFuture.set(false);
-                                break;
-                            }
-                        }
-                    } catch (final Exception e) {
-                        resultFuture.setException(e);
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(contextClassLoader);
-                    }
-                    resultFuture.set(true);
-                }
-            });
-
-            return resultFuture;
-        }
-    }
-
-    static class AllSubscribersFetchCallback implements FetchCallback<ChunkCursor, SubscriptionsForClientResult> {
+    static class AllSubscribersFetchCallback extends AllItemsFetchCallback<SubscriptionsForClientResult, Map<String, ImmutableSet<Topic>>> {
 
         @NotNull
         private final ClientSessionSubscriptionPersistence subscriptionPersistence;
@@ -462,45 +418,15 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         }
 
         @Override
-        public @NotNull ListenableFuture<ChunkResult<ChunkCursor, SubscriptionsForClientResult>> fetchNextResults(@Nullable final ChunkCursor cursor) {
-
-            final ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> persistenceFuture =
-                    subscriptionPersistence.getAllLocalSubscribersChunk(cursor != null ? cursor : new ChunkCursor());
-
-            return Futures.transform(persistenceFuture, input -> {
-                Preconditions.checkNotNull(input, "Chunk result cannot be null");
-                return convertToChunkResult(input);
-            }, MoreExecutors.directExecutor());
+        protected @NotNull ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> persistenceCall(final @NotNull ChunkCursor chunkCursor) {
+            return subscriptionPersistence.getAllLocalSubscribersChunk(chunkCursor);
         }
 
-        @NotNull
-        ChunkResult<ChunkCursor, SubscriptionsForClientResult> convertToChunkResult(@NotNull final MultipleChunkResult<Map<String, ImmutableSet<Topic>>> input) {
-            final ImmutableList.Builder<SubscriptionsForClientResult> results = ImmutableList.builder();
-            final ImmutableMap.Builder<Integer, String> lastKeys = ImmutableMap.builder();
-            final ImmutableSet.Builder<Integer> finishedBuckets = ImmutableSet.builder();
-
-            boolean finished = true;
-            for (final Map.Entry<Integer, BucketChunkResult<Map<String, ImmutableSet<Topic>>>> bucketResult : input.getValues().entrySet()) {
-                final BucketChunkResult<Map<String, ImmutableSet<Topic>>> bucketChunkResult = bucketResult.getValue();
-
-                if (bucketChunkResult.isFinished()) {
-                    finishedBuckets.add(bucketChunkResult.getBucketIndex());
-                } else {
-                    finished = false;
-                }
-
-                if (bucketChunkResult.getLastKey() != null) {
-                    lastKeys.put(bucketChunkResult.getBucketIndex(), bucketChunkResult.getLastKey());
-                }
-
-                for (final Map.Entry<String, ImmutableSet<Topic>> entry : bucketChunkResult.getValue().entrySet()) {
-                    results.add(new SubscriptionsForClientResultImpl(entry.getKey(),
-                            entry.getValue().stream().map(topic -> new TopicSubscriptionImpl(topic)).collect(Collectors.toSet())));
-                }
-            }
-
-            return new ChunkResult<>(results.build(), new ChunkCursor(lastKeys.build(), finishedBuckets.build()), finished);
+        @Override
+        protected @NotNull Collection<SubscriptionsForClientResult> transform(final @NotNull Map<String, ImmutableSet<Topic>> stringSetMap) {
+            return stringSetMap.entrySet().stream()
+                    .map(entry -> new SubscriptionsForClientResultImpl(entry.getKey(),
+                            entry.getValue().stream().map(TopicSubscriptionImpl::new).collect(Collectors.toSet()))).collect(Collectors.toUnmodifiableList());
         }
-
     }
 }

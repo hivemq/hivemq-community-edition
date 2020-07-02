@@ -22,6 +22,7 @@ import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.PublishTopicTree;
@@ -199,6 +200,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             }
             return false;
         });
+    }
+
+    @Override
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults) {
+        return null;
     }
 
     @Override
