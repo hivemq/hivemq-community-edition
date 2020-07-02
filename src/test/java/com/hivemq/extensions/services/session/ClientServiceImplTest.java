@@ -357,8 +357,8 @@ public class ClientServiceImplTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final ClientServiceImpl.AllClientsItemCallback itemCallback =
-                new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SessionInformation> itemCallback =
+                new AllItemsItemCallback<>(executor, (context, value) -> {
                     items.add(value);
                     latch.countDown();
                 });
@@ -380,8 +380,8 @@ public class ClientServiceImplTest {
     public void test_item_callback_abort() throws Exception {
 
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final ClientServiceImpl.AllClientsItemCallback itemCallback =
-                new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SessionInformation> itemCallback =
+                new AllItemsItemCallback<>(executor, (context, value) -> {
                     context.abortIteration();
                 });
 
@@ -400,8 +400,8 @@ public class ClientServiceImplTest {
     public void test_item_callback_exception() throws Throwable {
 
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final ClientServiceImpl.AllClientsItemCallback itemCallback =
-                new ClientServiceImpl.AllClientsItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SessionInformation> itemCallback =
+                new AllItemsItemCallback<>(executor, (context, value) -> {
                     throw new RuntimeException("test-exception");
                 });
 
@@ -456,7 +456,7 @@ public class ClientServiceImplTest {
         final ClientServiceImpl.AllClientsFetchCallback fetchCallback =
                 new ClientServiceImpl.AllClientsFetchCallback(null);
 
-        final ChunkResult<ChunkCursor, SessionInformation> chunkResult =
+        final ChunkResult<SessionInformation> chunkResult =
                 fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ClientSession>>(
                         Map.of(
                                 1, new BucketChunkResult<>(Map.of(
@@ -473,9 +473,9 @@ public class ClientServiceImplTest {
     }
 
     @NotNull
-    private GlobalManagedPluginExecutorService getManagedExtensionExecutorService() {
-        final GlobalManagedPluginExecutorService globalManagedPluginExecutorService =
-                new GlobalManagedPluginExecutorService(mock(ShutdownHooks.class));
+    private GlobalManagedExtensionExecutorService getManagedExtensionExecutorService() {
+        final GlobalManagedExtensionExecutorService globalManagedPluginExecutorService =
+                new GlobalManagedExtensionExecutorService(mock(ShutdownHooks.class));
         globalManagedPluginExecutorService.postConstruct();
         return globalManagedPluginExecutorService;
     }

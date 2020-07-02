@@ -16,6 +16,7 @@
 package com.hivemq.persistence.retained;
 
 import com.google.common.collect.Sets;
+import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -64,7 +65,7 @@ public class RetainedMessagePersistenceImplTest {
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1L, 1000);
         retainedMessagePersistence =
                 new RetainedMessagePersistenceImpl(localPersistence, topicMatcher, payloadPersistence,
-                        TestSingleWriterFactory.defaultSingleWriter());
+                        TestSingleWriterFactory.defaultSingleWriter(), new Chunker());
     }
 
     @Test(expected = NullPointerException.class)

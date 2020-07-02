@@ -25,11 +25,11 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.IterablePersistenceEntry;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.ObjectMemoryEstimation;
 import com.hivemq.util.ThreadPreConditions;
@@ -165,7 +165,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final IterablePersistenceEntry<ImmutableSet<Topic>> remove = buckets[bucketIndex].remove(client);
-        if(remove == null){
+        if (remove == null) {
             return;
         }
         currentMemorySize.addAndGet(-remove.getEstimatedSize());
@@ -179,7 +179,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
 
         final IterablePersistenceEntry<ImmutableSet<Topic>> entry =
                 buckets[BucketUtils.getBucket(client, bucketCount)].get(client);
-        if(entry == null){
+        if (entry == null) {
             return ImmutableSet.of();
         } else {
             return entry.getObject();

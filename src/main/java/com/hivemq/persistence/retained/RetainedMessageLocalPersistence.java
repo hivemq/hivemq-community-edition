@@ -15,12 +15,15 @@
  */
 package com.hivemq.persistence.retained;
 
+import com.hivemq.annotations.ExecuteInSingleWriter;
+import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.annotations.ReadOnly;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.RetainedMessage;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -71,7 +74,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * Get the topics of all retained messages for a subscription from a persistence bucket
      *
      * @param subscription The filter to receive retained messages for.
-     * @param bucket The index of the bucket in which the retained messages are stored.
+     * @param bucket       The index of the bucket in which the retained messages are stored.
      * @return a readonly set of topic strings.
      */
     @NotNull
@@ -84,6 +87,24 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param bucketIdx the index of the bucket.
      */
     void cleanUp(int bucketIdx);
+
+    /**
+     * Gets a chunk of retained messages from the persistence.
+     * <p>
+     * Messages are ignored if they have passed their message expiry interval.
+     * Messages are ignored if their payload can not be dereferenced.
+     * Tombstones are ignored.
+     *
+     * @param bucketIndex the bucket index
+     * @param lastTopic   the last topic for this chunk. Pass <code>null</code> to start at the beginning.
+     * @param maxResults  the max amount of results contained in the chunk.
+     * @return a {@link BucketChunkResult} with the mapping of topic -> retained message and the information if more
+     * chunks are available
+     * @since 4.4.0
+     */
+    @ExecuteInSingleWriter
+    @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults);
+
 
     void iterate(@NotNull ItemCallback callback);
 

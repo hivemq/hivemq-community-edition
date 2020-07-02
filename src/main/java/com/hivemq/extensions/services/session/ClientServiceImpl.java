@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
 
@@ -199,12 +200,11 @@ public class ClientServiceImpl implements ClientService {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
 
-        final FetchCallback<ChunkCursor, SessionInformation> fetchCallback =
-                new AllClientsFetchCallback(clientSessionPersistence);
-        final AsyncIterator<ChunkCursor, SessionInformation> asyncIterator =
+        final FetchCallback<SessionInformation> fetchCallback = new AllClientsFetchCallback(clientSessionPersistence);
+        final AsyncIterator<SessionInformation> asyncIterator =
                 asyncIteratorFactory.createIterator(
                         fetchCallback,
-                        new AllClientsItemCallback(callbackExecutor, callback));
+                        new AllItemsItemCallback<>(callbackExecutor, callback));
 
         asyncIterator.fetchAndIterate();
 
@@ -220,54 +220,7 @@ public class ClientServiceImpl implements ClientService {
         return ListenableFutureConverter.toCompletable(settableFuture, managedExtensionExecutorService);
     }
 
-    static class AllClientsItemCallback implements AsyncIterator.ItemCallback<SessionInformation> {
-
-        private @NotNull
-        final Executor callbackExecutor;
-        private @NotNull
-        final IterationCallback<SessionInformation> callback;
-
-        AllClientsItemCallback(
-                @NotNull final Executor callbackExecutor,
-                @NotNull final IterationCallback<SessionInformation> callback) {
-            this.callbackExecutor = callbackExecutor;
-            this.callback = callback;
-        }
-
-        @Override
-        public @NotNull ListenableFuture<Boolean> onItems(@NotNull final Collection<SessionInformation> items) {
-
-            final IterationContextImpl iterationContext = new IterationContextImpl();
-            final SettableFuture<Boolean> resultFuture = SettableFuture.create();
-
-            //this is not a lambda because we want it to be identifiable in a heap-dump
-            callbackExecutor.execute(() -> {
-
-                final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                try {
-                    Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
-                    for (final SessionInformation sessionInformation : items) {
-
-                        callback.iterate(iterationContext, sessionInformation);
-
-                        if (iterationContext.isAborted()) {
-                            resultFuture.set(false);
-                            break;
-                        }
-                    }
-                } catch (final Exception e) {
-                    resultFuture.setException(e);
-                } finally {
-                    Thread.currentThread().setContextClassLoader(contextClassLoader);
-                }
-                resultFuture.set(true);
-            });
-
-            return resultFuture;
-        }
-    }
-
-    static class AllClientsFetchCallback implements FetchCallback<ChunkCursor, SessionInformation> {
+    static class AllClientsFetchCallback extends AllItemsFetchCallback<SessionInformation, Map<String, ClientSession>> {
 
         @NotNull
         private final ClientSessionPersistence clientSessionPersistence;
@@ -322,5 +275,4 @@ public class ClientServiceImpl implements ClientService {
         }
 
     }
-
 }

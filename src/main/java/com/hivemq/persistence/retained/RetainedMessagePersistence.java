@@ -19,8 +19,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.extensions.iteration.ChunkCursor;
+import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.persistence.RetainedMessage;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -91,4 +94,11 @@ public interface RetainedMessagePersistence {
     @NotNull
     ListenableFuture<Void> clear();
 
+    /**
+     * Process a request for a chunk of all the client sessions from this node
+     *
+     * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
+     * @return a result containing the new cursor and a map of clientIds to their session
+     */
+    @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(@NotNull ChunkCursor cursor);
 }

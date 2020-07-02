@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings({"NullabilityAnnotations"})
 public class AsyncLocalChunkIteratorTest {
 
-    private AsyncLocalChunkIterator<String, String> asyncIterator;
+    private AsyncLocalChunkIterator<String> asyncIterator;
     private TestFetchCallback fetchCallback;
     private TestItemCallback itemCallback;
     private ExecutorService executorService;
@@ -160,7 +160,7 @@ public class AsyncLocalChunkIteratorTest {
         }
     }
 
-    private static class TestFetchCallback implements FetchCallback<String, String> {
+    private static class TestFetchCallback implements FetchCallback<String> {
 
         private final AtomicReference<Queue<Collection<String>>> chunks = new AtomicReference<>();
         private final AtomicBoolean block = new AtomicBoolean(false);
@@ -174,13 +174,13 @@ public class AsyncLocalChunkIteratorTest {
         }
 
         @Override
-        public @NotNull ListenableFuture<ChunkResult<String, String>> fetchNextResults(@Nullable final String cursor) {
+        public @NotNull ListenableFuture<ChunkResult<String>> fetchNextResults(@Nullable final ChunkCursor cursor) {
 
             if (exception != null) {
                 return Futures.immediateFailedFuture(exception);
             }
 
-            final SettableFuture<ChunkResult<String, String>> resultFuture = SettableFuture.create();
+            final SettableFuture<ChunkResult<String>> resultFuture = SettableFuture.create();
             executorService.submit(() -> {
 
                 final Queue<Collection<String>> chunkQueue = chunks.get();

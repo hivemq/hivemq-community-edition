@@ -21,11 +21,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.UnmodifiableIterator;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.IterablePersistenceEntry;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ObjectMemoryEstimation;
@@ -271,10 +271,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         boolean topic4Found = false;
 
         for (final Topic subscription : subscriptions) {
-            if(subscription.getTopic().equals("topic2")){
+            if (subscription.getTopic().equals("topic2")) {
                 topic2Found = true;
             }
-            if(subscription.getTopic().equals("topic4")){
+            if (subscription.getTopic().equals("topic4")) {
                 topic4Found = true;
             }
             assertEquals(QoS.EXACTLY_ONCE, subscription.getQoS());
@@ -545,7 +545,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
             assertEquals(2, entry.getValue().size());
             for (final Topic topic : entry.getValue()) {
                 size += ObjectMemoryEstimation.objectRefSize();
-                size +=  topic.getEstimatedSize();
+                size += topic.getEstimatedSize();
             }
             size += ObjectMemoryEstimation.stringSize(entry.getKey());
             size += IterablePersistenceEntry.getFixedSize();
