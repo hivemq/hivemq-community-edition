@@ -15,8 +15,8 @@
  */
 package com.hivemq.extensions.services.executor;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +31,11 @@ public class ManagedPluginExecutorShutdownHook extends HiveMQShutdownHook {
     private static final Logger log = LoggerFactory.getLogger(ManagedPluginExecutorShutdownHook.class);
 
     @NotNull
-    private final GlobalManagedPluginExecutorService scheduledExecutorService;
+    private final GlobalManagedExtensionExecutorService scheduledExecutorService;
     private final int timeout;
 
     public ManagedPluginExecutorShutdownHook(
-            @NotNull final GlobalManagedPluginExecutorService scheduledExecutorService, final int timeout) {
+            @NotNull final GlobalManagedExtensionExecutorService scheduledExecutorService, final int timeout) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.timeout = timeout;
     }

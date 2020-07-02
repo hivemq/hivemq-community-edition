@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ManagedExecutorServicePerExtension implements ManagedExtensionExecutorService {
 
     @NotNull
-    private final GlobalManagedPluginExecutorService managedPluginExecutorService;
+    private final GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     @NotNull
     private final IsolatedPluginClassloader classLoader;
@@ -42,7 +42,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
     private final HiveMQExtensions hiveMQExtensions;
 
     public ManagedExecutorServicePerExtension(
-            @NotNull final GlobalManagedPluginExecutorService managedPluginExecutorService,
+            @NotNull final GlobalManagedExtensionExecutorService managedPluginExecutorService,
             @NotNull final IsolatedPluginClassloader classLoader, @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.managedPluginExecutorService = managedPluginExecutorService;
         this.classLoader = classLoader;

@@ -18,6 +18,7 @@ package com.hivemq.persistence.local.memory;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -35,9 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -203,8 +202,42 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     }
 
     @Override
-    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults) {
-        return null;
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
+                                                                                                         final @Nullable String ignored,
+                                                                                                         final int alsoIgnored) {
+
+        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages = buckets[bucketIndex].entrySet()
+                .stream()
+                .map(entry -> {
+                    final String topic = entry.getKey();
+                    final RetainedMessage retainedMessage = entry.getValue();
+
+                    // ignore messages with exceeded message expiry interval
+                    if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+                        return null;
+                    }
+
+                    final Long payloadId = retainedMessage.getPayloadId();
+                    if (payloadId == null) {
+                        log.warn("Could not dereference payload for retained message on topic \"{}\" as payload was null.", topic);
+                        return null;
+                    }
+
+                    final byte[] payload = payloadPersistence.getPayloadOrNull(payloadId);
+                    if (payload == null) {
+                        log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".", topic, payloadId);
+                        return null;
+                    }
+
+                    final RetainedMessage copiedMessage = retainedMessage.copyWithoutPayload();
+                    copiedMessage.setMessage(payload);
+                    return new AbstractMap.SimpleEntry<>(topic, copiedMessage);
+
+                })
+                .filter(entry -> !Objects.isNull(entry))
+                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return new BucketChunkResult<>(collectedRetainedMessages, true, null, bucketIndex);
     }
 
     @Override

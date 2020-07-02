@@ -30,7 +30,7 @@ public class ResultBufferTest {
     @Test
     public void test_fetch_once() {
 
-        final ResultBuffer<String, String> resultBuffer = prepareBuffer();
+        final ResultBuffer<String> resultBuffer = prepareBuffer();
 
         final List<String> values = new ArrayList<>();
         Collection<String> chunk = resultBuffer.getNextChunk();
@@ -44,7 +44,7 @@ public class ResultBufferTest {
 
     @Test
     public void test_clean() {
-        final ResultBuffer<String, String> resultBuffer = prepareBuffer();
+        final ResultBuffer<String> resultBuffer = prepareBuffer();
 
         resultBuffer.clean();
 

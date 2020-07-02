@@ -47,7 +47,7 @@ import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
 import com.hivemq.extensions.services.auth.AuthorizersImpl;
 import com.hivemq.extensions.services.auth.SecurityRegistryImpl;
 import com.hivemq.extensions.services.builder.*;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 import com.hivemq.extensions.services.initializer.InitializerRegistryImpl;
 import com.hivemq.extensions.services.initializer.InitializersImpl;
@@ -111,7 +111,7 @@ public class PluginStaticInitializerImplTest {
     private HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private GlobalManagedPluginExecutorService managedPluginExecutorService;
+    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     @Mock
     private PublishService publishService;

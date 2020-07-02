@@ -25,18 +25,18 @@ import java.util.Collection;
  * @author Christoph Schäbel
  */
 @ThreadSafe
-public class ResultBuffer<K, V> {
+public class ResultBuffer<V> {
 
-    private ChunkResult<K, V> currentChunk = null;
+    private ChunkResult<V> currentChunk = null;
 
     @NotNull
-    private final NextChunkCallback<K, V> nextChunkCallback;
+    private final NextChunkCallback<V> nextChunkCallback;
 
-    ResultBuffer(@NotNull final NextChunkCallback<K, V> nextChunkCallback) {
+    ResultBuffer(@NotNull final NextChunkCallback<V> nextChunkCallback) {
         this.nextChunkCallback = nextChunkCallback;
     }
 
-    synchronized void addChunk(@NotNull final ChunkResult<K, V> chunk) {
+    synchronized void addChunk(@NotNull final ChunkResult<V> chunk) {
         currentChunk = chunk;
     }
 
@@ -47,7 +47,7 @@ public class ResultBuffer<K, V> {
             return null;
         }
 
-        final ChunkResult<K, V> chunkResult = currentChunk;
+        final ChunkResult<V> chunkResult = currentChunk;
         currentChunk = null;
 
         if (!chunkResult.isFinished()) {
@@ -60,9 +60,9 @@ public class ResultBuffer<K, V> {
         currentChunk = null;
     }
 
-    public interface NextChunkCallback<K, V> {
+    public interface NextChunkCallback<V> {
 
-        void fetchNextChunk(@Nullable K cursor, @NotNull ResultBuffer<K, V> resultBuffer);
+        void fetchNextChunk(@Nullable ChunkCursor cursor, @NotNull ResultBuffer<V> resultBuffer);
 
     }
 }

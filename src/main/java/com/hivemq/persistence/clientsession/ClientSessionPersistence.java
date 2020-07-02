@@ -23,7 +23,6 @@ import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 
 import java.util.Map;
 import java.util.Set;

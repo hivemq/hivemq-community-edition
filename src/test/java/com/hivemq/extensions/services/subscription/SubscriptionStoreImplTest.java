@@ -32,20 +32,15 @@ import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededExceptio
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
-import com.hivemq.extensions.iteration.AsyncIterator;
-import com.hivemq.extensions.iteration.AsyncIteratorFactory;
-import com.hivemq.extensions.iteration.ChunkResult;
-import com.hivemq.extensions.iteration.FetchCallback;
+import com.hivemq.extensions.iteration.*;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
-import com.hivemq.extensions.services.executor.GlobalManagedPluginExecutorService;
+import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
-import com.hivemq.persistence.local.xodus.BucketChunkResult;
-import com.hivemq.persistence.local.xodus.MultipleChunkResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -750,7 +745,7 @@ public class SubscriptionStoreImplTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SubscriptionsForClientResult> itemCallback = new AllItemsItemCallback<>(executor, (context, value) -> {
             items.add(value);
             latch.countDown();
         });
@@ -772,7 +767,7 @@ public class SubscriptionStoreImplTest {
     public void test_item_callback_abort() throws Exception {
 
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SubscriptionsForClientResult> itemCallback = new AllItemsItemCallback<>(executor, (context, value) -> {
             context.abortIteration();
         });
 
@@ -791,7 +786,7 @@ public class SubscriptionStoreImplTest {
     public void test_item_callback_exception() throws Throwable {
 
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final SubscriptionStoreImpl.AllSubscribersResultItemCallback itemCallback = new SubscriptionStoreImpl.AllSubscribersResultItemCallback(executor, (context, value) -> {
+        final AllItemsItemCallback<SubscriptionsForClientResult> itemCallback = new AllItemsItemCallback<>(executor, (context, value) -> {
             throw new RuntimeException("test-exception");
         });
 
