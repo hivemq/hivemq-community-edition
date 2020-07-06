@@ -2,11 +2,13 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
+    id 'com.jfrog.bintray'
     id 'com.github.johnrengelman.shadow'
     id 'com.github.hierynomus.license'
     id 'org.owasp.dependencycheck'
     id 'com.github.sgtsilvio.gradle.utf8'
     id 'com.github.sgtsilvio.gradle.metadata'
+    id 'com.github.sgtsilvio.gradle.javadoc-links'
 
     /* Code Quality Plugins */
     id 'jacoco'
@@ -302,12 +304,18 @@ tasks.javadoc {
     options.addStringOption('-html5')
     options.addBooleanOption '-no-module-directories', true
 
+    include('com/hivemq/embedded/*')
+
     doLast {
         javaexec {
             main = '-jar'
             args = ["${projectDir}/gradle/tools/javadoc-cleaner-1.0.jar"]
         }
     }
+}
+
+javadocLinks {
+    configuration = 'api'
 }
 
 
@@ -488,6 +496,30 @@ publishing {
                 usage('java-runtime') {
                     fromResolutionResult()
                 }
+            }
+        }
+    }
+}
+
+bintray {
+    user = "${project.findProperty('bintrayUser') ?: System.getenv('BINTRAY_USER')}"
+    key = "${project.findProperty('bintrayKey') ?: System.getenv('BINTRAY_KEY')}"
+    publications = ['embedded']
+    publish = true
+    pkg {
+        userOrg = 'hivemq'
+        repo = 'HiveMQ'
+        name = 'hivemq-community-edition-embedded'
+        desc = project.description
+        websiteUrl = metadata.url
+        issueTrackerUrl = metadata.issueManagement.url
+        vcsUrl = metadata.scm.url
+        licenses = [metadata.license.shortName]
+        labels = ['hivemq', 'mqtt-broker', 'mqtt-server', 'mqtt', 'mqtt5', 'broker', 'messaging', 'pubsub']
+        version {
+            released = new Date().toString()
+            gpg {
+                sign = true
             }
         }
     }
