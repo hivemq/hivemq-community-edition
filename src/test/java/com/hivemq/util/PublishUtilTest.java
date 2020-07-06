@@ -61,11 +61,11 @@ public class PublishUtilTest {
 
     @Test
     public void publish_ttl_expired() throws Exception {
-        assertTrue(PublishUtil.isExpired(System.currentTimeMillis() - 2000, 1));
-        assertTrue(PublishUtil.isExpired(System.currentTimeMillis() - 10000, 10));
-        assertTrue(PublishUtil.isExpired(System.currentTimeMillis(), 0));
-        assertFalse(PublishUtil.isExpired(System.currentTimeMillis() - 2, 1));
-        assertFalse(PublishUtil.isExpired(System.currentTimeMillis(), 1));
-        assertFalse(PublishUtil.isExpired(System.currentTimeMillis() - 100000000, MqttConfigurationDefaults.TTL_DISABLED));
+        assertTrue(PublishUtil.checkExpiry(System.currentTimeMillis() - 2000, 1));
+        assertTrue(PublishUtil.checkExpiry(System.currentTimeMillis() - 10000, 10));
+        assertTrue(PublishUtil.checkExpiry(System.currentTimeMillis(), 0));
+        assertFalse(PublishUtil.checkExpiry(System.currentTimeMillis() - 2, 1));
+        assertFalse(PublishUtil.checkExpiry(System.currentTimeMillis(), 1));
+        assertFalse(PublishUtil.checkExpiry(System.currentTimeMillis() - 100000000, MqttConfigurationDefaults.TTL_DISABLED));
     }
 }

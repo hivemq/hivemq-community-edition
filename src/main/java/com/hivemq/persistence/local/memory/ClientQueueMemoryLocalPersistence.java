@@ -307,7 +307,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 continue;
             }
 
-            if (PublishUtil.isExpired(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
+            if (PublishUtil.checkExpiry(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
                 iterator.remove();
                 payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -332,7 +332,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             // poll a qos 0 message
             if (!qos0Messages.isEmpty()) {
                 final PUBLISH qos0Publish = pollQos0Message(key, qos0Messages, bucketIndex);
-                if (!PublishUtil.isExpired(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
+                if (!PublishUtil.checkExpiry(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
                     publishes.add(qos0Publish);
                     messageCount++;
                     bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -358,7 +358,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         int qos0Bytes = 0;
         while (qos0MessagesFound < packetIds.length() && bytesLimit > qos0Bytes) {
             final PUBLISH qos0Publish = pollQos0Message(key, qos0Messages, bucketIndex);
-            if (!PublishUtil.isExpired(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
+            if (!PublishUtil.checkExpiry(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
                 publishes.add(qos0Publish);
                 qos0MessagesFound++;
                 qos0Bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -846,7 +846,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Iterator<PublishWithRetained> iterator = qos0Messages.iterator();
         while (iterator.hasNext()) {
             final PublishWithRetained publishWithRetained = iterator.next();
-            if (PublishUtil.isExpired(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
+            if (PublishUtil.checkExpiry(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                 increaseQos0MessagesMemory(-publishWithRetained.getEstimatedSize());
                 increaseClientQos0MessagesMemory(key, -publishWithRetained.getEstimatedSize());
@@ -873,7 +873,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
                     continue;
                 }
-                if (!PublishUtil.isExpired(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
+                if (!PublishUtil.checkExpiry(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
                     continue;
                 }
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -887,7 +887,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 final PublishWithRetained publish = (PublishWithRetained) messageWithID;
                 final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
                 final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
-                final boolean drop = PublishUtil.isExpired(publish) && (!isInflight || expireInflight);
+                final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                 if (drop) {
                     payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
                     getOrPutQueueSize(key, bucketIndex).decrementAndGet();

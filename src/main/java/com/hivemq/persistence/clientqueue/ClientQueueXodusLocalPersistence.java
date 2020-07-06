@@ -546,7 +546,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             int qos0Bytes = 0;
             while (qos0MessagesFound < packetIds.length() && bytesLimit > qos0Bytes) {
                 final PUBLISH qos0Publish = pollQos0Message(key, bucketIndex);
-                if (!PublishUtil.isExpired(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
+                if (!PublishUtil.checkExpiry(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
                     publishes.add(qos0Publish);
                     qos0MessagesFound++;
                     qos0Bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -572,7 +572,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                 iterateQueue(cursor, key, true, () -> {
                     final ByteIterable serializedValue = cursor.getValue();
                     final PUBLISH publish = (PUBLISH) serializer.deserializeValue(serializedValue);
-                    if (PublishUtil.isExpired(publish.getTimestamp(), publish.getMessageExpiryInterval())) {
+                    if (PublishUtil.checkExpiry(publish.getTimestamp(), publish.getMessageExpiryInterval())) {
                         cursor.deleteCurrent();
                         payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -600,7 +600,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     // Add a qos 0 message
                     if (!qos0Messages.isEmpty()) {
                         final PUBLISH qos0Publish = pollQos0Message(key, bucketIndex);
-                        if (!PublishUtil.isExpired(
+                        if (!PublishUtil.checkExpiry(
                                 qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
                             publishes.add(qos0Publish);
                             messageCount[0]++;
@@ -972,7 +972,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         while (iterator.hasNext()) {
             final PublishWithRetained publishWithRetained = iterator.next();
             final PUBLISH qos0Message = publishWithRetained.publish;
-            if (PublishUtil.isExpired(qos0Message.getTimestamp(), qos0Message.getMessageExpiryInterval())) {
+            if (PublishUtil.checkExpiry(qos0Message.getTimestamp(), qos0Message.getMessageExpiryInterval())) {
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                 increaseQos0MessagesMemory(qos0Message.getEstimatedSizeInMemory() * -1);
                 increaseClientQos0MessagesMemory(key, qos0Message.getEstimatedSizeInMemory() * -1);
@@ -1000,7 +1000,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
                             return true;
                         }
-                        if (!PublishUtil.isExpired(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
+                        if (!PublishUtil.checkExpiry(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
                             return true;
                         }
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -1013,7 +1013,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         final PUBLISH publish = (PUBLISH) message;
                         final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
                         final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
-                        final boolean drop = PublishUtil.isExpired(publish) && (!isInflight || expireInflight);
+                        final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                         if (drop) {
                             payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
                             getOrPutQueueSize(key, bucketIndex).decrementAndGet();
