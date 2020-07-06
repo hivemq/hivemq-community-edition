@@ -342,7 +342,11 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 iterator.seek(serializer.serializeKey(lastTopic));
                 // we already have this one, lets look for the next
                 if (iterator.isValid()) {
-                    iterator.next();
+                    final String deserializedTopic = serializer.deserializeKey(iterator.key());
+                    // we double check that in between calls no messages were removed
+                    if (deserializedTopic.equals(lastTopic)) {
+                        iterator.next();
+                    }
                 }
             }
 
