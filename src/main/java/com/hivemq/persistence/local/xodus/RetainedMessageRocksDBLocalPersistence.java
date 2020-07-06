@@ -242,7 +242,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 }
             }
 
-            if (PublishUtil.isExpired(message.getTimestamp(), message.getMessageExpiryInterval())) {
+            if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
                 return null;
             }
             message.setMessage(payload);
@@ -313,7 +313,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             while (iterator.isValid()) {
                 final String topic = serializer.deserializeKey(iterator.key());
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
-                if (PublishUtil.isExpired(message.getTimestamp(), message.getMessageExpiryInterval())) {
+                if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
                     writeBatch.delete(iterator.key());
                     checkNotNull(message.getPayloadId(), "Payload id must never be null");
                     payloadPersistence.decrementReferenceCounter(message.getPayloadId());
@@ -357,7 +357,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 final RetainedMessage deserializedMessage = serializer.deserializeValue(iterator.value());
 
                 // ignore messages with exceeded message expiry interval
-                if (PublishUtil.isExpired(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
+                if (PublishUtil.checkExpiry(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
                     iterator.next();
                     continue;
                 }

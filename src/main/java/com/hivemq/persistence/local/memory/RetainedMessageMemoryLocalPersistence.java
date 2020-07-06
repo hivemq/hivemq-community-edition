@@ -141,7 +141,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                     topic);
             return null;
         }
-        if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+        if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
             return null;
         }
         final RetainedMessage copy = retainedMessage.copyWithoutPayload();
@@ -191,7 +191,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             }
             final RetainedMessage retainedMessage = entry.getValue();
             final String topic = entry.getKey();
-            if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+            if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
                 payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
                 currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
                 topicTrees[bucketIndex].remove(topic);
@@ -213,7 +213,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                     final RetainedMessage retainedMessage = entry.getValue();
 
                     // ignore messages with exceeded message expiry interval
-                    if (PublishUtil.isExpired(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+                    if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
                         return null;
                     }
 
