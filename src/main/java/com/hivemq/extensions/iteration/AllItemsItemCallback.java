@@ -53,11 +53,12 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
 
                     if (iterationContext.isAborted()) {
                         resultFuture.set(false);
-                        break;
+                        return;
                     }
                 }
             } catch (final Exception e) {
                 resultFuture.setException(e);
+                return;
             } finally {
                 Thread.currentThread().setContextClassLoader(contextClassLoader);
             }
