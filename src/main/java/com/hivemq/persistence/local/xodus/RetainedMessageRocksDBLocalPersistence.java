@@ -331,7 +331,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
                                                                                                          final @Nullable String lastTopic,
-                                                                                                         final int maxResults) {
+                                                                                                         final int maxMemory) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final RocksDB bucket = buckets[bucketIndex];
 
@@ -350,12 +350,12 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 }
             }
 
-            int foundMessages = 0;
+            int usedMemory = 0;
             final ImmutableMap.Builder<String, RetainedMessage> retrievedMessages = ImmutableMap.builder();
             String lastFoundTopic = null;
 
             // we iterate either until the end of the persistence or until the maximum requested messages are found
-            while (iterator.isValid() && foundMessages < maxResults) {
+            while (iterator.isValid() && usedMemory < maxMemory) {
 
                 final String deserializedTopic = serializer.deserializeKey(iterator.key());
                 final RetainedMessage deserializedMessage = serializer.deserializeValue(iterator.value());
@@ -379,7 +379,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 deserializedMessage.setMessage(payload);
 
                 lastFoundTopic = deserializedTopic;
-                foundMessages++;
+                usedMemory += deserializedMessage.getEstimatedSizeInMemory();
 
                 retrievedMessages.put(lastFoundTopic, deserializedMessage);
                 iterator.next();

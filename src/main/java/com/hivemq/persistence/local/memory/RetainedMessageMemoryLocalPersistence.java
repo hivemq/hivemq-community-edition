@@ -201,6 +201,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         });
     }
 
+    // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
     @Override
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
                                                                                                          final @Nullable String ignored,
