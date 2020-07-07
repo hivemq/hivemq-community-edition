@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.util;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.persistence.util.BatchedException;
 import org.junit.Test;
 
@@ -33,37 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class ExceptionsTest {
 
     @Test
-    public void test_rethrowUnrecoverableCause_no_unrecoverable_cause() throws Exception {
-        final RuntimeException nestedThrowable = getNestedThrowable(10, new IllegalAccessException());
-        Exceptions.rethrowUnrecoverableCause(nestedThrowable);
-    }
-
-    @Test
-    public void test_rethrowUnrecoverableCause_null_cause() throws Exception {
-        final RuntimeException nestedThrowable = getNestedThrowable(10, null);
-        final RuntimeException runtimeException = new RuntimeException((Throwable) null);
-        Exceptions.rethrowUnrecoverableCause(nestedThrowable);
-        Exceptions.rethrowUnrecoverableCause(runtimeException);
-    }
-
-    @Test(expected = UnrecoverableException.class)
-    public void test_rethrowUnrecoverableCause_unrecoverable_cause() throws Exception {
-        final RuntimeException nestedThrowable = getNestedThrowable(10, new UnrecoverableException());
-        Exceptions.rethrowUnrecoverableCause(nestedThrowable);
-    }
-
-    @Test
-    public void test_rethrowUnrecoverableCause_throwable_is_unrecoverable_itself() throws Exception {
-        Exceptions.rethrowUnrecoverableCause(new UnrecoverableException());
-    }
-
-    @Test
-    public void test_rethrowUnrecoverableCause_throwable_is_null() throws Exception {
-        Exceptions.rethrowUnrecoverableCause(null);
-    }
-
-    @Test
-    public void test_is_connection_closed_exception() throws Exception{
+    public void test_is_connection_closed_exception() {
         assertTrue(Exceptions.isConnectionClosedException(new ClosedChannelException()));
         assertTrue(Exceptions.isConnectionClosedException(new SSLException("abc")));
         //native Io Exception cannot be instantiated without native transport
@@ -76,21 +46,13 @@ public class ExceptionsTest {
     }
 
     @Test
-    public void test_is_connection_closed_exception_batched() throws Exception {
-        final BatchedException batchedException1 = new BatchedException(
-                ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
+    public void test_is_connection_closed_exception_batched() {
+        final BatchedException batchedException1 =
+                new BatchedException(ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
         assertTrue(Exceptions.isConnectionClosedException(batchedException1));
-        final BatchedException batchedException2 = new BatchedException(ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
+        final BatchedException batchedException2 =
+                new BatchedException(ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
         assertFalse(Exceptions.isConnectionClosedException(batchedException2));
 
-    }
-
-    private static RuntimeException getNestedThrowable(final int nest, final Throwable nested) {
-        RuntimeException runtimeException = new RuntimeException(nested);
-        for (int i = 0; i < nest; i++) {
-            final RuntimeException nextRuntimeException = new RuntimeException(runtimeException);
-            runtimeException = nextRuntimeException;
-        }
-        return runtimeException;
     }
 }
