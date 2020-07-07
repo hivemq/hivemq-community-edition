@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.util;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +28,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
     private static final Logger log = LoggerFactory.getLogger(UncaughtExceptionHandler.class);
 
     @Override
-    public void uncaughtException(final Thread thread, final Throwable throwable) {
-        log.error("Uncaught exception in thread " + thread.getName(), throwable);
+    public void uncaughtException(final @NotNull Thread thread, final @NotNull Throwable throwable) {
+        log.error("Uncaught exception in thread '{}'.", thread.getName(), throwable);
     }
-
 }
