@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -32,20 +33,15 @@ public class ClientSessions {
      * @param timeSinceDisconnect The time that passed since the client disconnected in milliseconds
      * @return true if the client sessions ttl is expired
      */
-    public static boolean isExpired(@NotNull final ClientSession clientSession, final long timeSinceDisconnect) {
+    public static boolean isExpired(final @NotNull ClientSession clientSession, final long timeSinceDisconnect) {
         checkNotNull(clientSession);
 
         if (clientSession.isConnected()) {
             return false;
         }
 
-        final long sessionExpiryInMillis = clientSession.getSessionExpiryInterval() * 1000L;
+        final long timeSinceDisconnectSeconds = timeSinceDisconnect / 1000;
 
-        //prevent accidental overflow
-        if (sessionExpiryInMillis < 0) {
-            return false;
-        }
-
-        return timeSinceDisconnect >= sessionExpiryInMillis;
+        return timeSinceDisconnectSeconds >= clientSession.getSessionExpiryInterval();
     }
 }
