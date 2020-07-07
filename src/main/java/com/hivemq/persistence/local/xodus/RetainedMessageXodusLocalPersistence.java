@@ -320,12 +320,12 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     @Override
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
                                                                                                          final @Nullable String lastTopic,
-                                                                                                         final int maxResults) {
+                                                                                                         final int maxMemory) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final Bucket bucket = buckets[bucketIndex];
 
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-            int foundMessages = 0;
+            int usedMemory = 0;
             final ImmutableMap.Builder<String, RetainedMessage> retrievedMessages = ImmutableMap.builder();
             String lastFoundTopic = lastTopic;
             boolean hasNext = true;
@@ -349,7 +349,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                 }
 
                 // we iterate either until the end of the persistence or until the maximum requested messages are found
-                while (hasNext && foundMessages < maxResults) {
+                while (hasNext && usedMemory < maxMemory) {
 
                     final String deserializedTopic = byteIterableToString(cursor.getKey());
                     final RetainedMessage deserializedMessage = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
@@ -373,7 +373,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     deserializedMessage.setMessage(payload);
 
                     lastFoundTopic = deserializedTopic;
-                    foundMessages++;
+                    usedMemory += deserializedMessage.getEstimatedSizeInMemory();
 
                     retrievedMessages.put(lastFoundTopic, deserializedMessage);
                     hasNext = cursor.getNext();
