@@ -97,13 +97,13 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      *
      * @param bucketIndex the bucket index
      * @param lastTopic   the last topic for this chunk. Pass <code>null</code> to start at the beginning.
-     * @param maxResults  the max amount of results contained in the chunk.
+     * @param maxMemory  the max amount of memory for results contained in the chunk.
      * @return a {@link BucketChunkResult} with the mapping of topic -> retained message and the information if more
      * chunks are available
      * @since 4.4.0
      */
     @ExecuteInSingleWriter
-    @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxResults);
+    @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(int bucketIndex, @Nullable String lastTopic, int maxMemory);
 
 
     void iterate(@NotNull ItemCallback callback);

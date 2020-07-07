@@ -66,8 +66,8 @@ public class InternalConfigurations {
     //max amount of clients to pull from the peristence for extension iterate chunk
     public static final int PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE = 2000;
 
-    //max amount of retained messages to pull from the peristence for extension iterate chunk
-    public static final int PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_SIZE = 2000;
+    //max amount of memory for retained messages to pull from the peristence for extension iterate chunk
+    public static final int PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY = 10485760; //10 MByte
 
     //The threshold at which the topic tree starts to map entries instead of storing them in an array
     public static final AtomicInteger TOPIC_TREE_MAP_CREATION_THRESHOLD = new AtomicInteger(16);

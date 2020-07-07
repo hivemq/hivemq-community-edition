@@ -311,7 +311,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
 
-        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 2);
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
         assertTrue(chunk.getLastKey() != null);
@@ -324,7 +324,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 0), "topic", 1);
 
-        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 100);
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
         assertTrue(chunk.getLastKey() != null);
@@ -338,7 +338,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
         when(payloadPersistence.getPayloadOrNull(2)).thenReturn(null);
 
-        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, 100);
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk = persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
         assertTrue(chunk.getLastKey() != null);
