@@ -170,15 +170,4 @@ public class FutureUtilsTest {
 
         assertThat(expected.getCause(), instanceOf(BatchedException.class));
     }
-
-    @Test
-    public void test_add_settable_future_callback() throws Exception {
-        final SettableFuture<Void> future1 = SettableFuture.create();
-        final SettableFuture<Void> future2 = SettableFuture.create();
-
-        FutureUtils.addSettableFutureCallback(future1, future2);
-        assertEquals(false, future2.isDone());
-        future1.set(null);
-        assertEquals(true, future2.isDone());
-    }
 }

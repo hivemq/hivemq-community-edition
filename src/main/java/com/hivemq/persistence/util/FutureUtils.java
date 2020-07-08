@@ -19,7 +19,6 @@ package com.hivemq.persistence.util;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
@@ -45,11 +44,6 @@ public class FutureUtils {
 
     public static <T> @NotNull ListenableFuture<Void> voidFutureFromList(final @NotNull ImmutableList<ListenableFuture<T>> futureList) {
         return delegate.voidFutureFromList(futureList);
-    }
-
-    public static <T> void addSettableFutureCallback(
-            final @NotNull ListenableFuture<T> listenableFuture, final @NotNull SettableFuture<T> settableFuture) {
-        delegate.addSettableFutureCallback(listenableFuture, settableFuture);
     }
 
     public static void addExceptionLogger(final @NotNull ListenableFuture<?> listenableFuture) {

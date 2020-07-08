@@ -59,26 +59,11 @@ public abstract class AbstractFutureUtils {
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         final FutureCallback<T> futureCallback = new VoidFutureCombiningCallback<>(futureList.size(), resultFuture);
 
-        for (final ListenableFuture<T> voidListenableFuture : futureList) {
-            Futures.addCallback(voidListenableFuture, futureCallback, MoreExecutors.directExecutor());
+        for (final ListenableFuture<T> future : futureList) {
+            Futures.addCallback(future, futureCallback, MoreExecutors.directExecutor());
         }
 
         return resultFuture;
-    }
-
-    public <T> void addSettableFutureCallback(
-            final @NotNull ListenableFuture<T> listenableFuture, final @NotNull SettableFuture<T> settableFuture) {
-        Futures.addCallback(listenableFuture, new FutureCallback<T>() {
-            @Override
-            public void onSuccess(final @Nullable T result) {
-                settableFuture.set(result);
-            }
-
-            @Override
-            public void onFailure(final @NotNull Throwable throwable) {
-                settableFuture.setException(throwable);
-            }
-        }, MoreExecutors.directExecutor());
     }
 
     public void addExceptionLogger(final @NotNull ListenableFuture<?> listenableFuture) {
