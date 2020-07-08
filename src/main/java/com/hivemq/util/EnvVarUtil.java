@@ -16,6 +16,7 @@
 package com.hivemq.util;
 
 import com.google.inject.Singleton;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.exceptions.UnrecoverableException;
 import org.slf4j.Logger;
@@ -41,8 +42,7 @@ public class EnvVarUtil {
      * @param name the name of the environment variable
      * @return the value of the environment variable with the specified name
      */
-    @Nullable
-    public String getValue(final String name) {
+    public @Nullable String getValue(final @NotNull String name) {
         //also check java properties if system variable is not found
         final String systemProperty = System.getProperty(name);
         if (systemProperty != null) {
@@ -59,7 +59,7 @@ public class EnvVarUtil {
      * @return the text with all the placeholders replaced
      * @throws UnrecoverableException if a variable used in a placeholder is not set
      */
-    public String replaceEnvironmentVariablePlaceholders(final String text) {
+    public @NotNull String replaceEnvironmentVariablePlaceholders(final @NotNull String text) {
 
         final StringBuffer resultString = new StringBuffer();
 
@@ -70,7 +70,7 @@ public class EnvVarUtil {
 
             if (matcher.groupCount() < 1) {
                 //this should never happen
-                log.warn("Found unexpected enviroment variable placeholder in config.xml");
+                log.warn("Found unexpected environment variable placeholder in config.xml");
                 matcher.appendReplacement(resultString, "");
                 continue;
             }
@@ -95,7 +95,7 @@ public class EnvVarUtil {
         return resultString.toString();
     }
 
-    private String escapeReplacement(final String replacement) {
+    private @NotNull String escapeReplacement(final @NotNull String replacement) {
         return replacement
                 .replace("\\", "\\\\")
                 .replace("$", "\\$");

@@ -15,7 +15,7 @@ This project is the technical core of many large MQTT deployments and is now ava
 * Contribution Guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
 * License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
 
-= Features
+== Features
 
 * All MQTT 3.1, 3.1.1 and MQTT 5.0 features
 * MQTT over TCP, TLS, WebSocket and Secure WebSocket transport
@@ -30,7 +30,7 @@ This project is the technical core of many large MQTT deployments and is now ava
 
 HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client].
 
-= Documentation
+== Documentation
 
 The documentation for the HiveMQ CE can be found https://github.com/hivemq/hivemq-community-edition/wiki[here].
 
@@ -39,13 +39,13 @@ MQTT Resources
 * https://www.hivemq.com/mqtt-essentials/[MQTT Essentials]
 * https://www.hivemq.com/mqtt-5/[MQTT 5 Essentials]
 
-= HiveMQ Community Forum
+== HiveMQ Community Forum
 
 The ideal place for questions or discussions about the HiveMQ Community Edition is our brand new https://community.hivemq.com/[HiveMQ Community Forum].
 
-= How to Use
+== How to Use
 
-== Quick Start
+=== Quick Start
 
 * Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2020.2/hivemq-ce-2020.2.zip[HiveMQ CE binary package].
 * Unzip the package.
@@ -62,11 +62,11 @@ You can now connect MQTT clients to `<ip address>:1883`.
 [CAUTION]
 If you want to connect devices on external networks to HiveMQ CE, please make sure your server is reachable from those networks and the required ports (default: 1883) are accessible through your firewall.
 
-== Just in Time Builds
+=== Just in Time Builds
 
 Just in time builds for current branches on this repository and for specific commits are available https://hivemq.github.io/nightly-builds/[here].
 
-== Run with Docker
+=== Run with Docker
 
 All releases as well as the current state of the `master` branch are available in the https://hub.docker.com/r/hivemq/hivemq-ce[hivemq/hivemq-ce] repository on DockerHub.
 To execute this image, simply run the following command:
@@ -83,15 +83,15 @@ To change the default log level you can set the environment variable `HIVEMQ_LOG
 docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 hivemq/hivemq-ce
 ----
 
-== Building from Source
+=== Building from Source
 
-=== Prerequisites
+==== Prerequisites
 
 At least Java version 11 is required to build and run HiveMQ CE.
 
 If you are in doubt, you can check the installed Java version by entering `java -version` on your command line.
 
-=== Building the Binary Package
+==== Building the Binary Package
 
 Check out the git repository and build the binary package.
 
@@ -106,7 +106,7 @@ cd hivemq-community-edition
 
 The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
 
-=== Building the Docker Image
+==== Building the Docker Image
 
 Check out the git repository and build the Docker image.
 
@@ -125,7 +125,7 @@ The Docker image `hivemq/hivemq-ce` is created locally.
 
 You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
 
-=== Start
+==== Start
 
 Unzip the created binary package
 
@@ -138,15 +138,15 @@ cd hivemq-ce-<version>
 
 For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
 
-== Embedded Mode
+=== Embedded Mode
 
 HiveMQ Community Edition offers an embedded mode and a programmatic API for integrating with Java/Java EE software.
 
-=== Dependency
+==== Dependency
 
 IMPORTANT: Until HiveMQ Community Edition 2020.3 is released embedded mode is only available from link:https://jitpack.io/#hivemq/hivemq-community-edition[jitpack.io].
 
-==== Gradle
+===== Gradle
 
 If you use Gradle, include the following code in your `build.gradle` file.
 
@@ -162,7 +162,7 @@ dependencies {
 }
 ----
 
-==== Maven
+===== Maven
 
 If you use Maven, include the following code in your `pom.xml` file.
 
@@ -178,11 +178,11 @@ If you use Maven, include the following code in your `pom.xml` file.
     </repositories>
 
     <dependencies>
-    <dependency>
-        <groupId>com.github.hivemq.hivemq-community-edition</groupId>
-        <artifactId>hivemq-community-edition-embedded</artifactId>
-        <version>master-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>com.github.hivemq.hivemq-community-edition</groupId>
+            <artifactId>hivemq-community-edition-embedded</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     ...
 </project>
@@ -190,7 +190,7 @@ If you use Maven, include the following code in your `pom.xml` file.
 
 NOTE: You must set the compiler version to `11` or higher.
 
-=== Usage
+==== Usage
 
 Entry into the embedded mode is done with the `com.hivemq.embedded.EmbeddedHiveMQBuilder`.
 
@@ -216,8 +216,8 @@ Once built, an EmbeddedHiveMQ can be started with `start()`.
 public class Main {
 
     public static void main(String[] args) {
-        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder()
-        ...;
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder();
+        ...
 
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
             hiveMQ.start().join();
@@ -252,7 +252,7 @@ public class Main {
 NOTE: An EmbeddedHiveMQ is a resource that is similar to a e.g. network connection and implements the `java.lang.AutoCloseable` interface.
 Always use ARM (_try with resources_) or ensure a call to `close()`.
 
-=== Exclusions
+==== Exclusions
 
 When you deploy an application that includes EmbeddedHiveMQ, it can be useful to exclude some dependencies.
 One way to exclude dependencies is with the  link:https://maven.apache.org/plugins/maven-shade-plugin/[maven shade plugin].
@@ -301,7 +301,7 @@ One way to exclude dependencies is with the  link:https://maven.apache.org/plugi
 </project>
 ----
 
-==== RocksDB Exclusion
+===== RocksDB Exclusion
 
 To exclude the `org.rocksdb:rocksdbjni` dependency, two internal configurations must be changed before you call `start()`.
 
@@ -328,11 +328,11 @@ public class Main {
 }
 ----
 
-= Contributing
+== Contributing
 
 If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.adoc[contribution guidelines].
 
-= License
+== License
 
 HiveMQ Community Edition is licensed under the `APACHE LICENSE, VERSION 2.0`.
 A copy of the license can be found link:LICENSE[here].

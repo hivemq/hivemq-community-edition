@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.persistence.util;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Georg Held
  */
-class VoidFutureCombiningCallback implements FutureCallback<Void> {
+class VoidFutureCombiningCallback<T> implements FutureCallback<T> {
     private final int size;
     private final SettableFuture<Void> resultFuture;
     private final AtomicInteger count;
@@ -40,7 +41,7 @@ class VoidFutureCombiningCallback implements FutureCallback<Void> {
     }
 
     @Override
-    public void onSuccess(@Nullable final Void result) {
+    public void onSuccess(@Nullable final T result) {
         final int actualCount = count.incrementAndGet();
         if (actualCount == size) {
             setFuture();
