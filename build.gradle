@@ -300,9 +300,7 @@ tasks.register('packaging', Zip) {
 defaultTasks 'clean', 'packaging'
 
 tasks.javadoc {
-    options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-html5')
-    options.addBooleanOption '-no-module-directories', true
 
     include('com/hivemq/embedded/*')
 
