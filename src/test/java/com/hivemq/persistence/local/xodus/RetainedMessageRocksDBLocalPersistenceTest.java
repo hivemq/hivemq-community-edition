@@ -348,14 +348,17 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
 
     @Test
     public void getAllRetainedMessagesChunk_removeDuringIteration() {
-        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
+        final RetainedMessage retainedMessage = new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000);
+        final int maxMemory = retainedMessage.getEstimatedSizeInMemory() * 2 - 1;
+
+        persistence.put(retainedMessage, "topic/1", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/3", 1);
 
-        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk1 = persistence.getAllRetainedMessagesChunk(1, null, 2);
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk1 = persistence.getAllRetainedMessagesChunk(1, null, maxMemory);
         assertEquals(2, chunk1.getValue().size());
         persistence.remove(chunk1.getLastKey(), 1);
-        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk2 = persistence.getAllRetainedMessagesChunk(1, chunk1.getLastKey(), 2);
+        final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk2 = persistence.getAllRetainedMessagesChunk(1, chunk1.getLastKey(), maxMemory);
         assertEquals(1, chunk2.getValue().size());
         assertTrue(chunk2.isFinished());
     }
