@@ -56,8 +56,8 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
                         return;
                     }
                 }
-            } catch (final Exception e) {
-                resultFuture.setException(e);
+            } catch (final Throwable t) {
+                resultFuture.setException(t);
                 return;
             } finally {
                 Thread.currentThread().setContextClassLoader(contextClassLoader);
