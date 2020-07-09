@@ -16,6 +16,7 @@
 package com.hivemq.extensions.iteration;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -25,21 +26,20 @@ import java.util.Collection;
 public class ChunkResult<V> {
 
     private final @NotNull Collection<V> results;
-    private final ChunkCursor cursor;
+    private final @Nullable ChunkCursor cursor;
     private final boolean finished;
 
-    public ChunkResult(@NotNull final Collection<V> results, final ChunkCursor cursor, final boolean finished) {
+    public ChunkResult(final @NotNull Collection<V> results, final @Nullable ChunkCursor cursor, final boolean finished) {
         this.results = results;
         this.cursor = cursor;
         this.finished = finished;
     }
 
-    @NotNull
-    public Collection<V> getResults() {
+    public @NotNull Collection<V> getResults() {
         return results;
     }
 
-    public ChunkCursor getCursor() {
+    public @Nullable ChunkCursor getCursor() {
         return cursor;
     }
 

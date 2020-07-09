@@ -47,8 +47,6 @@ import java.util.stream.Collectors;
 @LazySingleton
 public class RetainedMessageStoreImpl implements RetainedMessageStore {
 
-    private static final String ITERATE_MIN_VERSION = "4.4.0";
-
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence;
     private final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService;
     private final @NotNull PluginServiceRateLimitService pluginServiceRateLimitService;
@@ -130,7 +128,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> iterateAllRetainedMessages(final @NotNull IterationCallback<RetainedPublish> callback, final Executor callbackExecutor) {
+    public @NotNull CompletableFuture<Void> iterateAllRetainedMessages(final @NotNull IterationCallback<RetainedPublish> callback, final @NotNull Executor callbackExecutor) {
         Preconditions.checkNotNull(callback, "Callback cannot be null");
         Preconditions.checkNotNull(callbackExecutor, "Callback executor cannot be null");
 
