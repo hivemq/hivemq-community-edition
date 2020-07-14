@@ -17,6 +17,7 @@ package com.hivemq.extensions.auth.parameter;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 
@@ -29,8 +30,9 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     private @NotNull OverloadProtectionThrottlingLevel overloadProtectionThrottlingLevel =
             OverloadProtectionThrottlingLevel.DEFAULT;
     private boolean modified = false;
+    private @Nullable Long queueSizeMaximum;
 
-    public ModifiableClientSettingsImpl(final int receiveMaximum) {
+    public ModifiableClientSettingsImpl(final int receiveMaximum, @Nullable final Long queueSizeMaximum) {
         this.receiveMaximum = receiveMaximum;
     }
 
@@ -56,6 +58,16 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     }
 
     @Override
+    public void setClientQueueSizeMaximum(final long queueSizeMaximum) {
+        Preconditions.checkArgument(queueSizeMaximum >= 1, "Queue size maximum must NOT be less than 1, was " + receiveMaximum + ".");
+        if (this.queueSizeMaximum != null && queueSizeMaximum == this.queueSizeMaximum) {
+            return;
+        }
+        this.queueSizeMaximum = queueSizeMaximum;
+        modified = true;
+    }
+
+    @Override
     public @NotNull OverloadProtectionThrottlingLevel getOverloadProtectionThrottlingLevel() {
         return overloadProtectionThrottlingLevel;
     }
@@ -63,6 +75,11 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     @Override
     public int getClientReceiveMaximum() {
         return receiveMaximum;
+    }
+
+    @Nullable
+    public Long getQueueSizeMaximum() {
+        return queueSizeMaximum;
     }
 
     public boolean isModified() {

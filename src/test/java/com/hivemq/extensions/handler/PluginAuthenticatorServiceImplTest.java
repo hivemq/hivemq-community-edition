@@ -29,6 +29,7 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtensions;
+import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -36,7 +37,6 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.extensions.services.auth.Authenticators;
-import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
@@ -160,7 +160,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Collections.emptyMap());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum());
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
 
@@ -173,7 +173,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Collections.emptyMap());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum());
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
 
@@ -187,7 +187,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createSimple());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum());
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
 
@@ -201,7 +201,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum());
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
 
@@ -215,7 +215,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createMulti());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum());
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
 

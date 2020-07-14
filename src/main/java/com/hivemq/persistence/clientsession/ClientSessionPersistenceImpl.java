@@ -160,7 +160,11 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @NotNull
     @Override
-    public ListenableFuture<Void> clientConnected(@NotNull final String client, final boolean cleanStart, final long clientSessionExpiryInterval, @Nullable final MqttWillPublish willPublish) {
+    public ListenableFuture<Void> clientConnected(@NotNull final String client,
+                                                  final boolean cleanStart,
+                                                  final long clientSessionExpiryInterval,
+                                                  @Nullable final MqttWillPublish willPublish,
+                                                  @Nullable final Long queueLimit) {
         checkNotNull(client, "Client id must not be null");
         pendingWillMessages.cancelWill(client);
         final long timestamp = System.currentTimeMillis();
@@ -170,7 +174,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             willPublish.setPayload(null);
             sessionWill = new ClientSessionWill(willPublish, willPayloadId);
         }
-        final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill);
+        final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
         final ListenableFuture<ConnectResult> submitFuture =
                 singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
                     final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);

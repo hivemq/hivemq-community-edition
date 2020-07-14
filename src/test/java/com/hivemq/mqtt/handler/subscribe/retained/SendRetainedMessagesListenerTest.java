@@ -15,11 +15,11 @@
  */
 package com.hivemq.mqtt.handler.subscribe.retained;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
@@ -74,6 +74,9 @@ public class SendRetainedMessagesListenerTest {
 
     @Mock
     private ClientQueuePersistence queuePersistence;
+
+    @Mock
+    private MqttConfigurationService mqttConfigurationService;
 
     @Before
     public void setUp() throws Exception {
@@ -175,7 +178,7 @@ public class SendRetainedMessagesListenerTest {
         listener.operationComplete(embeddedChannel.newSucceededFuture());
         embeddedChannel.runPendingTasks();
 
-        verify(queuePersistence).add(eq("client"), eq(false), anyList(), eq(true));
+        verify(queuePersistence).add(eq("client"), eq(false), anyList(), eq(true), anyLong());
     }
 
     @Test
@@ -202,7 +205,7 @@ public class SendRetainedMessagesListenerTest {
 
         final ArgumentCaptor<List<PUBLISH>> captor =
                 ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
-        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true));
+        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
         assertEquals("topic", publish.getTopic());
@@ -282,7 +285,7 @@ public class SendRetainedMessagesListenerTest {
 
         final ArgumentCaptor<List<PUBLISH>> captor =
                 ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
-        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true));
+        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
         assertEquals("topic", publish.getTopic());
@@ -317,7 +320,7 @@ public class SendRetainedMessagesListenerTest {
 
         final ArgumentCaptor<List<PUBLISH>> captor =
                 ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
-        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true));
+        verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getAllValues().get(0).get(0);
         assertEquals("topic", publish.getTopic());
@@ -453,7 +456,7 @@ public class SendRetainedMessagesListenerTest {
 
         final ImmutableSet<String> set = ImmutableSet.of("topic", "topic2");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
-        when(queuePersistence.add(eq("client"), eq(false), anyList(), eq(true))).thenReturn(
+        when(queuePersistence.add(eq("client"), eq(false), anyList(), eq(true), anyLong())).thenReturn(
                 Futures.immediateFuture(null));
         final List<SubscriptionResult> subscriptions = newArrayList(
                 subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false),
@@ -469,7 +472,8 @@ public class SendRetainedMessagesListenerTest {
 
         final ArgumentCaptor<List<PUBLISH>> captor =
                 ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
-        verify(queuePersistence, timeout(5000).times(2)).add(eq("client"), eq(false), captor.capture(), eq(true));
+        verify(queuePersistence, timeout(5000).times(2)).add(eq("client"), eq(false),
+                captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getAllValues().get(0).get(0);
         assertEquals("topic", publish.getTopic());
@@ -492,7 +496,7 @@ public class SendRetainedMessagesListenerTest {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mock(PublishPollService.class));
+                messageIDPools, mock(PublishPollService.class), mqttConfigurationService);
 
         return new SendRetainedMessagesListener(
                 subscriptions, ignoredTopics, retainedMessagePersistence, retainedMessagesSender);
@@ -506,7 +510,7 @@ public class SendRetainedMessagesListenerTest {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mock(PublishPollService.class));
+                messageIDPools, mock(PublishPollService.class), mqttConfigurationService);
 
         return new SendRetainedMessageResultListener(channel, topic, retainedMessagesSender);
 

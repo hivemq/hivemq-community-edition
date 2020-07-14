@@ -33,15 +33,18 @@ public class ClientSession implements Sizable {
 
     private int inMemorySize = SIZE_NOT_CALCULATED;
 
+    private final  @Nullable Long queueLimit;
+
     private @Nullable ClientSessionWill willPublish;
 
     public ClientSession(final boolean connected, final long sessionExpiryInterval) {
-        this(connected, sessionExpiryInterval, null);
+        this(connected, sessionExpiryInterval, null, null);
     }
 
     public ClientSession(final boolean connected,
                          final long sessionExpiryInterval,
-                         final @Nullable ClientSessionWill willPublish) {
+                         final @Nullable ClientSessionWill willPublish,
+                         final @Nullable Long queueLimit) {
 
         Preconditions.checkArgument(
                 sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
@@ -50,6 +53,7 @@ public class ClientSession implements Sizable {
         this.connected = connected;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.willPublish = willPublish;
+        this.queueLimit = queueLimit;
     }
 
     public boolean isConnected() {
@@ -77,15 +81,20 @@ public class ClientSession implements Sizable {
         this.willPublish = willPublish;
     }
 
+    public @Nullable Long getQueueLimit() {
+        return queueLimit;
+    }
+
     public @NotNull ClientSession deepCopyWithoutPayload() {
         return new ClientSession(
                 this.connected,
                 this.sessionExpiryInterval,
-                this.willPublish != null ? this.willPublish.deepCopyWithoutPayload() : null);
+                this.willPublish != null ? this.willPublish.deepCopyWithoutPayload() : null,
+                this.queueLimit);
     }
 
     public @NotNull ClientSession copyWithoutWill() {
-        return new ClientSession(this.connected, this.sessionExpiryInterval, null);
+        return new ClientSession(this.connected, this.sessionExpiryInterval, null, this.queueLimit);
     }
 
     @Override

@@ -129,7 +129,7 @@ public class ClientSessionPersistenceImplTest {
         when(clientQueuePersistence.clear("client", false)).thenReturn(Futures.immediateFuture(null));
 
         final MqttWillPublish willPublish = createWillPublish();
-        clientSessionPersistence.clientConnected("client", true, 0, willPublish).get();
+        clientSessionPersistence.clientConnected("client", true, 0, willPublish, 123L).get();
 
         verify(publishPayloadPersistence).add(any(byte[].class), eq(1L));
         verify(localPersistence).put(eq("client"), any(ClientSession.class), anyLong(), anyInt());

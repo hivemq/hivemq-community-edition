@@ -210,7 +210,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     }
 
     private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
-        return new ModifiableClientSettingsImpl(connect.getReceiveMaximum());
+        return new ModifiableClientSettingsImpl(connect.getReceiveMaximum(), null);
     }
 
     public void connectSuccessfulUnauthenticated(final @NotNull ChannelHandlerContext ctx,
@@ -410,6 +410,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
         channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(clientSettings.getClientReceiveMaximum());
+        channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(clientSettings.getQueueSizeMaximum());
     }
 
     private void continueAfterWillAuthorization(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
