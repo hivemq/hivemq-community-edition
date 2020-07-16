@@ -34,6 +34,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     public ModifiableClientSettingsImpl(final int receiveMaximum, @Nullable final Long queueSizeMaximum) {
         this.receiveMaximum = receiveMaximum;
+        this.queueSizeMaximum = queueSizeMaximum;
     }
 
     @Override
@@ -49,7 +50,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     @Override
     public void setOverloadProtectionThrottlingLevel(final @NotNull OverloadProtectionThrottlingLevel level) {
-        Preconditions.checkNotNull(level,"Overload protection throttling level must not be null");
+        Preconditions.checkNotNull(level, "Overload protection throttling level must not be null");
         if (this.overloadProtectionThrottlingLevel == level) {
             return;
         }
