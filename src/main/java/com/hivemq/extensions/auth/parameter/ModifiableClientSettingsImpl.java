@@ -21,6 +21,8 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 
+import java.util.Optional;
+
 /**
  * @author Lukas Brandl
  */
@@ -78,9 +80,9 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
         return receiveMaximum;
     }
 
-    @Nullable
-    public Long getQueueSizeMaximum() {
-        return queueSizeMaximum;
+    @NotNull
+    public Optional<Long> getQueueSizeMaximum() {
+        return Optional.ofNullable(queueSizeMaximum);
     }
 
     public boolean isModified() {
