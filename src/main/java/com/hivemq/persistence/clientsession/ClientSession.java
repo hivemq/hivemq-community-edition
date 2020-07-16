@@ -30,11 +30,8 @@ public class ClientSession implements Sizable {
 
     private boolean connected;
     private long sessionExpiryInterval;
-
     private int inMemorySize = SIZE_NOT_CALCULATED;
-
-    private final  @Nullable Long queueLimit;
-
+    private final @Nullable Long queueLimit;
     private @Nullable ClientSessionWill willPublish;
 
     public ClientSession(final boolean connected, final long sessionExpiryInterval) {
@@ -112,6 +109,9 @@ public class ClientSession implements Sizable {
         size += ObjectMemoryEstimation.objectRefSize(); // reference to will
         if (willPublish != null) {
             size += willPublish.getEstimatedSize();
+        }
+        if(queueLimit != null){
+            size += ObjectMemoryEstimation.longSize();
         }
 
         inMemorySize = size;

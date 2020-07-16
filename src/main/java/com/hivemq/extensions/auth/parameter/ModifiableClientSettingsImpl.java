@@ -59,7 +59,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     @Override
     public void setClientQueueSizeMaximum(final long queueSizeMaximum) {
-        Preconditions.checkArgument(queueSizeMaximum >= 1, "Queue size maximum must NOT be less than 1, was " + receiveMaximum + ".");
+        Preconditions.checkArgument(queueSizeMaximum >= 1, "Queue size maximum must NOT be less than 1, was " + queueSizeMaximum + ".");
         if (this.queueSizeMaximum != null && queueSizeMaximum == this.queueSizeMaximum) {
             return;
         }
