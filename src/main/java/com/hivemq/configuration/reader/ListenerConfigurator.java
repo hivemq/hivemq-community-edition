@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.configuration.reader;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.entity.listener.*;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
@@ -41,8 +43,9 @@ public class ListenerConfigurator {
 
     private final @NotNull List<String> chosenNames;
 
-    public ListenerConfigurator(final @NotNull ListenerConfigurationService listenerConfigurationService,
-                                final @NotNull SystemInformation systemInformation) {
+    public ListenerConfigurator(
+            final @NotNull ListenerConfigurationService listenerConfigurationService,
+            final @NotNull SystemInformation systemInformation) {
         this.listenerConfigurationService = listenerConfigurationService;
         this.systemInformation = systemInformation;
         this.chosenNames = new ArrayList<>();
@@ -86,14 +89,11 @@ public class ListenerConfigurator {
     }
 
     @NotNull TcpListener convertTcpListener(final @NotNull TCPListenerEntity entity) {
-        return new TcpListener(entity.getPort(),
-                entity.getBindAddress(),
-                getName(entity,"tcp-listener-"));
+        return new TcpListener(entity.getPort(), entity.getBindAddress(), getName(entity, "tcp-listener-"));
     }
 
     @NotNull WebsocketListener convertWebsocketListener(final @NotNull WebsocketListenerEntity entity) {
-        return new WebsocketListener.Builder()
-                .allowExtensions(entity.isAllowExtensions())
+        return new WebsocketListener.Builder().allowExtensions(entity.isAllowExtensions())
                 .bindAddress(entity.getBindAddress())
                 .path(entity.getPath())
                 .port(entity.getPort())
@@ -103,13 +103,14 @@ public class ListenerConfigurator {
     }
 
     @NotNull TlsTcpListener convertTlsTcpListener(final @NotNull TlsTCPListenerEntity entity) {
-        return new TlsTcpListener(entity.getPort(), entity.getBindAddress(), convertTls(entity.getTls()),
+        return new TlsTcpListener(entity.getPort(),
+                entity.getBindAddress(),
+                convertTls(entity.getTls()),
                 getName(entity, "tls-tcp-listener-"));
     }
 
     @NotNull TlsWebsocketListener convertTlsWebsocketListener(final @NotNull TlsWebsocketListenerEntity entity) {
-        return new TlsWebsocketListener.Builder()
-                .port(entity.getPort())
+        return new TlsWebsocketListener.Builder().port(entity.getPort())
                 .bindAddress(entity.getBindAddress())
                 .path(entity.getPath())
                 .allowExtensions(entity.isAllowExtensions())
@@ -122,7 +123,9 @@ public class ListenerConfigurator {
     @NotNull
     private String getName(final @NotNull ListenerEntity entity, final @NotNull String defaultPrefix) {
 
-        final String chosenName = (entity.getName() == null || entity.getName().trim().isEmpty()) ? defaultPrefix + entity.getPort() : entity.getName();
+        final String chosenName =
+                (entity.getName() == null || entity.getName().trim().isEmpty()) ? defaultPrefix + entity.getPort() :
+                        entity.getName();
 
         if (chosenNames.contains(chosenName)) {
 
@@ -132,7 +135,12 @@ public class ListenerConfigurator {
                 newName = chosenName + "-" + count++;
             }
 
-            log.warn("Name '{}' already in use. Renaming listener with address '{}' and port '{}' to: '{}'", chosenName, entity.getBindAddress(), entity.getPort(), newName);
+            log.warn(
+                    "Name '{}' already in use. Renaming listener with address '{}' and port '{}' to: '{}'",
+                    chosenName,
+                    entity.getBindAddress(),
+                    entity.getPort(),
+                    newName);
             chosenNames.add(newName);
             return newName;
         } else {
@@ -143,8 +151,11 @@ public class ListenerConfigurator {
     }
 
     @NotNull Tls convertTls(final @NotNull TLSEntity entity) {
-        final String keystorePath = findAbsoluteAndRelative(entity.getKeystoreEntity().getPath()).getAbsolutePath();
-        final String truststorePath = findAbsoluteAndRelative(entity.getTruststoreEntity().getPath()).getAbsolutePath();
+
+        final String keystorePath = getPathFromEntityPath(entity.getKeystoreEntity().getPath());
+        final String truststorePath = getPathFromEntityPath(entity.getTruststoreEntity().getPath());
+
+        Preconditions.checkNotNull(keystorePath, "Keystore path must not be null");
 
         return new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType(JKS)
@@ -166,17 +177,23 @@ public class ListenerConfigurator {
     }
 
     /**
-     * Tries to find a file in the given absolute path or relative to the HiveMQ home folder.
+     * Tries to find a file if set in the given absolute path or relative to the HiveMQ home folder.
      *
-     * @param fileLocation The absolute or relative path
-     * @return a file
+     * @param path the absolute or relative path set in the config entity.
+     * @return the absolute path to the file or null if unset.
      */
-    private @NotNull File findAbsoluteAndRelative(final @NotNull String fileLocation) {
-        final File file = new File(fileLocation);
-        if (file.isAbsolute()) {
-            return file;
+    @Nullable
+    private String getPathFromEntityPath(final @NotNull String path) {
+        //blank is default for unused
+        if (path.isBlank()) {
+            return null;
         } else {
-            return new File(systemInformation.getHiveMQHomeFolder(), fileLocation);
+            final File file = new File(path);
+            if (file.isAbsolute()) {
+                return file.getAbsolutePath();
+            } else {
+                return new File(systemInformation.getHiveMQHomeFolder(), path).getAbsolutePath();
+            }
         }
     }
 

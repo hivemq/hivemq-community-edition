@@ -23,6 +23,7 @@ import java.io.File;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
@@ -81,6 +82,47 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
         assertEquals("password-truststore", tlsTcpListener.getTls().getTruststorePassword());
         assertEquals("my-tls-tcp-listener", tlsTcpListener.getName());
 
+    }
+
+    @Test
+    public void test_read_tls_listener_without_trust_store() throws Exception {
+
+        final String contents = "" +
+                "<hivemq>" +
+                "    <listeners>" +
+                "        <tls-tcp-listener>" +
+                "            <port>8883</port>" +
+                "            <bind-address>0.0.0.0</bind-address>" +
+                "            <tls>" +
+                "                <protocols>" +
+                "                    <protocol>TLSv1.2</protocol>" +
+                "                </protocols>" +
+                "                <keystore>" +
+                "                    <path>/absolute/path.jks</path>" +
+                "                    <password>password-keystore</password>" +
+                "                    <private-key-password>password-key</private-key-password>" +
+                "                </keystore>" +
+                "                <native-ssl>false</native-ssl>" +
+                "            </tls>" +
+                "        </tls-tcp-listener>" +
+                "    </listeners>" +
+                "</hivemq>";
+
+        Files.write(contents.getBytes(UTF_8), xmlFile);
+
+        reader.applyConfig();
+
+        final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().get(0);
+
+        assertEquals(8883, tlsTcpListener.getPort());
+        assertEquals("0.0.0.0", tlsTcpListener.getBindAddress());
+
+        assertEquals("password-keystore", tlsTcpListener.getTls().getKeystorePassword());
+        assertEquals("/absolute/path.jks", tlsTcpListener.getTls().getKeystorePath());
+        assertEquals("password-key", tlsTcpListener.getTls().getPrivateKeyPassword());
+
+        //Check if the relative path was made absolute
+        assertNull(tlsTcpListener.getTls().getTruststorePath());
     }
 
     @Test
