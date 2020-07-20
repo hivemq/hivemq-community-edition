@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -125,7 +126,9 @@ public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapt
         final ConnectInboundProviderInputImpl providerInput =
                 new ConnectInboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
 
-        final ConnectPacketImpl packet = new ConnectPacketImpl(connect);
+        final long timestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+                System.currentTimeMillis());
+        final ConnectPacketImpl packet = new ConnectPacketImpl(connect, timestamp);
         final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
 

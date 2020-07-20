@@ -59,7 +59,8 @@ public class ModifiableWillPublishImplTest {
                 null,
                 null,
                 UserPropertiesImpl.of(ImmutableList.of()),
-                0);
+                0,
+                1234L);
         final ModifiableWillPublishImpl modifiablePacket =
                 new ModifiableWillPublishImpl(packet, configurationService);
 
@@ -84,7 +85,8 @@ public class ModifiableWillPublishImplTest {
                 null,
                 null,
                 UserPropertiesImpl.of(ImmutableList.of()),
-                0);
+                0,
+                1234L);
         final ModifiableWillPublishImpl modifiablePacket =
                 new ModifiableWillPublishImpl(packet, configurationService);
 
@@ -109,7 +111,8 @@ public class ModifiableWillPublishImplTest {
                 null,
                 null,
                 UserPropertiesImpl.of(ImmutableList.of()),
-                0);
+                0,
+                1234L);
         final ModifiableWillPublishImpl modifiablePacket =
                 new ModifiableWillPublishImpl(packet, configurationService);
 
@@ -131,7 +134,8 @@ public class ModifiableWillPublishImplTest {
                 null,
                 null,
                 UserPropertiesImpl.of(ImmutableList.of()),
-                0);
+                0,
+                1234L);
         final ModifiableWillPublishImpl modifiablePacket =
                 new ModifiableWillPublishImpl(packet, configurationService);
 
@@ -159,7 +163,8 @@ public class ModifiableWillPublishImplTest {
                 "responseTopic",
                 ByteBuffer.wrap("correlationData".getBytes()),
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))),
-                10);
+                10,
+                1234L);
         assertEquals(expectedPacket, copy);
     }
 

@@ -23,8 +23,10 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
 import com.hivemq.extensions.parameter.ClientBasedInputImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -37,16 +39,19 @@ public class AuthConnectInput extends ClientBasedInputImpl
 
     private final @NotNull CONNECT connect;
     private @Nullable ConnectPacketImpl connectPacket;
+    private final long connectTimestamp;
 
     public AuthConnectInput(final @NotNull CONNECT connect, final @NotNull Channel channel) {
         super(connect.getClientIdentifier(), channel);
         this.connect = connect;
+        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+                System.currentTimeMillis());
     }
 
     @Override
     public @NotNull ConnectPacket getConnectPacket() {
         if (connectPacket == null) {
-            connectPacket = new ConnectPacketImpl(connect);
+            connectPacket = new ConnectPacketImpl(connect, connectTimestamp);
         }
         return connectPacket;
     }

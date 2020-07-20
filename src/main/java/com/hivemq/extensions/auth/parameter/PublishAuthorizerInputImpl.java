@@ -27,8 +27,10 @@ import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.extensions.packets.publish.WillPublishPacketImpl;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -55,7 +57,9 @@ public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, Plugi
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
 
-        this.publishPacket = new WillPublishPacketImpl(publish);
+        final Long timestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+                System.currentTimeMillis());
+        this.publishPacket = new WillPublishPacketImpl(publish, timestamp);
         this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
         this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
     }
