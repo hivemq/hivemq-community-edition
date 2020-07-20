@@ -64,7 +64,8 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
                 responseTopic,
                 correlationData,
                 ImmutableIntArray.of(),
-                userProperties);
+                userProperties,
+                0); // TODO: add real timestamp
         this.willDelay = willDelay;
     }
 
