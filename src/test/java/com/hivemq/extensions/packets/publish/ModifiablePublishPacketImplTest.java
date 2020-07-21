@@ -1146,7 +1146,7 @@ public class ModifiablePublishPacketImplTest {
                 null,
                 ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of()),
-                System.currentTimeMillis());
+                1234L);
         final ModifiablePublishPacketImpl modifiablePacket =
                 new ModifiablePublishPacketImpl(packet, configurationService);
 
@@ -1176,7 +1176,7 @@ public class ModifiablePublishPacketImplTest {
                 ByteBuffer.wrap("correlationData".getBytes()),
                 ImmutableIntArray.of(),
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))),
-                System.currentTimeMillis());
+                1234L);
         assertEquals(expectedPacket, copy);
     }
 
