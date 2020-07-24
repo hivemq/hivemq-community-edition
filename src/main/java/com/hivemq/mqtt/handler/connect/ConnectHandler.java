@@ -405,12 +405,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void applyClientSettings(final @NotNull ModifiableClientSettings clientSettings,
+    private void applyClientSettings(final @NotNull ModifiableClientSettingsImpl clientSettings,
                                      final @NotNull CONNECT msg,
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
         channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(clientSettings.getClientReceiveMaximum());
-        channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(clientSettings.getQueueSizeMaximum().orElse(null));
+        channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(clientSettings.getQueueSizeMaximum());
     }
 
     private void continueAfterWillAuthorization(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {

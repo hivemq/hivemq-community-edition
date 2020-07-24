@@ -80,9 +80,9 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
         return receiveMaximum;
     }
 
-    @NotNull
-    public Optional<Long> getQueueSizeMaximum() {
-        return Optional.ofNullable(queueSizeMaximum);
+    @Nullable
+    public Long getQueueSizeMaximum() {
+        return queueSizeMaximum;
     }
 
     public boolean isModified() {

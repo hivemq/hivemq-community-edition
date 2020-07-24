@@ -71,4 +71,21 @@ public class ModifiableClientSettingsImplTest {
         clientSettings.setOverloadProtectionThrottlingLevel(OverloadProtectionThrottlingLevel.NONE);
         assertTrue(clientSettings.isModified());
     }
+
+    @Test
+    public void test_queue_size_modified() {
+        assertNull(clientSettings.getQueueSizeMaximum());
+        clientSettings.setClientQueueSizeMaximum(123L);
+        assertEquals(123L, clientSettings.getQueueSizeMaximum().longValue());
+        assertTrue(clientSettings.isModified());
+    }
+
+    @Test
+    public void test_queue_siz_not_modified() {
+        clientSettings = new ModifiableClientSettingsImpl(65535, 1000L);
+        assertEquals(1000L, clientSettings.getQueueSizeMaximum().longValue());
+        clientSettings.setClientQueueSizeMaximum(1000L);
+        assertEquals(1000L, clientSettings.getQueueSizeMaximum().longValue());
+        assertFalse(clientSettings.isModified());
+    }
 }
