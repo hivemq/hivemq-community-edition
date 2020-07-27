@@ -100,18 +100,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     @Override
     @NotNull
     public ListenableFuture<Void> add(
-            @NotNull final String queueId, final boolean shared, @NotNull final PUBLISH publish) {
-        return add(queueId, shared, publish, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @NotNull
-    public ListenableFuture<Void> add(
             @NotNull final String queueId, final boolean shared, @NotNull final PUBLISH publish,
-            final boolean retained) {
+            final boolean retained, final long queueLimit) {
         try {
             checkNotNull(queueId, "Queue ID must not be null");
             checkNotNull(publish, "Publish must not be null");
@@ -120,8 +110,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         }
 
         return singleWriter.submit(queueId, (bucketIndex, queueBuckets, queueIndex) -> {
-            localPersistence.add(queueId, shared, publish, mqttConfigurationService.maxQueuedMessages(),
-                    mqttConfigurationService.getQueuedMessagesStrategy(), retained, bucketIndex);
+            localPersistence.add(queueId, shared, publish, queueLimit, mqttConfigurationService.getQueuedMessagesStrategy(),
+                    retained, bucketIndex);
             final int queueSize = localPersistence.size(queueId, shared, bucketIndex);
             if (queueSize == 1) {
                 if (shared) {
@@ -134,10 +124,11 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         });
     }
 
+    @Override
     @NotNull
     public ListenableFuture<Void> add(
             @NotNull final String queueId, final boolean shared, @NotNull final List<PUBLISH> publishes,
-            final boolean retained) {
+            final boolean retained, final long queueLimit) {
         try {
             checkNotNull(queueId, "Queue ID must not be null");
             checkNotNull(publishes, "Publishes must not be null");
@@ -147,8 +138,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
 
         return singleWriter.submit(queueId, (bucketIndex, queueBuckets, queueIndex) -> {
             final boolean queueWasEmpty = localPersistence.size(queueId, shared, bucketIndex) == 0;
-            localPersistence.add(queueId, shared, publishes, mqttConfigurationService.maxQueuedMessages(),
-                    mqttConfigurationService.getQueuedMessagesStrategy(), retained, bucketIndex);
+            localPersistence.add(queueId, shared, publishes, queueLimit, mqttConfigurationService.getQueuedMessagesStrategy(),
+                    retained, bucketIndex);
             if (queueWasEmpty) {
                 if (shared) {
                     sharedPublishAvailable(queueId);

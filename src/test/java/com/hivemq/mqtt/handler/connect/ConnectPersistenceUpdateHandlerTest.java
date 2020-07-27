@@ -98,9 +98,11 @@ public class ConnectPersistenceUpdateHandlerTest {
         when(channel.closeFuture()).thenReturn(channelFuture);
         when(channel.attr(eq(ChannelAttributes.TAKEN_OVER))).thenReturn(new TestChannelAttribute<Boolean>(false));
         when(channel.attr(eq(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED))).thenReturn(new TestChannelAttribute<Boolean>(true));
+        when(channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
 
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), eq(null))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class), anyLong())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), isNull(), anyLong())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), isNull(), isNull())).thenReturn(Futures.immediateFuture(null));
         when(ctx.channel()).thenReturn(channel);
         persistenceUpdateHandler = new ConnectPersistenceUpdateHandler(clientSessionPersistence, clientSessionSubscriptionPersistence,
                 messageIDPools, channelPersistence, singleWriterService);
@@ -116,7 +118,21 @@ public class ConnectPersistenceUpdateHandlerTest {
         final StartConnectPersistence startConnectPersistence = new StartConnectPersistence(connect, true, SESSION_EXPIRY_MAX);
         persistenceUpdateHandler.userEventTriggered(channelHandlerContext, startConnectPersistence);
 
-        verify(clientSessionPersistence).clientConnected(eq("client"), eq(false), eq(SESSION_EXPIRY_MAX), eq(null));
+        verify(clientSessionPersistence).clientConnected(eq("client"), eq(false), eq(SESSION_EXPIRY_MAX), isNull(), isNull());
+    }
+
+    @Test
+    public void test_start_connection_persistent_queue_limit() throws Exception {
+        final CONNECT connect = new CONNECT.Mqtt3Builder().withClientIdentifier("client").withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withCleanStart(false).build();
+
+        when(channel.attr(eq(ChannelAttributes.CLIENT_ID))).thenReturn(new TestChannelAttribute<>("client"));
+        when(channel.attr(eq(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL))).thenReturn(new TestChannelAttribute<>(20000L));
+        when(channel.attr(eq(ChannelAttributes.QUEUE_SIZE_MAXIMUM))).thenReturn(new TestChannelAttribute<>(123L));
+
+        final StartConnectPersistence startConnectPersistence = new StartConnectPersistence(connect, true, SESSION_EXPIRY_MAX);
+        persistenceUpdateHandler.userEventTriggered(channelHandlerContext, startConnectPersistence);
+
+        verify(clientSessionPersistence).clientConnected(eq("client"), eq(false), eq(SESSION_EXPIRY_MAX), eq(null), eq(123L));
     }
 
     @Test
@@ -125,7 +141,7 @@ public class ConnectPersistenceUpdateHandlerTest {
 
         when(channel.attr(eq(ChannelAttributes.CLIENT_ID))).thenReturn(new TestChannelAttribute<>("client"));
         when(channel.attr(eq(ChannelAttributes.CLEAN_START))).thenReturn(new TestChannelAttribute<>(true));
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), eq(null))).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), isNull(), isNull())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
 
         final StartConnectPersistence startConnectPersistence = new StartConnectPersistence(connect, true, 1000);
         persistenceUpdateHandler.userEventTriggered(channelHandlerContext, startConnectPersistence);

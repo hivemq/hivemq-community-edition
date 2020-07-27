@@ -15,8 +15,8 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.PropertiesSerializationUtil;
@@ -40,6 +40,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ClientSessionPersistenceSerializer {
 
     private static final int NO_WILL_MARKER = -1;
+
+    private static final byte CLIENT_CONNECTED_BIT = 0;
+    private static final byte QUEUE_SIZE_PRESENT_BIT = 1;
 
     public byte[] serializeKey(final String clientId) {
         return clientId.getBytes(UTF_8);
@@ -90,8 +93,15 @@ public class ClientSessionPersistenceSerializer {
             payloadFormatIndicator = (byte) (willPublish.getPayloadFormatIndicator() != null ? willPublish.getPayloadFormatIndicator().getCode() : -1);
         }
 
+        int queueLimitLength = clientSession.getQueueLimit() != null ? Long.BYTES : 0;
 
-        final byte[] bytes = new byte[8 + 8 + 1 + willLength];
+
+        final byte[] bytes = new byte[
+                Long.BYTES +        // timestamp
+                        Long.BYTES +        // expiry interval
+                        1 +                 // flags
+                        willLength +
+                        queueLimitLength];
         int cursor = 0;
 
         Bytes.copyLongToByteArray(timestamp, bytes, 0);
@@ -99,60 +109,69 @@ public class ClientSessionPersistenceSerializer {
         Bytes.copyLongToByteArray(clientSession.getSessionExpiryInterval(), bytes, cursor);
         cursor += 8;
 
-        bytes[cursor] = Bytes.setBit((byte) 0b0000_0000, 0, clientSession.isConnected());
+        byte flags = (byte) 0b0000_0000;
+        flags = Bytes.setBit(flags, CLIENT_CONNECTED_BIT, clientSession.isConnected());
+        flags = Bytes.setBit(flags, QUEUE_SIZE_PRESENT_BIT, clientSession.getQueueLimit() != null);
+        bytes[cursor] = flags;
         cursor += 1;
+
+        if (clientSession.getQueueLimit() != null) {
+            Bytes.copyLongToByteArray(clientSession.getQueueLimit(), bytes, cursor);
+            cursor += Long.BYTES;
+        }
 
         if (willLength == 1) {
             bytes[cursor] = -1;
-            return bytes;
+            cursor++;
+        } else {
+
+            bytes[cursor] = (byte) willPublish.getQos().getQosNumber();
+            cursor += 1;
+
+            Bytes.copyLongToByteArray(willPublish.getPayloadId(), bytes, cursor);
+            cursor += 8;
+            Bytes.copyLongToByteArray(willPublish.getDelayInterval(), bytes, cursor);
+            cursor += 8;
+            Bytes.copyLongToByteArray(willPublish.getMessageExpiryInterval(), bytes, cursor);
+            cursor += 8;
+
+            bytes[cursor] = payloadFormatIndicator;
+            cursor += 1;
+
+            bytes[cursor] = (byte) (willPublish.isRetain() ? 1 : 0);
+            cursor += 1;
+
+            Bytes.copyIntToByteArray(topicLength, bytes, cursor);
+            cursor += 4;
+            System.arraycopy(topic, 0, bytes, cursor, topicLength);
+            cursor += topicLength;
+
+            Bytes.copyIntToByteArray(hivemqIdLength, bytes, cursor);
+            cursor += 4;
+            System.arraycopy(hivemqId, 0, bytes, cursor, hivemqIdLength);
+            cursor += hivemqIdLength;
+
+            Bytes.copyIntToByteArray(responseTopicLength, bytes, cursor);
+            cursor += 4;
+            if (responseTopicLength > 0) {
+                System.arraycopy(responseTopic, 0, bytes, cursor, responseTopicLength);
+                cursor += responseTopicLength;
+            }
+            Bytes.copyIntToByteArray(correlationDataLength, bytes, cursor);
+            cursor += 4;
+            if (correlationDataLength > 0) {
+                System.arraycopy(correlationData, 0, bytes, cursor, correlationDataLength);
+                cursor += correlationDataLength;
+            }
+            Bytes.copyIntToByteArray(contentTypeLength, bytes, cursor);
+            cursor += 4;
+            if (contentTypeLength > 0) {
+                System.arraycopy(contentType, 0, bytes, cursor, contentTypeLength);
+                cursor += contentTypeLength;
+            }
+
+            PropertiesSerializationUtil.write(willPublish.getUserProperties(), bytes, cursor);
         }
-
-        bytes[cursor] = (byte) willPublish.getQos().getQosNumber();
-        cursor += 1;
-
-        Bytes.copyLongToByteArray(willPublish.getPayloadId(), bytes, cursor);
-        cursor += 8;
-        Bytes.copyLongToByteArray(willPublish.getDelayInterval(), bytes, cursor);
-        cursor += 8;
-        Bytes.copyLongToByteArray(willPublish.getMessageExpiryInterval(), bytes, cursor);
-        cursor += 8;
-
-        bytes[cursor] = payloadFormatIndicator;
-        cursor += 1;
-
-        bytes[cursor] = (byte) (willPublish.isRetain() ? 1 : 0);
-        cursor += 1;
-
-        Bytes.copyIntToByteArray(topicLength, bytes, cursor);
-        cursor += 4;
-        System.arraycopy(topic, 0, bytes, cursor, topicLength);
-        cursor += topicLength;
-
-        Bytes.copyIntToByteArray(hivemqIdLength, bytes, cursor);
-        cursor += 4;
-        System.arraycopy(hivemqId, 0, bytes, cursor, hivemqIdLength);
-        cursor += hivemqIdLength;
-
-        Bytes.copyIntToByteArray(responseTopicLength, bytes, cursor);
-        cursor += 4;
-        if (responseTopicLength > 0) {
-            System.arraycopy(responseTopic, 0, bytes, cursor, responseTopicLength);
-            cursor += responseTopicLength;
-        }
-        Bytes.copyIntToByteArray(correlationDataLength, bytes, cursor);
-        cursor += 4;
-        if (correlationDataLength > 0) {
-            System.arraycopy(correlationData, 0, bytes, cursor, correlationDataLength);
-            cursor += correlationDataLength;
-        }
-        Bytes.copyIntToByteArray(contentTypeLength, bytes, cursor);
-        cursor += 4;
-        if (contentTypeLength > 0) {
-            System.arraycopy(contentType, 0, bytes, cursor, contentTypeLength);
-            cursor += contentTypeLength;
-        }
-
-        PropertiesSerializationUtil.write(willPublish.getUserProperties(), bytes, cursor);
 
         return bytes;
     }
@@ -160,89 +179,102 @@ public class ClientSessionPersistenceSerializer {
     @NotNull
     public ClientSession deserializeValue(final byte[] bytes) {
 
-        int cursor = 8;
+        int cursor = Long.BYTES; // skip time stamp
         final long timeToLive = Bytes.readLong(bytes, cursor);
-        cursor += 8;
+        cursor += Long.BYTES;
         final byte flags = bytes[cursor];
-        final boolean connected = Bytes.isBitSet(flags, 0);
+        final boolean connected = Bytes.isBitSet(flags, CLIENT_CONNECTED_BIT);
         cursor += 1;
+
+        Long queueLimit = null;
+        if (Bytes.isBitSet(flags, QUEUE_SIZE_PRESENT_BIT)) {
+            queueLimit = Bytes.readLong(bytes, cursor);
+            cursor += Long.BYTES;
+        }
 
         final int willQos = bytes[cursor];
-        if (willQos == NO_WILL_MARKER) {
-            return new ClientSession(connected, timeToLive);
-        }
         cursor += 1;
-        final MqttWillPublish.Mqtt5Builder willBuilder = new MqttWillPublish.Mqtt5Builder();
-        willBuilder.withQos(QoS.valueOf(willQos));
+        ClientSessionWill sessionWill = null;
+        if (willQos != NO_WILL_MARKER) {
+            final MqttWillPublish.Mqtt5Builder willBuilder = new MqttWillPublish.Mqtt5Builder();
+            willBuilder.withQos(QoS.valueOf(willQos));
 
-        final long payloadId = Bytes.readLong(bytes, cursor);
-        cursor += 8;
-        willBuilder.withDelayInterval(Bytes.readLong(bytes, cursor));
-        cursor += 8;
-        willBuilder.withMessageExpiryInterval(Bytes.readLong(bytes, cursor));
-        cursor += 8;
+            final long payloadId = Bytes.readLong(bytes, cursor);
+            cursor += 8;
+            willBuilder.withDelayInterval(Bytes.readLong(bytes, cursor));
+            cursor += 8;
+            willBuilder.withMessageExpiryInterval(Bytes.readLong(bytes, cursor));
+            cursor += 8;
 
-        final byte payloadFormatCode = bytes[cursor];
-        cursor += 1;
-        willBuilder.withPayloadFormatIndicator(payloadFormatCode != -1 ? Mqtt5PayloadFormatIndicator.fromCode(payloadFormatCode) : null);
+            final byte payloadFormatCode = bytes[cursor];
+            cursor += 1;
+            willBuilder.withPayloadFormatIndicator(payloadFormatCode != -1 ? Mqtt5PayloadFormatIndicator.fromCode(payloadFormatCode) : null);
 
-        willBuilder.withRetain(bytes[cursor] == 1);
-        cursor += 1;
+            willBuilder.withRetain(bytes[cursor] == 1);
+            cursor += 1;
 
-        final int topicLength = Bytes.readInt(bytes, cursor);
-        cursor += 4;
-        if (topicLength > 0) {
-            willBuilder.withTopic(new String(bytes, cursor, topicLength));
-            cursor += topicLength;
+            final int topicLength = Bytes.readInt(bytes, cursor);
+            cursor += 4;
+            if (topicLength > 0) {
+                willBuilder.withTopic(new String(bytes, cursor, topicLength));
+                cursor += topicLength;
+            }
+
+            final int hivemqIdLength = Bytes.readInt(bytes, cursor);
+            cursor += 4;
+            if (topicLength > 0) {
+                willBuilder.withHivemqId(new String(bytes, cursor, hivemqIdLength));
+                cursor += hivemqIdLength;
+            }
+
+            final int responseTopicLength = Bytes.readInt(bytes, cursor);
+            cursor += 4;
+            if (responseTopicLength > 0) {
+                willBuilder.withResponseTopic(new String(bytes, cursor, responseTopicLength));
+                cursor += responseTopicLength;
+            }
+
+            final int correlationDataLength = Bytes.readInt(bytes, cursor);
+            cursor += 4;
+            if (correlationDataLength != 0) {
+                final byte[] correlationData = new byte[correlationDataLength];
+                System.arraycopy(bytes, cursor, correlationData, 0, correlationDataLength);
+                willBuilder.withCorrelationData(correlationData);
+                cursor += correlationDataLength;
+            }
+
+            final int contentTypeLength = Bytes.readInt(bytes, cursor);
+            cursor += 4;
+            if (contentTypeLength != 0) {
+                willBuilder.withContentType(new String(bytes, cursor, contentTypeLength, UTF_8));
+                cursor += contentTypeLength;
+            }
+
+            willBuilder.withUserProperties(PropertiesSerializationUtil.read(bytes, cursor));
+            sessionWill = new ClientSessionWill(willBuilder.build(), payloadId);
         }
 
-        final int hivemqIdLength = Bytes.readInt(bytes, cursor);
-        cursor += 4;
-        if (topicLength > 0) {
-            willBuilder.withHivemqId(new String(bytes, cursor, hivemqIdLength));
-            cursor += hivemqIdLength;
-        }
-
-        final int responseTopicLength = Bytes.readInt(bytes, cursor);
-        cursor += 4;
-        if (responseTopicLength > 0) {
-            willBuilder.withResponseTopic(new String(bytes, cursor, responseTopicLength));
-            cursor += responseTopicLength;
-        }
-
-        final int correlationDataLength = Bytes.readInt(bytes, cursor);
-        cursor += 4;
-        if (correlationDataLength != 0) {
-            final byte[] correlationData = new byte[correlationDataLength];
-            System.arraycopy(bytes, cursor, correlationData, 0, correlationDataLength);
-            willBuilder.withCorrelationData(correlationData);
-            cursor += correlationDataLength;
-        }
-
-        final int contentTypeLength = Bytes.readInt(bytes, cursor);
-        cursor += 4;
-        if (contentTypeLength != 0) {
-            willBuilder.withContentType(new String(bytes, cursor, contentTypeLength, UTF_8));
-            cursor += contentTypeLength;
-        }
-
-        willBuilder.withUserProperties(PropertiesSerializationUtil.read(bytes, cursor));
-
-        return new ClientSession(connected, timeToLive, new ClientSessionWill(willBuilder.build(), payloadId));
+        return new ClientSession(connected, timeToLive, sessionWill, queueLimit);
     }
 
 
     @NotNull
     public ClientSession deserializeValueWithoutWill(final byte[] bytes) {
 
-        int cursor = 8;
+        int cursor = Long.BYTES; // Skip timestamp
         final long timeToLive = Bytes.readLong(bytes, cursor);
-        cursor += 8;
+        cursor += Long.BYTES;
         final byte flags = bytes[cursor];
         final boolean connected = Bytes.isBitSet(flags, 0);
         cursor += 1;
 
-        return new ClientSession(connected, timeToLive);
+        Long queueLimit = null;
+        if (Bytes.isBitSet(flags, QUEUE_SIZE_PRESENT_BIT)) {
+            queueLimit = Bytes.readLong(bytes, cursor);
+            cursor += Long.BYTES;
+        }
+
+        return new ClientSession(connected, timeToLive, null, queueLimit);
     }
 
 

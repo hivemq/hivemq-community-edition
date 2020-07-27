@@ -319,7 +319,7 @@ public class ClientServiceImplTest {
 
     @NotNull
     private ClientSession getSession(final boolean connected) {
-        return new ClientSession(connected, sessionExpiry, new ClientSessionWill(mock(MqttWillPublish.class), 12345L));
+        return new ClientSession(connected, sessionExpiry, new ClientSessionWill(mock(MqttWillPublish.class), 12345L), 23456L);
     }
 
     @Test(timeout = 10000, expected = RateLimitExceededException.class)

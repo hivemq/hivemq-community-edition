@@ -74,7 +74,10 @@ public class ConnectPersistenceUpdateHandler extends ChannelInboundHandlerAdapte
 
             final StartConnectPersistence event = (StartConnectPersistence) evt;
 
-            final ListenableFuture<Void> future = updatePersistenceData(event.getMessage().isCleanStart(), event.getMessage().getClientIdentifier(), event.getTimeToLive(), event.getMessage().getWillPublish());
+            final Long queueSizeMaximum = ctx.channel().attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+            final ListenableFuture<Void> future = updatePersistenceData(event.getMessage().isCleanStart(),
+                    event.getMessage().getClientIdentifier(), event.getTimeToLive(), event.getMessage().getWillPublish(),
+                    queueSizeMaximum);
             FutureUtils.addPersistenceCallback(future, new UpdatePersistenceCallback(ctx, event));
 
         } else {
@@ -82,8 +85,12 @@ public class ConnectPersistenceUpdateHandler extends ChannelInboundHandlerAdapte
         }
     }
 
-    private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart, final String clientId, final long sessionExpiryInterval, final MqttWillPublish willPublish) {
-        return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish);
+    private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart,
+                                                         @NotNull final String clientId,
+                                                         final long sessionExpiryInterval,
+                                                         @Nullable final MqttWillPublish willPublish,
+                                                         @Nullable final Long queueSizeMaximum) {
+        return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish, queueSizeMaximum);
     }
 
     @Override

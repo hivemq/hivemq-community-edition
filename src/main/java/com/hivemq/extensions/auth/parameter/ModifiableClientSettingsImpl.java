@@ -17,8 +17,11 @@ package com.hivemq.extensions.auth.parameter;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
+
+import java.util.Optional;
 
 /**
  * @author Lukas Brandl
@@ -29,9 +32,11 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     private @NotNull OverloadProtectionThrottlingLevel overloadProtectionThrottlingLevel =
             OverloadProtectionThrottlingLevel.DEFAULT;
     private boolean modified = false;
+    private @Nullable Long queueSizeMaximum;
 
-    public ModifiableClientSettingsImpl(final int receiveMaximum) {
+    public ModifiableClientSettingsImpl(final int receiveMaximum, @Nullable final Long queueSizeMaximum) {
         this.receiveMaximum = receiveMaximum;
+        this.queueSizeMaximum = queueSizeMaximum;
     }
 
     @Override
@@ -47,11 +52,21 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
 
     @Override
     public void setOverloadProtectionThrottlingLevel(final @NotNull OverloadProtectionThrottlingLevel level) {
-        Preconditions.checkNotNull(level,"Overload protection throttling level must not be null");
+        Preconditions.checkNotNull(level, "Overload protection throttling level must not be null");
         if (this.overloadProtectionThrottlingLevel == level) {
             return;
         }
         this.overloadProtectionThrottlingLevel = level;
+        modified = true;
+    }
+
+    @Override
+    public void setClientQueueSizeMaximum(final long queueSizeMaximum) {
+        Preconditions.checkArgument(queueSizeMaximum >= 1, "Queue size maximum must NOT be less than 1, was " + queueSizeMaximum + ".");
+        if (this.queueSizeMaximum != null && queueSizeMaximum == this.queueSizeMaximum) {
+            return;
+        }
+        this.queueSizeMaximum = queueSizeMaximum;
         modified = true;
     }
 
@@ -63,6 +78,11 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
     @Override
     public int getClientReceiveMaximum() {
         return receiveMaximum;
+    }
+
+    @Nullable
+    public Long getQueueSizeMaximum() {
+        return queueSizeMaximum;
     }
 
     public boolean isModified() {

@@ -48,7 +48,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -101,7 +106,7 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_add() throws ExecutionException, InterruptedException {
-        clientQueuePersistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic")).get();
+        clientQueuePersistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L).get();
         verify(localPersistence).add(
                 eq("client"), eq(false), any(PUBLISH.class), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(), anyInt());
@@ -110,7 +115,7 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_add_shared() throws ExecutionException, InterruptedException {
-        clientQueuePersistence.add("name/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic")).get();
+        clientQueuePersistence.add("name/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L).get();
         verify(localPersistence).add(
                 eq("name/topic"), eq(true), any(PUBLISH.class), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(), anyInt());
@@ -253,7 +258,7 @@ public class ClientQueuePersistenceImplTest {
         final ImmutableList<PUBLISH> publishes = ImmutableList.of(
                 createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
                 createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
-        clientQueuePersistence.add("client", false, publishes, false).get();
+        clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
         verify(localPersistence).add(
                 eq("client"), eq(false), eq(publishes), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(), anyInt());
@@ -268,7 +273,7 @@ public class ClientQueuePersistenceImplTest {
         final ImmutableList<PUBLISH> publishes = ImmutableList.of(
                 createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
                 createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
-        clientQueuePersistence.add("client", false, publishes, false).get();
+        clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
         verify(localPersistence).add(
                 eq("client"), eq(false), eq(publishes), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(), anyInt());

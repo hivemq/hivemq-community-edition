@@ -18,9 +18,10 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
+import com.hivemq.configuration.HivemqId;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
 import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
@@ -49,6 +50,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.channels.ClosedChannelException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,6 +76,7 @@ public class RetainedMessagesSender {
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull MessageIDPools messageIDPools;
+    private final @NotNull MqttConfigurationService mqttConfigurationService;
 
     @Inject
     public RetainedMessagesSender(
@@ -82,7 +85,8 @@ public class RetainedMessagesSender {
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull MessageIDPools messageIDPools,
-            final @NotNull PublishPollService publishPollService) {
+            final @NotNull PublishPollService publishPollService,
+            final @NotNull MqttConfigurationService mqttConfigurationService) {
 
         this.hiveMQId = hiveMQId;
         this.publishPayloadPersistence = publishPayloadPersistence;
@@ -90,6 +94,7 @@ public class RetainedMessagesSender {
         this.clientQueuePersistence = clientQueuePersistence;
         this.messageIDPools = messageIDPools;
         this.publishPollService = publishPollService;
+        this.mqttConfigurationService = mqttConfigurationService;
     }
 
     /**
@@ -118,7 +123,7 @@ public class RetainedMessagesSender {
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         Futures.addCallback(retainedMessagesFuture, new SendRetainedMessageCallback(subscribedTopics, hiveMQId,
                 publishPayloadPersistence, messageIDPools, clientId, resultFuture, channel, clientQueuePersistence,
-                publishPollService), channel.eventLoop());
+                publishPollService, mqttConfigurationService), channel.eventLoop());
 
         return resultFuture;
 
@@ -135,6 +140,7 @@ public class RetainedMessagesSender {
         private final @NotNull Channel channel;
         private final @NotNull ClientQueuePersistence clientQueuePersistence;
         private final @NotNull PublishPollService publishPollService;
+        private final @NotNull MqttConfigurationService mqttConfigurationService;
 
         SendRetainedMessageCallback(
                 final @NotNull Topic[] subscribedTopics,
@@ -145,7 +151,8 @@ public class RetainedMessagesSender {
                 final @NotNull SettableFuture<Void> resultFuture,
                 final @NotNull Channel channel,
                 final @NotNull ClientQueuePersistence clientQueuePersistence,
-                final @NotNull PublishPollService publishPollService) {
+                final @NotNull PublishPollService publishPollService,
+                final @NotNull MqttConfigurationService mqttConfigurationService) {
 
             this.subscribedTopics = subscribedTopics;
             this.hivemqId = hivemqId;
@@ -156,6 +163,7 @@ public class RetainedMessagesSender {
             this.channel = channel;
             this.clientQueuePersistence = clientQueuePersistence;
             this.publishPollService = publishPollService;
+            this.mqttConfigurationService = mqttConfigurationService;
         }
 
         @Override
@@ -233,8 +241,9 @@ public class RetainedMessagesSender {
                 resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
                 return;
             }
-
-            futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true));
+            final Long queueLimit = channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+            futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true,
+                    Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
         }
 

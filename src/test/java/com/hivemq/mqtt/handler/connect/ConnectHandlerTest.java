@@ -132,9 +132,12 @@ public class ConnectHandlerTest {
 
         MockitoAnnotations.initMocks(this);
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(), isNull()))
+                .thenReturn(Futures.immediateFuture(null));
 
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
+
+        embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(null);
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
@@ -1067,7 +1070,8 @@ public class ConnectHandlerTest {
     public void test_will_authorization_success() {
         createHandler();
 
-        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientConnected(anyString(), anyBoolean(), anyLong(), any(MqttWillPublish.class), anyLong()))
+                .thenReturn(Futures.immediateFuture(null));
 
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
                 .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
@@ -1313,7 +1317,7 @@ public class ConnectHandlerTest {
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
 
-        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535);
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
         clientSettings.setClientReceiveMaximum(123);
         clientSettings.setOverloadProtectionThrottlingLevel(NONE);
         handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -38,6 +39,7 @@ import com.hivemq.persistence.util.FutureUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -58,16 +60,20 @@ public class PublishDistributorImpl implements PublishDistributor {
     private final ClientSessionPersistence clientSessionPersistence;
     @NotNull
     private final SingleWriterService singleWriterService;
+    @NotNull
+    private final MqttConfigurationService mqttConfigurationService;
 
     @Inject
     public PublishDistributorImpl(@NotNull final PublishPayloadPersistence payloadPersistence,
                                   @NotNull final ClientQueuePersistence clientQueuePersistence,
                                   @NotNull final ClientSessionPersistence clientSessionPersistence,
-                                  @NotNull final SingleWriterService singleWriterService) {
+                                  @NotNull final SingleWriterService singleWriterService,
+                                  @NotNull final MqttConfigurationService mqttConfigurationService) {
         this.payloadPersistence = payloadPersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.clientSessionPersistence = clientSessionPersistence;
         this.singleWriterService = singleWriterService;
+        this.mqttConfigurationService = mqttConfigurationService;
     }
 
     @NotNull
@@ -123,7 +129,7 @@ public class PublishDistributorImpl implements PublishDistributor {
                                                           @Nullable final ImmutableIntArray subscriptionIdentifier) {
 
         if (sharedSubscription) {
-            return queuePublish(client, publish, subscriptionQos, true, retainAsPublished, subscriptionIdentifier);
+            return queuePublish(client, publish, subscriptionQos, true, retainAsPublished, subscriptionIdentifier, null);
         }
 
         final boolean qos0Message = Math.min(subscriptionQos, publish.getQoS().getQosNumber()) == 0;
@@ -139,15 +145,20 @@ public class PublishDistributorImpl implements PublishDistributor {
             return Futures.immediateFuture(NOT_CONNECTED);
         }
 
-        return queuePublish(client, publish, subscriptionQos, false, retainAsPublished, subscriptionIdentifier);
+        return queuePublish(client, publish, subscriptionQos, false, retainAsPublished,
+                subscriptionIdentifier, clientSession.getQueueLimit());
     }
 
     @NotNull
     private SettableFuture<PublishStatus> queuePublish(@NotNull final String client, @NotNull final PUBLISH publish,
                                                        final int subscriptionQos, final boolean shared, final boolean retainAsPublished,
-                                                       @Nullable final ImmutableIntArray subscriptionIdentifier) {
+                                                       @Nullable final ImmutableIntArray subscriptionIdentifier,
+                                                       @Nullable final Long queueLimit) {
 
-        final ListenableFuture<Void> future = clientQueuePersistence.add(client, shared, createPublish(publish, subscriptionQos, retainAsPublished, subscriptionIdentifier));
+        final ListenableFuture<Void> future = clientQueuePersistence.add(client, shared, createPublish(publish, subscriptionQos,
+                retainAsPublished, subscriptionIdentifier), false,
+                Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages));
+
         final SettableFuture<PublishStatus> statusFuture = SettableFuture.create();
 
         Futures.addCallback(future, new FutureCallback<Void>() {

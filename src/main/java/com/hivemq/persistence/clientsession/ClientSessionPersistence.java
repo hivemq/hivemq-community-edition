@@ -45,10 +45,12 @@ public interface ClientSessionPersistence {
      * @param client                The client ID
      * @param cleanStart            clean start or use previous session
      * @param sessionExpiryInterval The session expiry interval for this client
+     * @param queueLimit for this session specifically
      * @return The state of incomplete outgoing message transmissions for this client
      */
     @NotNull
-    ListenableFuture<Void> clientConnected(final @NotNull String client, final boolean cleanStart, final long sessionExpiryInterval, @Nullable MqttWillPublish willPublish);
+    ListenableFuture<Void> clientConnected(final @NotNull String client, final boolean cleanStart, final long sessionExpiryInterval,
+                                           @Nullable MqttWillPublish willPublish, @Nullable Long queueLimit);
 
     /**
      * Close the persistence.

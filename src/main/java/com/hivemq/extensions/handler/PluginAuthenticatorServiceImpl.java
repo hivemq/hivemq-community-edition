@@ -303,7 +303,8 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     private @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
         final Integer receiveMax = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
         Preconditions.checkNotNull(receiveMax, "Receive maximum must not be null here");
-        return new ModifiableClientSettingsImpl(receiveMax);
+        final Long queueSizeMaximum = channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+        return new ModifiableClientSettingsImpl(receiveMax, queueSizeMaximum);
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {

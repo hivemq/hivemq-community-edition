@@ -49,7 +49,8 @@ public class ReAuthOutputTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        authTaskOutput = new ReAuthOutput(asyncer, true, new ModifiableDefaultPermissionsImpl(), new ModifiableClientSettingsImpl(10), 30);
+        authTaskOutput = new ReAuthOutput(asyncer, true, new ModifiableDefaultPermissionsImpl(),
+                new ModifiableClientSettingsImpl(10, null), 30);
     }
 
     @Test(timeout = 5000)

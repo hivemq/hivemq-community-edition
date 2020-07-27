@@ -33,38 +33,31 @@ public interface ClientQueuePersistence {
      * Add a publish to the queue.
      * The publish will be queued without a packet ID
      *
-     * @param queueId of the queue
-     * @param shared  is true if the client is actually a shared subscription
-     * @param publish to add
+     * @param queueId    of the queue
+     * @param shared     is true if the client is actually a shared subscription
+     * @param publish    to add
+     * @param retained   true if this message was sent in response to a subscribe.
+     *                   It is not necessarily the same as the retain flag of the publish.
+     * @param queueLimit of the client session or the default configuration.
      */
     @NotNull
-    ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull PUBLISH publish);
-
-    /**
-     * Add a publish to the queue.
-     * The publish will be queued without a packet ID
-     *
-     * @param queueId  of the queue
-     * @param shared   is true if the client is actually a shared subscription
-     * @param publish  to add
-     * @param retained true if this message was sent in response to a subscribe.
-     *                 It is not necessarily the same as the retain flag of the publish.
-     */
-    @NotNull
-    ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull PUBLISH publish, boolean retained);
+    ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull PUBLISH publish, boolean retained,
+                               long queueLimit);
 
     /**
      * Add a list of publishes to the queue.
      * The publishes will be queued without packet IDs
      *
-     * @param queueId   of the queue
-     * @param shared    is true if the client is actually a shared subscription
-     * @param publishes to add
-     * @param retained  true if this message was sent in response to a subscribe.
-     *                  It is not necessarily the same as the retain flag of the publishes.
+     * @param queueId    of the queue
+     * @param shared     is true if the client is actually a shared subscription
+     * @param publishes  to add
+     * @param retained   true if this message was sent in response to a subscribe.
+     *                   It is not necessarily the same as the retain flag of the publishes.
+     * @param queueLimit of the client session or the default configuration.
      */
     @NotNull
-    ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull List<PUBLISH> publishes, boolean retained);
+    ListenableFuture<Void> add(@NotNull String queueId, boolean shared, @NotNull List<PUBLISH> publishes, boolean retained,
+                               final long queueLimit);
 
     /**
      * Read publishes that are not yet in-flight.
