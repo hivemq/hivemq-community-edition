@@ -49,7 +49,8 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
             final @Nullable String responseTopic,
             final @Nullable ByteBuffer correlationData,
             final @NotNull UserPropertiesImpl userProperties,
-            final long willDelay) {
+            final long willDelay,
+            final long timestamp) {
 
         super(
                 topic,
@@ -64,11 +65,12 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
                 responseTopic,
                 correlationData,
                 ImmutableIntArray.of(),
-                userProperties);
+                userProperties,
+                timestamp);
         this.willDelay = willDelay;
     }
 
-    public WillPublishPacketImpl(final @NotNull MqttWillPublish willPublish) {
+    public WillPublishPacketImpl(final @NotNull MqttWillPublish willPublish, final long timestamp) {
         this(
                 willPublish.getTopic(),
                 willPublish.getQos().toQos(),
@@ -81,7 +83,8 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
                 willPublish.getResponseTopic(),
                 willPublish.getCorrelationData() == null ? null : ByteBuffer.wrap(willPublish.getCorrelationData()),
                 UserPropertiesImpl.of(willPublish.getUserProperties().asList()),
-                willPublish.getDelayInterval());
+                willPublish.getDelayInterval(),
+                timestamp);
     }
 
     @Override

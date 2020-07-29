@@ -94,7 +94,7 @@ public class ConnectPacketImpl implements ConnectPacket {
         this.userProperties = userProperties;
     }
 
-    public ConnectPacketImpl(final @NotNull CONNECT connect) {
+    public ConnectPacketImpl(final @NotNull CONNECT connect, final long timestamp) {
         this(
                 MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()),
                 connect.getClientIdentifier(),
@@ -110,7 +110,7 @@ public class ConnectPacketImpl implements ConnectPacket {
                 (connect.getPassword() == null) ? null : ByteBuffer.wrap(connect.getPassword()),
                 connect.getAuthMethod(),
                 (connect.getAuthData() == null) ? null : ByteBuffer.wrap(connect.getAuthData()),
-                (connect.getWillPublish() == null) ? null : new WillPublishPacketImpl(connect.getWillPublish()),
+                (connect.getWillPublish() == null) ? null : new WillPublishPacketImpl(connect.getWillPublish(), timestamp),
                 UserPropertiesImpl.of(connect.getUserProperties().asList()));
     }
 

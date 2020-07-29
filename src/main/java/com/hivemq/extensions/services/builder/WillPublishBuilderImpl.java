@@ -274,6 +274,6 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
 
         return new WillPublishPacketImpl(topic, qos, payload, retain, messageExpiryInterval, payloadFormatIndicator,
                 contentType, responseTopic, correlationData, UserPropertiesImpl.of(userPropertyBuilder.build()),
-                willDelay);
+                willDelay, System.currentTimeMillis());
     }
 }

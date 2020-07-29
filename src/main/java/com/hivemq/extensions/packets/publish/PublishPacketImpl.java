@@ -51,6 +51,7 @@ public class PublishPacketImpl implements PublishPacket {
     final @Nullable ByteBuffer correlationData;
     final @NotNull ImmutableIntArray subscriptionIdentifiers;
     final @NotNull UserPropertiesImpl userProperties;
+    final long timestamp;
 
     public PublishPacketImpl(
             final @NotNull String topic,
@@ -65,7 +66,8 @@ public class PublishPacketImpl implements PublishPacket {
             final @Nullable String responseTopic,
             final @Nullable ByteBuffer correlationData,
             final @NotNull ImmutableIntArray subscriptionIdentifiers,
-            final @NotNull UserPropertiesImpl userProperties) {
+            final @NotNull UserPropertiesImpl userProperties,
+            final long timestamp) {
 
         this.topic = topic;
         this.qos = qos;
@@ -80,6 +82,7 @@ public class PublishPacketImpl implements PublishPacket {
         this.correlationData = correlationData;
         this.subscriptionIdentifiers = subscriptionIdentifiers;
         this.userProperties = userProperties;
+        this.timestamp = timestamp;
     }
 
     public PublishPacketImpl(final @NotNull PUBLISH publish) {
@@ -98,7 +101,8 @@ public class PublishPacketImpl implements PublishPacket {
                 publish.getCorrelationData() == null ? null : ByteBuffer.wrap(publish.getCorrelationData()),
                 (publish.getSubscriptionIdentifiers() == null) ? ImmutableIntArray.of() :
                         publish.getSubscriptionIdentifiers(),
-                UserPropertiesImpl.of(publish.getUserProperties().asList()));
+                UserPropertiesImpl.of(publish.getUserProperties().asList()),
+                publish.getTimestamp());
     }
 
     @Override
@@ -171,6 +175,11 @@ public class PublishPacketImpl implements PublishPacket {
     }
 
     @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
     public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
@@ -192,7 +201,8 @@ public class PublishPacketImpl implements PublishPacket {
                 Objects.equals(responseTopic, that.responseTopic) &&
                 Objects.equals(correlationData, that.correlationData) &&
                 subscriptionIdentifiers.equals(that.subscriptionIdentifiers) &&
-                userProperties.equals(that.userProperties);
+                userProperties.equals(that.userProperties) &&
+                timestamp == that.timestamp;
     }
 
     protected boolean canEqual(final @Nullable Object o) {
@@ -203,6 +213,6 @@ public class PublishPacketImpl implements PublishPacket {
     public int hashCode() {
         return Objects.hash(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties);
+                userProperties, timestamp);
     }
 }

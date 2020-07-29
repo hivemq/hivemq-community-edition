@@ -410,6 +410,11 @@ public class WillPublishBuilderImplTest {
                     new MqttUserProperty("name", "value2"),
                     new MqttUserProperty("name2", "val")));
         }
+
+        @Override
+        public long getTimestamp() {
+            return System.currentTimeMillis();
+        }
     }
 
     private class TestWillPublishPacket implements WillPublishPacket {
@@ -482,6 +487,11 @@ public class WillPublishBuilderImplTest {
         @Override
         public UserProperties getUserProperties() {
             return null;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return System.currentTimeMillis();
         }
     }
 

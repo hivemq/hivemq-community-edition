@@ -70,8 +70,8 @@ public class ConnectPacketImplTest {
                 .withClientIdentifier("client")
                 .build();
 
-        connectPacket = new ConnectPacketImpl(connect);
-        emptyPacket = new ConnectPacketImpl(empty);
+        connectPacket = new ConnectPacketImpl(connect, System.currentTimeMillis());
+        emptyPacket = new ConnectPacketImpl(empty, System.currentTimeMillis());
     }
 
     @Test(timeout = 5000)

@@ -375,6 +375,11 @@ public class RetainedPublishBuilderImplTest {
                     new MqttUserProperty("name", "value2"),
                     new MqttUserProperty("name2", "val")));
         }
+
+        @Override
+        public long getTimestamp() {
+            return System.currentTimeMillis();
+        }
     }
 
     private class TestPublish implements Publish {

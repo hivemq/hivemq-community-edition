@@ -58,6 +58,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     @Nullable ByteBuffer correlationData;
     final @NotNull ImmutableIntArray subscriptionIdentifiers;
     final @NotNull ModifiableUserPropertiesImpl userProperties;
+    final long timestamp;
 
     final @NotNull FullConfigurationService configurationService;
     boolean modified = false;
@@ -80,6 +81,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.subscriptionIdentifiers = packet.subscriptionIdentifiers;
         this.userProperties = new ModifiableUserPropertiesImpl(
                 packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        this.timestamp = packet.timestamp;
 
         this.configurationService = configurationService;
     }
@@ -259,6 +261,11 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         return userProperties;
     }
 
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public boolean isModified() {
         return modified || userProperties.isModified();
     }
@@ -266,7 +273,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     public @NotNull PublishPacketImpl copy() {
         return new PublishPacketImpl(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties.copy());
+                userProperties.copy(), timestamp);
     }
 
     public @NotNull ModifiablePublishPacketImpl update(final @NotNull PublishPacketImpl packet) {
@@ -295,7 +302,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
                 Objects.equals(responseTopic, that.responseTopic) &&
                 Objects.equals(correlationData, that.correlationData) &&
                 subscriptionIdentifiers.equals(that.subscriptionIdentifiers) &&
-                userProperties.equals(that.userProperties);
+                userProperties.equals(that.userProperties) &&
+                timestamp == that.timestamp;
     }
 
     protected boolean canEqual(final @Nullable Object o) {
@@ -306,6 +314,6 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     public int hashCode() {
         return Objects.hash(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties);
+                userProperties, timestamp);
     }
 }

@@ -34,8 +34,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class MqttConnectDecoderTest {
@@ -108,6 +110,7 @@ public class MqttConnectDecoderTest {
         final ChannelFuture cf = mock(ChannelFuture.class);
         when(channel.writeAndFlush(any())).thenReturn(cf);
         when(channel.attr(ChannelAttributes.MQTT_VERSION)).thenReturn(protocolVersionAttribute);
+        when(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP)).thenReturn(new TestChannelAttribute<>(null));
 
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 5});
 
@@ -118,6 +121,7 @@ public class MqttConnectDecoderTest {
         }
 
         verify(protocolVersionAttribute).set(ProtocolVersion.MQTTv5);
+        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
 
     }
 
@@ -127,12 +131,14 @@ public class MqttConnectDecoderTest {
         final ChannelFuture cf = mock(ChannelFuture.class);
         when(channel.writeAndFlush(any())).thenReturn(cf);
         when(channel.attr(ChannelAttributes.MQTT_VERSION)).thenReturn(protocolVersionAttribute);
+        when(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP)).thenReturn(new TestChannelAttribute<>(null));
 
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 4});
 
         decoder.decode(channel, buf, fixedHeader);
 
         verify(protocolVersionAttribute).set(ProtocolVersion.MQTTv3_1_1);
+        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
 
     }
 
@@ -142,12 +148,14 @@ public class MqttConnectDecoderTest {
         final ChannelFuture cf = mock(ChannelFuture.class);
         when(channel.writeAndFlush(any())).thenReturn(cf);
         when(channel.attr(ChannelAttributes.MQTT_VERSION)).thenReturn(protocolVersionAttribute);
+        when(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP)).thenReturn(new TestChannelAttribute<>(null));
 
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 6, 'M', 'Q', 'T', 'T', 3, 1});
 
         decoder.decode(channel, buf, fixedHeader);
 
         verify(protocolVersionAttribute).set(ProtocolVersion.MQTTv3_1);
+        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
 
     }
 

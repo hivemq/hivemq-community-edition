@@ -57,6 +57,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     private @Nullable ByteBuffer correlationData;
     private @NotNull ImmutableIntArray subscriptionIdentifiers;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
+    private final long timestamp;
 
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
@@ -79,6 +80,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         subscriptionIdentifiers = packet.subscriptionIdentifiers;
         userProperties = new ModifiableUserPropertiesImpl(
                 packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        timestamp = packet.timestamp;
 
         this.configurationService = configurationService;
     }
@@ -255,6 +257,11 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
         return userProperties;
     }
 
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public boolean isModified() {
         return modified || userProperties.isModified();
     }
@@ -262,7 +269,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     public @NotNull PublishPacketImpl copy() {
         return new PublishPacketImpl(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties.copy());
+                userProperties.copy(), timestamp);
     }
 
     public @NotNull ModifiableOutboundPublishImpl update(final @NotNull PublishPacketImpl packet) {

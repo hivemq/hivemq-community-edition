@@ -98,6 +98,11 @@ public class ChannelAttributes {
 
 
     /**
+     * The time at which the clients CONNECT message was received by the broker.
+     */
+    public static final AttributeKey<Long> CONNECT_RECEIVED_TIMESTAMP = AttributeKey.valueOf("Connect.Received.Timestamp");
+
+    /**
      * This key contains the actual listener a client connected to
      */
     public static final AttributeKey<Listener> LISTENER = AttributeKey.valueOf("Listener");

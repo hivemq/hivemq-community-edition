@@ -42,8 +42,15 @@ public class AuthConnectInputTest {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        embeddedChannel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).set(12345L);
 
-        connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").withUsername("user").withPassword("password".getBytes(Charset.defaultCharset())).withAuthMethod("method").withAuthData(new byte[]{'a', 'b', 'c'}).build();
+        connect = new CONNECT.Mqtt5Builder()
+                .withClientIdentifier("client")
+                .withUsername("user")
+                .withPassword("password".getBytes(Charset.defaultCharset()))
+                .withAuthMethod("method")
+                .withAuthData(new byte[]{'a', 'b', 'c'})
+                .build();
         taskInput = new AuthConnectInput(connect, embeddedChannel);
     }
 

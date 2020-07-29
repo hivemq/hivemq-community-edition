@@ -1177,7 +1177,7 @@ public class ModifiableConnectPacketImplTest {
 
         final WillPublishPacketImpl willPublishPacket = new WillPublishPacketImpl(
                 "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                UserPropertiesImpl.of(ImmutableList.of()), 0);
+                UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L);
         modifiablePacket.setWillPublish(willPublishPacket);
 
         assertTrue(modifiablePacket.isModified());
@@ -1205,7 +1205,7 @@ public class ModifiableConnectPacketImplTest {
                 null,
                 new WillPublishPacketImpl(
                         "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                        UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableConnectPacketImpl modifiablePacket =
                 new ModifiableConnectPacketImpl(packet, configurationService);
@@ -1214,7 +1214,7 @@ public class ModifiableConnectPacketImplTest {
 
         final WillPublishPacketImpl willPublishPacket = new WillPublishPacketImpl(
                 "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                UserPropertiesImpl.of(ImmutableList.of()), 0);
+                UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L);
         modifiablePacket.setWillPublish(willPublishPacket);
 
         assertFalse(modifiablePacket.isModified());
@@ -1242,7 +1242,7 @@ public class ModifiableConnectPacketImplTest {
                 null,
                 new WillPublishPacketImpl(
                         "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                        UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableConnectPacketImpl modifiablePacket =
                 new ModifiableConnectPacketImpl(packet, configurationService);
@@ -1274,7 +1274,7 @@ public class ModifiableConnectPacketImplTest {
                 null,
                 new WillPublishPacketImpl(
                         "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                        UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L),
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableConnectPacketImpl modifiablePacket =
                 new ModifiableConnectPacketImpl(packet, configurationService);
@@ -1382,7 +1382,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setAuthenticationData(ByteBuffer.wrap("authData".getBytes()));
         modifiablePacket.setWillPublish(new WillPublishPacketImpl(
                 "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                UserPropertiesImpl.of(ImmutableList.of()), 0));
+                UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L));
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final ConnectPacketImpl copy = modifiablePacket.copy();
 
@@ -1403,7 +1403,7 @@ public class ModifiableConnectPacketImplTest {
                 ByteBuffer.wrap("authData".getBytes()),
                 new WillPublishPacketImpl(
                         "topic", Qos.AT_LEAST_ONCE, null, false, 10, null, null, null, null,
-                        UserPropertiesImpl.of(ImmutableList.of()), 0),
+                        UserPropertiesImpl.of(ImmutableList.of()), 0, 1234L),
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }

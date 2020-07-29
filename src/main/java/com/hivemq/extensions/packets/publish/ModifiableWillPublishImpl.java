@@ -63,7 +63,7 @@ public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl imple
     @Override
     public @NotNull WillPublishPacketImpl copy() {
         return new WillPublishPacketImpl(topic, qos, payload, retain, messageExpiryInterval, payloadFormatIndicator,
-                contentType, responseTopic, correlationData, userProperties.copy(), willDelay);
+                contentType, responseTopic, correlationData, userProperties.copy(), willDelay, timestamp);
     }
 
     @Override
