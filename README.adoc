@@ -1,6 +1,10 @@
-= HiveMQ Community Edition
+++++
+<p align="center">
+  <img src="https://www.hivemq.com/img/svg/hivemq-ce.svg" width="500">
+</p>
+++++
 
-image:https://www.hivemq.com/img/svg/hivemq-ce.svg[HiveMQ Community,500,align="center"]
+= HiveMQ Community Edition
 
 image:https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded"]
 image:https://jitpack.io/v/hivemq/hivemq-community-edition.svg["JitPack", link="https://jitpack.io/#hivemq/hivemq-community-edition"]
