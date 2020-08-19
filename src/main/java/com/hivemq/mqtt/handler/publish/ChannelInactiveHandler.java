@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.handler.publish;
 
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -34,6 +35,7 @@ public class ChannelInactiveHandler extends ChannelDuplexHandler {
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
 
+        System.err.println("Client disconnected: " + ctx.channel().attr(ChannelAttributes.CLIENT_ID).get());
         for (final ChannelInactiveCallback callback : callbacks.values()) {
             callback.channelInactive();
         }

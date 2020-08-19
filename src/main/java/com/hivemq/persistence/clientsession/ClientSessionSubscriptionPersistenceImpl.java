@@ -118,15 +118,17 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 return Futures.immediateFuture(null);
             }
 
-            final ListenableFuture<Void> invalidateCacheFuture;
             final boolean subscriberExisted;
             //parse topic for shared flag
             final SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+            final ListenableFuture<Void> persistFuture;
             if (sharedSubscription == null) {
                 //not a shared subscription
                 subscriberExisted = topicTree.addTopic(client, topic, SubscriptionFlags.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
-                //not needed for non shared subscriptions
-                invalidateCacheFuture = Futures.immediateFuture(null);
+                persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+                    localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
+                    return null;
+                });
             } else {
                 if (sharedSubscription.getTopicFilter().isEmpty()) {
                     disconnectSharedSubscriberWithEmptyTopic(client);
@@ -145,23 +147,17 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
 
                 final Subscription subscription = new Subscription(sharedTopic, SubscriptionFlags.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
 
-                invalidateSharedSubscriptionCacheAndPoll(client, ImmutableSet.of(subscription));
+                persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+                    localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
+                    invalidateSharedSubscriptionCacheAndPoll(client, ImmutableSet.of(subscription));
+                    return null;
+                });
             }
-
-            final ListenableFuture<Void> persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
-                localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
-                return null;
-            });
 
             //set future result when local persistence future and topic tree future return;
-            if (sharedSubscription == null) {
-                return Futures.whenAllComplete(persistFuture).call(() -> new SubscriptionResult(topic, subscriberExisted, null),
-                        MoreExecutors.directExecutor());
-            } else {
-                return Futures.whenAllComplete(persistFuture)
-                        .call(() -> new SubscriptionResult(new Topic(sharedSubscription.getTopicFilter(), topic.getQoS()), subscriberExisted, sharedSubscription.getShareName()),
-                                MoreExecutors.directExecutor());
-            }
+            return Futures.whenAllComplete(persistFuture)
+                    .call(() -> new SubscriptionResult(topic, subscriberExisted, sharedSubscription == null ? null : sharedSubscription.getShareName()),
+                    MoreExecutors.directExecutor());
 
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);

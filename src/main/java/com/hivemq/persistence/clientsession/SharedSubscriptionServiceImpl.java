@@ -139,12 +139,9 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
             return ImmutableSet.of();
         }
         try {
-            return sharedSubscriberCache.get(sharedSubscription, new Callable<ImmutableSet<SubscriberWithQoS>>() {
-                @Override
-                public ImmutableSet<SubscriberWithQoS> call() throws Exception {
-                    final SharedSubscription split = splitTopicAndGroup(sharedSubscription);
-                    return topicTree.getSharedSubscriber(split.getShareName(), split.getTopicFilter());
-                }
+            return sharedSubscriberCache.get(sharedSubscription, () -> {
+                final SharedSubscription split = splitTopicAndGroup(sharedSubscription);
+                return topicTree.getSharedSubscriber(split.getShareName(), split.getTopicFilter());
             });
         } catch (final ExecutionException e) {
             return ImmutableSet.of();

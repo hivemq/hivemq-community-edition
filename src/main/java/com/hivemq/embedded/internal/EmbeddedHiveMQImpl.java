@@ -28,6 +28,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -136,6 +137,12 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 log.info("Starting EmbeddedHiveMQ.");
                 try {
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+
+                    if(configurationService.persistenceConfigurationService().getMode().equals(PersistenceConfigurationService.PersistenceMode.FILE)){
+                        log.info("Starting with file persistence mode.");
+                    } else {
+                        log.info("Starting with in-memory persistence mode.");
+                    }
 
                     bootstrapInjector();
                     final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
