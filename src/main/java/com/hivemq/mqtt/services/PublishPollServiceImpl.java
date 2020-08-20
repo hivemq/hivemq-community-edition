@@ -125,6 +125,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 final ImmutableSet<Topic> topics = sharedSubscriptionService.getSharedSubscriptions(client);
                 if (topics.isEmpty()) {
                     channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).setIfAbsent(true);
+                    return;
                 }
                 for (final Topic topic : topics) {
                     final String sharedSubscriptions = sharedSubscriptionService.removePrefix(topic.getTopic());
@@ -219,7 +220,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
                 if (messages.isEmpty()) {
                     channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).set(true);
-                    pollMessages(client, channel); // No more inflight messages
+                    channel.eventLoop().submit(() -> pollMessages(client, channel)); // No more inflight messages
                     return;
                 }
 
@@ -316,6 +317,9 @@ public class PublishPollServiceImpl implements PublishPollService {
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(@NotNull final ImmutableList<PUBLISH> publishes) {
+                if(publishes.isEmpty()){
+                    return;
+                }
                 final MessageIDPool messageIDPool = messageIDPools.forClient(client);
                 final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
                 for (PUBLISH publish : publishes) {
