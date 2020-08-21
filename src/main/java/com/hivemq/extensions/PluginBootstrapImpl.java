@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Christoph Schäbel
@@ -62,8 +63,9 @@ public class PluginBootstrapImpl implements PluginBootstrap {
         this.authenticators = authenticators;
     }
 
+    @NotNull
     @Override
-    public void startPluginSystem() {
+    public CompletableFuture<Void> startPluginSystem() {
 
         log.info("Starting HiveMQ extension system.");
 
@@ -75,7 +77,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
                 extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
 
         //start them if needed
-        lifecycleHandler.handlePluginEvents(hiveMQPluginEvents)
+        return lifecycleHandler.handlePluginEvents(hiveMQPluginEvents)
                 .thenAccept(((v) -> authenticators.checkAuthenticationSafetyAndLifeness()));
     }
 
