@@ -56,7 +56,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         this.qos = qos;
         this.flags = flags;
         this.sharedName = sharedName;
-        this.subscriptionIdentifier = ImmutableIntArray.of();
+        this.subscriptionIdentifier = ImmutableIntArray.of(subscriptionIdentifier);
         this.topicFilter = topicFilter;
     }
 
