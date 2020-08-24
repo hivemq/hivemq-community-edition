@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

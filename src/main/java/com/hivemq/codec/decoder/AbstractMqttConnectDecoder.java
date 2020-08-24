@@ -25,6 +25,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -65,8 +66,10 @@ public abstract class AbstractMqttConnectDecoder extends AbstractMqttDecoder<CON
      * @param buf          the ByteBuf of the encoded will message
      * @param willQoS      the quality of service of the will message
      * @param isWillRetain the retain flag of the will message
-     * @param log          the static logger
      * @param eventLog     the event log
+     * @param hiveMQId     the HiveMQ identifier
+     *
+     *
      * @return a {@link MqttWillPublish} if valid, else {@code null}.
      */
     protected MqttWillPublish readMqtt3WillPublish(final Channel channel, final ByteBuf buf, final int willQoS, final boolean isWillRetain,
