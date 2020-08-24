@@ -19,6 +19,7 @@ import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.information.client.ClientIds;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -80,7 +81,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new ClusterId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
 
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);

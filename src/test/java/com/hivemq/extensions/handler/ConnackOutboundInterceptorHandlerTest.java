@@ -60,7 +60,6 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -128,10 +127,17 @@ public class ConnackOutboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_ID).set(null);
 
-        channel.writeOutbound(testConnack());
+        final CONNACK initial = testConnack();
+        channel.writeOutbound(initial);
         channel.runPendingTasks();
+        CONNACK connack = channel.readOutbound();
+        while (connack == null) {
+            channel.runPendingTasks();
+            channel.runScheduledPendingTasks();
+            connack = channel.readOutbound();
+        }
 
-        assertNull(channel.readOutbound());
+        assertEquals(initial, connack);
     }
 
     @Test(timeout = 5000)

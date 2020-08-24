@@ -66,7 +66,7 @@ public class Mqtt31ConnectDecoderTest {
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new ClusterId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 

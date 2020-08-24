@@ -73,7 +73,7 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
         decoder = new Mqtt311ConnectDecoder(new MqttConnacker(new MqttConnackSendUtil(eventLog)),
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new ClusterId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 

@@ -68,6 +68,7 @@ public class Mqtt311ConnectDecoderTest {
     private Mqtt311ConnectDecoder decoder;
 
     private static final byte fixedHeader = 0b0001_0000;
+    private ClusterId clusterId;
 
     @Before
     public void setUp() throws Exception {
@@ -412,8 +413,8 @@ public class Mqtt311ConnectDecoderTest {
 
         final CONNECT connectPacket = decoder.decode(channel, buf, fixedHeader);
 
-        assertTrue(connectPacket.getClientIdentifier().length() > 0);
-        assertEquals("gen-", connectPacket.getClientIdentifier().substring(0, 4));
+        assertTrue(connectPacket.getClientIdentifier().length() > 9);
+        assertEquals("hmq_" + clusterId.get(), connectPacket.getClientIdentifier().substring(0, 9));
     }
 
     @Test

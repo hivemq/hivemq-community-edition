@@ -17,6 +17,8 @@ package com.hivemq.codec.decoder;
 
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -40,13 +42,17 @@ public abstract class AbstractMqttConnectDecoder extends AbstractMqttDecoder<CON
     protected static final int DISCONNECTED = -1;
 
     protected final long maxSessionExpiryInterval;
+    protected final boolean allowAssignedClientId;
+    protected final @NotNull ClientIds clientIds;
 
-    protected final MqttConnacker mqttConnacker;
+    protected final @NotNull MqttConnacker mqttConnacker;
 
-    public AbstractMqttConnectDecoder(final MqttConnacker mqttConnacker, final MqttServerDisconnector disconnector, final FullConfigurationService fullMqttConfigurationService) {
+    public AbstractMqttConnectDecoder(final @NotNull MqttConnacker mqttConnacker, final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullMqttConfigurationService, final @NotNull ClientIds clientIds) {
         super(disconnector, fullMqttConfigurationService);
         this.mqttConnacker = mqttConnacker;
         this.maxSessionExpiryInterval = fullMqttConfigurationService.mqttConfiguration().maxSessionExpiryInterval();
+        this.allowAssignedClientId = fullMqttConfigurationService.securityConfiguration().allowServerAssignedClientId();
+        this.clientIds = clientIds;
     }
 
     /**
@@ -72,6 +78,7 @@ public abstract class AbstractMqttConnectDecoder extends AbstractMqttDecoder<CON
      *
      * @return a {@link MqttWillPublish} if valid, else {@code null}.
      */
+    @Nullable
     protected MqttWillPublish readMqtt3WillPublish(final Channel channel, final ByteBuf buf, final int willQoS, final boolean isWillRetain,
                                                    final EventLog eventLog, final HivemqId hiveMQId) {
 

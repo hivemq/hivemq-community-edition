@@ -55,18 +55,14 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     private static final String PROTOCOL_NAME = "MQTT";
     private static final byte VARIABLE_HEADER_LENGTH = 10;
     private final HivemqId hiveMQId;
-    private final ClientIds clientIds;
-    private final boolean allowAssignedClientId;
 
     public Mqtt5ConnectDecoder(final MqttConnacker mqttConnacker,
                                final Mqtt5ServerDisconnector disconnector,
                                final HivemqId hiveMQId,
                                final ClientIds clientIds,
                                final FullConfigurationService fullMqttConfigurationService) {
-        super(mqttConnacker, disconnector, fullMqttConfigurationService);
+        super(mqttConnacker, disconnector, fullMqttConfigurationService, clientIds);
         this.hiveMQId = hiveMQId;
-        this.clientIds = clientIds;
-        this.allowAssignedClientId = fullMqttConfigurationService.securityConfiguration().allowServerAssignedClientId();
     }
 
     @Override
@@ -158,6 +154,8 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(false);
         }
 
+        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
+
         final MqttWillPublish mqttWillPublish;
         if (will) {
             mqttWillPublish = decodeAndValidateWill(channel, buf, willQos, willRetain);
@@ -176,7 +174,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
         channel.attr(ChannelAttributes.CLEAN_START).set(cleanStart);
 
         return connectBuilder
