@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt311;
 
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -24,6 +25,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -70,7 +72,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new ClientIds(new ClusterId()), new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 
@@ -307,8 +309,8 @@ public class Mqtt311ConnectDecoderValidationsTest {
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new ClientIds(new ClusterId()), fullConfigurationService,
-                new ClusterId());
+                new ClientIds(new HivemqId()), fullConfigurationService,
+                new HivemqId());
 
 
         final ChannelFuture cf = mock(ChannelFuture.class);

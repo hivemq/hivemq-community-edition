@@ -27,6 +27,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -68,7 +69,7 @@ public class Mqtt311ConnectDecoderTest {
     private Mqtt311ConnectDecoder decoder;
 
     private static final byte fixedHeader = 0b0001_0000;
-    private ClusterId clusterId;
+    private HivemqId hiveMQId;
 
     @Before
     public void setUp() throws Exception {
@@ -78,11 +79,12 @@ public class Mqtt311ConnectDecoderTest {
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);
 
+        hiveMQId = new HivemqId();
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
-                new HivemqId());
+                new ClientIds(hiveMQId), new TestConfigurationBootstrap().getFullConfigurationService(),
+                hiveMQId);
     }
 
     @Test
@@ -414,7 +416,7 @@ public class Mqtt311ConnectDecoderTest {
         final CONNECT connectPacket = decoder.decode(channel, buf, fixedHeader);
 
         assertTrue(connectPacket.getClientIdentifier().length() > 9);
-        assertEquals("hmq_" + clusterId.get(), connectPacket.getClientIdentifier().substring(0, 9));
+        assertEquals("hmq_" + hiveMQId.get(), connectPacket.getClientIdentifier().substring(0, 9));
     }
 
     @Test
