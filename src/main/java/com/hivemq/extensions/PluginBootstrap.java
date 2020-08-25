@@ -15,6 +15,10 @@
  */
 package com.hivemq.extensions;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
+import java.util.concurrent.CompletableFuture;
+
 /**
  * @author Christoph Schäbel
  * @author Georg Held
@@ -28,7 +32,7 @@ public interface PluginBootstrap {
      * <p>
      * This method runs asynchronously and does NOT block until the extensions are started.
      */
-    void startPluginSystem();
+    @NotNull CompletableFuture<Void> startPluginSystem();
 
     /**
      * Stops all currently enabled HiveMQ extensions and the extension system.
