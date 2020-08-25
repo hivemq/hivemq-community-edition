@@ -19,6 +19,8 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -29,6 +31,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -53,19 +56,20 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
     public static final String PROTOCOL_NAME = "MQIsdp";
 
-    public final EventLog eventLog;
-    private final HivemqId hiveMQId;
+    public final @NotNull EventLog eventLog;
+    private final @NotNull HivemqId hiveMQId;
 
-    public Mqtt31ConnectDecoder(final MqttConnacker connacker, final Mqtt3ServerDisconnector disconnector,
-                                final EventLog eventLog, final FullConfigurationService fullConfigurationService,
-                                final HivemqId hiveMQId) {
-        super(connacker, disconnector, fullConfigurationService);
+    public Mqtt31ConnectDecoder(final @NotNull MqttConnacker connacker, final @NotNull Mqtt3ServerDisconnector disconnector,
+                                final @NotNull EventLog eventLog, final @NotNull ClientIds clientIds, final @NotNull FullConfigurationService fullConfigurationService,
+                                final @NotNull HivemqId hiveMQId) {
+        super(connacker, disconnector, fullConfigurationService, clientIds);
         this.eventLog = eventLog;
         this.hiveMQId = hiveMQId;
     }
 
+    @Nullable
     @Override
-    public CONNECT decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public CONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (buf.readableBytes() < 12) {
             if (log.isDebugEnabled()) {
@@ -159,6 +163,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         } else {
             clientId = Strings.getPrefixedString(buf, utf8StringLength);
         }
+        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
 
         final MqttWillPublish willPublish;
 
@@ -196,7 +201,6 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
             password = null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
         channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(keepAlive);
         channel.attr(ChannelAttributes.CLEAN_START).set(isCleanSessionFlag);
 

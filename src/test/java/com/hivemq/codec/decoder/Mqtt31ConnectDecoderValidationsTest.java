@@ -27,6 +27,7 @@ import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -80,7 +81,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
 
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
