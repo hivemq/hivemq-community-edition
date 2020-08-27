@@ -52,11 +52,12 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
     public SubscriberWithIdentifiers(final @NotNull String subscriber, final int qos, final byte flags, final @Nullable String sharedName,
                                      final @NotNull ImmutableList<Integer> subscriptionIdentifier, final @Nullable String topicFilter) {
         checkNotNull(subscriber, "Subscriber must not be null");
+        checkNotNull(subscriptionIdentifier, "Subscriber Identifiers must not be null")
         this.subscriber = subscriber;
         this.qos = qos;
         this.flags = flags;
         this.sharedName = sharedName;
-        this.subscriptionIdentifier = ImmutableIntArray.of(subscriptionIdentifier);
+        this.subscriptionIdentifier = (subscriptionIdentifier == null) ? ImmutableIntArray.of():ImmutableIntArray.copyOf(subscriptionIdentifier);
         this.topicFilter = topicFilter;
     }
 
