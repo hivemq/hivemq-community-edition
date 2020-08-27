@@ -22,6 +22,7 @@ import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
+import com.hivemq.util.ClientIds;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -73,7 +74,7 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
         decoder = new Mqtt311ConnectDecoder(new MqttConnacker(new MqttConnackSendUtil(eventLog)),
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 

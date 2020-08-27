@@ -37,6 +37,7 @@ import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.statistics.UsageStatistics;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.TemporaryFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.configuration.service.PersistenceConfigurationService.PersistenceMode;
@@ -79,11 +81,13 @@ public class HiveMQServer {
 
         payloadPersistence.init();
 
-        pluginBootstrap.startPluginSystem();
+        final CompletableFuture<Void> pluginStartFuture = pluginBootstrap.startPluginSystem();
+        pluginStartFuture.get();
 
         final ListenableFuture<List<ListenerStartupInformation>> startFuture = nettyBootstrap.bootstrapServer();
 
         final List<ListenerStartupInformation> startupInformation = startFuture.get();
+        Checkpoints.checkpoint("listener-started");
 
         new StartupListenerVerifier(startupInformation).verifyAndPrint();
 

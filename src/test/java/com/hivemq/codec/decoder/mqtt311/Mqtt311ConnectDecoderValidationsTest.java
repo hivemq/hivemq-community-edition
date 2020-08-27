@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt311;
 
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -24,6 +25,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -70,7 +72,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
                 eventLog,
-                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 
@@ -271,7 +273,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
     }
 
     @Test
-    public void test_invalid_persistent_session_but_no_user_name() {
+    public void test_invalid_persistent_session_but_no_client_id() {
 
         final ChannelFuture cf = mock(ChannelFuture.class);
 
@@ -282,6 +284,44 @@ public class Mqtt311ConnectDecoderValidationsTest {
         buffer.writeBytes("MQTT".getBytes(UTF_8));
         buffer.writeByte(4);
         buffer.writeByte(0b0000_0000);
+        //keepAlive
+        buffer.writeShort(14);
+        //payload length
+        buffer.writeShort(0);
+
+        assertNull(decoder.decode(channel, buffer, fixedHeader));
+
+        final ArgumentCaptor<CONNACK> captor = ArgumentCaptor.forClass(CONNACK.class);
+
+        verify(channel).writeAndFlush(captor.capture());
+
+        verify(cf).addListener(eq(ChannelFutureListener.CLOSE));
+
+        assertEquals(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED, captor.getValue().getReturnCode());
+    }
+
+    @Test
+    public void test_invalid_clean_session_but_no_client_id_not_allowed() {
+
+        final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        fullConfigurationService.securityConfiguration().setAllowServerAssignedClientId(false);
+
+        decoder = new Mqtt311ConnectDecoder(connacker,
+                new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
+                eventLog,
+                new ClientIds(new HivemqId()), fullConfigurationService,
+                new HivemqId());
+
+
+        final ChannelFuture cf = mock(ChannelFuture.class);
+
+        when(channel.writeAndFlush(any())).thenReturn(cf);
+
+        final ByteBuf buffer = Unpooled.buffer(10);
+        buffer.writeBytes(new byte[]{0, 4});
+        buffer.writeBytes("MQTT".getBytes(UTF_8));
+        buffer.writeByte(4);
+        buffer.writeByte(0b0000_0010);
         //keepAlive
         buffer.writeShort(14);
         //payload length

@@ -19,6 +19,8 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -29,11 +31,11 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,18 +55,23 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
     private static final Logger log = LoggerFactory.getLogger(Mqtt311ConnectDecoder.class);
 
     public static final String PROTOCOL_NAME = "MQTT";
-    private final EventLog eventLog;
-    private final HivemqId hiveMQId;
+    private final @NotNull EventLog eventLog;
+    private final @NotNull HivemqId hiveMQId;
 
-    public Mqtt311ConnectDecoder(final MqttConnacker connacker, final Mqtt3ServerDisconnector disconnector, final EventLog eventLog,
-                                 final FullConfigurationService fullConfigurationService, final HivemqId hiveMQId) {
-        super(connacker, disconnector, fullConfigurationService);
+    public Mqtt311ConnectDecoder(final @NotNull MqttConnacker connacker,
+                                 final @NotNull Mqtt3ServerDisconnector disconnector,
+                                 final @NotNull EventLog eventLog,
+                                 final @NotNull ClientIds clientIds,
+                                 final @NotNull FullConfigurationService fullConfigurationService,
+                                 final @NotNull HivemqId hiveMQId) {
+        super(connacker, disconnector, fullConfigurationService, clientIds);
         this.eventLog = eventLog;
         this.hiveMQId = hiveMQId;
     }
 
+    @Nullable
     @Override
-    public CONNECT decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public CONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
 
         if (!validateHeader(header)) {
@@ -168,19 +175,32 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
             if (utf8StringLength == 0) {
                 if (!isCleanSessionFlag) {
                     if (log.isDebugEnabled()) {
-                        log.debug("A client (IP: {}) connected with an a persistent session and NO clientID. Using an empty client ID is only allowed when using a cleanSession. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
+                        log.debug("A client (IP: {}) connected with a persistent session and NO clientID. Using an empty client ID is only allowed when using a cleanSession. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
                     }
 
+                    eventLog.clientWasDisconnected(channel, "Sent CONNECT with empty client id");
+                    channel.writeAndFlush(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED)).
+                            addListener(ChannelFutureListener.CLOSE);
+                    return null;
+                }
+                if (!allowAssignedClientId) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("The client id of the client (IP: {}) is empty. This is not allowed.", getChannelIP(channel).or("UNKNOWN"));
+                    }
+                    eventLog.clientWasDisconnected(channel, "Sent CONNECT with empty client id");
                     channel.writeAndFlush(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED)).
                             addListener(ChannelFutureListener.CLOSE);
                     return null;
                 }
 
-                clientId = "gen-" + Integer.toHexString(channel.hashCode()) + "-" + RandomStringUtils.randomAlphanumeric(10);
+                clientId = clientIds.generateNext();
+                channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(true);
             } else {
                 clientId = Strings.getPrefixedString(buf, utf8StringLength);
             }
         }
+
+        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
 
         final MqttWillPublish willPublish;
 
@@ -220,7 +240,6 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
             password = null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
         channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(keepAlive);
         channel.attr(ChannelAttributes.CLEAN_START).set(isCleanSessionFlag);
 

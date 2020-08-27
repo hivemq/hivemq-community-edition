@@ -110,6 +110,7 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
+            ctx.write(connack, promise);
             return;
         }
 
