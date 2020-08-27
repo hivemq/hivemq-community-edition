@@ -16,14 +16,14 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.codec.decoder.mqtt5.Mqtt5ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
@@ -65,8 +65,8 @@ public class MqttConnectDecoder {
                               final @NotNull ClientIds clientIds) {
         this.eventLog = eventLog;
         mqtt5ConnectDecoder = new Mqtt5ConnectDecoder(mqttConnacker, mqtt5disconnector, hiveMQId, clientIds, fullConfigurationService);
-        mqtt311ConnectDecoder = new Mqtt311ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, fullConfigurationService, hiveMQId);
-        mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, fullConfigurationService, hiveMQId);
+        mqtt311ConnectDecoder = new Mqtt311ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, clientIds, fullConfigurationService, hiveMQId);
+        mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, clientIds, fullConfigurationService, hiveMQId);
     }
 
     public @Nullable CONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte fixedHeader) {
