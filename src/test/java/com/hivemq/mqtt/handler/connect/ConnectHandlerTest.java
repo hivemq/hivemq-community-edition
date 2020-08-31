@@ -71,6 +71,7 @@ import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import net.jodah.concurrentunit.Waiter;
 import org.junit.After;
 import org.junit.Before;
@@ -81,6 +82,7 @@ import org.mockito.MockitoAnnotations;
 import util.*;
 
 import javax.inject.Provider;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -237,6 +239,16 @@ public class ConnectHandlerTest {
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
+        boolean containsHandler = false;
+        for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
+            if (handler.getValue() instanceof IdleStateHandler) {
+                containsHandler = true;
+                break;
+            }
+        }
+        assertFalse(containsHandler);
+
+
         assertNotNull(keepAlive);
         assertEquals(0, keepAlive.longValue());
     }
@@ -259,6 +271,16 @@ public class ConnectHandlerTest {
         assertEquals(true, embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+
+        boolean containsHandler = false;
+        for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
+            if (handler.getValue() instanceof IdleStateHandler) {
+                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
+                assertEquals(( (long)(65535D * 1.5D) * 1000L), ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
+                containsHandler = true;
+            }
+        }
+        assertTrue(containsHandler);
 
         assertNotNull(keepAlive);
         assertEquals(65535, keepAlive.longValue());
@@ -299,6 +321,16 @@ public class ConnectHandlerTest {
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
+        boolean containsHandler = false;
+        for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
+            if (handler.getValue() instanceof IdleStateHandler) {
+                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
+                assertEquals((long)( 500 * 1.5 * 1000), ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
+                containsHandler = true;
+            }
+        }
+        assertTrue(containsHandler);
+
         assertNotNull(keepAlive);
         assertEquals(500, keepAlive.longValue());
         assertEquals(500, keepAliveFromCONNACK.get());
@@ -338,6 +370,16 @@ public class ConnectHandlerTest {
         assertEquals(true, embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+
+        boolean containsHandler = false;
+        for (Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
+            if (handler.getValue() instanceof IdleStateHandler) {
+                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
+                assertEquals(( (long)(360 * 1.5D) * 1000L), ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
+                containsHandler = true;
+            }
+        }
+        assertTrue(containsHandler);
 
         assertNotNull(keepAlive);
         assertEquals(360, keepAlive.longValue());
