@@ -730,7 +730,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         final int keepAlive;
         if (ProtocolVersion.MQTTv5.equals(msg.getProtocolVersion()) &&
                 ((msg.getKeepAlive() == 0 && !allowZeroKeepAlive) || (msg.getKeepAlive() > serverKeepAliveMaximum))) {
-            log.trace("Client {} used keepAlive {} which is invalid, using server maximum of {}", msg.getClientIdentifier(), msg.getKeepAlive(), serverKeepAliveMaximum);
+            if(log.isTraceEnabled()) {
+                log.trace("Client {} used keepAlive {} which is invalid, using server maximum of {}", msg.getClientIdentifier(), msg.getKeepAlive(), serverKeepAliveMaximum);
+            }
             keepAlive = serverKeepAliveMaximum;
         } else {
             keepAlive = msg.getKeepAlive();
@@ -740,12 +742,19 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             // The MQTT spec defines a 1.5 grace period
             final Double keepAliveValue = keepAlive * getGracePeriod();
-            log.trace("Client {} specified a keepAlive value of {}s. Using keepAlive of {}s. The maximum timeout before disconnecting is {}s",
-                    msg.getClientIdentifier(), msg.getKeepAlive(), keepAlive, keepAliveValue);
+            if(log.isTraceEnabled()) {
+                log.trace("Client {} specified a keepAlive value of {}s. Using keepAlive of {}s. The maximum timeout before disconnecting is {}s",
+                        msg.getClientIdentifier(), msg.getKeepAlive(), keepAlive, keepAliveValue);
+            }
             ctx.pipeline().addFirst(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, new IdleStateHandler(keepAliveValue.intValue(), 0, 0, TimeUnit.SECONDS));
-            ctx.pipeline().addAfter(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, MQTT_KEEPALIVE_IDLE_HANDLER, new KeepAliveIdleHandler(eventLog));
+            ctx.pipeline().addAfter(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, MQTT_KEEPALIVE_IDLE_HANDLER, new KeepAliveIdleHandler(metricsHolder, eventLog));
+        } else {
+            if(log.isTraceEnabled()) {
+                log.trace("Client {} specified keepAlive of 0. Disabling PING mechanism", msg.getClientIdentifier());
+            }
         }
     }
+
 
     private double getGracePeriod() {
         return InternalConfigurations.MQTT_CONNECTION_KEEP_ALIVE_FACTOR;
