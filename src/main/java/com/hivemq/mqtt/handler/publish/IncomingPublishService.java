@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.publish;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -64,17 +65,20 @@ public class IncomingPublishService {
     private final @NotNull InternalPublishService publishService;
     private final @NotNull EventLog eventLog;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector;
 
     @Inject
     IncomingPublishService(final @NotNull InternalPublishService publishService,
                            final @NotNull EventLog eventLog,
                            final @NotNull MqttConfigurationService mqttConfigurationService,
+                           final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
                            final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector) {
 
         this.publishService = publishService;
         this.eventLog = eventLog;
         this.mqttConfigurationService = mqttConfigurationService;
+        this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqtt5ServerDisconnector = mqtt5ServerDisconnector;
     }
 
@@ -105,6 +109,18 @@ public class IncomingPublishService {
                             ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), publish.getQoS(), mqttConfigurationService.maximumQos());
                 }
                 finishBadPublish(ctx, "Sent PUBLISH with QoS (" + qos + ") higher than the allowed maximum (" + maxQos + ")");
+            }
+            return;
+        }
+
+        final String topic = publish.getTopic();
+        final int maxTopicLength = restrictionsConfigurationService.maxTopicLength();
+        if (topic.length() > maxTopicLength) {
+            log.trace("Dismissing PUBLISH from client '{}' because the topic exceeded the maximum length of '{}'", ChannelUtils.getClientId(ctx.channel()), maxTopicLength);
+            if (ProtocolVersion.MQTTv5.equals(protocolVersion)) {
+                mqtt5ServerDisconnector.disconnect(ctx.channel(), null, "Sent a PUBLISH with a topic exceeding the maximum length of '" + maxTopicLength + "'", Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID, "Maximum topic length configured at the broker exceeded");
+            } else if (ProtocolVersion.MQTTv3_1.equals(protocolVersion) || ProtocolVersion.MQTTv3_1_1.equals(protocolVersion)) {
+                finishBadPublish(ctx, "Sent PUBLISH for topic that exceeds maximum topic length");
             }
             return;
         }

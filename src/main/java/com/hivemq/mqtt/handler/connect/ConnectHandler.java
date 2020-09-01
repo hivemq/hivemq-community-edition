@@ -363,6 +363,16 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                         String.format(ReasonStrings.CONNACK_QOS_NOT_SUPPORTED_WILL, willQos, maxQos));
                 return false;
             }
+
+            final int maxTopicLength = configurationService.restrictionsConfiguration().maxTopicLength();
+            if(msg.getWillPublish().getTopic().length() > maxTopicLength) {
+                mqttConnacker.connackError(ctx.channel(),
+                        "A client (IP: {}) sent a CONNECT with a Will Topic exceeding the max length. This is not allowed.",
+                        "Sent CONNECT with Will topic that exceeds maximum topic length",
+                        Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
+                        ReasonStrings.CONNACK_NOT_AUTHORIZED_MAX_TOPIC_LENGTH_EXCEEDED);
+                return false;
+            }
         }
         return true;
     }
