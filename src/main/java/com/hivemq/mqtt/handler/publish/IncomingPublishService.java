@@ -118,7 +118,7 @@ public class IncomingPublishService {
         if (topic.length() > maxTopicLength) {
             log.trace("Dismissing PUBLISH from client '{}' because the topic exceeded the maximum length of '{}'", ChannelUtils.getClientId(ctx.channel()), maxTopicLength);
             if (ProtocolVersion.MQTTv5.equals(protocolVersion)) {
-                mqtt5ServerDisconnector.disconnect(ctx.channel(), null, "Sent a PUBLISH with a topic exceeding the maximum length of '" + maxTopicLength + "'", Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID, "Maximum topic length configured at the broker exceeded");
+                mqtt5ServerDisconnector.disconnect(ctx.channel(), null, "Sent PUBLISH for topic that exceeds maximum topic length", Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID, "Maximum topic length configured at the broker exceeded");
             } else if (ProtocolVersion.MQTTv3_1.equals(protocolVersion) || ProtocolVersion.MQTTv3_1_1.equals(protocolVersion)) {
                 finishBadPublish(ctx, "Sent PUBLISH for topic that exceeds maximum topic length");
             }
