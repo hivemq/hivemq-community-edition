@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -107,6 +108,8 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
     private final RetainedMessagesSender retainedMessagesSender;
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
+    @NotNull
+    private final RestrictionsConfigurationService restrictionsConfigurationService;
 
     @Inject
     SubscribeHandler(@NotNull final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
@@ -114,7 +117,8 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
                      @NotNull final SharedSubscriptionService sharedSubscriptionService,
                      @NotNull final EventLog eventLog,
                      @NotNull final RetainedMessagesSender retainedMessagesSender,
-                     @NotNull final MqttConfigurationService mqttConfigurationService) {
+                     @NotNull final MqttConfigurationService mqttConfigurationService,
+                     @NotNull final RestrictionsConfigurationService restrictionsConfigurationService) {
 
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.retainedMessagePersistence = retainedMessagePersistence;
@@ -122,6 +126,7 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
         this.eventLog = eventLog;
         this.retainedMessagesSender = retainedMessagesSender;
         this.mqttConfigurationService = mqttConfigurationService;
+        this.restrictionsConfigurationService = restrictionsConfigurationService;
     }
 
     @Override
@@ -204,18 +209,28 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
     private boolean hasOnlyValidSubscriptions(final ChannelHandlerContext ctx, final SUBSCRIBE msg) {
         log.trace("Checking SUBSCRIBE message of client '{}' if topics are valid", ChannelUtils.getClientId(ctx.channel()));
 
+        final int maxTopicLength = restrictionsConfigurationService.maxTopicLength();
         for (final Topic topic : msg.getTopics()) {
-            if (!Topics.isValidToSubscribe(topic.getTopic())) {
+            final String topicString = topic.getTopic();
+            if (!Topics.isValidToSubscribe(topicString)) {
                 log.debug("Disconnecting client '{}' because it sent an invalid subscription: '{}'",
-                        ChannelUtils.getClientId(ctx.channel()), topic.getTopic());
-                eventLog.clientWasDisconnected(ctx.channel(), "Invalid subscription topic " + topic.getTopic());
+                        ChannelUtils.getClientId(ctx.channel()), topicString);
+                eventLog.clientWasDisconnected(ctx.channel(), "Invalid subscription topic " + topicString);
+
+                ctx.close();
+                return false;
+            } else if(topicString.length() > maxTopicLength) {
+                log.debug("Disconnecting client '{}' because it sent a subscription to a topic exceeding the maximum topic length: '{}'",
+                        ChannelUtils.getClientId(ctx.channel()), topicString);
+                eventLog.clientWasDisconnected(ctx.channel(), "Sent SUBSCRIBE for topic that exceeds maximum topic length");
+
+                // TODO: This behavior needs to be updated so we send a DISCONNECT with an appropriate reason code as part of ID:931
                 ctx.close();
                 return false;
             }
         }
         return true;
     }
-
     private void persistSubscriptionForClient(final @NotNull ChannelHandlerContext ctx,
                                               final @NotNull ClientData clientData,
                                               final @NotNull SUBSCRIBE msg,

@@ -867,6 +867,62 @@ public class ConnectHandlerTest {
     }
 
     @Test
+    public void test_will_topic_max_length_exceeded() throws Exception {
+        configurationService.restrictionsConfiguration().setMaxTopicLength(5);
+
+        createHandler();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt3Builder().withPayload(new byte[100])
+                .withQos(QoS.EXACTLY_ONCE)
+                .withTopic("12345678890")
+                .build();
+
+        final CONNECT connect = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("123456")
+                .withWillPublish(willPublish)
+                .build();
+
+        final CountDownLatch eventLatch = new CountDownLatch(1);
+        embeddedChannel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
+        embeddedChannel.closeFuture().addListener((ChannelFutureListener) future -> latch.countDown());
+
+        embeddedChannel.writeInbound(connect);
+
+        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
+        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void test_will_topic_max_length_exceeded_mqtt5() throws Exception {
+        configurationService.restrictionsConfiguration().setMaxTopicLength(5);
+
+        createHandler();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withPayload(new byte[100])
+                .withQos(QoS.EXACTLY_ONCE)
+                .withTopic("12345678890")
+                .build();
+
+        final CONNECT connect = new CONNECT.Mqtt5Builder()
+                .withClientIdentifier("123456")
+                .withWillPublish(willPublish)
+                .build();
+
+        final CountDownLatch eventLatch = new CountDownLatch(1);
+        embeddedChannel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
+        embeddedChannel.closeFuture().addListener((ChannelFutureListener) future -> latch.countDown());
+
+        embeddedChannel.writeInbound(connect);
+
+        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
+        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
     public void test_will_exceed_max_qos_mqtt5() throws Exception {
 
         createHandler();

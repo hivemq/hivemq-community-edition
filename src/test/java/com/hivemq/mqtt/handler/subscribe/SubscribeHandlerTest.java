@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
@@ -55,7 +56,11 @@ import java.util.HashSet;
 import java.util.Queue;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ALL")
@@ -88,6 +93,9 @@ public class SubscribeHandlerTest {
     @Mock
     private MqttConfigurationService mqttConfigurationService;
 
+    @Mock
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+
     private EmbeddedChannel channel;
     private SubscribeHandler handler;
 
@@ -95,7 +103,7 @@ public class SubscribeHandlerTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        handler = new SubscribeHandler(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, eventLog, retainedMessagesSender, mqttConfigurationService);
+        handler = new SubscribeHandler(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, eventLog, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService);
 
         channel = new EmbeddedChannel(handler);
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
@@ -105,6 +113,7 @@ public class SubscribeHandlerTest {
         when(ctx.channel()).thenReturn(channel);
         when(ctx.writeAndFlush(anyObject())).thenReturn(channelFuture);
         when(ctx.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
+        when(restrictionsConfigurationService.maxTopicLength()).thenReturn(65535);
     }
 
 
@@ -529,6 +538,20 @@ public class SubscribeHandlerTest {
         for (Topic topic : immutableList) {
             assertTrue(topic.getTopic().equals("test1") || topic.getTopic().equals("test4"));
         }
+    }
+
+    @Test
+    public void test_subscribe_topic_length_exceeded() throws Exception {
+        when(restrictionsConfigurationService.maxTopicLength()).thenReturn(5);
+
+        final ArgumentCaptor<ImmutableSet> captor = ArgumentCaptor.forClass(ImmutableSet.class);
+        final Topic topic1 = new Topic("123456", QoS.AT_LEAST_ONCE);
+
+        final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1)), 10);
+
+        channel.writeInbound(subscribe);
+
+        assertFalse(channel.isActive());
     }
 
     @Test

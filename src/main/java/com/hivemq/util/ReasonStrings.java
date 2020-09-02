@@ -38,6 +38,7 @@ public class ReasonStrings {
     public static final String CONNACK_MALFORMED_PROPERTIES_LENGTH = "Sent CONNECT with malformed properties length.";
     public static final String CONNACK_MALFORMED_PROPERTIES_INVALID = "Sent CONNECT with an invalid property identifier.";
 
+    public static final String CONNACK_NOT_AUTHORIZED_MAX_TOPIC_LENGTH_EXCEEDED = "Not authorized to connect. The will topic length exceeded the maximum length configured on the broker.";
     public static final String CONNACK_PROTOCOL_ERROR_NO_AUTH = "Sent CONNECT with auth data and no auth method. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_RECEIVE_MAXIMUM = "Sent CONNECT with receive maximum set to '0'. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_PACKET_SIZE = "Sent CONNECT with packet size set to '0'. This is a protocol violation.";
