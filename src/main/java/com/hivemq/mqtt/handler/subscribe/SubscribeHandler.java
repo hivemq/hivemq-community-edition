@@ -274,12 +274,6 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
                         ctx.channel().close();
                         return;
                     }
-                } else if (topic.getTopic().length() > restrictionsConfigurationService.maxTopicLength()) {
-                    if (mqttVersion == ProtocolVersion.MQTTv5) {
-
-                    } else {
-
-                    }
                 } else {
                     final Mqtt5SubAckReasonCode reasonCode = fromCode(topic.getQoS().getQosNumber());
                     answerCodes[i] = reasonCode != null ? reasonCode : Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
