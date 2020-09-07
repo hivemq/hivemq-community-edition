@@ -22,7 +22,8 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
@@ -51,19 +52,15 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @VisibleForTesting
     @Inject
-    public Mqtt5SubscribeDecoder(final Mqtt5ServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
+    public Mqtt5SubscribeDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
     }
 
     @Override
-    public SUBSCRIBE decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public SUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if ((header & 0b0000_1111) != 2) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a SUBSCRIBE with an invalid fixed header. Disconnecting client.",
-                    "Invalid SUBSCRIBE fixed header",
-                    Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.DISCONNECT_MALFORMED_SUBSCRIBE_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.SUBSCRIBE);
             return null;
         }
 

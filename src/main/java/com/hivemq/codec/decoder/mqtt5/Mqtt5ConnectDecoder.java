@@ -27,7 +27,6 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
@@ -54,14 +53,13 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     private static final String PROTOCOL_NAME = "MQTT";
     private static final byte VARIABLE_HEADER_LENGTH = 10;
-    private final HivemqId hiveMQId;
+    private final @NotNull HivemqId hiveMQId;
 
-    public Mqtt5ConnectDecoder(final MqttConnacker mqttConnacker,
-                               final Mqtt5ServerDisconnector disconnector,
-                               final HivemqId hiveMQId,
-                               final ClientIds clientIds,
-                               final FullConfigurationService fullMqttConfigurationService) {
-        super(mqttConnacker, disconnector, fullMqttConfigurationService, clientIds);
+    public Mqtt5ConnectDecoder(final @NotNull MqttConnacker mqttConnacker,
+                               final @NotNull HivemqId hiveMQId,
+                               final @NotNull ClientIds clientIds,
+                               final @NotNull FullConfigurationService fullMqttConfigurationService) {
+        super(mqttConnacker, fullMqttConfigurationService, clientIds);
         this.hiveMQId = hiveMQId;
     }
 
@@ -71,11 +69,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         Preconditions.checkNotNull(buf, "A byte buffer must never be null");
 
         if (!validateHeader(header)) {
-            mqttConnacker.connackError(channel,
-                    "A client (IP: {}) connected with an invalid fixed header.",
-                    "Invalid CONNECT fixed header",
-                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.CONNACK_MALFORMED_PACKET_FIXED_HEADER);
+            disconnectByInvalidFixedHeader(channel);
             return null;
         }
 
@@ -85,7 +79,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         }
 
         //bytes 1-6
-        if (!validateProtocolName(fixedVariableHeader, channel)) {
+        if (!validateProtocolName(fixedVariableHeader, channel, PROTOCOL_NAME)) {
             return null;
         }
 
@@ -107,7 +101,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     }
 
-    private CONNECT decodeConnect(final Channel channel, final ByteBuf buf, final byte connectFlagsByte, final ByteBuf fixedVariableHeader) {
+    private CONNECT decodeConnect(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte connectFlagsByte, final @NotNull ByteBuf fixedVariableHeader) {
 
 
         final boolean cleanStart = isBitSet(connectFlagsByte, 1);
@@ -184,7 +178,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 .build();
     }
 
-    private ImmutableList.Builder<MqttUserProperty> readUserProperty(final Channel channel, final ByteBuf buf, ImmutableList.Builder<MqttUserProperty> userPropertiesBuilder) {
+    private ImmutableList.Builder<MqttUserProperty> readUserProperty(final @NotNull Channel channel, final @NotNull ByteBuf buf, ImmutableList.@Nullable Builder<MqttUserProperty> userPropertiesBuilder) {
         final MqttUserProperty userProperty = MqttUserProperty.decode(buf, validateUTF8);
         if (userProperty == null) {
             mqttConnacker.connackError(channel,
@@ -202,7 +196,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     }
 
 
-    private boolean decodeAndValidateUsername(final Channel channel, final ByteBuf buf, final Mqtt5Builder connectBuilder, final boolean usernameRequired) {
+    private boolean decodeAndValidateUsername(final @NotNull Channel channel, final @NotNull ByteBuf buf, final @NotNull Mqtt5Builder connectBuilder, final boolean usernameRequired) {
         if (usernameRequired) {
             final String username = MqttBinaryData.decodeString(buf, validateUTF8);
             if (username == null) {
@@ -220,7 +214,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return true;
     }
 
-    private boolean decodeAndValidatePassword(final Channel channel, final ByteBuf buf, final Mqtt5Builder connectBuilder, final boolean passwordRequired) {
+    private boolean decodeAndValidatePassword(final @NotNull Channel channel, final @NotNull ByteBuf buf, final @NotNull Mqtt5Builder connectBuilder, final boolean passwordRequired) {
         if (passwordRequired) {
             final byte[] password = MqttBinaryData.decode(buf);
             if (password == null) {
@@ -237,7 +231,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return true;
     }
 
-    private boolean readConnectProperties(final Channel channel, final ByteBuf buf, final Mqtt5Builder connectBuilder) {
+    private boolean readConnectProperties(final @NotNull Channel channel, final @NotNull ByteBuf buf, final @NotNull Mqtt5Builder connectBuilder) {
         final int propertiesLength = MqttVariableByteInteger.decode(buf);
 
         if (propertiesLengthInvalid(channel, buf, propertiesLength)) {
@@ -368,7 +362,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     }
 
-    private int readReceiveMaximum(final Channel channel, final ByteBuf buf, int receiveMaximum) {
+    private int readReceiveMaximum(final @NotNull Channel channel, final @NotNull ByteBuf buf, int receiveMaximum) {
         if (receiveMaximum != Integer.MAX_VALUE) {
             connackByMoreThanOnce(channel, "receive maximum");
             return DISCONNECTED;
@@ -389,7 +383,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return receiveMaximum;
     }
 
-    private long readMaximumPacketSize(final Channel channel, final ByteBuf buf, long maximumPacketSize) {
+    private long readMaximumPacketSize(final @NotNull Channel channel, final @NotNull ByteBuf buf, long maximumPacketSize) {
         if (maximumPacketSize != Long.MAX_VALUE) {
             connackByMoreThanOnce(channel, "maximum packet size");
             return DISCONNECTED;
@@ -410,7 +404,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return maximumPacketSize;
     }
 
-    private int readTopicAliasMaximum(final Channel channel, final ByteBuf buf, final int topicAliasMaximum) {
+    private int readTopicAliasMaximum(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int topicAliasMaximum) {
         if (topicAliasMaximum != Integer.MAX_VALUE) {
             connackByMoreThanOnce(channel, "topic alias maximum");
             return DISCONNECTED;
@@ -422,7 +416,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return buf.readUnsignedShort();
     }
 
-    private Boolean readBoolean(final Channel channel, final ByteBuf buf, final Boolean current, final String key) {
+    private Boolean readBoolean(final @NotNull Channel channel, final @NotNull ByteBuf buf, final @Nullable Boolean current, final @NotNull String key) {
         if (current != null) {
             connackByMoreThanOnce(channel, key);
             return null;
@@ -447,7 +441,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     }
 
     @Nullable
-    private String readAuthMethod(final Channel channel, final ByteBuf buf, String authMethod) {
+    private String readAuthMethod(final @NotNull Channel channel, final @NotNull ByteBuf buf, @Nullable String authMethod) {
         if (authMethod != null) {
             connackByMoreThanOnce(channel, "auth method");
             return null;
@@ -464,8 +458,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return authMethod;
     }
 
-    @Nullable
-    private byte[] readAuthData(final Channel channel, final ByteBuf buf, byte[] authData) {
+    private byte @Nullable [] readAuthData(final @NotNull Channel channel, final @NotNull ByteBuf buf, byte @Nullable [] authData) {
         if (authData != null) {
             connackByMoreThanOnce(channel, "auth data");
             return null;
@@ -482,7 +475,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return authData;
     }
 
-    private MqttWillPublish decodeAndValidateWill(final Channel channel, final ByteBuf buf, final int willQos, final boolean willRetain) {
+    private MqttWillPublish decodeAndValidateWill(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int willQos, final boolean willRetain) {
 
         final MqttWillPublish.Mqtt5Builder mqtt5Builder = new MqttWillPublish.Mqtt5Builder();
 
@@ -593,7 +586,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     }
 
-    private boolean willDelayIntervalInvalid(final Channel channel, final ByteBuf buf, final long willDelayInterval) {
+    private boolean willDelayIntervalInvalid(final @NotNull Channel channel, final @NotNull ByteBuf buf, final long willDelayInterval) {
         if (willDelayInterval != WILL_DELAY_INTERVAL_NOT_SET) {
             connackByMoreThanOnce(channel, "will delay interval");
             return true;
@@ -605,7 +598,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return false;
     }
 
-    private boolean readAndValidatePayload(final Channel channel, final ByteBuf buf, final MqttWillPublish.Mqtt5Builder mqtt5Builder) {
+    private boolean readAndValidatePayload(final @NotNull Channel channel, final @NotNull ByteBuf buf, final MqttWillPublish.@NotNull Mqtt5Builder mqtt5Builder) {
         final byte[] payload = MqttBinaryData.decode(buf);
         if (payload == null) {
             mqttConnacker.connackError(channel,
@@ -630,7 +623,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param buf     the encoded ByteBuf of the message
      * @return the length of the string or -1 for malformed packet
      */
-    protected int decodeUTF8StringLength(final Channel channel, final ByteBuf buf) {
+    protected int decodeUTF8StringLength(final @NotNull Channel channel, final ByteBuf buf) {
 
         final int utf8StringLength;
 
@@ -656,7 +649,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return the topic as String or {@code null} if failed
      */
     @Nullable
-    protected String decodeUTF8Topic(final Channel channel, final ByteBuf buf) {
+    protected String decodeUTF8Topic(final @NotNull Channel channel, final @NotNull ByteBuf buf) {
 
         final int utf8StringLength = decodeUTF8StringLength(channel, buf);
         if (utf8StringLength == DISCONNECTED) {
@@ -683,7 +676,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return the topic as String or {@code null} if failed
      */
     @Nullable
-    protected String decodeUTF8Topic(final Channel channel, final ByteBuf buf, final int utf8StringLength) {
+    protected String decodeUTF8Topic(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int utf8StringLength) {
 
         final String utf8String = Strings.getValidatedPrefixedString(buf, utf8StringLength, validateUTF8);
         if (utf8String == null) {
@@ -699,7 +692,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     }
 
 
-    private boolean readAndValidateTopic(final Channel channel, final ByteBuf buf, final MqttWillPublish.Mqtt5Builder mqtt5Builder) {
+    private boolean readAndValidateTopic(final @NotNull Channel channel, final @NotNull ByteBuf buf, final MqttWillPublish.@NotNull Mqtt5Builder mqtt5Builder) {
         final String willTopic = decodeUTF8Topic(channel, buf);
         if (willTopic == null) {
             return false;
@@ -721,7 +714,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return true;
     }
 
-    private boolean propertiesLengthInvalid(final Channel channel, final ByteBuf buf, final int propertyLength) {
+    private boolean propertiesLengthInvalid(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int propertyLength) {
         if (propertyLength < 0) {
             mqttConnacker.connackError(channel,
                     "A client (IP: {}) sent a CONNECT with malformed properties length.",
@@ -779,7 +772,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * or {@code null} when failed.
      */
     @Nullable
-    private String readResponseTopic(final Channel channel, final ByteBuf buf, String responseTopic) {
+    private String readResponseTopic(final @NotNull Channel channel, final @NotNull ByteBuf buf, @Nullable String responseTopic) {
         if (responseTopic != null) {
             connackByMoreThanOnce(channel, "response topic");
             return null;
@@ -802,27 +795,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return responseTopic;
     }
 
-    /**
-     * Validates the connect flags byte
-     * <p>
-     * If the first bit of the connect flags byte is set, it is a malformed packet
-     *
-     * @param connectFlagsByte the connect flags byte
-     * @param channel          the channel of the mqtt client
-     * @return false if the reserved bit zero is set to 1, else true
-     */
-    protected boolean validateConnectFlagByte(final byte connectFlagsByte, final Channel channel) {
-        if (isBitSet(connectFlagsByte, 0)) {
-            mqttConnacker.connackError(
-                    channel,
-                    "A client (IP: {}) connected with invalid CONNECT flags. Disconnecting client",
-                    "Invalid CONNECT flags",
-                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.CONNACK_MALFORMED_CONNECT_FLAGS);
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Decodes and validates a correlation data property
@@ -842,8 +814,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return a byte[] containing decoded correlation data,
      * or {@code null} when failed.
      */
-    @Nullable
-    private byte[] readCorrelationData(final Channel channel, final ByteBuf buf, byte[] correlationData) {
+    private byte @Nullable [] readCorrelationData(final @NotNull Channel channel, final @NotNull ByteBuf buf, byte @Nullable [] correlationData) {
         if (correlationData != null) {
             connackByMoreThanOnce(channel, "correlation data");
             return null;
@@ -881,7 +852,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * or {@code null} when failed.
      */
     @Nullable
-    private String readContentType(final Channel channel, final ByteBuf buf, String contentType) {
+    private String readContentType(final @NotNull Channel channel, final @NotNull ByteBuf buf, @Nullable String contentType) {
         if (contentType != null) {
             connackByMoreThanOnce(channel, "content type");
             return null;
@@ -919,9 +890,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * or {@code null} when failed.
      */
     @Nullable
-    private Mqtt5PayloadFormatIndicator readPayloadFormatIndicator(final Channel channel,
-                                                                   final ByteBuf buf,
-                                                                   Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
+    private Mqtt5PayloadFormatIndicator readPayloadFormatIndicator(final @NotNull Channel channel,
+                                                                   final @NotNull ByteBuf buf,
+                                                                   @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
         if (payloadFormatIndicator != null) {
             connackByMoreThanOnce(channel, "payload format indicator");
             return null;
@@ -991,7 +962,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      *                              (must be {@link PUBLISH#MESSAGE_EXPIRY_INTERVAL_NOT_SET})
      * @return true if invalid, false if valid
      */
-    private boolean messageExpiryIntervalInvalid(final Channel channel, final ByteBuf buf, final long messageExpiryInterval) {
+    private boolean messageExpiryIntervalInvalid(final @NotNull Channel channel, final @NotNull ByteBuf buf, final long messageExpiryInterval) {
         if (messageExpiryInterval != MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             connackByMoreThanOnce(channel, "message expiry interval");
             return true;
@@ -1014,7 +985,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param topicName the topic
      * @return true if invalid, false if valid
      */
-    private boolean topicInvalid(final Channel channel, final String topicName, final String location) {
+    private boolean topicInvalid(final @NotNull Channel channel, final @NotNull String topicName, final @NotNull String location) {
 
         if (Topics.containsWildcard(topicName)) {
             mqttConnacker.connackError(
@@ -1029,86 +1000,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         return false;
     }
 
-    /**
-     * Validates Will Flags by MQTT Specification.
-     * <p>
-     * If the Will Flag is set to 0, then the Will QoS MUST be set to 0. If the Will Flag is set to 0, then Will Retain
-     * MUST be set to 0
-     * <p>
-     * If the Will Flag is set to 1, the value of Will QoS can be 0, 1, or 2.
-     * <p>
-     * A Will QoS of 3 is a malformed packet.
-     * <p>
-     * A Will QoS of 0 and a Will Retain of 1 is a malformed packet.
-     *
-     * @param isWillFlag   will flag set
-     * @param isWillRetain will retain set
-     * @param willQoS      quality of service of will
-     * @param channel      the channel of the mqtt client
-     * @return true if valid, else false
-     */
-    private boolean validateWill(final boolean isWillFlag, final boolean isWillRetain, final int willQoS, final Channel channel) {
-        final boolean valid = (isWillFlag && willQoS < 3) || (!isWillRetain && willQoS == 0);
-        if (!valid) {
-            mqttConnacker.connackError(channel, "A client (IP: {}) connected with an invalid willTopic flag combination. Disconnecting client.",
-                    "Invalid will-topic/flag combination",
-                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.CONNACK_MALFORMED_WILL_FLAG);
-        }
-        return valid;
-    }
-
-    /**
-     * Validates the protocol name of the MQTT Version
-     * <p>
-     * If the validation fails it is an unsupported protocol version error.
-     *
-     * @param variableHeader the variable header of a mqtt connect message
-     * @param channel        the channel of the mqtt client
-     * @return true if valid, else false
-     */
-    private boolean validateProtocolName(final ByteBuf variableHeader, final Channel channel) {
-
-        if (!PROTOCOL_NAME.equals(Strings.getPrefixedString(variableHeader))) {
-            mqttConnacker.connackError(
-                    channel,
-                    "A client (IP: {}) connected with an invalid protocol name. Disconnecting client.",
-                    "Invalid CONNECT protocol name",
-                    Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
-                    ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
-            variableHeader.clear();
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * decodes the fixed part of the connect variable header.
-     * <p>
-     * the buf reader index will be increased by the length
-     * <p>
-     * if readable bytes less than length a connack with protocol error reason code will be sent.
-     *
-     * @param channel the channel of the mqtt client
-     * @param buf     the encoded ByteBuf of the message
-     * @return a new ByteBuf of the fixed variable header part or {@code null} in an error case
-     */
-    private ByteBuf decodeFixedVariableHeaderConnect(final Channel channel, final ByteBuf buf) {
-
-        if (buf.readableBytes() >= VARIABLE_HEADER_LENGTH) {
-            return buf.readSlice(VARIABLE_HEADER_LENGTH);
-        } else {
-            mqttConnacker.connackError(
-                    channel,
-                    "A client (IP: {}) sent a CONNECT message with an incorrect variable header. Disconnecting client.",
-                    "Invalid CONNECT variable header",
-                    Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.CONNACK_PROTOCOL_VARIABLE_HEADER);
-            return null;
-        }
-    }
-
-    private void connackByMoreThanOnce(final Channel channel, final String key) {
+    private void connackByMoreThanOnce(final @NotNull Channel channel, final @NotNull String key) {
         mqttConnacker.connackError(channel,
                 "A client (IP: {}) sent a CONNECT with '" + key + "' included more than once. This is not allowed.",
                 "Sent a CONNECT with '" + key + "' included more than once",
@@ -1117,7 +1009,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     }
 
-    private void connackByRemainingLengthToShort(final Channel channel) {
+    private void connackByRemainingLengthToShort(final @NotNull Channel channel) {
         mqttConnacker.connackError(channel,
                 "A client (IP: {}) sent a CONNECT with remaining length too short. This is not allowed.",
                 "Sent a CONNECT with remaining length too short",
@@ -1125,7 +1017,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 ReasonStrings.CONNACK_MALFORMED_REMAINING);
     }
 
-    private void connackByMalformedPropertyLength(final Channel channel) {
+    private void connackByMalformedPropertyLength(final @NotNull Channel channel) {
         mqttConnacker.connackError(channel,
                 "A client (IP: {}) sent a CONNECT with a malformed properties length. This is not allowed. Disconnecting client.",
                 "Sent a CONNECT with a malformed properties length",
@@ -1134,7 +1026,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     }
 
-    private void connackByInvalidPropertyIdentifier(final Channel channel, final int propertyIdentifier) {
+    private void connackByInvalidPropertyIdentifier(final @NotNull Channel channel, final int propertyIdentifier) {
         mqttConnacker.connackError(channel,
                 "A client (IP: {}) sent a CONNECT with a invalid property identifier '" + propertyIdentifier + "'. This is not allowed. Disconnecting client.",
                 "Sent CONNECT with invalid property identifier",

@@ -16,13 +16,13 @@
 package com.hivemq.codec.decoder;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.MessageType;
@@ -62,7 +62,6 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected AbstractMqttDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService configurationService) {
         this.configurationService = configurationService;
         this.disconnector = disconnector;
-
         this.validateUTF8 = configurationService.securityConfiguration().validateUTF8();
         this.maxMessageExpiryInterval = configurationService.mqttConfiguration().maxMessageExpiryInterval();
         this.maxUserPropertiesLength = InternalConfigurations.USER_PROPERTIES_MAX_SIZE;
@@ -268,8 +267,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param messageType     the type of the message
      * @return a byte[] containing decoded correlation data, or {@code null} when failed.
      */
-    @Nullable
-    protected byte[] readCorrelationData(final @NotNull Channel channel, final @NotNull ByteBuf buf, @Nullable byte[] correlationData, final @NotNull MessageType messageType) {
+    protected byte @Nullable[] readCorrelationData(final @NotNull Channel channel, final @NotNull ByteBuf buf, byte @Nullable[] correlationData, final @NotNull MessageType messageType) {
         if (correlationData != null) {
             disconnectByMoreThanOnce(channel, "correlation data", messageType);
             return null;
@@ -679,11 +677,43 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected void disconnectByInvalidPropertyIdentifier(final @NotNull Channel channel, final int propertyIdentifier, final @NotNull MessageType messageType) {
 
         disconnector.disconnect(channel,
-                "A client (IP: {}) sent a " + messageType.name() + " with a invalid property identifier '" + propertyIdentifier + "'. This is not allowed. Disconnecting client.",
+                "A client (IP: {}) sent a " + messageType.name() + " with an invalid property identifier '" + propertyIdentifier + "'. This is not allowed. Disconnecting client.",
                 "Sent " + messageType.name() + " with invalid property identifier",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_PROPERTY_IDENTIFIER,messageType.name()));
 
+    }
+
+    /**
+     * Sends a DISCONNECT to a client because of sending an invalid fixed header
+     * The Server MUST treat this as malformed and close the Network Connection
+     *
+     * @param channel            the channel of the mqtt client
+     * @param messageType        the type of the message
+     */
+    protected void disconnectByInvalidFixedHeader(final @NotNull Channel channel, final @NotNull MessageType messageType) {
+            disconnector.disconnect(channel,
+                    "A client (IP: {}) sent a " + messageType.name() + " with an invalid fixed header. Disconnecting client.",
+                    "Sent " + messageType.name() + " with invalid fixed header",
+                    Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
+                    String.format(ReasonStrings.DISCONNECT_MALFORMED_FIXED_HEADER, messageType.name()));
+    }
+
+    /**
+     * Closes the connection of a client because of sending a message without identifier
+     * <p>
+     * MQTT 3 only. adapted from {@link this#decodePacketIdentifier(Channel, ByteBuf, MessageType)}
+     * <p>
+     *
+     * @param channel            the channel of the mqtt client
+     * @param messageType        the type of the message
+     */
+    protected void disconnectByNoMessageId(final @NotNull Channel channel, final @NotNull MessageType messageType) {
+            disconnector.disconnect(channel,
+                    "A client (IP: {}) sent a " + messageType.name() + " without a message id. Disconnecting client.",
+                    "Sent " + messageType.name() + " without message id",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_MESSAGE_ID, messageType.name()));
     }
 
     /**

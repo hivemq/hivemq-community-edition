@@ -18,58 +18,51 @@ package com.hivemq.codec.decoder.mqtt3;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.codec.decoder.MqttDecoder;
-import com.hivemq.logging.EventLog;
+import com.hivemq.codec.decoder.AbstractMqttDecoder;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
  * @author Dominik Obermaier
  */
 @LazySingleton
-public class Mqtt3SubscribeDecoder extends MqttDecoder<SUBSCRIBE> {
-
-    private static final Logger log = LoggerFactory.getLogger(Mqtt3SubscribeDecoder.class);
-
-    private final EventLog eventLog;
+public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @Inject
-    public Mqtt3SubscribeDecoder(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public Mqtt3SubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
+                                 final @NotNull FullConfigurationService fullConfigurationService) {
+        super(disconnector, fullConfigurationService);
     }
 
+    @Nullable
     @Override
-    public SUBSCRIBE decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public SUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
-                if (log.isDebugEnabled()) {
-                    log.error("A client (IP: {}) sent a subscribe message with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid SUBSCRIBE fixed header");
-                channel.close();
+                disconnectByInvalidFixedHeader(channel, MessageType.SUBSCRIBE);
                 buf.clear();
                 return null;
             }
         } else if (ProtocolVersion.MQTTv3_1 == channel.attr(MQTT_VERSION).get()) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a subscribe message with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid SUBSCRIBE fixed header");
-                channel.close();
+                disconnectByInvalidFixedHeader(channel, MessageType.SUBSCRIBE);
                 buf.clear();
                 return null;
             }
@@ -79,21 +72,13 @@ public class Mqtt3SubscribeDecoder extends MqttDecoder<SUBSCRIBE> {
         if (buf.readableBytes() >= 2) {
             messageId = buf.readUnsignedShort();
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a subscribe message with an invalid message id. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-            }
-            eventLog.clientWasDisconnected(channel, "Invalid SUBSCRIBE message id");
-            channel.close();
+            disconnectByNoMessageId(channel, MessageType.SUBSCRIBE);
             buf.clear();
             return null;
         }
 
         if (messageId < 1) {
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a subscribe message with invalid message id '{}'. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"), messageId);
-            }
-            eventLog.clientWasDisconnected(channel, "Invalid SUBSCRIBE message id");
-            channel.close();
+            disconnectByNoMessageId(channel, MessageType.SUBSCRIBE);
             buf.clear();
             return null;
         }
@@ -101,11 +86,11 @@ public class Mqtt3SubscribeDecoder extends MqttDecoder<SUBSCRIBE> {
         final ImmutableList.Builder<Topic> topics = new ImmutableList.Builder<>();
 
         if(!buf.isReadable()){
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a subscribe message which didn't contain any subscription. This is not allowed. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-            }
-            eventLog.clientWasDisconnected(channel, "Sent SUBSCRIBE without any subscriptions");
-            channel.close();
+            disconnector.disconnect(channel,
+                    "A client (IP: {}) sent a SUBSCRIBE which didn't contain any subscription. This is not allowed. Disconnecting client.",
+                    "Sent SUBSCRIBE without any subscriptions",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTIONS);
             buf.clear();
             return null;
         }
@@ -114,27 +99,31 @@ public class Mqtt3SubscribeDecoder extends MqttDecoder<SUBSCRIBE> {
             final String topic = Strings.getPrefixedString(buf);
 
             if (isInvalidTopic(channel, topic)) {
-                channel.close();
-                buf.clear();
+                disconnector.disconnect(
+                        channel,
+                        null, //already logged
+                        "Sent SUBSCRIBE with an invalid topic filter",
+                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        "Sent SUBSCRIBE with invalid topic filter");
                 return null;
             }
 
             if (buf.readableBytes() == 0) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a subscribe message which contained no QoS. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Sent SUBSCRIBE without QoS");
-                channel.close();
+                disconnector.disconnect(channel,
+                        "A client (IP: {}) sent a SUBSCRIBE message without QoS. Disconnecting client.",
+                        "Sent SUBSCRIBE without QoS",
+                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        ReasonStrings.DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_NO_QOS);
                 buf.clear();
                 return null;
             }
             final int qos = buf.readByte();
             if (qos < 0 || qos > 2) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a subscribe message which contained an invalid QoS subscription. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid SUBSCRIBE QoS");
-                channel.close();
+                disconnector.disconnect(channel,
+                        "A client (IP: {}) sent a SUBSCRIBE with an invalid qos '3'. This is not allowed. Disconnecting client.",
+                        "Invalid SUBSCRIBE with invalid qos '3'",
+                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        ReasonStrings.DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_QOS_3);
                 buf.clear();
                 return null;
             }

@@ -17,11 +17,17 @@ package com.hivemq.mqtt.ioc;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Injector;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.SingletonModule;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
+import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
+
+import javax.inject.Singleton;
 
 import static com.hivemq.configuration.service.InternalConfigurations.MQTT_EVENT_EXECUTOR_THREAD_COUNT;
 
@@ -45,6 +51,9 @@ public class MQTTHandlerModule extends SingletonModule<Class<MQTTHandlerModule>>
         bind(EventExecutorGroup.class).toInstance(mqttHandlerWorker);
 
         bind(MessageDroppedService.class).toInstance(persistenceInjector.getInstance(MessageDroppedService.class));
+
+        bind(MqttServerDisconnector.class).to(MqttServerDisconnectorImpl.class).in(Singleton.class);
+        bind(MqttConnacker.class).to(MqttConnackerImpl.class).in(Singleton.class);
 
     }
 }

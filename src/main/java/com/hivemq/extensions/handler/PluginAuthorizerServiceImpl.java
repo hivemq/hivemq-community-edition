@@ -33,20 +33,16 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.handler.tasks.*;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
-import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.Topics;
 import io.netty.channel.ChannelHandlerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,15 +59,11 @@ import static com.hivemq.configuration.service.InternalConfigurations.MQTT_ALLOW
 @Singleton
 public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginAuthorizerService.class);
-
     private final @NotNull Authorizers authorizers;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull ServerInformation serverInformation;
-    private final @NotNull Mqtt3ServerDisconnector mqtt3Disconnector;
-    private final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector;
-    private final @NotNull EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull ExtensionPriorityComparator extensionPriorityComparator;
     private final @NotNull IncomingPublishService incomingPublishService;
 
@@ -84,19 +76,15 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull ServerInformation serverInformation,
             final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull Mqtt3ServerDisconnector mqtt3Disconnector,
-            final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector,
-            final @NotNull EventLog eventLog,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingPublishService incomingPublishService) {
 
         this.authorizers = authorizers;
         this.asyncer = asyncer;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.serverInformation = serverInformation;
-        this.mqtt3Disconnector = mqtt3Disconnector;
-        this.mqtt5Disconnector = mqtt5Disconnector;
-        this.eventLog = eventLog;
         this.incomingPublishService = incomingPublishService;
+        this.mqttServerDisconnector = mqttServerDisconnector;
         this.extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
         this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
     }
@@ -105,27 +93,14 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
         //We first check if the topic is allowed to be published
         if (!Topics.isValidTopicToPublish(msg.getTopic())) {
-            if (log.isDebugEnabled()) {
-                final String clientId = ChannelUtils.getClientId(ctx.channel());
-                log.debug(
-                        "Client '" + clientId +
-                                "' (IP: {}) published to an invalid topic ( '{}' ). Disconnecting client.",
-                        ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), msg.getTopic());
-            }
-            disconnectByClose(ctx, "Sent PUBLISH for an invalid topic");
+            disconnectWithReasonCode(ctx, "an invalid topic ('" + msg.getTopic() + "')", "an invalid topic");
             return;
         }
 
         // if $ topics are not allowed
         if (!allowDollarTopics && Topics.isDollarTopic(msg.getTopic())) {
-            if (log.isDebugEnabled()) {
-                final String clientId = ChannelUtils.getClientId(ctx.channel());
-                log.debug(
-                        "Client '" + clientId +
-                                "' (IP: {}) published to a topic starting with '$' ( '{}' ). Disconnecting client.",
-                        ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), msg.getTopic());
-            }
-            disconnectByClose(ctx, "Sent PUBLISH for an topic that starts with '$'");
+            final String reason = "a topic that starts with '$'";
+            disconnectWithReasonCode(ctx, reason + " ('" + msg.getTopic() + "')", reason);
             return;
         }
 
@@ -164,7 +139,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
         Futures.addCallback(
                 publishProcessedFuture,
-                new PublishAuthorizationProcessedTask(msg, ctx, mqtt5Disconnector, mqtt3Disconnector,
+                new PublishAuthorizationProcessedTask(msg, ctx, mqttServerDisconnector,
                         incomingPublishService), MoreExecutors.directExecutor());
     }
 
@@ -282,7 +257,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
         Futures.whenAllComplete(listenableFutures)
                 .run(
-                        new AllTopicsProcessedTask(msg, listenableFutures, ctx, mqtt5Disconnector, mqtt3Disconnector),
+                        new AllTopicsProcessedTask(msg, listenableFutures, ctx, mqttServerDisconnector),
                         MoreExecutors.directExecutor());
     }
 
@@ -297,9 +272,15 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         return clientAuthorizers;
     }
 
-    private void disconnectByClose(final ChannelHandlerContext ctx, final @NotNull String reason) {
+    private void disconnectWithReasonCode(final @NotNull ChannelHandlerContext ctx, @NotNull final String logReason, final @NotNull String reasonString) {
         if (ctx.channel().isActive()) {
-            eventLog.clientWasDisconnected(ctx.channel(), reason);
+            final String logMessage = "Client (IP: {}) sent PUBLISH for " + logReason + ". This is not allowed. Disconnecting client.";
+            final String reasonMessage = "Sent PUBLISH for " + reasonString;
+            mqttServerDisconnector.disconnect(ctx.channel(),
+                    logMessage,
+                    reasonMessage,
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    reasonMessage);
             ctx.close();
         }
     }

@@ -20,13 +20,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
-import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -37,21 +34,18 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
 
     private final @NotNull PUBLISH publish;
     private final @NotNull ChannelHandlerContext ctx;
-    private final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector;
-    private final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull IncomingPublishService incomingPublishService;
 
     public PublishAuthorizationProcessedTask(
             final @NotNull PUBLISH publish,
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector,
-            final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingPublishService incomingPublishService) {
 
         this.publish = publish;
         this.ctx = ctx;
-        this.mqtt5ServerDisconnector = mqtt5ServerDisconnector;
-        this.mqtt3ServerDisconnector = mqtt3ServerDisconnector;
+        this.mqttServerDisconnector = mqttServerDisconnector;
         this.incomingPublishService = incomingPublishService;
     }
 
@@ -109,19 +103,11 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
         final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "'. Disconnecting client from extension.";
         final String eventLogMessage = "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "', extension requested disconnect";
 
-        if (ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get() == ProtocolVersion.MQTTv5) {
-            mqtt5ServerDisconnector.disconnect(ctx.channel(),
-                    logMessage,
-                    eventLogMessage,
-                    output != null ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
-                    output != null ? output.getReasonString() : null);
-        } else {
-            mqtt3ServerDisconnector.disconnect(ctx.channel(),
-                    logMessage,
-                    eventLogMessage,
-                    null,
-                    null);
-        }
+        mqttServerDisconnector.disconnect(ctx.channel(),
+                logMessage,
+                eventLogMessage,
+                output != null ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                output != null ? output.getReasonString() : null);
     }
 
     private String getReasonString(@NotNull final PUBLISH publish) {

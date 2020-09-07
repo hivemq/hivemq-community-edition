@@ -15,12 +15,14 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
@@ -34,8 +36,8 @@ public class NonSslHandlerTest {
 
     private EmbeddedChannel channel;
 
-    @Mock
-    private EventLog eventLog;
+
+    private MqttServerDisconnector disconnector;
 
     private static final byte[] VALID_SSL_PACKET = {
             22, 3, 3, 1, 42, 1, 0, 1, 38, 3, 3, 54, -41, -98, 66, -38, 61, 6, -46, 107, -62, 115, 33, 110, 94, -82,
@@ -70,7 +72,8 @@ public class NonSslHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.pipeline().addLast(new NonSslHandler(eventLog));
+        disconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
+        channel.pipeline().addLast(new NonSslHandler(disconnector));
     }
 
     @Test

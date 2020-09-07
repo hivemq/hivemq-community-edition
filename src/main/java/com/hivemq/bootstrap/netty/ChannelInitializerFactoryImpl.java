@@ -15,9 +15,9 @@
  */
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.initializer.*;
 import com.hivemq.configuration.service.entity.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.security.ssl.NonSslHandler;
 import com.hivemq.security.ssl.SslFactory;
@@ -83,24 +83,24 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
 
     @NotNull
     protected AbstractChannelInitializer createTcpInitializer(@NotNull final TcpListener listener) {
-        return new TcpChannelInitializer(channelDependencies, listener, nonSslHandlerProvider, eventLog);
+        return new TcpChannelInitializer(channelDependencies, listener, nonSslHandlerProvider);
     }
 
     @NotNull
     protected AbstractChannelInitializer createTlsTcpInitializer(@NotNull final TlsTcpListener listener) {
         sslFactory.verifySslAtBootstrap(listener, listener.getTls());
-        return new TlsTcpChannelInitializer(channelDependencies, listener, sslFactory, eventLog);
+        return new TlsTcpChannelInitializer(channelDependencies, listener, sslFactory);
     }
 
     @NotNull
     protected AbstractChannelInitializer createWebsocketInitializer(@NotNull final WebsocketListener listener) {
-        return new WebsocketChannelInitializer(channelDependencies, listener, nonSslHandlerProvider, eventLog);
+        return new WebsocketChannelInitializer(channelDependencies, listener, nonSslHandlerProvider);
     }
 
     @NotNull
     protected AbstractChannelInitializer createTlsWebsocketInitializer(@NotNull final TlsWebsocketListener listener) {
         sslFactory.verifySslAtBootstrap(listener, listener.getTls());
-        return new TlsWebsocketChannelInitializer(channelDependencies, listener, sslFactory, eventLog);
+        return new TlsWebsocketChannelInitializer(channelDependencies, listener, sslFactory);
     }
 
 }

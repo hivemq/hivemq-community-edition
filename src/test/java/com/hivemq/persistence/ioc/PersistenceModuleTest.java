@@ -29,6 +29,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.services.InternalPublishService;
@@ -108,6 +109,7 @@ public class PersistenceModuleTest {
                 bind(SingleWriterService.class).toInstance(Mockito.mock(SingleWriterService.class));
                 bind(EventLog.class).toInstance(Mockito.mock(EventLog.class));
                 bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
+                bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
             }
         });
 

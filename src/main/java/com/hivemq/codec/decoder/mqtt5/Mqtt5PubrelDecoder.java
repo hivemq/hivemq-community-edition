@@ -20,14 +20,13 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
-import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
@@ -45,18 +44,15 @@ public class Mqtt5PubrelDecoder extends AbstractMqttDecoder<PUBREL> {
 
     @VisibleForTesting
     @Inject
-    public Mqtt5PubrelDecoder(final Mqtt5ServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
+    public Mqtt5PubrelDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
     }
 
     @Override
-    public PUBREL decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public PUBREL decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) disconnected with an invalid fixed header. Disconnecting client.",
-                    "Invalid PUBREL fixed header", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_PUBREL_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.PUBREL);
             return null;
         }
 

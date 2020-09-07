@@ -18,6 +18,8 @@ package com.hivemq.mqtt.ioc;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedServiceImpl;
 import org.junit.Before;
@@ -45,6 +47,7 @@ public class MQTTHandlerModuleTest {
                 final Injector persistenceInjector = mock(Injector.class);
                 when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(MessageDroppedServiceImpl.class));
                 install(new MQTTHandlerModule(persistenceInjector));
+                bindScope(LazySingleton.class, LazySingletonScope.get());
             }
         });
     }

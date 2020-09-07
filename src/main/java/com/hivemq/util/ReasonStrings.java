@@ -64,6 +64,8 @@ public class ReasonStrings {
 
     public static final String CONNACK_QOS_NOT_SUPPORTED_WILL = "Quality of service level of Will message in CONNECT exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
     public static final String CONNACK_QOS_NOT_SUPPORTED_PUBLISH = "Quality of service level of PUBLISH exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
+    public static final String CONNACK_CONNECTION_RATE_EXCEEDED = "The connection rate was exceeded";
+    public static final String CONNACK_CONNECT_TIMED_OUT = "Connect timed out";
 
     public static final String DISCONNECT_MALFORMED_USER_PROPERTY = "%s containing a malformed user property was sent.";
     public static final String DISCONNECT_MALFORMED_UTF8_LENGTH = "%s with incorrect UTF-8 String length for %s was sent.";
@@ -80,13 +82,12 @@ public class ReasonStrings {
     public static final String DISCONNECT_MALFORMED_PROPERTIES_LENGTH = "%s with malformed properties length was sent.";
     public static final String DISCONNECT_MALFORMED_PROPERTY_IDENTIFIER = "%s with invalid property identifier was sent.";
     public static final String DISCONNECT_MALFORMED_PUBLISH_QOS_3 = "PUBLISH with quality of service set to '3' was sent.";
-    public static final String DISCONNECT_MALFORMED_AUTH_HEADER = "AUTH with incorrect fixed header was sent.";
-    public static final String DISCONNECT_MALFORMED_SUBSCRIBE_HEADER = "SUBSCRIBE with incorrect fixed header was sent.";
-    public static final String DISCONNECT_MALFORMED_UNSUBSCRIBE_HEADER = "UNSUBSCRIBE with incorrect fixed header was sent.";
+    public static final String DISCONNECT_MALFORMED_FIXED_HEADER = "%s with incorrect fixed header was sent.";
     public static final String DISCONNECT_MALFORMED_AUTH_DATA = "AUTH with malformed authentication data was sent.";
     public static final String DISCONNECT_MALFORMED_SUBSCRIPTION_OPTIONS = "SUBSCRIBE with malformed subscription options was sent.";
     public static final String DISCONNECT_MALFORMED_UTF8_STRING = "%s with malformed UTF-8 String for %s was sent.";
 
+    public static final String DISCONNECT_PROTOCOL_ERROR_MESSAGE_ID = "%s without message id was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD = "%s with invalid authentication method was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_FIXED_HEADER = "Sent DISCONNECT with invalid fixed header.";
     public static final String DISCONNECT_PROTOCOL_ERROR_SESSION_EXPIRY = "Sent DISCONNECT with invalid session expiry interval. Session expiry was set to zero on CONNECT and DISCONNECT contained a different value. This is a protocol violation.";
@@ -98,12 +99,14 @@ public class ReasonStrings {
     public static final String DISCONNECT_PROTOCOL_ERROR_PUBLISH_QOS_0_DP = "PUBLISH with quality of service set to '0' and DUP flag set to true was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_PUBLISH_SUBSCRIPTION_IDENTIFIER = "PUBLISH containing subscription identifiers was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_PUBACK_HEADER = "PUBACK with incorrect fixed header was sent.";
-    public static final String DISCONNECT_PROTOCOL_ERROR_PUBCOMP_HEADER = "PUBCOMP with incorrect fixed header was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBREC_HEADER = "PUBREC with incorrect fixed header was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_PUBREL_HEADER = "PUBREL with incorrect fixed header was sent.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_PUBCOMP_HEADER = "PUBCOMP with incorrect fixed header was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTIONS = "SUBSCRIBE with zero subscriptions was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTION_OPTIONS = "SUBSCRIBE with no subscription options was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_SHARED_SUBSCRIPTION_NO_LOCAL = "SUBSCRIBE with a shared subscription and the no local flag set to true was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIPTION_IDENTIFIER_ZERO = "SUBSCRIBE with a subscription identifier of '0' was sent. This is a protocol violation.";
+    public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_NO_QOS = "SUBSCRIBE without a quality of service level was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_QOS_3 = "SUBSCRIBE with a quality of service level set to '3' was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_RETAIN_HANDLING_3 = "SUBSCRIBE with retain handling set to '3' was sent. This is a protocol violation.";
     public static final String DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_NO_TOPIC_FILTERS = "UNSUBSCRIBE containing no topic filters was sent. This is a protocol violation.";
@@ -111,21 +114,35 @@ public class ReasonStrings {
 
     public static final String DISCONNECT_RECEIVE_MAXIMUM_EXCEEDED = "Too many concurrent PUBLISH messages sent.";
 
+    public static final String DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY = "Shared subscription with empty topic.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ZERO = "PUBLISH containing topic alias of '0' was sent.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_TOO_LARGE = "Topic alias in PUBLISH sent was too large.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_UNMAPPED = "Topic alias in PUBLISH could not be mapped.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_HARD_LIMIT = "Topic alias in PUBLISH exceeds the global memory hard limit.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ABSENT = "PUBLISH missing both topic name and topic alias was sent.";
 
+    public static final String DISCONNECT_MESSAGE_TYPE_ZERO = "Message type '0' is not allowed.";
+    public static final String DISCONNECT_CONNACK_RECEIVED = "CONNACK message type is not allowed.";
+    public static final String DISCONNECT_SUBACK_RECEIVED = "SUBACK message type is not allowed.";
+    public static final String DISCONNECT_UNSUBACK_RECEIVED = "UNSUBACK message type is not allowed.";
+    public static final String DISCONNECT_PINGRESP_RECEIVED = "PINGRESP message type is not allowed.";
+    public static final String DISCONNECT_MESSAGE_TYPE_FIFTEEN = "Message type '15' is not allowed.";
+    public static final String DISCONNECT_MESSAGE_TYPE_INVALID = "Message type invalid.";
+    public static final String DISCONNECT_PACKET_TOO_LARGE_MESSAGE = "Size of the message sent was too large.";
     public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "User properties size of %s sent was too large.";
+    public static final String DISCONNECT_MAXIMUM_TOPIC_LENGTH_EXCEEDED = "Maximum topic length configured at the broker exceeded.";
 
     public static final String DISCONNECT_PAYLOAD_FORMAT_INVALID_PUBLISH = "PUBLISH with no valid UTF-8 payload was sent.";
 
     public static final String DISCONNECT_RETAIN_NOT_SUPPORTED = "PUBLISH with retain flag set to true was sent. The broker does not allow this.";
 
     public static final String DISCONNECT_SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED = "Disconnecting client. SUBSCRIBE containing subscription identifiers was sent. The broker does not allow this.";
+    public static final String DISCONNECT_WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED = "Disconnecting client. SUBSCRIBE containing wildcard characters (#/+) was sent. The broker does not allow this.";
+    public static final String DISCONNECT_SHARED_SUBSCRIPTIONS_NOT_SUPPORTED = "Disconnecting client. SUBSCRIBE containing shared subscriptions was sent. The broker does not allow this.";
 
     public static final String DISCONNECT_SESSION_TAKEN_OVER = "Another client connected with the same client id.";
+
+    public static final String DISCONNECT_KEEP_ALIVE_TIMEOUT = "The client was idle for too long without sending an MQTT control packet";
 
     public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
     public static final String UNSUBACK_EXTENSION_PREVENTED = "UNSUBSCRIBE prevented by an extension.";
@@ -144,6 +161,8 @@ public class ReasonStrings {
     public static final String RE_AUTH_FAILED_EXCEPTION = "Re-authentication failed, exception in authenticator";
     public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client";
     public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client";
+
+    public static final String CLOSE_MALFORMED_REMAINING_LENGTH = "Message with not enough remaining read buffer length was sent.";
 
     private ReasonStrings() {
         //Don't instantiate

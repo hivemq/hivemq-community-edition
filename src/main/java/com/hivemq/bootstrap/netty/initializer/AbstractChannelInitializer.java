@@ -21,10 +21,11 @@ import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -55,16 +56,12 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     private final ChannelDependencies channelDependencies;
     @NotNull
     private final Listener listener;
-    @NotNull
-    private final EventLog eventLog;
 
     public AbstractChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
-            @NotNull final Listener listener,
-            @NotNull final EventLog eventLog) {
+            @NotNull final Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
-        this.eventLog = eventLog;
     }
 
     @Override
@@ -83,7 +80,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         addNoConnectIdleHandler(ch);
 
-        ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(eventLog));
+        ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(channelDependencies.getMqttServerDisconnector()));
         ch.pipeline().addLast(MQTT_SUBSCRIBE_MESSAGE_BARRIER, new SubscribeMessageBarrier());
 
         // before connack outbound interceptor as it initializes the client context after the connack
@@ -162,19 +159,21 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     protected abstract void addSpecialHandlers(@NotNull final Channel ch) throws Exception;
 
     @Override
-    public void exceptionCaught(final ChannelHandlerContext ctx, @NotNull final Throwable cause) throws Exception {
+    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, @NotNull final Throwable cause) throws Exception {
         if (cause instanceof SslException) {
             log.error(
                     "{}. Disconnecting client {} ", cause.getMessage(),
                     ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
             log.debug("Original exception:", cause);
-            if (cause.getMessage() != null) {
-                eventLog.clientWasDisconnected(ctx.channel(), cause.getMessage());
-            } else {
-                eventLog.clientWasDisconnected(ctx.channel(), "TLS connection initialization failed.");
-            }
             //We need to close the channel because the initialization wasn't successful
-            ctx.close();
+            channelDependencies.getMqttServerDisconnector().disconnect(ctx.channel(),
+                    null, //already logged
+                    cause.getMessage() != null ? cause.getMessage() : "TLS connection initialization failed.",
+                    Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES,
+                    false,
+                    true);
         } else {
 
             //Just use the default handler

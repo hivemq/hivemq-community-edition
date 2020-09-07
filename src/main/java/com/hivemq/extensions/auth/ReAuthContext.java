@@ -20,7 +20,7 @@ import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnAuthSuccessEvent;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -36,7 +36,7 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
-    private final @NotNull Mqtt5ServerDisconnector disconnector;
+    private final @NotNull MqttServerDisconnector disconnector;
 
     public ReAuthContext(
             final @NotNull String identifier,
@@ -44,7 +44,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
             final @NotNull MqttAuthSender authSender,
             final int authenticatorsCount,
             final @NotNull ReAuthOutput output,
-            final @NotNull Mqtt5ServerDisconnector disconnector) {
+            final @NotNull MqttServerDisconnector disconnector) {
 
         super(identifier, ctx, authSender, authenticatorsCount, output);
         this.disconnector = disconnector;
@@ -87,7 +87,8 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 output.getReasonCode(),
                 output.getReasonString(),
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
-                true);
+                true,
+                false);
     }
 
     @Override
@@ -99,7 +100,8 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
     }
 
     @Override
@@ -111,7 +113,8 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
     }
 
     @Override
@@ -123,7 +126,8 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_SEND_EXCEPTION,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
     }
 
     private void applyClientSettings(

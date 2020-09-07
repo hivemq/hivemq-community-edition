@@ -16,6 +16,10 @@
 package com.hivemq.codec.encoder;
 
 import com.hivemq.codec.encoder.mqtt3.Mqtt3SubackEncoder;
+import com.hivemq.configuration.HivemqId;
+import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
@@ -26,6 +30,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockitoAnnotations;
 
 import java.nio.channels.ClosedChannelException;
 import java.util.ArrayList;
@@ -43,7 +48,10 @@ public class Mqtt3SubackEncoderTest {
 
     @Before
     public void setUp() throws Exception {
-        mqtt3SubackEncoder = new Mqtt3SubackEncoder();
+        MockitoAnnotations.initMocks(this);
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
+
+        mqtt3SubackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
         channel = new EmbeddedChannel(mqtt3SubackEncoder);
 
     }

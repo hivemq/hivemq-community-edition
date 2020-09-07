@@ -16,7 +16,10 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -28,6 +31,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 import util.TestMessageUtil;
 
@@ -47,7 +51,10 @@ public class MessageBarrierTest {
 
     @Before
     public void before() {
-        messageBarrier = new MessageBarrier(new EventLog());
+        MockitoAnnotations.initMocks(this);
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
+
+        messageBarrier = new MessageBarrier(mqttServerDisconnector);
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
         embeddedChannel.pipeline().addFirst(MQTT_MESSAGE_BARRIER, messageBarrier);
     }

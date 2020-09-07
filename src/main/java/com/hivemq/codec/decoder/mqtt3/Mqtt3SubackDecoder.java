@@ -17,44 +17,40 @@ package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.codec.decoder.MqttDecoder;
-import com.hivemq.logging.EventLog;
+import com.hivemq.codec.decoder.AbstractMqttDecoder;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
  * @author Lukas Brandl
  */
 @LazySingleton
-public class Mqtt3SubackDecoder extends MqttDecoder<SUBACK> {
-
-    private static final Logger log = LoggerFactory.getLogger(Mqtt3PubackDecoder.class);
-
-    private final EventLog eventLog;
+public class Mqtt3SubackDecoder extends AbstractMqttDecoder<SUBACK> {
 
     @Inject
-    public Mqtt3SubackDecoder(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public Mqtt3SubackDecoder(final @NotNull MqttServerDisconnector disconnector,
+                              final @NotNull FullConfigurationService fullConfigurationService) {
+        super(disconnector, fullConfigurationService);
     }
 
     @Override
-    public SUBACK decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public SUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
         if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
             if (!validateHeader(header)) {
-                log.error("A client (IP: {}) sent a Suback with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                eventLog.clientWasDisconnected(channel, "Invalid SUBACK fixed header");
-                channel.close();
+                disconnectByInvalidFixedHeader(channel, MessageType.SUBACK);
                 buf.clear();
                 return null;
             }
@@ -65,9 +61,11 @@ public class Mqtt3SubackDecoder extends MqttDecoder<SUBACK> {
         while (buf.isReadable()) {
             final byte qos = buf.readByte();
             if (qos < 0 || qos > 2) {
-                log.error("A client (IP: {}) sent a suback which contained an invalid QoS. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                eventLog.clientWasDisconnected(channel, "Invalid SUBACK qos");
-                channel.close();
+                disconnector.disconnect(channel,
+                        "A client (IP: {}) sent a SUBACK with an invalid QoS. Disconnecting client.",
+                        "Sent SUBACK with invalid QoS",
+                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        null); // hivemq never sends SUBACKs reason string
                 buf.clear();
                 return null;
             }

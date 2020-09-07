@@ -15,9 +15,11 @@
  */
 package com.hivemq.mqtt.handler.auth;
 
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
+import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
+import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -27,6 +29,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,11 +55,10 @@ public class AuthInProgressMessageHandlerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog);
-
-        connacker = new MqttConnacker(connackSendUtil);
+        connacker = new MqttConnackerImpl(eventLog, new HivemqId());
 
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         channel.pipeline().addFirst(new AuthInProgressMessageHandler(connacker));
     }
 

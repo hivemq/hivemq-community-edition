@@ -17,11 +17,14 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -84,10 +87,15 @@ public class TlsWebsocketChannelInitializerTest {
 
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
+        when(socketChannel.isActive()).thenReturn(true);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(mockListener.getTls()).thenReturn(tls);
         when(ssl.getSslHandler(any(SocketChannel.class), any(Tls.class))).thenReturn(sslHandler);
+
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+
+        when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
     }
 
     @Test
@@ -99,7 +107,7 @@ public class TlsWebsocketChannelInitializerTest {
                 .tls(TlsTestUtil.createDefaultTLS())
                 .build();
 
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl, eventLog);
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl);
 
         pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
 

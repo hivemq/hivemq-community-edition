@@ -15,10 +15,10 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelInitializerFactoryImpl;
 import com.hivemq.configuration.service.entity.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.security.ssl.NonSslHandler;
 import com.hivemq.security.ssl.SslFactory;
@@ -199,7 +199,7 @@ public class ChannelInitializerFactoryImplTest {
         private final String type;
 
         public FakeAbstractChannelInitializer(final ChannelDependencies channelDependencies, final String type) {
-            super(channelDependencies, new FakeListener(), eventLog);
+            super(channelDependencies, new FakeListener());
             this.type = type;
         }
 

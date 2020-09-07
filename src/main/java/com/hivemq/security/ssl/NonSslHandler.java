@@ -16,13 +16,12 @@
 package com.hivemq.security.ssl;
 
 import com.google.inject.Inject;
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.ssl.SslHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -31,17 +30,15 @@ import java.util.List;
  */
 public class NonSslHandler extends ByteToMessageDecoder {
 
-    private static final Logger log = LoggerFactory.getLogger(NonSslHandler.class);
-
-    private final EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    public NonSslHandler(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public NonSslHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @Override
-    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws Exception {
+    protected void decode(final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf in, final @NotNull List<Object> out) throws Exception {
 
         //Needs minimum 5 bytes to be able to tell what it is.
         if (in.readableBytes() < 11) {
@@ -59,10 +56,10 @@ public class NonSslHandler extends ByteToMessageDecoder {
                 in.getUnsignedByte(10) == 'T';
 
         if (encrypted && !(isConnectPacket && isMqttPacket)) {
-            log.debug("SSL connection on non-SSL listener, dropping connection.");
+            mqttServerDisconnector.logAndClose(ctx.channel(),
+                    "SSL connection on non-SSL listener, dropping connection for client with IP '{}'",
+                    "SSL connection to non-SSL listener");
             in.clear();
-            eventLog.clientWasDisconnected(ctx.channel(), "SSL connection to non-SSL listener");
-            ctx.close();
             return;
         }
 

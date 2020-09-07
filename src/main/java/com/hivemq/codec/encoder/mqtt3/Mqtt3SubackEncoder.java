@@ -15,9 +15,12 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.util.ChannelAttributes;
@@ -40,6 +43,12 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
 
     private static final byte SUBACK_FIXED_HEADER = (byte) 0b1001_0000;
     public static final int VARIABLE_HEADER_SIZE = 2;
+
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+
+    public Mqtt3SubackEncoder(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
+    }
 
     @Override
     public void encode(final ChannelHandlerContext ctx, final SUBACK msg, final ByteBuf out) {
@@ -71,21 +80,42 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
 
         if (grantedQos.size() == 0) {
             log.error("Tried to write a SUBACK with empty payload to a client. Disconnecting client (IP: {}).", getChannelIP(ctx.channel()).or("UNKNOWN"));
-            ctx.channel().close();
+            mqttServerDisconnector.disconnect(ctx.channel(),
+                    null, //already logged
+                    "Tried to write a SUBACK with empty payload to a client.",
+                    Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES,
+                    false,
+                    true);
             return true;
         }
 
         for (final Mqtt5SubAckReasonCode granted : grantedQos) {
             if ((granted.getCode() >= 128) && (protocolVersion == ProtocolVersion.MQTTv3_1)) {
                 log.error("Tried to write a failure code (0x80) to a MQTT 3.1 subscriber. Disconnecting client (IP: {}).", getChannelIP(ctx.channel()).or("UNKNOWN"));
-                ctx.close();
+                mqttServerDisconnector.disconnect(ctx.channel(),
+                        null, //already logged
+                        "Tried to write a failure code (0x80) to a MQTT 3.1 subscriber.",
+                        Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
+                        null,
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        false,
+                        true);
                 return true;
             } else if (granted != GRANTED_QOS_0 &&
                     granted != GRANTED_QOS_1 &&
                     granted != GRANTED_QOS_2 &&
                     granted.getCode() < 128) {
                 log.error("Tried to write an invalid SUBACK return code to a subscriber. Disconnecting client (IP: {}).", getChannelIP(ctx.channel()).or("UNKNOWN"));
-                ctx.close();
+                mqttServerDisconnector.disconnect(ctx.channel(),
+                        null, //already logged
+                        "Tried to write an invalid SUBACK return code to a subscriber.",
+                        Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
+                        null,
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        false,
+                        true);
                 return true;
             }
         }

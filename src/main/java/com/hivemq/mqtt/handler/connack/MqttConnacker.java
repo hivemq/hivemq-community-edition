@@ -15,33 +15,39 @@
  */
 package com.hivemq.mqtt.handler.connack;
 
-import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
-
-import javax.inject.Inject;
 
 /**
  * @author Florian Limpöck
  */
-public class MqttConnacker {
+public interface MqttConnacker {
 
-    private final boolean connackWithReasonCode;
-    private final boolean connackWithReasonString;
-    private final @NotNull MqttConnackSendUtil connackSendUtil;
-
-    @Inject
-    public MqttConnacker(final @NotNull MqttConnackSendUtil connackSendUtil) {
-        this.connackWithReasonCode = InternalConfigurations.CONNACK_WITH_REASON_CODE;
-        this.connackWithReasonString = InternalConfigurations.CONNACK_WITH_REASON_STRING;
-        this.connackSendUtil = connackSendUtil;
-    }
+    /**
+     * Send a connack with optional reason code and reason string.
+     * <p>
+     * log a message to console, file and event log.
+     * <p>
+     * close the channel.
+     * <p>
+     * for connack at authentication or with userproperties use:
+     * {@link #connackError(Channel, String, String, Mqtt5ConnAckReasonCode, String, Mqtt5UserProperties, boolean)}
+     *
+     * @param channel         the Channel of the mqtt client
+     * @param logMessage      the message to log
+     * @param eventLogMessage the event log message
+     * @param reasonCode      the reason code
+     * @param reasonString    the reason string
+     */
+    void connackError(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage,
+            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable String reasonString);
 
     /**
      * Send a connack with optional reason code and reason string.
@@ -50,40 +56,21 @@ public class MqttConnacker {
      * <p>
      * close the channel.
      *
-     * @param channel         the Channel of the mqtt client
-     * @param logMessage      the message to log
-     * @param eventLogMessage the event log message
-     * @param reasonCode      the reason code
-     * @param reasonString    the reason string
+     * @param channel          the Channel of the mqtt client
+     * @param logMessage       the message to log
+     * @param eventLogMessage  the event log message
+     * @param reasonCode       the reason code
+     * @param reasonString     the reason string
+     * @param userProperties   the user properties for the events and the CONNACK (Mqtt5)
+     * @param isAuthentication bad CONNACK during authentication? (important for the correct event)
      */
-    public void connackError(
+    void connackError(
             final @NotNull Channel channel,
             final @Nullable String logMessage,
             final @Nullable String eventLogMessage,
-            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
-            final @Nullable String reasonString) {
-
-        connackError(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
-    }
-
-    public void connackError(
-            final @NotNull Channel channel,
-            final @Nullable String logMessage,
-            final @Nullable String eventLogMessage,
-            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
-            final boolean isAuthentication) {
+            final boolean isAuthentication);
 
-        Preconditions.checkNotNull(channel, "Channel must never be null");
-        Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
-
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
-        connackSendUtil.logConnack(channel, logMessage, eventLogMessage);
-        if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
-            connackSendUtil.connackError(channel, connackWithReasonCode, false, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES, isAuthentication);
-        } else {
-            connackSendUtil.connackError(channel, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties, isAuthentication);
-        }
-    }
 }
