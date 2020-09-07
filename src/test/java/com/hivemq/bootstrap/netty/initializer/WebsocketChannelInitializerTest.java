@@ -18,7 +18,7 @@ package com.hivemq.bootstrap.netty.initializer;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
 import com.hivemq.configuration.service.entity.WebsocketListener;
-import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.security.ssl.NonSslHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -48,7 +48,7 @@ public class WebsocketChannelInitializerTest {
     private Provider<NonSslHandler> nonSslHandlerProvider;
 
     @Mock
-    private EventLog eventLog;
+    private MqttServerDisconnector disconnector;
 
     private ChannelPipeline pipeline;
 
@@ -59,7 +59,7 @@ public class WebsocketChannelInitializerTest {
         pipeline = new FakeChannelPipeline();
 
         when(socketChannel.pipeline()).thenReturn(pipeline);
-        when(nonSslHandlerProvider.get()).thenReturn(new NonSslHandler(eventLog));
+        when(nonSslHandlerProvider.get()).thenReturn(new NonSslHandler(disconnector));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class WebsocketChannelInitializerTest {
                 .port(0)
                 .build();
 
-        final WebsocketChannelInitializer websocketChannelInitializer = new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider, eventLog);
+        final WebsocketChannelInitializer websocketChannelInitializer = new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider);
 
         pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
 

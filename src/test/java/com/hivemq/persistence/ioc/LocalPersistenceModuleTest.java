@@ -27,6 +27,7 @@ import com.hivemq.configuration.service.*;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.ioc.MQTTServiceModule;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -225,6 +226,7 @@ public class LocalPersistenceModuleTest {
                         bind(MessageDroppedService.class).toInstance(messageDroppedService);
                         bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
                         bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
+                        bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
                     }
                 });
     }

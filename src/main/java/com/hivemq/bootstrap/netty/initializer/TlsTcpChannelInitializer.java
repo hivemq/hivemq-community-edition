@@ -15,11 +15,10 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.NoTlsHandshakeIdleHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.security.ssl.SslFactory;
@@ -46,18 +45,19 @@ public class TlsTcpChannelInitializer extends AbstractChannelInitializer {
     private final SslFactory sslFactory;
 
     @NotNull
-    private final EventLog eventLog;
-
-    @NotNull
     private final SslParameterHandler sslParameterHandler;
 
-    public TlsTcpChannelInitializer(@NotNull final ChannelDependencies channelDependencies, @NotNull final TlsTcpListener tlsTcpListener,
-                                    @NotNull final SslFactory sslFactory, @NotNull final EventLog eventLog) {
-        super(channelDependencies, tlsTcpListener, eventLog);
+    @NotNull
+    private final ChannelDependencies channelDependencies;
+
+    public TlsTcpChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
+                                    @NotNull final TlsTcpListener tlsTcpListener,
+                                    @NotNull final SslFactory sslFactory) {
+        super(channelDependencies, tlsTcpListener);
         this.tlsTcpListener = tlsTcpListener;
         this.sslFactory = sslFactory;
-        this.eventLog = eventLog;
         this.sslParameterHandler = channelDependencies.getSslParameterHandler();
+        this.channelDependencies = channelDependencies;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class TlsTcpChannelInitializer extends AbstractChannelInitializer {
 
         final int handshakeTimeout = tlsTcpListener.getTls().getHandshakeTimeout();
         final IdleStateHandler idleStateHandler = new IdleStateHandler(handshakeTimeout, 0, 0, TimeUnit.MILLISECONDS);
-        final NoTlsHandshakeIdleHandler noTlsHandshakeIdleHandler = new NoTlsHandshakeIdleHandler(eventLog);
+        final NoTlsHandshakeIdleHandler noTlsHandshakeIdleHandler = new NoTlsHandshakeIdleHandler(channelDependencies.getMqttServerDisconnector());
         if (handshakeTimeout > 0) {
             ch.pipeline().addLast(NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
             ch.pipeline().addLast(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, noTlsHandshakeIdleHandler);
@@ -90,7 +90,7 @@ public class TlsTcpChannelInitializer extends AbstractChannelInitializer {
             addNoConnectIdleHandlerAfterTlsHandshake(ch);
         });
 
-        new SslInitializer(sslHandler, tls, eventLog, sslParameterHandler).addHandlers(ch);
+        new SslInitializer(sslHandler, tls, channelDependencies.getMqttServerDisconnector(), sslParameterHandler).addHandlers(ch);
     }
 
 }

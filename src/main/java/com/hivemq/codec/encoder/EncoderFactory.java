@@ -17,11 +17,12 @@ package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.codec.encoder.mqtt3.*;
 import com.hivemq.codec.encoder.mqtt5.*;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -62,9 +63,11 @@ public class EncoderFactory {
     private final @NotNull Mqtt3EncoderFactory mqtt3Instance;
 
     @Inject
-    public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         mqtt5Instance = new Mqtt5EncoderFactory(messageDroppedService, securityConfigurationService);
-        mqtt3Instance = new Mqtt3EncoderFactory();
+        mqtt3Instance = new Mqtt3EncoderFactory(mqttServerDisconnector);
     }
 
     /**
@@ -188,47 +191,63 @@ public class EncoderFactory {
      */
     private static class Mqtt3EncoderFactory {
 
-        private static final Mqtt3ConnackEncoder CONNACK_ENCODER = new Mqtt3ConnackEncoder();
-        private static final Mqtt3PubackEncoder PUBACK_ENCODER = new Mqtt3PubackEncoder();
-        private static final Mqtt3PubrecEncoder PUBREC_ENCODER = new Mqtt3PubrecEncoder();
-        private static final Mqtt3PubrelEncoder PUBREL_ENCODER = new Mqtt3PubrelEncoder();
-        private static final Mqtt3PubcompEncoder PUBCOMP_ENCODER = new Mqtt3PubcompEncoder();
-        private static final Mqtt3SubackEncoder SUBACK_ENCODER = new Mqtt3SubackEncoder();
-        private static final Mqtt3UnsubackEncoder UNSUBACK_ENCODER = new Mqtt3UnsubackEncoder();
-        private static final Mqtt3PublishEncoder PUBLISH_ENCODER = new Mqtt3PublishEncoder();
-        private static final Mqtt3SubscribeEncoder SUBSCRIBE_ENCODER = new Mqtt3SubscribeEncoder();
-        private static final Mqtt3UnsubscribeEncoder UNSUBSCRIBE_ENCODER = new Mqtt3UnsubscribeEncoder();
-        private static final Mqtt3DisconnectEncoder DISCONNECT_ENCODER = new Mqtt3DisconnectEncoder();
-        private static final Mqtt3ConnectEncoder CONNECT_ENCODER = new Mqtt3ConnectEncoder();
-        private static final MqttPingrespEncoder PINGRESP_ENCODER = new MqttPingrespEncoder();
+        private final @NotNull Mqtt3ConnackEncoder connackEncoder;
+        private final @NotNull Mqtt3PubackEncoder pubackEncoder;
+        private final @NotNull Mqtt3PubrecEncoder pubrecEncoder;
+        private final @NotNull Mqtt3PubrelEncoder pubrelEncoder;
+        private final @NotNull Mqtt3PubcompEncoder pubcompEncoder;
+        private final @NotNull Mqtt3SubackEncoder subackEncoder;
+        private final @NotNull Mqtt3UnsubackEncoder unsubackEncoder;
+        private final @NotNull Mqtt3PublishEncoder publishEncoder;
+        private final @NotNull Mqtt3SubscribeEncoder subscribeEncoder;
+        private final @NotNull Mqtt3UnsubscribeEncoder unsubscribeEncoder;
+        private final @NotNull Mqtt3DisconnectEncoder disconnectEncoder;
+        private final @NotNull Mqtt3ConnectEncoder connectEncoder;
+        private final @NotNull MqttPingrespEncoder pingrespEncoder;
+
+        Mqtt3EncoderFactory(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+            this.connackEncoder = new Mqtt3ConnackEncoder();
+            this.pubackEncoder = new Mqtt3PubackEncoder();
+            this.pubrecEncoder = new Mqtt3PubrecEncoder();
+            this.pubrelEncoder = new Mqtt3PubrelEncoder();
+            this.pubcompEncoder = new Mqtt3PubcompEncoder();
+            this.subackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
+            this.unsubackEncoder = new Mqtt3UnsubackEncoder();
+            this.publishEncoder = new Mqtt3PublishEncoder();
+            this.subscribeEncoder = new Mqtt3SubscribeEncoder();
+            this.unsubscribeEncoder = new Mqtt3UnsubscribeEncoder();
+            this.disconnectEncoder = new Mqtt3DisconnectEncoder();
+            this.connectEncoder = new Mqtt3ConnectEncoder();
+            this.pingrespEncoder = new MqttPingrespEncoder();
+        }
 
         private @Nullable MqttEncoder getEncoder(final @NotNull Message msg) {
             if (msg instanceof PUBLISH) {
-                return PUBLISH_ENCODER;
+                return publishEncoder;
             } else if (msg instanceof PINGRESP) {
-                return PINGRESP_ENCODER;
+                return pingrespEncoder;
             } else if (msg instanceof PUBACK) {
-                return PUBACK_ENCODER;
+                return pubackEncoder;
             } else if (msg instanceof PUBREC) {
-                return PUBREC_ENCODER;
+                return pubrecEncoder;
             } else if (msg instanceof PUBREL) {
-                return PUBREL_ENCODER;
+                return pubrelEncoder;
             } else if (msg instanceof PUBCOMP) {
-                return PUBCOMP_ENCODER;
+                return pubcompEncoder;
             } else if (msg instanceof Mqtt3CONNACK) {
-                return CONNACK_ENCODER;
+                return connackEncoder;
             } else if (msg instanceof SUBACK) {
-                return SUBACK_ENCODER;
+                return subackEncoder;
             } else if (msg instanceof UNSUBACK) {
-                return UNSUBACK_ENCODER;
+                return unsubackEncoder;
             } else if (msg instanceof SUBSCRIBE) {
-                return SUBSCRIBE_ENCODER;
+                return subscribeEncoder;
             } else if (msg instanceof UNSUBSCRIBE) {
-                return UNSUBSCRIBE_ENCODER;
+                return unsubscribeEncoder;
             } else if (msg instanceof DISCONNECT) {
-                return DISCONNECT_ENCODER;
+                return disconnectEncoder;
             } else if (msg instanceof CONNECT) {
-                return CONNECT_ENCODER;
+                return connectEncoder;
             }
 
             return null;

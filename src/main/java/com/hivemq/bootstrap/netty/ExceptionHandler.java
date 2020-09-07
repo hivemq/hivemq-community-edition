@@ -15,7 +15,9 @@
  */
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -41,11 +43,11 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
-    private final EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    public ExceptionHandler(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public ExceptionHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     /* java.io.IOException: Connection reset by peer
@@ -76,8 +78,12 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
         } else if (cause instanceof CorruptedFrameException) {
 
             //We can ignore this because the channel is already closed because of an IO problem
-            eventLog.clientWasDisconnected(channel, "Illegal websocket data sent by client: " + cause.getMessage());
-            channel.close();
+            mqttServerDisconnector.disconnect(channel,
+                    "A client (IP: {}) sent illegal websocket data. Disconnecting client.",
+                    "Illegal websocket data sent by client: " + cause.getMessage(),
+                    Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                    null
+            );
             return;
 
 
@@ -91,8 +97,12 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
         }
 
         if (channel != null) {
-            eventLog.clientWasDisconnected(channel, "Channel exception: " + cause.getMessage());
-            channel.close();
+            mqttServerDisconnector.disconnect(channel,
+                    null, // already logged
+                    "Channel exception: " + cause.getMessage(),
+                    Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                    null
+            );
         }
     }
 }

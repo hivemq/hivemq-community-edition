@@ -15,10 +15,9 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.entity.WebsocketListener;
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.ssl.NonSslHandler;
 import com.hivemq.websocket.WebSocketInitializer;
 import io.netty.channel.Channel;
@@ -39,9 +38,8 @@ public class WebsocketChannelInitializer extends AbstractChannelInitializer {
 
     public WebsocketChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
                                        @NotNull final WebsocketListener websocketListener,
-                                       @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
-                                       @NotNull final EventLog eventLog) {
-        super(channelDependencies, websocketListener, eventLog);
+                                       @NotNull final Provider<NonSslHandler> nonSslHandlerProvider) {
+        super(channelDependencies, websocketListener);
         this.websocketListener = websocketListener;
         this.nonSslHandlerProvider = nonSslHandlerProvider;
     }

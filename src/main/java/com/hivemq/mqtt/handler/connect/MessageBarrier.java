@@ -17,7 +17,7 @@ package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -51,14 +51,14 @@ public class MessageBarrier extends ChannelDuplexHandler {
         }
     };
 
-    private final @NotNull EventLog eventLog;
+    private final @NotNull MqttServerDisconnector serverDisconnector;
     private final @NotNull Queue<Message> messageQueue = new LinkedList<>();
 
     private boolean connectReceived = false;
     private boolean connackSent = false;
 
-    public MessageBarrier(final @NotNull EventLog eventLog) {
-        this.eventLog = eventLog;
+    public MessageBarrier(final @NotNull MqttServerDisconnector serverDisconnector) {
+        this.serverDisconnector = serverDisconnector;
     }
 
     @Override
@@ -69,12 +69,9 @@ public class MessageBarrier extends ChannelDuplexHandler {
                 connectReceived = true;
                 suspendRead(ctx.channel());
             } else if (!connectReceived) {
-                eventLog.clientWasDisconnected(ctx.channel(), "Sent other message before CONNECT");
-                ctx.channel().close();
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Disconnecting client with IP [{}] because it sent another message before a CONNECT message", ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
-                }
+                serverDisconnector.logAndClose(ctx.channel(),
+                        "A client (IP: {}) sent other message before CONNECT. Disconnecting client.",
+                        "Sent other message before CONNECT");
                 return;
             } else if (msg instanceof AUTH) {
                 suspendRead(ctx.channel());

@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.util;
+package util;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -38,7 +41,7 @@ public class TestMessageEncoder extends MQTTMessageEncoder {
     private final PingreqEncoder pingreqEncoder;
 
     public TestMessageEncoder(final MessageDroppedService messageDroppedService, final SecurityConfigurationService securityConfigurationService) {
-        super(new EncoderFactory(messageDroppedService, securityConfigurationService));
+        super(new EncoderFactory(messageDroppedService, securityConfigurationService, new MqttServerDisconnectorImpl(new EventLog(), new HivemqId())));
         pingreqEncoder = new PingreqEncoder();
     }
 

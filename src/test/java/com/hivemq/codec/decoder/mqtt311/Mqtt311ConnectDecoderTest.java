@@ -22,11 +22,10 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -81,9 +80,8 @@ public class Mqtt311ConnectDecoderTest {
 
         hiveMQId = new HivemqId();
         decoder = new Mqtt311ConnectDecoder(connacker,
-                new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
-                eventLog,
-                new ClientIds(hiveMQId), new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(hiveMQId),
+                new TestConfigurationBootstrap().getFullConfigurationService(),
                 hiveMQId);
     }
 
@@ -295,8 +293,8 @@ public class Mqtt311ConnectDecoderTest {
 
         final CONNECT connectPacket = decoder.decode(channel, buf, fixedHeader);
 
-        assertFalse(channel.isActive());
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        assertNull(connectPacket);
+        verify(connacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID), anyString());
     }
 
     @Test

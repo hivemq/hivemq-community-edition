@@ -21,7 +21,8 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
@@ -45,18 +46,14 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @VisibleForTesting
     @Inject
-    public Mqtt5UnsubscribeDecoder(final Mqtt5ServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
+    public Mqtt5UnsubscribeDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
     }
 
     @Override
-    public UNSUBSCRIBE decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public UNSUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
         if ((header & 0b0000_1111) != 2) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a UNSUBSCRIBE with an invalid fixed header. Disconnecting client.",
-                    "Invalid UNSUBSCRIBE fixed header",
-                    Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.DISCONNECT_MALFORMED_UNSUBSCRIBE_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
             return null;
         }
 
@@ -83,17 +80,14 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         while ((readPropertyLength = buf.readerIndex() - propertiesStartIndex) < propertiesLength) {
 
             final int propertyIdentifier = buf.readByte();
-
-            switch (propertyIdentifier) {
-                case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(channel, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
-                    if (userPropertiesBuilder == null) {
-                        return null;
-                    }
-                    break;
-                default:
-                    disconnectByInvalidPropertyIdentifier(channel, propertyIdentifier, MessageType.UNSUBSCRIBE);
+            if (propertyIdentifier == USER_PROPERTY) {
+                userPropertiesBuilder = readUserProperty(channel, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
+                if (userPropertiesBuilder == null) {
                     return null;
+                }
+            } else {
+                disconnectByInvalidPropertyIdentifier(channel, propertyIdentifier, MessageType.UNSUBSCRIBE);
+                return null;
             }
         }
 
@@ -104,7 +98,7 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
         if (!buf.isReadable()) {
             disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a UNSUBSCRIBE without topic filters. This is not allowed. Disconnecting client.",
+                    "A client (IP: {}) sent an UNSUBSCRIBE without topic filters. This is not allowed. Disconnecting client.",
                     "Sent UNSUBSCRIBE without topic filters",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_NO_TOPIC_FILTERS);
@@ -131,7 +125,7 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
             disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a UNSUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
+                    "A client (IP: {}) sent an UNSUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
                     "Sent UNSUBSCRIBE with message id = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_PACKET_ID_0);
         }

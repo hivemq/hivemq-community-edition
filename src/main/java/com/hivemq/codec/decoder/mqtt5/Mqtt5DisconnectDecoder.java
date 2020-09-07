@@ -20,7 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -52,19 +53,17 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
     @VisibleForTesting
     @Inject
     public Mqtt5DisconnectDecoder(
-            final Mqtt5ServerDisconnector errorHandler, final FullConfigurationService fullConfigurationService) {
-        super(errorHandler, fullConfigurationService);
+            final MqttServerDisconnector disconnector,
+            final FullConfigurationService fullConfigurationService) {
+        super(disconnector, fullConfigurationService);
         maxSessionExpiryInterval = fullConfigurationService.mqttConfiguration().maxSessionExpiryInterval();
     }
 
     @Override
-    public DISCONNECT decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public DISCONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) disconnected with an invalid fixed header. Disconnecting client.",
-                    "Invalid DISCONNECT fixed header", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_FIXED_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.DISCONNECT);
             return null;
         }
 

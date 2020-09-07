@@ -19,7 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -53,14 +53,14 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
 
     private final @NotNull MqttConnacker connacker;
     private final @NotNull MqttAuthSender authSender;
-    private final @NotNull Mqtt5ServerDisconnector disconnector;
+    private final @NotNull MqttServerDisconnector disconnector;
     private final @NotNull PluginAuthenticatorService authService;
 
     @Inject
     public AuthHandler(
             final @NotNull MqttConnacker connacker,
             final @NotNull MqttAuthSender authSender,
-            final @NotNull Mqtt5ServerDisconnector disconnector,
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull PluginAuthenticatorService authService) {
 
         this.connacker = connacker;
@@ -103,7 +103,8 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     reasonString,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    true);
+                    true,
+                    false);
         } else {
             connacker.connackError(
                     ctx.channel(),
@@ -131,7 +132,8 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                         reasonString,
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
-                        true);
+                        true,
+                        false);
             } else {
                 connacker.connackError(
                         ctx.channel(),

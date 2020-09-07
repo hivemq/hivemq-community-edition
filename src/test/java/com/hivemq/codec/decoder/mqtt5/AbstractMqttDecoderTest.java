@@ -15,8 +15,7 @@
  */
 package com.hivemq.codec.decoder.mqtt5;
 
-
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +29,7 @@ public class AbstractMqttDecoderTest {
 
     @Before
     public void setUp() {
-        logCapture = LogbackCapturingAppender.Factory.weaveInto(MqttDisconnectUtil.log);
+        logCapture = LogbackCapturingAppender.Factory.weaveInto(MqttServerDisconnectorImpl.log);
         createChannel();
     }
 

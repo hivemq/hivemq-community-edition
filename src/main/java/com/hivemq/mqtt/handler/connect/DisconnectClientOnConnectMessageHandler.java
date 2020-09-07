@@ -56,7 +56,7 @@ public class DisconnectClientOnConnectMessageHandler extends SimpleChannelInboun
     protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) throws Exception {
 
         if (log.isDebugEnabled()) {
-            log.debug("The client with id {} and IP {} sent a second MQTT CONNECT message. This is not allowed. Disconnecting client", msg.getClientIdentifier(), getChannelIP(ctx.channel()).or("UNKNOWN"));
+            log.debug("The client with id {} and IP {} sent a second MQTT CONNECT message. This is not allowed. Disconnecting client.", msg.getClientIdentifier(), getChannelIP(ctx.channel()).or("UNKNOWN"));
         }
         eventLog.clientWasDisconnected(ctx.channel(), "Sent second CONNECT message");
         ctx.channel().close();

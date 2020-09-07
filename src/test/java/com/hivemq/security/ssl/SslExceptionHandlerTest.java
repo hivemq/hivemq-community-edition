@@ -15,12 +15,16 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.NotSslRecordException;
 import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -50,6 +54,9 @@ public class SslExceptionHandlerTest {
     Attribute<String> clientIdAttribute;
 
     @Mock
+    Attribute attribute;
+
+    @Mock
     EventLog eventLog;
 
     SslExceptionHandler sslExceptionHandler;
@@ -58,15 +65,20 @@ public class SslExceptionHandlerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
+        when(channel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(clientIdAttribute);
+        when(channel.isActive()).thenReturn(true);
         when(clientIdAttribute.get()).thenReturn("client");
-        sslExceptionHandler = new SslExceptionHandler(eventLog);
+
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+
+        sslExceptionHandler = new SslExceptionHandler(mqttServerDisconnector);
     }
 
     @Test
     public void test_ignorable_exception() throws Exception {
         sslExceptionHandler.exceptionCaught(ctx, new NotSslRecordException());
-        verify(ctx).close();
+        verify(channel).close();
         verify(ctx, never()).fireExceptionCaught(any(Throwable.class));
     }
 
@@ -74,7 +86,7 @@ public class SslExceptionHandlerTest {
     public void test_handshake_exception() throws Exception {
         when(throwable.getCause()).thenReturn(new SSLHandshakeException(""));
         sslExceptionHandler.exceptionCaught(ctx, throwable);
-        verify(ctx).close();
+        verify(channel).close();
         verify(ctx, never()).fireExceptionCaught(any(Throwable.class));
     }
 
@@ -82,14 +94,14 @@ public class SslExceptionHandlerTest {
     public void test_ssl_exception() throws Exception {
         when(throwable.getCause()).thenReturn(new SSLException(""));
         sslExceptionHandler.exceptionCaught(ctx, throwable);
-        verify(ctx).close();
+        verify(channel).close();
         verify(ctx, never()).fireExceptionCaught(any(Throwable.class));
     }
 
     @Test
     public void test_any_exception() throws Exception {
         sslExceptionHandler.exceptionCaught(ctx, throwable);
-        verify(ctx, never()).close();
+        verify(channel, never()).close();
         verify(ctx).fireExceptionCaught(any(Throwable.class));
 
     }

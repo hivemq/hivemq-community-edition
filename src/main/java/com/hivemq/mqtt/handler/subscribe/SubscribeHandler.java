@@ -23,19 +23,20 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.handler.subscribe.retained.RetainedMessagesSender;
 import com.hivemq.mqtt.handler.subscribe.retained.SendRetainedMessagesListener;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -48,10 +49,7 @@ import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.security.auth.ClientData;
 import com.hivemq.security.auth.ClientToken;
-import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
-import com.hivemq.util.Exceptions;
-import com.hivemq.util.Topics;
+import com.hivemq.util.*;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -103,30 +101,30 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
     @NotNull
     private final SharedSubscriptionService sharedSubscriptionService;
     @NotNull
-    private final EventLog eventLog;
-    @NotNull
     private final RetainedMessagesSender retainedMessagesSender;
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
     @NotNull
     private final RestrictionsConfigurationService restrictionsConfigurationService;
+    @NotNull
+    private final MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    SubscribeHandler(@NotNull final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
-                     @NotNull final RetainedMessagePersistence retainedMessagePersistence,
-                     @NotNull final SharedSubscriptionService sharedSubscriptionService,
-                     @NotNull final EventLog eventLog,
-                     @NotNull final RetainedMessagesSender retainedMessagesSender,
-                     @NotNull final MqttConfigurationService mqttConfigurationService,
-                     @NotNull final RestrictionsConfigurationService restrictionsConfigurationService) {
+    SubscribeHandler(final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+                     final @NotNull RetainedMessagePersistence retainedMessagePersistence,
+                     final @NotNull SharedSubscriptionService sharedSubscriptionService,
+                     final @NotNull RetainedMessagesSender retainedMessagesSender,
+                     final @NotNull MqttConfigurationService mqttConfigurationService,
+                     final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
+                     final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.sharedSubscriptionService = sharedSubscriptionService;
-        this.eventLog = eventLog;
         this.retainedMessagesSender = retainedMessagesSender;
         this.mqttConfigurationService = mqttConfigurationService;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @Override
@@ -213,19 +211,22 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
         for (final Topic topic : msg.getTopics()) {
             final String topicString = topic.getTopic();
             if (!Topics.isValidToSubscribe(topicString)) {
-                log.debug("Disconnecting client '{}' because it sent an invalid subscription: '{}'",
-                        ChannelUtils.getClientId(ctx.channel()), topicString);
-                eventLog.clientWasDisconnected(ctx.channel(), "Invalid subscription topic " + topicString);
-
-                ctx.close();
+                final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent an invalid subscription: '" + topic.getTopic() + "'";
+                mqttServerDisconnector.disconnect(
+                        ctx.channel(),
+                        logMessage,
+                        "Invalid subscription topic " + topic.getTopic(),
+                        Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
+                        "Sent SUBSCRIBE with invalid topic filter");
                 return false;
             } else if(topicString.length() > maxTopicLength) {
-                log.debug("Disconnecting client '{}' because it sent a subscription to a topic exceeding the maximum topic length: '{}'",
-                        ChannelUtils.getClientId(ctx.channel()), topicString);
-                eventLog.clientWasDisconnected(ctx.channel(), "Sent SUBSCRIBE for topic that exceeds maximum topic length");
-
-                // TODO: This behavior needs to be updated so we send a DISCONNECT with an appropriate reason code as part of ID:931
-                ctx.close();
+                final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" + topic.getTopic() + "'";
+                mqttServerDisconnector.disconnect(
+                        ctx.channel(),
+                        logMessage,
+                        "Sent SUBSCRIBE for topic that exceeds maximum topic length",
+                        Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
+                        "Sent SUBSCRIBE with invalid topic filter");
                 return false;
             }
         }
@@ -253,27 +254,23 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
 
             if (answerCodes[i] == null || answerCodes[i].getCode() < 128) {
                 if (!mqttConfigurationService.wildcardSubscriptionsEnabled() && Topics.containsWildcard(topic.getTopic())) {
-                    if (mqttVersion == ProtocolVersion.MQTTv5) {
-                        answerCodes[i] = Mqtt5SubAckReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED;
-                    } else if (mqttVersion == ProtocolVersion.MQTTv3_1_1) {
-                        answerCodes[i] = Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
-                    } else {
-                        log.debug("MQTT 3.1 client '" + clientId + "' sent a SUBSCRIBE with a wildcard character in the topic filter '{}', although wildcard subscriptions are disabled. Disconnecting client.", clientData.getClientId(), topic.getTopic());
-                        eventLog.clientWasDisconnected(ctx.channel(), "Sent a SUBSCRIBE with a wildcard character in the topic filter '" + topic.getTopic() + "', although wildcard subscriptions are disabled");
-                        ctx.channel().close();
-                        return;
-                    }
+                    final String logMessage = "Client '" + clientId + "' (IP: {}) sent a SUBSCRIBE with a wildcard character in the topic filter '" + topic.getTopic() + "', although wildcard subscriptions are disabled. Disconnecting client.";
+                    mqttServerDisconnector.disconnect(
+                            ctx.channel(),
+                            logMessage,
+                            "Sent a SUBSCRIBE with a wildcard character in the topic filter '" + topic.getTopic() + "', although wildcard subscriptions are disabled",
+                            Mqtt5DisconnectReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED,
+                            ReasonStrings.DISCONNECT_WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
+                    return;
                 } else if (!mqttConfigurationService.sharedSubscriptionsEnabled() && Topics.isSharedSubscriptionTopic(topic.getTopic())) {
-                    if (mqttVersion == ProtocolVersion.MQTTv5) {
-                        answerCodes[i] = Mqtt5SubAckReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED;
-                    } else if (mqttVersion == ProtocolVersion.MQTTv3_1_1) {
-                        answerCodes[i] = Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
-                    } else {
-                        log.debug("MQTT 3.1 client '" + clientId + "' sent a SUBSCRIBE, which matches a shared subscription '{}', although shared subscriptions are disabled. Disconnecting client.", clientData.getClientId(), topic.getTopic());
-                        eventLog.clientWasDisconnected(ctx.channel(), "Sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic() + "', although shared subscriptions are disabled");
-                        ctx.channel().close();
-                        return;
-                    }
+                    final String logMessage = "Client '" + clientId + "' (IP: {}) sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic() + "', although shared subscriptions are disabled. Disconnecting client.";
+                    mqttServerDisconnector.disconnect(
+                            ctx.channel(),
+                            logMessage,
+                            "Sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic() + "', although shared subscriptions are disabled",
+                            Mqtt5DisconnectReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED,
+                            ReasonStrings.DISCONNECT_SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
+                    return;
                 } else {
                     final Mqtt5SubAckReasonCode reasonCode = fromCode(topic.getQoS().getQosNumber());
                     answerCodes[i] = reasonCode != null ? reasonCode : Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
@@ -402,8 +399,12 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
     private void handleInsufficientPermissionsV31(final ChannelHandlerContext ctx, final ClientData clientData, final Topic topic) {
         log.debug("MQTT v3.1 Client '{}' (IP: {}) is not authorized to subscribe to topic '{}' with QoS '{}'. Disconnecting client.",
                 clientData.getClientId(), ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
-        eventLog.clientWasDisconnected(ctx.channel(), "Not authorized to subscribe to topic '" + topic.getTopic() + "', QoS '" + topic.getQoS() + "'");
-        ctx.channel().close();
+        mqttServerDisconnector.disconnect(
+                ctx.channel(),
+                null, //already logged
+                "Not authorized to subscribe to topic '" + topic.getTopic() + "', QoS '" + topic.getQoS() + "'",
+                Mqtt5DisconnectReasonCode.NOT_AUTHORIZED, //same as mqtt 5 just for the events
+                null);
     }
 
     private static class SubscribePersistenceBatchedCallback implements FutureCallback<ImmutableList<SubscriptionResult>> {

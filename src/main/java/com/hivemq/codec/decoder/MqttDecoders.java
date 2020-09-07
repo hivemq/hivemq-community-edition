@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.mqtt3.*;
 import com.hivemq.codec.decoder.mqtt5.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -45,34 +46,34 @@ import java.util.Map;
 @LazySingleton
 public class MqttDecoders {
 
-    private final Map<Class, MqttDecoder> mqtt3Decoder;
-    private final Map<Class, MqttDecoder> mqtt5Decoder;
+    private final @NotNull Map<Class<? extends Message>, MqttDecoder<? extends Message>> mqtt3Decoder;
+    private final @NotNull Map<Class<? extends Message>, MqttDecoder<? extends Message>>  mqtt5Decoder;
 
     @Inject
-    public MqttDecoders(final Mqtt3ConnackDecoder mqtt3ConnackDecoder,
-                        final Mqtt3PublishDecoder mqtt3PublishDecoder,
-                        final Mqtt3PubackDecoder mqtt3PubackDecoder,
-                        final Mqtt3PubrecDecoder mqtt3PubrecDecoder,
-                        final Mqtt3PubcompDecoder mqtt3PubcompDecoder,
-                        final Mqtt3PubrelDecoder mqtt3PubrelDecoder,
-                        final Mqtt3DisconnectDecoder mqtt3DisconnectDecoder,
-                        final Mqtt3SubscribeDecoder mqtt3SubscribeDecoder,
-                        final Mqtt3UnsubscribeDecoder mqtt3UnsubscribeDecoder,
-                        final Mqtt3SubackDecoder mqtt3SubackDecoder,
-                        final Mqtt3UnsubackDecoder mqtt3UnsubackDecoder,
-                        final MqttPingreqDecoder mqttPingreqDecoder,
-                        final Mqtt5PublishDecoder mqtt5PublishDecoder,
-                        final Mqtt5DisconnectDecoder mqtt5DisconnectDecoder,
-                        final Mqtt5SubscribeDecoder mqtt5SubscribeDecoder,
-                        final Mqtt5PubackDecoder mqtt5PubackDecoder,
-                        final Mqtt5PubrecDecoder mqtt5PubrecDecoder,
-                        final Mqtt5PubrelDecoder mqtt5PubrelDecoder,
-                        final Mqtt5PubcompDecoder mqtt5PubcompDecoder,
-                        final Mqtt5AuthDecoder mqtt5AuthDecoder,
-                        final Mqtt5UnsubscribeDecoder mqtt5UnsubscribeDecoder) {
+    public MqttDecoders(final @NotNull Mqtt3ConnackDecoder mqtt3ConnackDecoder,
+                        final @NotNull Mqtt3PublishDecoder mqtt3PublishDecoder,
+                        final @NotNull Mqtt3PubackDecoder mqtt3PubackDecoder,
+                        final @NotNull Mqtt3PubrecDecoder mqtt3PubrecDecoder,
+                        final @NotNull Mqtt3PubcompDecoder mqtt3PubcompDecoder,
+                        final @NotNull Mqtt3PubrelDecoder mqtt3PubrelDecoder,
+                        final @NotNull Mqtt3DisconnectDecoder mqtt3DisconnectDecoder,
+                        final @NotNull Mqtt3SubscribeDecoder mqtt3SubscribeDecoder,
+                        final @NotNull Mqtt3UnsubscribeDecoder mqtt3UnsubscribeDecoder,
+                        final @NotNull Mqtt3SubackDecoder mqtt3SubackDecoder,
+                        final @NotNull Mqtt3UnsubackDecoder mqtt3UnsubackDecoder,
+                        final @NotNull MqttPingreqDecoder mqttPingreqDecoder,
+                        final @NotNull Mqtt5PublishDecoder mqtt5PublishDecoder,
+                        final @NotNull Mqtt5DisconnectDecoder mqtt5DisconnectDecoder,
+                        final @NotNull Mqtt5SubscribeDecoder mqtt5SubscribeDecoder,
+                        final @NotNull Mqtt5PubackDecoder mqtt5PubackDecoder,
+                        final @NotNull Mqtt5PubrecDecoder mqtt5PubrecDecoder,
+                        final @NotNull Mqtt5PubrelDecoder mqtt5PubrelDecoder,
+                        final @NotNull Mqtt5PubcompDecoder mqtt5PubcompDecoder,
+                        final @NotNull Mqtt5AuthDecoder mqtt5AuthDecoder,
+                        final @NotNull Mqtt5UnsubscribeDecoder mqtt5UnsubscribeDecoder) {
 
-        final ImmutableMap.Builder<Class, MqttDecoder> mqtt3DecoderBuilder = ImmutableMap.builder();
-        final ImmutableMap.Builder<Class, MqttDecoder> mqtt5DecoderBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Class<? extends Message>, MqttDecoder<? extends Message>> mqtt3DecoderBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Class<? extends Message>, MqttDecoder<? extends Message>> mqtt5DecoderBuilder = ImmutableMap.builder();
 
         mqtt3DecoderBuilder.put(CONNACK.class, mqtt3ConnackDecoder);
         mqtt3DecoderBuilder.put(PUBLISH.class, mqtt3PublishDecoder);
@@ -102,7 +103,8 @@ public class MqttDecoders {
         mqtt5Decoder = mqtt5DecoderBuilder.build();
     }
 
-    public <T extends Message> MqttDecoder decoder(final Class<T> clazz, final ProtocolVersion version) {
+    @NotNull
+    public MqttDecoder<?> decoder(final @NotNull Class<? extends Message> clazz, final @NotNull ProtocolVersion version) {
         if (version == ProtocolVersion.MQTTv5) {
             return mqtt5Decoder.get(clazz);
         }

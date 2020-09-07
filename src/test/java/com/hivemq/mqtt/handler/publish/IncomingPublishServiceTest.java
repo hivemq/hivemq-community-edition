@@ -29,7 +29,7 @@ import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -43,7 +43,6 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,7 +58,7 @@ import util.TestMessageUtil;
 import java.util.concurrent.ExecutorService;
 
 import static com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties.NO_USER_PROPERTIES;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NullabilityAnnotations")
@@ -86,7 +85,7 @@ public class IncomingPublishServiceTest {
     private IncomingPublishService incomingPublishService;
 
     @Mock
-    private Mqtt5ServerDisconnector mqtt5ServerDisconnector;
+    private MqttServerDisconnectorImpl mqttServerDisconnector;
 
     @Before
     public void setUp() throws Exception {
@@ -109,10 +108,9 @@ public class IncomingPublishServiceTest {
     private void setupHandlerAndChannel() {
 
         incomingPublishService = new IncomingPublishService(publishService,
-                eventLog,
                 mqttConfigurationService,
                 restrictionsConfigurationService,
-                mqtt5ServerDisconnector);
+                mqttServerDisconnector);
 
         final CheckUserEventTriggeredOnSuper triggeredUserEvents = new CheckUserEventTriggeredOnSuper();
 
@@ -127,7 +125,7 @@ public class IncomingPublishServiceTest {
         embeddedChannel.attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
         incomingPublishService.processPublish(ctx, TestMessageUtil.createMqtt5Publish(), null);
 
-        verify(mqtt5ServerDisconnector, never()).disconnect(
+        verify(mqttServerDisconnector, never()).disconnect(
                 any(Channel.class),
                 anyString(),
                 anyString(),
@@ -146,8 +144,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(false, embeddedChannel.isActive());
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE), any());
     }
 
     @Test
@@ -265,7 +262,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -303,7 +300,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -328,7 +325,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -372,7 +369,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -420,7 +417,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -453,7 +450,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(false, embeddedChannel.isActive());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), any());
 
         verify(publishService, never()).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -473,7 +470,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(false, embeddedChannel.isActive());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), any());
 
         verify(publishService, never()).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -512,7 +509,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -557,7 +554,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(embeddedChannel),
                 anyString(),
                 anyString(),
@@ -745,7 +742,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        verify(mqtt5ServerDisconnector).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 eq(ctx.channel()),
                 anyString(),
                 anyString(),
@@ -767,8 +764,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertFalse(ctx.channel().isActive());
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.QOS_NOT_SUPPORTED), any());
 
         // Verify PUBLISH not processed
         verify(publishService, never()).publish(any(), any(), anyString());
@@ -785,7 +781,7 @@ public class IncomingPublishServiceTest {
                 publish,
                 new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true));
 
-        assertTrue(!embeddedChannel.isActive());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), any());
 
     }
 
@@ -797,7 +793,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish();
         incomingPublishService.processPublish(ctx, publish, new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true));
 
-        assertFalse(embeddedChannel.isActive());
+        verify(mqttServerDisconnector).disconnect(any(), any(), any(), eq(Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID), any());
     }
 
     @Test(timeout = 20000)
@@ -808,7 +804,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
         incomingPublishService.processPublish(ctx, publish, new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true));
 
-        verify(mqtt5ServerDisconnector).disconnect(eq(embeddedChannel), eq(null), anyString(), eq(Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID), anyString());
+        verify(mqttServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID), anyString());
     }
 
 }

@@ -16,16 +16,15 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.TestMessageEncoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -34,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
+import util.TestMessageEncoder;
 import util.TestMqttDecoder;
 
 import static org.junit.Assert.*;

@@ -42,7 +42,7 @@ import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -79,7 +79,7 @@ public class PluginAuthenticatorServiceImplTest {
     @Mock
     private MqttConnacker mqttConnacker;
     @Mock
-    private Mqtt5ServerDisconnector mqttDisconnectUtil;
+    private MqttServerDisconnectorImpl mqttDisconnectUtil;
     @Mock
     private FullConfigurationService configurationService;
     @Mock
@@ -240,7 +240,8 @@ public class PluginAuthenticatorServiceImplTest {
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
 
     }
 
@@ -261,7 +262,8 @@ public class PluginAuthenticatorServiceImplTest {
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
 
     }
 
@@ -278,7 +280,8 @@ public class PluginAuthenticatorServiceImplTest {
                 Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name()),
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
-                true);
+                true,
+                false);
 
     }
 

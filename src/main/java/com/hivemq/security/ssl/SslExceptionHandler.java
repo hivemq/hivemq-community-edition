@@ -16,7 +16,8 @@
 package com.hivemq.security.ssl;
 
 import com.google.inject.Inject;
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -42,16 +43,15 @@ import javax.net.ssl.SSLHandshakeException;
 public class SslExceptionHandler extends ChannelHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(SslExceptionHandler.class);
-
-    private final EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    public SslExceptionHandler(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public SslExceptionHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @Override
-    public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) throws Exception {
+    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
 
         if (ignorableException(cause, ctx)) {
             return;
@@ -62,14 +62,16 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
             if (cause.getCause() instanceof SSLHandshakeException) {
                 logSSLHandshakeException(ctx, cause);
                 //Just in case the channel wasn't closed already
-                eventLog.clientWasDisconnected(ctx.channel(), "SSL handshake failed");
-                ctx.close();
+                mqttServerDisconnector.logAndClose(ctx.channel(),
+                        null, //already logged
+                        "SSL handshake failed");
                 return;
 
             } else if (cause.getCause() instanceof SSLException) {
                 logSSLException(ctx, cause);
-                eventLog.clientWasDisconnected(ctx.channel(), "SSL message transmission failed");
-                ctx.close();
+                mqttServerDisconnector.logAndClose(ctx.channel(),
+                        null, //already logged
+                        "SSL message transmission failed");
                 return;
             }
         }
@@ -79,7 +81,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
     }
 
 
-    private void logSSLException(final ChannelHandlerContext ctx, final Throwable cause) {
+    private void logSSLException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
         if (log.isDebugEnabled()) {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);
@@ -94,7 +96,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
         }
     }
 
-    private void logSSLHandshakeException(final ChannelHandlerContext ctx, final Throwable cause) {
+    private void logSSLHandshakeException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
         if (log.isDebugEnabled()) {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);
@@ -110,7 +112,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
     }
 
 
-    private boolean ignorableException(final Throwable cause, final ChannelHandlerContext ctx) {
+    private boolean ignorableException(final @NotNull Throwable cause, final @NotNull ChannelHandlerContext ctx) {
 
         if (cause instanceof NotSslRecordException) {
             if (log.isDebugEnabled()) {
@@ -118,8 +120,9 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
                 log.trace("Original Exception:", cause);
             }
             //Just in case the client wasn't disconnected already
-            eventLog.clientWasDisconnected(ctx.channel(), "SSL handshake failed");
-            ctx.close();
+            mqttServerDisconnector.logAndClose(ctx.channel(),
+                    null, //already logged
+                    "SSL handshake failed");
             return true;
         }
         return false;

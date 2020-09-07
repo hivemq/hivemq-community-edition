@@ -17,7 +17,7 @@ package com.hivemq.mqtt.handler.auth;
 
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
@@ -51,7 +51,7 @@ public class AuthHandlerTest {
     @Mock
     private MqttAuthSender mqttAuthSender;
     @Mock
-    private Mqtt5ServerDisconnector disconnector;
+    private MqttServerDisconnectorImpl disconnector;
 
     private AuthHandler authHandler;
     private EmbeddedChannel channel;
@@ -97,7 +97,8 @@ public class AuthHandlerTest {
                 channel, SUCCESS_AUTH_RECEIVED_FROM_CLIENT, "Success reason code set in AUTH",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"),
-                Mqtt5UserProperties.NO_USER_PROPERTIES, true);
+                Mqtt5UserProperties.NO_USER_PROPERTIES, true,
+                false);
 
     }
 
@@ -112,7 +113,8 @@ public class AuthHandlerTest {
                 channel, REAUTHENTICATE_DURING_RE_AUTH, "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, "AUTH"),
-                Mqtt5UserProperties.NO_USER_PROPERTIES, true);
+                Mqtt5UserProperties.NO_USER_PROPERTIES, true,
+                false);
 
         verify(pluginAuthenticatorService, never()).authenticateReAuth(any(), any());
 

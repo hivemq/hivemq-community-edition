@@ -34,7 +34,7 @@ import com.hivemq.extensions.interceptor.publish.parameter.PublishInboundInputIm
 import com.hivemq.extensions.interceptor.publish.parameter.PublishInboundOutputImpl;
 import com.hivemq.extensions.packets.publish.ModifiablePublishPacketImpl;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -42,6 +42,7 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
@@ -90,7 +91,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull MessageDroppedService messageDroppedService;
     private final @NotNull PluginAuthorizerService authorizerService;
-    private final @NotNull Mqtt3ServerDisconnector mqttDisconnector;
+    private final @NotNull MqttServerDisconnector mqttDisconnector;
     private final @NotNull FullConfigurationService configurationService;
 
     @Inject
@@ -100,7 +101,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
             final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull PluginAuthorizerService authorizerService,
-            final @NotNull Mqtt3ServerDisconnector mqttDisconnector,
+            final @NotNull MqttServerDisconnector mqttDisconnector,
             final @NotNull FullConfigurationService configurationService) {
 
         this.executorService = executorService;
@@ -247,7 +248,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                             "Client '" + clientId +
                                     "' (IP: {}) sent a PUBLISH, but its onward delivery was prevented by a publish inbound interceptor. Disconnecting client.",
                             "Sent PUBLISH, but its onward delivery was prevented by a publish inbound interceptor",
-                            null,
+                            Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                             null);
                 } else {
 

@@ -27,6 +27,24 @@ import io.netty.channel.Channel;
 public interface MqttServerDisconnector {
 
     /**
+     * close an MQTT connection without disconnect and just log.
+     * <p>
+     * log a message to console, file and event log.
+     * <p>
+     * close the channel.
+     *
+     * @param channel         the Channel of the mqtt client
+     * @param logMessage      the message to log
+     * @param eventLogMessage the event log message
+     */
+    default void logAndClose(
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage) {
+        disconnect(channel, logMessage, eventLogMessage, null, null, Mqtt5UserProperties.NO_USER_PROPERTIES, false, true);
+    }
+
+    /**
      * Send a DISCONNECT with optional reason code and reason string.
      * <p>
      * log a message to console, file and event log.
@@ -46,7 +64,7 @@ public interface MqttServerDisconnector {
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
 
-        disconnect(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
+        disconnect(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false, false);
     }
 
     void disconnect(
@@ -56,5 +74,6 @@ public interface MqttServerDisconnector {
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
-            final boolean isAuthentication);
+            final boolean isAuthentication,
+            final boolean forceClose);
 }

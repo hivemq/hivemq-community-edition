@@ -31,6 +31,7 @@ import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
 import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
@@ -191,6 +192,9 @@ public class ChannelDependenciesTest {
     @Mock
     private ConnectionLimiterHandler connectionLimiterHandler;
 
+    @Mock
+    private MqttServerDisconnector mqttServerDisconnector;
+
     @Before
     public void setUp() throws Exception {
 
@@ -240,7 +244,9 @@ public class ChannelDependenciesTest {
                 subAckOutboundInterceptorHandler,
                 unsubackOutboundInterceptorHandler,
                 unsubscribeInboundInterceptorHandler,
-                pingInterceptorHandler
+                pingInterceptorHandler,
+                mqttServerDisconnector
+
         );
 
     }
@@ -291,5 +297,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
         assertNotNull(channelDependencies.getPingInterceptorHandler());
         assertNotNull(channelDependencies.getConnectionLimiterHandler());
+        assertNotNull(channelDependencies.getMqttServerDisconnector());
     }
 }

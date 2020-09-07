@@ -16,41 +16,33 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.inject.Inject;
-import com.hivemq.logging.EventLog;
-import com.hivemq.util.ChannelUtils;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Christoph Schäbel
  */
 public class NoTlsHandshakeIdleHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(NoTlsHandshakeIdleHandler.class);
-    private final EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    public NoTlsHandshakeIdleHandler(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public NoTlsHandshakeIdleHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @Override
-    public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
+    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) throws Exception {
 
         if (evt instanceof IdleStateEvent) {
-
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                if (log.isDebugEnabled()) {
-
-                    log.debug("Client with IP {} disconnected. The client was idle for too long without finishing the TLS handshake",
-                            ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(ctx.channel(), "TLS handshake not finished in time");
-                ctx.close();
+                mqttServerDisconnector.logAndClose(ctx.channel(),
+                        "Client with IP {} disconnected. The client was idle for too long without finishing the TLS handshake.",
+                        "TLS handshake not finished in time");
                 return;
             }
         }

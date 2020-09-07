@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -31,7 +32,7 @@ public abstract class MqttDecoder<T extends Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);
 
-    public abstract T decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header);
+    public abstract @Nullable T decode(final @NotNull  Channel channel, final @NotNull  ByteBuf buf, final byte header);
 
     /**
      * Checks if the last 4 bits are actually zeroed out
@@ -52,7 +53,7 @@ public abstract class MqttDecoder<T extends Message> {
      * @param topic the topic string
      * @return <code>true</code> if the topic is valid.
      */
-    protected boolean isInvalidTopic(final Channel channel, final String topic) {
+    protected boolean isInvalidTopic(final @NotNull Channel channel, final @Nullable String topic) {
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));

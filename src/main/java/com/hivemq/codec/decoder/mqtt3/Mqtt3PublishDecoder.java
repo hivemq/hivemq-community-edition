@@ -16,12 +16,13 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttPublishDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.Mqtt3PUBLISH;
@@ -37,14 +38,17 @@ import io.netty.channel.Channel;
 @LazySingleton
 public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH> {
 
-    private final HivemqId hivemqId;
+    private final @NotNull HivemqId hivemqId;
 
     @Inject
-    public Mqtt3PublishDecoder(final HivemqId hivemqId, final Mqtt3ServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
+    public Mqtt3PublishDecoder(final @NotNull HivemqId hivemqId,
+                               final @NotNull MqttServerDisconnector disconnector,
+                               final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
         this.hivemqId = hivemqId;
     }
 
+    @Nullable
     @Override
     public Mqtt3PUBLISH decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
 

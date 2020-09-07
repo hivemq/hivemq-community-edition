@@ -45,6 +45,8 @@ import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
 import com.hivemq.metrics.handler.GlobalTrafficCounter;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.services.InternalPublishService;
@@ -122,6 +124,8 @@ public class ExtensionModuleTest {
                 bind(ListenerConfigurationService.class).toInstance(mock(ListenerConfigurationService.class));
                 bind(OpenConnectionsGauge.class).toInstance(mock(OpenConnectionsGauge.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
+                bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
+                bind(MqttConnacker.class).toInstance(mock(MqttConnacker.class));
             }
         });
     }

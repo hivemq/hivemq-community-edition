@@ -18,6 +18,7 @@ package com.hivemq.codec.decoder.mqtt3;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.MqttDecoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -39,15 +40,15 @@ public class Mqtt3ConnackDecoder extends MqttDecoder<CONNACK> {
     private static final Logger log = LoggerFactory.getLogger(Mqtt3ConnackDecoder.class);
     private static final int SESSION_PRESENT_BITMASK = 0b0000_0001;
 
-    private final EventLog eventLog;
+    private final @NotNull EventLog eventLog;
 
     @Inject
-    public Mqtt3ConnackDecoder(final EventLog eventLog) {
+    public Mqtt3ConnackDecoder(final @NotNull EventLog eventLog) {
         this.eventLog = eventLog;
     }
 
     @Override
-    public CONNACK decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public CONNACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
         final boolean isMqtt311 = ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get();
         final byte connectAcknowledgeFlags = buf.readByte();
         if (isMqtt311) {

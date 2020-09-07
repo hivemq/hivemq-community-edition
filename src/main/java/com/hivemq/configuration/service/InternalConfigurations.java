@@ -290,22 +290,22 @@ public class InternalConfigurations {
     /**
      * Disconnect Client with reason code?
      */
-    public static final boolean DISCONNECT_WITH_REASON_CODE = true;
+    public static final AtomicBoolean DISCONNECT_WITH_REASON_CODE = new AtomicBoolean(true);
 
     /**
      * Disconnect Client with reason string?
      */
-    public static final boolean DISCONNECT_WITH_REASON_STRING = true;
+    public static final AtomicBoolean DISCONNECT_WITH_REASON_STRING = new AtomicBoolean(true);
 
     /**
      * Send CONNACK with reason code?
      */
-    public static final boolean CONNACK_WITH_REASON_CODE = true;
+    public static final AtomicBoolean CONNACK_WITH_REASON_CODE = new AtomicBoolean(true);
 
     /**
      * Send CONNACK with reason string?
      */
-    public static final boolean CONNACK_WITH_REASON_STRING = true;
+    public static final AtomicBoolean CONNACK_WITH_REASON_STRING = new AtomicBoolean(true);
 
     /**
      * The maximum allowed size of the user properties in bytes
