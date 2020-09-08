@@ -37,7 +37,6 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author Florian Limpöck
- * @since 4.4.2
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class NoTlsHandshakeIdleHandlerTest {
