@@ -33,7 +33,6 @@ import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.limitation.TopicAliasLimiter;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.MessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -88,7 +87,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull FullConfigurationService configurationService;
-    private final @NotNull EventLog eventLog;
     private final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider;
     private final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider;
     private final @NotNull MqttConnacker mqttConnacker;
@@ -117,7 +115,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence,
             final @NotNull FullConfigurationService configurationService,
-            final @NotNull EventLog eventLog,
             final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider,
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
             final @NotNull MqttConnacker mqttConnacker,
@@ -133,7 +130,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.configurationService = configurationService;
-        this.eventLog = eventLog;
         this.orderedTopicHandlerProvider = orderedTopicHandlerProvider;
         this.flowControlHandlerProvider = flowControlHandlerProvider;
         this.mqttConnacker = mqttConnacker;
@@ -564,19 +560,16 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(msg);
 
-        eventLog.clientConnected(ctx.channel());
-
         if (ProtocolVersion.MQTTv5 == msg.getProtocolVersion()) {
-
             final CONNACK connack = buildMqtt5Connack(ctx.channel(), msg, sessionPresent);
-            connackSent = ctx.writeAndFlush(connack);
+            connackSent = mqttConnacker.connackSuccess(ctx, connack);
 
         } else {
             ctx.channel().attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(msg.getSessionExpiryInterval());
             if (sessionPresent) {
-                connackSent = ctx.writeAndFlush(ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
+                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
             } else {
-                connackSent = ctx.writeAndFlush(ConnackMessages.ACCEPTED_MSG_NO_SESS);
+                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_NO_SESS);
             }
         }
 

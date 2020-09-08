@@ -60,7 +60,7 @@ public class TestMqttDecoder {
         final EventLog eventLog = new EventLog();
         final HivemqId hiveMQId = new HivemqId();
         final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog, hiveMQId);
-        final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog, hiveMQId);
+        final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
 
         final MqttConnectDecoder mqttConnectDecoder = new MqttConnectDecoder(mqttConnacker,
                 fullConfigurationService,

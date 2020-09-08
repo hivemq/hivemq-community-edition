@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.handler.auth;
 
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
@@ -55,7 +54,7 @@ public class AuthInProgressMessageHandlerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        connacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        connacker = new MqttConnackerImpl(eventLog);
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);

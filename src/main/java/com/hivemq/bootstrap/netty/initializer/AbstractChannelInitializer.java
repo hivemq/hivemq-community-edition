@@ -24,8 +24,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
-import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -166,14 +164,9 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
                     ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
             log.debug("Original exception:", cause);
             //We need to close the channel because the initialization wasn't successful
-            channelDependencies.getMqttServerDisconnector().disconnect(ctx.channel(),
+            channelDependencies.getMqttServerDisconnector().logAndClose(ctx.channel(),
                     null, //already logged
-                    cause.getMessage() != null ? cause.getMessage() : "TLS connection initialization failed.",
-                    Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    false,
-                    true);
+                    cause.getMessage() != null ? cause.getMessage() : "TLS connection initialization failed.");
         } else {
 
             //Just use the default handler

@@ -16,7 +16,6 @@
 
 package com.hivemq.mqtt.handler.connack;
 
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
@@ -34,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyHandler;
 import util.LogbackCapturingAppender;
 
 import java.nio.ByteBuffer;
@@ -61,8 +61,9 @@ public class MqttConnackerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mqttConnacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        mqttConnacker = new MqttConnackerImpl(eventLog);
         channel = new EmbeddedChannel();
+        channel.pipeline().addLast(new DummyHandler());
         logbackCapturingAppender = LogbackCapturingAppender.Factory.weaveInto(MqttConnackerImpl.log);
     }
 
@@ -247,7 +248,7 @@ public class MqttConnackerTest {
     @Test(timeout = 20000)
     public void test_connackError_mqtt_3_1_without_reason_code() {
         InternalConfigurations.CONNACK_WITH_REASON_CODE.set(false);
-        mqttConnacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        mqttConnacker = new MqttConnackerImpl(eventLog);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -364,7 +365,7 @@ public class MqttConnackerTest {
     @Test(timeout = 20000)
     public void test_connackError_mqtt_5_without_reason_string() throws InterruptedException {
         InternalConfigurations.CONNACK_WITH_REASON_STRING.set(false);
-        mqttConnacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        mqttConnacker = new MqttConnackerImpl(eventLog);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -381,7 +382,7 @@ public class MqttConnackerTest {
     @Test(timeout = 20000)
     public void test_connackError_mqtt_5_without_reason_code() {
         InternalConfigurations.CONNACK_WITH_REASON_CODE.set(false);
-        mqttConnacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        mqttConnacker = new MqttConnackerImpl(eventLog);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -449,5 +450,29 @@ public class MqttConnackerTest {
         assertNull(connack.getAuthData());
         assertFalse(channel.isActive());
 
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_connackSuccess_ctx_null() {
+        mqttConnacker.connackSuccess(null, new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void test_connackSuccess_connack_null() {
+        mqttConnacker.connackSuccess(channel.pipeline().firstContext(), null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_connackSuccess_connack_error_reason_code() {
+        mqttConnacker.connackSuccess(channel.pipeline().firstContext(), new CONNACK(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, null));
+    }
+
+    @Test
+    public void test_connackSuccess() {
+        mqttConnacker.connackSuccess(channel.pipeline().firstContext(), new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null));
+
+        final CONNACK connack = channel.readOutbound();
+        assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
+        assertTrue(channel.isActive());
     }
 }

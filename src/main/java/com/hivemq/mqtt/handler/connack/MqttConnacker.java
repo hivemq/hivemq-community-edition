@@ -17,14 +17,31 @@ package com.hivemq.mqtt.handler.connack;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Florian Limpöck
  */
 public interface MqttConnacker {
+
+    /**
+     * Send a successful CONNACK.
+     * <p>
+     * log to the event log.
+     * <p>
+     * returns the connack sent future.
+     *
+     * @param ctx the channel handler context of the connecting MQTT client
+     * @param connack the CONNACK message to send. (Must be SUCCESS reason code)
+     * @return the connack sent future that completes when the CONNACK is sent
+     */
+    @NotNull
+    ChannelFuture connackSuccess(@NotNull ChannelHandlerContext ctx, @NotNull CONNACK connack);
 
     /**
      * Send a connack with optional reason code and reason string.
@@ -43,11 +60,11 @@ public interface MqttConnacker {
      * @param reasonString    the reason string
      */
     void connackError(
-            final @NotNull Channel channel,
-            final @Nullable String logMessage,
-            final @Nullable String eventLogMessage,
-            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
-            final @Nullable String reasonString);
+            @NotNull Channel channel,
+            @Nullable String logMessage,
+            @Nullable String eventLogMessage,
+            @Nullable Mqtt5ConnAckReasonCode reasonCode,
+            @Nullable String reasonString);
 
     /**
      * Send a connack with optional reason code and reason string.
@@ -65,12 +82,12 @@ public interface MqttConnacker {
      * @param isAuthentication bad CONNACK during authentication? (important for the correct event)
      */
     void connackError(
-            final @NotNull Channel channel,
-            final @Nullable String logMessage,
-            final @Nullable String eventLogMessage,
-            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties,
-            final boolean isAuthentication);
+            @NotNull Channel channel,
+            @Nullable String logMessage,
+            @Nullable String eventLogMessage,
+            @Nullable Mqtt5ConnAckReasonCode reasonCode,
+            @Nullable String reasonString,
+            @NotNull Mqtt5UserProperties userProperties,
+            boolean isAuthentication);
 
 }
