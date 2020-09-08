@@ -144,7 +144,7 @@ public class ConnectHandlerTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
-        mqttConnacker = new MqttConnackerImpl(eventLog, new HivemqId());
+        mqttConnacker = new MqttConnackerImpl(eventLog);
         serverDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
 
         when(channelPersistence.get(anyString())).thenReturn(null);
@@ -1449,7 +1449,7 @@ public class ConnectHandlerTest {
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
 
         handler = new ConnectHandler(new DisconnectClientOnConnectMessageHandler(eventLog), clientSessionPersistence,
-                channelPersistence, configurationService, eventLog,
+                channelPersistence, configurationService,
                 orderedTopicHandlerProvider, flowControlHandlerProvider, mqttConnacker,
                 new TopicAliasLimiterImpl(),
                 mock(PublishPollService.class), mock(SharedSubscriptionService.class),

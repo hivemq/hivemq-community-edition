@@ -142,7 +142,7 @@ public class ReasonStrings {
 
     public static final String DISCONNECT_SESSION_TAKEN_OVER = "Another client connected with the same client id.";
 
-    public static final String DISCONNECT_KEEP_ALIVE_TIMEOUT = "The client was idle for too long without sending an MQTT control packet";
+    public static final String DISCONNECT_KEEP_ALIVE_TIMEOUT = "The client was idle for too long without sending an MQTT control packet.";
 
     public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
     public static final String UNSUBACK_EXTENSION_PREVENTED = "UNSUBSCRIBE prevented by an extension.";
@@ -162,7 +162,7 @@ public class ReasonStrings {
     public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client";
     public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client";
 
-    public static final String CLOSE_MALFORMED_REMAINING_LENGTH = "Message with not enough remaining read buffer length was sent.";
+    public static final String CLOSE_MALFORMED_REMAINING_LENGTH = "Message with a malformed remaining length was sent.";
 
     private ReasonStrings() {
         //Don't instantiate

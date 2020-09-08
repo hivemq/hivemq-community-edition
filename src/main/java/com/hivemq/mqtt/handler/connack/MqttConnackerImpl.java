@@ -17,7 +17,6 @@ package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -33,7 +32,9 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,30 +57,26 @@ public class MqttConnackerImpl implements MqttConnacker {
     private final boolean connackWithReasonString;
 
     private final @NotNull EventLog eventLog;
-    private final HivemqId hivemqId;
 
     @Inject
-    public MqttConnackerImpl(final @NotNull EventLog eventLog,
-                             final @NotNull HivemqId hivemqId) {
+    public MqttConnackerImpl(final @NotNull EventLog eventLog) {
         this.connackWithReasonCode = InternalConfigurations.CONNACK_WITH_REASON_CODE.get();
         this.connackWithReasonString = InternalConfigurations.CONNACK_WITH_REASON_STRING.get();
         this.eventLog = eventLog;
-        this.hivemqId = hivemqId;
     }
 
-    /**
-     * Send a connack with optional reason code and reason string.
-     * <p>
-     * log a message to console, file and event log.
-     * <p>
-     * close the channel.
-     *
-     * @param channel         the Channel of the mqtt client
-     * @param logMessage      the message to log
-     * @param eventLogMessage the event log message
-     * @param reasonCode      the reason code
-     * @param reasonString    the reason string
-     */
+    @Override
+    public @NotNull ChannelFuture connackSuccess(final @NotNull ChannelHandlerContext ctx,
+                                                 final @NotNull CONNACK connack) {
+
+        Preconditions.checkNotNull(ctx, "ChannelHandlerContext must never be null");
+        Preconditions.checkNotNull(connack, "CONNACK must never be null");
+        Preconditions.checkArgument(connack.getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS, "Error is no success");
+
+        eventLog.clientConnected(ctx.channel());
+        return ctx.writeAndFlush(connack);
+    }
+
     public void connackError(
             final @NotNull Channel channel,
             final @Nullable String logMessage,
@@ -215,6 +212,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             case MALFORMED_PACKET:
             case PROTOCOL_ERROR:
             case IMPLEMENTATION_SPECIFIC_ERROR:
+                //no reason code for mqtt 3 available for these cases
                 return null;
             default:
                 return Mqtt3ConnAckReturnCode.fromReasonCode(reasonCode);
