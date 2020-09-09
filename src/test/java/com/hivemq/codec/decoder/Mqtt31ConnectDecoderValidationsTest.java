@@ -220,7 +220,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -241,7 +241,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test

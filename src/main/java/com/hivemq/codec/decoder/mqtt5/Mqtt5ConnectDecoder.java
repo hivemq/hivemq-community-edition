@@ -129,7 +129,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttConnacker.connackError(channel,
                     "The client id of the client (IP: {}) is not well formed. This is not allowed.",
                     "Sent CONNECT with malformed client id",
-                    Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_CLIENT_IDENTIFIER_NOT_VALID);
             return null;
         }
@@ -631,7 +631,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttConnacker.connackError(channel,
                     "A client (IP: {}) sent a CONNECT with an incorrect UTF-8 string length for 'will topic'.",
                     "Incorrect CONNECT UTF-8 string length for 'will topic'",
-                    Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_LENGTH);
 
             return DISCONNECTED;
@@ -684,7 +684,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     channel,
                     "A client (IP: {}) sent a CONNECT with a malformed 'will topic'. This is not allowed.",
                     "Sent CONNECT with malformed UTF-8 String for 'will topic'",
-                    Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_MALFORMED);
 
         }
