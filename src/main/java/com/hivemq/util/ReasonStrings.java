@@ -42,7 +42,7 @@ public class ReasonStrings {
     public static final String CONNACK_PROTOCOL_ERROR_NO_AUTH = "Sent CONNECT with auth data and no auth method. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_RECEIVE_MAXIMUM = "Sent CONNECT with receive maximum set to '0'. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_PACKET_SIZE = "Sent CONNECT with packet size set to '0'. This is a protocol violation.";
-    public static final String CONNACK_PROTOCOL_VARIABLE_HEADER = "Sent CONNECT with invalid variable header. This is a protocol violation.";
+    public static final String CONNACK_PROTOCOL_ERROR_VARIABLE_HEADER = "Sent CONNECT with invalid variable header. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_MULTIPLE_KEY = "Sent CONNECT with %s included more than once. This is a protocol violation.";
 
     public static final String CONNACK_UNSUPPORTED_PROTOCOL_VERSION = "Sent CONNECT with invalid protocol name.";

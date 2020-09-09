@@ -75,7 +75,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
                 "A client (IP: {}) connected with an invalid CONNECT header.",
                 "Invalid CONNECT header",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
-                ReasonStrings.CONNACK_PROTOCOL_VARIABLE_HEADER);
+                ReasonStrings.CONNACK_PROTOCOL_ERROR_VARIABLE_HEADER);
     }
 
     /**
