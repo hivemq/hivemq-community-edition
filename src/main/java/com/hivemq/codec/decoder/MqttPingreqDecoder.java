@@ -53,7 +53,7 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
             if (!validateHeader(header)) {
                 serverDisconnector.disconnect(channel,
                         "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
-                        "Sent PINGREQ with invalid fixed header",
+                        "Sent a PINGREQ with invalid fixed header",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         String.format(ReasonStrings.DISCONNECT_MALFORMED_FIXED_HEADER, "PINGREQ"));
                 buf.clear();

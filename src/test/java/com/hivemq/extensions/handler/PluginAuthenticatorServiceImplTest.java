@@ -42,7 +42,7 @@ import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -79,7 +79,7 @@ public class PluginAuthenticatorServiceImplTest {
     @Mock
     private MqttConnacker mqttConnacker;
     @Mock
-    private MqttServerDisconnectorImpl mqttDisconnectUtil;
+    private MqttServerDisconnector mqttServerDisconnector;
     @Mock
     private FullConfigurationService configurationService;
     @Mock
@@ -138,7 +138,7 @@ public class PluginAuthenticatorServiceImplTest {
         pluginAuthenticatorService = new PluginAuthenticatorServiceImpl(
                 connectHandler,
                 mqttConnacker,
-                mqttDisconnectUtil,
+                mqttServerDisconnector,
                 mqttAuthSender,
                 configurationService,
                 authenticators,
@@ -233,7 +233,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
 
-        verify(mqttDisconnectUtil).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 embeddedChannel,
                 RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
@@ -255,7 +255,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
 
-        verify(mqttDisconnectUtil).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 embeddedChannel,
                 RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
@@ -275,7 +275,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
 
-        verify(mqttDisconnectUtil).disconnect(
+        verify(mqttServerDisconnector).disconnect(
                 embeddedChannel, DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Different auth method",
                 Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name()),
