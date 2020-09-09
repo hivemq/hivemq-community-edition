@@ -186,8 +186,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         if (utf8String == null) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with a malformed '" + key + "'. This is not allowed. Disconnecting client.",
-                    "Sent " + messageType.name() + " with malformed UTF-8 String for '" + key + "'",
-                    Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
+                    "Sent a " + messageType.name() + " with malformed UTF-8 String for '" + key + "'",
+                    Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_UTF8_STRING,messageType.name(),key));
 
         }
@@ -212,8 +212,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         authenticationMethod = MqttBinaryData.decodeString(buf, validateUTF8);
         if (authenticationMethod == null) {
             disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed UTF-8 string for auth method. This is not allowed. Disconnecting client.",
-                    "sent a " + messageType.name() + " with a malformed UTF-8 string for auth method",
+                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed auth method. This is not allowed. Disconnecting client.",
+                    "Sent a " + messageType.name() + " with malformed UTF-8 String for auth method",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_AUTH_METHOD,messageType.name()));
             return null;
@@ -239,7 +239,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         if (Topics.containsWildcard(topicName)) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with a wildcard character (# or +). This is not allowed. Disconnecting client.",
-                    "Sent " + messageType.name() + " with wildcard character (#/+) in topic: " + topicName,
+                    "Sent a " + messageType.name() + " with wildcard character (#/+) in topic: " + topicName,
                     Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD,messageType.name()));
 
@@ -601,7 +601,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected void disconnectByInvalidReasonCode(final @NotNull Channel channel, final @NotNull MessageType messageType) {
         disconnector.disconnect(channel,
                 "A client (IP: {}) sent a " + messageType.name() + " with invalid reason code. Disconnecting client.",
-                "" + messageType.name() + " with invalid reason code",
+                "Sent a " + messageType.name() + " with invalid reason code",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE,messageType.name()));
 
@@ -616,7 +616,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected void disconnectByInvalidAuthMethod(final @NotNull Channel channel, final @NotNull MessageType messageType) {
         disconnector.disconnect(channel,
                 "A client (IP: {}) sent a " + messageType.name() + " with invalid authentication method. Disconnecting client.",
-                "" + messageType.name() + " with invalid authentication method",
+                "Sent a " + messageType.name() + " with invalid authentication method",
                 Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD,messageType.name()));
     }
@@ -678,7 +678,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
 
         disconnector.disconnect(channel,
                 "A client (IP: {}) sent a " + messageType.name() + " with an invalid property identifier '" + propertyIdentifier + "'. This is not allowed. Disconnecting client.",
-                "Sent " + messageType.name() + " with invalid property identifier",
+                "Sent a " + messageType.name() + " with invalid property identifier",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_PROPERTY_IDENTIFIER,messageType.name()));
 
@@ -694,7 +694,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected void disconnectByInvalidFixedHeader(final @NotNull Channel channel, final @NotNull MessageType messageType) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with an invalid fixed header. Disconnecting client.",
-                    "Sent " + messageType.name() + " with invalid fixed header",
+                    "Sent a " + messageType.name() + " with invalid fixed header",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_FIXED_HEADER, messageType.name()));
     }
@@ -711,7 +711,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected void disconnectByNoMessageId(final @NotNull Channel channel, final @NotNull MessageType messageType) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " without a message id. Disconnecting client.",
-                    "Sent " + messageType.name() + " without message id",
+                    "Sent a " + messageType.name() + " without message id",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_MESSAGE_ID, messageType.name()));
     }
@@ -734,7 +734,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         if (packetIdentifier == 0) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with message ID 0. Disconnecting client.",
-                    "Sent " + messageType.name() + " with message id 0", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent a " + messageType.name() + " with message id 0", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_ID_ZERO,messageType.name()));
         }
 
@@ -750,8 +750,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     protected boolean invalidUserPropertiesLength(final @NotNull Channel channel, final @NotNull MessageType messageType, final @NotNull Mqtt5UserProperties userProperties) {
         if (userProperties.encodedLength() > maxUserPropertiesLength) {
             disconnector.disconnect(channel,
-                    "A client (IP: {}) sent a " + messageType.name() + " user properties that are too large. Disconnecting client.",
-                    "Sent " + messageType.name() + " too large user properties", Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
+                    "A client (IP: {}) sent a " + messageType.name() + " with user properties that are too large. Disconnecting client.",
+                    "Sent a " + messageType.name() + " with too large user properties", Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
                     String.format(ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES,messageType.name()));
             return true;
         }

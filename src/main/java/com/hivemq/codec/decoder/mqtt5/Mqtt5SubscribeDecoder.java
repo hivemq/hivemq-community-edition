@@ -119,7 +119,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (!buf.isReadable()) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a SUBSCRIBE which didn't contain any subscription. This is not allowed. Disconnecting client.",
-                    "Sent SUBSCRIBE without any subscriptions",
+                    "Sent a SUBSCRIBE without any subscriptions",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTIONS);
             return null;
@@ -154,7 +154,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (buf.readableBytes() == 0) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a SUBSCRIBE without subscription options. Disconnecting client.",
-                    "Sent SUBSCRIBE without subscription options",
+                    "Sent a SUBSCRIBE without subscription options",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_NO_SUBSCRIPTION_OPTIONS);
             return null;
@@ -164,7 +164,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (Bytes.isBitSet(subscriptionOptions, 6) || Bytes.isBitSet(subscriptionOptions, 7)) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a SUBSCRIBE with malformed subscription options. Disconnecting client.",
-                    "Sent SUBSCRIBE with malformed subscription options",
+                    "Sent a SUBSCRIBE with malformed subscription options",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     ReasonStrings.DISCONNECT_MALFORMED_SUBSCRIPTION_OPTIONS);
             return null;
@@ -179,7 +179,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (noLocal && Topics.isSharedSubscriptionTopic(topicFilter)) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent SUBSCRIBE with a shared subscription and no local set to true. This is not allowed. Disconnecting client.",
-                    "Sent SUBSCRIBE with a shared subscription and no local set to true",
+                    "Sent a SUBSCRIBE with a shared subscription and no local set to true",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_SHARED_SUBSCRIPTION_NO_LOCAL);
             return null;
@@ -232,7 +232,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (packetIdentifier == 0) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a SUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
-                    "Sent SUBSCRIBE with message id = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent a SUBSCRIBE with message id = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_SUBSCRIBE_ID_ZERO);
         }
 
