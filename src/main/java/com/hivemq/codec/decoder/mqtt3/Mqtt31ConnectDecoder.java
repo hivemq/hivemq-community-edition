@@ -105,7 +105,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttConnacker.connackError(channel,
                     "A client (IP: {}) sent a CONNECT message with an incorrect client id length. Disconnecting client.",
                     "Sent CONNECT with incorrect client id length",
-                    Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_CLIENT_IDENTIFIER_NOT_VALID);
             return null;
         }
@@ -127,7 +127,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 mqttConnacker.connackError(channel,
                         "The client id of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with malformed client id",
-                        Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                        Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                         ReasonStrings.CONNACK_CLIENT_IDENTIFIER_NOT_VALID);
                 buf.clear();
                 return null;

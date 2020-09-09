@@ -225,7 +225,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
                     channel,
                     "A client (IP: {}) sent a CONNECT with an incorrect will-topic length. Disconnecting client.",
                     "Incorrect CONNECT will-topic length",
-                    Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     "Incorrect CONNECT will-topic length");
             return null;
         }
@@ -237,7 +237,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
                         channel,
                         "The will-topic of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with bad UTF-8 character",
-                        Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
+                        Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                         "Sent CONNECT with bad UTF-8 character");
                 return null;
             }
