@@ -98,8 +98,8 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttConnacker.connackError(channel,
                     "A client (IP: {}) connected with an invalid username/password combination. The password flag was set but the username flag was not set. Disconnecting client.",
                     "Sent a CONNECT with invalid username/password combination",
-                    null, // no code and string here because this case does not exist in MQTT 5
-                    null);
+                    Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
+                    ReasonStrings.CONNACK_PROTOCOL_ERROR_INVALID_USER_PASS_COMB_MQTT3);
             return null;
         }
 

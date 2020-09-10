@@ -23,6 +23,7 @@ import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
+import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -201,7 +202,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), isNull(), isNull());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), eq(ReasonStrings.CONNACK_PROTOCOL_ERROR_INVALID_USER_PASS_COMB_MQTT3));
     }
 
     @Test
