@@ -294,7 +294,7 @@ public class Mqtt311ConnectDecoderTest {
         final CONNECT connectPacket = decoder.decode(channel, buf, fixedHeader);
 
         assertNull(connectPacket);
-        verify(connacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID), anyString());
+        verify(connacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test

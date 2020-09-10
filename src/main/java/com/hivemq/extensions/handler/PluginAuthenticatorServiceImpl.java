@@ -266,7 +266,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     reasonString,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     true,
-                false);
+                    false);
         } else {
             connacker.connackError(
                     ctx.channel(),

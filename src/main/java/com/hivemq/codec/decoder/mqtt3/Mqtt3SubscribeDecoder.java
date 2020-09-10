@@ -97,13 +97,12 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
-
             if (isInvalidTopic(channel, topic)) {
                 disconnector.disconnect(
                         channel,
                         null, //already logged
                         "Sent SUBSCRIBE with an invalid topic filter",
-                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                        Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         "Sent SUBSCRIBE with invalid topic filter");
                 return null;
             }

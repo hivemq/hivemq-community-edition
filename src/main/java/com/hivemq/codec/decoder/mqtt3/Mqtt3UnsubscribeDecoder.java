@@ -78,7 +78,7 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
-            if (topic == null || topic.isEmpty()) {
+            if (isInvalidTopic(channel, topic)) {
                 disconnector.disconnect(channel,
                         "A client (IP: {}) sent an UNSUBSCRIBE with an empty topic. This is not allowed. Disconnecting client.",
                         "Sent UNSUBSCRIBE with an empty topic",

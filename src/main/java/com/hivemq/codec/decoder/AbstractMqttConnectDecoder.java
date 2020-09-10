@@ -154,6 +154,8 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
     }
 
     /**
+     * THIS IS FOR MQTT 3 ONLY !
+     *
      * checks if the username flag is set when the password flag is set
      */
     protected boolean validateUsernamePassword(final boolean isUsernameFlag, final boolean isPasswordFlag) {
@@ -250,7 +252,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
                     channel,
                     null, //already logged
                     "Sent CONNECT with invalid will-topic",
-                    Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     "Sent CONNECT with invalid will-topic");
             return null;
         }

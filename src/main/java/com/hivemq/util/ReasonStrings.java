@@ -39,6 +39,7 @@ public class ReasonStrings {
     public static final String CONNACK_MALFORMED_PROPERTIES_INVALID = "Sent CONNECT with an invalid property identifier.";
 
     public static final String CONNACK_NOT_AUTHORIZED_MAX_TOPIC_LENGTH_EXCEEDED = "Not authorized to connect. The will topic length exceeded the maximum length configured on the broker.";
+    public static final String CONNACK_PROTOCOL_ERROR_INVALID_USER_PASS_COMB_MQTT3 = "Sent CONNECT with invalid username/password combination.";
     public static final String CONNACK_PROTOCOL_ERROR_NO_AUTH = "Sent CONNECT with auth data and no auth method. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_RECEIVE_MAXIMUM = "Sent CONNECT with receive maximum set to '0'. This is a protocol violation.";
     public static final String CONNACK_PROTOCOL_PACKET_SIZE = "Sent CONNECT with packet size set to '0'. This is a protocol violation.";
@@ -64,8 +65,7 @@ public class ReasonStrings {
 
     public static final String CONNACK_QOS_NOT_SUPPORTED_WILL = "Quality of service level of Will message in CONNECT exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
     public static final String CONNACK_QOS_NOT_SUPPORTED_PUBLISH = "Quality of service level of PUBLISH exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
-    public static final String CONNACK_CONNECTION_RATE_EXCEEDED = "The connection rate was exceeded";
-    public static final String CONNACK_CONNECT_TIMED_OUT = "Connect timed out";
+    public static final String CONNACK_CONNECT_TIMED_OUT = "Connect timed out.";
 
     public static final String DISCONNECT_MALFORMED_USER_PROPERTY = "%s containing a malformed user property was sent.";
     public static final String DISCONNECT_MALFORMED_UTF8_LENGTH = "%s with incorrect UTF-8 String length for %s was sent.";

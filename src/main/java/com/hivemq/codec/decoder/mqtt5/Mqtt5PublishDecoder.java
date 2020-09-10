@@ -201,7 +201,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
                     if (topicAlias == 0) {
                         disconnector.disconnect(channel,
                                 "A client (IP: {}) sent a PUBLISH with topic alias = '0'. This is not allowed. Disconnecting client.",
-                                "Sent a PUBLISH with topic alias = '0'", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                                "Sent a PUBLISH with topic alias = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                                 ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ZERO);
                         return null;
                     }
@@ -302,7 +302,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         } else if (topicName == null) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a PUBLISH with absent topic alias while topic name is zero length. This is not allowed. Disconnecting client.",
-                    "Sent a PUBLISH with absent topic alias while topic name is zero length", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                    "Sent a PUBLISH with absent topic alias while topic name is zero length", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ABSENT);
             return null;
         }
