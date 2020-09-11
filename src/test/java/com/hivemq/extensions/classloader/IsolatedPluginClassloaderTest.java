@@ -17,6 +17,8 @@ package com.hivemq.extensions.classloader;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.classloader.ClassLoaderTestClass;
 import com.hivemq.extension.sdk.api.services.Services;
 import org.apache.commons.io.FileUtils;
@@ -28,8 +30,11 @@ import util.OnTheFlyCompilationUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -87,6 +92,19 @@ public class IsolatedPluginClassloaderTest {
         final ClassLoadedClass originalClassloadedClass = new ClassLoadedClass();
 
         assertNotEquals(originalClassloadedClass.get(), output);
+    }
+
+    @Test
+    public void test_original_class_loaded_delegate() throws Exception {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+
+        final Class<?> aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
+
+        final String output = (String) aClass.getDeclaredMethod("get").invoke(new ClassLoadedClass());
+
+        assertEquals("original", output);
+
     }
 
     @Test
@@ -186,6 +204,62 @@ public class IsolatedPluginClassloaderTest {
         assertEquals("modified", ((Map<String, Object>) servicesFieldIsolated.get(null)).get("key"));
     }
 
+    @Test
+    public void test_get_resource() throws MalformedURLException {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        URL resource = loader.getResource("logback-test.xml");
+        assertNotNull(resource);
+
+    }
+
+    @Test
+    public void test_get_resource_delegate() {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        URL resource = loader.getResource("logback-test.xml");
+        assertNotNull(resource);
+
+    }
+
+    @Test
+    public void test_get_resources() throws IOException {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        @NotNull Enumeration<URL> resource = loader.getResources("logback-test.xml");
+        assertNotNull(resource);
+        assertTrue(resource.hasMoreElements());
+        assertNotNull(resource.nextElement());
+
+    }
+
+    @Test
+    public void test_get_resources_delegate() throws IOException {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        @NotNull Enumeration<URL> resource = loader.getResources("logback-test.xml");
+        assertNotNull(resource);
+        assertTrue(resource.hasMoreElements());
+        assertNotNull(resource.nextElement());
+    }
+
+    @Test
+    public void test_get_resources_as_stream() throws IOException {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        @Nullable InputStream resource = loader.getResourceAsStream("logback-test.xml");
+        assertNotNull(resource);
+
+    }
+
+    @Test
+    public void test_get_resources_as_stream_delegate() throws IOException {
+
+        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        @Nullable InputStream resource = loader.getResourceAsStream("logback-test.xml");
+        assertNotNull(resource);
+
+    }
 
     private void replaceFileContent(final File file, final String original, final String modified) throws IOException {
         String content = FileUtils.readFileToString(file, UTF_8);
