@@ -66,7 +66,12 @@ public interface EmbeddedHiveMQBuilder {
      */
     @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@Nullable Path extensionsFolder);
 
-    //FIXME: javadoc
+    /**
+     * Sets the {@link EmbeddedExtension} to the given argument.
+     *
+     * @param embeddedExtension the used embedded extension.
+     * @return this builder.
+     */
     @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(@NotNull EmbeddedExtension embeddedExtension);
 
     /**
