@@ -21,7 +21,6 @@ import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,8 +62,7 @@ public class AuthorizersImpl implements Authorizers {
         writeLock.lock();
 
         try {
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) authorizerProvider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = authorizerProvider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 

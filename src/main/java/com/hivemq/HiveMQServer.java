@@ -26,7 +26,9 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.PluginBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
@@ -77,11 +79,11 @@ public class HiveMQServer {
         this.adminService = adminService;
     }
 
-    public void start() throws Exception {
+    public void start(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
 
         payloadPersistence.init();
 
-        final CompletableFuture<Void> pluginStartFuture = pluginBootstrap.startPluginSystem();
+        final CompletableFuture<Void> pluginStartFuture = pluginBootstrap.startPluginSystem(embeddedExtension);
         pluginStartFuture.get();
 
         final ListenableFuture<List<ListenerStartupInformation>> startFuture = nettyBootstrap.bootstrapServer();
@@ -184,7 +186,7 @@ public class HiveMQServer {
         /* It's important that we are modifying the log levels after Guice is initialized,
         otherwise this somehow interferes with Singleton creation */
         LoggingBootstrap.addLoglevelModifiers();
-        instance.start();
+        instance.start(null);
 
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;

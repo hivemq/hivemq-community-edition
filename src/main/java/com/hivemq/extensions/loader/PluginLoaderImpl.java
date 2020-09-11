@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -20,18 +21,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.*;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.config.HiveMQPluginXMLReader;
+import com.hivemq.extensions.exception.PluginLoadingException;
 import com.hivemq.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -113,7 +117,8 @@ public class PluginLoaderImpl implements PluginLoader {
     @VisibleForTesting
     @NotNull <T extends ExtensionMain> Optional<Class<? extends T>> loadFromUrls(
             @NotNull final Collection<URL> urls,
-            @NotNull final Class<T> desiredPluginClass, @NotNull final String pluginId) {
+            @NotNull final Class<T> desiredPluginClass,
+            @NotNull final String pluginId) {
 
         checkNotNull(desiredPluginClass, "extension class must not be null");
         checkNotNull(urls, "urls must not be null");
@@ -170,15 +175,17 @@ public class PluginLoaderImpl implements PluginLoader {
                             (Class<? extends T>) implementation;
                     desiredPlugins.add(pluginClass);
                 } else {
-                    log.debug(
-                            "Extension {} is not a {} Extension and will be ignored", implementation.getName(),
+                    log.debug("Extension {} is not a {} Extension and will be ignored",
+                            implementation.getName(),
                             type.getRawType().getName());
                 }
             }
         } catch (final IOException | ClassNotFoundException | SecurityException e) {
             log.error(
                     "An error occurred while searching the implementations for the extension {}. The extension will be disabled. {} : {}",
-                    pluginId, e.getClass().getSimpleName(), e.getMessage());
+                    pluginId,
+                    e.getClass().getSimpleName(),
+                    e.getMessage());
             return Optional.empty();
         }
 
@@ -238,20 +245,24 @@ public class PluginLoaderImpl implements PluginLoader {
         if (!fileName.equals(xmlEntity.getId())) {
             log.warn(
                     "Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}",
-                    xmlEntity.getId(), pluginFolder);
+                    xmlEntity.getId(),
+                    pluginFolder);
             return null;
         }
 
         //check if folder is disabled
         if (!folderEnabled) {
             //plugin is always enabled here
-            return new HiveMQPluginEvent(
-                    HiveMQPluginEvent.Change.DISABLE, xmlEntity.getId(), xmlEntity.getStartPriority(), pluginFolder);
+            return new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE,
+                    xmlEntity.getId(),
+                    xmlEntity.getStartPriority(),
+                    pluginFolder,
+                    false);
         }
 
         if (hiveMQExtensions.isHiveMQPluginIDKnown(xmlEntity.getId()) && pluginEnabled) {
-            log.warn(
-                    "An extension with id \"{}\" is already loaded, ignoring extension at {}", xmlEntity.getId(),
+            log.warn("An extension with id \"{}\" is already loaded, ignoring extension at {}",
+                    xmlEntity.getId(),
                     pluginFolder);
             return null;
         }
@@ -265,13 +276,56 @@ public class PluginLoaderImpl implements PluginLoader {
 
         hiveMQExtensions.addHiveMQPlugin(hiveMQExtension);
 
-        return new HiveMQPluginEvent(
-                HiveMQPluginEvent.Change.ENABLE, hiveMQExtension.getId(), hiveMQExtension.getStartPriority(),
-                pluginFolder);
+        return new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                hiveMQExtension.getId(),
+                hiveMQExtension.getStartPriority(),
+                pluginFolder,
+                false);
+    }
+
+    @Override
+    public @Nullable HiveMQPluginEvent loadEmbeddedExtension(final @NotNull EmbeddedExtension embeddedExtension) {
+
+        final HiveMQPluginEvent hiveMQPluginEvent =
+                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE, embeddedExtension.getId(), embeddedExtension.getStartPriority(), new File("/tmp").toPath(), true);
+
+        final HiveMQEmbeddedExtensionImpl extension =
+                new HiveMQEmbeddedExtensionImpl(embeddedExtension.getId(),
+                        embeddedExtension.getVersion(),
+                        embeddedExtension.getName(),
+                        embeddedExtension.getAuthor(),
+                        embeddedExtension.getPriority(),
+                        embeddedExtension.getStartPriority(),
+                        embeddedExtension.getExtensionMain(),
+                        true);
+        hiveMQExtensions.addHiveMQPlugin(extension);
+
+        final IsolatedPluginClassloader isolatedPluginClassloader = extension.getPluginClassloader();
+        if(isolatedPluginClassloader == null){
+            throw new IllegalStateException("The extensions class loader must not be null at loading stage");
+        }
+
+
+        isolatedPluginClassloader.loadClassesWithStaticContext();
+
+        try {
+            staticInitializer.initialize(embeddedExtension.getId(), isolatedPluginClassloader);
+        } catch (final PluginLoadingException e) {
+            log.warn(
+                    "Embedded extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
+                    embeddedExtension.getId(),
+                    e.getMessage());
+            log.debug("Original exception", e);
+            Exceptions.rethrowError(e);
+            return null;
+        }
+
+        return hiveMQPluginEvent;
     }
 
     @Nullable <T extends ExtensionMain> HiveMQExtension loadSinglePlugin(
-            @NotNull final Path pluginFolder, @NotNull final HiveMQPluginEntity xmlEntity,
+            @NotNull final Path pluginFolder,
+            @NotNull final HiveMQPluginEntity xmlEntity,
             @NotNull final Class<T> desiredClass) {
         final ImmutableList.Builder<Path> jarPaths = ImmutableList.builder();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(pluginFolder)) {
@@ -316,12 +370,14 @@ public class PluginLoaderImpl implements PluginLoader {
         } catch (final NoSuchMethodException nsme) {
             log.warn("Extension {} cannot be loaded. The {} has no constructor without parameters, " +
                             "a no-arg constructor for a ExtensionMain is required by HiveMQ.",
-                    pluginFolder.toAbsolutePath().toString(), pluginMainClass);
+                    pluginFolder.toAbsolutePath().toString(),
+                    pluginMainClass);
             return null;
         } catch (final Exception e) {
             log.warn("Extension {} cannot be loaded. The class {} cannot be instantiated, reason: {}",
                     pluginFolder.toAbsolutePath().toString(),
-                    pluginMainClass.getCanonicalName(), e.getMessage());
+                    pluginMainClass.getCanonicalName(),
+                    e.getMessage());
             log.debug("Original exception:", e);
             return null;
         }
@@ -336,7 +392,8 @@ public class PluginLoaderImpl implements PluginLoader {
         } catch (final Throwable e) {
             log.warn(
                     "Extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
-                    hiveMQPluginID, e.getMessage());
+                    hiveMQPluginID,
+                    e.getMessage());
             log.debug("Original exception", e);
             Exceptions.rethrowError(e);
             return false;

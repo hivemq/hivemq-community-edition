@@ -102,7 +102,7 @@ public class PluginInitializerHandlerTest {
     private HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private HiveMQExtension plugin;
+    private HiveMQExtension hiveMQExtension;
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;
@@ -128,6 +128,9 @@ public class PluginInitializerHandlerTest {
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
+
+        when(hiveMQExtensions.getExtensionForClassloader(any(ClassLoader.class))).thenReturn(hiveMQExtension);
+        when(hiveMQExtension.getPluginClassloader()).thenReturn(classloader1);
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,

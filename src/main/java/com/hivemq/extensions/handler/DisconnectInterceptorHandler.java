@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.inject.Inject;
@@ -26,7 +27,6 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.DisconnectOutboundInt
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginInformationUtil;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -140,8 +140,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
 
         for (final DisconnectInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -188,13 +188,17 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         final ExtensionParameterHolder<DisconnectOutboundOutputImpl> outputHolder =
                 new ExtensionParameterHolder<>(output);
 
-        final DisconnectOutboundInterceptorContext context = new DisconnectOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final DisconnectOutboundInterceptorContext context = new DisconnectOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final DisconnectOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -284,7 +288,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound DISCONNECT interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId);
                 log.debug("Original exception: ", e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
@@ -298,8 +303,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private static class DisconnectInboundInterceptorContext
-            extends PluginInOutTaskContext<DisconnectInboundOutputImpl> implements Runnable {
+    private static class DisconnectInboundInterceptorContext extends PluginInOutTaskContext<DisconnectInboundOutputImpl>
+            implements Runnable {
 
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
@@ -373,7 +378,8 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound DISCONNECT interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId);
                 log.debug("Original exception: ", e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.initializer;
 
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -34,8 +34,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * This class contains every initializer set by any extension.
  * <p>
- * get, add and remove share the same {@link ReadWriteLock}
- * which makes it ThreadSafe.
+ * get, add and remove share the same {@link ReadWriteLock} which makes it ThreadSafe.
  * <p>
  * the clientInitializerMap is sorted by extension priority.
  * <p>
@@ -73,8 +72,7 @@ public class InitializersImpl implements Initializers {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) initializer.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = initializer.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 

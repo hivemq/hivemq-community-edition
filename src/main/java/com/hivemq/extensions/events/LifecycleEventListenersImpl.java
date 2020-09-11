@@ -21,7 +21,6 @@ import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerPr
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,8 +62,7 @@ public class LifecycleEventListenersImpl implements LifecycleEventListeners {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) provider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = provider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 

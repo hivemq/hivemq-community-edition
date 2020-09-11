@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
-import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.parameter.ExtensionStartOutputImpl;
@@ -55,7 +56,7 @@ public class HiveMQExtensions {
     @GuardedBy("pluginsLock")
     private final @NotNull HashMap<String, HiveMQExtension> knownPlugins = new HashMap<>();
     @GuardedBy("classloaderLock")
-    private final @NotNull HashMap<IsolatedPluginClassloader, HiveMQExtension> classloaderToPlugin = new HashMap<>();
+    private final @NotNull HashMap<ClassLoader, HiveMQExtension> classloaderToPlugin = new HashMap<>();
     @GuardedBy("beforePluginStopCallbacksLock")
     private final @NotNull List<Consumer<HiveMQExtension>> beforePluginStopCallbacks = new LinkedList<>();
     @GuardedBy("afterPluginStopCallbacksLock")
@@ -68,7 +69,7 @@ public class HiveMQExtensions {
     private final @NotNull ServerInformation serverInformation;
 
     @Inject
-    public HiveMQExtensions(final @NotNull ServerInformation serverInformation){
+    public HiveMQExtensions(final @NotNull ServerInformation serverInformation) {
         this.serverInformation = serverInformation;
     }
 
@@ -76,7 +77,8 @@ public class HiveMQExtensions {
         final Lock lock = pluginsLock.readLock();
         try {
             lock.lock();
-            return knownPlugins.values().stream()
+            return knownPlugins.values()
+                    .stream()
                     .filter(HiveMQExtension::isEnabled)
                     .sorted(Comparator.comparingInt(HiveMQExtension::getPriority))
                     .collect(ImmutableMap.toImmutableMap(HiveMQExtension::getId, Function.identity()));
@@ -85,7 +87,7 @@ public class HiveMQExtensions {
         }
     }
 
-    public @NotNull ImmutableMap<IsolatedPluginClassloader, HiveMQExtension> getClassloaderToExtensionMap() {
+    public @NotNull ImmutableMap<ClassLoader, HiveMQExtension> getClassloaderToExtensionMap() {
         return ImmutableMap.copyOf(classloaderToPlugin);
     }
 
@@ -154,11 +156,11 @@ public class HiveMQExtensions {
     }
 
     /**
-     * @param classloader a {@link IsolatedPluginClassloader}
+     * @param classloader the {@link ClassLoader} of the extension.
      * @return null if no extension with this classloader was started or if it was already stopped. Otherwise the
      *         extension associated with this classloader is returned
      */
-    public @Nullable HiveMQExtension getExtensionForClassloader(final @NotNull IsolatedPluginClassloader classloader) {
+    public @Nullable HiveMQExtension getExtensionForClassloader(final @NotNull ClassLoader classloader) {
         final Lock lock = classloaderLock.readLock();
         try {
             lock.lock();
@@ -174,6 +176,10 @@ public class HiveMQExtensions {
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
+            if (extension instanceof HiveMQEmbeddedExtensionImpl && extension.getPluginMainClazz() != null) {
+                //for embedded extensions also add the original (delegate) classloader
+                classloaderToPlugin.put(extension.getPluginMainClazz().getClassLoader(), extension);
+            }
             classloaderToPlugin.put(classloader, extension);
         } finally {
             loaderLock.unlock();
@@ -217,18 +223,22 @@ public class HiveMQExtensions {
 
             if (output.getReason().isPresent()) {
                 log.info(
-                        "Startup of extension with id \"{}\" was prevented by the extension itself, reason: {}. Extension will be disabled.",
-                        plugin.getId(), output.getReason().get());
+                        "Startup of {}extension with id \"{}\" was prevented by the extension itself, reason: {}. Extension will be disabled.",
+                        plugin.isEmbedded() ? "embedded " : "",
+                        plugin.getId(),
+                        output.getReason().get());
                 extensionStartFailed(plugin, pluginClassloader);
             } else {
-                log.info("Extension \"{}\" version {} started successfully.", plugin.getName(), plugin.getVersion());
+                log.info("{}xtension \"{}\" version {} started successfully.", plugin.isEmbedded() ? "Embedded e" : "E", plugin.getName(), plugin.getVersion());
                 Checkpoints.checkpoint("extension-started");
             }
 
         } catch (final Throwable t) {
             log.error(
-                    "Extension with id \"{}\" cannot be started because of an uncaught exception thrown by the extension. Extension will be disabled.",
-                    plugin.getId(), t);
+                    "{}xtension with id \"{}\" cannot be started because of an uncaught exception thrown by the extension. Extension will be disabled.",
+                    plugin.isEmbedded() ? "Embedded e" : "E",
+                    plugin.getId(),
+                    t);
             extensionStartFailed(plugin, pluginClassloader);
 
         } finally {
@@ -280,12 +290,11 @@ public class HiveMQExtensions {
             Thread.currentThread().setContextClassLoader(pluginClassloader);
             plugin.stop(input, output);
 
-            log.info("Extension \"{}\" version {} stopped successfully.", plugin.getName(), plugin.getVersion());
+            log.info("{}xtension \"{}\" version {} stopped successfully.", plugin.isEmbedded() ? "Embedded e" : "E", plugin.getName(), plugin.getVersion());
 
         } catch (final Throwable t) {
             log.warn("Uncaught exception was thrown from extension with id \"" + plugin.getId() +
-                    "\" on extension stop. " +
-                    "Extensions are responsible on their own to handle exceptions.", t);
+                    "\" on extension stop. Extensions are responsible on their own to handle exceptions.", t);
             disable = true;
 
         } finally {

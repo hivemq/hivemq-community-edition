@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.loader.PluginLifecycleHandler;
 import com.hivemq.extensions.loader.PluginLoader;
 import com.hivemq.extensions.services.auth.Authenticators;
@@ -65,7 +68,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
 
     @NotNull
     @Override
-    public CompletableFuture<Void> startPluginSystem() {
+    public CompletableFuture<Void> startPluginSystem(final @Nullable EmbeddedExtension embeddedExtension) {
 
         log.info("Starting HiveMQ extension system.");
 
@@ -73,11 +76,21 @@ public class PluginBootstrapImpl implements PluginBootstrap {
         final Path extensionFolder = systemInformation.getExtensionsFolder().toPath();
 
         //load already installed extensions
-        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents = pluginLoader.loadPlugins(
-                extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
+        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents = pluginLoader.loadPlugins(extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
+
+        final ImmutableList.Builder<HiveMQPluginEvent> pluginEventBuilder = ImmutableList.<HiveMQPluginEvent>builder().addAll(hiveMQPluginEvents);
+
+        if(embeddedExtension != null) {
+            final HiveMQPluginEvent pluginEvent = pluginLoader.loadEmbeddedExtension(embeddedExtension);
+            if (pluginEvent != null) {
+                pluginEventBuilder.add(pluginEvent);
+            }
+        }
+
+        final ImmutableList<HiveMQPluginEvent> allPlugins = pluginEventBuilder.build();
 
         //start them if needed
-        return lifecycleHandler.handlePluginEvents(hiveMQPluginEvents)
+        return lifecycleHandler.handlePluginEvents(allPlugins)
                 .thenAccept(((v) -> authenticators.checkAuthenticationSafetyAndLifeness()));
     }
 
@@ -85,12 +98,14 @@ public class PluginBootstrapImpl implements PluginBootstrap {
     @Override
     public void stopPluginSystem() {
 
-        final ImmutableList<HiveMQPluginEvent> events = hiveMQExtensions.getEnabledHiveMQExtensions()
-                .values().stream()
-                .map(extension -> new HiveMQPluginEvent(
-                        HiveMQPluginEvent.Change.DISABLE, extension.getId(), extension.getStartPriority(),
-                        extension.getPluginFolderPath()))
-                .collect(ImmutableList.toImmutableList());
+        final ImmutableList<HiveMQPluginEvent> events =
+                hiveMQExtensions.getEnabledHiveMQExtensions().values().stream().map(extension -> new HiveMQPluginEvent(
+                        HiveMQPluginEvent.Change.DISABLE,
+                        extension.getId(),
+                        extension.getStartPriority(),
+                        extension.getPluginFolderPath(),
+                        extension.isEmbedded()))
+                        .collect(ImmutableList.toImmutableList());
 
         //stop extensions
         lifecycleHandler.handlePluginEvents(events).join();

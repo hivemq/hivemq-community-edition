@@ -547,11 +547,7 @@ public class ClientContextImpl {
     }
 
     private int getExtensionPriority(final @NotNull Object object) {
-        if (!(object.getClass().getClassLoader() instanceof IsolatedPluginClassloader)) {
-            return -1;
-        }
-        final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedPluginClassloader) object.getClass().getClassLoader());
+        final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(object.getClass().getClassLoader());
         if (extension != null) {
             return extension.getPriority();
         } else {

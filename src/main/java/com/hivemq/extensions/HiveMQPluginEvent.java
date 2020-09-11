@@ -27,12 +27,19 @@ public class HiveMQPluginEvent {
     private final String pluginId;
     private final int priority;
     private final Path pluginFolder;
+    private final boolean embedded;
 
-    public HiveMQPluginEvent(@NotNull final Change change, @NotNull final String pluginId, final int priority, @NotNull final Path pluginFolder) {
+    public HiveMQPluginEvent(
+            @NotNull final Change change,
+            @NotNull final String pluginId,
+            final int priority,
+            @NotNull final Path pluginFolder,
+            final boolean embedded) {
         this.change = change;
         this.pluginId = pluginId;
         this.priority = priority;
         this.pluginFolder = pluginFolder;
+        this.embedded = embedded;
     }
 
     @NotNull
@@ -52,6 +59,10 @@ public class HiveMQPluginEvent {
     @NotNull
     public Path getPluginFolder() {
         return pluginFolder;
+    }
+
+    public boolean isEmbedded() {
+        return embedded;
     }
 
     public enum Change {ENABLE, DISABLE}

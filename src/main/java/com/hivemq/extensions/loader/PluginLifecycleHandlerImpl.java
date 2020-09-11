@@ -79,7 +79,7 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
             case ENABLE:
                 return startPlugin(hiveMQPluginEvent);
             case DISABLE:
-                return stopPlugin(hiveMQPluginEvent.getPluginId());
+                return stopPlugin(hiveMQPluginEvent.getPluginId(), hiveMQPluginEvent.isEmbedded());
             default:
                 return CompletableFuture.completedFuture(false);
         }
@@ -88,13 +88,13 @@ public class PluginLifecycleHandlerImpl implements PluginLifecycleHandler {
     private @NotNull CompletableFuture<Boolean> startPlugin(final @NotNull HiveMQPluginEvent pluginEvent) {
         final String pluginId = pluginEvent.getPluginId();
 
-        log.debug("Starting extension with id \"{}\" at {}", pluginId, pluginEvent.getPluginFolder());
+        log.debug("Starting {}extension with id \"{}\" at {}", pluginEvent.isEmbedded() ? "embedded " : "", pluginId, pluginEvent.getPluginFolder());
         return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStart(pluginId), pluginStartStopExecutor);
     }
 
-    private @NotNull CompletableFuture<Boolean> stopPlugin(final @NotNull String pluginId) {
+    private @NotNull CompletableFuture<Boolean> stopPlugin(final @NotNull String pluginId, final boolean embedded) {
 
-        log.debug("Stopping extension with id {}", pluginId);
+        log.debug("Stopping {}extension with id {}", embedded ? "embedded " : "", pluginId);
         return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false), pluginStartStopExecutor);
     }
 

@@ -125,4 +125,10 @@ public interface HiveMQExtension {
      */
     void setPreviousVersion(@Nullable String previousVersion);
 
+    /**
+     * is it an embedded extension or not?
+     *
+     * @return true for embedded else false
+     */
+    boolean isEmbedded();
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
 import com.google.common.collect.ImmutableList;
@@ -21,6 +22,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -41,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.InitFutureUtilsExecutorRule;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 
@@ -70,6 +73,9 @@ public class PluginBootstrapImplTest {
     @Mock
     Authenticators authenticators;
 
+    @Mock
+    EmbeddedExtension embeddedExtension;
+
     private PluginBootstrapImpl pluginBootstrap;
     private PluginLifecycleHandler pluginLifecycleHandler;
 
@@ -78,18 +84,57 @@ public class PluginBootstrapImplTest {
         MockitoAnnotations.initMocks(this);
 
 
-        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
-        pluginBootstrap = new PluginBootstrapImpl(pluginLoader, new SystemInformationImpl(), pluginLifecycleHandler,
-                hiveMQExtensions, shutdownHooks,authenticators);
+        pluginLifecycleHandler =
+                new PluginLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
+        pluginBootstrap = new PluginBootstrapImpl(pluginLoader,
+                new SystemInformationImpl(),
+                pluginLifecycleHandler,
+                hiveMQExtensions,
+                shutdownHooks,
+                authenticators);
     }
 
     @Test
     public void test_startPluginSystem_shutdown_hook_registered() {
 
         when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
-        pluginBootstrap.startPluginSystem();
+        pluginBootstrap.startPluginSystem(null);
 
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
+    }
+
+    @Test
+    public void test_startPluginSystem_with_embeddedExtensions() {
+
+        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
+        when(pluginLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                "my-extension",
+                0,
+                new File("/tmp").toPath(),
+                true));
+        pluginBootstrap.startPluginSystem(embeddedExtension);
+
+        verify(hiveMQExtensions).extensionStart("my-extension");
+        verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
+    }
+
+    @Test
+    public void test_startPluginSystem_mixed() {
+
+        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                "my-extension-1",
+                0,
+                new File("/folder").toPath(),
+                false)));
+        when(pluginLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                "my-extension-2",
+                0,
+                new File("/tmp").toPath(),
+                true));
+        pluginBootstrap.startPluginSystem(embeddedExtension);
+
+        verify(hiveMQExtensions).extensionStart("my-extension-1");
+        verify(hiveMQExtensions).extensionStart("my-extension-2");
     }
 
     @Test
@@ -190,12 +235,16 @@ public class PluginBootstrapImplTest {
         }
 
         @Override
-        public void start(final @NotNull ExtensionStartInput extensionStartInput, final @NotNull ExtensionStartOutput extensionStartOutput) {
+        public void start(
+                final @NotNull ExtensionStartInput extensionStartInput,
+                final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         }
 
         @Override
-        public void stop(final @NotNull ExtensionStopInput extensionStopInput, final @NotNull ExtensionStopOutput extensionStopOutput) {
+        public void stop(
+                final @NotNull ExtensionStopInput extensionStopInput,
+                final @NotNull ExtensionStopOutput extensionStopOutput) {
 
         }
 
@@ -203,12 +252,19 @@ public class PluginBootstrapImplTest {
         public void clean(final boolean disable) {
 
         }
+
+        @Override
+        public boolean isEmbedded() {
+            return false;
+        }
     }
 
     private static class TestExtensionMain implements ExtensionMain {
 
         @Override
-        public void extensionStart(final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+        public void extensionStart(
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
 
         }
 

@@ -24,7 +24,6 @@ import com.hivemq.extension.sdk.api.interceptor.pubrec.PubrecOutboundInterceptor
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.PluginInformationUtil;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -133,8 +132,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrecInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -184,8 +182,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
 
         for (final PubrecOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(
-                    (IsolatedPluginClassloader) interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;

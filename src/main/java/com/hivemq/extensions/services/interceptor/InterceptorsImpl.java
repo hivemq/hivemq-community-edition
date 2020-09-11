@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.collect.ImmutableMap;
@@ -41,7 +42,8 @@ public class InterceptorsImpl implements Interceptors {
     private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInboundInterceptorProviderMap;
 
     @NotNull
-    private final Map<@NotNull String, @NotNull ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviderMap;
+    private final Map<@NotNull String, @NotNull ConnackOutboundInterceptorProvider>
+            connackOutboundInterceptorProviderMap;
 
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
@@ -73,8 +75,7 @@ public class InterceptorsImpl implements Interceptors {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) provider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = provider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
@@ -108,8 +109,7 @@ public class InterceptorsImpl implements Interceptors {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) provider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = provider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 

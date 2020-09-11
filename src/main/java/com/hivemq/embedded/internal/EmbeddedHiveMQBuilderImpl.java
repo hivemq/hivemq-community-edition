@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded.internal;
 
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.embedded.EmbeddedHiveMQBuilder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -25,31 +27,36 @@ import java.nio.file.Path;
 
 /**
  * @author Georg Held
+ * @author Florian Limpöck
  */
 public class EmbeddedHiveMQBuilderImpl implements EmbeddedHiveMQBuilder {
 
     private @Nullable Path configFolder = null;
     private @Nullable Path dataFolder = null;
     private @Nullable Path extensionsFolder = null;
+    private @Nullable EmbeddedExtension embeddedExtension = null;
 
     @Override
     public @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(final @Nullable Path configFolder) {
         this.configFolder = configFolder;
-
         return this;
     }
 
     @Override
     public @NotNull EmbeddedHiveMQBuilder withDataFolder(final @Nullable Path dataFolder) {
         this.dataFolder = dataFolder;
-
         return this;
     }
 
     @Override
     public @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(final @Nullable Path extensionsFolder) {
         this.extensionsFolder = extensionsFolder;
+        return this;
+    }
 
+    @Override
+    public @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(final @NotNull EmbeddedExtension embeddedExtension) {
+        this.embeddedExtension = embeddedExtension;
         return this;
     }
 
@@ -60,6 +67,7 @@ public class EmbeddedHiveMQBuilderImpl implements EmbeddedHiveMQBuilder {
         final File dataFile = dataFolder == null ? null : dataFolder.toFile();
         final File extensionsFile = extensionsFolder == null ? null : extensionsFolder.toFile();
 
-        return new EmbeddedHiveMQImpl(confFile, dataFile, extensionsFile);
+        return new EmbeddedHiveMQImpl(confFile, dataFile, extensionsFile, embeddedExtension);
     }
+
 }

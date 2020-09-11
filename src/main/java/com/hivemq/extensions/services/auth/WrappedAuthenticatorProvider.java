@@ -59,8 +59,8 @@ public class WrappedAuthenticatorProvider {
         this.enhancedAuthenticatorProvider = null;
     }
 
-    public WrappedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider simpleAuthenticatorProvider, @NotNull final IsolatedPluginClassloader classLoader) {
-        this.enhancedAuthenticatorProvider = simpleAuthenticatorProvider;
+    public WrappedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider, @NotNull final IsolatedPluginClassloader classLoader) {
+        this.enhancedAuthenticatorProvider = enhancedAuthenticatorProvider;
         this.classLoader = classLoader;
         this.simpleAuthenticatorProvider = null;
     }

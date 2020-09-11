@@ -90,10 +90,9 @@ public class SecurityRegistryImplTest {
 
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authorizers = new AuthorizersImpl(hiveMQExtensions);
-        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers);
+        securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQExtensions);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(
-                hiveMQExtension);
+        when(hiveMQExtensions.getExtensionForClassloader(any(ClassLoader.class))).thenReturn(hiveMQExtension);
         when(hiveMQExtensions.getExtension(anyString())).thenReturn(hiveMQExtension);
 
         when(hiveMQExtension.getId()).thenReturn("extension1");
@@ -105,6 +104,8 @@ public class SecurityRegistryImplTest {
                         TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class,
                         EnhancedTestProvider1.class, EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
                 });
+
+        when(hiveMQExtension.getPluginClassloader()).thenReturn(classloader);
 
         provider1 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestProvider1.class);
         provider2 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestProvider2.class);
@@ -166,7 +167,7 @@ public class SecurityRegistryImplTest {
                 registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 50000000)
     public void test_set_second_enhanced_authenticator_provider_from_same_classloader() {
 
         securityRegistry.setEnhancedAuthenticatorProvider(enhancedProvider1);

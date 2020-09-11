@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded;
 
 import com.hivemq.embedded.internal.EmbeddedHiveMQBuilderImpl;
@@ -33,7 +34,8 @@ public interface EmbeddedHiveMQBuilder {
     }
 
     /**
-     * Sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure the HIVEMQ_CONFIG_FOLDER.
+     * Sets the HIVEMQ_CONFIG_FOLDER to the given argument. Using this method overrides all other ways to configure the
+     * HIVEMQ_CONFIG_FOLDER.
      *
      * @param configFolder the used configuration folder.
      * @return this builder.
@@ -43,7 +45,8 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withConfigurationFolder(@Nullable Path configFolder);
 
     /**
-     * Sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure the HIVEMQ_DATA_FOLDER.
+     * Sets the HIVEMQ_DATA_FOLDER to the given argument. Using this method overrides all other ways to configure the
+     * HIVEMQ_DATA_FOLDER.
      *
      * @param dataFolder the used data folder.
      * @return this builder.
@@ -63,6 +66,9 @@ public interface EmbeddedHiveMQBuilder {
      */
     @NotNull EmbeddedHiveMQBuilder withExtensionsFolder(@Nullable Path extensionsFolder);
 
+    //FIXME: javadoc
+    @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(@NotNull EmbeddedExtension embeddedExtension);
+
     /**
      * Concludes the EmbeddedHiveMQ build process.
      * <p>
@@ -73,4 +79,5 @@ public interface EmbeddedHiveMQBuilder {
      * @return a new EmbeddedHiveMQ with the configured HiveMQ folders.
      */
     @NotNull EmbeddedHiveMQ build();
+
 }

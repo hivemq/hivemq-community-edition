@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
+import com.hivemq.HiveMQServer;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -27,18 +29,18 @@ import com.hivemq.util.Checkpoints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author Georg Held
  * @author Christoph Schäbel
- * @author Silvio Giebl
+ * @author Florian Limpöck
  */
-public class HiveMQExtensionImpl implements HiveMQExtension {
+public class HiveMQEmbeddedExtensionImpl implements HiveMQExtension {
 
-    private static final Logger log = LoggerFactory.getLogger(HiveMQExtensionImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HiveMQEmbeddedExtensionImpl.class);
 
     private final @NotNull String id;
     private final @NotNull String version;
@@ -51,20 +53,36 @@ public class HiveMQExtensionImpl implements HiveMQExtension {
     private @Nullable ExtensionMain extensionMain;
     private @Nullable String previousVersion;
 
-    public HiveMQExtensionImpl(
-            final @NotNull HiveMQPluginEntity pluginEntity, final @NotNull Path pluginFolderPath,
-            final @NotNull ExtensionMain extensionMain, final boolean enabled) {
+    private final @Nullable IsolatedPluginClassloader isolatedPluginClassloader;
 
-        this.id = pluginEntity.getId();
-        this.version = pluginEntity.getVersion();
-        this.name = pluginEntity.getName();
-        this.author = pluginEntity.getAuthor();
-        this.pluginFolderPath = pluginFolderPath;
-        this.priority = pluginEntity.getPriority();
-        this.startPriority = pluginEntity.getStartPriority();
+    //TODO: Refactor with ExtensionImpl
+    public HiveMQEmbeddedExtensionImpl(
+            final @NotNull String id,
+            final @NotNull String version,
+            final @NotNull String name,
+            final @Nullable String author,
+            final int priority,
+            final int startPriority,
+            final @NotNull ExtensionMain extensionMain,
+            final boolean enabled) {
+
+        this.id = id;
+        this.version = version;
+        this.name = name;
+        this.author = author;
+        this.pluginFolderPath = new File("/tmp").toPath();
+        this.priority = priority;
+        this.startPriority = startPriority;
 
         this.enabled = new AtomicBoolean(enabled);
         this.extensionMain = extensionMain;
+
+        final ClassLoader classLoader = extensionMain.getClass().getClassLoader();
+        if ((classLoader instanceof IsolatedPluginClassloader)) {
+            isolatedPluginClassloader = (IsolatedPluginClassloader) classLoader;
+        } else {
+            isolatedPluginClassloader = new IsolatedPluginClassloader(classLoader, HiveMQServer.class.getClassLoader());
+        }
     }
 
     @Override
@@ -119,7 +137,7 @@ public class HiveMQExtensionImpl implements HiveMQExtension {
 
     @Override
     public @Nullable IsolatedPluginClassloader getPluginClassloader() {
-        return extensionMain != null ? (IsolatedPluginClassloader) extensionMain.getClass().getClassLoader() : null;
+        return isolatedPluginClassloader;
     }
 
     @Override
@@ -134,7 +152,8 @@ public class HiveMQExtensionImpl implements HiveMQExtension {
 
     @Override
     public void start(
-            final @NotNull ExtensionStartInput extensionStartInput, final @NotNull ExtensionStartOutput extensionStartOutput) {
+            final @NotNull ExtensionStartInput extensionStartInput,
+            final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         if (extensionMain != null) {
             extensionMain.extensionStart(extensionStartInput, extensionStartOutput);
@@ -142,7 +161,9 @@ public class HiveMQExtensionImpl implements HiveMQExtension {
     }
 
     @Override
-    public void stop(final @NotNull ExtensionStopInput extensionStopInput, final @NotNull ExtensionStopOutput extensionStopOutput) {
+    public void stop(
+            final @NotNull ExtensionStopInput extensionStopInput,
+            final @NotNull ExtensionStopOutput extensionStopOutput) {
         if (extensionMain != null) {
             extensionMain.extensionStop(extensionStopInput, extensionStopOutput);
         }
@@ -176,6 +197,6 @@ public class HiveMQExtensionImpl implements HiveMQExtension {
 
     @Override
     public boolean isEmbedded() {
-        return false;
+        return true;
     }
 }

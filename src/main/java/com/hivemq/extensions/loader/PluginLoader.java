@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -54,9 +56,7 @@ public interface PluginLoader {
      */
     @ReadOnly
     @NotNull <T extends ExtensionMain> ImmutableList<HiveMQPluginEvent> loadPlugins(
-            @NotNull final Path pluginFolder,
-            boolean permissive,
-            @NotNull final Class<T> desiredPluginClass);
+            @NotNull final Path pluginFolder, boolean permissive, @NotNull final Class<T> desiredPluginClass);
 
     /**
      * Loads a single extension.
@@ -65,6 +65,8 @@ public interface PluginLoader {
      * @return An Optional of a loaded extension. Empty if loading fails or extension <id> already known.
      */
     @Nullable <T extends ExtensionMain> HiveMQPluginEvent processSinglePluginFolder(
-            @NotNull final Path pluginFolder,
-            @NotNull final Class<T> desiredClass);
+            @NotNull final Path pluginFolder, @NotNull final Class<T> desiredClass);
+
+
+    @Nullable HiveMQPluginEvent loadEmbeddedExtension(@NotNull EmbeddedExtension extensionMain);
 }
