@@ -300,7 +300,7 @@ public class PluginLoaderImpl implements PluginLoader {
                         true);
         hiveMQExtensions.addHiveMQPlugin(extension);
 
-        final IsolatedPluginClassloader isolatedPluginClassloader = extension.getPluginClassloader();
+        final IsolatedPluginClassloader isolatedPluginClassloader = extension.getExtensionClassloader();
         if(isolatedPluginClassloader == null){
             throw new IllegalStateException("The extensions class loader must not be null at loading stage");
         }

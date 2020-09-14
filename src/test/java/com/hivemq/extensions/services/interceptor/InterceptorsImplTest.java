@@ -107,7 +107,7 @@ public class InterceptorsImplTest {
 
         assertSame(connectInterceptorProvider, interceptors.connectInboundInterceptorProviders().get("plugin1"));
 
-        when(plugin1.getPluginClassloader()).thenReturn(cl);
+        when(plugin1.getExtensionClassloader()).thenReturn(cl);
         captor.getValue().accept(plugin1);
         assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
 
@@ -144,7 +144,7 @@ public class InterceptorsImplTest {
 
         assertSame(connackInterceptorProvider, interceptors.connackOutboundInterceptorProviders().get("plugin1"));
 
-        when(plugin1.getPluginClassloader()).thenReturn(cl);
+        when(plugin1.getExtensionClassloader()).thenReturn(cl);
         captor.getValue().accept(plugin1);
         assertEquals(0, interceptors.connackOutboundInterceptorProviders().size());
 

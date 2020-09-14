@@ -56,12 +56,12 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         final HiveMQExtension extension =
                 hiveMQExtensions.getExtensionForClassloader(authenticatorProvider.getClass().getClassLoader());
 
-        if(extension == null || extension.getPluginClassloader() == null){
+        if(extension == null || extension.getExtensionClassloader() == null){
             return;
         }
 
         final WrappedAuthenticatorProvider wrapped =
-                new WrappedAuthenticatorProvider(authenticatorProvider, extension.getPluginClassloader());
+                new WrappedAuthenticatorProvider(authenticatorProvider, extension.getExtensionClassloader());
         authenticators.registerAuthenticatorProvider(wrapped);
     }
 
@@ -74,12 +74,12 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         final HiveMQExtension extension =
                 hiveMQExtensions.getExtensionForClassloader(enhancedAuthenticatorProvider.getClass().getClassLoader());
 
-        if(extension == null || extension.getPluginClassloader() == null){
+        if(extension == null || extension.getExtensionClassloader() == null){
             return;
         }
 
         final WrappedAuthenticatorProvider wrapped =
-                new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider, extension.getPluginClassloader());
+                new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider, extension.getExtensionClassloader());
         authenticators.registerAuthenticatorProvider(wrapped);
     }
 

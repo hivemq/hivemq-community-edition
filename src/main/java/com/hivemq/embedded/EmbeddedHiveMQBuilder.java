@@ -72,7 +72,7 @@ public interface EmbeddedHiveMQBuilder {
      * @param embeddedExtension the used embedded extension.
      * @return this builder.
      */
-    @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(@NotNull EmbeddedExtension embeddedExtension);
+    @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(@Nullable EmbeddedExtension embeddedExtension);
 
     /**
      * Concludes the EmbeddedHiveMQ build process.

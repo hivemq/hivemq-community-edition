@@ -25,12 +25,14 @@ import javax.annotation.Nullable;
 
 /**
  * @author Florian Limpöck
+ * @since CE 2020.5
  */
 @DoNotImplement
 public interface EmbeddedExtensionBuilder {
 
     /**
      * @return a new EmbeddedExtensionBuilder.
+     * @since CE 2020.5
      */
     static @NotNull EmbeddedExtensionBuilder builder() {
         return new EmbeddedExtensionBuilderImpl();
@@ -43,6 +45,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param id The unique ID of an extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withId(@NotNull String id);
 
@@ -63,6 +66,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param version The version of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withVersion(@NotNull String version);
 
@@ -73,6 +77,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param author The author of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withAuthor(@Nullable String author);
 
@@ -83,6 +88,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param priority The priority of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withPriority(int priority);
 
@@ -93,6 +99,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param startPriority The start priority of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withStartPriority(int startPriority);
 
@@ -103,6 +110,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param extensionMain The main class of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withExtensionMain(@NotNull ExtensionMain extensionMain);
 
@@ -118,7 +126,8 @@ public interface EmbeddedExtensionBuilder {
      * </ul>
      *
      * @return an instance of an {@link EmbeddedExtension}
-     * @throws NullPointerException if any required parameter is missing.
+     * @throws IllegalStateException if any required parameter is missing.
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtension build();
 

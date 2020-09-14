@@ -39,7 +39,7 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     private final @NotNull String version;
     private final @NotNull String name;
     private final @Nullable String author;
-    private final @NotNull Path pluginFolderPath;
+    private final @NotNull Path extensionFolderPath;
     private final int priority;
     private final int startPriority;
     private final @NotNull AtomicBoolean enabled;
@@ -54,12 +54,12 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
                                    final int startPriority,
                                    final @NotNull ExtensionMain extensionMain,
                                    final boolean enabled,
-                                   final @NotNull Path pluginFolderPath) {
+                                   final @NotNull Path extensionFolderPath) {
         this.id = id;
         this.version = version;
         this.name = name;
         this.author = author;
-        this.pluginFolderPath = pluginFolderPath;
+        this.extensionFolderPath = extensionFolderPath;
         this.priority = priority;
         this.startPriority = startPriority;
 
@@ -88,8 +88,8 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     }
 
     @Override
-    public @NotNull Path getPluginFolderPath() {
-        return this.pluginFolderPath;
+    public @NotNull Path getExtensionFolderPath() {
+        return this.extensionFolderPath;
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     }
 
     @Override
-    public @Nullable Class<? extends ExtensionMain> getPluginMainClazz() {
+    public @Nullable Class<? extends ExtensionMain> getExtensionMainClazz() {
         return extensionMain != null ? extensionMain.getClass() : null;
     }
 
@@ -128,7 +128,7 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     }
 
     @Override
-    public abstract @Nullable IsolatedPluginClassloader getPluginClassloader();
+    public abstract @Nullable IsolatedPluginClassloader getExtensionClassloader();
 
     @NotNull
     public abstract Logger getLogger();
@@ -156,19 +156,19 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
         if (disable) {
             final boolean disabled;
             try {
-                if (pluginFolderPath.toFile().exists()) {
-                    disabled = PluginUtil.disablePluginFolder(pluginFolderPath);
+                if (extensionFolderPath.toFile().exists()) {
+                    disabled = PluginUtil.disablePluginFolder(extensionFolderPath);
                 } else {
                     getLogger().trace(
                             "Extension folder {} was already removed and cannot be disabled, continuing normally",
-                            pluginFolderPath.toFile().getAbsolutePath());
+                            extensionFolderPath.toFile().getAbsolutePath());
                     disabled = true;
                 }
                 if (!disabled) {
-                    getLogger().warn("Could not disable extension folder {}.", pluginFolderPath);
+                    getLogger().warn("Could not disable extension folder {}.", extensionFolderPath);
                 }
             } catch (final IOException e) {
-                getLogger().warn("Could not disable extension folder {}, reason {}", pluginFolderPath, e.getMessage());
+                getLogger().warn("Could not disable extension folder {}, reason {}", extensionFolderPath, e.getMessage());
                 getLogger().trace("Original exception", e);
             }
             Checkpoints.checkpoint("extension-disabled");

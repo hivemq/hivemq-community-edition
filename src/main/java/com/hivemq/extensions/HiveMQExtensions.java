@@ -125,7 +125,7 @@ public class HiveMQExtensions {
         checkNotNull(hiveMQExtensionID, "every extension must have an id");
 
         final HiveMQExtension plugin = getExtension(hiveMQExtensionID, enabled);
-        return (plugin != null) && plugin.getPluginFolderPath().equals(extensionFolder);
+        return (plugin != null) && plugin.getExtensionFolderPath().equals(extensionFolder);
     }
 
     public boolean isHiveMQExtensionEnabled(@NotNull final String hiveMQExtensionID) {
@@ -176,9 +176,9 @@ public class HiveMQExtensions {
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
-            if (extension instanceof HiveMQEmbeddedExtensionImpl && extension.getPluginMainClazz() != null) {
+            if (extension instanceof HiveMQEmbeddedExtensionImpl && extension.getExtensionMainClazz() != null) {
                 //for embedded extensions also add the original (delegate) classloader
-                classloaderToPlugin.put(extension.getPluginMainClazz().getClassLoader(), extension);
+                classloaderToPlugin.put(extension.getExtensionMainClazz().getClassLoader(), extension);
             }
             classloaderToPlugin.put(classloader, extension);
         } finally {
@@ -207,7 +207,7 @@ public class HiveMQExtensions {
             return false;
         }
 
-        final IsolatedPluginClassloader pluginClassloader = plugin.getPluginClassloader();
+        final IsolatedPluginClassloader pluginClassloader = plugin.getExtensionClassloader();
         Preconditions.checkNotNull(pluginClassloader, "Extension ClassLoader cannot be null");
 
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
@@ -276,7 +276,7 @@ public class HiveMQExtensions {
             lock.unlock();
         }
 
-        final IsolatedPluginClassloader pluginClassloader = plugin.getPluginClassloader();
+        final IsolatedPluginClassloader pluginClassloader = plugin.getExtensionClassloader();
         Preconditions.checkNotNull(pluginClassloader, "Extension ClassLoader cannot be null");
 
         notifyBeforeExtensionStopCallbacks(plugin);

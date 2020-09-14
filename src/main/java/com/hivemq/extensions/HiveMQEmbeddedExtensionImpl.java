@@ -58,7 +58,7 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
     }
 
     @Override
-    public @Nullable IsolatedPluginClassloader getPluginClassloader() {
+    public @Nullable IsolatedPluginClassloader getExtensionClassloader() {
         return isolatedPluginClassloader;
     }
 

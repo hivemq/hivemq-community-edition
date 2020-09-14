@@ -101,17 +101,17 @@ public interface HiveMQExtension {
     /**
      * @return the {@link Class} of the extension's implementation of the {@link ExtensionMain} class
      */
-    @Nullable Class<? extends ExtensionMain> getPluginMainClazz();
+    @Nullable Class<? extends ExtensionMain> getExtensionMainClazz();
 
     /**
      * @return the {@link IsolatedPluginClassloader} used to load the {@link ExtensionMain} class
      */
-    @Nullable IsolatedPluginClassloader getPluginClassloader();
+    @Nullable IsolatedPluginClassloader getExtensionClassloader();
 
     /**
      * @return the path to the extension's folder
      */
-    @NotNull Path getPluginFolderPath();
+    @NotNull Path getExtensionFolderPath();
 
     /**
      * @return the previously enabled version of the extension, or null if no previous version was enabled

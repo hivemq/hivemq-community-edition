@@ -15,9 +15,9 @@
  */
 package com.hivemq.extensions.parameter;
 
-import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
+import com.hivemq.extensions.HiveMQExtension;
 
 import java.io.File;
 import java.util.Optional;
@@ -55,6 +55,6 @@ public class ExtensionInformationImpl implements ExtensionInformation {
 
     @Override
     public @NotNull File getExtensionHomeFolder() {
-        return this.hiveMQExtension.getPluginFolderPath().toFile();
+        return this.hiveMQExtension.getExtensionFolderPath().toFile();
     }
 }

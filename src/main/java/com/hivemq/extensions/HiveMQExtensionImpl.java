@@ -43,7 +43,7 @@ public class HiveMQExtensionImpl extends AbstractHiveMQExtension {
     }
 
     @Override
-    public @Nullable IsolatedPluginClassloader getPluginClassloader() {
+    public @Nullable IsolatedPluginClassloader getExtensionClassloader() {
         return extensionMain != null ? (IsolatedPluginClassloader) extensionMain.getClass().getClassLoader() : null;
     }
 

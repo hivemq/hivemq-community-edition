@@ -103,7 +103,7 @@ public class PluginBootstrapImpl implements PluginBootstrap {
                         HiveMQPluginEvent.Change.DISABLE,
                         extension.getId(),
                         extension.getStartPriority(),
-                        extension.getPluginFolderPath(),
+                        extension.getExtensionFolderPath(),
                         extension.isEmbedded()))
                         .collect(ImmutableList.toImmutableList());
 

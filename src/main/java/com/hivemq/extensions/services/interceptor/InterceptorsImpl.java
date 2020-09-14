@@ -59,7 +59,7 @@ public class InterceptorsImpl implements Interceptors {
         this.connackOutboundInterceptorProviderMap = new TreeMap<>(pluginPriorityComparator);
         this.readWriteLock = new ReentrantReadWriteLock();
         hiveMQExtensions.addAfterExtensionStopCallback(hiveMQExtension -> {
-            final IsolatedPluginClassloader pluginClassloader = hiveMQExtension.getPluginClassloader();
+            final IsolatedPluginClassloader pluginClassloader = hiveMQExtension.getExtensionClassloader();
             if (pluginClassloader != null) {
                 removeInterceptors(hiveMQExtension.getId());
             }

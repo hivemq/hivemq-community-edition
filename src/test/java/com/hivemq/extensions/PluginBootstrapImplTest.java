@@ -208,19 +208,19 @@ public class PluginBootstrapImplTest {
 
         @NotNull
         @Override
-        public Class<? extends ExtensionMain> getPluginMainClazz() {
+        public Class<? extends ExtensionMain> getExtensionMainClazz() {
             return TestExtensionMain.class;
         }
 
         @Nullable
         @Override
-        public IsolatedPluginClassloader getPluginClassloader() {
+        public IsolatedPluginClassloader getExtensionClassloader() {
             return null;
         }
 
         @NotNull
         @Override
-        public Path getPluginFolderPath() {
+        public Path getExtensionFolderPath() {
             return temporaryFolder.getRoot().toPath();
         }
 

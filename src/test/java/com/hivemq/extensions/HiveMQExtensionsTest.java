@@ -80,10 +80,10 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         when(plugin1.getId()).thenReturn(id1);
         when(plugin2.getId()).thenReturn(id2);
 
-        Mockito.<Class<? extends ExtensionMain>>when(plugin1.getPluginMainClazz()).thenReturn(ExtensionMain.class);
-        Mockito.<Class<? extends ExtensionMain>>when(plugin2.getPluginMainClazz()).thenReturn(ExtensionMain.class);
-        when(plugin1.getPluginClassloader()).thenReturn(loader1);
-        when(plugin2.getPluginClassloader()).thenReturn(loader2);
+        Mockito.<Class<? extends ExtensionMain>>when(plugin1.getExtensionMainClazz()).thenReturn(ExtensionMain.class);
+        Mockito.<Class<? extends ExtensionMain>>when(plugin2.getExtensionMainClazz()).thenReturn(ExtensionMain.class);
+        when(plugin1.getExtensionClassloader()).thenReturn(loader1);
+        when(plugin2.getExtensionClassloader()).thenReturn(loader2);
 
 
         hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService));
@@ -102,7 +102,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         assertTrue(hiveMQExtensions.extensionStart(id1));
 
         verify(plugin1, times(1)).start(any(ExtensionStartInput.class), any(ExtensionStartOutput.class));
-        verify(plugin1, times(1)).getPluginClassloader();
+        verify(plugin1, times(1)).getExtensionClassloader();
 
         assertEquals(plugin1, hiveMQExtensions.getExtensionForClassloader(loader1));
     }

@@ -105,7 +105,7 @@ public class SecurityRegistryImplTest {
                         EnhancedTestProvider1.class, EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
                 });
 
-        when(hiveMQExtension.getPluginClassloader()).thenReturn(classloader);
+        when(hiveMQExtension.getExtensionClassloader()).thenReturn(classloader);
 
         provider1 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestProvider1.class);
         provider2 = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestProvider2.class);

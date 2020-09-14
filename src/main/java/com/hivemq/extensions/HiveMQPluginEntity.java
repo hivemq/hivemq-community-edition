@@ -30,6 +30,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "hivemq-extension")
 public class HiveMQPluginEntity {
 
+    public static final int DEFAULT_PRIORITY = 0;
+    public static final int DEFAULT_START_PRIORITY = 1000;
+
     @NotNull
     @XmlElement(name = "id", required = true)
     private String id = "";
@@ -43,10 +46,10 @@ public class HiveMQPluginEntity {
     private String version = "";
 
     @XmlElement(name = "priority", defaultValue = "0")
-    private int priority = 0;
+    private int priority = DEFAULT_PRIORITY;
 
     @XmlElement(name = "start-priority", defaultValue = "1000")
-    private int startPriority = 1000;
+    private int startPriority = DEFAULT_START_PRIORITY;
 
     @Nullable
     @XmlElement(name = "author")

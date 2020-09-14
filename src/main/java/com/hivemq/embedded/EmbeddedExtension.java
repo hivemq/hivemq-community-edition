@@ -17,6 +17,7 @@
 package com.hivemq.embedded;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
@@ -24,46 +25,52 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 
+/**
+ * @author Florian Limpöck
+ * @author Christop Schäbel
+ * @since CE 2020.5
+ */
+@DoNotImplement
 public interface EmbeddedExtension {
 
     /**
-     * @return The unique ID of an extension.
+     * @return The unique ID of the extension.
      * @since CE 2020.5
      */
     @NotNull String getId();
 
     /**
-     * @return The human readable name of an extension.
+     * @return The human readable name of the extension.
      * @since CE 2020.5
      */
     @NotNull String getName();
 
     /**
-     * @return The version of an extension.
+     * @return The version of the extension.
      * @since CE 2020.5
      */
     @NotNull String getVersion();
 
     /**
-     * @return The author of an extension, if the extension provides information about the author.
+     * @return The author of the extension or <code>null</code> if the extension does not provide information about the author.
      * @since CE 2020.5
      */
     @Nullable String getAuthor();
 
     /**
-     * @return the extension's priority, the extension with a higher priority is used first
+     * @return the extension's priority. All extensions are called in the order of their priority (highest to lowest).
      * @since CE 2020.5
      */
     int getPriority();
 
     /**
-     * @return the extension's start priority, the extension with a higher priority starts first
+     * @return the extension's start priority. All extensions are started in the order of their priority (highest to lowest).
      * @since CE 2020.5
      */
     int getStartPriority();
 
     /**
-     * @return an {@link ExtensionMain} which is the main class of the extension.
+     * @return the object of the {@link ExtensionMain} implementation of the extension.
      * It must override the {@link ExtensionMain#extensionStart(ExtensionStartInput, ExtensionStartOutput)}
      * and the {@link ExtensionMain#extensionStop(ExtensionStopInput, ExtensionStopOutput)} )} methods.
      *
