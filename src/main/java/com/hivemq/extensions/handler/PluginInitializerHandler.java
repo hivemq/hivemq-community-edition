@@ -154,7 +154,7 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
             final ClientInitializer initializer = initializerEntry.getValue();
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
             if(extension == null || extension.getPluginClassloader() == null) {
-                taskContext.counter.incrementAndGet();
+                taskContext.finishInitializer();
                 continue;
             }
 
@@ -275,6 +275,10 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         @Override
         public void pluginPost(final @NotNull ClientContextPluginImpl pluginContext) {
+            finishInitializer();
+        }
+
+        public void finishInitializer(){
             try {
                 if (counter.incrementAndGet() == initializerSize) {
                     //update the clients context when all initializers are initialized.
