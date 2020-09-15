@@ -282,7 +282,7 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
             try {
                 if (counter.incrementAndGet() == initializerSize) {
                     //update the clients context when all initializers are initialized.
-                    channelHandlerContext.channel().attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+                    channelHandlerContext.channel().attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
                     channelHandlerContext.channel()
                             .attr(ChannelAttributes.AUTH_PERMISSIONS)
                             .set(clientContext.getDefaultPermissions());

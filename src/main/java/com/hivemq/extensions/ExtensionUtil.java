@@ -32,11 +32,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Georg Held
  */
-public class PluginUtil {
+public class ExtensionUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtensionUtil.class);
 
-    static boolean isValidPluginFolder(@NotNull final Path path, final boolean logErrors) {
+    static boolean isValidExtensionFolder(@NotNull final Path path, final boolean logErrors) {
 
         checkNotNull(path, "extension path must not be null");
 
@@ -82,14 +82,14 @@ public class PluginUtil {
     }
 
     @NotNull
-    public static List<Path> findAllPluginFolders(@NotNull final Path pluginPath) throws IOException {
+    public static List<Path> findAllExtensionFolders(@NotNull final Path extensionPath) throws IOException {
 
-        checkNotNull(pluginPath, "provided extension folder path CAN NOT be null");
+        checkNotNull(extensionPath, "provided extension folder path CAN NOT be null");
 
         final ImmutableList.Builder<Path> builder = ImmutableList.builder();
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(pluginPath)) {
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(extensionPath)) {
             for (final Path path : stream) {
-                if (PluginUtil.isValidPluginFolder(path, true)) {
+                if (ExtensionUtil.isValidExtensionFolder(path, true)) {
                     log.trace("Found extension folder {}", path.toString());
                     builder.add(path);
                 }
@@ -98,9 +98,9 @@ public class PluginUtil {
         return builder.build();
     }
 
-    public static boolean disablePluginFolder(@NotNull final Path pluginFolderPath) throws IOException {
+    public static boolean disableExtensionFolder(@NotNull final Path extensionFolderPath) throws IOException {
 
-        final File disabledFile = pluginFolderPath.resolve("DISABLED").toFile();
+        final File disabledFile = extensionFolderPath.resolve("DISABLED").toFile();
         if (!disabledFile.exists()) {
             return disabledFile.createNewFile();
         }

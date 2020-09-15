@@ -138,7 +138,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             if (protocolVersion == ProtocolVersion.MQTTv5) {
                 final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE, null, Mqtt5UserProperties.NO_USER_PROPERTIES,
                         null, SESSION_EXPIRY_NOT_SET);
-                if (ctx.channel().attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
+                if (ctx.channel().attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
                     ctx.channel().pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
                 }
                 ctx.channel().writeAndFlush(disconnect)

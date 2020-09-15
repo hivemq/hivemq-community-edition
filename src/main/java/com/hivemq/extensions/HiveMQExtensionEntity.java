@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType(propOrder = {})
 @XmlRootElement(name = "hivemq-extension")
-public class HiveMQPluginEntity {
+public class HiveMQExtensionEntity {
 
     public static final int DEFAULT_PRIORITY = 0;
     public static final int DEFAULT_START_PRIORITY = 1000;
@@ -56,11 +56,11 @@ public class HiveMQPluginEntity {
     private String author;
 
 
-    public HiveMQPluginEntity() {
+    public HiveMQExtensionEntity() {
     }
 
-    public HiveMQPluginEntity(@NotNull final String id, @NotNull final String name, @NotNull final String version,
-                              final int priority, final int startPriority, @Nullable final String author) {
+    public HiveMQExtensionEntity(@NotNull final String id, @NotNull final String name, @NotNull final String version,
+                                 final int priority, final int startPriority, @Nullable final String author) {
         this.id = id;
         this.name = name;
         this.version = version;

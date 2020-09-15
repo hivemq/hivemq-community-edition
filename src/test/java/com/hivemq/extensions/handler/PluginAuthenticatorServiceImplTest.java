@@ -30,7 +30,7 @@ import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider
 import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -108,9 +108,9 @@ public class PluginAuthenticatorServiceImplTest {
 
 
     @Mock
-    private IsolatedPluginClassloader classloader1;
+    private IsolatedExtensionClassloader classloader1;
     @Mock
-    private IsolatedPluginClassloader classloader2;
+    private IsolatedExtensionClassloader classloader2;
 
     private PluginAuthenticatorService pluginAuthenticatorService;
     private SecurityConfigurationServiceImpl securityConfig;

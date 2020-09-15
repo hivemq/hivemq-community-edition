@@ -1485,7 +1485,7 @@ public class ConnectHandlerTest {
 
         ctx = embeddedChannel.pipeline().context(ConnectHandler.class);
 
-        embeddedChannel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
+        embeddedChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
     }
 
     private static class OrderedTopicHandlerDummy extends OrderedTopicHandler {

@@ -17,7 +17,7 @@ package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public interface ClientAuthenticators {
      *
      * @param pluginClassLoader the classloader of the plugin
      */
-    void removeForExtension(@NotNull IsolatedPluginClassloader pluginClassLoader);
+    void removeForExtension(@NotNull IsolatedExtensionClassloader pluginClassLoader);
 
     /**
      * @return a map containing all extensions with their registered enhanced authenticators.

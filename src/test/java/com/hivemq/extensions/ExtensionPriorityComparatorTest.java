@@ -30,18 +30,18 @@ import static org.mockito.Mockito.when;
  * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginPriorityComparatorTest {
+public class ExtensionPriorityComparatorTest {
 
     @Mock
     private HiveMQExtensions hiveMQExtensions;
 
-    private PluginPriorityComparator comparator;
+    private ExtensionPriorityComparator comparator;
 
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        comparator = new PluginPriorityComparator(hiveMQExtensions);
+        comparator = new ExtensionPriorityComparator(hiveMQExtensions);
     }
 
     @Test

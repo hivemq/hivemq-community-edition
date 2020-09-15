@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,23 +49,23 @@ public class WrappedAuthenticatorProvider {
     @Nullable
     private final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider;
     @NotNull
-    private final IsolatedPluginClassloader classLoader;
+    private final IsolatedExtensionClassloader classLoader;
 
     private final AtomicBoolean checkThreading = new AtomicBoolean(true);
 
-    public WrappedAuthenticatorProvider(@NotNull final AuthenticatorProvider simpleAuthenticatorProvider, @NotNull final IsolatedPluginClassloader classLoader) {
+    public WrappedAuthenticatorProvider(@NotNull final AuthenticatorProvider simpleAuthenticatorProvider, @NotNull final IsolatedExtensionClassloader classLoader) {
         this.simpleAuthenticatorProvider = simpleAuthenticatorProvider;
         this.classLoader = classLoader;
         this.enhancedAuthenticatorProvider = null;
     }
 
-    public WrappedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider, @NotNull final IsolatedPluginClassloader classLoader) {
+    public WrappedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider, @NotNull final IsolatedExtensionClassloader classLoader) {
         this.enhancedAuthenticatorProvider = enhancedAuthenticatorProvider;
         this.classLoader = classLoader;
         this.simpleAuthenticatorProvider = null;
     }
 
-    public @NotNull IsolatedPluginClassloader getClassLoader() {
+    public @NotNull IsolatedExtensionClassloader getClassLoader() {
         return classLoader;
     }
 
@@ -78,7 +78,7 @@ public class WrappedAuthenticatorProvider {
 
         try {
             if(checkThreading.get()) {
-                Preconditions.checkArgument(Thread.currentThread().getContextClassLoader() instanceof IsolatedPluginClassloader);
+                Preconditions.checkArgument(Thread.currentThread().getContextClassLoader() instanceof IsolatedExtensionClassloader);
             }
             final Authenticator authenticator = Objects.requireNonNull(simpleAuthenticatorProvider).getAuthenticator(authenticatorProviderInput);
 
@@ -107,7 +107,7 @@ public class WrappedAuthenticatorProvider {
 
         try {
             if(checkThreading.get()) {
-                Preconditions.checkArgument(Thread.currentThread().getContextClassLoader() instanceof IsolatedPluginClassloader);
+                Preconditions.checkArgument(Thread.currentThread().getContextClassLoader() instanceof IsolatedExtensionClassloader);
             }
             return Objects.requireNonNull(enhancedAuthenticatorProvider).getEnhancedAuthenticator(authenticatorProviderInput);
         } catch (final Throwable throwable) {

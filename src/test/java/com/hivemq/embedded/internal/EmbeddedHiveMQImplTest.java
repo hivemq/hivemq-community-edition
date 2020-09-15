@@ -256,7 +256,7 @@ public class EmbeddedHiveMQImplTest {
                 new EmbeddedHiveMQImpl(conf, data, extensions, extension);
         embeddedHiveMQ.start().get();
 
-        assertTrue(EmbeddedMain.running.get());
+        assertTrue(embeddedMain.running.get());
 
         final Injector injector = embeddedHiveMQ.getInjector();
         final HiveMQExtensions hiveMQExtensions = injector.getInstance(HiveMQExtensions.class);
@@ -286,7 +286,7 @@ public class EmbeddedHiveMQImplTest {
 
     public static class EmbeddedMain implements ExtensionMain {
 
-        public static @NotNull AtomicBoolean running = new AtomicBoolean();
+        public final @NotNull AtomicBoolean running = new AtomicBoolean();
 
         @Override
         public void extensionStart(

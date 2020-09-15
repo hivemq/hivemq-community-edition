@@ -15,21 +15,21 @@
  */
 package com.hivemq.extensions.loader;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.HiveMQPluginEvent;
-
-import java.util.concurrent.CompletableFuture;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.extensions.exception.ExtensionLoadingException;
 
 /**
  * @author Christoph Schäbel
  */
-public interface PluginLifecycleHandler {
+public interface ExtensionStaticInitializer {
 
     /**
-     * Handles extension En-/Disable events and calls the extension's start or stop methods if needed.
+     * Initializes all the extension dependencies which are accessed via static context in the extension
+     * e.g. Services and Builders
      *
-     * @param hiveMQPluginEvents {@link ImmutableList} of {@link HiveMQPluginEvent}s which should be processed.
+     * @param classLoader the {@link IsolatedExtensionClassloader} for this extension
+     * @throws ExtensionLoadingException if this extensions static context can not be initialized
      */
-    CompletableFuture<Void> handlePluginEvents(final @NotNull ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents);
+    void initialize(@NotNull String pluginId, @NotNull IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException;
 }

@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInbound
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundOutput;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -60,8 +60,8 @@ public class TestInterceptorUtil {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-        final IsolatedPluginClassloader cl =
-                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, types.get(0).getClassLoader());
+        final IsolatedExtensionClassloader cl =
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, types.get(0).getClassLoader());
 
         final LinkedList<T> list = new LinkedList<>();
         for (final Class<? extends T> type : types) {

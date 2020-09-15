@@ -41,7 +41,7 @@ import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundIn
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.Comparator;
 import java.util.List;
@@ -237,7 +237,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull Interceptor> getAllInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return streamAllInterceptors()
                 .filter(interceptor -> interceptor.getClass().getClassLoader().equals(extensionClassLoader))
@@ -264,7 +264,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(publishInbounds, extensionClassLoader);
     }
@@ -274,7 +274,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PublishOutboundInterceptor> getPublishOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(publishOutbounds, extensionClassLoader);
     }
@@ -284,7 +284,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubackInboundInterceptor> getPubackInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubackInbounds, extensionClassLoader);
     }
@@ -294,7 +294,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubackOutboundInterceptor> getPubackOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubackOutbounds, extensionClassLoader);
     }
@@ -304,7 +304,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubrecInboundInterceptor> getPubrecInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubrecInbounds, extensionClassLoader);
     }
@@ -314,7 +314,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubrecOutboundInterceptor> getPubrecOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubrecOutbounds, extensionClassLoader);
     }
@@ -324,7 +324,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubrelInboundInterceptor> getPubrelInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubrelInbounds, extensionClassLoader);
     }
@@ -334,7 +334,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubrelOutboundInterceptor> getPubrelOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubrelOutbounds, extensionClassLoader);
     }
@@ -344,7 +344,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubcompInboundInterceptor> getPubcompInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubcompInbounds, extensionClassLoader);
     }
@@ -354,7 +354,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PubcompOutboundInterceptor> getPubcompOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pubcompOutbounds, extensionClassLoader);
     }
@@ -364,7 +364,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull SubscribeInboundInterceptor> getSubscribeInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(subscribeInbounds, extensionClassLoader);
     }
@@ -374,7 +374,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull SubackOutboundInterceptor> getSubackOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(subackOutbounds, extensionClassLoader);
     }
@@ -384,7 +384,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(unsubscribeInbounds, extensionClassLoader);
     }
@@ -394,7 +394,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull UnsubackOutboundInterceptor> getUnsubackOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(unsubackOutbounds, extensionClassLoader);
     }
@@ -404,7 +404,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull DisconnectInboundInterceptor> getDisconnectInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(disconnectInbounds, extensionClassLoader);
     }
@@ -414,7 +414,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(disconnectOutbounds, extensionClassLoader);
     }
@@ -424,7 +424,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PingReqInboundInterceptor> getPingReqInboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pingReqInbounds, extensionClassLoader);
     }
@@ -434,7 +434,7 @@ public class ClientContextImpl {
     }
 
     public @Immutable @NotNull List<@NotNull PingRespOutboundInterceptor> getPingRespOutboundInterceptorsOfExtension(
-            final @NotNull IsolatedPluginClassloader extensionClassLoader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassLoader) {
 
         return filterInterceptorsOfExtension(pingRespOutbounds, extensionClassLoader);
     }
@@ -520,7 +520,7 @@ public class ClientContextImpl {
 
     private <T extends Interceptor> @NotNull ImmutableList<T> filterInterceptorsOfExtension(
             final @NotNull ImmutableList<T> interceptors,
-            final @NotNull IsolatedPluginClassloader extensionClassloader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassloader) {
 
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (int i = 0; i < interceptors.size(); i++) {
@@ -534,7 +534,7 @@ public class ClientContextImpl {
 
     private <T extends Interceptor> @NotNull ImmutableList<T> removeInterceptorsOfExtension(
             final @NotNull ImmutableList<T> interceptors,
-            final @NotNull IsolatedPluginClassloader extensionClassloader) {
+            final @NotNull IsolatedExtensionClassloader extensionClassloader) {
 
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (int i = 0; i < interceptors.size(); i++) {

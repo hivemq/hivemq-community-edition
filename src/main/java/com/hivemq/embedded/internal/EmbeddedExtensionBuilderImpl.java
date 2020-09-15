@@ -23,8 +23,8 @@ import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-import static com.hivemq.extensions.HiveMQPluginEntity.DEFAULT_PRIORITY;
-import static com.hivemq.extensions.HiveMQPluginEntity.DEFAULT_START_PRIORITY;
+import static com.hivemq.extensions.HiveMQExtensionEntity.DEFAULT_PRIORITY;
+import static com.hivemq.extensions.HiveMQExtensionEntity.DEFAULT_START_PRIORITY;
 
 public class EmbeddedExtensionBuilderImpl implements EmbeddedExtensionBuilder {
 

@@ -16,11 +16,11 @@
 package com.hivemq.extensions;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.*;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extensions.client.parameter.ClientInformationImpl;
@@ -41,24 +41,24 @@ import java.security.cert.X509Certificate;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class PluginInformationUtil {
+public class ExtensionInformationUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginInformationUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtensionInformationUtil.class);
 
     public static @NotNull ClientInformation getAndSetClientInformation(@NotNull final Channel channel, @NotNull final String clientId) {
-        ClientInformation clientInformation = channel.attr(ChannelAttributes.PLUGIN_CLIENT_INFORMATION).get();
+        ClientInformation clientInformation = channel.attr(ChannelAttributes.EXTENSION_CLIENT_INFORMATION).get();
         if (clientInformation == null) {
             clientInformation = new ClientInformationImpl(clientId);
-            channel.attr(ChannelAttributes.PLUGIN_CLIENT_INFORMATION).set(clientInformation);
+            channel.attr(ChannelAttributes.EXTENSION_CLIENT_INFORMATION).set(clientInformation);
         }
         return clientInformation;
     }
 
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
-        ConnectionInformation connectionInformation = channel.attr(ChannelAttributes.PLUGIN_CONNECTION_INFORMATION).get();
+        ConnectionInformation connectionInformation = channel.attr(ChannelAttributes.EXTENSION_CONNECTION_INFORMATION).get();
         if (connectionInformation == null) {
             connectionInformation = new ConnectionInformationImpl(channel);
-            channel.attr(ChannelAttributes.PLUGIN_CONNECTION_INFORMATION).set(connectionInformation);
+            channel.attr(ChannelAttributes.EXTENSION_CONNECTION_INFORMATION).set(connectionInformation);
         }
         return connectionInformation;
     }
@@ -85,7 +85,7 @@ public class PluginInformationUtil {
         }
     }
 
-    public static @Nullable Listener getPluginListenerFromChannel(final @NotNull Channel channel) {
+    public static @Nullable Listener getListenerFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
         final com.hivemq.configuration.service.entity.Listener hiveMQListener = channel.attr(ChannelAttributes.LISTENER).get();

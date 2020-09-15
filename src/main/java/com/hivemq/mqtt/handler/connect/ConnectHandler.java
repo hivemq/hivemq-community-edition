@@ -20,7 +20,6 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.auth.parameter.ModifiableClientSettings;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
@@ -720,7 +719,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 null,
                 SESSION_EXPIRY_NOT_SET);
 
-        if (oldClient.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
+        if (oldClient.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
             oldClient.pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
         }
 

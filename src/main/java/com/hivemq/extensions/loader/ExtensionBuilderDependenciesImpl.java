@@ -18,7 +18,7 @@ package com.hivemq.extensions.loader;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.builder.*;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  * @author Christoph Schäbel
  */
 @Singleton
-public class PluginBuilderDependenciesImpl implements PluginBuilderDependencies {
+public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDependencies {
 
     private final @NotNull Provider<RetainedPublishBuilder> retainedPublishBuilderProvider;
     private final @NotNull Provider<TopicSubscriptionBuilder> topicSubscriptionBuilderProvider;
@@ -38,11 +38,11 @@ public class PluginBuilderDependenciesImpl implements PluginBuilderDependencies 
     private final @NotNull Provider<WillPublishBuilder> willPublishBuilderProvider;
 
     @Inject
-    public PluginBuilderDependenciesImpl(final @NotNull Provider<RetainedPublishBuilder> retainedPublishBuilderProvider,
-                                         final @NotNull Provider<TopicSubscriptionBuilder> topicSubscriptionBuilderProvider,
-                                         final @NotNull Provider<TopicPermissionBuilder> topicPermissionBuilderProvider,
-                                         final @NotNull Provider<PublishBuilder> publishBuilderProvider,
-                                         final @NotNull Provider<WillPublishBuilder> willPublishBuilderProvider) {
+    public ExtensionBuilderDependenciesImpl(final @NotNull Provider<RetainedPublishBuilder> retainedPublishBuilderProvider,
+                                            final @NotNull Provider<TopicSubscriptionBuilder> topicSubscriptionBuilderProvider,
+                                            final @NotNull Provider<TopicPermissionBuilder> topicPermissionBuilderProvider,
+                                            final @NotNull Provider<PublishBuilder> publishBuilderProvider,
+                                            final @NotNull Provider<WillPublishBuilder> willPublishBuilderProvider) {
         this.retainedPublishBuilderProvider = retainedPublishBuilderProvider;
         this.topicSubscriptionBuilderProvider = topicSubscriptionBuilderProvider;
         this.topicPermissionBuilderProvider = topicPermissionBuilderProvider;
@@ -51,7 +51,7 @@ public class PluginBuilderDependenciesImpl implements PluginBuilderDependencies 
     }
 
     @NotNull
-    public ImmutableMap<String, Supplier<Object>> getDependenciesMap(@NotNull final IsolatedPluginClassloader classLoader) {
+    public ImmutableMap<String, Supplier<Object>> getDependenciesMap(@NotNull final IsolatedExtensionClassloader classLoader) {
         //classLoader is unused but prepared here for future use
 
         final ImmutableMap.Builder<String, Supplier<Object>> builder = ImmutableMap.builder();

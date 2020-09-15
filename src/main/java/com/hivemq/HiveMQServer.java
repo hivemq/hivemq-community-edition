@@ -30,7 +30,7 @@ import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
-import com.hivemq.extensions.PluginBootstrap;
+import com.hivemq.extensions.ExtensionBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.metrics.MetricRegistryLogger;
 import com.hivemq.migration.MigrationUnit;
@@ -63,19 +63,19 @@ public class HiveMQServer {
 
     private final @NotNull HiveMQNettyBootstrap nettyBootstrap;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
-    private final @NotNull PluginBootstrap pluginBootstrap;
+    private final @NotNull ExtensionBootstrap extensionBootstrap;
     private final @NotNull AdminService adminService;
 
     @Inject
     HiveMQServer(
             final @NotNull HiveMQNettyBootstrap nettyBootstrap,
             final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull PluginBootstrap pluginBootstrap,
+            final @NotNull ExtensionBootstrap extensionBootstrap,
             final @NotNull AdminService adminService) {
 
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
-        this.pluginBootstrap = pluginBootstrap;
+        this.extensionBootstrap = extensionBootstrap;
         this.adminService = adminService;
     }
 
@@ -83,8 +83,8 @@ public class HiveMQServer {
 
         payloadPersistence.init();
 
-        final CompletableFuture<Void> pluginStartFuture = pluginBootstrap.startPluginSystem(embeddedExtension);
-        pluginStartFuture.get();
+        final CompletableFuture<Void> extensionStartFuture = extensionBootstrap.startExtensionSystem(embeddedExtension);
+        extensionStartFuture.get();
 
         final ListenableFuture<List<ListenerStartupInformation>> startFuture = nettyBootstrap.bootstrapServer();
 

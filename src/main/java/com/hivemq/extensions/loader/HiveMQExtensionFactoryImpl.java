@@ -15,11 +15,11 @@
  */
 package com.hivemq.extensions.loader;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.ExtensionMain;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtension;
+import com.hivemq.extensions.HiveMQExtensionEntity;
 import com.hivemq.extensions.HiveMQExtensionImpl;
-import com.hivemq.extensions.HiveMQPluginEntity;
 
 import javax.inject.Singleton;
 import java.nio.file.Path;
@@ -28,14 +28,14 @@ import java.nio.file.Path;
  * @author Christoph Schäbel
  */
 @Singleton
-public class HiveMQPluginFactoryImpl implements HiveMQPluginFactory {
+public class HiveMQExtensionFactoryImpl implements HiveMQExtensionFactory {
 
     @NotNull
     @Override
-    public HiveMQExtension createHiveMQPlugin(@NotNull final ExtensionMain extensionMainInstance,
-                                              @NotNull final Path pluginFolder,
-                                              @NotNull final HiveMQPluginEntity pluginConfig,
-                                              final boolean enabled) {
-        return new HiveMQExtensionImpl(pluginConfig, pluginFolder, extensionMainInstance, enabled);
+    public HiveMQExtension createHiveMQExtension(@NotNull final ExtensionMain extensionMainInstance,
+                                                 @NotNull final Path extensionFolder,
+                                                 @NotNull final HiveMQExtensionEntity extensionConfig,
+                                                 final boolean enabled) {
+        return new HiveMQExtensionImpl(extensionConfig, extensionFolder, extensionMainInstance, enabled);
     }
 }

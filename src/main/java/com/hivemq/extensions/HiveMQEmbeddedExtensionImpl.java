@@ -20,7 +20,7 @@ import com.hivemq.HiveMQServer;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(HiveMQEmbeddedExtensionImpl.class);
 
-    private final @Nullable IsolatedPluginClassloader isolatedPluginClassloader;
+    private final @Nullable IsolatedExtensionClassloader isolatedExtensionClassloader;
 
     public HiveMQEmbeddedExtensionImpl(
             final @NotNull String id,
@@ -47,19 +47,19 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
             final boolean enabled) {
         super(id, version, name, author, priority,
                 startPriority, extensionMain, enabled,
-                new File("/tmp").toPath());
+                new File(System.getProperty("java.io.tmpdir")).toPath());
 
         final ClassLoader classLoader = extensionMain.getClass().getClassLoader();
-        if ((classLoader instanceof IsolatedPluginClassloader)) {
-            isolatedPluginClassloader = (IsolatedPluginClassloader) classLoader;
+        if ((classLoader instanceof IsolatedExtensionClassloader)) {
+            isolatedExtensionClassloader = (IsolatedExtensionClassloader) classLoader;
         } else {
-            isolatedPluginClassloader = new IsolatedPluginClassloader(classLoader, HiveMQServer.class.getClassLoader());
+            isolatedExtensionClassloader = new IsolatedExtensionClassloader(classLoader, HiveMQServer.class.getClassLoader());
         }
     }
 
     @Override
-    public @Nullable IsolatedPluginClassloader getExtensionClassloader() {
-        return isolatedPluginClassloader;
+    public @Nullable IsolatedExtensionClassloader getExtensionClassloader() {
+        return isolatedExtensionClassloader;
     }
 
     @Override

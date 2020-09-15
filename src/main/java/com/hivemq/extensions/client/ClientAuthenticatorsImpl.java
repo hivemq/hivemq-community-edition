@@ -19,8 +19,8 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.common.annotations.GuardedBy;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.ExtensionPriorityComparator;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,8 +38,8 @@ public class ClientAuthenticatorsImpl implements ClientAuthenticators {
     @GuardedBy("authenticatorLock")
     private final @NotNull Map<String, EnhancedAuthenticator> enhancedAuthenticatorMap;
 
-    public ClientAuthenticatorsImpl(final @NotNull PluginPriorityComparator pluginPriorityComparator) {
-        this.enhancedAuthenticatorMap = new TreeMap<>(pluginPriorityComparator);
+    public ClientAuthenticatorsImpl(final @NotNull ExtensionPriorityComparator extensionPriorityComparator) {
+        this.enhancedAuthenticatorMap = new TreeMap<>(extensionPriorityComparator);
         this.authenticatorLock = new ReentrantReadWriteLock();
     }
 
@@ -55,7 +55,7 @@ public class ClientAuthenticatorsImpl implements ClientAuthenticators {
     }
 
     @Override
-    public void removeForExtension(final @NotNull IsolatedPluginClassloader pluginClassLoader) {
+    public void removeForExtension(final @NotNull IsolatedExtensionClassloader pluginClassLoader) {
         final Lock lock = authenticatorLock.writeLock();
         lock.lock();
         try {

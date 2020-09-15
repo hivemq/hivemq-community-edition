@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.parameter.ExtensionStartOutputImpl;
 import com.hivemq.extensions.parameter.ExtensionStartStopInputImpl;
 import com.hivemq.extensions.parameter.ExtensionStopOutputImpl;
@@ -53,19 +53,19 @@ public class HiveMQExtensions {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQExtensions.class);
 
-    @GuardedBy("pluginsLock")
-    private final @NotNull HashMap<String, HiveMQExtension> knownPlugins = new HashMap<>();
+    @GuardedBy("extensionsLock")
+    private final @NotNull HashMap<String, HiveMQExtension> knownExtensions = new HashMap<>();
     @GuardedBy("classloaderLock")
-    private final @NotNull HashMap<ClassLoader, HiveMQExtension> classloaderToPlugin = new HashMap<>();
-    @GuardedBy("beforePluginStopCallbacksLock")
-    private final @NotNull List<Consumer<HiveMQExtension>> beforePluginStopCallbacks = new LinkedList<>();
-    @GuardedBy("afterPluginStopCallbacksLock")
-    private final @NotNull List<Consumer<HiveMQExtension>> afterPluginStopCallbacks = new LinkedList<>();
+    private final @NotNull HashMap<ClassLoader, HiveMQExtension> classloaderToExtension = new HashMap<>();
+    @GuardedBy("beforeExtensionStopCallbacksLock")
+    private final @NotNull List<Consumer<HiveMQExtension>> beforeExtensionStopCallbacks = new LinkedList<>();
+    @GuardedBy("afterExtensionStopCallbacksLock")
+    private final @NotNull List<Consumer<HiveMQExtension>> afterExtensionStopCallbacks = new LinkedList<>();
 
-    private final @NotNull ReadWriteLock pluginsLock = new ReentrantReadWriteLock();
+    private final @NotNull ReadWriteLock extensionsLock = new ReentrantReadWriteLock();
     private final @NotNull ReadWriteLock classloaderLock = new ReentrantReadWriteLock();
-    private final @NotNull ReadWriteLock beforePluginStopCallbacksLock = new ReentrantReadWriteLock();
-    private final @NotNull ReadWriteLock afterPluginStopCallbacksLock = new ReentrantReadWriteLock();
+    private final @NotNull ReadWriteLock beforeExtensionStopCallbacksLock = new ReentrantReadWriteLock();
+    private final @NotNull ReadWriteLock afterExtensionStopCallbacksLock = new ReentrantReadWriteLock();
     private final @NotNull ServerInformation serverInformation;
 
     @Inject
@@ -74,10 +74,10 @@ public class HiveMQExtensions {
     }
 
     public @NotNull Map<String, HiveMQExtension> getEnabledHiveMQExtensions() {
-        final Lock lock = pluginsLock.readLock();
+        final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            return knownPlugins.values()
+            return knownExtensions.values()
                     .stream()
                     .filter(HiveMQExtension::isEnabled)
                     .sorted(Comparator.comparingInt(HiveMQExtension::getPriority))
@@ -88,32 +88,32 @@ public class HiveMQExtensions {
     }
 
     public @NotNull ImmutableMap<ClassLoader, HiveMQExtension> getClassloaderToExtensionMap() {
-        return ImmutableMap.copyOf(classloaderToPlugin);
+        return ImmutableMap.copyOf(classloaderToExtension);
     }
 
-    public void addHiveMQPlugin(final @NotNull HiveMQExtension extension) {
+    public void addHiveMQExtension(final @NotNull HiveMQExtension extension) {
         checkNotNull(extension, "can only add valid extensions");
 
-        final Lock lock = pluginsLock.writeLock();
+        final Lock lock = extensionsLock.writeLock();
         try {
             lock.lock();
-            final HiveMQExtension oldPlugin = knownPlugins.get(extension.getId());
-            if (oldPlugin != null) {
-                extension.setPreviousVersion(oldPlugin.getVersion());
+            final HiveMQExtension oldExtension = knownExtensions.get(extension.getId());
+            if (oldExtension != null) {
+                extension.setPreviousVersion(oldExtension.getVersion());
             }
-            knownPlugins.put(extension.getId(), extension);
+            knownExtensions.put(extension.getId(), extension);
         } finally {
             lock.unlock();
         }
     }
 
-    public boolean isHiveMQPluginIDKnown(final @NotNull String hiveMQExtensionID) {
+    public boolean isHiveMQExtensionIDKnown(final @NotNull String hiveMQExtensionID) {
         checkNotNull(hiveMQExtensionID, "every extension must have an id");
 
-        final Lock lock = pluginsLock.readLock();
+        final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            return knownPlugins.containsKey(hiveMQExtensionID);
+            return knownExtensions.containsKey(hiveMQExtensionID);
         } finally {
             lock.unlock();
         }
@@ -124,8 +124,8 @@ public class HiveMQExtensions {
 
         checkNotNull(hiveMQExtensionID, "every extension must have an id");
 
-        final HiveMQExtension plugin = getExtension(hiveMQExtensionID, enabled);
-        return (plugin != null) && plugin.getExtensionFolderPath().equals(extensionFolder);
+        final HiveMQExtension extension = getExtension(hiveMQExtensionID, enabled);
+        return (extension != null) && extension.getExtensionFolderPath().equals(extensionFolder);
     }
 
     public boolean isHiveMQExtensionEnabled(@NotNull final String hiveMQExtensionID) {
@@ -135,21 +135,21 @@ public class HiveMQExtensions {
     }
 
     public @Nullable HiveMQExtension getExtension(final @NotNull String xtensionId, final boolean enabled) {
-        final Lock lock = pluginsLock.readLock();
+        final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            final HiveMQExtension plugin = knownPlugins.get(xtensionId);
-            return ((plugin == null) || plugin.isEnabled() != enabled) ? null : plugin;
+            final HiveMQExtension extension = knownExtensions.get(xtensionId);
+            return ((extension == null) || extension.isEnabled() != enabled) ? null : extension;
         } finally {
             lock.unlock();
         }
     }
 
     public @Nullable HiveMQExtension getExtension(final @NotNull String extensionId) {
-        final Lock lock = pluginsLock.readLock();
+        final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            return knownPlugins.get(extensionId);
+            return knownExtensions.get(extensionId);
         } finally {
             lock.unlock();
         }
@@ -164,33 +164,33 @@ public class HiveMQExtensions {
         final Lock lock = classloaderLock.readLock();
         try {
             lock.lock();
-            return classloaderToPlugin.get(classloader);
+            return classloaderToExtension.get(classloader);
         } finally {
             lock.unlock();
         }
     }
 
     private void addClassLoaderMapping(
-            final @NotNull IsolatedPluginClassloader classloader, final @NotNull HiveMQExtension extension) {
+            final @NotNull IsolatedExtensionClassloader classloader, final @NotNull HiveMQExtension extension) {
 
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
-            if (extension instanceof HiveMQEmbeddedExtensionImpl && extension.getExtensionMainClazz() != null) {
+            if (extension.isEmbedded() && extension.getExtensionMainClazz() != null) {
                 //for embedded extensions also add the original (delegate) classloader
-                classloaderToPlugin.put(extension.getExtensionMainClazz().getClassLoader(), extension);
+                classloaderToExtension.put(extension.getExtensionMainClazz().getClassLoader(), extension);
             }
-            classloaderToPlugin.put(classloader, extension);
+            classloaderToExtension.put(classloader, extension);
         } finally {
             loaderLock.unlock();
         }
     }
 
-    private void removeClassLoaderMapping(final @NotNull IsolatedPluginClassloader classloader) {
+    private void removeClassLoaderMapping(final @NotNull IsolatedExtensionClassloader classloader) {
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
-            classloaderToPlugin.remove(classloader);
+            classloaderToExtension.remove(classloader);
         } finally {
             loaderLock.unlock();
         }
@@ -202,44 +202,44 @@ public class HiveMQExtensions {
     public boolean extensionStart(@NotNull final String extensionId) {
         checkNotNull(extensionId, "every extension must have an id");
 
-        final HiveMQExtension plugin = getExtension(extensionId, true);
-        if (plugin == null) {
+        final HiveMQExtension extension = getExtension(extensionId, true);
+        if (extension == null) {
             return false;
         }
 
-        final IsolatedPluginClassloader pluginClassloader = plugin.getExtensionClassloader();
-        Preconditions.checkNotNull(pluginClassloader, "Extension ClassLoader cannot be null");
+        final IsolatedExtensionClassloader extensionClassloader = extension.getExtensionClassloader();
+        Preconditions.checkNotNull(extensionClassloader, "Extension ClassLoader cannot be null");
 
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            addClassLoaderMapping(pluginClassloader, plugin);
+            addClassLoaderMapping(extensionClassloader, extension);
 
             final ExtensionStartStopInputImpl input =
-                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions(), serverInformation);
+                    new ExtensionStartStopInputImpl(extension, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStartOutputImpl output = new ExtensionStartOutputImpl();
 
-            Thread.currentThread().setContextClassLoader(pluginClassloader);
-            plugin.start(input, output);
+            Thread.currentThread().setContextClassLoader(extensionClassloader);
+            extension.start(input, output);
 
             if (output.getReason().isPresent()) {
                 log.info(
                         "Startup of {}extension with id \"{}\" was prevented by the extension itself, reason: {}. Extension will be disabled.",
-                        plugin.isEmbedded() ? "embedded " : "",
-                        plugin.getId(),
+                        extension.isEmbedded() ? "embedded " : "",
+                        extension.getId(),
                         output.getReason().get());
-                extensionStartFailed(plugin, pluginClassloader);
+                extensionStartFailed(extension, extensionClassloader);
             } else {
-                log.info("{}xtension \"{}\" version {} started successfully.", plugin.isEmbedded() ? "Embedded e" : "E", plugin.getName(), plugin.getVersion());
+                log.info("{}xtension \"{}\" version {} started successfully.", extension.isEmbedded() ? "Embedded e" : "E", extension.getName(), extension.getVersion());
                 Checkpoints.checkpoint("extension-started");
             }
 
         } catch (final Throwable t) {
             log.error(
                     "{}xtension with id \"{}\" cannot be started because of an uncaught exception thrown by the extension. Extension will be disabled.",
-                    plugin.isEmbedded() ? "Embedded e" : "E",
-                    plugin.getId(),
+                    extension.isEmbedded() ? "Embedded e" : "E",
+                    extension.getId(),
                     t);
-            extensionStartFailed(plugin, pluginClassloader);
+            extensionStartFailed(extension, extensionClassloader);
 
         } finally {
             Thread.currentThread().setContextClassLoader(previousClassLoader);
@@ -248,11 +248,11 @@ public class HiveMQExtensions {
     }
 
     private void extensionStartFailed(
-            final @NotNull HiveMQExtension extension, final @NotNull IsolatedPluginClassloader pluginClassloader) {
+            final @NotNull HiveMQExtension extension, final @NotNull IsolatedExtensionClassloader extensionClassloader) {
 
         extension.setDisabled();
         extension.clean(true);
-        removeClassLoaderMapping(pluginClassloader);
+        removeClassLoaderMapping(extensionClassloader);
         Checkpoints.checkpoint("extension-failed");
     }
 
@@ -262,48 +262,48 @@ public class HiveMQExtensions {
     public boolean extensionStop(@NotNull final String extensionId, boolean disable) {
         checkNotNull(extensionId, "every extension must have an id");
 
-        final HiveMQExtension plugin;
+        final HiveMQExtension extension;
 
-        final Lock lock = pluginsLock.readLock();
+        final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            plugin = knownPlugins.get(extensionId);
-            if ((plugin == null) || !plugin.isEnabled()) {
+            extension = knownExtensions.get(extensionId);
+            if ((extension == null) || !extension.isEnabled()) {
                 return false;
             }
-            plugin.setDisabled();
+            extension.setDisabled();
         } finally {
             lock.unlock();
         }
 
-        final IsolatedPluginClassloader pluginClassloader = plugin.getExtensionClassloader();
-        Preconditions.checkNotNull(pluginClassloader, "Extension ClassLoader cannot be null");
+        final IsolatedExtensionClassloader extensionClassloader = extension.getExtensionClassloader();
+        Preconditions.checkNotNull(extensionClassloader, "Extension ClassLoader cannot be null");
 
-        notifyBeforeExtensionStopCallbacks(plugin);
+        notifyBeforeExtensionStopCallbacks(extension);
 
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             final ExtensionStartStopInputImpl input =
-                    new ExtensionStartStopInputImpl(plugin, getEnabledHiveMQExtensions(), serverInformation);
+                    new ExtensionStartStopInputImpl(extension, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStopOutputImpl output = new ExtensionStopOutputImpl();
 
-            Thread.currentThread().setContextClassLoader(pluginClassloader);
-            plugin.stop(input, output);
+            Thread.currentThread().setContextClassLoader(extensionClassloader);
+            extension.stop(input, output);
 
-            log.info("{}xtension \"{}\" version {} stopped successfully.", plugin.isEmbedded() ? "Embedded e" : "E", plugin.getName(), plugin.getVersion());
+            log.info("{}xtension \"{}\" version {} stopped successfully.", extension.isEmbedded() ? "Embedded e" : "E", extension.getName(), extension.getVersion());
 
         } catch (final Throwable t) {
-            log.warn("Uncaught exception was thrown from extension with id \"" + plugin.getId() +
+            log.warn("Uncaught exception was thrown from extension with id \"" + extension.getId() +
                     "\" on extension stop. Extensions are responsible on their own to handle exceptions.", t);
             disable = true;
 
         } finally {
             Thread.currentThread().setContextClassLoader(previousClassLoader);
 
-            notifyAfterExtensionStopCallbacks(plugin);
+            notifyAfterExtensionStopCallbacks(extension);
 
-            plugin.clean(disable);
-            removeClassLoaderMapping(pluginClassloader);
+            extension.clean(disable);
+            removeClassLoaderMapping(extensionClassloader);
             Checkpoints.checkpoint("extension-stopped");
         }
         return true;
@@ -315,10 +315,10 @@ public class HiveMQExtensions {
      * @param callback the consumer of the stopped extension.
      */
     public void addBeforeExtensionStopCallback(final @NotNull Consumer<HiveMQExtension> callback) {
-        final Lock lock = beforePluginStopCallbacksLock.writeLock();
+        final Lock lock = beforeExtensionStopCallbacksLock.writeLock();
         try {
             lock.lock();
-            beforePluginStopCallbacks.add(callback);
+            beforeExtensionStopCallbacks.add(callback);
         } finally {
             lock.unlock();
         }
@@ -330,20 +330,20 @@ public class HiveMQExtensions {
      * @param callback the consumer of the stopped extension.
      */
     public void addAfterExtensionStopCallback(final @NotNull Consumer<HiveMQExtension> callback) {
-        final Lock lock = afterPluginStopCallbacksLock.writeLock();
+        final Lock lock = afterExtensionStopCallbacksLock.writeLock();
         try {
             lock.lock();
-            afterPluginStopCallbacks.add(callback);
+            afterExtensionStopCallbacks.add(callback);
         } finally {
             lock.unlock();
         }
     }
 
     private void notifyBeforeExtensionStopCallbacks(final @NotNull HiveMQExtension extension) {
-        final Lock lock = beforePluginStopCallbacksLock.readLock();
+        final Lock lock = beforeExtensionStopCallbacksLock.readLock();
         try {
             lock.lock();
-            for (final Consumer<HiveMQExtension> callback : beforePluginStopCallbacks) {
+            for (final Consumer<HiveMQExtension> callback : beforeExtensionStopCallbacks) {
                 callback.accept(extension);
             }
         } finally {
@@ -352,10 +352,10 @@ public class HiveMQExtensions {
     }
 
     private void notifyAfterExtensionStopCallbacks(final @NotNull HiveMQExtension extension) {
-        final Lock lock = afterPluginStopCallbacksLock.readLock();
+        final Lock lock = afterExtensionStopCallbacksLock.readLock();
         try {
             lock.lock();
-            for (final Consumer<HiveMQExtension> callback : afterPluginStopCallbacks) {
+            for (final Consumer<HiveMQExtension> callback : afterExtensionStopCallbacks) {
                 callback.accept(extension);
             }
         } finally {

@@ -30,10 +30,10 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.loader.PluginLifecycleHandler;
-import com.hivemq.extensions.loader.PluginLifecycleHandlerImpl;
-import com.hivemq.extensions.loader.PluginLoader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.extensions.loader.ExtensionLifecycleHandler;
+import com.hivemq.extensions.loader.ExtensionLifecycleHandlerImpl;
+import com.hivemq.extensions.loader.ExtensionLoader;
 import com.hivemq.extensions.services.auth.Authenticators;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.*;
  * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginBootstrapImplTest {
+public class ExtensionBootstrapImplTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -62,7 +62,7 @@ public class PluginBootstrapImplTest {
     public InitFutureUtilsExecutorRule executorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
-    private PluginLoader pluginLoader;
+    private ExtensionLoader extensionLoader;
 
     @Mock
     HiveMQExtensions hiveMQExtensions;
@@ -76,19 +76,19 @@ public class PluginBootstrapImplTest {
     @Mock
     EmbeddedExtension embeddedExtension;
 
-    private PluginBootstrapImpl pluginBootstrap;
-    private PluginLifecycleHandler pluginLifecycleHandler;
+    private ExtensionBootstrapImpl pluginBootstrap;
+    private ExtensionLifecycleHandler extensionLifecycleHandler;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
 
 
-        pluginLifecycleHandler =
-                new PluginLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
-        pluginBootstrap = new PluginBootstrapImpl(pluginLoader,
+        extensionLifecycleHandler =
+                new ExtensionLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
+        pluginBootstrap = new ExtensionBootstrapImpl(extensionLoader,
                 new SystemInformationImpl(),
-                pluginLifecycleHandler,
+                extensionLifecycleHandler,
                 hiveMQExtensions,
                 shutdownHooks,
                 authenticators);
@@ -97,8 +97,8 @@ public class PluginBootstrapImplTest {
     @Test
     public void test_startPluginSystem_shutdown_hook_registered() {
 
-        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
-        pluginBootstrap.startPluginSystem(null);
+        when(extensionLoader.loadExtensions(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
+        pluginBootstrap.startExtensionSystem(null);
 
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
     }
@@ -106,13 +106,13 @@ public class PluginBootstrapImplTest {
     @Test
     public void test_startPluginSystem_with_embeddedExtensions() {
 
-        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
-        when(pluginLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        when(extensionLoader.loadExtensions(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of());
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension",
                 0,
                 new File("/tmp").toPath(),
                 true));
-        pluginBootstrap.startPluginSystem(embeddedExtension);
+        pluginBootstrap.startExtensionSystem(embeddedExtension);
 
         verify(hiveMQExtensions).extensionStart("my-extension");
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
@@ -121,17 +121,17 @@ public class PluginBootstrapImplTest {
     @Test
     public void test_startPluginSystem_mixed() {
 
-        when(pluginLoader.loadPlugins(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        when(extensionLoader.loadExtensions(any(Path.class), anyBoolean(), any(Class.class))).thenReturn(ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-1",
                 0,
                 new File("/folder").toPath(),
                 false)));
-        when(pluginLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-2",
                 0,
                 new File("/tmp").toPath(),
                 true));
-        pluginBootstrap.startPluginSystem(embeddedExtension);
+        pluginBootstrap.startExtensionSystem(embeddedExtension);
 
         verify(hiveMQExtensions).extensionStart("my-extension-1");
         verify(hiveMQExtensions).extensionStart("my-extension-2");
@@ -146,7 +146,7 @@ public class PluginBootstrapImplTest {
         extensions.put("extension-2", new TestHiveMQExtension("extension-2", temporaryFolder));
 
         when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(extensions);
-        pluginBootstrap.stopPluginSystem();
+        pluginBootstrap.stopExtensionSystem();
 
         verify(hiveMQExtensions, times(1)).extensionStop(eq("extension-1"), eq(false));
         verify(hiveMQExtensions, times(1)).extensionStop(eq("extension-2"), eq(false));
@@ -214,7 +214,7 @@ public class PluginBootstrapImplTest {
 
         @Nullable
         @Override
-        public IsolatedPluginClassloader getExtensionClassloader() {
+        public IsolatedExtensionClassloader getExtensionClassloader() {
             return null;
         }
 

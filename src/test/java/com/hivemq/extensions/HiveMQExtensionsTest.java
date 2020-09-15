@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,10 +57,10 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
     private HiveMQExtension plugin2;
 
     @Mock
-    private IsolatedPluginClassloader loader1;
+    private IsolatedExtensionClassloader loader1;
 
     @Mock
-    private IsolatedPluginClassloader loader2;
+    private IsolatedExtensionClassloader loader2;
 
     @Mock
     private ListenerConfigurationService listenerConfigurationService;
@@ -88,7 +88,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
 
         hiveMQExtensions = new HiveMQExtensions(new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService));
 
-        hiveMQExtensions.addHiveMQPlugin(plugin1);
+        hiveMQExtensions.addHiveMQExtension(plugin1);
     }
 
     @Test(timeout = 5000)
@@ -142,7 +142,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
 
     @Test(timeout = 5000)
     public void test_enabled_plugin_is_returned() {
-        hiveMQExtensions.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQExtension(plugin2);
         when(plugin1.isEnabled()).thenReturn(true);
 
 
@@ -164,7 +164,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         when(plugin1.getVersion()).thenReturn(version);
         when(plugin2.getId()).thenReturn(id1);
 
-        hiveMQExtensions.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQExtension(plugin2);
 
         verify(plugin2, times(1)).setPreviousVersion(same(version));
     }
@@ -175,7 +175,7 @@ public class HiveMQExtensionsTest extends PluginAbstractTest {
         when(plugin1.getVersion()).thenReturn(version);
         when(plugin2.getId()).thenReturn(id2);
 
-        hiveMQExtensions.addHiveMQPlugin(plugin2);
+        hiveMQExtensions.addHiveMQExtension(plugin2);
 
         verify(plugin2, never()).setPreviousVersion(anyString());
     }

@@ -18,7 +18,7 @@ package com.hivemq.extensions.services.auth;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public interface Authenticators {
 
     /**
      * Register a {@link WrappedAuthenticatorProvider}. Will replace an other WrappedAuthenticatorProvider with the same
-     * {@link IsolatedPluginClassloader}.
+     * {@link IsolatedExtensionClassloader}.
      *
      * @param provider a wrapped {@link AuthenticatorProvider}
      */

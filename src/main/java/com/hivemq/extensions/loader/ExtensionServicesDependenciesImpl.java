@@ -30,7 +30,7 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 
@@ -41,7 +41,7 @@ import javax.inject.Singleton;
  * @author Christoph Schäbel
  */
 @Singleton
-public class PluginServicesDependenciesImpl implements PluginServicesDependencies {
+public class ExtensionServicesDependenciesImpl implements ExtensionServicesDependencies {
 
     private final @NotNull MetricRegistry metricRegistry;
     private final @NotNull InitializerRegistry initializerRegistry;
@@ -60,7 +60,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
     private final @NotNull AdminService adminService;
 
     @Inject
-    public PluginServicesDependenciesImpl(
+    public ExtensionServicesDependenciesImpl(
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull InitializerRegistry initializerRegistry,
             final @NotNull RetainedMessageStore retainedMessageStore,
@@ -90,7 +90,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
     }
 
     @NotNull
-    public ImmutableMap<String, Object> getDependenciesMap(@NotNull final IsolatedPluginClassloader classLoader) {
+    public ImmutableMap<String, Object> getDependenciesMap(@NotNull final IsolatedExtensionClassloader classLoader) {
         //classLoader is unused but prepared here for future use
 
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
@@ -113,7 +113,7 @@ public class PluginServicesDependenciesImpl implements PluginServicesDependencie
 
     @NotNull
     private ManagedExecutorServicePerExtension getManagedExecutorService(
-            @NotNull final IsolatedPluginClassloader classLoader) {
+            @NotNull final IsolatedExtensionClassloader classLoader) {
         return new ManagedExecutorServicePerExtension(
                 globalManagedExtensionExecutorService, classLoader, hiveMQExtensions);
     }

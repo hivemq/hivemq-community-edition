@@ -39,8 +39,8 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.exception.PluginLoadingException;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.extensions.exception.ExtensionLoadingException;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
@@ -78,16 +78,16 @@ import static org.mockito.Mockito.when;
  * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginStaticInitializerImplTest {
+public class ExtensionStaticInitializerImplTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private PluginStaticInitializerImpl staticInitializer;
+    private ExtensionStaticInitializerImpl staticInitializer;
     private MetricRegistry metricRegistry;
     private InitializerRegistry initializerRegistry;
-    private PluginServicesDependenciesImpl servicesDependencies;
-    private PluginBuilderDependenciesImpl builderDependencies;
+    private ExtensionServicesDependenciesImpl servicesDependencies;
+    private ExtensionBuilderDependenciesImpl builderDependencies;
     private SecurityRegistryImpl securityRegistry;
 
     private RetainedPublishBuilderImpl retainedPublishBuilder;
@@ -154,13 +154,13 @@ public class PluginStaticInitializerImplTest {
         securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions),
                 new AuthorizersImpl(hiveMQExtensions), hiveMQExtensions);
         servicesDependencies = Mockito.spy(
-                new PluginServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
+                new ExtensionServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
                         clientService, subscriptionStore, managedPluginExecutorService, publishService,
                         hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry,
                         adminService));
         builderDependencies = Mockito.spy(
-                new PluginBuilderDependenciesImpl(() -> retainedPublishBuilder, () -> topicSubscriptionBuilder, () -> topicPermissionBuilder, () -> publishBuilder, () -> willPublishBuilder));
-        staticInitializer = new PluginStaticInitializerImpl(servicesDependencies, builderDependencies);
+                new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder, () -> topicSubscriptionBuilder, () -> topicPermissionBuilder, () -> publishBuilder, () -> willPublishBuilder));
+        staticInitializer = new ExtensionStaticInitializerImpl(servicesDependencies, builderDependencies);
     }
 
     @Test
@@ -382,16 +382,16 @@ public class PluginStaticInitializerImplTest {
         assertSame(topicSubscriptionBuilder, objectFromMap.get());
     }
 
-    @Test(expected = PluginLoadingException.class)
+    @Test(expected = ExtensionLoadingException.class)
     public void test_exception_at_static_initialization() throws Exception {
-        when(servicesDependencies.getDependenciesMap(any(IsolatedPluginClassloader.class))).thenThrow(
+        when(servicesDependencies.getDependenciesMap(any(IsolatedExtensionClassloader.class))).thenThrow(
                 new RuntimeException("Test-Exception"));
         createAndLoadPlugin();
     }
 
-    @Test(expected = PluginLoadingException.class)
+    @Test(expected = ExtensionLoadingException.class)
     public void test_exception_at_static_builders_initialization() throws Exception {
-        when(builderDependencies.getDependenciesMap(any(IsolatedPluginClassloader.class))).thenThrow(
+        when(builderDependencies.getDependenciesMap(any(IsolatedExtensionClassloader.class))).thenThrow(
                 new RuntimeException("Test-Exception"));
         createAndLoadPlugin();
     }
@@ -431,7 +431,7 @@ public class PluginStaticInitializerImplTest {
     }
 
     private Class<? extends ExtensionMain> createAndLoadPlugin()
-            throws IOException, ClassNotFoundException, PluginLoadingException {
+            throws IOException, ClassNotFoundException, ExtensionLoadingException {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addAsServiceProviderAndClasses(ExtensionMain.class, TestExtensionMain.class);
 
@@ -442,8 +442,8 @@ public class PluginStaticInitializerImplTest {
         final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl =
-                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl =
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
         cl.loadClassesWithStaticContext();
         staticInitializer.initialize("pluginid", cl);
 

@@ -23,8 +23,8 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extensions.*;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.config.HiveMQPluginXMLReader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.extensions.config.HiveMQExtensionXMLReader;
 import net.bytebuddy.ByteBuddy;
 import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -47,7 +47,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-public class PluginLoaderImplTest extends PluginAbstractTest {
+public class ExtensionLoaderImplTest extends PluginAbstractTest {
 
     private static final String invalidPluginXML =
             "<hivemq-extension>" + "<id>invalid-plugin1</id>" + "<name>Some Name</name>" +
@@ -75,26 +75,26 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
     private ServerInformation serverInformation;
 
     @Mock
-    private PluginStaticInitializer staticInitializer;
+    private ExtensionStaticInitializer staticInitializer;
 
     @Captor
     private ArgumentCaptor<ClassLoader> captor;
 
-    private PluginLoaderImpl pluginLoader;
-    private PluginLoaderImpl realPluginLoader;
+    private ExtensionLoaderImpl pluginLoader;
+    private ExtensionLoaderImpl realPluginLoader;
     private HiveMQExtensions hiveMQExtensions;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         hiveMQExtensions = new HiveMQExtensions(serverInformation);
-        pluginLoader = new PluginLoaderImpl(classServiceLoader,
+        pluginLoader = new ExtensionLoaderImpl(classServiceLoader,
                 hiveMQExtensions,
-                new HiveMQPluginFactoryImpl(),
+                new HiveMQExtensionFactoryImpl(),
                 staticInitializer);
-        realPluginLoader = new PluginLoaderImpl(new ClassServiceLoader(),
+        realPluginLoader = new ExtensionLoaderImpl(new ClassServiceLoader(),
                 hiveMQExtensions,
-                new HiveMQPluginFactoryImpl(),
+                new HiveMQExtensionFactoryImpl(),
                 staticInitializer);
     }
 
@@ -122,7 +122,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 "test-extension");
 
         verify(classServiceLoader).load(eq(ExtensionMain.class), captor.capture());
-        assertTrue(captor.getValue() instanceof IsolatedPluginClassloader);
+        assertTrue(captor.getValue() instanceof IsolatedExtensionClassloader);
     }
 
     @Test
@@ -209,13 +209,13 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
     @Test(expected = NullPointerException.class)
     public void test_load_plugins_folder_null() {
 
-        pluginLoader.loadPlugins(null, false, ExtensionMain.class);
+        pluginLoader.loadExtensions(null, false, ExtensionMain.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void test_load_plugins_desired_plugin_null() throws Exception {
 
-        pluginLoader.loadPlugins(temporaryFolder.newFolder().toPath(), false, null);
+        pluginLoader.loadExtensions(temporaryFolder.newFolder().toPath(), false, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -223,7 +223,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         final File pluginFolder = temporaryFolder.newFolder();
         assertTrue(pluginFolder.delete());
-        pluginLoader.loadPlugins(pluginFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginFolder.toPath(), false, ExtensionMain.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -231,14 +231,14 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         final File pluginFolder = temporaryFolder.newFolder();
         assertTrue(pluginFolder.setReadable(false));
-        pluginLoader.loadPlugins(pluginFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginFolder.toPath(), false, ExtensionMain.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_load_plugins_folder_is_not_a_folder() throws Exception {
 
         final File pluginFolder = temporaryFolder.newFile();
-        pluginLoader.loadPlugins(pluginFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginFolder.toPath(), false, ExtensionMain.class);
     }
 
     @Test
@@ -246,10 +246,10 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         final File pluginFolder = temporaryFolder.newFolder();
         assertTrue(pluginFolder.delete());
-        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents =
-                pluginLoader.loadPlugins(pluginFolder.toPath(), true, ExtensionMain.class);
+        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+                pluginLoader.loadExtensions(pluginFolder.toPath(), true, ExtensionMain.class);
 
-        assertTrue(hiveMQPluginEvents.isEmpty());
+        assertTrue(hiveMQExtensionEvents.isEmpty());
     }
 
     @Test
@@ -257,28 +257,28 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         final File pluginFolder = temporaryFolder.newFolder();
         assertTrue(pluginFolder.setReadable(false));
-        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents =
-                pluginLoader.loadPlugins(pluginFolder.toPath(), true, ExtensionMain.class);
+        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+                pluginLoader.loadExtensions(pluginFolder.toPath(), true, ExtensionMain.class);
 
-        assertTrue(hiveMQPluginEvents.isEmpty());
+        assertTrue(hiveMQExtensionEvents.isEmpty());
     }
 
     @Test
     public void loadPlugins_folderIsNotAFolder_permissive() throws IOException {
 
         final File pluginFolder = temporaryFolder.newFile();
-        final ImmutableList<HiveMQPluginEvent> hiveMQPluginEvents =
-                pluginLoader.loadPlugins(pluginFolder.toPath(), true, ExtensionMain.class);
+        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+                pluginLoader.loadExtensions(pluginFolder.toPath(), true, ExtensionMain.class);
 
-        assertTrue(hiveMQPluginEvents.isEmpty());
+        assertTrue(hiveMQExtensionEvents.isEmpty());
     }
 
     @Test
     public void test_load_plugins_from_empty_folder() throws Exception {
 
         final File pluginFolder = temporaryFolder.newFolder();
-        final Collection<HiveMQPluginEvent> extensions =
-                pluginLoader.loadPlugins(pluginFolder.toPath(), false, ExtensionMain.class);
+        final Collection<HiveMQExtensionEvent> extensions =
+                pluginLoader.loadExtensions(pluginFolder.toPath(), false, ExtensionMain.class);
 
         assertTrue(extensions.isEmpty());
     }
@@ -298,7 +298,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         when(classServiceLoader.load(eq(ExtensionMain.class), any(ClassLoader.class))).thenReturn(new ArrayList<>());
 
-        pluginLoader.loadPlugins(pluginFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginFolder.toPath(), false, ExtensionMain.class);
 
         //Only JAR files are considered. Class files are not allowed
         verify(classServiceLoader, never()).load(any(Class.class), any(ClassLoader.class));
@@ -319,7 +319,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         when(classServiceLoader.load(eq(ExtensionMain.class), any(ClassLoader.class))).thenReturn(new ArrayList<>());
 
-        pluginLoader.loadPlugins(pluginsFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginsFolder.toPath(), false, ExtensionMain.class);
 
         //Let's verify that the extension was loaded
         verify(classServiceLoader).load(any(Class.class), any(ClassLoader.class));
@@ -340,8 +340,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         pluginFolder.setWritable(false);
 
-        final ImmutableList<HiveMQPluginEvent> pluginEvents =
-                pluginLoader.loadPlugins(pluginsFolder.toPath(), false, ExtensionMain.class);
+        final ImmutableList<HiveMQExtensionEvent> pluginEvents =
+                pluginLoader.loadExtensions(pluginsFolder.toPath(), false, ExtensionMain.class);
 
         assertEquals(0, pluginEvents.size());
 
@@ -377,8 +377,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final ImmutableList<HiveMQPluginEvent> pluginEvents =
-                pluginLoader.loadPlugins(pluginsFolder.toPath(), false, ExtensionMain.class);
+        final ImmutableList<HiveMQExtensionEvent> pluginEvents =
+                pluginLoader.loadExtensions(pluginsFolder.toPath(), false, ExtensionMain.class);
 
         assertEquals(0, pluginEvents.size());
 
@@ -427,7 +427,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         when(classServiceLoader.load(eq(ExtensionMain.class), any(ClassLoader.class))).thenReturn(new ArrayList<>());
 
-        pluginLoader.loadPlugins(pluginsFolder.toPath(), false, ExtensionMain.class);
+        pluginLoader.loadExtensions(pluginsFolder.toPath(), false, ExtensionMain.class);
 
         //Let's verify that the extensions were loaded
         verify(classServiceLoader, times(2)).load(any(Class.class), any(ClassLoader.class));
@@ -453,8 +453,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -478,7 +478,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        hiveMQExtensions.addHiveMQPlugin(new HiveMQExtensionImpl(new HiveMQPluginEntity("plugin1",
+        hiveMQExtensions.addHiveMQExtension(new HiveMQExtensionImpl(new HiveMQExtensionEntity("plugin1",
                 "my_plugin",
                 "1.0.0",
                 1,
@@ -488,8 +488,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 new TestExtensionMainImpl(),
                 true));
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -514,7 +514,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        hiveMQExtensions.addHiveMQPlugin(new HiveMQExtensionImpl(new HiveMQPluginEntity("plugin-other-id",
+        hiveMQExtensions.addHiveMQExtension(new HiveMQExtensionImpl(new HiveMQExtensionEntity("plugin-other-id",
                 "my_plugin",
                 "1.0.0",
                 1,
@@ -524,8 +524,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 new TestExtensionMainImpl(),
                 false));
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -539,7 +539,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
         final File pluginFolder1 = temporaryFolder.newFolder("extension", "plugin1");
         final File pluginFolder2 = temporaryFolder.newFolder("extension", "plugin2");
 
-        hiveMQExtensions.addHiveMQPlugin(new HiveMQExtensionImpl(new HiveMQPluginEntity("plugin1",
+        hiveMQExtensions.addHiveMQExtension(new HiveMQExtensionImpl(new HiveMQExtensionEntity("plugin1",
                 "my_plugin",
                 "1.0.0",
                 1,
@@ -560,8 +560,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder2.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder2.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -575,7 +575,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
         final File pluginFolder1 = temporaryFolder.newFolder("extension", "plugin1");
         final File pluginFolder2 = temporaryFolder.newFolder("extension", "plugin2");
 
-        hiveMQExtensions.addHiveMQPlugin(new HiveMQExtensionImpl(new HiveMQPluginEntity("plugin1",
+        hiveMQExtensions.addHiveMQExtension(new HiveMQExtensionImpl(new HiveMQExtensionEntity("plugin1",
                 "my_plugin",
                 "1.0.0",
                 1,
@@ -597,8 +597,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder2.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder2.toPath(), ExtensionMain.class);
 
         //NO DISABLE EVENT HERE IS VERY IMPORTANT
         assertNull(event);
@@ -624,7 +624,7 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        hiveMQExtensions.addHiveMQPlugin(new HiveMQExtensionImpl(new HiveMQPluginEntity("plugin1",
+        hiveMQExtensions.addHiveMQExtension(new HiveMQExtensionImpl(new HiveMQExtensionEntity("plugin1",
                 "my_plugin",
                 "1.0.0",
                 1,
@@ -634,8 +634,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 new TestExtensionMainImpl(),
                 true));
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNotNull(event);
 
@@ -648,14 +648,14 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         hiveMQExtensions = Mockito.mock(HiveMQExtensions.class);
 
-        pluginLoader = new PluginLoaderImpl(classServiceLoader,
+        pluginLoader = new ExtensionLoaderImpl(classServiceLoader,
                 hiveMQExtensions,
-                new HiveMQPluginFactoryImpl(),
+                new HiveMQExtensionFactoryImpl(),
                 staticInitializer);
 
         when(hiveMQExtensions.isHiveMQExtensionKnown(anyString(), any(Path.class), anyBoolean())).thenReturn(false);
         when(hiveMQExtensions.isHiveMQExtensionEnabled(anyString())).thenReturn(true);
-        when(hiveMQExtensions.isHiveMQPluginIDKnown(anyString())).thenReturn(true);
+        when(hiveMQExtensions.isHiveMQExtensionIDKnown(anyString())).thenReturn(true);
 
         final File pluginFolder1 = temporaryFolder.newFolder("extension", "plugin1");
 
@@ -670,8 +670,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -695,8 +695,8 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQPluginEvent event =
-                pluginLoader.processSinglePluginFolder(pluginFolder1.toPath(), ExtensionMain.class);
+        final HiveMQExtensionEvent event =
+                pluginLoader.processSingleExtensionFolder(pluginFolder1.toPath(), ExtensionMain.class);
 
         assertNull(event);
 
@@ -734,9 +734,9 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 addAsServiceProviderAndClasses(ExtensionMain.class, TestExtensionMainImpl.class);
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQExtension hiveMQExtension = realPluginLoader.loadSinglePlugin(
+        final HiveMQExtension hiveMQExtension = realPluginLoader.loadSingleExtension(
                 pluginFolder1.toPath(),
-                HiveMQPluginXMLReader.getPluginEntityFromXML(pluginFolder1.toPath(), true).get(),
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginFolder1.toPath(), true).get(),
                 ExtensionMain.class);
 
         assertNotNull(hiveMQExtension);
@@ -756,9 +756,9 @@ public class PluginLoaderImplTest extends PluginAbstractTest {
                 addAsServiceProviderAndClasses(ExtensionMain.class, TestExtensionMainConstructorParamImpl.class);
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final HiveMQExtension hiveMQExtension = realPluginLoader.loadSinglePlugin(
+        final HiveMQExtension hiveMQExtension = realPluginLoader.loadSingleExtension(
                 pluginFolder1.toPath(),
-                HiveMQPluginXMLReader.getPluginEntityFromXML(pluginFolder1.toPath(), true).get(),
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginFolder1.toPath(), true).get(),
                 ExtensionMain.class);
 
         assertNull(hiveMQExtension);

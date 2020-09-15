@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Georg Held
  */
-public class PluginUtilTest extends PluginAbstractTest {
+public class ExtensionUtilTest extends PluginAbstractTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -36,12 +36,12 @@ public class PluginUtilTest extends PluginAbstractTest {
     @Test(timeout = 5000)
     public void test_empty_plugin_folder() throws Exception {
         final File emptyFolder = folder.newFolder("emptyFolder");
-        assertFalse(PluginUtil.isValidPluginFolder(emptyFolder.toPath(), true));
+        assertFalse(ExtensionUtil.isValidExtensionFolder(emptyFolder.toPath(), true));
     }
 
     @Test(timeout = 5000)
     public void test_null_folder() throws Exception {
-        assertFalse(PluginUtil.isValidPluginFolder(new File("some-path").toPath(), true));
+        assertFalse(ExtensionUtil.isValidExtensionFolder(new File("some-path").toPath(), true));
     }
 
     @Test(timeout = 5000)
@@ -49,7 +49,7 @@ public class PluginUtilTest extends PluginAbstractTest {
         final File validPluginFolder =
                 TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validPlugin");
 
-        assertTrue(PluginUtil.isValidPluginFolder(validPluginFolder.toPath(), true));
+        assertTrue(ExtensionUtil.isValidExtensionFolder(validPluginFolder.toPath(), true));
     }
 
     @Test(timeout = 5000)
@@ -58,7 +58,7 @@ public class PluginUtilTest extends PluginAbstractTest {
                 TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validPlugin");
         new File(validPluginFolder, "hivemq-extension.xml").delete();
 
-        assertFalse(PluginUtil.isValidPluginFolder(validPluginFolder.toPath(), true));
+        assertFalse(ExtensionUtil.isValidExtensionFolder(validPluginFolder.toPath(), true));
     }
 
     @Test(timeout = 5000)
@@ -67,7 +67,7 @@ public class PluginUtilTest extends PluginAbstractTest {
                 TestExtensionUtil.createValidExtension(folder.newFolder("extension"), "validPlugin");
         new File(validPluginFolder, "extension.jar").delete();
 
-        assertFalse(PluginUtil.isValidPluginFolder(validPluginFolder.toPath(), true));
+        assertFalse(ExtensionUtil.isValidExtensionFolder(validPluginFolder.toPath(), true));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PluginUtilTest extends PluginAbstractTest {
         final File validPluginFolder =
                 TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validPlugin");
 
-        final boolean result = PluginUtil.disablePluginFolder(validPluginFolder.toPath());
+        final boolean result = ExtensionUtil.disableExtensionFolder(validPluginFolder.toPath());
 
         assertTrue(result);
 

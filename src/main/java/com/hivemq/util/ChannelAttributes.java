@@ -17,7 +17,6 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -87,14 +86,14 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Long> MAX_PACKET_SIZE_SEND = AttributeKey.valueOf("Restriction.MaxPacketSize.Send");
 
-    public static final AttributeKey<ClientContextImpl> PLUGIN_CLIENT_CONTEXT = AttributeKey.valueOf("Extension.Client.Context");
-    public static final AttributeKey<ClientEventListeners> PLUGIN_CLIENT_EVENT_LISTENERS = AttributeKey.valueOf("Extension.Client.Event.Listeners");
-    public static final AttributeKey<Boolean> PLUGIN_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
-    public static final AttributeKey<Boolean> PLUGIN_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
-    public static final AttributeKey<ClientAuthenticators> PLUGIN_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
-    public static final AttributeKey<ClientAuthorizers> PLUGIN_CLIENT_AUTHORIZERS = AttributeKey.valueOf("Extension.Client.Authorizers");
-    public static final AttributeKey<ClientInformation> PLUGIN_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
-    public static final AttributeKey<ConnectionInformation> PLUGIN_CONNECTION_INFORMATION = AttributeKey.valueOf("Extension.Connection.Information");
+    public static final AttributeKey<ClientContextImpl> EXTENSION_CLIENT_CONTEXT = AttributeKey.valueOf("Extension.Client.Context");
+    public static final AttributeKey<ClientEventListeners> EXTENSION_CLIENT_EVENT_LISTENERS = AttributeKey.valueOf("Extension.Client.Event.Listeners");
+    public static final AttributeKey<Boolean> EXTENSION_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
+    public static final AttributeKey<Boolean> EXTENSION_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
+    public static final AttributeKey<ClientAuthenticators> EXTENSION_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
+    public static final AttributeKey<ClientAuthorizers> EXTENSION_CLIENT_AUTHORIZERS = AttributeKey.valueOf("Extension.Client.Authorizers");
+    public static final AttributeKey<ClientInformation> EXTENSION_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
+    public static final AttributeKey<ConnectionInformation> EXTENSION_CONNECTION_INFORMATION = AttributeKey.valueOf("Extension.Connection.Information");
 
 
     /**

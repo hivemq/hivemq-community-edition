@@ -13,33 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.extensions;
+package com.hivemq.extensions.loader;
 
-import com.hivemq.embedded.EmbeddedExtension;
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extensions.HiveMQExtensionEvent;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Christoph Schäbel
- * @author Georg Held
  */
-public interface PluginBootstrap {
+public interface ExtensionLifecycleHandler {
 
     /**
-     * Starts HiveMQ's extension system and the runtime-reload for extensions.
-     * <p/>
-     * Already installed (and enabled) extensions are loaded and started here.
-     * <p>
-     * This method runs asynchronously and does NOT block until the extensions are started.
+     * Handles extension En-/Disable events and calls the extension's start or stop methods if needed.
+     *
+     * @param hiveMQExtensionEvents {@link ImmutableList} of {@link HiveMQExtensionEvent}s which should be processed.
      */
-    @NotNull CompletableFuture<Void> startPluginSystem(@Nullable EmbeddedExtension embeddedExtension);
-
-    /**
-     * Stops all currently enabled HiveMQ extensions and the extension system.
-     * <p>
-     * This method blocks until the extensions are stopped.
-     */
-    void stopPluginSystem();
+    @NotNull
+    CompletableFuture<Void> handleExtensionEvents(@NotNull ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents);
 }

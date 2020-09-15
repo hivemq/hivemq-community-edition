@@ -15,11 +15,11 @@
  */
 package com.hivemq.extensions.config;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.exception.ValidationError;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.HiveMQExtension;
-import com.hivemq.extensions.HiveMQPluginEntity;
+import com.hivemq.extensions.HiveMQExtensionEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,27 +35,27 @@ import java.util.Optional;
  * @author Georg Held
  */
 @Singleton
-public class HiveMQPluginXMLReader {
+public class HiveMQExtensionXMLReader {
 
-    private static final Logger log = LoggerFactory.getLogger(HiveMQPluginXMLReader.class);
+    private static final Logger log = LoggerFactory.getLogger(HiveMQExtensionXMLReader.class);
 
     @NotNull
-    public static Optional<HiveMQPluginEntity> getPluginEntityFromXML(@NotNull final Path pluginFolder, final boolean logging) {
+    public static Optional<HiveMQExtensionEntity> getExtensionEntityFromXML(@NotNull final Path extensionFolder, final boolean logging) {
 
-        final Path pluginXMLPath = pluginFolder.resolve(HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE);
-        if (Files.exists(pluginXMLPath) && logging) {
-            log.trace("Found hivemq-extension.xml {}", pluginXMLPath);
+        final Path extensionXMLPath = extensionFolder.resolve(HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE);
+        if (Files.exists(extensionXMLPath) && logging) {
+            log.trace("Found hivemq-extension.xml {}", extensionXMLPath);
         }
         try {
-            final JAXBContext context = JAXBContext.newInstance(HiveMQPluginEntity.class);
+            final JAXBContext context = JAXBContext.newInstance(HiveMQExtensionEntity.class);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
-            final HiveMQPluginEntity unmarshal = (HiveMQPluginEntity) unmarshaller.unmarshal(pluginXMLPath.toFile());
+            final HiveMQExtensionEntity unmarshal = (HiveMQExtensionEntity) unmarshaller.unmarshal(extensionXMLPath.toFile());
 
-            final Optional<ValidationError> validationError = validateHiveMQPluginEntity(unmarshal);
+            final Optional<ValidationError> validationError = validateHiveMQExtensionEntity(unmarshal);
 
             if (validationError.isPresent()) {
                 if (logging) {
-                    log.warn("Could not parse \"{}\" in {} because of {}. Not loading extension.", HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE, pluginFolder.toString(), validationError.get().getMessage());
+                    log.warn("Could not parse \"{}\" in {} because of {}. Not loading extension.", HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE, extensionFolder.toString(), validationError.get().getMessage());
                 }
                 return Optional.empty();
             }
@@ -63,24 +63,24 @@ public class HiveMQPluginXMLReader {
             return Optional.of(unmarshal);
         } catch (final JAXBException e) {
             if (logging) {
-                log.warn("Could not parse \"{}\" in {}. Not loading extension.", HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE, pluginFolder.toString(), e);
+                log.warn("Could not parse \"{}\" in {}. Not loading extension.", HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE, extensionFolder.toString(), e);
             }
             return Optional.empty();
         }
     }
 
     @NotNull
-    private static Optional<ValidationError> validateHiveMQPluginEntity(@Nullable final HiveMQPluginEntity hiveMQPluginEntity) {
+    private static Optional<ValidationError> validateHiveMQExtensionEntity(@Nullable final HiveMQExtensionEntity hiveMQExtensionEntity) {
         final String message = "missing %s";
-        if (hiveMQPluginEntity == null || hiveMQPluginEntity.getId().isEmpty()) {
+        if (hiveMQExtensionEntity == null || hiveMQExtensionEntity.getId().isEmpty()) {
             return Optional.of(new ValidationError(message, "<id>"));
         }
 
-        if ( hiveMQPluginEntity.getName().isEmpty()) {
+        if ( hiveMQExtensionEntity.getName().isEmpty()) {
             return Optional.of(new ValidationError(message, "<name>"));
         }
 
-        if (hiveMQPluginEntity.getVersion().isEmpty()) {
+        if (hiveMQExtensionEntity.getVersion().isEmpty()) {
             return Optional.of(new ValidationError(message, "<version>"));
         }
         return Optional.empty();

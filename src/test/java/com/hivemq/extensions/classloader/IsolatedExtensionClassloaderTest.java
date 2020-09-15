@@ -40,7 +40,7 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 
-public class IsolatedPluginClassloaderTest {
+public class IsolatedExtensionClassloaderTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -76,7 +76,7 @@ public class IsolatedPluginClassloaderTest {
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
 
@@ -97,7 +97,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_original_class_loaded_delegate() throws Exception {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(this.getClass().getClassLoader(), null);
 
         final Class<?> aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
 
@@ -119,7 +119,7 @@ public class IsolatedPluginClassloaderTest {
         //Actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> aClass = loader.loadClass(ClassLoaderTestClass.class.getCanonicalName());
 
@@ -151,7 +151,7 @@ public class IsolatedPluginClassloaderTest {
         //Actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> aClass = loader.loadClass("com.hivemq.extensions.api.test.ClassLoadedClass");
 
@@ -185,7 +185,7 @@ public class IsolatedPluginClassloaderTest {
         final String path = serviceUrl.toExternalForm();
         final URL folder = new URL(path.replace(Services.class.getCanonicalName().replace(".", File.separator) + ".class", ""));
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder}, this.getClass().getClassLoader());
 
         final Class<?> servicesClassIsolated = loader.loadClass(Services.class.getCanonicalName());
 
@@ -207,7 +207,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resource() throws MalformedURLException {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
         URL resource = loader.getResource("logback-test.xml");
         assertNotNull(resource);
 
@@ -216,7 +216,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resource_delegate() {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(this.getClass().getClassLoader(), null);
         URL resource = loader.getResource("logback-test.xml");
         assertNotNull(resource);
 
@@ -225,7 +225,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resources() throws IOException {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
         @NotNull Enumeration<URL> resource = loader.getResources("logback-test.xml");
         assertNotNull(resource);
         assertTrue(resource.hasMoreElements());
@@ -236,7 +236,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resources_delegate() throws IOException {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(this.getClass().getClassLoader(), null);
         @NotNull Enumeration<URL> resource = loader.getResources("logback-test.xml");
         assertNotNull(resource);
         assertTrue(resource.hasMoreElements());
@@ -246,7 +246,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resources_as_stream() throws IOException {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, this.getClass().getClassLoader());
         @Nullable InputStream resource = loader.getResourceAsStream("logback-test.xml");
         assertNotNull(resource);
 
@@ -255,7 +255,7 @@ public class IsolatedPluginClassloaderTest {
     @Test
     public void test_get_resources_as_stream_delegate() throws IOException {
 
-        final IsolatedPluginClassloader loader = new IsolatedPluginClassloader(this.getClass().getClassLoader(), null);
+        final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(this.getClass().getClassLoader(), null);
         @Nullable InputStream resource = loader.getResourceAsStream("logback-test.xml");
         assertNotNull(resource);
 

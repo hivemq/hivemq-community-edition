@@ -20,9 +20,9 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class InitializersImpl implements Initializers {
     @Inject
     public InitializersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        this.clientInitializerMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.clientInitializerMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 

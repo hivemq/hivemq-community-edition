@@ -76,8 +76,8 @@ public class MqttDisconnectUtil {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if ((channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).get() != null) &&
-                (channel.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).getAndSet(true) == null)) {
+        if ((channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null) &&
+                (channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null)) {
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
             channel.pipeline().fireUserEventTriggered(isAuthentication ?

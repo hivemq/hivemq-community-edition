@@ -22,9 +22,9 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  *
  * @author Christoph Schäbel
  */
-public class PluginLoadingException extends Exception {
+public class ExtensionLoadingException extends Exception {
 
-    public PluginLoadingException(@NotNull final String message, @NotNull final Throwable cause) {
+    public ExtensionLoadingException(@NotNull final String message, @NotNull final Throwable cause) {
         super(message, cause);
     }
 }

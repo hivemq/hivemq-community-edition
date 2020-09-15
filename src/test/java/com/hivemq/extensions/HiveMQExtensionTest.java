@@ -22,7 +22,7 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.config.HiveMQPluginXMLReader;
+import com.hivemq.extensions.config.HiveMQExtensionXMLReader;
 import com.hivemq.extensions.parameter.ExtensionStartOutputImpl;
 import com.hivemq.extensions.parameter.ExtensionStartStopInputImpl;
 import com.hivemq.extensions.parameter.ExtensionStopOutputImpl;
@@ -49,7 +49,7 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
     @Rule
     public TemporaryFolder tmpFolder = new TemporaryFolder();
     private File validPluginFolder;
-    private HiveMQPluginEntity pluginEntityFromXML;
+    private HiveMQExtensionEntity pluginEntityFromXML;
     private HiveMQExtension enabledStartPlugin;
     private Map<String, HiveMQExtension> enabledPlugins;
     private ExtensionStartOutputImpl pluginStartOutput;
@@ -65,7 +65,7 @@ public class HiveMQExtensionTest extends PluginAbstractTest {
     public void setUp() throws Exception {
 
         validPluginFolder = TestExtensionUtil.createValidExtension(tmpFolder.newFolder("extension"), "id");
-        pluginEntityFromXML = HiveMQPluginXMLReader.getPluginEntityFromXML(validPluginFolder.toPath(), true).get();
+        pluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(validPluginFolder.toPath(), true).get();
 
         enabledStartPlugin =
                 new HiveMQExtensionImpl(

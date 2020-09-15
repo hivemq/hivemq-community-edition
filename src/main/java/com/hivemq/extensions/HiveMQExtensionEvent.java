@@ -22,14 +22,14 @@ import java.nio.file.Path;
 /**
  * @author Georg Held
  */
-public class HiveMQPluginEvent {
+public class HiveMQExtensionEvent {
     private final Change change;
     private final String pluginId;
     private final int priority;
     private final Path pluginFolder;
     private final boolean embedded;
 
-    public HiveMQPluginEvent(
+    public HiveMQExtensionEvent(
             @NotNull final Change change,
             @NotNull final String pluginId,
             final int priority,

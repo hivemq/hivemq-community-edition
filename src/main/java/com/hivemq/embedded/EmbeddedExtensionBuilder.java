@@ -56,6 +56,7 @@ public interface EmbeddedExtensionBuilder {
      *
      * @param name The name of the extension
      * @return the builder itself
+     * @since CE 2020.5
      */
     @NotNull EmbeddedExtensionBuilder withName(@NotNull String name);
 

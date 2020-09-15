@@ -29,7 +29,7 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,14 +45,14 @@ import static org.mockito.Mockito.mock;
  * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginServicesDependenciesImplTest {
+public class ExtensionServicesDependenciesImplTest {
 
-    private PluginServicesDependenciesImpl pluginServicesDependencies;
+    private ExtensionServicesDependenciesImpl pluginServicesDependencies;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        pluginServicesDependencies = new PluginServicesDependenciesImpl(new MetricRegistry(), mock(InitializerRegistry.class), mock(RetainedMessageStore.class),
+        pluginServicesDependencies = new ExtensionServicesDependenciesImpl(new MetricRegistry(), mock(InitializerRegistry.class), mock(RetainedMessageStore.class),
                 mock(ClientService.class), mock(SubscriptionStore.class), mock(GlobalManagedExtensionExecutorService.class), mock(PublishService.class),
                 mock(HiveMQExtensions.class), mock(SecurityRegistry.class), mock(EventRegistry.class), mock(ClusterService.class),
                 mock(GlobalInterceptorRegistry.class), mock(AdminService.class));
@@ -62,7 +62,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_metric_registry() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(MetricRegistry.class.getCanonicalName());
 
@@ -74,7 +74,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_initializer_registry() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(InitializerRegistry.class.getCanonicalName());
 
@@ -85,7 +85,7 @@ public class PluginServicesDependenciesImplTest {
     @Test(timeout = 5000)
     public void test_map_contains_security_registry() {
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(SecurityRegistry.class.getCanonicalName());
 
@@ -97,7 +97,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_retained_message_store() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(RetainedMessageStore.class.getCanonicalName());
 
@@ -109,7 +109,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_client_service() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(ClientService.class.getCanonicalName());
 
@@ -121,7 +121,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_subscription_store() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(SubscriptionStore.class.getCanonicalName());
 
@@ -133,7 +133,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_plugin_executor_service() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(ManagedExtensionExecutorService.class.getCanonicalName());
 
@@ -145,7 +145,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_publish_service() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(PublishService.class.getCanonicalName());
 
@@ -157,7 +157,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_event_registry() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(EventRegistry.class.getCanonicalName());
 
@@ -169,7 +169,7 @@ public class PluginServicesDependenciesImplTest {
     public void test_map_contains_cluster_service() {
 
         final ImmutableMap<String, Object> dependenciesMap = pluginServicesDependencies.getDependenciesMap(
-                new IsolatedPluginClassloader(new URL[]{}, this.getClass().getClassLoader()));
+                new IsolatedExtensionClassloader(new URL[]{}, this.getClass().getClassLoader()));
 
         final Object o = dependenciesMap.get(ClusterService.class.getCanonicalName());
 

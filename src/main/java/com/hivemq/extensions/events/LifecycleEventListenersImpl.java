@@ -18,9 +18,9 @@ package com.hivemq.extensions.events;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,7 +50,7 @@ public class LifecycleEventListenersImpl implements LifecycleEventListeners {
     public LifecycleEventListenersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
         this.readWriteLock = new ReentrantReadWriteLock();
-        this.clientLifecycleEventListenerProviderMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.clientLifecycleEventListenerProviderMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
     }
 
     @Override

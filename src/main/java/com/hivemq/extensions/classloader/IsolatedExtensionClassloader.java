@@ -44,9 +44,9 @@ import java.util.List;
  * @author Dominik Obermaier
  * @author Georg Held
  */
-public class IsolatedPluginClassloader extends URLClassLoader {
+public class IsolatedExtensionClassloader extends URLClassLoader {
 
-    private static final Logger log = LoggerFactory.getLogger(IsolatedPluginClassloader.class);
+    private static final Logger log = LoggerFactory.getLogger(IsolatedExtensionClassloader.class);
 
     private final @Nullable ClassLoader delegate;
 
@@ -64,12 +64,12 @@ public class IsolatedPluginClassloader extends URLClassLoader {
             new ImmutableSet.Builder<String>().add(Services.class.getCanonicalName(), Builders.class.getCanonicalName())
                     .build();
 
-    public IsolatedPluginClassloader(@NotNull final URL[] classpath, @NotNull final ClassLoader parent) {
+    public IsolatedExtensionClassloader(@NotNull final URL[] classpath, @NotNull final ClassLoader parent) {
         super(classpath, parent);
         this.delegate = null;
     }
 
-    public IsolatedPluginClassloader(@NotNull final ClassLoader delegate, @NotNull final ClassLoader parent) {
+    public IsolatedExtensionClassloader(@NotNull final ClassLoader delegate, @NotNull final ClassLoader parent) {
         super(new URL[]{}, parent);
         this.delegate = delegate;
     }

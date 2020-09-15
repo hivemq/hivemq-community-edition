@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.config;
 
-import com.hivemq.extensions.HiveMQPluginEntity;
+import com.hivemq.extensions.HiveMQExtensionEntity;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,14 +45,14 @@ public class HiveMQExtensionXMLReaderTest {
                         "<priority>1000</priority>" +
                         "<author>Some Author</author>" +
                         "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQPluginEntity> optionalPluginEntityFromXML = HiveMQPluginXMLReader.getPluginEntityFromXML(pluginXML.toPath().getParent(), true);
+        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginXML.toPath().getParent(), true);
         assertTrue(optionalPluginEntityFromXML.isPresent());
-        final HiveMQPluginEntity hiveMQPluginEntity = optionalPluginEntityFromXML.get();
-        assertEquals("some-id", hiveMQPluginEntity.getId());
-        assertEquals("Some Name", hiveMQPluginEntity.getName());
-        assertEquals("1.0.0", hiveMQPluginEntity.getVersion());
-        assertEquals(1000, hiveMQPluginEntity.getPriority());
-        assertEquals("Some Author", hiveMQPluginEntity.getAuthor());
+        final HiveMQExtensionEntity hiveMQExtensionEntity = optionalPluginEntityFromXML.get();
+        assertEquals("some-id", hiveMQExtensionEntity.getId());
+        assertEquals("Some Name", hiveMQExtensionEntity.getName());
+        assertEquals("1.0.0", hiveMQExtensionEntity.getVersion());
+        assertEquals(1000, hiveMQExtensionEntity.getPriority());
+        assertEquals("Some Author", hiveMQExtensionEntity.getAuthor());
     }
 
     @Test(timeout = 5000)
@@ -64,7 +64,7 @@ public class HiveMQExtensionXMLReaderTest {
                         "<version>1.0.0</version>" +
                         "<priority>1000</priority>" +
                         "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQPluginEntity> optionalPluginEntityFromXML = HiveMQPluginXMLReader.getPluginEntityFromXML(pluginXML.toPath().getParent(), true);
+        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginXML.toPath().getParent(), true);
         assertFalse(optionalPluginEntityFromXML.isPresent());
     }
 }

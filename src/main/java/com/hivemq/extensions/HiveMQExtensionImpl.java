@@ -18,7 +18,7 @@ package com.hivemq.extensions;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class HiveMQExtensionImpl extends AbstractHiveMQExtension {
     private static final @NotNull Logger log = LoggerFactory.getLogger(HiveMQExtensionImpl.class);
 
     public HiveMQExtensionImpl(
-            final @NotNull HiveMQPluginEntity pluginEntity, final @NotNull Path pluginFolderPath,
+            final @NotNull HiveMQExtensionEntity pluginEntity, final @NotNull Path pluginFolderPath,
             final @NotNull ExtensionMain extensionMain, final boolean enabled) {
         super(pluginEntity.getId(), pluginEntity.getVersion(), pluginEntity.getName(),
                 pluginEntity.getAuthor(), pluginEntity.getPriority(),
@@ -43,8 +43,8 @@ public class HiveMQExtensionImpl extends AbstractHiveMQExtension {
     }
 
     @Override
-    public @Nullable IsolatedPluginClassloader getExtensionClassloader() {
-        return extensionMain != null ? (IsolatedPluginClassloader) extensionMain.getClass().getClassLoader() : null;
+    public @Nullable IsolatedExtensionClassloader getExtensionClassloader() {
+        return extensionMain != null ? (IsolatedExtensionClassloader) extensionMain.getClass().getClassLoader() : null;
     }
 
     @Override

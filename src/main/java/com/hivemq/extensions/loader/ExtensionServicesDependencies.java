@@ -15,21 +15,24 @@
  */
 package com.hivemq.extensions.loader;
 
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.exception.PluginLoadingException;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 /**
+ * Defines all dependencies which are accessible via {@link Services} in an extension
+ *
  * @author Christoph Schäbel
  */
-public interface PluginStaticInitializer {
+public interface ExtensionServicesDependencies {
 
     /**
-     * Initializes all the extension dependencies which are accessed via static context in the extension
-     * e.g. Services and Builders
-     *
-     * @param classLoader the {@link IsolatedPluginClassloader} for this extension
-     * @throws PluginLoadingException if this extensions static context can not be initialized
+     * @param classLoader the {@link IsolatedExtensionClassloader} for this extension
+     * @return a {@link ImmutableMap} which contains all dependencies which are accessible
+     * via {@link Services} in an extension
      */
-    void initialize(@NotNull String pluginId, @NotNull IsolatedPluginClassloader classLoader) throws PluginLoadingException;
+    @NotNull
+    ImmutableMap<String, Object> getDependenciesMap(@NotNull IsolatedExtensionClassloader classLoader);
+
 }

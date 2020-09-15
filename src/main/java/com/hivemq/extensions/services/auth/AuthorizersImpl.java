@@ -18,9 +18,9 @@ package com.hivemq.extensions.services.auth;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,7 +50,7 @@ public class AuthorizersImpl implements Authorizers {
     @Inject
     public AuthorizersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        this.authorizerProviderMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.authorizerProviderMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 

@@ -17,8 +17,8 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extensions.HiveMQExtensionEvent;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.HiveMQPluginEvent;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,9 +40,9 @@ import static org.mockito.Mockito.*;
  * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class PluginLifecycleHandlerImplTest {
+public class ExtensionLifecycleHandlerImplTest {
 
-    private PluginLifecycleHandlerImpl pluginLifecycleHandler;
+    private ExtensionLifecycleHandlerImpl pluginLifecycleHandler;
 
     ExecutorService pluginStartStopExecutor = Executors.newSingleThreadExecutor();
 
@@ -55,48 +55,48 @@ public class PluginLifecycleHandlerImplTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        pluginLifecycleHandler = new PluginLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor);
+        pluginLifecycleHandler = new ExtensionLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor);
     }
 
     @Test(timeout = 5000)
     public void test_handlePluginEvents_enable() throws ExecutionException, InterruptedException {
 
-        final ImmutableList<HiveMQPluginEvent> events =
-                ImmutableList.of(new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        final ImmutableList<HiveMQExtensionEvent> events =
+                ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension",
                         1,
                         temporaryFolder.getRoot().toPath(),
                         false));
 
-        pluginLifecycleHandler.handlePluginEvents(events).get();
+        pluginLifecycleHandler.handleExtensionEvents(events).get();
         verify(hiveMQExtensions).extensionStart(eq("test-extension"));
     }
 
     @Test(timeout = 5000)
     public void handlePluginEvents_inStartPriority() throws ExecutionException, InterruptedException {
-        final ImmutableList<HiveMQPluginEvent> events = ImmutableList.of(
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-100",
                         100,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-1",
                         1,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-10",
                         10,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-1000",
                         1000,
                         temporaryFolder.getRoot().toPath(),
                         false));
 
-        pluginLifecycleHandler.handlePluginEvents(events).get();
+        pluginLifecycleHandler.handleExtensionEvents(events).get();
 
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(hiveMQExtensions, times(4)).extensionStart(captor.capture());
@@ -112,29 +112,29 @@ public class PluginLifecycleHandlerImplTest {
     public void handlePluginEvents_inStartPriority_exception() throws ExecutionException, InterruptedException {
         when(hiveMQExtensions.extensionStart(eq("test-extension-100"))).thenThrow(new RuntimeException());
 
-        final ImmutableList<HiveMQPluginEvent> events = ImmutableList.of(
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+        final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-100",
                         100,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-1",
                         1,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-10",
                         10,
                         temporaryFolder.getRoot().toPath(),
                         false),
-                new HiveMQPluginEvent(HiveMQPluginEvent.Change.ENABLE,
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-1000",
                         1000,
                         temporaryFolder.getRoot().toPath(),
                         false));
 
-        pluginLifecycleHandler.handlePluginEvents(events).get();
+        pluginLifecycleHandler.handleExtensionEvents(events).get();
 
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(hiveMQExtensions, times(4)).extensionStart(captor.capture());
@@ -149,14 +149,14 @@ public class PluginLifecycleHandlerImplTest {
     @Test(timeout = 5000)
     public void test_handlePluginEvents_disable() throws ExecutionException, InterruptedException {
 
-        final ImmutableList<HiveMQPluginEvent> events =
-                ImmutableList.of(new HiveMQPluginEvent(HiveMQPluginEvent.Change.DISABLE,
+        final ImmutableList<HiveMQExtensionEvent> events =
+                ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE,
                         "test-extension",
                         1,
                         temporaryFolder.getRoot().toPath(),
                         false));
 
-        pluginLifecycleHandler.handlePluginEvents(events).get();
+        pluginLifecycleHandler.handleExtensionEvents(events).get();
 
         verify(hiveMQExtensions).extensionStop(eq("test-extension"), eq(false));
     }

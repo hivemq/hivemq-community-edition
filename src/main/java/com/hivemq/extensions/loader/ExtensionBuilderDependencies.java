@@ -18,7 +18,7 @@ package com.hivemq.extensions.loader;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.function.Supplier;
 
@@ -27,14 +27,14 @@ import java.util.function.Supplier;
  *
  * @author Christoph Schäbel
  */
-public interface PluginBuilderDependencies {
+public interface ExtensionBuilderDependencies {
 
     /**
-     * @param classLoader the {@link IsolatedPluginClassloader} for this extension
+     * @param classLoader the {@link IsolatedExtensionClassloader} for this extension
      * @return a {@link ImmutableMap} which contains all dependencies which are accessible
      * via {@link Builders} in an extension
      */
     @NotNull
-    ImmutableMap<String, Supplier<Object>> getDependenciesMap(@NotNull IsolatedPluginClassloader classLoader);
+    ImmutableMap<String, Supplier<Object>> getDependenciesMap(@NotNull IsolatedExtensionClassloader classLoader);
 
 }

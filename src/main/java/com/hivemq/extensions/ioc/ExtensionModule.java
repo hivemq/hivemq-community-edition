@@ -17,7 +17,6 @@ package com.hivemq.extensions.ioc;
 
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
@@ -30,8 +29,8 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
-import com.hivemq.extensions.PluginBootstrap;
-import com.hivemq.extensions.PluginBootstrapImpl;
+import com.hivemq.extensions.ExtensionBootstrap;
+import com.hivemq.extensions.ExtensionBootstrapImpl;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.events.EventRegistryImpl;
 import com.hivemq.extensions.events.LifecycleEventListeners;
@@ -61,12 +60,9 @@ import com.hivemq.extensions.services.publish.PublishServiceImpl;
 import com.hivemq.extensions.services.publish.RetainedMessageStoreImpl;
 import com.hivemq.extensions.services.session.ClientServiceImpl;
 import com.hivemq.extensions.services.subscription.SubscriptionStoreImpl;
-import com.hivemq.util.ThreadFactoryUtil;
 
 import javax.inject.Singleton;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -81,12 +77,12 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
     @Override
     protected void configure() {
 
-        bind(PluginBootstrap.class).to(PluginBootstrapImpl.class);
-        bind(PluginStaticInitializer.class).to(PluginStaticInitializerImpl.class);
-        bind(HiveMQPluginFactory.class).to(HiveMQPluginFactoryImpl.class);
-        bind(PluginLoader.class).to(PluginLoaderImpl.class);
-        bind(PluginServicesDependencies.class).to(PluginServicesDependenciesImpl.class);
-        bind(PluginLifecycleHandler.class).to(PluginLifecycleHandlerImpl.class);
+        bind(ExtensionBootstrap.class).to(ExtensionBootstrapImpl.class);
+        bind(ExtensionStaticInitializer.class).to(ExtensionStaticInitializerImpl.class);
+        bind(HiveMQExtensionFactory.class).to(HiveMQExtensionFactoryImpl.class);
+        bind(ExtensionLoader.class).to(ExtensionLoaderImpl.class);
+        bind(ExtensionServicesDependencies.class).to(ExtensionServicesDependenciesImpl.class);
+        bind(ExtensionLifecycleHandler.class).to(ExtensionLifecycleHandlerImpl.class);
         bind(Authenticators.class).to(AuthenticatorsImpl.class);
         bind(Authorizers.class).to(AuthorizersImpl.class);
         bind(SecurityRegistry.class).to(SecurityRegistryImpl.class);
@@ -113,7 +109,7 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
 
         bind(TopicPermissionBuilder.class).to(TopicPermissionBuilderImpl.class);
 
-        bind(PluginBuilderDependencies.class).to(PluginBuilderDependenciesImpl.class);
+        bind(ExtensionBuilderDependencies.class).to(ExtensionBuilderDependenciesImpl.class);
 
         bind(PublishService.class).to(PublishServiceImpl.class).in(LazySingleton.class);
         bind(PublishBuilder.class).to(PublishBuilderImpl.class);

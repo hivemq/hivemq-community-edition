@@ -19,8 +19,8 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.exception.PluginLoadingException;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.extensions.exception.ExtensionLoadingException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,25 +33,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Christoph Schäbel
  */
 @Singleton
-public class PluginStaticInitializerImpl implements PluginStaticInitializer {
+public class ExtensionStaticInitializerImpl implements ExtensionStaticInitializer {
 
     private static final String SERVICES_CLASS = Services.class.getCanonicalName();
     private static final String BUILDERS_CLASS = Builders.class.getCanonicalName();
 
     @NotNull
-    private final PluginServicesDependencies servicesDependencies;
+    private final ExtensionServicesDependencies servicesDependencies;
 
     @NotNull
-    private final PluginBuilderDependencies pluginBuilderDependencies;
+    private final ExtensionBuilderDependencies builderDependencies;
 
     @Inject
-    public PluginStaticInitializerImpl(@NotNull final PluginServicesDependencies servicesDependencies,
-                                       @NotNull final PluginBuilderDependencies pluginBuilderDependencies) {
+    public ExtensionStaticInitializerImpl(@NotNull final ExtensionServicesDependencies servicesDependencies,
+                                          @NotNull final ExtensionBuilderDependencies builderDependencies) {
         this.servicesDependencies = servicesDependencies;
-        this.pluginBuilderDependencies = pluginBuilderDependencies;
+        this.builderDependencies = builderDependencies;
     }
 
-    public void initialize(@NotNull final String pluginId, @NotNull final IsolatedPluginClassloader classLoader) throws PluginLoadingException {
+    public void initialize(@NotNull final String pluginId, @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
         checkNotNull(pluginId, "extension id must not be null");
         checkNotNull(classLoader, "classLoader must not be null");
 
@@ -60,7 +60,7 @@ public class PluginStaticInitializerImpl implements PluginStaticInitializer {
     }
 
     private void initializeServices(@NotNull final String pluginId,
-                                    @NotNull final IsolatedPluginClassloader classLoader) throws PluginLoadingException {
+                                    @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
 
         try {
 
@@ -71,13 +71,13 @@ public class PluginStaticInitializerImpl implements PluginStaticInitializer {
             servicesField.set(null, dependencies);
 
         } catch (final Exception e) {
-            throw new PluginLoadingException("Not able to initialize Services for extension with id " + pluginId, e);
+            throw new ExtensionLoadingException("Not able to initialize Services for extension with id " + pluginId, e);
         }
 
     }
 
     private void initializeBuilders(@NotNull final String pluginId,
-                                    @NotNull final IsolatedPluginClassloader classLoader) throws PluginLoadingException {
+                                    @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
 
         try {
 
@@ -85,11 +85,11 @@ public class PluginStaticInitializerImpl implements PluginStaticInitializer {
             final Field buildersField = buildersClass.getDeclaredField("builders");
             buildersField.setAccessible(true);
             final ImmutableMap<String, Supplier<Object>> dependencies =
-                    pluginBuilderDependencies.getDependenciesMap(classLoader);
+                    builderDependencies.getDependenciesMap(classLoader);
             buildersField.set(null, dependencies);
 
         } catch (final Exception e) {
-            throw new PluginLoadingException("Not able to initialize Builders for extension with id " + pluginId, e);
+            throw new ExtensionLoadingException("Not able to initialize Builders for extension with id " + pluginId, e);
         }
 
     }

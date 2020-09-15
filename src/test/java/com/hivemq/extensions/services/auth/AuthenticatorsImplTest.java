@@ -19,9 +19,7 @@ import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
-import com.hivemq.extensions.handler.PluginAuthenticatorService;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,7 +29,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
 /**
@@ -58,19 +57,19 @@ public class AuthenticatorsImplTest {
     private WrappedAuthenticatorProvider simpleProvider2;
 
     private AuthenticatorsImpl authenticators;
-    private IsolatedPluginClassloader isolatedPluginClassloader1;
-    private IsolatedPluginClassloader isolatedPluginClassloader2;
+    private IsolatedExtensionClassloader isolatedExtensionClassloader1;
+    private IsolatedExtensionClassloader isolatedExtensionClassloader2;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
 
-        isolatedPluginClassloader1 = new IsolatedPluginClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
-        isolatedPluginClassloader2 = new IsolatedPluginClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
+        isolatedExtensionClassloader1 = new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
+        isolatedExtensionClassloader2 = new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
 
-        when(hiveMQExtensions.getExtensionForClassloader(isolatedPluginClassloader1)).thenReturn(extension1);
-        when(hiveMQExtensions.getExtensionForClassloader(isolatedPluginClassloader2)).thenReturn(extension2);
+        when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader1)).thenReturn(extension1);
+        when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader2)).thenReturn(extension2);
 
         when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
         when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
@@ -81,8 +80,8 @@ public class AuthenticatorsImplTest {
         when(extension1.getId()).thenReturn("extension1");
         when(extension2.getId()).thenReturn("extension2");
 
-        simpleProvider1 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator1, isolatedPluginClassloader1);
-        simpleProvider2 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2, isolatedPluginClassloader2);
+        simpleProvider1 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator1, isolatedExtensionClassloader1);
+        simpleProvider2 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2, isolatedExtensionClassloader2);
         simpleProvider1.setCheckThreading(false);
         simpleProvider2.setCheckThreading(false);
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
