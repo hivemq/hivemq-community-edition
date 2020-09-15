@@ -154,11 +154,18 @@ public class PublishTopicTree {
         public Set<String> get(
                 @NotNull final ArrayList<String> subTopics, @Nullable final String currentTopic, final boolean getAll) {
             if (childNodes == null && child == null) {
-                if (currentTopic == null || (!subTopics.isEmpty() && !getAll)) {
+                if (currentTopic == null) {
                     return ImmutableSet.of();
                 }
-
-                return ImmutableSet.of(currentTopic);
+                if (subTopics.isEmpty() || getAll) {
+                    return ImmutableSet.of(currentTopic);
+                }
+                final String currentSubTopic = subTopics.get(0);
+                if (currentSubTopic.equals("#")) {
+                    // x/y/z matches x/y/z/#
+                    return ImmutableSet.of(currentTopic);
+                }
+                return ImmutableSet.of();
             }
             final Set<String> result = new HashSet<>();
 
@@ -169,7 +176,8 @@ public class PublishTopicTree {
                 return result;
             }
             final String currentSubTopic = subTopics.get(0);
-            if (getAll && directMatch) {
+            if ((getAll || currentSubTopic.equals("#")) && directMatch) {
+                // x/y/z matches x/y/z/#
                 result.add(currentTopic);
             }
 
