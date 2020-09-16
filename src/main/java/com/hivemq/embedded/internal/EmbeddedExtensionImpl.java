@@ -31,7 +31,7 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
     private final int startPriority;
     private final @NotNull ExtensionMain extensionMain;
 
-    public EmbeddedExtensionImpl(
+    EmbeddedExtensionImpl(
             final @NotNull String id,
             final @NotNull String name,
             final @NotNull String version,
