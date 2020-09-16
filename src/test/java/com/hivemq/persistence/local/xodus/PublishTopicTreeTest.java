@@ -254,6 +254,7 @@ public class PublishTopicTreeTest {
         assertEquals(0, results.size());
 
         tree.add("a/b/");
+        tree.add("a/b");
         results = tree.get("a/b/+");
         assertEquals(1, results.size());
         assertTrue(results.contains("a/b/"));
