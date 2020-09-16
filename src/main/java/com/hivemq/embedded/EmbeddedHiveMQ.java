@@ -16,6 +16,7 @@
 package com.hivemq.embedded;
 
 import com.codahale.metrics.MetricRegistry;
+import com.hivemq.embedded.internal.EmbeddedHiveMQBuilderImpl;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
@@ -27,6 +28,13 @@ import java.util.concurrent.ExecutionException;
 @ThreadSafe
 public interface EmbeddedHiveMQ extends AutoCloseable {
 
+    /**
+     * @return a new EmbeddedHiveMQBuilder.
+     */
+    static @NotNull EmbeddedHiveMQBuilder builder() {
+        return new EmbeddedHiveMQBuilderImpl();
+    }
+    
     /**
      * Start an EmbeddedHiveMQ.
      * <p>

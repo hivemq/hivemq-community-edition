@@ -16,6 +16,7 @@
 
 package com.hivemq.embedded;
 
+import com.hivemq.embedded.internal.EmbeddedExtensionBuilderImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -32,6 +33,14 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
  */
 @DoNotImplement
 public interface EmbeddedExtension {
+
+    /**
+     * @return a new EmbeddedExtensionBuilder.
+     * @since CE 2020.5
+     */
+    static @NotNull EmbeddedExtensionBuilder builder() {
+        return new EmbeddedExtensionBuilderImpl();
+    }
 
     /**
      * @return The unique ID of the extension.

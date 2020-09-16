@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-public class EmbeddedExtensionImpl implements EmbeddedExtension {
+class EmbeddedExtensionImpl implements EmbeddedExtension {
 
     private final @NotNull String id;
     private final @NotNull String name;
