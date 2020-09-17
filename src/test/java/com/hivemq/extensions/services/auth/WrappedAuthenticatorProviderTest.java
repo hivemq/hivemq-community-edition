@@ -90,16 +90,4 @@ public class WrappedAuthenticatorProviderTest {
         assertNull(wrappedAuthenticatorProvider.getAuthenticator(input));
     }
 
-    @Test(timeout = 5000)
-    public void test_enhanced_provider_bad_threading() {
-        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider = new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) i -> enhancedAuthenticator, isolatedExtensionClassloader);
-        assertNull(wrappedAuthenticatorProvider.getEnhancedAuthenticator(input));
-    }
-
-    @Test(timeout = 5000)
-    public void test_simple_provider_bad_threading() {
-        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator, isolatedExtensionClassloader);
-        assertNull(wrappedAuthenticatorProvider.getAuthenticator(input));
-    }
-
 }
