@@ -26,9 +26,11 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
-import com.hivemq.extensions.PluginBootstrap;
+import com.hivemq.extensions.ExtensionBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
 import com.hivemq.metrics.MetricRegistryLogger;
 import com.hivemq.migration.MigrationUnit;
@@ -61,28 +63,28 @@ public class HiveMQServer {
 
     private final @NotNull HiveMQNettyBootstrap nettyBootstrap;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
-    private final @NotNull PluginBootstrap pluginBootstrap;
+    private final @NotNull ExtensionBootstrap extensionBootstrap;
     private final @NotNull AdminService adminService;
 
     @Inject
     HiveMQServer(
             final @NotNull HiveMQNettyBootstrap nettyBootstrap,
             final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull PluginBootstrap pluginBootstrap,
+            final @NotNull ExtensionBootstrap extensionBootstrap,
             final @NotNull AdminService adminService) {
 
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
-        this.pluginBootstrap = pluginBootstrap;
+        this.extensionBootstrap = extensionBootstrap;
         this.adminService = adminService;
     }
 
-    public void start() throws Exception {
+    public void start(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
 
         payloadPersistence.init();
 
-        final CompletableFuture<Void> pluginStartFuture = pluginBootstrap.startPluginSystem();
-        pluginStartFuture.get();
+        final CompletableFuture<Void> extensionStartFuture = extensionBootstrap.startExtensionSystem(embeddedExtension);
+        extensionStartFuture.get();
 
         final ListenableFuture<List<ListenerStartupInformation>> startFuture = nettyBootstrap.bootstrapServer();
 
@@ -184,7 +186,7 @@ public class HiveMQServer {
         /* It's important that we are modifying the log levels after Guice is initialized,
         otherwise this somehow interferes with Singleton creation */
         LoggingBootstrap.addLoglevelModifiers();
-        instance.start();
+        instance.start(null);
 
         if (ShutdownHooks.SHUTTING_DOWN.get()) {
             return;

@@ -16,13 +16,13 @@
 package com.hivemq.extensions.client;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.annotations.GuardedBy;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.PublishAuthorizer;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.ExtensionPriorityComparator;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +44,9 @@ public class ClientAuthorizersImpl implements ClientAuthorizers {
     private final @NotNull Map<String, SubscriptionAuthorizer> subscriptionAuthorizerMap;
     private final @NotNull Map<String, PublishAuthorizer> publishAuthorizerMap;
 
-    public ClientAuthorizersImpl(final @NotNull PluginPriorityComparator pluginPriorityComparator) {
-        this.subscriptionAuthorizerMap = new TreeMap<>(pluginPriorityComparator);
-        this.publishAuthorizerMap = new TreeMap<>(pluginPriorityComparator);
+    public ClientAuthorizersImpl(final @NotNull ExtensionPriorityComparator extensionPriorityComparator) {
+        this.subscriptionAuthorizerMap = new TreeMap<>(extensionPriorityComparator);
+        this.publishAuthorizerMap = new TreeMap<>(extensionPriorityComparator);
         this.authorizerLock = new ReentrantReadWriteLock();
     }
 
@@ -67,7 +67,7 @@ public class ClientAuthorizersImpl implements ClientAuthorizers {
     }
 
     @Override
-    public void removeAllForPlugin(final @NotNull IsolatedPluginClassloader pluginClassLoader) {
+    public void removeAllForPlugin(final @NotNull IsolatedExtensionClassloader pluginClassLoader) {
         final Lock lock = authorizerLock.writeLock();
         lock.lock();
         try {

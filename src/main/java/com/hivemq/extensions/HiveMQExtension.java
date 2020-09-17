@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.nio.file.Path;
 
@@ -101,17 +100,17 @@ public interface HiveMQExtension {
     /**
      * @return the {@link Class} of the extension's implementation of the {@link ExtensionMain} class
      */
-    @Nullable Class<? extends ExtensionMain> getPluginMainClazz();
+    @Nullable Class<? extends ExtensionMain> getExtensionMainClazz();
 
     /**
-     * @return the {@link IsolatedPluginClassloader} used to load the {@link ExtensionMain} class
+     * @return the {@link ClassLoader} used to load the {@link ExtensionMain} class
      */
-    @Nullable IsolatedPluginClassloader getPluginClassloader();
+    @Nullable ClassLoader getExtensionClassloader();
 
     /**
      * @return the path to the extension's folder
      */
-    @NotNull Path getPluginFolderPath();
+    @NotNull Path getExtensionFolderPath();
 
     /**
      * @return the previously enabled version of the extension, or null if no previous version was enabled
@@ -125,4 +124,10 @@ public interface HiveMQExtension {
      */
     void setPreviousVersion(@Nullable String previousVersion);
 
+    /**
+     * is it an embedded extension or not?
+     *
+     * @return true for embedded else false
+     */
+    boolean isEmbedded();
 }

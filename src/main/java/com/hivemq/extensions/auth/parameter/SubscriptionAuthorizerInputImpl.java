@@ -22,7 +22,7 @@ import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.subscribe.SubscriptionImpl;
 import com.hivemq.mqtt.message.subscribe.Topic;
@@ -62,8 +62,8 @@ public class SubscriptionAuthorizerInputImpl implements SubscriptionAuthorizerIn
 
         this.subscription = new SubscriptionImpl(topic);
 
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     @Override

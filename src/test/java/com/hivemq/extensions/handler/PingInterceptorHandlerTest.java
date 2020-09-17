@@ -15,8 +15,8 @@
  */
 package com.hivemq.extensions.handler;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.PingReqInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.parameter.PingReqInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.pingreq.parameter.PingReqInboundOutput;
@@ -25,7 +25,7 @@ import com.hivemq.extension.sdk.api.interceptor.pingresp.parameter.PingRespOutbo
 import com.hivemq.extension.sdk.api.interceptor.pingresp.parameter.PingRespOutboundOutput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
@@ -128,10 +128,10 @@ public class PingInterceptorHandlerTest {
         final PingReqInboundInterceptor interceptor = getIsolatedInboundInterceptor("SimplePingReqTestInterceptor");
         clientContext.addPingReqInboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new PINGREQ());
         PINGREQ pingreq = channel.readInbound();
@@ -155,10 +155,10 @@ public class PingInterceptorHandlerTest {
                 getIsolatedInboundInterceptor("AdvancedPingReqTestInterceptor");
         clientContext.addPingReqInboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new PINGREQ());
         PINGREQ pingreq = channel.readInbound();
@@ -181,10 +181,10 @@ public class PingInterceptorHandlerTest {
                 getIsolatedOutboundInterceptor("SimplePingRespTestInterceptor");
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeOutbound(new PINGRESP());
         PINGRESP pingresp = channel.readOutbound();
@@ -207,10 +207,10 @@ public class PingInterceptorHandlerTest {
                 getIsolatedOutboundInterceptor("AdvancedPingRespTestInterceptor");
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeOutbound(new PINGRESP());
         PINGRESP pingresp = channel.readOutbound();
@@ -232,9 +232,9 @@ public class PingInterceptorHandlerTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-        final IsolatedPluginClassloader
+        final IsolatedExtensionClassloader
                 cl =
-                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> interceptorClass =
                 cl.loadClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);
@@ -254,9 +254,9 @@ public class PingInterceptorHandlerTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-        final IsolatedPluginClassloader
+        final IsolatedExtensionClassloader
                 cl =
-                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> interceptorClass =
                 cl.loadClass("com.hivemq.extensions.handler.PingInterceptorHandlerTest$" + name);

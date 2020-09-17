@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.embedded.internal;
 
 import com.codahale.metrics.MetricFilter;
@@ -29,6 +30,7 @@ import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -53,6 +55,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private final @NotNull MetricRegistry metricRegistry;
     @VisibleForTesting
     final @NotNull ExecutorService stateChangeExecutor;
+    private final @Nullable EmbeddedExtension embeddedExtension;
     private @Nullable FullConfigurationService configurationService;
     private @Nullable Injector injector;
 
@@ -66,7 +69,15 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     EmbeddedHiveMQImpl(
             final @Nullable File conf, final @Nullable File data, final @Nullable File extensions) {
+        this(conf, data, extensions, null);
+    }
 
+    EmbeddedHiveMQImpl(
+            final @Nullable File conf,
+            final @Nullable File data,
+            final @Nullable File extensions,
+            final @Nullable EmbeddedExtension embeddedExtension) {
+        this.embeddedExtension = embeddedExtension;
 
         log.info("Setting default authentication behavior to ALLOW ALL");
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
@@ -93,7 +104,6 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     }
 
     private enum State {
-
         RUNNING,
         STOPPED,
         FAILED,
@@ -146,7 +156,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
                     bootstrapInjector();
                     final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
-                    hiveMQServer.start();
+
+                    hiveMQServer.start(embeddedExtension);
 
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
                     succeedFutureList(localStartFutures);

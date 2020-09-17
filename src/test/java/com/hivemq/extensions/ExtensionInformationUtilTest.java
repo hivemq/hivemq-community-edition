@@ -60,7 +60,7 @@ public class ExtensionInformationUtilTest {
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
 
-        assertNull(PluginInformationUtil.getTlsInformationFromChannel(channel));
+        assertNull(ExtensionInformationUtil.getTlsInformationFromChannel(channel));
 
     }
 
@@ -86,7 +86,7 @@ public class ExtensionInformationUtilTest {
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
 
-        assertNull(PluginInformationUtil.getTlsInformationFromChannel(channel));
+        assertNull(ExtensionInformationUtil.getTlsInformationFromChannel(channel));
 
     }
 

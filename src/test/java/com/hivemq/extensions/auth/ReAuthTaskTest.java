@@ -21,13 +21,9 @@ import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.auth.AuthInput;
-import com.hivemq.extensions.auth.AuthenticationState;
-import com.hivemq.extensions.auth.ReAuthOutput;
-import com.hivemq.extensions.auth.ReAuthTask;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.ClientAuthenticatorsImpl;
 import com.hivemq.extensions.packets.auth.AuthPacketImpl;
 import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
@@ -68,7 +64,7 @@ public class ReAuthTaskTest {
     private ReAuthTask authTask;
     @Mock
     private AuthenticatorProviderInput authenticatorProviderInput;
-    private IsolatedPluginClassloader classloader;
+    private IsolatedExtensionClassloader classloader;
     @Mock
     private HiveMQExtensions extensions;
 
@@ -85,7 +81,7 @@ public class ReAuthTaskTest {
         enhancedAuthenticator = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestAuthenticator.class);
 
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(enhancedAuthenticator);
-        authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new PluginPriorityComparator(extensions)));
+        authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new ExtensionPriorityComparator(extensions)));
     }
 
     @Test(timeout = 5000)

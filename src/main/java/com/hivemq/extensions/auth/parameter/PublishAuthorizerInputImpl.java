@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.PublishAuthorizerInput;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 import com.hivemq.extensions.packets.publish.WillPublishPacketImpl;
@@ -48,8 +48,8 @@ public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, Plugi
         Preconditions.checkNotNull(clientId, "clientId must never be null");
 
         this.publishPacket = new PublishPacketImpl(publish);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     public PublishAuthorizerInputImpl(final @NotNull MqttWillPublish publish, final @NotNull Channel channel, final @NotNull String clientId) {
@@ -60,8 +60,8 @@ public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, Plugi
         final Long timestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
                 System.currentTimeMillis());
         this.publishPacket = new WillPublishPacketImpl(publish, timestamp);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     @NotNull

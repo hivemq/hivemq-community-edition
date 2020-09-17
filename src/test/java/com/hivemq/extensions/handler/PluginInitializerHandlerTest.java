@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
@@ -96,13 +96,13 @@ public class PluginInitializerHandlerTest {
     private InitializersImpl initializers;
 
     @Mock
-    private IsolatedPluginClassloader classloader1;
+    private IsolatedExtensionClassloader classloader1;
 
     @Mock
     private HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private HiveMQExtension plugin;
+    private HiveMQExtension hiveMQExtension;
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;
@@ -128,6 +128,9 @@ public class PluginInitializerHandlerTest {
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
+
+        when(hiveMQExtensions.getExtensionForClassloader(any(ClassLoader.class))).thenReturn(hiveMQExtension);
+        when(hiveMQExtension.getExtensionClassloader()).thenReturn(classloader1);
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,
@@ -282,7 +285,7 @@ public class PluginInitializerHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
 
@@ -292,7 +295,7 @@ public class PluginInitializerHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl2 = new IsolatedPluginClassloader(new URL[]{jarFile2.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
 

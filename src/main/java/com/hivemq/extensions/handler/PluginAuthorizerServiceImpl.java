@@ -23,8 +23,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.auth.parameter.*;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientAuthorizersImpl;
@@ -72,7 +72,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
     private final @NotNull Mqtt3ServerDisconnector mqtt3Disconnector;
     private final @NotNull Mqtt5ServerDisconnector mqtt5Disconnector;
     private final @NotNull EventLog eventLog;
-    private final @NotNull PluginPriorityComparator pluginPriorityComparator;
+    private final @NotNull ExtensionPriorityComparator extensionPriorityComparator;
     private final @NotNull IncomingPublishService incomingPublishService;
 
     private final boolean allowDollarTopics;
@@ -97,7 +97,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.mqtt5Disconnector = mqtt5Disconnector;
         this.eventLog = eventLog;
         this.incomingPublishService = incomingPublishService;
-        this.pluginPriorityComparator = new PluginPriorityComparator(hiveMQExtensions);
+        this.extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
         this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
     }
 
@@ -288,11 +288,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     @NotNull
     private ClientAuthorizers getClientAuthorizers(final @NotNull ChannelHandlerContext ctx) {
-        ClientAuthorizers clientAuthorizers = ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get();
+        ClientAuthorizers clientAuthorizers = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get();
         if (clientAuthorizers == null) {
 
-            clientAuthorizers = new ClientAuthorizersImpl(pluginPriorityComparator);
-            ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).set(clientAuthorizers);
+            clientAuthorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
+            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).set(clientAuthorizers);
         }
         return clientAuthorizers;
     }

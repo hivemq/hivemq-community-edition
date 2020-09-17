@@ -36,7 +36,7 @@ import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -296,13 +296,13 @@ public class ClientContextImplTest {
         final HiveMQExtension extension2 = mock(HiveMQExtension.class);
         final HiveMQExtension extension3 = mock(HiveMQExtension.class);
         when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedPluginClassloader) interceptor1.getClass().getClassLoader()))
+                (IsolatedExtensionClassloader) interceptor1.getClass().getClassLoader()))
                 .thenReturn(extension1);
         when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedPluginClassloader) interceptor2.getClass().getClassLoader()))
+                (IsolatedExtensionClassloader) interceptor2.getClass().getClassLoader()))
                 .thenReturn(extension2);
         when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedPluginClassloader) interceptor3.getClass().getClassLoader()))
+                (IsolatedExtensionClassloader) interceptor3.getClass().getClassLoader()))
                 .thenReturn(extension3);
         when(extension1.getPriority()).thenReturn(1);
         when(extension2.getPriority()).thenReturn(2);

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -41,7 +41,8 @@ public class InterceptorsImpl implements Interceptors {
     private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInboundInterceptorProviderMap;
 
     @NotNull
-    private final Map<@NotNull String, @NotNull ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviderMap;
+    private final Map<@NotNull String, @NotNull ConnackOutboundInterceptorProvider>
+            connackOutboundInterceptorProviderMap;
 
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
@@ -52,12 +53,12 @@ public class InterceptorsImpl implements Interceptors {
     @Inject
     public InterceptorsImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        final PluginPriorityComparator pluginPriorityComparator = new PluginPriorityComparator(hiveMQExtensions);
-        this.connectInboundInterceptorProviderMap = new TreeMap<>(pluginPriorityComparator);
-        this.connackOutboundInterceptorProviderMap = new TreeMap<>(pluginPriorityComparator);
+        final ExtensionPriorityComparator extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
+        this.connectInboundInterceptorProviderMap = new TreeMap<>(extensionPriorityComparator);
+        this.connackOutboundInterceptorProviderMap = new TreeMap<>(extensionPriorityComparator);
         this.readWriteLock = new ReentrantReadWriteLock();
         hiveMQExtensions.addAfterExtensionStopCallback(hiveMQExtension -> {
-            final IsolatedPluginClassloader pluginClassloader = hiveMQExtension.getPluginClassloader();
+            final ClassLoader pluginClassloader = hiveMQExtension.getExtensionClassloader();
             if (pluginClassloader != null) {
                 removeInterceptors(hiveMQExtension.getId());
             }
@@ -73,8 +74,7 @@ public class InterceptorsImpl implements Interceptors {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) provider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = provider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 
@@ -108,8 +108,7 @@ public class InterceptorsImpl implements Interceptors {
 
         try {
 
-            final IsolatedPluginClassloader pluginClassloader =
-                    (IsolatedPluginClassloader) provider.getClass().getClassLoader();
+            final ClassLoader pluginClassloader = provider.getClass().getClassLoader();
 
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
 

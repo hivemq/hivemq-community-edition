@@ -26,8 +26,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
 import com.hivemq.extensions.auth.*;
 import com.hivemq.extensions.auth.parameter.AuthenticatorProviderInputImpl;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
@@ -85,7 +85,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull ServerInformation serverInformation;
-    private final @NotNull PluginPriorityComparator priorityComparator;
+    private final @NotNull ExtensionPriorityComparator priorityComparator;
     private final boolean validateUTF8;
     private final int timeout;
 
@@ -111,7 +111,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         this.asyncer = asyncer;
         this.pluginTaskExecutorService = pluginTaskExecutorService;
         this.authSender = authSender;
-        this.priorityComparator = new PluginPriorityComparator(extensions);
+        this.priorityComparator = new ExtensionPriorityComparator(extensions);
         this.serverInformation = serverInformation;
         this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT.get();
         this.validateUTF8 = configurationService.securityConfiguration().validateUTF8();
@@ -308,10 +308,10 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {
-        ClientAuthenticators clientAuthenticators = ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_AUTHENTICATORS).get();
+        ClientAuthenticators clientAuthenticators = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHENTICATORS).get();
         if (clientAuthenticators == null) {
             clientAuthenticators = new ClientAuthenticatorsImpl(priorityComparator);
-            ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_AUTHENTICATORS).set(clientAuthenticators);
+            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHENTICATORS).set(clientAuthenticators);
         }
         return clientAuthenticators;
     }

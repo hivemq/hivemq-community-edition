@@ -279,17 +279,17 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<ConnectionStartInputImpl> connectEventTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
             pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, connectionStartInput, connectEventTask);
-            ctx.channel().attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).setIfAbsent(true);
+            ctx.channel().attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).setIfAbsent(true);
         }
 
     }
 
     @NotNull
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
-        ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_EVENT_LISTENERS).get();
+        ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_EVENT_LISTENERS).get();
         if (eventListeners == null) {
             eventListeners = new ClientEventListeners(hiveMQExtensions);
-            ctx.channel().attr(ChannelAttributes.PLUGIN_CLIENT_EVENT_LISTENERS).set(eventListeners);
+            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_EVENT_LISTENERS).set(eventListeners);
         }
         return eventListeners;
     }

@@ -21,11 +21,14 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
-import com.hivemq.extension.sdk.api.events.client.parameters.*;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.events.*;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
@@ -83,7 +86,7 @@ public class ClientLifecycleEventHandlerTest {
     private LifecycleEventListeners lifecycleEventListeners;
 
     @Mock
-    private IsolatedPluginClassloader classloader1;
+    private IsolatedExtensionClassloader classloader1;
 
     @Mock
     private HiveMQExtensions hiveMQExtensions;
@@ -402,7 +405,7 @@ public class ClientLifecycleEventHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> providerClass = cl.loadClass("com.hivemq.extensions.handler.testextensions.TestProvider");
 

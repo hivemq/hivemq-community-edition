@@ -61,7 +61,7 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
@@ -77,7 +77,7 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel_with_reason_code() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));
@@ -93,7 +93,7 @@ public class MqttDisconnectUtilTest {
     public void test_disconnect_channel_with_reason_code_and_reason_string() throws InterruptedException {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch));

@@ -24,8 +24,8 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
+import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.client.ClientContextPluginImpl;
 import com.hivemq.extensions.client.parameter.InitializerInputImpl;
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.nio.channels.ClosedChannelException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This handler initializes all client initializers at CONNECT for every running extension,
@@ -150,13 +151,20 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         for (final Map.Entry<String, ClientInitializer> initializerEntry : pluginInitializerMap.entrySet()) {
 
+            final ClientInitializer initializer = initializerEntry.getValue();
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
+            if(extension == null || extension.getExtensionClassloader() == null) {
+                taskContext.finishInitializer();
+                continue;
+            }
+
             pluginTaskExecutorService.handlePluginInOutTaskExecution(
                     taskContext,
                     () -> initializerInput,
                     () -> new ClientContextPluginImpl(
-                            (IsolatedPluginClassloader) initializerEntry.getValue().getClass().getClassLoader(),
+                            extension.getExtensionClassloader(),
                             clientContext),
-                    new InitializeTask(initializerEntry.getValue(), initializerEntry.getKey())
+                    new InitializeTask(initializer, initializerEntry.getKey())
             );
 
         }
@@ -248,7 +256,8 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         private final int initializerSize;
 
-        private int counter = 0;
+        @NotNull
+        private final AtomicInteger counter = new AtomicInteger(0);
 
         MultiInitializerTaskContext(
                 final @NotNull String clientId,
@@ -266,10 +275,14 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
 
         @Override
         public void pluginPost(final @NotNull ClientContextPluginImpl pluginContext) {
+            finishInitializer();
+        }
+
+        public void finishInitializer(){
             try {
-                if (++counter == initializerSize) {
+                if (counter.incrementAndGet() == initializerSize) {
                     //update the clients context when all initializers are initialized.
-                    channelHandlerContext.channel().attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+                    channelHandlerContext.channel().attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
                     channelHandlerContext.channel()
                             .attr(ChannelAttributes.AUTH_PERMISSIONS)
                             .set(clientContext.getDefaultPermissions());

@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -352,7 +352,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         assertEquals(2,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -377,7 +377,7 @@ public class PluginAuthorizerServiceImplTest {
         channel.runScheduledPendingTasks();
 
         assertEquals(2,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 5000)
@@ -397,7 +397,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
-        while (channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 1) {
+        while (channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 1) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             Thread.sleep(100);
@@ -407,7 +407,7 @@ public class PluginAuthorizerServiceImplTest {
         assertFalse(authorizeLatch2.await(0, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -426,14 +426,14 @@ public class PluginAuthorizerServiceImplTest {
         clearHandlers();
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
-        while (channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 2) {
+        while (channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 2) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             Thread.sleep(100);
         }
 
         assertEquals(2,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -456,7 +456,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         assertEquals(2,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -476,7 +476,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -497,7 +497,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);
@@ -523,7 +523,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.PLUGIN_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);
@@ -559,8 +559,8 @@ public class PluginAuthorizerServiceImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl =
-                new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl =
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> providerClass = cl.loadClass("com.hivemq.extensions.handler.testextensions." + name);
 

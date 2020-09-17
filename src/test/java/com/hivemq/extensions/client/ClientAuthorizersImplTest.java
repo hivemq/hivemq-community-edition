@@ -17,8 +17,8 @@ package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.ExtensionPriorityComparator;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,17 +44,17 @@ public class ClientAuthorizersImplTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
-    PluginPriorityComparator pluginPriorityComparator;
+    ExtensionPriorityComparator extensionPriorityComparator;
 
     private ClientAuthorizersImpl authorizers;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        when(pluginPriorityComparator.compare(any(), any())).thenAnswer(invocation -> {
+        when(extensionPriorityComparator.compare(any(), any())).thenAnswer(invocation -> {
             return Integer.compare(invocation.getArguments()[0].hashCode(), invocation.getArguments()[1].hashCode());
         });
-        authorizers = new ClientAuthorizersImpl(pluginPriorityComparator);
+        authorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class ClientAuthorizersImplTest {
         final @NotNull SubscriptionAuthorizer authorizer1 = TestAuthorizerUtil.getIsolatedSubscriptionAuthorizer(temporaryFolder, this.getClass().getClassLoader());
         final @NotNull SubscriptionAuthorizer authorizer2 = TestAuthorizerUtil.getIsolatedSubscriptionAuthorizer(temporaryFolder, this.getClass().getClassLoader());
 
-        final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) authorizer1.getClass().getClassLoader();
-        final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) authorizer2.getClass().getClassLoader();
+        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) authorizer1.getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) authorizer2.getClass().getClassLoader();
 
 
         authorizers.put("extension-1", authorizer1);
@@ -85,8 +85,8 @@ public class ClientAuthorizersImplTest {
         final @NotNull SubscriptionAuthorizer authorizer1 = TestAuthorizerUtil.getIsolatedSubscriptionAuthorizer(temporaryFolder, this.getClass().getClassLoader());
         final @NotNull SubscriptionAuthorizer authorizer2 = TestAuthorizerUtil.getIsolatedSubscriptionAuthorizer(temporaryFolder, this.getClass().getClassLoader());
 
-        final IsolatedPluginClassloader classloader = (IsolatedPluginClassloader) authorizer1.getClass().getClassLoader();
-        final IsolatedPluginClassloader anotherClassLoader = (IsolatedPluginClassloader) authorizer2.getClass().getClassLoader();
+        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) authorizer1.getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) authorizer2.getClass().getClassLoader();
 
 
         authorizers.put("extension-1", authorizer1);

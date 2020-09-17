@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationFailedInput;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import io.netty.channel.Channel;
 
@@ -55,8 +55,8 @@ public class AuthenticationFailedInputImpl
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
         this.userProperties = userProperties;
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
+        this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
     }
 
     @Override

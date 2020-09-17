@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -48,8 +48,8 @@ public class ConnectionStartInputImpl implements ConnectionStartInput, PluginTas
         Preconditions.checkNotNull(connect, "connect message must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.connect = connect;
-        this.connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
+        this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
         this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
                 System.currentTimeMillis());
     }

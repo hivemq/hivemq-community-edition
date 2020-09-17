@@ -19,7 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.PublishAuthorizer;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.Map;
 
@@ -42,7 +42,7 @@ public interface ClientAuthorizers {
      *
      * @param pluginClassLoader the classloader of the extension.
      */
-    void removeAllForPlugin(@NotNull IsolatedPluginClassloader pluginClassLoader);
+    void removeAllForPlugin(@NotNull IsolatedExtensionClassloader pluginClassLoader);
 
     /**
      * @return a map of all subscription authorizers per extension id.

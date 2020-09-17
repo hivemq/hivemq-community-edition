@@ -16,7 +16,7 @@
 package util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -33,13 +33,13 @@ public class IsolatedPluginClassLoaderUtil {
     public static <T> @NotNull T loadIsolated(
             final @NotNull TemporaryFolder temporaryFolder, final @NotNull Class<T> clazz) throws Exception {
 
-        final IsolatedPluginClassloader isolatedPluginClassloader =
+        final IsolatedExtensionClassloader isolatedExtensionClassloader =
                 buildClassLoader(temporaryFolder, new Class[]{clazz});
 
-        return instanceFromClassloader(isolatedPluginClassloader, clazz);
+        return instanceFromClassloader(isolatedExtensionClassloader, clazz);
     }
 
-    public static @NotNull IsolatedPluginClassloader buildClassLoader(
+    public static @NotNull IsolatedExtensionClassloader buildClassLoader(
             final @NotNull TemporaryFolder temporaryFolder, final @NotNull Class[] classes) throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClasses(classes);
@@ -47,13 +47,13 @@ public class IsolatedPluginClassLoaderUtil {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-        return new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()},
+        return new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()},
                 IsolatedPluginClassLoaderUtil.class.getClassLoader());
     }
 
     @SuppressWarnings("unchecked")
     public static <T> @NotNull T instanceFromClassloader(
-            final @NotNull IsolatedPluginClassloader classLoader, final @NotNull Class<T> clazz) throws Exception {
+            final @NotNull IsolatedExtensionClassloader classLoader, final @NotNull Class<T> clazz) throws Exception {
 
         final Class<T> isolatedClazz = (Class<T>) classLoader.loadClass(clazz.getName());
 

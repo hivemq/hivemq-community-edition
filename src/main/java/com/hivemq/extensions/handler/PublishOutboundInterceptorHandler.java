@@ -22,10 +22,9 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginInformationUtil;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -106,7 +105,7 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
         if (clientContext == null) {
             ctx.write(publish, promise);
             return;
@@ -117,8 +116,8 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
             return;
         }
 
-        final ClientInformation clientInfo = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        final ConnectionInformation connectionInfo = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
+        final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
 
         final PublishPacketImpl packet = new PublishPacketImpl(publish);
         final PublishOutboundInputImpl input = new PublishOutboundInputImpl(clientInfo, connectionInfo, packet);
@@ -141,8 +140,7 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         for (final PublishOutboundInterceptor interceptor : interceptors) {
 
             final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader((IsolatedPluginClassloader) interceptor.getClass()
-                            .getClassLoader());
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;

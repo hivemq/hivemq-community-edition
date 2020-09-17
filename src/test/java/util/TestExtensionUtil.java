@@ -20,7 +20,6 @@ import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +36,7 @@ public class TestExtensionUtil {
             "<name>Some Name</name>" +
             "<version>1.2.3-Version</version>" +
             "<priority>1000</priority>" +
+            "<start-priority>500</start-priority>" +
             "</hivemq-extension>";
 
     public static void writeValidExtensionXML(final File pluginXml, final String pluginId) throws IOException {

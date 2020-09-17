@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.CompletableScheduledFuture;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class ManagedExecutorServicePerPluginTest {
     ShutdownHooks shutdownHooks;
 
     @Mock
-    IsolatedPluginClassloader classLoader;
+    IsolatedExtensionClassloader classLoader;
 
     @Mock
     HiveMQExtensions hiveMQExtensions;

@@ -16,9 +16,9 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.Lists;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
@@ -26,7 +26,7 @@ import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInb
 import com.hivemq.extension.sdk.api.interceptor.subscribe.parameter.SubscribeInboundOutput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
@@ -177,7 +177,7 @@ public class IncomingSubscribeHandlerTest {
 
         final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Subscribe());
 
@@ -194,10 +194,10 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -221,10 +221,10 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -247,7 +247,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -264,7 +264,7 @@ public class IncomingSubscribeHandlerTest {
             }
         });
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -286,7 +286,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -304,7 +304,7 @@ public class IncomingSubscribeHandlerTest {
         });
 
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -325,7 +325,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -342,7 +342,7 @@ public class IncomingSubscribeHandlerTest {
             }
         });
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(plugin);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -362,7 +362,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.PLUGIN_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -379,7 +379,7 @@ public class IncomingSubscribeHandlerTest {
             }
         });
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedPluginClassloader.class))).thenReturn(null);
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(null);
 
         channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
@@ -405,7 +405,7 @@ public class IncomingSubscribeHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl = new IsolatedPluginClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.handler.IncomingSubscribeHandlerTest$TestInterceptorChangeTopic");
 
@@ -416,7 +416,7 @@ public class IncomingSubscribeHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile4, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl4 = new IsolatedPluginClassloader(new URL[]{jarFile4.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl4 = new IsolatedExtensionClassloader(new URL[]{jarFile4.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> classFour = cl4.loadClass("com.hivemq.extensions.handler.IncomingSubscribeHandlerTest$TestInterceptorThrowsException");
 
@@ -426,7 +426,7 @@ public class IncomingSubscribeHandlerTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile5, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedPluginClassloader cl5 = new IsolatedPluginClassloader(new URL[]{jarFile5.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl5 = new IsolatedExtensionClassloader(new URL[]{jarFile5.toURI().toURL()}, this.getClass().getClassLoader());
 
         final Class<?> classFive = cl5.loadClass("com.hivemq.extensions.handler.IncomingSubscribeHandlerTest$TestInterceptorTimeout");
 

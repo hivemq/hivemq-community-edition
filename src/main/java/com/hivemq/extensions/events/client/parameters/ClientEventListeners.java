@@ -18,9 +18,9 @@ package com.hivemq.extensions.events.client.parameters;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
+import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.PluginPriorityComparator;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
+import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Wrapper class for all ClientLifecycleEventListeners added by extensions.
  * <p>
- * This is the object of the channel attribute {@link com.hivemq.util.ChannelAttributes#PLUGIN_CLIENT_EVENT_LISTENERS}.
+ * This is the object of the channel attribute {@link com.hivemq.util.ChannelAttributes#EXTENSION_CLIENT_EVENT_LISTENERS}.
  *
  * @author Florian Limpöck
  * @since 4.0.0
@@ -44,7 +44,7 @@ public class ClientEventListeners {
     private final @NotNull ReadWriteLock readWriteLock;
 
     public ClientEventListeners(final @NotNull HiveMQExtensions hiveMQExtensions) {
-        this.pluginEventListenersMap = new TreeMap<>(new PluginPriorityComparator(hiveMQExtensions));
+        this.pluginEventListenersMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -58,7 +58,7 @@ public class ClientEventListeners {
         }
     }
 
-    public void removeForPlugin(final @NotNull IsolatedPluginClassloader pluginClassLoader) {
+    public void removeForPlugin(final @NotNull IsolatedExtensionClassloader pluginClassLoader) {
         final Lock lock = readWriteLock.writeLock();
         lock.lock();
         try {

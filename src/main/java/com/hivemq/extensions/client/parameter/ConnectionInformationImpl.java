@@ -20,7 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.*;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 
@@ -41,10 +41,10 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     public ConnectionInformationImpl(final @NotNull Channel channel) {
         Preconditions.checkNotNull(channel);
-        this.mqttVersion = PluginInformationUtil.mqttVersionFromChannel(channel);
+        this.mqttVersion = ExtensionInformationUtil.mqttVersionFromChannel(channel);
         this.inetAddress = ChannelUtils.getChannelAddress(channel).orNull();
-        this.listener = PluginInformationUtil.getPluginListenerFromChannel(channel);
-        this.tlsInformation = PluginInformationUtil.getTlsInformationFromChannel(channel);
+        this.listener = ExtensionInformationUtil.getListenerFromChannel(channel);
+        this.tlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         this.connectionAttributeStore = new ConnectionAttributeStoreImpl(channel);
 
     }

@@ -207,7 +207,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder()
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder()
             .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
             .withDataFolder(Path.of("/path/to/embedded-data-folder"))
             .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"));
@@ -223,7 +223,7 @@ Once built, an EmbeddedHiveMQ can be started with `start()`.
 public class Main {
 
     public static void main(String[] args) {
-        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder();
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder();
         ...
 
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
@@ -251,6 +251,55 @@ public class Main {
             hiveMQ.stop().join();
         } catch (final Exception ex) {
             ex.printStackTrace();
+        }
+    }
+}
+----
+
+Similar to the embedded HiveMQ an embedded extension can be built with the `com.hivemq.embedded.EmbeddedExtensionBuilder`.
+
+Then add the embedded extension to the embedded HiveMQ builder.
+
+[source,java]
+----
+public class Main {
+
+    public static void main(String[] args) {
+
+        final EmbeddedExtension embeddedExtension = EmbeddedExtension.builder()
+                .withId("embedded-ext-1")
+                .withName("Embedded Extension")
+                .withVersion("1.0.0")
+                .withPriority(0)
+                .withStartPriority(1000)
+                .withAuthor("Me")
+                .withExtensionMain(new MyEmbeddedExtensionMain())
+                .build();
+
+        final EmbeddedHiveMQBuilder builder = EmbeddedHiveMQ.builder()
+                .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
+                .withDataFolder(Path.of("/path/to/embedded-data-folder"))
+                .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"))
+                .withEmbeddedExtension(embeddedExtension);
+
+        try (final EmbeddedHiveMQ hiveMQ = builder.build()) {
+            hiveMQ.start().join();
+            //do something with hivemq
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static class MyEmbeddedExtensionMain implements ExtensionMain {
+
+        @Override
+        public void extensionStart(final @NotNull ExtensionStartInput extensionStartInput, final @NotNull ExtensionStartOutput extensionStartOutput) {
+            // my extension start code
+        }
+
+        @Override
+        public void extensionStop(final @NotNull ExtensionStopInput extensionStopInput, final @NotNull ExtensionStopOutput extensionStopOutput) {
+            // my extension stop code
         }
     }
 }

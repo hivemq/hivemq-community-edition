@@ -17,7 +17,6 @@ package com.hivemq.extensions.services.executor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedPluginClassloader;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,13 +30,13 @@ public class WrappedRunnable implements Runnable {
     private final Runnable runnable;
 
     @NotNull
-    private final IsolatedPluginClassloader classLoader;
+    private final ClassLoader classLoader;
 
     @Nullable
     private final CompletableFuture<?> future;
 
     WrappedRunnable(
-            @NotNull final Runnable runnable, @NotNull final IsolatedPluginClassloader classLoader,
+            @NotNull final Runnable runnable, @NotNull final ClassLoader classLoader,
             @Nullable final CompletableFuture<?> future) {
         this.runnable = runnable;
         this.classLoader = classLoader;

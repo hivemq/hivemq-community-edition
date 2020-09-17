@@ -19,7 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.parameter.ClientBasedInput;
-import com.hivemq.extensions.PluginInformationUtil;
+import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import io.netty.channel.Channel;
 
@@ -33,8 +33,8 @@ public abstract class ClientBasedInputImpl implements ClientBasedInput, PluginTa
     private final @NotNull ConnectionInformation connectionInformation;
 
     public ClientBasedInputImpl(final @NotNull String clientId, final @NotNull Channel channel) {
-        clientInformation = PluginInformationUtil.getAndSetClientInformation(channel, clientId);
-        connectionInformation = PluginInformationUtil.getAndSetConnectionInformation(channel);
+        clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
+        connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
     public @NotNull ClientInformation getClientInformation() {
