@@ -207,7 +207,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder()
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder()
             .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
             .withDataFolder(Path.of("/path/to/embedded-data-folder"))
             .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"));
@@ -223,7 +223,7 @@ Once built, an EmbeddedHiveMQ can be started with `start()`.
 public class Main {
 
     public static void main(String[] args) {
-        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQBuilder.builder();
+        final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder();
         ...
 
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
@@ -266,7 +266,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final EmbeddedExtension embeddedExtension = EmbeddedExtensionBuilder.builder()
+        final EmbeddedExtension embeddedExtension = EmbeddedExtension.builder()
                 .withId("embedded-ext-1")
                 .withName("Embedded Extension")
                 .withVersion("1.0.0")
@@ -276,7 +276,7 @@ public class Main {
                 .withExtensionMain(new MyEmbeddedExtensionMain())
                 .build();
 
-        final EmbeddedHiveMQBuilder builder = EmbeddedHiveMQBuilder.builder()
+        final EmbeddedHiveMQBuilder builder = EmbeddedHiveMQ.builder()
                 .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
                 .withDataFolder(Path.of("/path/to/embedded-data-folder"))
                 .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"))
