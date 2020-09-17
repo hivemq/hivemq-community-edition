@@ -16,7 +16,6 @@
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.exception.ExtensionLoadingException;
 
 /**
@@ -28,8 +27,8 @@ public interface ExtensionStaticInitializer {
      * Initializes all the extension dependencies which are accessed via static context in the extension
      * e.g. Services and Builders
      *
-     * @param classLoader the {@link IsolatedExtensionClassloader} for this extension
+     * @param classLoader the {@link ClassLoader} for this extension
      * @throws ExtensionLoadingException if this extensions static context can not be initialized
      */
-    void initialize(@NotNull String pluginId, @NotNull IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException;
+    void initialize(@NotNull String pluginId, @NotNull ClassLoader classLoader) throws ExtensionLoadingException;
 }

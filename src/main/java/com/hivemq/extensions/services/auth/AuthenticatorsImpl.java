@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +75,7 @@ public class AuthenticatorsImpl implements Authenticators {
         final Lock writeLock = authenticatorsLock.writeLock();
         writeLock.lock();
         try {
-            final IsolatedExtensionClassloader extensionClassLoader = provider.getClassLoader();
+            final ClassLoader extensionClassLoader = provider.getClassLoader();
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(extensionClassLoader);
 
             if (extension != null) {

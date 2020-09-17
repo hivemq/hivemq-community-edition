@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundIntercepto
 import com.hivemq.extensions.ExtensionPriorityComparator;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -59,7 +58,7 @@ public class InterceptorsImpl implements Interceptors {
         this.connackOutboundInterceptorProviderMap = new TreeMap<>(extensionPriorityComparator);
         this.readWriteLock = new ReentrantReadWriteLock();
         hiveMQExtensions.addAfterExtensionStopCallback(hiveMQExtension -> {
-            final IsolatedExtensionClassloader pluginClassloader = hiveMQExtension.getExtensionClassloader();
+            final ClassLoader pluginClassloader = hiveMQExtension.getExtensionClassloader();
             if (pluginClassloader != null) {
                 removeInterceptors(hiveMQExtension.getId());
             }

@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.util.Checkpoints;
 import org.slf4j.Logger;
 
@@ -128,7 +127,7 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     }
 
     @Override
-    public abstract @Nullable IsolatedExtensionClassloader getExtensionClassloader();
+    public abstract @Nullable ClassLoader getExtensionClassloader();
 
     @NotNull
     public abstract Logger getLogger();

@@ -82,8 +82,6 @@ public class AuthenticatorsImplTest {
 
         simpleProvider1 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator1, isolatedExtensionClassloader1);
         simpleProvider2 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2, isolatedExtensionClassloader2);
-        simpleProvider1.setCheckThreading(false);
-        simpleProvider2.setCheckThreading(false);
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authenticators.registerAuthenticatorProvider(simpleProvider1);
         authenticators.registerAuthenticatorProvider(simpleProvider2);

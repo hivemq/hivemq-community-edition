@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.exception.ExtensionLoadingException;
 
 import javax.inject.Inject;
@@ -51,7 +50,7 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
         this.builderDependencies = builderDependencies;
     }
 
-    public void initialize(@NotNull final String pluginId, @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
+    public void initialize(@NotNull final String pluginId, @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
         checkNotNull(pluginId, "extension id must not be null");
         checkNotNull(classLoader, "classLoader must not be null");
 
@@ -60,7 +59,7 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
     }
 
     private void initializeServices(@NotNull final String pluginId,
-                                    @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
+                                    @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
 
         try {
 
@@ -77,15 +76,14 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
     }
 
     private void initializeBuilders(@NotNull final String pluginId,
-                                    @NotNull final IsolatedExtensionClassloader classLoader) throws ExtensionLoadingException {
+                                    @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
 
         try {
 
             final Class<?> buildersClass = classLoader.loadClass(BUILDERS_CLASS);
             final Field buildersField = buildersClass.getDeclaredField("builders");
             buildersField.setAccessible(true);
-            final ImmutableMap<String, Supplier<Object>> dependencies =
-                    builderDependencies.getDependenciesMap(classLoader);
+            final ImmutableMap<String, Supplier<Object>> dependencies = builderDependencies.getDependenciesMap();
             buildersField.set(null, dependencies);
 
         } catch (final Exception e) {

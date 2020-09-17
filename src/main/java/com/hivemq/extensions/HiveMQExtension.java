@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.nio.file.Path;
 
@@ -104,9 +103,9 @@ public interface HiveMQExtension {
     @Nullable Class<? extends ExtensionMain> getExtensionMainClazz();
 
     /**
-     * @return the {@link IsolatedExtensionClassloader} used to load the {@link ExtensionMain} class
+     * @return the {@link ClassLoader} used to load the {@link ExtensionMain} class
      */
-    @Nullable IsolatedExtensionClassloader getExtensionClassloader();
+    @Nullable ClassLoader getExtensionClassloader();
 
     /**
      * @return the path to the extension's folder

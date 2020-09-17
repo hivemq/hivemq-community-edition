@@ -391,7 +391,7 @@ public class ExtensionStaticInitializerImplTest {
 
     @Test(expected = ExtensionLoadingException.class)
     public void test_exception_at_static_builders_initialization() throws Exception {
-        when(builderDependencies.getDependenciesMap(any(IsolatedExtensionClassloader.class))).thenThrow(
+        when(builderDependencies.getDependenciesMap()).thenThrow(
                 new RuntimeException("Test-Exception"));
         createAndLoadPlugin();
     }

@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.parameter.ExtensionStartOutputImpl;
 import com.hivemq.extensions.parameter.ExtensionStartStopInputImpl;
 import com.hivemq.extensions.parameter.ExtensionStopOutputImpl;
@@ -171,7 +170,7 @@ public class HiveMQExtensions {
     }
 
     private void addClassLoaderMapping(
-            final @NotNull IsolatedExtensionClassloader classloader, final @NotNull HiveMQExtension extension) {
+            final @NotNull ClassLoader classloader, final @NotNull HiveMQExtension extension) {
 
         final Lock loaderLock = classloaderLock.writeLock();
         try {
@@ -186,7 +185,7 @@ public class HiveMQExtensions {
         }
     }
 
-    private void removeClassLoaderMapping(final @NotNull IsolatedExtensionClassloader classloader) {
+    private void removeClassLoaderMapping(final @NotNull ClassLoader classloader) {
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
@@ -207,7 +206,7 @@ public class HiveMQExtensions {
             return false;
         }
 
-        final IsolatedExtensionClassloader extensionClassloader = extension.getExtensionClassloader();
+        final ClassLoader extensionClassloader = extension.getExtensionClassloader();
         Preconditions.checkNotNull(extensionClassloader, "Extension ClassLoader cannot be null");
 
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
@@ -248,7 +247,7 @@ public class HiveMQExtensions {
     }
 
     private void extensionStartFailed(
-            final @NotNull HiveMQExtension extension, final @NotNull IsolatedExtensionClassloader extensionClassloader) {
+            final @NotNull HiveMQExtension extension, final @NotNull ClassLoader extensionClassloader) {
 
         extension.setDisabled();
         extension.clean(true);
@@ -276,7 +275,7 @@ public class HiveMQExtensions {
             lock.unlock();
         }
 
-        final IsolatedExtensionClassloader extensionClassloader = extension.getExtensionClassloader();
+        final ClassLoader extensionClassloader = extension.getExtensionClassloader();
         Preconditions.checkNotNull(extensionClassloader, "Extension ClassLoader cannot be null");
 
         notifyBeforeExtensionStopCallbacks(extension);

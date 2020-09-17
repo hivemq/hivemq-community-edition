@@ -17,7 +17,6 @@ package com.hivemq.extensions.services.executor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -32,13 +31,13 @@ public class WrappedCallable<V> implements Callable<V> {
     private final Callable<V> callable;
 
     @NotNull
-    private final IsolatedExtensionClassloader classLoader;
+    private final ClassLoader classLoader;
 
     @Nullable
     private final CompletableFuture<V> completableFuture;
 
     WrappedCallable(
-            @NotNull final Callable<V> callable, @NotNull final IsolatedExtensionClassloader classLoader,
+            @NotNull final Callable<V> callable, @NotNull final ClassLoader classLoader,
             @Nullable final CompletableFuture<V> completableFuture) {
         this.callable = callable;
         this.classLoader = classLoader;

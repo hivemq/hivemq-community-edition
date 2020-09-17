@@ -38,7 +38,6 @@ import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterc
 import com.hivemq.extension.sdk.api.interceptor.unsuback.UnsubackOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.unsubscribe.UnsubscribeInboundInterceptor;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.executor.task.AbstractOutput;
 
 import java.util.List;
@@ -51,11 +50,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ClientContextPluginImpl extends AbstractOutput implements ClientContext {
 
-    private final @NotNull IsolatedExtensionClassloader pluginClassloader;
+    private final @NotNull ClassLoader pluginClassloader;
     private final @NotNull ClientContextImpl clientContext;
 
     public ClientContextPluginImpl(
-            final @NotNull IsolatedExtensionClassloader pluginClassloader,
+            final @NotNull ClassLoader pluginClassloader,
             final @NotNull ClientContextImpl clientContext) {
 
         this.pluginClassloader = pluginClassloader;

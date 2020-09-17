@@ -129,7 +129,6 @@ public class SecurityRegistryImplTest {
                 authenticators.getAuthenticatorProviderMap();
 
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(authenticator1, registeredAuthenticators.values().iterator().next().getAuthenticator(null));
     }
 
@@ -140,14 +139,12 @@ public class SecurityRegistryImplTest {
         Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
                 authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(authenticator1, registeredAuthenticators.values().iterator().next().getAuthenticator(null));
 
         //replace authenticator
         securityRegistry.setAuthenticatorProvider(provider2);
         registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(authenticator2, registeredAuthenticators.values().iterator().next().getAuthenticator(null));
 
     }
@@ -161,7 +158,6 @@ public class SecurityRegistryImplTest {
                 authenticators.getAuthenticatorProviderMap();
 
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(
                 enhancedAuthenticator1,
                 registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
@@ -174,7 +170,6 @@ public class SecurityRegistryImplTest {
         Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
                 authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(
                 enhancedAuthenticator1,
                 registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));
@@ -183,7 +178,6 @@ public class SecurityRegistryImplTest {
         securityRegistry.setEnhancedAuthenticatorProvider(enhancedProvider2);
         registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
         assertEquals(1, registeredAuthenticators.size());
-        registeredAuthenticators.values().iterator().next().setCheckThreading(false);
         assertSame(
                 enhancedAuthenticator2,
                 registeredAuthenticators.values().iterator().next().getEnhancedAuthenticator(null));

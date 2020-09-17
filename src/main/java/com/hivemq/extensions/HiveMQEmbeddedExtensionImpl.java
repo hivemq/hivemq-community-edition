@@ -16,11 +16,9 @@
 
 package com.hivemq.extensions;
 
-import com.hivemq.HiveMQServer;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,7 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(HiveMQEmbeddedExtensionImpl.class);
 
-    private final @Nullable IsolatedExtensionClassloader isolatedExtensionClassloader;
+    private final @Nullable ClassLoader classLoader;
 
     public HiveMQEmbeddedExtensionImpl(
             final @NotNull String id,
@@ -49,17 +47,12 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
                 startPriority, extensionMain, enabled,
                 new File(System.getProperty("java.io.tmpdir")).toPath());
 
-        final ClassLoader classLoader = extensionMain.getClass().getClassLoader();
-        if ((classLoader instanceof IsolatedExtensionClassloader)) {
-            isolatedExtensionClassloader = (IsolatedExtensionClassloader) classLoader;
-        } else {
-            isolatedExtensionClassloader = new IsolatedExtensionClassloader(classLoader, HiveMQServer.class.getClassLoader());
-        }
+        classLoader = extensionMain.getClass().getClassLoader();
     }
 
     @Override
-    public @Nullable IsolatedExtensionClassloader getExtensionClassloader() {
-        return isolatedExtensionClassloader;
+    public @Nullable ClassLoader getExtensionClassloader() {
+        return classLoader;
     }
 
     @Override

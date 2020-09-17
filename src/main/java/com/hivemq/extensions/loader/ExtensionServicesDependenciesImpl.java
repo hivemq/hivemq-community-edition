@@ -30,7 +30,6 @@ import com.hivemq.extension.sdk.api.services.publish.RetainedMessageStore;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 
@@ -90,7 +89,7 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     }
 
     @NotNull
-    public ImmutableMap<String, Object> getDependenciesMap(@NotNull final IsolatedExtensionClassloader classLoader) {
+    public ImmutableMap<String, Object> getDependenciesMap(@NotNull final ClassLoader classLoader) {
         //classLoader is unused but prepared here for future use
 
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
@@ -113,7 +112,7 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
 
     @NotNull
     private ManagedExecutorServicePerExtension getManagedExecutorService(
-            @NotNull final IsolatedExtensionClassloader classLoader) {
+            @NotNull final ClassLoader classLoader) {
         return new ManagedExecutorServicePerExtension(
                 globalManagedExtensionExecutorService, classLoader, hiveMQExtensions);
     }

@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
+import com.hivemq.HiveMQServer;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -300,16 +301,17 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
                 new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE, embeddedExtension.getId(), embeddedExtension.getStartPriority(), extension.getExtensionFolderPath(), true);
         hiveMQExtensions.addHiveMQExtension(extension);
 
-        final IsolatedExtensionClassloader isolatedExtensionClassloader = extension.getExtensionClassloader();
-        if(isolatedExtensionClassloader == null){
+        final ClassLoader extensionClassloader = extension.getExtensionClassloader();
+        if(extensionClassloader == null){
             throw new IllegalStateException("The extensions class loader must not be null at loading stage");
         }
 
-
+        //need wrapper to load static context and classes.
+        final IsolatedExtensionClassloader isolatedExtensionClassloader = new IsolatedExtensionClassloader(extensionClassloader, HiveMQServer.class.getClassLoader());
         isolatedExtensionClassloader.loadClassesWithStaticContext();
 
         try {
-            staticInitializer.initialize(embeddedExtension.getId(), isolatedExtensionClassloader);
+            staticInitializer.initialize(embeddedExtension.getId(), extensionClassloader);
         } catch (final ExtensionLoadingException e) {
             log.warn(
                     "Embedded extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
