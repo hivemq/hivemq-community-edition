@@ -143,7 +143,7 @@ public class PublishTopicTreeTest {
         assertEquals(7, result.size());
 
         result = tree.get("topic/#");
-        assertEquals(5, result.size());
+        assertEquals(6, result.size());
 
     }
 
@@ -237,5 +237,26 @@ public class PublishTopicTreeTest {
         assertTrue(result.contains("topic/a/b"));
         assertTrue(result.contains("topic/a/b/c"));
 
+    }
+
+    @Test
+    public void test_wildcard_edge_cases() {
+        tree.add("a/b/c");
+        tree.add("a/b/c/d");
+        Set<String> results = tree.get("a/b/c/#");
+        assertTrue(results.contains("a/b/c"));
+        assertTrue(results.contains("a/b/c/d"));
+        assertEquals(2, results.size());
+
+        tree.remove("a/b/c");
+        tree.remove("a/b/c/d");
+        results = tree.get("#");
+        assertEquals(0, results.size());
+
+        tree.add("a/b/");
+        tree.add("a/b");
+        results = tree.get("a/b/+");
+        assertEquals(1, results.size());
+        assertTrue(results.contains("a/b/"));
     }
 }
