@@ -734,7 +734,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         if (packetIdentifier == 0) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with message ID 0. Disconnecting client.",
-                    "Sent a " + messageType.name() + " with message id 0", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent a " + messageType.name() + " with message id 0",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_ID_ZERO,messageType.name()));
         }
 
@@ -751,7 +752,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         if (userProperties.encodedLength() > maxUserPropertiesLength) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a " + messageType.name() + " with user properties that are too large. Disconnecting client.",
-                    "Sent a " + messageType.name() + " with too large user properties", Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
+                    "Sent a " + messageType.name() + " with too large user properties",
+                    Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
                     String.format(ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES,messageType.name()));
             return true;
         }

@@ -103,7 +103,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
                         null, //already logged
                         "Sent SUBSCRIBE with an invalid topic filter",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
-                        "Sent SUBSCRIBE with invalid topic filter");
+                        ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return null;
             }
 

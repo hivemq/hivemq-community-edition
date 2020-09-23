@@ -217,7 +217,7 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
                         logMessage,
                         "Invalid subscription topic " + topic.getTopic(),
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
-                        "Sent SUBSCRIBE with invalid topic filter");
+                        ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return false;
             } else if(topicString.length() > maxTopicLength) {
                 final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" + topic.getTopic() + "'";
@@ -226,7 +226,7 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
                         logMessage,
                         "Sent SUBSCRIBE for topic that exceeds maximum topic length",
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
-                        "Sent SUBSCRIBE with invalid topic filter");
+                        ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return false;
             }
         }
