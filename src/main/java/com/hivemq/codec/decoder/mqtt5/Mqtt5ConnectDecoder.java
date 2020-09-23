@@ -740,8 +740,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         if (userProperties.encodedLength() > maxUserPropertiesLength) {
             mqttConnacker.connackError(channel,
                     "A client (IP: {}) sent a CONNECT with user properties that are too large. Disconnecting client.",
-                    "Sent CONNECT with too large user properties", Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
-                    "CONNECT with too large user properties");
+                    "Sent a CONNECT with too large user properties",
+                    Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
+                    ReasonStrings.CONNACK_PACKET_TOO_LARGE_USER_PROPERTIES);
             return true;
         }
         return false;

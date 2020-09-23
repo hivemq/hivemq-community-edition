@@ -83,7 +83,7 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
                         "A client (IP: {}) sent an UNSUBSCRIBE with an empty topic. This is not allowed. Disconnecting client.",
                         "Sent UNSUBSCRIBE with an empty topic",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
-                        "UNSUBSCRIBE with an empty topic was sent.");
+                        ReasonStrings.DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC);
                 buf.clear();
                 return null;
             }

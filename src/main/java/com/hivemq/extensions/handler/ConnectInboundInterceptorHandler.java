@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
@@ -44,6 +45,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
+import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -126,8 +128,9 @@ public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapt
         final ConnectInboundProviderInputImpl providerInput =
                 new ConnectInboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
 
-        final long timestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
-                System.currentTimeMillis());
+        final long timestamp =
+                Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+                        System.currentTimeMillis());
         final ConnectPacketImpl packet = new ConnectPacketImpl(connect, timestamp);
         final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
@@ -213,7 +216,11 @@ public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapt
                 final String logMessage = output.getLogMessage();
                 final String reasonString = output.getReasonString();
                 connacker.connackError(
-                        ctx.channel(), logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR, reasonString);
+                        ctx.channel(),
+                        logMessage,
+                        logMessage,
+                        Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
+                        reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
                 ctx.channel().attr(ChannelAttributes.CLIENT_ID).set(connect.getClientIdentifier());
@@ -266,10 +273,11 @@ public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapt
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId);
                 log.debug("Original exception:", e);
-                output.prevent("Connect with client ID " + clientId +
-                        " failed because of an exception was thrown by an interceptor", "Exception in interceptor");
+                output.prevent(String.format(ReasonStrings.CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION, clientId),
+                        "Exception in CONNECT inbound interceptor");
                 Exceptions.rethrowError(e);
             }
             return output;

@@ -62,6 +62,10 @@ public class ReasonStrings {
     public static final String CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD = "Not authorized to connect. Will topic contained wildcard characters (#/+) in the %s. The broker does not allow this.";
 
     public static final String CONNACK_RETAIN_NOT_SUPPORTED = "Retain flag of Will message was set to true. The broker does not allow this.";
+    public static final String CONNACK_PACKET_TOO_LARGE_USER_PROPERTIES = "CONNECT with too large user properties.";
+    public static final String CONNACK_MALFORMED_PACKET_INCORRECT_WILL_TOPIC_LENGTH = "Incorrect CONNECT will-topic length.";
+    public static final String CONNACK_MALFORMED_PACKET_BAD_UTF8 = "Sent CONNECT with bad UTF-8 character.";
+    public static final String CONNACK_MALFORMED_PACKET_INVALID_WILL_TOPIC = "Sent CONNECT with invalid will-topic.";
 
     public static final String CONNACK_QOS_NOT_SUPPORTED_WILL = "Quality of service level of Will message in CONNECT exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
     public static final String CONNACK_QOS_NOT_SUPPORTED_PUBLISH = "Quality of service level of PUBLISH exceeds maximum allowed QoS. QoS used: %s. Maximum allowed QoS: %s.";
@@ -86,6 +90,8 @@ public class ReasonStrings {
     public static final String DISCONNECT_MALFORMED_AUTH_DATA = "AUTH with malformed authentication data was sent.";
     public static final String DISCONNECT_MALFORMED_SUBSCRIPTION_OPTIONS = "SUBSCRIBE with malformed subscription options was sent.";
     public static final String DISCONNECT_MALFORMED_UTF8_STRING = "%s with malformed UTF-8 String for %s was sent.";
+    public static final String DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC = "Sent UNSUBSCRIBE with an empty topic.";
+    public static final String DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID = "Sent SUBSCRIBE with an invalid topic filter.";
 
     public static final String DISCONNECT_PROTOCOL_ERROR_MESSAGE_ID = "%s without message id was sent.";
     public static final String DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD = "%s with invalid authentication method was sent.";
@@ -129,7 +135,7 @@ public class ReasonStrings {
     public static final String DISCONNECT_MESSAGE_TYPE_FIFTEEN = "Message type '15' is not allowed.";
     public static final String DISCONNECT_MESSAGE_TYPE_INVALID = "Message type invalid.";
     public static final String DISCONNECT_PACKET_TOO_LARGE_MESSAGE = "Size of the message sent was too large.";
-    public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "User properties size of %s sent was too large.";
+    public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "%s with too large user properties.";
     public static final String DISCONNECT_MAXIMUM_TOPIC_LENGTH_EXCEEDED = "Maximum topic length configured at the broker exceeded.";
 
     public static final String DISCONNECT_PAYLOAD_FORMAT_INVALID_PUBLISH = "PUBLISH with no valid UTF-8 payload was sent.";
@@ -147,22 +153,24 @@ public class ReasonStrings {
     public static final String SUBACK_EXTENSION_PREVENTED = "SUBSCRIBE prevented by an extension.";
     public static final String UNSUBACK_EXTENSION_PREVENTED = "UNSUBSCRIBE prevented by an extension.";
 
-    public static final String AUTH_FAILED = "Authentication failed";
-    public static final String RE_AUTH_FAILED = "Re-authentication failed";
-    public static final String AUTH_FAILED_NO_AUTHENTICATOR = "Authentication failed, no authenticator registered";
-    public static final String RE_AUTH_FAILED_NO_AUTHENTICATOR = "Re-authentication failed, no authenticator registered";
-    public static final String AUTH_FAILED_CLIENT_TIMEOUT = "Authentication failed, timeout before the client provided required authentication data";
-    public static final String RE_AUTH_FAILED_CLIENT_TIMEOUT = "Re-authentication failed, timeout before the client provided required authentication data";
-    public static final String AUTH_FAILED_EXTENSION_TIMEOUT = "Authentication failed, authenticator timed out";
-    public static final String RE_AUTH_FAILED_EXTENSION_TIMEOUT = "Re-authentication failed, authenticator timed out";
-    public static final String AUTH_FAILED_UNDECIDED = "Authentication failed, authenticator did not decide authenticity";
-    public static final String RE_AUTH_FAILED_UNDECIDED = "Re-authentication failed, authenticator did not decide authenticity";
-    public static final String AUTH_FAILED_EXCEPTION = "Authentication failed, exception in authenticator";
-    public static final String RE_AUTH_FAILED_EXCEPTION = "Re-authentication failed, exception in authenticator";
-    public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client";
-    public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client";
+    public static final String AUTH_FAILED = "Authentication failed.";
+    public static final String RE_AUTH_FAILED = "Re-authentication failed.";
+    public static final String AUTH_FAILED_NO_AUTHENTICATOR = "Authentication failed, no authenticator registered.";
+    public static final String RE_AUTH_FAILED_NO_AUTHENTICATOR = "Re-authentication failed, no authenticator registered.";
+    public static final String AUTH_FAILED_CLIENT_TIMEOUT = "Authentication failed, timeout before the client provided required authentication data.";
+    public static final String RE_AUTH_FAILED_CLIENT_TIMEOUT = "Re-authentication failed, timeout before the client provided required authentication data.";
+    public static final String AUTH_FAILED_EXTENSION_TIMEOUT = "Authentication failed, authenticator timed out.";
+    public static final String RE_AUTH_FAILED_EXTENSION_TIMEOUT = "Re-authentication failed, authenticator timed out.";
+    public static final String AUTH_FAILED_UNDECIDED = "Authentication failed, authenticator did not decide authenticity.";
+    public static final String RE_AUTH_FAILED_UNDECIDED = "Re-authentication failed, authenticator did not decide authenticity.";
+    public static final String AUTH_FAILED_EXCEPTION = "Authentication failed, exception in authenticator.";
+    public static final String RE_AUTH_FAILED_EXCEPTION = "Re-authentication failed, exception in authenticator.";
+    public static final String AUTH_FAILED_SEND_EXCEPTION = "Authentication failed, could not send AUTH to client.";
+    public static final String RE_AUTH_FAILED_SEND_EXCEPTION = "Re-authentication failed, could not send AUTH to client.";
 
     public static final String CLOSE_MALFORMED_REMAINING_LENGTH = "Message with a malformed remaining length was sent.";
+
+    public static final String CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION = "Connect with client ID %s failed because of an exception was thrown by an CONNECT inbound interceptor.";
 
     private ReasonStrings() {
         //Don't instantiate

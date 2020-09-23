@@ -73,8 +73,17 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkNotNull(connack, "CONNACK must never be null");
         Preconditions.checkArgument(connack.getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS, "Error is no success");
 
-        eventLog.clientConnected(ctx.channel());
-        return ctx.writeAndFlush(connack);
+        final ChannelFuture channelFuture = ctx.writeAndFlush(connack);
+
+        //for preventing success, when a connack will be prevented by an extension
+        channelFuture.addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                future.channel().attr(ChannelAttributes.CONNACK_SENT).set(true);
+                eventLog.clientConnected(future.channel());
+            }
+        });
+
+        return channelFuture;
     }
 
     public void connackError(

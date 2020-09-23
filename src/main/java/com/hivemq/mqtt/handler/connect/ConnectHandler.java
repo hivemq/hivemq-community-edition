@@ -93,7 +93,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-    private final @NotNull ConnackSentListener connackSentListener = new ConnackSentListener();
     private final @NotNull Authorizers authorizers;
     private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
@@ -573,7 +572,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             }
         }
 
-        connackSent.addListener(connackSentListener);
         //send out queued messages (from inflight and client-session queue) for client after connack is sent
         connackSent.addListener(new PollInflightMessageListener(publishPollService, ctx.channel().attr(ChannelAttributes.CLIENT_ID).get()));
     }
