@@ -62,7 +62,7 @@ public class ReasonStrings {
     public static final String CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD = "Not authorized to connect. Will topic contained wildcard characters (#/+) in the %s. The broker does not allow this.";
 
     public static final String CONNACK_RETAIN_NOT_SUPPORTED = "Retain flag of Will message was set to true. The broker does not allow this.";
-    public static final String CONNACK_PACKET_TOO_LARGE_USER_PROPERTIES = "CONNECT with too large user properties.";
+    public static final String CONNACK_PACKET_TOO_LARGE_USER_PROPERTIES = "Sent CONNECT with too large user properties.";
     public static final String CONNACK_MALFORMED_PACKET_INCORRECT_WILL_TOPIC_LENGTH = "Incorrect CONNECT will-topic length.";
     public static final String CONNACK_MALFORMED_PACKET_BAD_UTF8 = "Sent CONNECT with bad UTF-8 character.";
     public static final String CONNACK_MALFORMED_PACKET_INVALID_WILL_TOPIC = "Sent CONNECT with invalid will-topic.";
@@ -135,7 +135,7 @@ public class ReasonStrings {
     public static final String DISCONNECT_MESSAGE_TYPE_FIFTEEN = "Message type '15' is not allowed.";
     public static final String DISCONNECT_MESSAGE_TYPE_INVALID = "Message type invalid.";
     public static final String DISCONNECT_PACKET_TOO_LARGE_MESSAGE = "Size of the message sent was too large.";
-    public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "%s with too large user properties.";
+    public static final String DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES = "Sent %s with too large user properties.";
     public static final String DISCONNECT_MAXIMUM_TOPIC_LENGTH_EXCEEDED = "Maximum topic length configured at the broker exceeded.";
 
     public static final String DISCONNECT_PAYLOAD_FORMAT_INVALID_PUBLISH = "PUBLISH with no valid UTF-8 payload was sent.";
