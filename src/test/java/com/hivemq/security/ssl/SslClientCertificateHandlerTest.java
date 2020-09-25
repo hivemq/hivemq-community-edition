@@ -17,7 +17,7 @@ package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Tls;
-import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -46,7 +46,7 @@ public class SslClientCertificateHandlerTest {
     private EmbeddedChannel channel;
 
     @Mock
-    private EventLog eventLog;
+    private MqttServerDisconnectorImpl mqttServerDisconnector;
 
     @Mock
     private Tls tls;
@@ -68,7 +68,7 @@ public class SslClientCertificateHandlerTest {
         when(sslEngine.getSession()).thenReturn(sslSession);
 
         channel = new EmbeddedChannel();
-        channel.pipeline().addLast(new SslClientCertificateHandler(tls, eventLog));
+        channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
 
@@ -104,7 +104,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog).clientWasDisconnected(eq(channel), anyString());
+        verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog, never()).clientWasDisconnected(eq(channel), anyString());
+        verify(mqttServerDisconnector, never()).logAndClose(eq(channel), anyString(), anyString());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog).clientWasDisconnected(eq(channel), anyString());
+        verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog, never()).clientWasDisconnected(eq(channel), anyString());
+        verify(mqttServerDisconnector, never()).logAndClose(eq(channel), anyString(), anyString());
     }
 
     @Test
@@ -144,19 +144,19 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("other exception"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog).clientWasDisconnected(eq(channel), eq("SSL handshake failed"));
+        verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
     @Test
     public void test_class_cast_exception_no_ssl_handler() throws SSLPeerUnverifiedException, InterruptedException {
 
         channel = new EmbeddedChannel();
-        channel.pipeline().addLast(new SslClientCertificateHandler(tls, eventLog));
+        channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());
 
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(eventLog).clientWasDisconnected(eq(channel), eq("SSL handshake failed"));
+        verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
     private class WrongHandler extends SimpleChannelInboundHandler<Object> {

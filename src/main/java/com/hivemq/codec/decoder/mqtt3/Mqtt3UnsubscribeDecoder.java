@@ -17,69 +17,59 @@ package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.codec.decoder.MqttDecoder;
-import com.hivemq.logging.EventLog;
+import com.hivemq.codec.decoder.AbstractMqttDecoder;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
+import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
  * @author Dominik Obermaier
  */
 @LazySingleton
-public class Mqtt3UnsubscribeDecoder extends MqttDecoder<UNSUBSCRIBE> {
-
-    private static final Logger log = LoggerFactory.getLogger(Mqtt3UnsubscribeDecoder.class);
-    private final EventLog eventLog;
+public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @Inject
-    public Mqtt3UnsubscribeDecoder(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public Mqtt3UnsubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
+                                   final @NotNull FullConfigurationService fullConfigurationService) {
+        super(disconnector, fullConfigurationService);
     }
 
+    @Nullable
     @Override
-    public UNSUBSCRIBE decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public UNSUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a unsubscribe message with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid UNSUBSCRIBE fixed header");
-                channel.close();
+                disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
         } else if (ProtocolVersion.MQTTv3_1 == channel.attr(MQTT_VERSION).get()) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a unsubscribe message with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid UNSUBSCRIBE fixed header");
-                channel.close();
+                disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
         }
 
         if (buf.readableBytes() < 2) {
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a unsubscribe message with an invalid message id. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-            }
-            eventLog.clientWasDisconnected(channel, "Invalid UNSUBSCRIBE message id");
-            channel.close();
+            disconnectByNoMessageId(channel, MessageType.UNSUBSCRIBE);
             buf.clear();
             return null;
         }
@@ -88,12 +78,12 @@ public class Mqtt3UnsubscribeDecoder extends MqttDecoder<UNSUBSCRIBE> {
 
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
-            if (topic == null || topic.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a Unsubscribe message with an empty topic. Disconnecting client", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Sent UNSUBSCRIBE with empty topic");
-                channel.close();
+            if (isInvalidTopic(channel, topic)) {
+                disconnector.disconnect(channel,
+                        "A client (IP: {}) sent an UNSUBSCRIBE with an empty topic. This is not allowed. Disconnecting client.",
+                        "Sent UNSUBSCRIBE with an empty topic",
+                        Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
+                        ReasonStrings.DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC);
                 buf.clear();
                 return null;
             }
@@ -101,11 +91,11 @@ public class Mqtt3UnsubscribeDecoder extends MqttDecoder<UNSUBSCRIBE> {
         }
 
         if (topics.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a Unsubscribe message with an empty payload. Disconnecting client", getChannelIP(channel).or("UNKNOWN"));
-            }
-            eventLog.clientWasDisconnected(channel, "Sent UNSUBSCRIBE with empty payload");
-            channel.close();
+            disconnector.disconnect(channel,
+                    "A client (IP: {}) sent an UNSUBSCRIBE without topic filters. This is not allowed. Disconnecting client.",
+                    "Sent UNSUBSCRIBE without topic filters",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_NO_TOPIC_FILTERS);
             buf.clear();
             return null;
         }

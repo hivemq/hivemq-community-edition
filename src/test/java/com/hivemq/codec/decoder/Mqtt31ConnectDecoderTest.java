@@ -20,17 +20,15 @@ import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import org.junit.Before;
@@ -51,23 +49,38 @@ public class Mqtt31ConnectDecoderTest {
     private Channel channel;
 
     @Mock
+    private ChannelFuture channelFuture;
+
+    @Mock
     private EventLog eventLog;
+
+    private Mqtt31ConnectDecoder decoder;
+
+    @Mock
+    private Attribute<ProtocolVersion> protocolVersionAttribute;
 
     @Mock
     private MqttConnacker connacker;
 
-    private Mqtt31ConnectDecoder decoder;
+    @Mock
+    Attribute<String> clientIdAttr;
+
 
     private static final byte fixedHeader = 0b0001_0000;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        when(channel.writeAndFlush(any())).thenReturn(channelFuture);
         when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
+        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(clientIdAttr);
+        when(clientIdAttr.get()).thenReturn("clientId");
+        when(channel.attr(ChannelAttributes.MQTT_VERSION)).thenReturn(protocolVersionAttribute);
+        when(protocolVersionAttribute.get()).thenReturn(ProtocolVersion.MQTTv3_1);
+
         decoder = new Mqtt31ConnectDecoder(connacker,
-                new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
-                eventLog,
-                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()),
+                new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
 
@@ -281,7 +294,7 @@ public class Mqtt31ConnectDecoderTest {
         buf.writeBytes("willPayload".getBytes(UTF_8));
 
         decoder.decode(channel, buf, fixedHeader);
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(), any(), anyString(), any(), anyString());
 
     }
 
@@ -374,8 +387,7 @@ public class Mqtt31ConnectDecoderTest {
         final CONNECT connectPacket = decoder.decode(channel, buf, fixedHeader);
 
         assertNull(connectPacket);
-        verify(channel).writeAndFlush(any());
-        verify(cf).addListener(ChannelFutureListener.CLOSE);
+        verify(connacker).connackError(any(), any(), anyString(), any(), anyString());
     }
 
     @Test

@@ -25,7 +25,6 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnAuthSuccessEvent;
-import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
@@ -34,9 +33,9 @@ import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.limitation.TopicAliasLimiter;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.MessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
@@ -44,7 +43,6 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
-import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -89,17 +87,16 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull FullConfigurationService configurationService;
-    private final @NotNull EventLog eventLog;
     private final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider;
     private final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider;
     private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-    private final @NotNull ConnackSentListener connackSentListener = new ConnackSentListener();
     private final @NotNull Authorizers authorizers;
     private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     private int maxClientIdLength;
     private long configuredSessionExpiryInterval;
@@ -117,7 +114,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence,
             final @NotNull FullConfigurationService configurationService,
-            final @NotNull EventLog eventLog,
             final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider,
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
             final @NotNull MqttConnacker mqttConnacker,
@@ -126,13 +122,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull SharedSubscriptionService sharedSubscriptionService,
             final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
             final @NotNull Authorizers authorizers,
-            final @NotNull PluginAuthorizerService pluginAuthorizerService) {
+            final @NotNull PluginAuthorizerService pluginAuthorizerService,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.onSecondConnectHandler = onSecondConnectHandler;
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.configurationService = configurationService;
-        this.eventLog = eventLog;
         this.orderedTopicHandlerProvider = orderedTopicHandlerProvider;
         this.flowControlHandlerProvider = flowControlHandlerProvider;
         this.mqttConnacker = mqttConnacker;
@@ -142,6 +138,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.pluginAuthenticatorService = pluginAuthenticatorService;
         this.authorizers = authorizers;
         this.pluginAuthorizerService = pluginAuthorizerService;
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @PostConstruct
@@ -547,8 +544,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         sendConnackSuccess(ctx, msg, sessionPresent);
 
-        eventLog.clientConnected(ctx.channel());
-
         //We're removing ourselves
         try {
             ctx.pipeline().remove(this);
@@ -565,20 +560,18 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(msg);
 
         if (ProtocolVersion.MQTTv5 == msg.getProtocolVersion()) {
-
             final CONNACK connack = buildMqtt5Connack(ctx.channel(), msg, sessionPresent);
-            connackSent = ctx.writeAndFlush(connack);
+            connackSent = mqttConnacker.connackSuccess(ctx, connack);
 
         } else {
             ctx.channel().attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(msg.getSessionExpiryInterval());
             if (sessionPresent) {
-                connackSent = ctx.writeAndFlush(ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
+                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
             } else {
-                connackSent = ctx.writeAndFlush(ConnackMessages.ACCEPTED_MSG_NO_SESS);
+                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_NO_SESS);
             }
         }
 
-        connackSent.addListener(connackSentListener);
         //send out queued messages (from inflight and client-session queue) for client after connack is sent
         connackSent.addListener(new PollInflightMessageListener(publishPollService, ctx.channel().attr(ChannelAttributes.CLIENT_ID).get()));
     }
@@ -705,29 +698,18 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
+        oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
+
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
                 msg.getClientIdentifier());
 
-        oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
-        eventLog.clientWasDisconnected(oldClient, ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
-
-        final DISCONNECT disconnect = new DISCONNECT(
-                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+        mqttServerDisconnector.disconnect(oldClient,
+                null, //already logged
                 ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                null,
-                SESSION_EXPIRY_NOT_SET);
+                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
 
-        if (oldClient.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
-            oldClient.pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
-        }
-
-        if (ProtocolVersion.MQTTv5 == oldClient.attr(ChannelAttributes.MQTT_VERSION).get()) {
-            oldClient.writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
-        } else {
-            oldClient.close();
-        }
         disconnectFuture.addListener(() -> {
             channelPersistence.remove(msg.getClientIdentifier());
             Checkpoints.checkpoint("ClientTakeOverDisconnected");
@@ -756,7 +738,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                         msg.getClientIdentifier(), msg.getKeepAlive(), keepAlive, keepAliveValue);
             }
             ctx.pipeline().addFirst(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, new IdleStateHandler(keepAliveValue.intValue(), 0, 0, TimeUnit.SECONDS));
-            ctx.pipeline().addAfter(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, MQTT_KEEPALIVE_IDLE_HANDLER, new KeepAliveIdleHandler(eventLog));
+            ctx.pipeline().addAfter(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, MQTT_KEEPALIVE_IDLE_HANDLER, new KeepAliveIdleHandler(mqttServerDisconnector));
         } else {
             if(log.isTraceEnabled()) {
                 log.trace("Client {} specified keepAlive of 0. Disabling PING mechanism", msg.getClientIdentifier());

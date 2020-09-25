@@ -31,12 +31,12 @@ import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.TestMessageEncoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import util.TestMessageEncoder;
 import util.TestMessageUtil;
 
 import java.nio.charset.StandardCharsets;

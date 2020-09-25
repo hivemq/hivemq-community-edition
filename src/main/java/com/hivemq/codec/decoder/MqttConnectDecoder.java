@@ -24,20 +24,15 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
+import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
  * The MQTT 'parent' decoder which decides to which actual MQTT decoder the message is delegated to
@@ -47,26 +42,21 @@ import static com.hivemq.util.ChannelUtils.getChannelIP;
 @LazySingleton
 public class MqttConnectDecoder {
 
-    private static final Logger log = LoggerFactory.getLogger(MqttConnectDecoder.class);
-
     private final @NotNull Mqtt5ConnectDecoder mqtt5ConnectDecoder;
     private final @NotNull Mqtt311ConnectDecoder mqtt311ConnectDecoder;
     private final @NotNull Mqtt31ConnectDecoder mqtt31ConnectDecoder;
 
-    private final @NotNull EventLog eventLog;
+    private final @NotNull MqttConnacker mqttConnacker;
 
     @Inject
-    public MqttConnectDecoder(final @NotNull Mqtt5ServerDisconnector mqtt5disconnector,
-                              final @NotNull Mqtt3ServerDisconnector mqtt3disconnector,
-                              final @NotNull MqttConnacker mqttConnacker,
-                              final @NotNull EventLog eventLog,
+    public MqttConnectDecoder(final @NotNull MqttConnacker mqttConnacker,
                               final @NotNull FullConfigurationService fullConfigurationService,
                               final @NotNull HivemqId hiveMQId,
                               final @NotNull ClientIds clientIds) {
-        this.eventLog = eventLog;
-        mqtt5ConnectDecoder = new Mqtt5ConnectDecoder(mqttConnacker, mqtt5disconnector, hiveMQId, clientIds, fullConfigurationService);
-        mqtt311ConnectDecoder = new Mqtt311ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, clientIds, fullConfigurationService, hiveMQId);
-        mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, mqtt3disconnector, eventLog, clientIds, fullConfigurationService, hiveMQId);
+        this.mqttConnacker = mqttConnacker;
+        this.mqtt5ConnectDecoder = new Mqtt5ConnectDecoder(mqttConnacker, hiveMQId, clientIds, fullConfigurationService);
+        this.mqtt311ConnectDecoder = new Mqtt311ConnectDecoder(mqttConnacker, clientIds, fullConfigurationService, hiveMQId);
+        this.mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, clientIds, fullConfigurationService, hiveMQId);
     }
 
     public @Nullable CONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte fixedHeader) {
@@ -85,11 +75,11 @@ public class MqttConnectDecoder {
         //The reader index is now at the beginning of the variable MQTT header field. We're only
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
-            if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) connected with a packet without protocol version.", getChannelIP(channel).or("UNKNOWN"));
-            }
-            eventLog.clientWasDisconnected(channel, "CONNECT without protocol version");
-            channel.close();
+            mqttConnacker.connackError(channel,
+                    "A client (IP: {}) connected with a packet without protocol version.",
+                    "Sent CONNECT without protocol version",
+                    Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
+                    ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
             return null;
         }
 
@@ -137,12 +127,10 @@ public class MqttConnectDecoder {
     }
 
     private void connackInvalidProtocolVersion(final @NotNull Channel channel) {
-        final String logMessage = "A client (IP: {}) connected with an invalid protocol version.";
-        final String eventLogMessage = "CONNECT with an invalid protocol version.";
-        if (log.isDebugEnabled()) {
-            log.debug(logMessage, getChannelIP(channel).or("UNKNOWN"));
-        }
-        eventLog.clientWasDisconnected(channel, eventLogMessage);
-        channel.close();
+        mqttConnacker.connackError(channel,
+                "A client (IP: {}) connected with an invalid protocol version.",
+                "Sent CONNECT with an invalid protocol version",
+                Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
+                ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
     }
 }

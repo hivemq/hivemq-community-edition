@@ -21,8 +21,7 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -52,10 +51,7 @@ import static org.mockito.Mockito.verify;
 public class PublishAuthorizationProcessedTaskTest {
 
     @Mock
-    Mqtt5ServerDisconnector mqtt5ServerDisconnector;
-
-    @Mock
-    Mqtt3ServerDisconnector mqtt3ServerDisconnector;
+    MqttServerDisconnectorImpl mqtt5ServerDisconnector;
 
     @Mock
     IncomingPublishService incomingPublishService;
@@ -72,7 +68,7 @@ public class PublishAuthorizationProcessedTaskTest {
         channel = new EmbeddedChannel(new DummyHandler());
         ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
-        task = new PublishAuthorizationProcessedTask(publish, ctx, mqtt5ServerDisconnector, mqtt3ServerDisconnector, incomingPublishService);
+        task = new PublishAuthorizationProcessedTask(publish, ctx, mqtt5ServerDisconnector, incomingPublishService);
 
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         output = new PublishAuthorizerOutputImpl(asyncer);
@@ -123,7 +119,7 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
-        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(null), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
 
     @Test
@@ -134,7 +130,7 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
-        verify(mqtt3ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(null), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
 
     @Test

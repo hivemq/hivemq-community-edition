@@ -15,7 +15,7 @@
  */
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -46,7 +46,7 @@ public class ExceptionHandlerTest {
     Channel channel;
 
     @Mock
-    EventLog eventLog;
+    MqttServerDisconnector mqttServerDisconnector;
 
     private ExceptionHandler handler;
 
@@ -58,7 +58,7 @@ public class ExceptionHandlerTest {
         when(channel.pipeline()).thenReturn(pipeline);
         when(ctx.channel()).thenReturn(channel);
 
-        handler = new ExceptionHandler(eventLog);
+        handler = new ExceptionHandler(mqttServerDisconnector);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new SSLException("test"));
 
-        verify(channel, never()).close();
+        verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new ClosedChannelException());
 
-        verify(channel, never()).close();
+        verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new IOException());
 
-        verify(channel, never()).close();
+        verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new CorruptedFrameException());
 
-        verify(channel).close();
+        verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
@@ -98,9 +98,7 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new IllegalArgumentException("test"));
 
-        verify(channel, times(1)).close();
-
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
@@ -108,8 +106,6 @@ public class ExceptionHandlerTest {
 
         handler.exceptionCaught(ctx, new RuntimeException("test"));
 
-        verify(channel, times(1)).close();
-
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 }

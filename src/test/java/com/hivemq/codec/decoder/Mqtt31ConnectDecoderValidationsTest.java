@@ -19,31 +19,24 @@ import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
-import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
+import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.util.Attribute;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -56,9 +49,6 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
     @Mock
     private Attribute attribute;
-
-    @Mock
-    private EventLog eventLog;
 
     @Mock
     private FullConfigurationService fullConfigurationService;
@@ -79,9 +69,8 @@ public class Mqtt31ConnectDecoderValidationsTest {
         MockitoAnnotations.initMocks(this);
         when(fullConfigurationService.mqttConfiguration()).thenReturn(mqttConfigurationService);
         decoder = new Mqtt31ConnectDecoder(connacker,
-                new Mqtt3ServerDisconnector(new MqttDisconnectUtil(eventLog)),
-                eventLog,
-                new ClientIds(new HivemqId()), new TestConfigurationBootstrap().getFullConfigurationService(),
+                new ClientIds(new HivemqId()),
+                new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
 
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
@@ -89,6 +78,16 @@ public class Mqtt31ConnectDecoderValidationsTest {
         when(channel.attr(ChannelAttributes.CLEAN_START)).thenReturn(attribute);
     }
 
+    @Test
+    public void test_invalid_header() {
+
+        final ByteBuf buffer = Unpooled.buffer(12);
+        buffer.writeBytes(new byte[11]);
+
+        assertNull(decoder.decode(channel, buffer, fixedHeader));
+
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), anyString());
+    }
 
     @Test
     public void test_invalid_protocol_name_mqtt_invalid_case() {
@@ -97,10 +96,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeBytes(new byte[]{0, 6});
         buffer.writeBytes("Mqisdp".getBytes(UTF_8));
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[4]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
     @Test
@@ -110,10 +111,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeBytes(new byte[]{0, 6});
         buffer.writeBytes("QMIsdp".getBytes(UTF_8));
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[4]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
 
@@ -126,10 +129,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeByte(4);
         buffer.writeByte(0b0000_1000);
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[2]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -141,10 +146,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeByte(4);
         buffer.writeByte(0b0001_0000);
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[2]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -152,14 +159,16 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         final ByteBuf buffer = Unpooled.buffer(12);
         buffer.writeBytes(new byte[]{0, 6});
-        buffer.writeBytes("MQTT".getBytes(UTF_8));
+        buffer.writeBytes("MQIsdp".getBytes(UTF_8));
         buffer.writeByte(4);
         buffer.writeByte(0b0010_0000);
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[2]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -171,10 +180,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeByte(4);
         buffer.writeByte(0b0001_1100);
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[2]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -186,10 +197,12 @@ public class Mqtt31ConnectDecoderValidationsTest {
         buffer.writeByte(4);
         buffer.writeByte(0b0100_0000);
 
+        //fill the rest to have enough readable bytes.
+        buffer.writeBytes(new byte[2]);
+
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR), eq(ReasonStrings.CONNACK_PROTOCOL_ERROR_INVALID_USER_PASS_COMB_MQTT3));
     }
 
     @Test
@@ -208,8 +221,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -230,7 +242,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
@@ -251,12 +263,11 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        verify(channel).close();
-        verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test
-    public void test_invalid_persistent_session_but_no_user_name() {
+    public void test_invalid_persistent_session_but_no_client_id() {
 
         final ChannelFuture cf = mock(ChannelFuture.class);
 
@@ -274,13 +285,8 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         assertNull(decoder.decode(channel, buffer, fixedHeader));
 
-        final ArgumentCaptor<CONNACK> captor = ArgumentCaptor.forClass(CONNACK.class);
+        verify(connacker).connackError(any(Channel.class), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID), anyString());
 
-        verify(channel).writeAndFlush(captor.capture());
-
-        verify(cf).addListener(eq(ChannelFutureListener.CLOSE));
-
-        assertEquals(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED, captor.getValue().getReturnCode());
     }
 
 }

@@ -16,13 +16,13 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -62,9 +62,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 @LazySingleton
 public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
-
     @Inject
-    public Mqtt5AuthDecoder(final Mqtt5ServerDisconnector disconnector, final FullConfigurationService configurationService) {
+    public Mqtt5AuthDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
 
@@ -75,11 +74,7 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
         // validate fixed header
         if (!validateHeader(header)) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) sent an AUTH with incorrect fixed header. Disconnecting client.",
-                    "Sent AUTH with incorrect fixed header",
-                    Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
-                    ReasonStrings.DISCONNECT_MALFORMED_AUTH_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.AUTH);
             return null;
         }
 

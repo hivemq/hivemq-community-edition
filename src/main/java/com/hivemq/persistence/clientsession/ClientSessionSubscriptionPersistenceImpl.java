@@ -28,7 +28,9 @@ import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.SubscriptionFlags;
@@ -43,6 +45,7 @@ import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +75,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull Chunker chunker;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
     ClientSessionSubscriptionPersistenceImpl(final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence,
@@ -82,7 +86,8 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                                              final @NotNull EventLog eventLog,
                                              final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
                                              final @NotNull PublishPollService publishPollService,
-                                             final @NotNull Chunker chunker) {
+                                             final @NotNull Chunker chunker,
+                                             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.localPersistence = localPersistence;
         this.topicTree = topicTree;
@@ -93,6 +98,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.publishPollService = publishPollService;
         this.chunker = chunker;
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @NotNull
@@ -398,11 +404,16 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     }
 
     private void disconnectSharedSubscriberWithEmptyTopic(final @NotNull String clientId) {
-        log.debug("Client {} sent a shared subscription with empty topic.");
         final Channel channel = channelPersistence.get(clientId);
         if (channel != null) {
-            eventLog.clientWasDisconnected(channel, "Sent shared subscription with empty topic");
-            channel.close();
+            mqttServerDisconnector.disconnect(channel,
+                    "A client (IP: {}) sent a shared subscription with an empty topic. Disconnecting client.",
+                    "Sent shared subscription with empty topic",
+                    Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
+                    ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY);
+        } else {
+            //at least log if that happens
+            log.debug("Client {} sent a shared subscription with empty topic.", clientId);
         }
     }
 

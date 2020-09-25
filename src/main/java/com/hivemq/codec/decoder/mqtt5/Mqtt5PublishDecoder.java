@@ -24,8 +24,10 @@ import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.limitation.TopicAliasLimiter;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -48,24 +50,25 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
 @LazySingleton
 public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH> {
 
-    private final HivemqId hiveMQId;
+    private final @NotNull HivemqId hiveMQId;
     private final boolean validatePayloadFormat;
-    private final TopicAliasLimiter topicAliasLimiter;
+    private final @NotNull TopicAliasLimiter topicAliasLimiter;
 
     @VisibleForTesting
     @Inject
-    public Mqtt5PublishDecoder(final Mqtt5ServerDisconnector errorHandler,
-                               final HivemqId hiveMQId,
-                               final FullConfigurationService fullConfigurationService,
-                               final TopicAliasLimiter topicAliasLimiter) {
-        super(errorHandler, fullConfigurationService);
+    public Mqtt5PublishDecoder(final @NotNull MqttServerDisconnector disconnector,
+                               final @NotNull HivemqId hiveMQId,
+                               final @NotNull FullConfigurationService fullConfigurationService,
+                               final @NotNull TopicAliasLimiter topicAliasLimiter) {
+        super(disconnector, fullConfigurationService);
         this.hiveMQId = hiveMQId;
         this.validatePayloadFormat = fullConfigurationService.securityConfiguration().payloadFormatValidation();
         this.topicAliasLimiter = topicAliasLimiter;
     }
 
+    @Nullable
     @Override
-    public Mqtt5PUBLISH decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public Mqtt5PUBLISH decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         final int qos = decodeQoS(channel, header);
         if (qos == DISCONNECTED) {
@@ -125,7 +128,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
 
     }
 
-    private Mqtt5Builder readPublishPropertiesAndPayload(final Channel channel, final ByteBuf buf, final String topicName) {
+    private Mqtt5Builder readPublishPropertiesAndPayload(final @NotNull Channel channel, final @NotNull ByteBuf buf, final @Nullable String topicName) {
 
         final int propertiesLength = MqttVariableByteInteger.decode(buf);
 
@@ -198,7 +201,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
                     if (topicAlias == 0) {
                         disconnector.disconnect(channel,
                                 "A client (IP: {}) sent a PUBLISH with topic alias = '0'. This is not allowed. Disconnecting client.",
-                                "Sent a PUBLISH with topic alias = '0'", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                                "Sent a PUBLISH with topic alias = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                                 ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ZERO);
                         return null;
                     }
@@ -255,7 +258,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
 
     }
 
-    private Mqtt5Builder readTopicFromAliasMapping(final Channel channel, String topicName, final int topicAlias) {
+    private Mqtt5Builder readTopicFromAliasMapping(final @NotNull Channel channel, @Nullable String topicName, final int topicAlias) {
 
         boolean isNewTopicAlias = false;
         if (topicAlias != DEFAULT_NO_TOPIC_ALIAS) {
@@ -299,7 +302,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         } else if (topicName == null) {
             disconnector.disconnect(channel,
                     "A client (IP: {}) sent a PUBLISH with absent topic alias while topic name is zero length. This is not allowed. Disconnecting client.",
-                    "Sent a PUBLISH with absent topic alias while topic name is zero length", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                    "Sent a PUBLISH with absent topic alias while topic name is zero length", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ABSENT);
             return null;
         }
@@ -309,7 +312,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
                 .withTopic(topicName);
     }
 
-    private boolean topicAliasInvalid(final Channel channel, final ByteBuf buf, final int topicAlias) {
+    private boolean topicAliasInvalid(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int topicAlias) {
         if (topicAlias != DEFAULT_NO_TOPIC_ALIAS) {
             disconnectByMoreThanOnce(channel, "topic alias", MessageType.PUBLISH);
             return true;
@@ -321,7 +324,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         return false;
     }
 
-    private boolean propertiesLengthInvalid(final Channel channel, final ByteBuf buf, final int propertyLength) {
+    private boolean propertiesLengthInvalid(final @NotNull Channel channel, final @NotNull ByteBuf buf, final int propertyLength) {
         if (propertyLength < 0) {
             disconnectByMalformedPropertyLength(channel, MessageType.PUBLISH);
             return true;

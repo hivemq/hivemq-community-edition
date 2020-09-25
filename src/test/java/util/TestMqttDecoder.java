@@ -25,11 +25,10 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
+import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.util.ClientIds;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
@@ -59,17 +58,11 @@ public class TestMqttDecoder {
     public static MQTTMessageDecoder create(final boolean strict, final FullConfigurationService fullConfigurationService) {
 
         final EventLog eventLog = new EventLog();
-        final MqttDisconnectUtil mqttDisconnectUtil = new MqttDisconnectUtil(eventLog);
-        final MqttConnackSendUtil mqttConnackSendUtil = new MqttConnackSendUtil(eventLog);
-        final Mqtt5ServerDisconnector mqtt5ServerDisconnector = new Mqtt5ServerDisconnector(mqttDisconnectUtil);
-        final Mqtt3ServerDisconnector mqtt3ServerDisconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
-        final MqttConnacker mqttConnacker = new MqttConnacker(mqttConnackSendUtil);
         final HivemqId hiveMQId = new HivemqId();
+        final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog, hiveMQId);
+        final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
 
-        final MqttConnectDecoder mqttConnectDecoder = new MqttConnectDecoder(mqtt5ServerDisconnector,
-                mqtt3ServerDisconnector,
-                mqttConnacker,
-                eventLog,
+        final MqttConnectDecoder mqttConnectDecoder = new MqttConnectDecoder(mqttConnacker,
                 fullConfigurationService,
                 hiveMQId,
                 new ClientIds(hiveMQId));
@@ -78,28 +71,28 @@ public class TestMqttDecoder {
                 mqttConnectDecoder,
                 strict,
                 fullConfigurationService.mqttConfiguration(),
-                eventLog,
                 new MqttDecoders(new Mqtt3ConnackDecoder(eventLog),
-                        new Mqtt3PublishDecoder(hiveMQId, mqtt3ServerDisconnector, fullConfigurationService),
-                        new Mqtt3PubackDecoder(eventLog),
-                        new Mqtt3PubrecDecoder(eventLog),
-                        new Mqtt3PubcompDecoder(eventLog),
-                        new Mqtt3PubrelDecoder(eventLog),
-                        new Mqtt3DisconnectDecoder(eventLog),
-                        new Mqtt3SubscribeDecoder(eventLog),
-                        new Mqtt3UnsubscribeDecoder(eventLog),
-                        new Mqtt3SubackDecoder(eventLog),
-                        new Mqtt3UnsubackDecoder(eventLog),
-                        new MqttPingreqDecoder(eventLog),
-                        new Mqtt5PublishDecoder(mqtt5ServerDisconnector, hiveMQId, fullConfigurationService, new TopicAliasLimiterImpl()),
-                        new Mqtt5DisconnectDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5SubscribeDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5PubackDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5PubrecDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5PubrelDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5PubcompDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5AuthDecoder(mqtt5ServerDisconnector, fullConfigurationService),
-                        new Mqtt5UnsubscribeDecoder(mqtt5ServerDisconnector, fullConfigurationService)));
+                        new Mqtt3PublishDecoder(hiveMQId, disconnector, fullConfigurationService),
+                        new Mqtt3PubackDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3PubrecDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3PubcompDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3PubrelDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3DisconnectDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3SubscribeDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3UnsubscribeDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3SubackDecoder(disconnector, fullConfigurationService),
+                        new Mqtt3UnsubackDecoder(disconnector, fullConfigurationService),
+                        new MqttPingreqDecoder(disconnector),
+                        new Mqtt5PublishDecoder(disconnector, hiveMQId, fullConfigurationService, new TopicAliasLimiterImpl()),
+                        new Mqtt5DisconnectDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5SubscribeDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5PubackDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5PubrecDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5PubrelDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5PubcompDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5AuthDecoder(disconnector, fullConfigurationService),
+                        new Mqtt5UnsubscribeDecoder(disconnector, fullConfigurationService))
+                , disconnector);
     }
 
 }

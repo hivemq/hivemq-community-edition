@@ -20,14 +20,14 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.puback.PUBACK;
-import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
-import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
@@ -45,18 +45,16 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
     @VisibleForTesting
     @Inject
-    public Mqtt5PubackDecoder(final Mqtt5ServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
+    public Mqtt5PubackDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
     }
 
+    @Nullable
     @Override
-    public PUBACK decode(final Channel channel, final ByteBuf buf, final byte header) {
+    public PUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnector.disconnect(channel,
-                    "A client (IP: {}) disconnected with an invalid fixed header. Disconnecting client.",
-                    "Invalid PUBACK fixed header", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    ReasonStrings.DISCONNECT_PROTOCOL_ERROR_PUBACK_HEADER);
+            disconnectByInvalidFixedHeader(channel, MessageType.PUBACK);
             return null;
         }
 

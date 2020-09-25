@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
@@ -32,9 +33,8 @@ import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -95,10 +95,6 @@ public class PluginAuthorizerServiceImplTest {
     @Mock
     private HiveMQExtensions hiveMQExtensions;
     @Mock
-    private Mqtt3ServerDisconnector mqtt3Disconnector;
-    @Mock
-    private Mqtt5ServerDisconnector mqtt5Disconnector;
-    @Mock
     private EventLog eventLog;
     @Mock
     private IncomingPublishService incomingPublishService;
@@ -108,6 +104,7 @@ public class PluginAuthorizerServiceImplTest {
     private EmbeddedChannel channel;
     private ChannelHandlerContext channelHandlerContext;
     private CollectUserEventsHandler<AuthorizeWillResultEvent> eventsHandler;
+    private MqttServerDisconnector mqttServerDisconnector;
 
     @Before
     public void setUp() throws Exception {
@@ -132,10 +129,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
 
-        final MqttDisconnectUtil mqttDisconnectUtil = new MqttDisconnectUtil(new EventLog());
-
-        mqtt5Disconnector = new Mqtt5ServerDisconnector(mqttDisconnectUtil);
-        mqtt3Disconnector = new Mqtt3ServerDisconnector(mqttDisconnectUtil);
+        mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
 
         final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
         pluginAuthorizerService = new PluginAuthorizerServiceImpl(authorizers,
@@ -143,9 +137,7 @@ public class PluginAuthorizerServiceImplTest {
                 pluginTaskExecutorService,
                 serverInformation,
                 hiveMQExtensions,
-                mqtt3Disconnector,
-                mqtt5Disconnector,
-                eventLog,
+                mqttServerDisconnector,
                 incomingPublishService);
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);

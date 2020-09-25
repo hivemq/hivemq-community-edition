@@ -21,8 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
@@ -76,9 +75,7 @@ public class ClientSessionPersistenceImplTest {
     @Mock
     private PendingWillMessages pendingWillMessages;
     @Mock
-    private Mqtt5ServerDisconnector mqtt5ServerDisconnector;
-    @Mock
-    private Mqtt3ServerDisconnector mqtt3ServerDisconnector;
+    private MqttServerDisconnector mqttServerDisconnector;
     @Mock
     private ChannelPersistenceImpl channelPersistence;
 
@@ -89,7 +86,7 @@ public class ClientSessionPersistenceImplTest {
         MockitoAnnotations.initMocks(this);
         clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence, clientQueuePersistence,
                 TestSingleWriterFactory.defaultSingleWriter(), channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
-                mqtt5ServerDisconnector, mqtt3ServerDisconnector, new Chunker());
+                mqttServerDisconnector, new Chunker());
     }
 
     @Test
@@ -162,7 +159,7 @@ public class ClientSessionPersistenceImplTest {
         final Boolean result = future.get();
         assertTrue(result);
         verify(pendingWillMessages).cancelWill("client");
-        verify(mqtt5ServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), any());
+        verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), any());
     }
 
     @Test
@@ -176,7 +173,7 @@ public class ClientSessionPersistenceImplTest {
         final Boolean result = future.get();
         assertTrue(result);
         verify(pendingWillMessages).cancelWill("client");
-        verify(mqtt5ServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER), eq("reason-string"));
+        verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER), eq("reason-string"));
     }
 
     @Test

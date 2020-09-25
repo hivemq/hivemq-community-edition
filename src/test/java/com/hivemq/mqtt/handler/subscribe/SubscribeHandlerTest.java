@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
@@ -27,6 +28,7 @@ import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.subscribe.retained.RetainedMessagesSender;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -98,12 +100,14 @@ public class SubscribeHandlerTest {
 
     private EmbeddedChannel channel;
     private SubscribeHandler handler;
+    private HivemqId hivemqId;
 
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        handler = new SubscribeHandler(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, eventLog, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService);
+        hivemqId = new HivemqId();
+        handler = new SubscribeHandler(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog, hivemqId));
 
         channel = new EmbeddedChannel(handler);
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
@@ -281,7 +285,6 @@ public class SubscribeHandlerTest {
         assertTrue(handler.batch(topics));
     }
 
-
     @Test
     public void test_subscribe_wildcard_disabled_mqtt5() {
         when(mqttConfigurationService.wildcardSubscriptionsEnabled()).thenReturn(false);
@@ -293,14 +296,8 @@ public class SubscribeHandlerTest {
 
         channel.writeInbound(subscribe);
 
-        final Queue<Object> objects = channel.outboundMessages();
-
-        assertEquals(1, objects.size());
-
-        final SUBACK response = (SUBACK) objects.element();
-        assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5SubAckReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED.getCode(), response.getReasonCodes().get(0).getCode());
-
+        assertFalse(channel.isActive());
+        
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
     }
 
@@ -315,14 +312,8 @@ public class SubscribeHandlerTest {
 
         channel.writeInbound(subscribe);
 
-        final Queue<Object> objects = channel.outboundMessages();
-
-        assertEquals(1, objects.size());
-
-        final SUBACK response = (SUBACK) objects.element();
-        assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR.getCode(), response.getReasonCodes().get(0).getCode());
-
+        assertFalse(channel.isActive());
+        
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
     }
 
@@ -352,13 +343,7 @@ public class SubscribeHandlerTest {
 
         channel.writeInbound(subscribe);
 
-        final Queue<Object> objects = channel.outboundMessages();
-
-        assertEquals(1, objects.size());
-
-        final SUBACK response = (SUBACK) objects.element();
-        assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5SubAckReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED.getCode(), response.getReasonCodes().get(0).getCode());
+        assertFalse(channel.isActive());
 
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
     }
@@ -375,13 +360,7 @@ public class SubscribeHandlerTest {
 
         channel.writeInbound(subscribe);
 
-        final Queue<Object> objects = channel.outboundMessages();
-
-        assertEquals(1, objects.size());
-
-        final SUBACK response = (SUBACK) objects.element();
-        assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR.getCode(), response.getReasonCodes().get(0).getCode());
+        assertFalse(channel.isActive());
 
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
     }

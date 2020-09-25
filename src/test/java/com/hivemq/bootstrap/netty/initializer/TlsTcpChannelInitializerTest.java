@@ -17,11 +17,14 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -88,9 +91,13 @@ public class TlsTcpChannelInitializerTest {
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
+        when(socketChannel.isActive()).thenReturn(true);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
 
-        tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, ssl, eventLog);
+        final MqttServerDisconnector mqttServerDisconnector =new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
+
+        tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, ssl);
 
     }
 

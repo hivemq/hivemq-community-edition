@@ -30,9 +30,7 @@ import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.logging.EventLog;
-import com.hivemq.mqtt.handler.disconnect.Mqtt3ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
-import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.AbstractPersistence;
@@ -78,8 +76,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
 
     private final @NotNull PendingWillMessages pendingWillMessages;
-    private final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector;
-    private final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull Chunker chunker;
 
     @Inject
@@ -91,8 +88,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                                         final @NotNull EventLog eventLog,
                                         final @NotNull PublishPayloadPersistence publishPayloadPersistence,
                                         final @NotNull PendingWillMessages pendingWillMessages,
-                                        final @NotNull Mqtt5ServerDisconnector mqtt5ServerDisconnector,
-                                        final @NotNull Mqtt3ServerDisconnector mqtt3ServerDisconnector,
+                                        final @NotNull MqttServerDisconnector mqttServerDisconnector,
                                         final @NotNull Chunker chunker) {
 
 
@@ -105,9 +101,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         this.eventLog = eventLog;
         this.publishPayloadPersistence = publishPayloadPersistence;
         this.pendingWillMessages = pendingWillMessages;
-
-        this.mqtt5ServerDisconnector = mqtt5ServerDisconnector;
-        this.mqtt3ServerDisconnector = mqtt3ServerDisconnector;
+        this.mqttServerDisconnector = mqttServerDisconnector;
         this.chunker = chunker;
     }
 
@@ -251,18 +245,13 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(session.getSessionExpiryInterval());
         }
 
-        final ProtocolVersion version = channel.attr(ChannelAttributes.MQTT_VERSION).get();
         final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);
         final String eventLogMessage = "Disconnected via extension system";
 
         final Mqtt5DisconnectReasonCode usedReasonCode =
                 reasonCode == null ? Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION : Mqtt5DisconnectReasonCode.valueOf(reasonCode.name());
 
-        if (version == ProtocolVersion.MQTTv5) {
-            mqtt5ServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
-        } else {
-            mqtt3ServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
-        }
+        mqttServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
 
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
         channel.closeFuture().addListener((ChannelFutureListener) future -> {

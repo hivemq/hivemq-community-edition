@@ -41,7 +41,7 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -78,7 +78,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
     private final @NotNull ConnectHandler connectHandler;
     private final @NotNull MqttConnacker connacker;
-    private final @NotNull Mqtt5ServerDisconnector disconnector;
+    private final @NotNull MqttServerDisconnector disconnector;
     private final @NotNull MqttAuthSender authSender;
     private final @NotNull Authenticators authenticators;
     private final @NotNull ChannelDependencies channelDependencies;
@@ -93,7 +93,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     public PluginAuthenticatorServiceImpl(
             final @NotNull ConnectHandler connectHandler,
             final @NotNull MqttConnacker connacker,
-            final @NotNull Mqtt5ServerDisconnector disconnector,
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull MqttAuthSender authSender,
             final @NotNull FullConfigurationService configurationService,
             final @NotNull Authenticators authenticators,
@@ -265,7 +265,8 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
                     reasonString,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    true);
+                    true,
+                    false);
         } else {
             connacker.connackError(
                     ctx.channel(),
@@ -287,7 +288,8 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                     ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    true);
+                    true,
+                    false);
         } else {
             connacker.connackError(
                     ctx.channel(),

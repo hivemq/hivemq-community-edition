@@ -22,6 +22,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ public class ThrottlingModuleTest {
                 bind(SystemInformation.class).toInstance(mock(SystemInformation.class));
                 bind(RestrictionsConfigurationService.class).toInstance(mock(RestrictionsConfigurationService.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
+                bind(MqttConnacker.class).toInstance(mock(MqttConnacker.class));
             }
         });
     }

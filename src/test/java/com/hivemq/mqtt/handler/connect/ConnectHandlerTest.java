@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -41,10 +42,9 @@ import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
-import com.hivemq.mqtt.handler.connack.MqttConnackSendUtil;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
-import com.hivemq.mqtt.handler.disconnect.Mqtt5ServerDisconnector;
-import com.hivemq.mqtt.handler.disconnect.MqttDisconnectUtil;
+import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
@@ -128,6 +128,7 @@ public class ConnectHandlerTest {
     private ModifiableDefaultPermissions defaultPermissions;
 
     private final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
+    private MqttServerDisconnectorImpl serverDisconnector;
 
     @Before
     public void setUp() throws Exception {
@@ -143,8 +144,8 @@ public class ConnectHandlerTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
-        final MqttConnackSendUtil connackSendUtil = new MqttConnackSendUtil(eventLog);
-        mqttConnacker = new MqttConnacker(connackSendUtil);
+        mqttConnacker = new MqttConnackerImpl(eventLog);
+        serverDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
 
         when(channelPersistence.get(anyString())).thenReturn(null);
 
@@ -655,6 +656,7 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
@@ -693,6 +695,7 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
@@ -735,6 +738,7 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
@@ -782,6 +786,7 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
@@ -1441,14 +1446,14 @@ public class ConnectHandlerTest {
         final Provider<OrderedTopicHandler> orderedTopicHandlerProvider =
                 () -> new OrderedTopicHandlerDummy();
         final Provider<FlowControlHandler> flowControlHandlerProvider =
-                () -> new FlowControlHandler(configurationService.mqttConfiguration(),
-                        new Mqtt5ServerDisconnector(new MqttDisconnectUtil(new EventLog())));
+                () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
 
         handler = new ConnectHandler(new DisconnectClientOnConnectMessageHandler(eventLog), clientSessionPersistence,
-                channelPersistence, configurationService, eventLog,
+                channelPersistence, configurationService,
                 orderedTopicHandlerProvider, flowControlHandlerProvider, mqttConnacker,
                 new TopicAliasLimiterImpl(),
-                mock(PublishPollService.class), mock(SharedSubscriptionService.class), internalAuthServiceImpl, authorizers, pluginAuthorizerService);
+                mock(PublishPollService.class), mock(SharedSubscriptionService.class),
+                internalAuthServiceImpl, authorizers, pluginAuthorizerService, serverDisconnector);
 
         handler.postConstruct();
         embeddedChannel.pipeline()

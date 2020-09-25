@@ -16,18 +16,18 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.logging.EventLog;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
  * @author Florian Limpöck
@@ -35,15 +35,14 @@ import static com.hivemq.util.ChannelUtils.getChannelIP;
 @LazySingleton
 public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
 
-    private static final Logger log = LoggerFactory.getLogger(MqttPingreqDecoder.class);
-
-    private final @NotNull EventLog eventLog;
+    private final @NotNull MqttServerDisconnector serverDisconnector;
 
     @Inject
-    public MqttPingreqDecoder(final @NotNull EventLog eventLog) {
-        this.eventLog = eventLog;
+    public MqttPingreqDecoder(final @NotNull MqttServerDisconnector serverDisconnector) {
+        this.serverDisconnector = serverDisconnector;
     }
 
+    @Nullable
     @Override
     public PINGREQ decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
 
@@ -52,11 +51,11 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
         //Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (ProtocolVersion.MQTTv5 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
             if (!validateHeader(header)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("A client (IP: {}) sent a ping with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(channel, "Invalid PINGREQ fixed header");
-                channel.close();
+                serverDisconnector.disconnect(channel,
+                        "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
+                        "Sent a PINGREQ with invalid fixed header",
+                        Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
+                        String.format(ReasonStrings.DISCONNECT_MALFORMED_FIXED_HEADER, "PINGREQ"));
                 buf.clear();
                 return null;
             }

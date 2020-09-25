@@ -15,14 +15,14 @@
  */
 package com.hivemq.mqtt.handler.connect;
 
-import com.hivemq.logging.EventLog;
-import com.hivemq.util.ChannelUtils;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.util.ReasonStrings;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This handler disconnects MQTT clients if they were idle for too long
@@ -32,26 +32,23 @@ import org.slf4j.LoggerFactory;
  */
 public class KeepAliveIdleHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(KeepAliveIdleHandler.class);
-    private final EventLog eventLog;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
-    public KeepAliveIdleHandler(final EventLog eventLog) {
-        this.eventLog = eventLog;
+    public KeepAliveIdleHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     @Override
-    public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
+    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) throws Exception {
 
         if (evt instanceof IdleStateEvent) {
 
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                if (log.isDebugEnabled()) {
-
-                    log.debug("Client with IP {} disconnected. The client was idle for too long without sending a MQTT control packet",
-                            ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
-                }
-                eventLog.clientWasDisconnected(ctx.channel(), "Client was idle for too long");
-                ctx.close();
+                mqttServerDisconnector.disconnect(ctx.channel(),
+                        "Client with IP {} disconnected. The client was idle for too long without sending a MQTT control packet",
+                        "Client was idle for too long",
+                        Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT,
+                        ReasonStrings.DISCONNECT_KEEP_ALIVE_TIMEOUT);
                 return;
             }
         }
