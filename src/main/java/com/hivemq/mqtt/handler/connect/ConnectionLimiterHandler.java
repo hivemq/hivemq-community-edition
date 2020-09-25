@@ -18,9 +18,10 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -42,7 +43,7 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
 
     private final static Logger log = LoggerFactory.getLogger(ConnectionLimiterHandler.class);
 
-    private final @NotNull EventLog eventLog;
+    private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull OpenConnectionsGauge openConnectionsGauge;
     private volatile long maxConnections;
@@ -50,10 +51,10 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
 
     @Inject
     public ConnectionLimiterHandler(
-            final @NotNull EventLog eventLog,
+            final @NotNull MqttConnacker mqttConnacker,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
             final @NotNull OpenConnectionsGauge openConnectionsGauge) {
-        this.eventLog = eventLog;
+        this.mqttConnacker = mqttConnacker;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.openConnectionsGauge = openConnectionsGauge;
     }
@@ -85,8 +86,11 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
 
             if (currentCount > maxConnections) {
                 log.warn("The connection limit ({}) is reached. ClientID ({}) connection denied.", maxConnections, connect.getClientIdentifier());
-                eventLog.clientWasDisconnected(ctx.channel(),"The configured maximum amount of connections is reached.");
-                ctx.close();
+                mqttConnacker.connackError(ctx.channel(),
+                        null, // logged on warn
+                        "The configured maximum amount of connections is reached",
+                        Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED,
+                        null);
                 return;
             } else if (warnThreshold > 0 && currentCount >= warnThreshold) {
                 log.warn("The amount of connections ({}) is close to its limit ({}).", currentCount, maxConnections);

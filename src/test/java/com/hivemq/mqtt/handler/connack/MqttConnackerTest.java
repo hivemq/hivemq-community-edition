@@ -270,8 +270,8 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -295,8 +295,8 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -320,8 +320,8 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
@@ -345,8 +345,8 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.PLUGIN_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.PLUGIN_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
+        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
         channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
