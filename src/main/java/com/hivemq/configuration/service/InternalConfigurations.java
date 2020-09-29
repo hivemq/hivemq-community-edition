@@ -203,6 +203,18 @@ public class InternalConfigurations {
     //The block size used by rocksdb for the retained message persistence in bytes
     public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE = 32 * 1024;
 
+    // The period with which stats are written to the LOG file in seconds. Periodic writes are disabled when set to '0'.
+    public static final int ROCKSDB_STATS_PERSIST_PERIOD = 0;
+
+    // The maximum size of each LOG file in bytes
+    public static final int ROCKSDB_MAX_LOG_FILE_SIZE = 1024 * 500; // 500KB
+
+    // The maximum amount of LOG files per RocksDB (bucket)
+    public static final int ROCKSDB_LOG_FILE_NUMBER = 2;
+
+    // The maximum size stats history buffer that is used to dump stats to the LOG file
+    public static final int ROCKSDB_STATS_HISTORY_BUFFER_SIZE = 64 * 1024; // 64KB
+
 
     /**
      * The live time of a entry in the shared subscriber cache in milliseconds

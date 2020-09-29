@@ -19,6 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.persistence.FilePersistence;
 import com.hivemq.persistence.LocalPersistence;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -116,6 +117,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
 
+            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
+            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
+            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
+            options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
+
             for (int i = 0; i < bucketCount; i++) {
                 final File persistenceFile = new File(persistenceFolder, name + "_" + i);
                 final RocksDB rocksDB = RocksDB.open(options, persistenceFile.getAbsolutePath());
@@ -150,6 +156,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             tableConfig.setBlockSize(blockSize);
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
+
+            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
+            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
+            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
+            options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
 
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
             final CountDownLatch counter = new CountDownLatch(bucketCount);
