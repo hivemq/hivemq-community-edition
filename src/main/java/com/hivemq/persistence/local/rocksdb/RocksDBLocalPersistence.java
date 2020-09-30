@@ -118,6 +118,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setWriteBufferSize(memtableSize);
 
             options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
+            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
             options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
             options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
             options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
@@ -158,6 +159,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setWriteBufferSize(memtableSize);
 
             options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
+            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
             options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
             options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
             options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
