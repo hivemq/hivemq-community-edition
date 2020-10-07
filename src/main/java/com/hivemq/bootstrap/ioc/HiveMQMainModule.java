@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.bootstrap.ioc;
 
-import com.hivemq.common.annotations.Internal;
 import com.hivemq.mqtt.topic.TokenizedTopicMatcher;
 import com.hivemq.mqtt.topic.TopicMatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.prefs.Preferences;
 
 /**
  * @author Dominik Obermaier
  * @author Christoph Schäbel
  */
 public class HiveMQMainModule extends SingletonModule {
-    private static final Logger log = LoggerFactory.getLogger(HiveMQMainModule.class);
 
     public HiveMQMainModule() {
         super(HiveMQMainModule.class);
@@ -37,7 +32,5 @@ public class HiveMQMainModule extends SingletonModule {
     @Override
     protected void configure() {
         bind(TopicMatcher.class).to(TokenizedTopicMatcher.class);
-        bind(Preferences.class).annotatedWith(Internal.class).toInstance(Preferences.userRoot().node("hivemq"));
     }
-
 }
