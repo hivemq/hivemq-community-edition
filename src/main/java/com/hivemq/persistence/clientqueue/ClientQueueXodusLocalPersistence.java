@@ -174,7 +174,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         Preconditions.checkNotNull(buckets, "Buckets must be initialized at this point");
 
         for (int i = 0; i < buckets.length; i++) {
-            qos0MessageBuckets.put(i, new HashMap<>());
+            qos0MessageBuckets.put(i, new ConcurrentHashMap<>());
             queueSizeBuckets.put(i, new ConcurrentSkipListMap<>());
             retainedQueueSizeBuckets.put(i, new ConcurrentHashMap<>());
         }
