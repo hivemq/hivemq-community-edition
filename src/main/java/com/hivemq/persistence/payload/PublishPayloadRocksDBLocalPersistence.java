@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.payload;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -26,6 +27,7 @@ import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
+import com.hivemq.util.PhysicalMemoryUtil;
 import org.rocksdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +45,15 @@ import static com.hivemq.persistence.payload.PublishPayloadRocksDBSerializer.ser
 public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersistence implements PublishPayloadLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
+    private static final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
 
     public static final String PERSISTENCE_VERSION = "040000_R";
+    private final long memtableSize;
 
     private long maxId = 0;
+
+    private int bytesInCurrentMemtable = 0;
+
 
     @Inject
     public PublishPayloadRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
@@ -58,6 +65,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
+        memtableSize = PhysicalMemoryUtil.physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
     }
 
     @NotNull
@@ -118,6 +126,14 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         final RocksDB bucket = getRocksDb(Long.toString(id));
         try {
             bucket.put(serializeKey(id), payload);
+            bytesInCurrentMemtable += payload.length;
+            if (bytesInCurrentMemtable >= memtableSize) {
+                bucket.flush(FLUSH_OPTIONS);
+                if (log.isDebugEnabled()) {
+                    log.debug("Hard flushing memTable due to exceeding memTable limit {}.", memtableSize);
+                }
+                bytesInCurrentMemtable = 0;
+            }
         } catch (final RocksDBException e) {
             log.error("Could not put a payload because of an exception: ", e);
         }
@@ -167,10 +183,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         }
     }
 
-    @Override
-    public long getMaxId() {
-        return maxId;
-    }
 
     @Override
     public void iterate(final @NotNull Callback callback) {
@@ -185,4 +197,20 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
             }
         }
     }
+
+
+    @VisibleForTesting
+    int getBytesInCurrentMemtable() {
+        return bytesInCurrentMemtable;
+    }
+
+    @Override
+    public long getMaxId() {
+        return maxId;
+    }
+
+    public long getMemtableSize() {
+        return memtableSize;
+    }
+
 }

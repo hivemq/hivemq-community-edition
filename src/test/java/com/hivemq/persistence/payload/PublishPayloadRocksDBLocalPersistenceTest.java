@@ -151,4 +151,23 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         assertEquals(false, allIds.contains(1L));
     }
 
+
+    @Test
+    public void put_bigPayloads_memtableFlushed() {
+
+        final long memtableSize = persistence.getMemtableSize();
+
+        int bytesPuttedIn = 0;
+
+        final byte[] payload1 = "payload".getBytes();
+
+        while (bytesPuttedIn < memtableSize) {
+            assertEquals(bytesPuttedIn, persistence.getBytesInCurrentMemtable());
+            persistence.put(0L, payload1);
+            bytesPuttedIn += payload1.length;
+        }
+        //after flush memtable must be empty
+        assertEquals(0, persistence.getBytesInCurrentMemtable());
+    }
+
 }
