@@ -154,20 +154,24 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
 
     @Test
     public void put_bigPayloads_memtableFlushed() {
-
         final long memtableSize = persistence.getMemtableSize();
-
-        int bytesPuttedIn = 0;
-
+        long bytesPuttedIn = 0L;
         final byte[] payload1 = "payload".getBytes();
-
         while (bytesPuttedIn < memtableSize) {
-            assertEquals(bytesPuttedIn, persistence.getBytesInCurrentMemtable());
+            for (final long memTableSize : persistence.getRocksdbToMemTableSize()) {
+                //skip the empty entries
+                if (memTableSize == 0) {
+                    continue;
+                }
+                assertEquals(bytesPuttedIn, memTableSize);
+            }
             persistence.put(0L, payload1);
             bytesPuttedIn += payload1.length;
         }
-        //after flush memtable must be empty
-        assertEquals(0, persistence.getBytesInCurrentMemtable());
+        //after flush memTable must be empty (all -  because the others were empty already)
+        for (final long memTableSize : persistence.getRocksdbToMemTableSize()) {
+            assertEquals(0L, memTableSize);
+        }
     }
 
 }

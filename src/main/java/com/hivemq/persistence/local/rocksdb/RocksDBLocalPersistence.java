@@ -222,6 +222,12 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         return buckets[BucketUtils.getBucket(key, bucketCount)];
     }
 
+
+    @NotNull
+    protected int getBucketIndex(final @NotNull String key) {
+        return BucketUtils.getBucket(key, bucketCount);
+    }
+
     protected void checkBucketIndex(final int bucketIndex) {
         checkArgument(bucketIndex >= 0 && bucketIndex < buckets.length, "Invalid bucket index: " + bucketIndex);
     }

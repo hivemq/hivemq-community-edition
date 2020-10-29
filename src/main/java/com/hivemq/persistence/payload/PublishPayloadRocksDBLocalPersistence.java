@@ -52,8 +52,8 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     private long maxId = 0;
 
-    private int bytesInCurrentMemtable = 0;
-
+    @NotNull
+    private long[] rocksdbToMemTableSize;
 
     @Inject
     public PublishPayloadRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
@@ -66,6 +66,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
         memtableSize = PhysicalMemoryUtil.physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
     }
 
     @NotNull
@@ -123,17 +124,20 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @Override
     public void put(final long id, @NotNull final byte[] payload) {
         checkNotNull(payload, "payload must not be null");
-        final RocksDB bucket = getRocksDb(Long.toString(id));
+        final int index = getBucketIndex(Long.toString(id));
+        final RocksDB bucket = buckets[index];;
         try {
             bucket.put(serializeKey(id), payload);
-            bytesInCurrentMemtable += payload.length;
-            if (bytesInCurrentMemtable >= memtableSize) {
+            long currentSize = rocksdbToMemTableSize[index];
+            currentSize += payload.length;
+            if (currentSize >= memtableSize) {
                 bucket.flush(FLUSH_OPTIONS);
                 if (log.isDebugEnabled()) {
                     log.debug("Hard flushing memTable due to exceeding memTable limit {}.", memtableSize);
                 }
-                bytesInCurrentMemtable = 0;
+                currentSize = 0L;
             }
+            rocksdbToMemTableSize[index] = currentSize;
         } catch (final RocksDBException e) {
             log.error("Could not put a payload because of an exception: ", e);
         }
@@ -200,8 +204,8 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
 
     @VisibleForTesting
-    int getBytesInCurrentMemtable() {
-        return bytesInCurrentMemtable;
+    long[] getRocksdbToMemTableSize() {
+        return rocksdbToMemTableSize;
     }
 
     @Override
