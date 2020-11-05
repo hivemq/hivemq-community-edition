@@ -127,7 +127,8 @@ public class ClientQueueXodusLocalPersistenceTest {
         }
 
         assertEquals(100, counter.get());
-        assertEquals((Long.MAX_VALUE / 2) + 99, ClientQueuePersistenceSerializer.NEXT_PUBLISH_NUMBER.get());
+        // Highest sequence number is 99 therefore the next number has to be 100
+        assertEquals((Long.MAX_VALUE / 2) + 100, ClientQueuePersistenceSerializer.NEXT_PUBLISH_NUMBER.get());
 
     }
 
