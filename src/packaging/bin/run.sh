@@ -23,7 +23,7 @@ echo '                 |_|  |_||_|  \_/  \___||_|  |_| \___\_\'
 echo
 echo "-------------------------------------------------------------------------"
 echo ""
-echo "  HiveMQ Start Script for Linux/Unix v1.11"
+echo "  HiveMQ Start Script for Linux/Unix v1.12"
 echo ""
 
 echoerr() { printf "%s\n" "$*" >&2; }
