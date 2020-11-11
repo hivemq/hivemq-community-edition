@@ -79,7 +79,7 @@ if hash java 2>/dev/null; then
             else
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=\"$HIVEMQ_FOLDER/heap-dump.hprof\""
+                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HIVEMQ_FOLDER/heap-dump.hprof"
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
