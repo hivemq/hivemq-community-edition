@@ -23,7 +23,7 @@ echo '                 |_|  |_||_|  \_/  \___||_|  |_| \___\_\'
 echo
 echo "-------------------------------------------------------------------------"
 echo ""
-echo "  HiveMQ Start Script for Linux/Unix v1.11"
+echo "  HiveMQ Start Script for Linux/Unix v1.12"
 echo ""
 
 echoerr() { printf "%s\n" "$*" >&2; }
@@ -79,7 +79,7 @@ if hash java 2>/dev/null; then
             else
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=\"$HIVEMQ_FOLDER/heap-dump.hprof\""
+                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HIVEMQ_FOLDER/heap-dump.hprof"
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
