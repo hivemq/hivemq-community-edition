@@ -87,7 +87,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.hivemq:hivemq-extension-sdk:${property('hivemq-extension-sdk.version')}")
+    api("com.hivemq:hivemq-extension-sdk:${property('hivemq-extension-sdk.version')}")
 
     /* netty */
     implementation("io.netty:netty-buffer:${property('netty.version')}")
