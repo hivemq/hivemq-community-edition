@@ -20,8 +20,7 @@ import com.hivemq.embedded.internal.EmbeddedExtensionBuilderImpl;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.DoNotImplement;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-
-import javax.annotation.Nullable;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Florian Limpöck
