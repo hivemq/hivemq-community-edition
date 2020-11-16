@@ -50,7 +50,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -212,8 +215,8 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         final MessageWithID messageWithID = serializer.deserializeValue(cursor.getValue());
                         if (messageWithID instanceof PUBLISH) {
                             final long deserializeIndex = serializer.deserializeIndex(cursor.getKey());
-                            if (nextMessageIndex.get() < deserializeIndex) {
-                                nextMessageIndex.set(deserializeIndex);
+                            if (nextMessageIndex.get() <= deserializeIndex) {
+                                nextMessageIndex.set(deserializeIndex + 1);
                             }
                             final PUBLISH publish = (PUBLISH) messageWithID;
                             payloadPersistence.incrementReferenceCounterOnBootstrap(publish.getPayloadId());
