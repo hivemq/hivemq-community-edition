@@ -77,6 +77,9 @@ public class InternalConfigurations {
     // The configuration for qos 0 memory limit per client, must be greater than 0.
     public static final AtomicInteger QOS_0_MEMORY_LIMIT_PER_CLIENT = new AtomicInteger(1024 * 1024 * 5);
 
+    // The configuration for shared sub caching of publish without packet-id
+    public static final AtomicInteger SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE = new AtomicInteger(10000);
+
     // The amount of qos 0 messages that are queued if the channel is not writable
     public static final AtomicInteger NOT_WRITABLE_QUEUE_SIZE = new AtomicInteger(1000);
 
