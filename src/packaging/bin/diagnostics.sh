@@ -66,6 +66,12 @@ if hash java 2>/dev/null; then
         HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
     fi
 
+    if [ -z "$HEAPDUMP_FOLDER" ]; then
+        HEAPDUMP_PATH="$HIVEMQ_FOLDER"
+    else
+        HEAPDUMP_PATH="$HEAPDUMP_HOME"
+    fi
+
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
         echoerr "ERROR! HiveMQ Home Folder not found."
     else
@@ -80,7 +86,8 @@ if hash java 2>/dev/null; then
             else
                 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
                 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HIVEMQ_FOLDER/heap-dump.hprof"
+                HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HEAPDUMP_PATH/heap-dump.hprof"
+                ERROR_FILE_PATH_OPT="-XX:ErrorFile=$HEAPDUMP_PATH/hs_err_pid%p.log"
 
                 echo "-------------------------------------------------------------------------"
                 echo ""
@@ -94,7 +101,7 @@ if hash java 2>/dev/null; then
                 echo ""
                 # Run HiveMQ
                 JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
-                exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
+                exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" "${ERROR_FILE_PATH_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
             fi
         fi
     fi
