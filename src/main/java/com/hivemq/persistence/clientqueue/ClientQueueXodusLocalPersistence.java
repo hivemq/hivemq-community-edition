@@ -105,7 +105,11 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     @NotNull
     private final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap;
 
-    private final @NotNull Cache<String, Long> sharedSubLastPacketWithoutIdCache;
+    // this caches the lower bound for a publish without packet-id,
+    // the cached index is guaranteed to be lower or equal to the index
+    //so it is safe to seek to this index without missing a publish without packet-id
+    @VisibleForTesting
+    final @NotNull Cache<String, Long> sharedSubLastPacketWithoutIdCache;
 
 
     @Inject
@@ -1070,12 +1074,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     }
 
     private int skipWithPacketId(
-            @NotNull final ByteIterable serializedKey, @NotNull final Cursor cursor, int comparison, String queueId, boolean isShared) {
+            @NotNull final ByteIterable serializedKey, @NotNull final Cursor cursor, int comparison) {
         while (comparison == ClientQueuePersistenceSerializer.CLIENT_ID_MATCH) {
             if (serializer.deserializePacketId(cursor.getValue()) == ClientQueuePersistenceSerializer.NO_PACKET_ID) {
-                if (isShared) {
-                    incrementSharedSubscriptionIndexFirstMessageWithoutPacketId(queueId, serializer.deserializeIndex(cursor.getKey()));
-                }
                 break;
             }
             comparison = compareNextClientId(serializedKey, cursor);
@@ -1097,20 +1098,30 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final Cursor cursor, @NotNull final Key key, final boolean skipWithId, @NotNull final Callback callback) {
         final ByteIterable serializedKey = serializer.serializeKey(key);
 
-        final Long indexToLookTo = sharedSubLastPacketWithoutIdCache.getIfPresent(key.getQueueId());
-        if (skipWithId && indexToLookTo != null) {
-            final ByteIterable keyToSeek = serializer.serializeKey(key, indexToLookTo);
-            if (cursor.getSearchKeyRange(keyToSeek) == null) {
-                return;
-            }
-        } else {
+        if (!skipWithId) {
             if (cursor.getSearchKeyRange(serializedKey) == null) {
                 return;
             }
+        } else {
+            final Long indexToLookTo = sharedSubLastPacketWithoutIdCache.getIfPresent(key.getQueueId());
+            if (indexToLookTo != null) {
+                final ByteIterable keyToSeek = serializer.serializeKey(key, indexToLookTo);
+                if (cursor.getSearchKeyRange(keyToSeek) == null) {
+                    return;
+                }
+            } else {
+                if (cursor.getSearchKeyRange(serializedKey) == null) {
+                    return;
+                }
+            }
         }
+
         int comparison = skipPrefix(serializedKey, cursor);
         if (skipWithId) {
-            comparison = skipWithPacketId(serializedKey, cursor, comparison, key.getQueueId(), key.isShared());
+            comparison = skipWithPacketId(serializedKey, cursor, comparison);
+            if (key.isShared()) {
+                incrementSharedSubscriptionIndexFirstMessageWithoutPacketId(key.getQueueId(), serializer.deserializeIndex(cursor.getKey()));
+            }
         }
         while (comparison == ClientQueuePersistenceSerializer.CLIENT_ID_MATCH) {
             if (!callback.call()) {
