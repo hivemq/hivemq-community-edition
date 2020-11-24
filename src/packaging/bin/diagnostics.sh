@@ -69,7 +69,7 @@ if hash java 2>/dev/null; then
     if [ -z "$HEAPDUMP_FOLDER" ]; then
         HEAPDUMP_PATH="$HIVEMQ_FOLDER"
     else
-        HEAPDUMP_PATH="$HEAPDUMP_HOME"
+        HEAPDUMP_PATH="$HEAPDUMP_FOLDER"
     fi
 
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
