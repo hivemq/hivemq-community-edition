@@ -52,7 +52,6 @@ public class PUBLISHFactory {
         private @Nullable QoS qoS;
         private long messageExpiryInterval = MESSAGE_EXPIRY_INTERVAL_NOT_SET;
         private @Nullable String hivemqId;
-        private @Nullable Long payloadId;
         private @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
         private @Nullable String contentType;
         private @Nullable String responseTopic;
@@ -72,11 +71,10 @@ public class PUBLISHFactory {
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
-            this.payloadId = publish.getPayloadId();
             this.duplicateDelivery = publish.isDuplicateDelivery();
             this.packetIdentifier = publish.getPacketIdentifier();
             this.persistence = publish.getPersistence();
-            this.publishId = publish.getLocalPublishId();
+            this.publishId = publish.getPublishId();
             this.userProperties = publish.getUserProperties();
             this.responseTopic = publish.getResponseTopic();
             this.correlationData = publish.getCorrelationData();
@@ -97,7 +95,7 @@ public class PUBLISHFactory {
             return new PUBLISH(hivemqId, topic, payload, qoS, retain, messageExpiryInterval,
                     payloadFormatIndicator, contentType, responseTopic, correlationData,
                     userProperties, packetIdentifier, duplicateDelivery, isNewTopicAlias, subscriptionIdentifiers,
-                    persistence, payloadId, timestamp, publishId);
+                    persistence, timestamp, publishId);
         }
 
         @NotNull
@@ -145,12 +143,6 @@ public class PUBLISHFactory {
         @NotNull
         public Mqtt5Builder withHivemqId(final @Nullable String hivemqId) {
             this.hivemqId = hivemqId;
-            return this;
-        }
-
-        @NotNull
-        public Mqtt5Builder withPayloadId(final @Nullable Long payloadId) {
-            this.payloadId = payloadId;
             return this;
         }
 
@@ -226,7 +218,6 @@ public class PUBLISHFactory {
         private boolean retain;
 
         private long messageExpiryInterval = MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-        private @Nullable Long payloadId;
         private boolean duplicateDelivery;
 
         private int packetIdentifier;
@@ -243,11 +234,10 @@ public class PUBLISHFactory {
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
-            this.payloadId = publish.getPayloadId();
             this.duplicateDelivery = publish.isDuplicateDelivery();
             this.packetIdentifier = publish.getPacketIdentifier();
             this.persistence = publish.getPersistence();
-            this.publishId = publish.getLocalPublishId();
+            this.publishId = publish.getPublishId();
             return this;
         }
 
@@ -259,7 +249,7 @@ public class PUBLISHFactory {
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
             return new PUBLISH(hivemqId, topic, payload, qoS, retain,
-                    messageExpiryInterval, payloadId, persistence, packetIdentifier, duplicateDelivery, publishId, timestamp);
+                    messageExpiryInterval, persistence, packetIdentifier, duplicateDelivery, publishId, timestamp);
         }
 
         @NotNull
@@ -311,12 +301,6 @@ public class PUBLISHFactory {
         }
 
         @NotNull
-        public Mqtt3Builder withPayloadId(final @Nullable Long payloadId) {
-            this.payloadId = payloadId;
-            return this;
-        }
-
-        @NotNull
         public Mqtt3Builder withDuplicateDelivery(final boolean duplicateDelivery) {
             this.duplicateDelivery = duplicateDelivery;
             return this;
@@ -342,7 +326,7 @@ public class PUBLISHFactory {
 
         return new Mqtt5Builder()
                 .withTimestamp(origin.getTimestamp())
-                .withPublishId(origin.getLocalPublishId())
+                .withPublishId(origin.getPublishId())
                 .withHivemqId(origin.getHivemqId())
                 .withTopic(packet.getTopic())
                 .withQoS(QoS.from(packet.getQos()))
@@ -351,7 +335,6 @@ public class PUBLISHFactory {
                 .withMessageExpiryInterval(packet.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))
                 .withDuplicateDelivery(packet.getDupFlag())
                 .withPacketIdentifier(packet.getPacketId())
-                .withPayloadId(origin.getPayloadId())
                 .withPersistence(origin.getPersistence())
                 .withPayloadFormatIndicator(payloadFormatIndicator)
                 .withContentType(packet.getContentType().orElse(null))

@@ -63,15 +63,15 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     private static final Logger log = LoggerFactory.getLogger(ClientQueueMemoryLocalPersistence.class);
 
     private static final int NO_PACKET_ID = 0;
-    
+
     private final @NotNull MessageDroppedService messageDroppedService;
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;
 
-    final private @NotNull Map<Key, LinkedList<MessageWithID>> @NotNull[] qos12MessageBuckets;
-    private final @NotNull Map<Key, LinkedList<PublishWithRetained>> @NotNull[] qos0MessageBuckets;
-    private final @NotNull Map<Key, AtomicInteger> @NotNull[] queueSizeBuckets;
-    private final @NotNull Map<Key, AtomicInteger> @NotNull[] retainedQueueSizeBuckets;
+    final private @NotNull Map<Key, LinkedList<MessageWithID>> @NotNull [] qos12MessageBuckets;
+    private final @NotNull Map<Key, LinkedList<PublishWithRetained>> @NotNull [] qos0MessageBuckets;
+    private final @NotNull Map<Key, AtomicInteger> @NotNull [] queueSizeBuckets;
+    private final @NotNull Map<Key, AtomicInteger> @NotNull [] retainedQueueSizeBuckets;
 
     //must be concurrent
     private final @NotNull Map<String, AtomicInteger> clientQos0MemoryMap;
@@ -233,7 +233,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 messageDroppedService.qos0MemoryExceeded(
                         key.getQueueId(), publishWithRetained.getTopic(), 0, currentQos0MessagesMemory, qos0MemoryLimit);
             }
-            payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+            payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
             return;
         }
 
@@ -241,7 +241,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             final AtomicInteger clientQos0Memory = clientQos0MemoryMap.get(key.getQueueId());
             if (clientQos0Memory != null && clientQos0Memory.get() >= qos0ClientMemoryLimit) {
                 messageDroppedService.qos0MemoryExceeded(key.getQueueId(), publishWithRetained.getTopic(), 0, clientQos0Memory.get(), qos0ClientMemoryLimit);
-                payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+                payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 return;
             }
         }
@@ -257,7 +257,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         increaseMessagesMemory(publishWithRetained.getEstimatedSize());
     }
 
-    
+
     /**
      * {@inheritDoc}
      */
@@ -298,18 +298,18 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Iterator<MessageWithID> iterator = messageQueue.iterator();
         while (iterator.hasNext()) {
             final MessageWithID messageWithID = iterator.next();
-            if(!(messageWithID instanceof PublishWithRetained)){
+            if (!(messageWithID instanceof PublishWithRetained)) {
                 continue;
             }
             final PublishWithRetained publishWithRetained = (PublishWithRetained) messageWithID;
-            if(publishWithRetained.getPacketIdentifier() != NO_PACKET_ID){
+            if (publishWithRetained.getPacketIdentifier() != NO_PACKET_ID) {
                 //already inflight
                 continue;
             }
 
             if (PublishUtil.checkExpiry(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
                 iterator.remove();
-                payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+                payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                 if (publishWithRetained.retained) {
                     getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -338,7 +338,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     bytes += qos0Publish.getEstimatedSizeInMemory();
                 }
             }
-            if((messageCount == countLimit) || (bytes > bytesLimit)){
+            if ((messageCount == countLimit) || (bytes > bytesLimit)) {
                 break;
             }
         }
@@ -381,7 +381,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         increaseQos0MessagesMemory(-publishWithRetained.getEstimatedSize());
         increaseClientQos0MessagesMemory(key, -publishWithRetained.getEstimatedSize());
         increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
-        payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+        payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
         return publishWithRetained;
     }
 
@@ -418,7 +418,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 publishWithRetained.setDuplicateDelivery(true);
             }
 
-            if((messageCount == batchSize) || (bytes > bytesLimit)){
+            if ((messageCount == batchSize) || (bytes > bytesLimit)) {
                 break;
             }
         }
@@ -458,7 +458,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (messageWithID instanceof PublishWithRetained) {
                     final PublishWithRetained publish = (PublishWithRetained) messageWithID;
                     retained = publish.retained;
-                    payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     increaseMessagesMemory(-publish.getEstimatedSize());
                     pubrel.setExpiryInterval(publish.getMessageExpiryInterval());
                     pubrel.setPublishTimestamp(publish.getTimestamp());
@@ -473,7 +473,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             }
         }
         final PubrelWithRetained pubrelWithRetained = new PubrelWithRetained(pubrel, retained);
-        if(packetIdFound) {
+        if (packetIdFound) {
             messageQueue.set(messageIndexInQueue, pubrelWithRetained);
         } else {
             getOrPutQueueSize(key, bucketIndex).incrementAndGet();
@@ -508,7 +508,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         final Iterator<MessageWithID> iterator = messageQueue.iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             final MessageWithID messageWithID = iterator.next();
             if (messageWithID.getPacketIdentifier() == packetId) {
                 String removedId = null;
@@ -517,7 +517,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     if (uniqueId != null && !uniqueId.equals(publish.getUniqueId())) {
                         break;
                     }
-                    payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     removedId = publish.getUniqueId();
                 }
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -532,7 +532,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         return null;
     }
 
-   
+
     /**
      * {@inheritDoc}
      */
@@ -573,7 +573,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         for (final MessageWithID messageWithID : messageQueue) {
             if (messageWithID instanceof PublishWithRetained) {
-                payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(((PublishWithRetained) messageWithID).getPayloadId()));
+                payloadPersistence.decrementReferenceCounter(((PublishWithRetained) messageWithID).getPublishId());
             }
             increaseMessagesMemory(-getMessageSize(messageWithID));
         }
@@ -585,7 +585,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             increaseQos0MessagesMemory(-qos0Message.getEstimatedSize());
             increaseClientQos0MessagesMemory(key, -qos0Message.getEstimatedSize());
             increaseMessagesMemory(-qos0Message.getEstimatedSize());
-            payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(qos0Message.getPayloadId()));
+            payloadPersistence.decrementReferenceCounter(qos0Message.getPublishId());
         }
         bucketMessages.remove(key);
         queueSizeBuckets[bucketIndex].remove(key);
@@ -605,7 +605,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Map<Key, LinkedList<PublishWithRetained>> bucketMessages = qos0MessageBuckets[bucketIndex];
         final LinkedList<PublishWithRetained> publishesWithRetained = getOrPutQos0MessageQueue(key, bucketMessages);
         for (final PublishWithRetained publishWithRetained : publishesWithRetained) {
-            payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+            payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
             getOrPutQueueSize(key, bucketIndex).decrementAndGet();
             if (publishWithRetained.retained) {
                 getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -654,14 +654,14 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Map<Key, LinkedList<MessageWithID>> bucket = qos12MessageBuckets[bucketIndex];
         final LinkedList<MessageWithID> messageQueue = getOrPutMessageQueue(key, bucket);
         final Iterator<MessageWithID> iterator = messageQueue.iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             final MessageWithID messageWithID = iterator.next();
             if (messageWithID instanceof PublishWithRetained) {
                 final PublishWithRetained publish = (PublishWithRetained) messageWithID;
                 if (!uniqueId.equals(publish.getUniqueId())) {
                     continue;
                 }
-                payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
+                payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                 if (publish.retained) {
                     getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -717,20 +717,20 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     }
 
     private int getMessageSize(final @NotNull MessageWithID messageWithID) {
-        if(messageWithID instanceof PublishWithRetained){
+        if (messageWithID instanceof PublishWithRetained) {
             return ((PublishWithRetained) messageWithID).getEstimatedSize();
         }
-        if(messageWithID instanceof PubrelWithRetained){
+        if (messageWithID instanceof PubrelWithRetained) {
             return ((PubrelWithRetained) messageWithID).getEstimatedSize();
         }
         return 0;
     }
 
     private boolean isRetained(final @NotNull MessageWithID messageWithID) {
-        if(messageWithID instanceof PublishWithRetained){
+        if (messageWithID instanceof PublishWithRetained) {
             return ((PublishWithRetained) messageWithID).retained;
         }
-        if(messageWithID instanceof PubrelWithRetained){
+        if (messageWithID instanceof PubrelWithRetained) {
             return ((PubrelWithRetained) messageWithID).retained;
         }
         return false;
@@ -790,7 +790,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             } else {
                 clientQos0Memory.addAndGet(size + ObjectMemoryEstimation.linkedListNodeOverhead());
             }
-            if(clientQos0Memory.get() <= 0){
+            if (clientQos0Memory.get() <= 0) {
                 return null; //this removes the AtomicInteger
             }
             return clientQos0Memory;
@@ -810,12 +810,12 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Iterator<MessageWithID> iterator = publishes.iterator();
         while (iterator.hasNext()) {
             final MessageWithID messageWithID = iterator.next();
-            if(!(messageWithID instanceof PublishWithRetained)){
+            if (!(messageWithID instanceof PublishWithRetained)) {
                 continue;
             }
             final PublishWithRetained publish = (PublishWithRetained) messageWithID;
             // we must no discard inflight messages
-            if(publish.getPacketIdentifier() != NO_PACKET_ID){
+            if (publish.getPacketIdentifier() != NO_PACKET_ID) {
                 continue;
             }
             // Messages that are queued as retained messages are not discarded,
@@ -835,7 +835,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     private void logAndDecrementPayloadReference(
             final @NotNull PUBLISH publish, final boolean shared, final @NotNull String queueId) {
         logMessageDropped(publish, shared, queueId);
-        payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
+        payloadPersistence.decrementReferenceCounter(publish.getPublishId());
     }
 
 
@@ -851,7 +851,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 increaseQos0MessagesMemory(-publishWithRetained.getEstimatedSize());
                 increaseClientQos0MessagesMemory(key, -publishWithRetained.getEstimatedSize());
                 increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
-                payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publishWithRetained.getPayloadId()));
+                payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 if (publishWithRetained.retained) {
                     getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
                 }
@@ -889,7 +889,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
                 final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                 if (drop) {
-                    payloadPersistence.decrementReferenceCounter(Objects.requireNonNull(publish.getPayloadId()));
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                     if (publish.retained) {
                         getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -916,7 +916,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     private @NotNull AtomicInteger getOrPutQueueSizeFromBucket(
             final @NotNull Key key, final @NotNull Map<Key, AtomicInteger> queueSizeBucket) {
         return queueSizeBucket.compute(key, (ignore, queueSize) -> {
-            if(queueSize == null){
+            if (queueSize == null) {
                 return new AtomicInteger();
             }
             return queueSize;
@@ -926,7 +926,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     @NotNull
     private LinkedList<PublishWithRetained> getOrPutQos0MessageQueue(@NotNull final Key key, final @NotNull Map<Key, LinkedList<PublishWithRetained>> bucket) {
         return bucket.compute(key, (ignore, publishes) -> {
-            if(publishes == null){
+            if (publishes == null) {
                 return new LinkedList<>();
             }
             return publishes;
@@ -936,7 +936,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     @NotNull
     private LinkedList<MessageWithID> getOrPutMessageQueue(@NotNull final Key key, final @NotNull Map<Key, LinkedList<MessageWithID>> bucket) {
         return bucket.compute(key, (ignore, publishes) -> {
-            if(publishes == null){
+            if (publishes == null) {
                 return new LinkedList<>();
             }
             return publishes;
@@ -958,11 +958,11 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         private final boolean retained;
 
         PublishWithRetained(@NotNull final PUBLISH publish, final boolean retained) {
-            super(publish, publish.getPayloadId(), publish.getPersistence());
+            super(publish, publish.getPersistence());
             this.retained = retained;
         }
 
-        int getEstimatedSize(){
+        int getEstimatedSize() {
             return getEstimatedSizeInMemory()  // publish
                     + ObjectMemoryEstimation.objectShellSize() // the object itself
                     + ObjectMemoryEstimation.booleanSize(); // retain flag
@@ -983,7 +983,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             this.retained = retained;
         }
 
-        private int getEstimatedSize(){
+        private int getEstimatedSize() {
             return getEstimatedSizeInMemory()  // publish
                     + ObjectMemoryEstimation.objectShellSize() // the object itself
                     + ObjectMemoryEstimation.booleanSize(); // retain flag

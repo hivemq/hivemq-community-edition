@@ -483,7 +483,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish == null) {
             return;
         }
-        payloadPersistence.decrementReferenceCounter(willPublish.getPayloadId());
+        payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
     }
 
     private void checkForPayloadExistence(final @NotNull ClientSession clientSession, final boolean dereference) {
@@ -494,11 +494,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish.getPayload() != null) {
             return;
         }
-        final Long payloadId = willPublish.getPayloadId();
-        final byte[] payload = payloadPersistence.getPayloadOrNull(payloadId);
+        final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
-            log.warn("Will Payload for payloadid {} not found", payloadId);
+            log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());
             return;
         }
         if (dereference) {

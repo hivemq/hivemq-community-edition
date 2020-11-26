@@ -39,7 +39,7 @@ public class RetainedMessage {
 
     private final @NotNull QoS qos;
 
-    private @Nullable Long payloadId;
+    private long publishId;
 
     private final long messageExpiryInterval;
 
@@ -60,12 +60,12 @@ public class RetainedMessage {
     public RetainedMessage(
             @Nullable final byte[] message,
             @NotNull final QoS qos,
-            @Nullable final Long payloadId,
+            final long publishId,
             final long messageExpiryInterval) {
         this(
                 message,
                 qos,
-                payloadId,
+                publishId,
                 messageExpiryInterval,
                 Mqtt5UserProperties.NO_USER_PROPERTIES,
                 null,
@@ -78,7 +78,7 @@ public class RetainedMessage {
     public RetainedMessage(
             @Nullable final byte[] message,
             @NotNull final QoS qos,
-            @Nullable final Long payloadId,
+            final long publishId,
             final long messageExpiryInterval,
             @NotNull final Mqtt5UserProperties userProperties,
             @Nullable final String responseTopic,
@@ -89,7 +89,7 @@ public class RetainedMessage {
         Preconditions.checkNotNull(qos, "QoS must not be null");
         this.message = message;
         this.qos = qos;
-        this.payloadId = payloadId;
+        this.publishId = publishId;
         this.messageExpiryInterval = messageExpiryInterval;
         this.userProperties = userProperties;
         this.responseTopic = responseTopic;
@@ -100,10 +100,11 @@ public class RetainedMessage {
     }
 
     public RetainedMessage(
-            @NotNull final PUBLISH publish, @Nullable final Long payloadId, final long messageExpiryInterval) {
+            @NotNull final PUBLISH publish,
+            final long messageExpiryInterval) {
         this.message = publish.getPayload();
         this.qos = publish.getQoS();
-        this.payloadId = payloadId;
+        this.publishId = publish.getPublishId();
         this.messageExpiryInterval = messageExpiryInterval;
         this.userProperties = publish.getUserProperties();
         this.responseTopic = publish.getResponseTopic();
@@ -117,7 +118,7 @@ public class RetainedMessage {
         return new RetainedMessage(
                 null,
                 qos,
-                payloadId,
+                publishId,
                 messageExpiryInterval,
                 userProperties,
                 responseTopic,
@@ -173,12 +174,8 @@ public class RetainedMessage {
         return messageExpiryInterval;
     }
 
-    public @Nullable Long getPayloadId() {
-        return payloadId;
-    }
-
-    public void setPayloadId(final long payloadId) {
-        this.payloadId = payloadId;
+    public long getPublishId() {
+        return publishId;
     }
 
     public @Nullable String getResponseTopic() {
@@ -228,7 +225,7 @@ public class RetainedMessage {
     @Override
     public int hashCode() {
 
-        int result = Objects.hash(qos, payloadId, messageExpiryInterval, userProperties);
+        int result = Objects.hash(qos, publishId, messageExpiryInterval, userProperties);
         result = 31 * result + Arrays.hashCode(message);
         return result;
     }

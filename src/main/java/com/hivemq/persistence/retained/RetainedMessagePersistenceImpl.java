@@ -24,6 +24,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
+import com.hivemq.extensions.services.publish.RetainedPublishImpl;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.AbstractPersistence;
 import com.hivemq.persistence.ProducerQueues;
@@ -85,8 +86,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                 if (retainedMessage == null) {
                     return null;
                 }
-                final long payloadId = payloadPersistence.add(retainedMessage.getMessage(), 1);
-                retainedMessage.setPayloadId(payloadId);
+                payloadPersistence.add(retainedMessage.getMessage(), 1, retainedMessage.getPublishId());
                 return retainedMessage;
             });
 
@@ -122,10 +122,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
             checkNotNull(topic, "Topic must not be null");
             checkNotNull(retainedMessage, "Retained message must not be null");
 
-            if (retainedMessage.getPayloadId() == null) {
-                final long payloadId = payloadPersistence.add(retainedMessage.getMessage(), 1);
-                retainedMessage.setPayloadId(payloadId);
-            }
+            payloadPersistence.add(retainedMessage.getMessage(), 1, retainedMessage.getPublishId());
 
             return singleWriter.submit(topic, (bucketIndex, queueBuckets, queueIndex) -> {
                 localPersistence.put(retainedMessage, topic, bucketIndex);

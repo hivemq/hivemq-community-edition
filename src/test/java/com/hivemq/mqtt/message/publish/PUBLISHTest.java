@@ -54,81 +54,6 @@ public class PUBLISHTest {
             ObjectMemoryEstimation.enumSize() +  // QoS
             ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_with_payload_id_null_persistence() {
-
-        new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPayloadId(1L)
-                .withUserProperties(Mqtt5UserProperties.of())
-                .build();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_with_payload_id_null_persistence_Mqtt3() {
-
-        new PUBLISHFactory.Mqtt3Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPayloadId(1L)
-                .build();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_null_payload_id_with_persistence() {
-
-        new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
-                .withUserProperties(Mqtt5UserProperties.of())
-                .build();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_null_payload_id_with_persistence_mqtt3() {
-
-        new PUBLISHFactory.Mqtt3Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
-                .build();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_neither_payload_nor_payload_id_set() {
-
-        new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
-                .withUserProperties(Mqtt5UserProperties.of())
-                .build();
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_publish_neither_payload_nor_payload_id_set_mqtt3() {
-
-        new PUBLISHFactory.Mqtt3Builder()
-                .withHivemqId("hivemqId")
-                .withTopic("topic")
-                .withQoS(QoS.AT_MOST_ONCE)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
-                .build();
-
-    }
-
     @Test(expected = NullPointerException.class)
     public void test_publish_qos_null() {
 
@@ -191,7 +116,7 @@ public class PUBLISHTest {
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic")
                 .withUserProperties(Mqtt5UserProperties.of())
@@ -200,7 +125,7 @@ public class PUBLISHTest {
         final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic")
                 .build();
@@ -267,7 +192,7 @@ public class PUBLISHTest {
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();

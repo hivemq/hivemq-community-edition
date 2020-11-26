@@ -30,19 +30,14 @@ public interface Mqtt3PUBLISH extends Message {
     String getHivemqId();
 
     /**
-     * @return the local id of the publish message
-     */
-    long getLocalPublishId();
-
-    /**
      * @return the unique id of the publish message
      */
     String getUniqueId();
 
     /**
-     * @return the payload id of the publish message
+     * @return the pulish id of the publish message
      */
-    Long getPayloadId();
+    long getPublishId();
 
     /**
      * @return the payload of the publish message

@@ -195,7 +195,7 @@ public class RetainedMessagesSender {
                         .withTimestamp(System.currentTimeMillis())
                         .withHivemqId(hivemqId.get())
                         .withPayload(retainedMessage.getMessage())
-                        .withPayloadId(retainedMessage.getPayloadId())
+                        .withPublishId(retainedMessage.getPublishId())
                         .withPersistence(payloadPersistence)
                         .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
                         .withTopic(subscribedTopic.getTopic())
@@ -217,7 +217,7 @@ public class RetainedMessagesSender {
         private void sendOutMessages(final @NotNull List<PUBLISH> publishs) {
             if (!channel.isActive()) {
                 for (final PUBLISH publish : publishs) {
-                    payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 }
                 resultFuture.setException(CLOSED_CHANNEL_EXCEPTION);
                 return;
@@ -271,7 +271,7 @@ public class RetainedMessagesSender {
                         resultFuture.setException(new ClosedChannelException());
                     }
 
-                    payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     if (publish.getPacketIdentifier() != 0) {
                         final MessageIDPool messageIDPool = messageIDPools.forClientOrNull(clientId);
                         if (messageIDPool != null) {
@@ -295,7 +295,7 @@ public class RetainedMessagesSender {
                         //response has already been sent by callback from ChannelInactiveHandler
                         return;
                     }
-                    payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 }
             }, MoreExecutors.directExecutor());
 
@@ -321,7 +321,7 @@ public class RetainedMessagesSender {
             }
 
             final PublishWithFuture event =
-                    new PublishWithFuture(publish, publishFuture, publish.getPayloadId(), false, payloadPersistence);
+                    new PublishWithFuture(publish, publishFuture, false, payloadPersistence);
             channel.pipeline().fireUserEventTriggered(event);
             return resultFuture;
         }

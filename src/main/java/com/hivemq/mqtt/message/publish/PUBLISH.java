@@ -48,7 +48,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     public static final long MESSAGE_EXPIRY_INTERVAL_NOT_SET = Long.MAX_VALUE;
     public static final long MESSAGE_EXPIRY_INTERVAL_MAX = UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE;
 
-    private static final AtomicLong PUBLISH_COUNTER = new AtomicLong(1);
+    public static final AtomicLong PUBLISH_COUNTER = new AtomicLong(1);
     protected long timestamp;
 
     private @Nullable byte[] payload;
@@ -70,8 +70,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     private final @Nullable ImmutableIntArray subscriptionIdentifiers;
 
     private final @Nullable PublishPayloadPersistence persistence;
-    private @Nullable
-    final Long payloadId;
 
     private int sizeInMemory = SIZE_NOT_CALCULATED;
 
@@ -93,7 +91,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             final boolean isNewTopicAlias,
             @Nullable final ImmutableIntArray subscriptionIdentifiers,
             final @Nullable PublishPayloadPersistence persistence,
-            final @Nullable Long payloadId,
             final long timestamp,
             final long publishId) {
 
@@ -102,12 +99,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         Preconditions.checkNotNull(hivemqId, "HivemqId may never be null");
         Preconditions.checkNotNull(topic, "Topic may never be null");
         Preconditions.checkNotNull(qos, "Quality of service may never be null");
-
-        Preconditions.checkArgument(payloadId != null || payload != null,
-                "Payload and Payload ID must never be null at the same time");
-        if (payloadId != null) {
-            Preconditions.checkArgument(persistence != null, "Persistence must be present if Payload ID is present");
-        }
 
         this.topic = topic;
         this.payload = payload;
@@ -139,7 +130,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         setPacketIdentifier(packetIdentifier);
 
         this.persistence = persistence;
-        this.payloadId = payloadId;
     }
 
     //MQTT 3
@@ -150,7 +140,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             @NotNull final QoS qos,
             final boolean isRetain,
             final long messageExpiryInterval,
-            @Nullable final Long payloadId,
             @Nullable final PublishPayloadPersistence publishPayloadPersistence,
             final int packetIdentifier,
             final boolean isDup,
@@ -163,19 +152,12 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         Preconditions.checkNotNull(topic, "Topic may never be null");
         Preconditions.checkNotNull(qos, "Quality of service may never be null");
 
-        Preconditions.checkArgument(payloadId != null || payload != null,
-                "Payload and Payload ID must never be null at the same time");
-        if (payloadId != null) {
-            Preconditions.checkArgument(publishPayloadPersistence != null,
-                    "Persistence must be present if Payload ID is present");
-        }
         this.hivemqId = hivemqId;
         this.topic = topic;
         this.payload = payload;
         this.qoS = qos;
         this.retain = isRetain;
         this.messageExpiryInterval = messageExpiryInterval;
-        this.payloadId = payloadId;
         this.persistence = publishPayloadPersistence;
         this.duplicateDelivery = isDup;
 
@@ -205,7 +187,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     public PUBLISH(
             @NotNull final PUBLISH publish,
-            @Nullable final Long payloadId,
             @Nullable final PublishPayloadPersistence persistence) {
 
         this(publish.getHivemqId(),
@@ -224,9 +205,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
                 publish.isNewTopicAlias(),
                 publish.getSubscriptionIdentifiers(),
                 persistence,
-                payloadId,
                 publish.getTimestamp(),
-                publish.getLocalPublishId());
+                publish.getPublishId());
     }
 
     @NotNull
@@ -241,10 +221,9 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return uniqueId;
     }
 
-    @Nullable
     @Override
-    public Long getPayloadId() {
-        return payloadId;
+    public long getPublishId() {
+        return publishId;
     }
 
     @Nullable
@@ -286,10 +265,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         if (payload != null) {
             return payload;
         }
-        if (payloadId == null) {
-            return null; // Publish objects don't necessary have a payload
-        }
-        return persistence.get(payloadId);
+        return persistence.get(publishId);
     }
 
     @NotNull
@@ -327,11 +303,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.messageExpiryInterval = messageExpiryInterval;
     }
 
-    @Override
-    public long getLocalPublishId() {
-        return publishId;
-    }
-
     @Nullable
     @Override
     public ImmutableIntArray getSubscriptionIdentifiers() {
@@ -367,7 +338,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
                 publishId == publish.publishId && isNewTopicAlias == publish.isNewTopicAlias &&
                 Arrays.equals(payload, publish.payload) && Objects.equals(topic, publish.topic) && qoS == publish.qoS &&
                 Objects.equals(hivemqId, publish.hivemqId) && Objects.equals(uniqueId, publish.uniqueId) &&
-                Objects.equals(payloadId, publish.payloadId) &&
                 payloadFormatIndicator == publish.payloadFormatIndicator &&
                 Objects.equals(contentType, publish.contentType) &&
                 Objects.equals(responseTopic, publish.responseTopic) &&
@@ -388,7 +358,6 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
                 publishId,
                 hivemqId,
                 uniqueId,
-                payloadId,
                 payloadFormatIndicator,
                 contentType,
                 responseTopic,

@@ -88,11 +88,11 @@ public class DropOutgoingPublishesHandlerTest {
                 .withTopic("topic")
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(publishPayloadPersistence)
                 .build();
 
-        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, 1L, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false, publishPayloadPersistence);
         handler.write(ctx, publishWithFuture, promise);
         assertEquals(PublishStatus.CHANNEL_NOT_WRITABLE, future.get());
         verify(promise).setSuccess();
@@ -109,10 +109,10 @@ public class DropOutgoingPublishesHandlerTest {
                 .withTopic("topic")
                 .withQoS(QoS.AT_LEAST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(publishPayloadPersistence)
                 .build();
-        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, 1L, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false, publishPayloadPersistence);
         handler.write(ctx, publishWithFuture, promise);
         assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();
@@ -130,10 +130,10 @@ public class DropOutgoingPublishesHandlerTest {
                 .withTopic("topic")
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(publishPayloadPersistence)
                 .build();
-        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, 1L, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false, publishPayloadPersistence);
         handler.write(ctx, publishWithFuture, promise);
         assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();

@@ -26,6 +26,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.RetainedMessage;
+import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -78,7 +79,7 @@ public class RetainedPublishImpl extends PublishImpl implements RetainedPublish 
         return new RetainedMessage(
                 payloadAsArray,
                 Objects.requireNonNull(QoS.valueOf(retainedPublish.getQos().getQosNumber())),
-                null,
+                PublishPayloadPersistenceImpl.createId(),
                 retainedPublish.getMessageExpiryInterval().orElse(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET),
                 Mqtt5UserProperties.of(retainedPublish.getUserProperties().asInternalList()),
                 retainedPublish.getResponseTopic().orElse(null),

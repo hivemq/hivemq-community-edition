@@ -52,7 +52,6 @@ public class RetainedPublishImplTest {
         assertNull(convert.getCorrelationData());
         assertNull(convert.getPayloadFormatIndicator());
         assertNull(convert.getResponseTopic());
-        assertNull(convert.getPayloadId());
         assertEquals(Mqtt5UserProperties.NO_USER_PROPERTIES, convert.getUserProperties());
         assertEquals(QoS.AT_LEAST_ONCE, convert.getQos());
 
@@ -78,7 +77,6 @@ public class RetainedPublishImplTest {
         assertEquals("content_type", convert.getContentType());
         assertEquals(UTF_8, convert.getPayloadFormatIndicator());
         assertEquals("response_topic", convert.getResponseTopic());
-        assertEquals(null, convert.getPayloadId());
         assertEquals(3, convert.getUserProperties().asList().size());
         assertEquals(QoS.AT_MOST_ONCE, convert.getQos());
 

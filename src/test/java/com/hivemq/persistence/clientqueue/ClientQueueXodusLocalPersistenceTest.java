@@ -461,7 +461,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 "client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, false,
                 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(1);
+        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic5"), eq(0), anyLong(), anyLong());
     }
 
@@ -476,7 +476,7 @@ public class ClientQueueXodusLocalPersistenceTest {
         persistence.add(
                 "group", true, createBigPublish(1, QoS.AT_MOST_ONCE, "topic5", 2, queueLimit), 100L, DISCARD, false, 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(1);
+        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceededShared(eq("group"), eq("topic5"), eq(0), anyLong(), anyLong());
     }
 
@@ -845,7 +845,7 @@ public class ClientQueueXodusLocalPersistenceTest {
         publishes.add(createBigPublish(1, QoS.AT_MOST_ONCE, "topic2", 2, queueLimit));
         persistence.add("client", false, publishes.build(), 100L, DISCARD, false, 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(1);
+        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic2"), eq(0), anyLong(), anyLong());
 
         assertEquals(1, persistence.size("client", false, 0));
@@ -1178,7 +1178,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final long expiryInterval, final long timestamp) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
@@ -1191,7 +1191,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
@@ -1202,7 +1202,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic, final int publishId) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
@@ -1215,7 +1215,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic, final int publishId, final byte[] message) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPayload(message)
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
@@ -1228,7 +1228,6 @@ public class ClientQueueXodusLocalPersistenceTest {
             final int packetId, final QoS qos, final String topic, final int publishId, final int queueLimit) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
-                .withPayloadId(1L)
                 .withPayload(RandomStringUtils.randomAlphanumeric(queueLimit).getBytes())
                 .withCorrelationData(RandomStringUtils.randomAlphanumeric(65000).getBytes())
                 .withResponseTopic(RandomStringUtils.randomAlphanumeric(65000))

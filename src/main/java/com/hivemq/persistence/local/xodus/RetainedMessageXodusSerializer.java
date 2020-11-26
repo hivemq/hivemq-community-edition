@@ -88,7 +88,7 @@ public class RetainedMessageXodusSerializer {
         Bytes.copyLongToByteArray(retainedMessage.getTimestamp(), bytes, cursor);
         cursor += 8;
 
-        Bytes.copyLongToByteArray(retainedMessage.getPayloadId(), bytes, cursor);
+        Bytes.copyLongToByteArray(retainedMessage.getPublishId(), bytes, cursor);
         cursor += 8;
 
         Bytes.copyLongToByteArray(retainedMessage.getMessageExpiryInterval(), bytes, cursor);
@@ -136,7 +136,7 @@ public class RetainedMessageXodusSerializer {
         final long timestamp = Bytes.readLong(serialized, cursor);
         cursor += 8;
 
-        final long payloadId = Bytes.readLong(serialized, cursor);
+        final long publishId = Bytes.readLong(serialized, cursor);
         cursor += 8;
 
         final long ttl = Bytes.readLong(serialized, cursor);
@@ -178,6 +178,6 @@ public class RetainedMessageXodusSerializer {
 
         final Mqtt5UserProperties properties = PropertiesSerializationUtil.read(serialized, cursor);
 
-        return new RetainedMessage(null, qoS, payloadId, ttl, properties, responseTopic, contentType, correlationData, payloadFormatIndicator, timestamp);
+        return new RetainedMessage(null, qoS, publishId, ttl, properties, responseTopic, contentType, correlationData, payloadFormatIndicator, timestamp);
     }
 }

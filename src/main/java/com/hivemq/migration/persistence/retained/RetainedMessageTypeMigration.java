@@ -179,18 +179,17 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
         @Override
         public void onItem(final @NotNull String topic, final @NotNull RetainedMessage message) {
-            Preconditions.checkNotNull(message.getPayloadId(), "Payload ID must never be null here");
             try {
                 final int bucketIndex = BucketUtils.getBucket(topic, bucketCount);
-                final byte[] bytes = payloadLocalPersistence.get(message.getPayloadId());
+                final byte[] bytes = payloadLocalPersistence.get(message.getPublishId());
                 if (bytes == null) {
-                    payloadExceptionLogging.addLogging(message.getPayloadId(), true, topic);
+                    payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
                     return;
                 }
                 retainedMessageLocalPersistence.put(message, topic, bucketIndex);
 
             } catch (final PayloadPersistenceException payloadException) {
-                payloadExceptionLogging.addLogging(message.getPayloadId(), true, topic);
+                payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
             } catch (final Throwable throwable) {
                 log.warn("Could not migrate retained message for topic {}, original exception: ", topic, throwable);
                 Exceptions.rethrowError(throwable);

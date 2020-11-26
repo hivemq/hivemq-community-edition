@@ -95,7 +95,7 @@ public class RetainedMessageXodusSerializerTest {
         final RetainedMessage message = serializer.deserializeValue(serialized);
 
         assertEquals(1231321231320L, message.getTimestamp());
-        assertEquals(10L, message.getPayloadId().longValue());
+        assertEquals(10L, message.getPublishId());
         assertEquals(QoS.AT_MOST_ONCE, message.getQos());
         assertEquals(10, message.getMessageExpiryInterval());
     }
@@ -135,7 +135,7 @@ public class RetainedMessageXodusSerializerTest {
         final RetainedMessage message = serializer.deserializeValue(serialized);
 
         assertEquals(1231321231321L, message.getTimestamp());
-        assertEquals(10, message.getPayloadId().longValue());
+        assertEquals(10, message.getPublishId());
         assertEquals(QoS.AT_LEAST_ONCE, message.getQos());
         assertEquals(10, message.getMessageExpiryInterval());
     }
@@ -176,7 +176,7 @@ public class RetainedMessageXodusSerializerTest {
         final RetainedMessage message = serializer.deserializeValue(serialized);
 
         assertEquals(1231321231302L, message.getTimestamp());
-        assertEquals(10L, message.getPayloadId().longValue());
+        assertEquals(10L, message.getPublishId());
         assertEquals(QoS.EXACTLY_ONCE, message.getQos());
         assertEquals(10, message.getMessageExpiryInterval());
     }

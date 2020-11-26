@@ -61,11 +61,12 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
-                InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION,
-                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION,
+                InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
-        memtableSize = PhysicalMemoryUtil.physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        memtableSize = PhysicalMemoryUtil.physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get()
+                / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
     }
 

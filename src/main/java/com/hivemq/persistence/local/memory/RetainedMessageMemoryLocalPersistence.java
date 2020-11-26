@@ -101,7 +101,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         for (final RetainedMessage retainedMessage : bucket.values()) {
-            payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(retainedMessage.getPublishId());
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
         }
         bucket.clear();
@@ -118,7 +118,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         final RetainedMessage retainedMessage = bucket.remove(topic);
         if (retainedMessage != null) {
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
-            payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(retainedMessage.getPublishId());
         }
     }
 
@@ -133,11 +133,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         if (retainedMessage == null) {
             return null;
         }
-        final byte[] payload = payloadPersistence.getPayloadOrNull(retainedMessage.getPayloadId());
+        final byte[] payload = payloadPersistence.getPayloadOrNull(retainedMessage.getPublishId());
         if (payload == null) {
             log.warn(
                     "Payload with ID '{}' for retained messages on topic '{}' not found.",
-                    retainedMessage.getPayloadId(),
+                    retainedMessage.getContentType(),
                     topic);
             return null;
         }
@@ -161,7 +161,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage previousMessage = bucket.put(topic, copy);
         if (previousMessage != null) {
-            payloadPersistence.decrementReferenceCounter(previousMessage.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(previousMessage.getPublishId());
             currentMemorySize.addAndGet(-previousMessage.getEstimatedSizeInMemory());
         }
         currentMemorySize.addAndGet(copy.getEstimatedSizeInMemory());
@@ -192,7 +192,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             final RetainedMessage retainedMessage = entry.getValue();
             final String topic = entry.getKey();
             if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
-                payloadPersistence.decrementReferenceCounter(retainedMessage.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(retainedMessage.getPublishId());
                 currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
                 topicTrees[bucketIndex].remove(topic);
                 return true;
@@ -218,7 +218,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                         return null;
                     }
 
-                    final Long payloadId = retainedMessage.getPayloadId();
+                    final Long payloadId = retainedMessage.getPublishId();
                     if (payloadId == null) {
                         log.warn("Could not dereference payload for retained message on topic \"{}\" as payload was null.", topic);
                         return null;

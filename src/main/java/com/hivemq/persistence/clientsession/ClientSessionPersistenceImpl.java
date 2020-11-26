@@ -41,6 +41,7 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientSessions;
@@ -164,9 +165,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final long timestamp = System.currentTimeMillis();
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
-            final long willPayloadId = publishPayloadPersistence.add(willPublish.getPayload(), 1);
+            final long publishId = PublishPayloadPersistenceImpl.createId();
+            publishPayloadPersistence.add(willPublish.getPayload(), 1, publishId);
             willPublish.setPayload(null);
-            sessionWill = new ClientSessionWill(willPublish, willPayloadId);
+            sessionWill = new ClientSessionWill(willPublish, publishId);
         }
         final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
         final ListenableFuture<ConnectResult> submitFuture =

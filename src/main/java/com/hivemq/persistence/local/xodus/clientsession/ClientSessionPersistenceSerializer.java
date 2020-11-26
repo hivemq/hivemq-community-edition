@@ -128,7 +128,7 @@ public class ClientSessionPersistenceSerializer {
             bytes[cursor] = (byte) willPublish.getQos().getQosNumber();
             cursor += 1;
 
-            Bytes.copyLongToByteArray(willPublish.getPayloadId(), bytes, cursor);
+            Bytes.copyLongToByteArray(willPublish.getPublishId(), bytes, cursor);
             cursor += 8;
             Bytes.copyLongToByteArray(willPublish.getDelayInterval(), bytes, cursor);
             cursor += 8;
@@ -199,7 +199,7 @@ public class ClientSessionPersistenceSerializer {
             final MqttWillPublish.Mqtt5Builder willBuilder = new MqttWillPublish.Mqtt5Builder();
             willBuilder.withQos(QoS.valueOf(willQos));
 
-            final long payloadId = Bytes.readLong(bytes, cursor);
+            final long publishId = Bytes.readLong(bytes, cursor);
             cursor += 8;
             willBuilder.withDelayInterval(Bytes.readLong(bytes, cursor));
             cursor += 8;
@@ -251,7 +251,7 @@ public class ClientSessionPersistenceSerializer {
             }
 
             willBuilder.withUserProperties(PropertiesSerializationUtil.read(bytes, cursor));
-            sessionWill = new ClientSessionWill(willBuilder.build(), payloadId);
+            sessionWill = new ClientSessionWill(willBuilder.build(), publishId);
         }
 
         return new ClientSession(connected, timeToLive, sessionWill, queueLimit);
