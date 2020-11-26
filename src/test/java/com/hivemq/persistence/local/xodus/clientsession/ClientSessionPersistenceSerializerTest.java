@@ -111,7 +111,7 @@ public class ClientSessionPersistenceSerializerTest {
 
         assertEquals("topic", resultWill.getTopic());
         assertEquals(1, resultWill.getDelayInterval());
-        assertEquals(2L, resultWill.getPayloadId().longValue());
+        assertEquals(2L, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
         assertEquals(true, resultWill.isRetain());
@@ -141,7 +141,7 @@ public class ClientSessionPersistenceSerializerTest {
 
         assertEquals("topic", resultWill.getTopic());
         assertEquals(1, resultWill.getDelayInterval());
-        assertEquals(2, resultWill.getPayloadId().longValue());
+        assertEquals(2, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
         assertEquals(true, resultWill.isRetain());
@@ -181,7 +181,7 @@ public class ClientSessionPersistenceSerializerTest {
 
         assertEquals("topic", resultWill.getTopic());
         assertEquals(1, resultWill.getDelayInterval());
-        assertEquals(2, resultWill.getPayloadId().longValue());
+        assertEquals(2, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
         assertEquals(true, resultWill.isRetain());

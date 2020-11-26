@@ -17,8 +17,8 @@ package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -82,16 +82,14 @@ public class DropOutgoingPublishesHandler extends ChannelOutboundHandlerAdapter 
                     log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable", clientId, publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
                     promise.setSuccess();
-                    if (publish.getPayloadId() != null) {
-                        if (publish instanceof PublishWithFuture) {
-                            //Don't decrement the reference count here because the message might be resent to an other client
-                            //The shared subscription handling will take care of the reference counting
-                            if (!((PublishWithFuture) publish).isShared()) {
-                                publishPayloadPersistence.decrementReferenceCounter(publish.getPayloadId());
-                            }
-                        } else {
-                            publishPayloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                    if (publish instanceof PublishWithFuture) {
+                        //Don't decrement the reference count here because the message might be resent to an other client
+                        //The shared subscription handling will take care of the reference counting
+                        if (!((PublishWithFuture) publish).isShared()) {
+                            publishPayloadPersistence.decrementReferenceCounter(publish.getPublishId());
                         }
+                    } else {
+                        publishPayloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     }
                     return;
                 }

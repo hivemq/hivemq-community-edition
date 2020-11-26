@@ -177,7 +177,7 @@ public class PublishDistributorImpl implements PublishDistributor {
 
     @NotNull
     private PUBLISH createPublish(@NotNull final PUBLISH publish, final int subscriptionQos, final boolean retainAsPublished, @Nullable final ImmutableIntArray subscriptionIdentifier) {
-        final long payloadId = payloadPersistence.add(publish.getPayload(), 1);
+        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
         final ImmutableIntArray identifiers;
         if (subscriptionIdentifier == null) {
             identifiers = ImmutableIntArray.of();
@@ -185,8 +185,8 @@ public class PublishDistributorImpl implements PublishDistributor {
             identifiers = subscriptionIdentifier;
         }
 
-        final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
-                .withPayloadId(payloadId)
+        final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder()
+                .fromPublish(publish)
                 .withPayload(null) // not needed anymore as we just put it in the payload persistence.
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)

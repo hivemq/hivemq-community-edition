@@ -85,20 +85,20 @@ public class TestMessageUtil {
     }
 
     public static PUBLISH createMqtt3Publish(
-            final String hivemqId, final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
+            final String hivemqId, final long publishId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withTopic("topic")
                 .withHivemqId(hivemqId)
-                .withPayloadId(payloadId)
+                .withPublishId(publishId)
                 .withPersistence(publishPayloadPersistence)
                 .build();
     }
 
     public static PUBLISH createMqtt3Publish(
-            final Long payloadId, final PublishPayloadPersistence publishPayloadPersistence) {
+            final long publishId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
-                .withPayloadId(payloadId)
+                .withPublishId(publishId)
                 .withPersistence(publishPayloadPersistence)
                 .withHivemqId("hivemqId")
                 .build();
@@ -112,12 +112,12 @@ public class TestMessageUtil {
             final String hivemqId,
             final PUBLISH publish,
             final long timestamp,
-            final long payloadId,
+            final long publishId,
             final PublishPayloadPersistence persistence) {
         return new PUBLISHFactory.Mqtt3Builder().fromPublish(publish)
                 .withHivemqId(hivemqId)
                 .withTimestamp(timestamp)
-                .withPayloadId(payloadId)
+                .withPublishId(publishId)
                 .withPersistence(persistence)
                 .build();
     }
@@ -171,7 +171,7 @@ public class TestMessageUtil {
                 .withTopic("topic")
                 .withPayload("payload".getBytes())
                 .withPacketIdentifier(1)
-                .withPayloadId(1L)
+                .withPublishId(1L)
                 .withPersistence(publishPayloadPersistence)
                 .withHivemqId("hivemqId");
     }

@@ -94,7 +94,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
             final ListenableFuture<Void> persistFuture;
             if (publish.getPayload().length > 0) {
                 //pass payloadId null here, because we don't know yet if the message must be stored in the payload persistence
-                final RetainedMessage retainedMessage = new RetainedMessage(publish, null, publish.getMessageExpiryInterval());
+                final RetainedMessage retainedMessage = new RetainedMessage(publish, publish.getMessageExpiryInterval());
                 log.trace("Adding retained message on topic {}", publish.getTopic());
                 persistFuture = retainedMessagePersistence.persist(publish.getTopic(), retainedMessage);
 

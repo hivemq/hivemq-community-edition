@@ -19,10 +19,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
 import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
@@ -317,7 +317,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(@NotNull final ImmutableList<PUBLISH> publishes) {
-                if(publishes.isEmpty()){
+                if (publishes.isEmpty()) {
                     return;
                 }
                 final MessageIDPool messageIDPool = messageIDPools.forClient(client);
@@ -375,8 +375,8 @@ public class PublishPollServiceImpl implements PublishPollService {
     private void sendOutPublish(PUBLISH publish, final boolean shared, @NotNull final Channel channel, @NotNull final String queueId,
                                 @NotNull final MessageIDPool messageIDPool, @NotNull final String client) {
 
-        final long payloadId = payloadPersistence.add(publish.getPayload(), 1);
-        publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPayloadId(payloadId).withPersistence(payloadPersistence).build();
+        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+        publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPersistence(payloadPersistence).build();
 
         //The client is connected locally
         final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
@@ -403,7 +403,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             return;
         }
 
-        final PublishWithFuture event = new PublishWithFuture(publish, publishFuture, publish.getPayloadId(), shared, payloadPersistence);
+        final PublishWithFuture event = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
         channel.pipeline().fireUserEventTriggered(event);
     }
 

@@ -30,13 +30,13 @@ import com.hivemq.util.ObjectMemoryEstimation;
 public class ClientSessionWill implements Sizable {
 
     private final @NotNull MqttWillPublish mqttWillPublish;
-    private final @NotNull Long payloadId;
+    private final long publishId;
 
     private int inMemorySize = SIZE_NOT_CALCULATED;
 
-    public ClientSessionWill(final @NotNull MqttWillPublish mqttWillPublish, final @NotNull Long payloadId) {
+    public ClientSessionWill(final @NotNull MqttWillPublish mqttWillPublish, final long publishId) {
         this.mqttWillPublish = mqttWillPublish;
-        this.payloadId = payloadId;
+        this.publishId = publishId;
     }
 
     @NotNull
@@ -45,8 +45,8 @@ public class ClientSessionWill implements Sizable {
     }
 
     @NotNull
-    public Long getPayloadId() {
-        return payloadId;
+    public long getPublishId() {
+        return publishId;
     }
 
     public long getDelayInterval() {
@@ -63,7 +63,7 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getTopic();
     }
 
-    public byte @Nullable[] getPayload() {
+    public byte @Nullable [] getPayload() {
         return mqttWillPublish.getPayload();
     }
 
@@ -96,7 +96,7 @@ public class ClientSessionWill implements Sizable {
     }
 
     @Nullable
-    public byte @Nullable[] getCorrelationData() {
+    public byte @Nullable [] getCorrelationData() {
         return mqttWillPublish.getCorrelationData();
     }
 
@@ -106,7 +106,7 @@ public class ClientSessionWill implements Sizable {
     }
 
     public @NotNull ClientSessionWill deepCopyWithoutPayload() {
-        return new ClientSessionWill(this.getMqttWillPublish().deepCopyWithoutPayload(), this.payloadId);
+        return new ClientSessionWill(this.getMqttWillPublish().deepCopyWithoutPayload(), this.getPublishId());
     }
 
     @Override

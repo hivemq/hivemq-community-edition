@@ -16,7 +16,6 @@
 package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -127,7 +126,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                     iterator.seekToFirst();
                     while (iterator.isValid()) {
                         final RetainedMessage message = serializer.deserializeValue(iterator.value());
-                        final Long payloadId = message.getPayloadId();
+                        final Long payloadId = message.getPublishId();
                         if (payloadId != null) {
                             payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
                         }
@@ -159,8 +158,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             iterator.seekToFirst();
             while (iterator.isValid()) {
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
-                Preconditions.checkNotNull(message.getPayloadId(), "Payload ID must not be null here");
-                payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(message.getPublishId());
                 retainMessageCounter.decrementAndGet();
                 writeBatch.delete(iterator.key());
                 iterator.next();
@@ -196,8 +194,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             log.trace("Removing retained message for topic {}", topic);
             bucket.delete(key);
             topicTrees[bucketIndex].remove(topic);
-            checkNotNull(message.getPayloadId(), "Payload id must never be null");
-            payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(message.getPublishId());
             retainMessageCounter.decrementAndGet();
 
         } catch (final Exception e) {
@@ -229,9 +226,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
         final byte[] messageAsBytes = bucket.get(serializer.serializeKey(topic));
         if (messageAsBytes != null) {
             final RetainedMessage message = serializer.deserializeValue(messageAsBytes);
-            final Long payloadId = message.getPayloadId();
-            checkNotNull(payloadId, "Payload id must never be null");
-            final byte[] payload = payloadPersistence.getPayloadOrNull(payloadId);
+            final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
             if (payload == null) {
                 // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
                 if (retry < 100) {
@@ -268,8 +263,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 log.trace("Replacing retained message for topic {}", topic);
                 bucket.put(serializedTopic, serializer.serializeValue(retainedMessage));
                 // The previous retained message is replaced, so we have to decrement the reference count.
-                checkNotNull(retainedMessageFromStore.getPayloadId(), "Payload id must never be null");
-                payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPublishId());
             } else {
                 log.trace("Creating new retained message for topic {}", topic);
                 bucket.put(serializedTopic, serializer.serializeValue(retainedMessage));
@@ -315,8 +309,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
                 if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
                     writeBatch.delete(iterator.key());
-                    checkNotNull(message.getPayloadId(), "Payload id must never be null");
-                    payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+                    payloadPersistence.decrementReferenceCounter(message.getPublishId());
                     retainMessageCounter.decrementAndGet();
                     topicTree.remove(topic);
                 }
@@ -366,13 +359,12 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                     continue;
                 }
 
-                final Long payloadId = deserializedMessage.getPayloadId();
-                checkNotNull(payloadId, "Payload id must never be null");
-                final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPayloadId());
+                final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPublishId());
 
                 // ignore messages with no payload and log a warning for the fact
                 if (payload == null) {
-                    log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".", deserializedTopic, payloadId);
+                    log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".",
+                            deserializedTopic, deserializedMessage.getPublishId());
                     iterator.next();
                     continue;
                 }
@@ -401,11 +393,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 while (iterator.isValid()) {
                     final RetainedMessage message = serializer.deserializeValue(iterator.value());
                     final String topic = serializer.deserializeKey(iterator.key());
-                    final Long payLoadID = message.getPayloadId();
-                    //we ignore tombstones and deleted at iteration. Tombstones have null payloadId.
-                    if (payLoadID != null) {
-                        callback.onItem(topic, message);
-                    }
+                    callback.onItem(topic, message);
                     iterator.next();
                 }
             }

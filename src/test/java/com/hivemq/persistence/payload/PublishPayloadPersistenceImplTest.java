@@ -67,51 +67,39 @@ public class PublishPayloadPersistenceImplTest {
     public void add_new_entries() throws Exception {
         final byte[] payload1 = "payload1".getBytes();
         final byte[] payload2 = "payload2".getBytes();
-        final long id1 = persistence.add(payload1, 1);
-        final long id2 = persistence.add(payload2, 2);
+        persistence.add(payload1, 1, 123);
+        persistence.add(payload2, 2, 234);
 
-        final long hash1 = hashFunction.hashBytes(payload1);
-        final long hash2 = hashFunction.hashBytes(payload2);
-
-        assertNotEquals(id1, id2);
-
-        assertEquals(1, persistence.referenceCounter.get(id1).get());
-        assertEquals(2, persistence.referenceCounter.get(id2).get());
-        assertNotNull(persistence.payloadCache.getIfPresent(id1));
-        assertNotNull(persistence.payloadCache.getIfPresent(id2));
-        assertEquals(id1, persistence.lookupTable.get(hash1).longValue());
-        assertEquals(id2, persistence.lookupTable.get(hash2).longValue());
+        assertEquals(1, persistence.referenceCounter.get(123L).get());
+        assertEquals(2, persistence.referenceCounter.get(234L).get());
+        assertNotNull(persistence.payloadCache.getIfPresent(123L));
+        assertNotNull(persistence.payloadCache.getIfPresent(234L));
     }
 
     @Test
     public void add_existent_entry() throws Exception {
         final byte[] payload = "payload".getBytes();
-        final long id1 = persistence.add(payload, 1);
-        final long id2 = persistence.add(payload, 2);
+        persistence.add(payload, 1, 123);
+        persistence.add(payload, 2, 123);
 
-        final long hash = hashFunction.hashBytes(payload);
 
-        assertEquals(id1, id2);
-
-        assertEquals(3, persistence.referenceCounter.get(id1).get());
-        assertNotNull(persistence.payloadCache.getIfPresent(id1));
+        assertEquals(3, persistence.referenceCounter.get(123L).get());
+        assertNotNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(1, persistence.payloadCache.size());
-        assertEquals(1L, persistence.lookupTable.get(hash).longValue());
     }
 
     @Test
     public void get_from_cache() throws Exception {
         final byte[] payload = "payload".getBytes();
-        final long id = persistence.add(payload, 1);
+        persistence.add(payload, 1, 123);
 
         final long hash = hashFunction.hashBytes(payload);
 
-        assertEquals(1, persistence.referenceCounter.get(id).get());
-        assertNotNull(persistence.payloadCache.getIfPresent(id));
+        assertEquals(1, persistence.referenceCounter.get(123L).get());
+        assertNotNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(1, persistence.payloadCache.size());
-        assertEquals(id, persistence.lookupTable.get(hash).longValue());
 
-        final byte[] result = persistence.get(id);
+        final byte[] result = persistence.get(123);
 
         verify(localPersistence, never()).get(anyLong());
         assertEquals(true, Arrays.equals(payload, result));
@@ -120,17 +108,16 @@ public class PublishPayloadPersistenceImplTest {
     @Test
     public void get_from_local_persistence() throws Exception {
         final byte[] payload = "payload".getBytes();
-        final long id = persistence.add(payload, 1);
+        persistence.add(payload, 1, 123);
 
-        when(localPersistence.get(id)).thenReturn(payload);
-        persistence.payloadCache.invalidate(id);
+        when(localPersistence.get(123)).thenReturn(payload);
+        persistence.payloadCache.invalidate(123L);
 
-        assertEquals(1, persistence.referenceCounter.get(id).get());
-        assertNull(persistence.payloadCache.getIfPresent(id));
+        assertEquals(1, persistence.referenceCounter.get(123L).get());
+        assertNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(0, persistence.payloadCache.size());
-        assertEquals(0, persistence.lookupTable.size());
 
-        final byte[] result = persistence.get(id);
+        final byte[] result = persistence.get(123);
 
         verify(localPersistence, times(1)).get(anyLong());
         assertEquals(true, Arrays.equals(payload, result));
@@ -207,10 +194,4 @@ public class PublishPayloadPersistenceImplTest {
         verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(750L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
     }
 
-    @Test
-    public void suspect() throws Exception {
-        persistence.suspect(1);
-        assertEquals(1, persistence.suspectedReferences.size());
-        assertEquals(1L, persistence.suspectedReferences.iterator().next().longValue());
-    }
 }

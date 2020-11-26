@@ -75,7 +75,7 @@ public class Mqtt3PublishDecoderTest {
 
         assertNotNull(publish.getHivemqId());
         assertNotNull(publish.getUniqueId());
-        assertTrue(publish.getLocalPublishId() > 0);
+        assertTrue(publish.getPublishId() > 0);
         assertTrue(publish.getTimestamp() > 0);
     }
 

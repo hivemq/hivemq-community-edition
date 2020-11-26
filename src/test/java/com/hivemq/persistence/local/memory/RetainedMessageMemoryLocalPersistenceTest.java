@@ -318,17 +318,13 @@ public class RetainedMessageMemoryLocalPersistenceTest {
                 Mqtt5PayloadFormatIndicator.UTF_8,
                 System.currentTimeMillis());
         persistence.put(originalMessage, "topic/0", 0);
-        originalMessage.setPayloadId(1L);
         originalMessage.setMessage(new byte[]{2, 3, 4});
         final RetainedMessage messageFromStore1 = persistence.get("topic/0", 0);
-        assertEquals(0L, messageFromStore1.getPayloadId().longValue());
         assertArrayEquals("message0".getBytes(), messageFromStore1.getMessage());
 
         messageFromStore1.setMessage(new byte[]{2, 3, 4});
-        messageFromStore1.setPayloadId(3L);
         final RetainedMessage messageFromStore2 = persistence.get("topic/0", 0);
 
-        assertEquals(0L, messageFromStore2.getPayloadId().longValue());
         assertArrayEquals("message0".getBytes(), messageFromStore2.getMessage());
     }
 

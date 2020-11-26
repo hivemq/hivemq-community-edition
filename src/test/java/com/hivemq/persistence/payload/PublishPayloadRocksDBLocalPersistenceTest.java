@@ -55,6 +55,8 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
 
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(8);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
+        InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.set(1024);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.set(16);
 
         persistence = new PublishPayloadRocksDBLocalPersistence(localPersistenceFileUtil, new PersistenceStartup());
         persistence.start();
@@ -152,7 +154,7 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
     }
 
 
-    @Test
+    @Test(timeout = 10_000)
     public void put_bigPayloads_memtableFlushed() {
         final long memtableSize = persistence.getMemtableSize();
         long bytesPuttedIn = 0L;

@@ -33,15 +33,14 @@ public class PublishWithFuture extends PUBLISH {
     public PublishWithFuture(@NotNull final PUBLISH publish,
                              @NotNull final SettableFuture<PublishStatus> future,
                              final boolean shared) {
-        this(publish, future, null, shared, null);
+        this(publish, future, shared, null);
     }
 
     public PublishWithFuture(@NotNull final PUBLISH publish,
                              @NotNull final SettableFuture<PublishStatus> future,
-                             @Nullable final Long payloadId,
                              final boolean shared,
                              @Nullable final PublishPayloadPersistence persistence) {
-        super(publish, payloadId, persistence);
+        super(publish, persistence);
         this.future = future;
         this.shared = shared;
     }

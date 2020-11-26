@@ -233,7 +233,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                                 nextMessageIndex.set(deserializeIndex + 1);
                             }
                             final PUBLISH publish = (PUBLISH) messageWithID;
-                            payloadPersistence.incrementReferenceCounterOnBootstrap(publish.getPayloadId());
+                            payloadPersistence.incrementReferenceCounterOnBootstrap(publish.getPublishId());
                         }
                         queueSize++;
                         if (serializer.deserializeRetained(cursor.getValue())) {
@@ -434,7 +434,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                 messageDroppedService.qos0MemoryExceeded(
                         key.getQueueId(), publish.getTopic(), 0, currentQos0MessagesMemory, qos0MemoryLimit);
             }
-            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
             return;
         }
 
@@ -442,7 +442,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final AtomicInteger clientQos0Memory = clientQos0MemoryMap.get(key.getQueueId());
             if (clientQos0Memory != null && clientQos0Memory.get() >= qos0ClientMemoryLimit) {
                 messageDroppedService.qos0MemoryExceeded(key.getQueueId(), publish.getTopic(), 0, clientQos0Memory.get(), qos0ClientMemoryLimit);
-                payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 return;
             }
         }
@@ -550,7 +550,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     private void logAndDecrementPayloadReference(
             final @NotNull PUBLISH publish, final boolean shared, final @NotNull String queueId) {
         logMessageDropped(publish, shared, queueId);
-        payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+        payloadPersistence.decrementReferenceCounter(publish.getPublishId());
     }
 
     /**
@@ -608,7 +608,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     final PUBLISH publish = (PUBLISH) serializer.deserializeValue(serializedValue);
                     if (PublishUtil.checkExpiry(publish.getTimestamp(), publish.getMessageExpiryInterval())) {
                         cursor.deleteCurrent();
-                        payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                        payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                         if (serializer.deserializeRetained(serializedValue)) {
                             getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -660,7 +660,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         }
         increaseQos0MessagesMemory(qos0Publish.getEstimatedSizeInMemory() * -1);
         increaseClientQos0MessagesMemory(key, qos0Publish.getEstimatedSizeInMemory() * -1);
-        payloadPersistence.decrementReferenceCounter(qos0Publish.getPayloadId());
+        payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
         return qos0Publish;
     }
 
@@ -736,7 +736,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         final boolean retained = serializer.deserializeRetained(cursor.getValue());
                         if (message instanceof PUBLISH) {
                             final PUBLISH publish = (PUBLISH) message;
-                            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                             pubrel.setExpiryInterval(publish.getMessageExpiryInterval());
                             pubrel.setPublishTimestamp(publish.getTimestamp());
                             replacedId[0] = publish.getUniqueId();
@@ -795,7 +795,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                             if (uniqueId != null && !uniqueId.equals(publish.getUniqueId())) {
                                 return false;
                             }
-                            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                             removedId = publish.getUniqueId();
                         }
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
@@ -853,7 +853,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                 iterateQueue(cursor, key, false, () -> {
                     final MessageWithID message = serializer.deserializeValue(cursor.getValue());
                     if (message instanceof PUBLISH) {
-                        payloadPersistence.decrementReferenceCounter(((PUBLISH) message).getPayloadId());
+                        payloadPersistence.decrementReferenceCounter(((PUBLISH) message).getPublishId());
                     }
                     cursor.deleteCurrent();
                     return true;
@@ -865,7 +865,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         for (final PublishWithRetained qos0Message : qos0Messages) {
             increaseQos0MessagesMemory(qos0Message.publish.getEstimatedSizeInMemory() * -1);
             increaseClientQos0MessagesMemory(key, qos0Message.publish.getEstimatedSizeInMemory() * -1);
-            payloadPersistence.decrementReferenceCounter(qos0Message.publish.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(qos0Message.publish.getPublishId());
         }
         qos0MessageBuckets.get(bucketIndex).remove(key);
         queueSizeBuckets.get(bucketIndex).remove(key);
@@ -887,7 +887,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final PublishWithRetained publishWithRetained = iterator.next();
             final PUBLISH publish = publishWithRetained.publish;
             iterator.remove();
-            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
             getOrPutQueueSize(key, bucketIndex).decrementAndGet();
             if (publishWithRetained.retained) {
                 getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -946,7 +946,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         if (!uniqueId.equals(publish.getUniqueId())) {
                             return true;
                         }
-                        payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                        payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                         if (serializer.deserializeRetained(cursor.getValue())) {
                             getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
@@ -1012,7 +1012,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                 getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                 increaseQos0MessagesMemory(qos0Message.getEstimatedSizeInMemory() * -1);
                 increaseClientQos0MessagesMemory(key, qos0Message.getEstimatedSizeInMemory() * -1);
-                payloadPersistence.decrementReferenceCounter(qos0Message.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(qos0Message.getPublishId());
                 if (publishWithRetained.retained) {
                     getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();
                 }
@@ -1051,7 +1051,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
                         final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                         if (drop) {
-                            payloadPersistence.decrementReferenceCounter(publish.getPayloadId());
+                            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                             getOrPutQueueSize(key, bucketIndex).decrementAndGet();
                             if (serializer.deserializeRetained(serializedValue)) {
                                 getOrPutRetainedQueueSize(key, bucketIndex).decrementAndGet();

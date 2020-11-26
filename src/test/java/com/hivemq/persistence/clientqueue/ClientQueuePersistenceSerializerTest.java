@@ -117,7 +117,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPayloadId(1L)
                 .withPersistence(payloadPersistence)
                 .withTopic("topic")
                 .withDuplicateDelivery(false)
@@ -133,10 +132,9 @@ public class ClientQueuePersistenceSerializerTest {
 
         assertEquals(10, readPublish.getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, readPublish.getQoS());
-        assertEquals(123, readPublish.getLocalPublishId());
+        assertEquals(123, readPublish.getPublishId());
         assertEquals(456, readPublish.getTimestamp());
         assertEquals("hivemqId", readPublish.getHivemqId());
-        assertEquals(1L, readPublish.getPayloadId().longValue());
         assertEquals(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET, readPublish.getMessageExpiryInterval());
         assertEquals(false, readPublish.isRetain());
         assertEquals(false, readPublish.isDuplicateDelivery());
@@ -153,7 +151,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPayloadId(1L)
                 .withPersistence(payloadPersistence)
                 .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
                 .withTopic("topic")
@@ -176,10 +173,9 @@ public class ClientQueuePersistenceSerializerTest {
 
         assertEquals(10, readPublish.getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, readPublish.getQoS());
-        assertEquals(123, readPublish.getLocalPublishId());
+        assertEquals(123, readPublish.getPublishId());
         assertEquals(456, readPublish.getTimestamp());
         assertEquals("hivemqId", readPublish.getHivemqId());
-        assertEquals(1L, readPublish.getPayloadId().longValue());
         assertEquals(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX, readPublish.getMessageExpiryInterval());
         assertEquals(true, readPublish.isRetain());
         assertEquals(false, readPublish.isDuplicateDelivery());
@@ -205,7 +201,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPayloadId(1L)
                 .withPersistence(payloadPersistence)
                 .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
                 .withTopic("topic")
@@ -222,10 +217,9 @@ public class ClientQueuePersistenceSerializerTest {
 
         assertEquals(10, readPublish.getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, readPublish.getQoS());
-        assertEquals(123, readPublish.getLocalPublishId());
+        assertEquals(123, readPublish.getPublishId());
         assertEquals(456, readPublish.getTimestamp());
         assertEquals("hivemqId", readPublish.getHivemqId());
-        assertEquals(1L, readPublish.getPayloadId().longValue());
         assertEquals(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX, readPublish.getMessageExpiryInterval());
         assertEquals(true, readPublish.isRetain());
         assertEquals(false, readPublish.isDuplicateDelivery());

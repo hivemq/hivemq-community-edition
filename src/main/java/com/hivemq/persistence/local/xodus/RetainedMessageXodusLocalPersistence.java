@@ -16,7 +16,6 @@
 package com.hivemq.persistence.local.xodus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -133,10 +132,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
                         while (cursor.getNext()) {
                             final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
-                            final Long payloadId = message.getPayloadId();
-                            if (payloadId != null) {
-                                payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
-                            }
+                            payloadPersistence.incrementReferenceCounterOnBootstrap(message.getPublishId());
                             final String topic = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
                             topicTrees.get(bucketIndex).add(topic);
                             retainMessageCounter.incrementAndGet();
@@ -164,8 +160,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
             final Cursor cursor = bucket.getStore().openCursor(txn);
             while (cursor.getNext()) {
                 final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
-                Preconditions.checkNotNull(message.getPayloadId(), "Payload ID must not be null here");
-                payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+                payloadPersistence.decrementReferenceCounter(message.getPublishId());
                 retainMessageCounter.decrementAndGet();
                 cursor.deleteCurrent();
             }
@@ -196,7 +191,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
             log.trace("Removing retained message for topic {}", topic);
             bucket.getStore().delete(txn, key);
             topicTrees.get(bucketIndex).remove(topic);
-            payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+            payloadPersistence.decrementReferenceCounter(message.getPublishId());
             retainMessageCounter.decrementAndGet();
         });
 
@@ -221,9 +216,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
 
                 final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(byteIterable));
 
-                final Long payloadId = message.getPayloadId();
-
-                final byte[] payload = payloadPersistence.getPayloadOrNull(payloadId);
+                final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
                 if (payload == null) {
                     // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
                     payloadIdExpired.set(true);
@@ -268,7 +261,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     log.trace("Replacing retained message for topic {}", topic);
                     bucket.getStore().put(txn, bytesToByteIterable(serializer.serializeKey(topic)), bytesToByteIterable(serializer.serializeValue(retainedMessage)));
                     // The previous retained message is replaced, so we have to decrement the reference count.
-                    payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPayloadId());
+                    payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPublishId());
                 } else {
                     bucket.getStore().put(txn, bytesToByteIterable(serializer.serializeKey(topic)), bytesToByteIterable(serializer.serializeValue(retainedMessage)));
                     log.trace("Creating new retained message for topic {}", topic);
@@ -306,7 +299,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                         final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
                         if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
                             cursor.deleteCurrent();
-                            payloadPersistence.decrementReferenceCounter(message.getPayloadId());
+                            payloadPersistence.decrementReferenceCounter(message.getPublishId());
                             retainMessageCounter.decrementAndGet();
                             topicTrees.get(bucketId).remove(serializer.deserializeKey(byteIterableToBytes(cursor.getKey())));
                         }
@@ -360,13 +353,12 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                         continue;
                     }
 
-                    final Long payloadId = deserializedMessage.getPayloadId();
-                    checkNotNull(payloadId, "Payload id must never be null");
-                    final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPayloadId());
+                    final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPublishId());
 
                     // ignore messages with no payload and log a warning for the fact
                     if (payload == null) {
-                        log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".", deserializedTopic, payloadId);
+                        log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".",
+                                deserializedTopic, deserializedMessage.getPublishId());
                         hasNext = cursor.getNext();
                         continue;
                     }
@@ -395,11 +387,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     while (cursor.getNext()) {
                         final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
                         final String topic = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                        final Long payLoadID = message.getPayloadId();
-                        //we ignore tombstones and deleted at iteration. Tombstones have null payloadId.
-                        if (payLoadID != null) {
-                            callback.onItem(topic, message);
-                        }
+                        callback.onItem(topic, message);
                     }
                 }
             });
