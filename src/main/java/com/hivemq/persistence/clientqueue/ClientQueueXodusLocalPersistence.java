@@ -17,6 +17,8 @@ package com.hivemq.persistence.clientqueue;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
@@ -56,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -102,6 +105,13 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     @NotNull
     private final ConcurrentHashMap<String, AtomicInteger> clientQos0MemoryMap;
 
+    // this caches the lower bound for a publish without packet-id,
+    // the cached index is guaranteed to be lower or equal to the index
+    //so it is safe to seek to this index without missing a publish without packet-id
+    @VisibleForTesting
+    final @NotNull Cache<String, Long> sharedSubLastPacketWithoutIdCache;
+
+
     @Inject
     ClientQueueXodusLocalPersistence(
             final @NotNull PublishPayloadPersistence payloadPersistence,
@@ -123,6 +133,10 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         this.qos0MessageBuckets = new ConcurrentHashMap<>();
         this.qos0MemoryLimit = getQos0MemoryLimit();
         this.clientQos0MemoryMap = new ConcurrentHashMap<>();
+        this.sharedSubLastPacketWithoutIdCache = CacheBuilder.newBuilder()
+                .maximumSize(InternalConfigurations.SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE.get())
+                .expireAfterAccess(60, TimeUnit.SECONDS)
+                .build();
     }
 
     private long getQos0MemoryLimit() {
@@ -250,6 +264,23 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
 
         ClientQueuePersistenceSerializer.NEXT_PUBLISH_NUMBER.set(nextMessageIndex.get());
     }
+
+
+    private void decrementSharedSubscriptionIndexFirstMessageWithoutPacketId(final @NotNull String sharedSubId, final @NotNull Long newIndex) {
+        final Long previous = sharedSubLastPacketWithoutIdCache.getIfPresent(sharedSubId);
+        if (previous == null || previous > newIndex) {
+            sharedSubLastPacketWithoutIdCache.put(sharedSubId, newIndex);
+        }
+    }
+
+    private void incrementSharedSubscriptionIndexFirstMessageWithoutPacketId(final @NotNull String sharedSubId, final @NotNull Long newIndex) {
+        final Long previous = sharedSubLastPacketWithoutIdCache.getIfPresent(sharedSubId);
+        if (previous == null || previous < newIndex) {
+            sharedSubLastPacketWithoutIdCache.put(sharedSubId, newIndex);
+        }
+    }
+
+
 
     /**
      * {@inheritDoc}
@@ -952,6 +983,8 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         if (!uniqueId.equals(publish.getUniqueId())) {
                             return true;
                         }
+                        final long index = serializer.deserializeIndex(cursor.getKey());
+                        decrementSharedSubscriptionIndexFirstMessageWithoutPacketId(sharedSubscription, index);
                         bucket.getStore()
                                 .put(txn, cursor.getKey(), serializer.serializePublishWithoutPacketId(publish, false));
                     }
@@ -1040,7 +1073,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         return comparison;
     }
 
-    private int skipWithId(
+    private int skipWithPacketId(
             @NotNull final ByteIterable serializedKey, @NotNull final Cursor cursor, int comparison) {
         while (comparison == ClientQueuePersistenceSerializer.CLIENT_ID_MATCH) {
             if (serializer.deserializePacketId(cursor.getValue()) == ClientQueuePersistenceSerializer.NO_PACKET_ID) {
@@ -1065,12 +1098,30 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final Cursor cursor, @NotNull final Key key, final boolean skipWithId, @NotNull final Callback callback) {
         final ByteIterable serializedKey = serializer.serializeKey(key);
 
-        if (cursor.getSearchKeyRange(serializedKey) == null) {
-            return;
+        if (!skipWithId) {
+            if (cursor.getSearchKeyRange(serializedKey) == null) {
+                return;
+            }
+        } else {
+            final Long indexToLookTo = sharedSubLastPacketWithoutIdCache.getIfPresent(key.getQueueId());
+            if (indexToLookTo != null) {
+                final ByteIterable keyToSeek = serializer.serializeKey(key, indexToLookTo);
+                if (cursor.getSearchKeyRange(keyToSeek) == null) {
+                    return;
+                }
+            } else {
+                if (cursor.getSearchKeyRange(serializedKey) == null) {
+                    return;
+                }
+            }
         }
+
         int comparison = skipPrefix(serializedKey, cursor);
         if (skipWithId) {
-            comparison = skipWithId(serializedKey, cursor, comparison);
+            comparison = skipWithPacketId(serializedKey, cursor, comparison);
+            if (key.isShared()) {
+                incrementSharedSubscriptionIndexFirstMessageWithoutPacketId(key.getQueueId(), serializer.deserializeIndex(cursor.getKey()));
+            }
         }
         while (comparison == ClientQueuePersistenceSerializer.CLIENT_ID_MATCH) {
             if (!callback.call()) {

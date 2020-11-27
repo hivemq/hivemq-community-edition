@@ -102,8 +102,7 @@ public class ClientQueuePersistenceSerializer {
         return serializeKey(key, messageNumber);
     }
 
-    @NotNull
-    private ByteIterable serializeKey(@NotNull final Key key, final long number) {
+    @NotNull ByteIterable serializeKey(@NotNull final Key key, final long number) {
         final byte[] clientBytes = key.getQueueId().getBytes(UTF_8);
         final byte[] result = new byte[clientBytes.length + 1 + Long.BYTES];
 
