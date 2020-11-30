@@ -43,6 +43,7 @@ import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Cursor;
+import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,11 +137,19 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         for (int i = 0; i < bucketCount; i++) {
             final Bucket bucket = buckets[i];
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
+                final Store store = bucket.getStore();
                 final Cursor cursor = bucket.getStore().openCursor(txn);
                 while (cursor.getNext()) {
-                    final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
+                    final byte[] bytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(bytes);
                     if (persistent(clientSession)) {
                         sessionsCount.incrementAndGet();
+                    }
+                    if (clientSession.getWillPublish() != null) {
+                        clientSession.setWillPublish(null);
+                        final long timestamp = serializer.deserializeTimestamp(bytes);
+                        final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
+                        store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
                     }
                 }
             });
