@@ -202,6 +202,10 @@ public class RetainedMessage {
         this.message = message;
     }
 
+    public void setPublishId(final long publishId) {
+        this.publishId = publishId;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

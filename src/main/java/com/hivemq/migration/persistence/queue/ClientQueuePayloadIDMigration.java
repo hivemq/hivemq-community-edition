@@ -36,7 +36,6 @@ import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.local.xodus.clientsession.ClientSessionSubscriptionXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
@@ -74,7 +73,6 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
     private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
-    private final @NotNull ClientSessionSubscriptionXodusLocalPersistence subscriptionPersistence;
 
     private final int bucketCount;
 
@@ -91,8 +89,7 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
                                          final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider,
                                          final @NotNull SystemInformation systemInformation,
                                          final @NotNull PayloadExceptionLogging payloadExceptionLogging,
-                                         final @NotNull PublishPayloadPersistence publishPayloadPersistence,
-                                         final @NotNull ClientSessionSubscriptionXodusLocalPersistence subscriptionPersistence) {
+                                         final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
         this.sessionLocalPersistenceProvider = sessionLocalPersistenceProvider;
         this.localXodusPersistenceProvider = localXodusPersistenceProvider;
         this.clientQueueXodusLocalPersistence_4_4Provider = clientQueueXodusLocalPersistence_4_4Provider;
@@ -105,7 +102,6 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         this.bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         this.payloadExceptionLogging = payloadExceptionLogging;
         this.publishPayloadPersistence = publishPayloadPersistence;
-        this.subscriptionPersistence = subscriptionPersistence;
     }
 
     private boolean oldFolderMissing(final @NotNull File persistenceFolder) {

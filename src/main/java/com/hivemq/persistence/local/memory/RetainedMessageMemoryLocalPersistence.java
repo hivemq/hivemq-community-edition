@@ -248,6 +248,11 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     }
 
     @Override
+    public void bootstrapPayloads() {
+        // noop
+    }
+
+    @Override
     public void closeDB(final int bucketIndex) {
         // noop
     }

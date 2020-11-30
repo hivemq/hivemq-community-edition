@@ -17,9 +17,9 @@ package com.hivemq.migration;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.meta.MetaFileService;
 import com.hivemq.migration.meta.MetaInformation;
 import com.hivemq.migration.meta.PersistenceType;
@@ -136,6 +136,9 @@ public class Migrations {
         }
 
         final Set<MigrationUnit> neededMigrations = new TreeSet<>();
+        if(retainedNeeded(metaInformation, systemInformation)){
+            neededMigrations.add(MigrationUnit.PAYLOAD_ID_RETAINED_MESSAGES);
+        }
         if(queuedNeeded(metaInformation, systemInformation)){
             neededMigrations.add(MigrationUnit.PAYLOAD_ID_CLIENT_QUEUE);
         }
@@ -149,6 +152,26 @@ public class Migrations {
         return neededMigrations;
     }
 
+    private static boolean retainedNeeded(final @NotNull MetaInformation metaInformation,
+            final @NotNull SystemInformation systemInformation) {
+
+        final String previousRetainedVersion;
+        if(metaInformation.getRetainedMessagesPersistenceVersion() == null){
+            previousRetainedVersion = "NOT_SET";
+        } else {
+            previousRetainedVersion = metaInformation.getRetainedMessagesPersistenceVersion();
+        }
+
+        final PersistenceType currentRetainedType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
+        final String currentRetainedVersion;
+        if (currentRetainedType == PersistenceType.FILE){
+            currentRetainedVersion = RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION;
+        } else {
+            currentRetainedVersion = RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION;
+        }
+
+        return !previousRetainedVersion.equals(currentRetainedVersion) && isPreviousPersistenceExistent(systemInformation, RetainedMessageLocalPersistence.PERSISTENCE_NAME);
+    }
 
     private static boolean queuedNeeded(final @NotNull MetaInformation metaInformation,
                                           final @NotNull SystemInformation systemInformation) {

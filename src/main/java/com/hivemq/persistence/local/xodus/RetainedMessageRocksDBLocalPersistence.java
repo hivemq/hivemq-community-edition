@@ -55,7 +55,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageRocksDBLocalPersistence.class);
 
-    public static final String PERSISTENCE_VERSION = "040000_R";
+    public static final String PERSISTENCE_VERSION = "040500_R";
     @VisibleForTesting
     public final @NotNull PublishTopicTree[] topicTrees;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
@@ -133,6 +133,28 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                         final String topic = serializer.deserializeKey(iterator.key());
                         topicTrees[i].add(topic);
                         retainMessageCounter.incrementAndGet();
+                        iterator.next();
+                    }
+                }
+            }
+
+        } catch (final ExodusException e) {
+            log.error("An error occurred while preparing the Retained Message persistence.");
+            log.debug("Original Exception:", e);
+            throw new UnrecoverableException(false);
+        }
+    }
+
+    @Override
+    public void bootstrapPayloads() {
+        try {
+            for (final RocksDB bucket : buckets) {
+                try (final RocksIterator iterator = bucket.newIterator()) {
+                    iterator.seekToFirst();
+                    while (iterator.isValid()) {
+                        final RetainedMessage message = serializer.deserializeValue(iterator.value());
+                        final long payloadId = message.getPublishId();
+                        payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
                         iterator.next();
                     }
                 }
