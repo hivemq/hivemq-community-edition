@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -131,6 +132,7 @@ public class HiveMQServer {
         //must happen before persistence injector bootstrap as it creates the persistence folder.
         log.trace("Checking for migrations");
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
+        final Set<MigrationUnit> valueMigrations = Migrations.checkForValueMigration(systemInformation);
 
         log.trace("Initializing persistences");
         final Injector persistenceInjector =
@@ -142,16 +144,24 @@ public class HiveMQServer {
             return;
         }
         if (configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
-            log.info("Starting with file persistences");
-            if (migrations.size() > 0) {
-                log.info("Persistence types has been changed, migrating persistent data.");
+
+            if (migrations.size() + valueMigrations.size() > 0) {
+                if(migrations.size() > 0) {
+                    log.info("Persistence types has been changed, migrating persistent data.");
+                } else {
+                    log.info("Persistence values has been changed, migrating persistent data.");
+                }
                 for (final MigrationUnit migrationUnit : migrations.keySet()) {
                     log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
                 }
-                Migrations.migrate(persistenceInjector, migrations);
+                for (final MigrationUnit migrationUnit : valueMigrations) {
+                    log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
+                }
+                Migrations.migrate(persistenceInjector, migrations, valueMigrations);
             }
 
             Migrations.afterMigration(systemInformation);
+
         } else {
             log.info("Starting with in memory persistences");
         }

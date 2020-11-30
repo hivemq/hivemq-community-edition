@@ -55,7 +55,7 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence i
     private static final Logger log = LoggerFactory.getLogger(
             PublishPayloadXodusLocalPersistence.class);
 
-    public static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_VERSION = "040500";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
 
     private final @NotNull PublishPayloadXodusSerializer serializer;

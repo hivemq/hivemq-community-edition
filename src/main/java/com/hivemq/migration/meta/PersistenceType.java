@@ -23,6 +23,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public enum PersistenceType {
     FILE, FILE_NATIVE;
 
+    private static final PersistenceType DEFAULT = FILE_NATIVE;
+
     @NotNull
     public static PersistenceType forCode(final int code){
         if (code < 0 || code >= values().length) {
