@@ -24,6 +24,9 @@ import com.hivemq.migration.meta.MetaFileService;
 import com.hivemq.migration.meta.MetaInformation;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.migration.persistence.PersistenceMigrator;
+import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
+import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
+import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -31,9 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.hivemq.configuration.info.SystemInformationImpl.DEVELOPMENT_VERSION;
 
@@ -111,16 +112,72 @@ public class Migrations {
         return neededMigrations;
     }
 
+
+    public static Set<MigrationUnit> checkForValueMigration(final @NotNull SystemInformation systemInformation) {
+        MIGRATION_LOGGER.info("Checking for value migrations (HiveMQ version {}).", systemInformation.getHiveMQVersion());
+
+        if (systemInformation.getHiveMQVersion().equals(DEVELOPMENT_VERSION)) {
+            MIGRATION_LOGGER.info("Skipping migration because it is a Development Snapshot.");
+            return Collections.emptySet();
+        }
+
+        final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
+
+        if (!metaInformation.isDataFolderPresent()) {
+            log.trace("No data folder present, skip migrations.");
+            MIGRATION_LOGGER.info("Skipping migration because no data folder is present.");
+            return Collections.emptySet();
+        }
+
+        if (!metaInformation.isPersistenceFolderPresent()) {
+            log.trace("No persistence folder present, skip migrations.");
+            MIGRATION_LOGGER.info("Skipping migration because no persistence folder is present.");
+            return Collections.emptySet();
+        }
+
+        final Set<MigrationUnit> neededMigrations = new TreeSet<>();
+        if(queuedNeeded(metaInformation, systemInformation)){
+            neededMigrations.add(MigrationUnit.PAYLOAD_ID_CLIENT_QUEUE);
+        }
+
+        if (neededMigrations.isEmpty()) {
+            MIGRATION_LOGGER.info("Nothing to migrate found.");
+        } else {
+            MIGRATION_LOGGER.info("Found following needed migrations: {}", neededMigrations);
+        }
+
+        return neededMigrations;
+    }
+
+
+    private static boolean queuedNeeded(final @NotNull MetaInformation metaInformation,
+                                          final @NotNull SystemInformation systemInformation) {
+
+        final String previousQueuedVersion;
+        if(metaInformation.getQueuedMessagesPersistenceVersion() == null){
+            previousQueuedVersion = "NOT_SET";
+        } else {
+            previousQueuedVersion = metaInformation.getQueuedMessagesPersistenceVersion();
+        }
+
+        final String currentQueuedVersion = ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION;
+
+        return !previousQueuedVersion.equals(currentQueuedVersion) && isPreviousPersistenceExistent(systemInformation, ClientQueueXodusLocalPersistence.PERSISTENCE_NAME);
+    }
+
     private static boolean isPreviousPersistenceExistent(final @NotNull SystemInformation systemInformation, final @NotNull String persistence) {
         return new File(systemInformation.getDataFolder() + File.separator + LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME, persistence).exists();
     }
 
-    public static void migrate(final Injector persistenceInjector, final @NotNull Map<MigrationUnit, PersistenceType> migrations) {
+    public static void migrate(final Injector persistenceInjector, final @NotNull Map<MigrationUnit, PersistenceType> typeMigrations, final @NotNull Set<MigrationUnit> valueMigrations) {
 
         MIGRATION_LOGGER.info("Start migration.");
 
+        // migrate persistences
         final PersistenceMigrator persistenceMigrator = persistenceInjector.getInstance(PersistenceMigrator.class);
-        persistenceMigrator.migratePersistenceTypes(migrations);
+        persistenceMigrator.migratePersistenceValues(valueMigrations);
+        persistenceMigrator.migratePersistenceTypes(typeMigrations);
+        persistenceMigrator.closeAllLegacyPersistences();
 
     }
 

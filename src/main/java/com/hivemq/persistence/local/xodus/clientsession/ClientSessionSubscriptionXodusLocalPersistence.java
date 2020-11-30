@@ -285,7 +285,9 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
 
     @Override
     @NotNull
-    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(final int bucketIndex, @Nullable final String lastClientId, final int maxResults) {
+    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(final int bucketIndex,
+                                                                                      @Nullable final String lastClientId,
+                                                                                      final int maxResults) {
         checkArgument(maxResults > 0, "max results must be greater than 0");
 
         final ImmutableMap.Builder<String, ImmutableSet<Topic>> resultBuilder = ImmutableMap.builder();

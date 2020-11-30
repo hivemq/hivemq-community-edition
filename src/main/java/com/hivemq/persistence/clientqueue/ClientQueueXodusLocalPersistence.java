@@ -78,8 +78,8 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     @NotNull
     private static final Logger log = LoggerFactory.getLogger(ClientQueueXodusLocalPersistence.class);
 
-    private static final String PERSISTENCE_NAME = "client_queue";
-    public static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_NAME = "client_queue";
+    public static final String PERSISTENCE_VERSION = "040500";
     private static final int LINKED_LIST_NODE_OVERHEAD = 24;
 
     private final @NotNull ClientQueuePersistenceSerializer serializer;
@@ -1134,6 +1134,36 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     private interface Callback {
 
         boolean call();
+    }
+
+    @NotNull
+    public ImmutableList<ClientQueueEntry> getAll(@NotNull final String queueId, final boolean shared, final int bucketIndex) {
+        checkNotNull(queueId, "Queue id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
+        final Key key = new Key(queueId, shared);
+
+        final Bucket bucket = buckets[bucketIndex];
+        final ImmutableList.Builder<ClientQueueEntry> messageBuilder = bucket.getEnvironment().computeInExclusiveTransaction(txn -> {
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+
+                final ImmutableList.Builder<ClientQueueEntry> entries = ImmutableList.builder();
+
+                iterateQueue(cursor, key, false, () -> {
+                    final ByteIterable value = cursor.getValue();
+                    final MessageWithID messageWithID = serializer.deserializeValue(value);
+                    final boolean retained = serializer.deserializeRetained(value);
+                    entries.add(new ClientQueueEntry(messageWithID, retained));
+                    return true;
+                });
+                return entries;
+            }
+        });
+        return messageBuilder.build();
+    }
+
+    public interface QueueCallback {
+        void onItem(@NotNull Key queueId, @NotNull ImmutableList<ClientQueueEntry> messages);
     }
 
     @NotNull

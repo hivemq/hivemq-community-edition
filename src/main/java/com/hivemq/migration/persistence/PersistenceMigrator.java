@@ -15,13 +15,15 @@
  */
 package com.hivemq.migration.persistence;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.MigrationUnit;
 import com.hivemq.migration.Migrations;
 import com.hivemq.migration.TypeMigration;
+import com.hivemq.migration.ValueMigration;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.migration.persistence.payload.PublishPayloadTypeMigration;
+import com.hivemq.migration.persistence.queue.ClientQueuePayloadIDMigration;
 import com.hivemq.migration.persistence.retained.RetainedMessageTypeMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +31,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Florian Limpöck
+ * @author Lukas Brandl
  */
 @LazySingleton
 public class PersistenceMigrator {
@@ -41,12 +45,15 @@ public class PersistenceMigrator {
 
     private final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider;
     private final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider;
+    private final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider;
 
     @Inject
     public PersistenceMigrator(final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider,
-                               final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider) {
+                               final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider,
+                               final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider) {
         this.publishPayloadMigrationProvider = publishPayloadMigrationProvider;
         this.retainedMessageMigrationProvider = retainedMessageMigrationProvider;
+        this.clientQueuePayloadIDMigrationProvider = clientQueuePayloadIDMigrationProvider;
     }
 
     public void migratePersistenceTypes(final Map<MigrationUnit, PersistenceType> migrations) {
@@ -85,6 +92,35 @@ public class PersistenceMigrator {
 
         log.info("File Persistences successfully migrated in " + (System.currentTimeMillis() - start) + " ms");
         migrationlog.info("File Persistences successfully migrated in " + (System.currentTimeMillis() - start) + " ms");
+
+    }
+
+    public void closeAllLegacyPersistences() {
+        clientQueuePayloadIDMigrationProvider.get().closeLegacy();
+    }
+
+
+    public void migratePersistenceValues(final @NotNull Set<MigrationUnit> valueMigrations) {
+
+        for (final MigrationUnit migrationUnit : valueMigrations) {
+            final ValueMigration migrator;
+            switch (migrationUnit) {
+                case PAYLOAD_ID_CLIENT_QUEUE:
+                    migrator = clientQueuePayloadIDMigrationProvider.get();
+                    break;
+                default:
+                    continue;
+            }
+
+            final long startOne = System.currentTimeMillis();
+            migrationlog.info("Migrating {}.", migrationUnit);
+            log.debug("Migrating {}.", migrationUnit);
+
+            migrator.migrateToValue();
+
+            migrationlog.info("Migrated {} successfully in {} ms", migrationUnit, (System.currentTimeMillis() - startOne));
+            log.debug("Migrated {} successfully in {} ms", migrationUnit, (System.currentTimeMillis() - startOne));
+        }
 
     }
 
