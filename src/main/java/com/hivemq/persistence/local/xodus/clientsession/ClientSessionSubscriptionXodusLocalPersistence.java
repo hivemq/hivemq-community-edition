@@ -43,7 +43,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.*;
@@ -111,24 +110,14 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         try {
             for (int i = 0; i < bucketCount; i++) {
                 final Bucket bucket = buckets[i];
-                final Map<String, Long> timestampsInBucket = new ConcurrentSkipListMap<>();
 
                 bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                     try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-
                         while (cursor.getNext()) {
-                            final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                            final long timestamp = serializer.deserializeTimestamp(byteIterableToBytes(cursor.getValue()));
                             final long id = serializer.deserializeId(byteIterableToBytes(cursor.getValue()));
                             if (nextId.get() < id) {
                                 nextId.set(id);
                             }
-
-                            final Long currentTimestamp = timestampsInBucket.get(clientId);
-                            if (currentTimestamp == null || currentTimestamp < timestamp) {
-                                timestampsInBucket.put(clientId, timestamp);
-                            }
-
                         }
                     }
                 });

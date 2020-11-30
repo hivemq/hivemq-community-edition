@@ -62,7 +62,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
     private static final Logger log = LoggerFactory.getLogger(
             RetainedMessageXodusLocalPersistence.class);
 
-    public static final String PERSISTENCE_VERSION = "040000";
+    public static final String PERSISTENCE_VERSION = "040500";
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull RetainedMessageXodusSerializer serializer;
@@ -147,6 +147,28 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
             throw new UnrecoverableException(false);
         }
     }
+
+    @Override
+    public void bootstrapPayloads() {
+        try {
+            for (final Bucket bucket : buckets) {
+                bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
+                    try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                        while (cursor.getNext()) {
+                            final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
+                            final long payloadId = message.getPublishId();
+                            payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
+                        }
+                    }
+                });
+            }
+        } catch (final ExodusException e) {
+            log.error("An error occurred while preparing the Retained Message persistence.");
+            log.debug("Original Exception:", e);
+            throw new UnrecoverableException(false);
+        }
+    }
+
 
     @Override
     public void clear(final int bucketIndex) {

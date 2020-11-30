@@ -28,11 +28,11 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
-import net.openhft.hashing.LongHashFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
@@ -250,7 +250,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         }
     }
 
-    @NotNull
     public static long createId() {
         return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
     }
