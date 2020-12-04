@@ -126,7 +126,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      */
     //this method is not allowed to return null
     @Override
-    public byte @NotNull [] get(final @NotNull long id) {
+    public byte @NotNull [] get(final long id) {
 
         final byte[] payload = getPayloadOrNull(id);
 
@@ -141,7 +141,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      */
     //this method is allowed to return null
     @Override
-    public byte @Nullable [] getPayloadOrNull(final @NotNull long id) {
+    public byte @Nullable [] getPayloadOrNull(final long id) {
         final byte[] cachedPayload = payloadCache.getIfPresent(id);
         // We don't need to lock here.
         // In case of a lost update issue, we would just overwrite the cache entry with the same payload.
@@ -186,7 +186,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      * {@inheritDoc}
      */
     @Override
-    public void decrementReferenceCounter(final @NotNull long id) {
+    public void decrementReferenceCounter(final long id) {
         final AtomicLong counter = referenceCounter.get(id);
         if (counter == null || counter.get() <= 0) {
             log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
