@@ -194,7 +194,10 @@ tasks.test {
         logger.lifecycle("Excluded " + lines.size() + " tests for this execution")
     }
 
-    testLogging.events("failed")
+    testLogging {
+        events("STARTED", "FAILED", "SKIPPED")
+    }
+
     testLogging.exceptionFormat("full")
 
     /* use tmpdir from gradle property or the same tmpdir as the runner */
