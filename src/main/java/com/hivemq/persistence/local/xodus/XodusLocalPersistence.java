@@ -124,7 +124,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         } catch (final ExodusException e) {
             logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
-            logger.debug("Original Exception:", e);
+            logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
 
@@ -163,7 +163,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         } catch (final ExodusException | InterruptedException e) {
             logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
-            logger.debug("Original Exception:", e);
+            logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
 
