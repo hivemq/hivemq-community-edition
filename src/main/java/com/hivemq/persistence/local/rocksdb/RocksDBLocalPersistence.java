@@ -130,7 +130,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         } catch (final RocksDBException e) {
             logger.error(
                     "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
-            logger.debug("Original Exception:", e);
+            logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
 
@@ -175,7 +175,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
                         logger.error(
                                 "An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
                                 name);
-                        logger.debug("Original Exception:", e);
+                        logger.info("Original Exception:", e);
                         throw new UnrecoverableException();
                     }
                 });
@@ -186,7 +186,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         } catch (final Exception e) {
             logger.error(
                     "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
-            logger.debug("Original Exception:", e);
+            logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
 
