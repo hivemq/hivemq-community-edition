@@ -65,10 +65,10 @@ if hash java 2>/dev/null; then
         HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
     fi
 
-    if [ -z "$HEAPDUMP_FOLDER" ]; then
+    if [ -z "$HIVEMQ_HEAPDUMP_FOLDER" ]; then
         HEAPDUMP_PATH="$HIVEMQ_FOLDER"
     else
-        HEAPDUMP_PATH="$HEAPDUMP_FOLDER"
+        HEAPDUMP_PATH="$HIVEMQ_HEAPDUMP_FOLDER"
     fi
 
     if [ ! -d "$HIVEMQ_FOLDER" ]; then
