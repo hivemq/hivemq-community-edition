@@ -11,13 +11,13 @@ Library                                                            | License    
  com.fasterxml.jackson.core:jackson-annotations                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.core:jackson-core                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.fasterxml.jackson.core:jackson-databind                       | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
- com.github.oshi:oshi-core                                         | EPL, Version 1.0                           | https://opensource.org/licenses/EPL-1.0                           | 
+ com.github.oshi:oshi-core                                         | MIT License                                | https://opensource.org/licenses/MIT                               | 
  com.google.code.findbugs:jsr305                                   | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.google.guava:failureaccess                                    | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.google.guava:guava                                            | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.google.guava:listenablefuture                                 | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  com.google.inject:guice                                           | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
- com.google.j2objc:j2objc-annotations                              | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
+ com.google.j2objc:j2objc-annotations                              | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        |
  com.sun.activation:jakarta.activation                             | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
  com.sun.xml.bind:jaxb-impl                                        | EDL, Version 1.0                           | https://www.eclipse.org/org/documents/edl-v10.php                 | 
  commons-io:commons-io                                             | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
@@ -41,8 +41,8 @@ Library                                                            | License    
  net.openhft:zero-allocation-hashing                               | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  org.apache.commons:commons-compress                               | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  org.apache.commons:commons-lang3                                  | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
- org.bouncycastle:bcpkix-jdk15on                                   | Bouncy Castle Licence                      | https://www.bouncycastle.org/licence.html                         | 
- org.bouncycastle:bcprov-jdk15on                                   | Bouncy Castle Licence                      | https://www.bouncycastle.org/licence.html                         | 
+ org.bouncycastle:bcpkix-jdk15on                                   | Bouncy Castle License                      | https://www.bouncycastle.org/licence.html                         | 
+ org.bouncycastle:bcprov-jdk15on                                   | Bouncy Castle License                      | https://www.bouncycastle.org/licence.html                         | 
  org.jetbrains.kotlin:kotlin-stdlib                                | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  org.jetbrains.kotlin:kotlin-stdlib-common                         | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  org.jetbrains.xodus:xodus-compress                                | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
@@ -52,7 +52,6 @@ Library                                                            | License    
  org.rocksdb:rocksdbjni                                            | Apache License, Version 2.0                | https://opensource.org/licenses/Apache-2.0                        | 
  org.slf4j:jul-to-slf4j                                            | MIT License                                | https://opensource.org/licenses/MIT                               | 
  org.slf4j:slf4j-api                                               | MIT License                                | https://opensource.org/licenses/MIT                               | 
- org.threeten:threetenbp                                           | BSD 3-Clause License                       | https://opensource.org/licenses/BSD-3-Clause                      | 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
