@@ -17,12 +17,12 @@ package com.hivemq.statistics;
 
 import com.codahale.metrics.Gauge;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.metrics.MetricsHolder;
@@ -36,7 +36,6 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
-import oshi.software.os.OperatingSystemVersion;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -206,7 +205,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
 
         statistic.setOsManufacturer(operatingSystem.getManufacturer());
         statistic.setOs(operatingSystem.getFamily());
-        final OperatingSystemVersion version = operatingSystem.getVersion();
+        final OperatingSystem.OSVersionInfo version = operatingSystem.getVersionInfo();
         statistic.setOsVersion(version.getVersion());
         statistic.setOpenFileLimit(operatingSystem.getFileSystem().getMaxFileDescriptors());
 
@@ -223,7 +222,7 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         statistic.setCpuPhysicalCores(processor.getPhysicalProcessorCount());
         statistic.setCpuTotalCores(processor.getLogicalProcessorCount());
 
-        statistic.setOsUptime(processor.getSystemUptime());
+        statistic.setOsUptime(operatingSystem.getSystemUptime());
         statistic.setMemorySize(hardware.getMemory().getTotal() / 1024 / 1024);
     }
 }
