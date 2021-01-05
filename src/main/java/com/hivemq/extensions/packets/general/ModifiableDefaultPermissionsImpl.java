@@ -26,7 +26,6 @@ import com.hivemq.extensions.auth.parameter.TopicPermissionImpl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermissions {
 
-    private final List<TopicPermission> topicPermissions = new CopyOnWriteArrayList<>();
+    private @NotNull ImmutableList<TopicPermission> topicPermissions = ImmutableList.of();
 
     private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour
             = new AtomicReference<>(DefaultAuthorizationBehaviour.ALLOW);
@@ -44,7 +43,7 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
 
     @Override
     public @NotNull List<TopicPermission> asList() {
-        return ImmutableList.copyOf(topicPermissions);
+        return topicPermissions;
     }
 
     @Override
@@ -57,7 +56,7 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
 
-        topicPermissions.add(permission);
+        topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).add(permission).build();
     }
 
     @Override
@@ -75,7 +74,7 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
 
-        topicPermissions.addAll(permissions);
+        topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions).build();
     }
 
     @Override
@@ -84,12 +83,19 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
         if (!(permission instanceof TopicPermissionImpl)) {
             throw new DoNotImplementException("Topic permission must be created with Builders.topicPermission()");
         }
-        topicPermissions.remove(permission);
+        final ImmutableList.Builder<TopicPermission> builder = ImmutableList.builder();
+        for (int i = 0; i < topicPermissions.size(); i++) {
+            final TopicPermission topicPermission = topicPermissions.get(i);
+            if (!topicPermission.equals(permission)) {
+                builder.add(topicPermission);
+            }
+        }
+        topicPermissions = builder.build();
     }
 
     @Override
     public void clear() {
-        topicPermissions.clear();
+        topicPermissions = ImmutableList.of();
     }
 
     @Override
