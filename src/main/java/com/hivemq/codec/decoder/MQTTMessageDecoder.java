@@ -23,22 +23,10 @@ import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.MessageType;
-import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.auth.AUTH;
-import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.puback.PUBACK;
-import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
-import com.hivemq.mqtt.message.publish.PUBLISH;
-import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
@@ -68,17 +56,13 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
-    private final boolean strict;
-
     public MQTTMessageDecoder(final @NotNull MqttConnectDecoder connectDecoder,
-                              final boolean strict,
                               final @NotNull MqttConfigurationService mqttConfig,
                               final @NotNull MqttDecoders mqttDecoders,
                               final @NotNull MqttServerDisconnector mqttServerDisconnector,
                               final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.connectDecoder = connectDecoder;
         this.mqttConfig = mqttConfig;
-        this.strict = strict;
         this.mqttDecoders = mqttDecoders;
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.globalMQTTMessageCounter = globalMQTTMessageCounter;
@@ -86,7 +70,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
     public MQTTMessageDecoder(final ChannelDependencies channelDependencies) {
         this(channelDependencies.getMqttConnectDecoder(),
-                true,
                 channelDependencies.getConfigurationService().mqttConfiguration(),
                 channelDependencies.getMqttDecoders(),
                 channelDependencies.getMqttServerDisconnector(),
@@ -170,7 +153,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final MessageType messageType = getMessageType(fixedHeader);
 
-        if (strict && protocolVersion == null && messageType != CONNECT) {
+        if (protocolVersion == null && messageType != CONNECT) {
             mqttServerDisconnector.logAndClose(channel,
                     "A client (IP: {}) sent other message before CONNECT. Disconnecting client.",
                     "Sent other message before CONNECT");
@@ -178,123 +161,83 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
-        if(strict && protocolVersion != null && messageType == CONNECT) {
+        if (protocolVersion != null && messageType == CONNECT) {
             mqttServerDisconnector.logAndClose(channel,
                     "A client (IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
-                    "Sent second CONNECT message"
-                    );
+                    "Sent second CONNECT message");
             buf.clear();
             return;
         }
 
         globalMQTTMessageCounter.countInboundTraffic(readableBytes);
-        switch (messageType) {
-            case RESERVED_ZERO:
-                mqttServerDisconnector.disconnect(channel,
-                        "A client (IP: {}) sent a message with an invalid message type '0'. This message type is reserved. Disconnecting client.",
-                        "Sent a message with message type '0'",
-                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                        ReasonStrings.DISCONNECT_MESSAGE_TYPE_ZERO);
-                buf.clear();
-                return;
-            case CONNECT:
-                message = connectDecoder.decode(channel, messageBuffer, fixedHeader);
-                break;
-            case CONNACK:
-                if (strict) {
-                    mqttServerDisconnector.disconnect(channel,
-                            "A client (IP: {}) sent a CONNACK message. This is invalid because clients are not allowed to send CONNACKs. Disconnecting client.",
-                            "Sent a CONNACK message",
-                            Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                            ReasonStrings.DISCONNECT_CONNACK_RECEIVED);
-                    buf.clear();
-                    return;
-                } else {
-                    message = mqttDecoders.decoder(CONNACK.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                    break;
+
+        if (messageType == CONNECT) {
+            message = connectDecoder.decode(channel, messageBuffer, fixedHeader);
+        } else {
+            final MqttDecoder<?> decoder = mqttDecoders.decoder(messageType, protocolVersion);
+
+            if (decoder != null) {
+                message = decoder.decode(channel, messageBuffer, fixedHeader);
+            } else {
+                switch (messageType) {
+                    case RESERVED_ZERO:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a message with an invalid message type '0'. This message type is reserved. Disconnecting client.",
+                                "Sent a message with message type '0'",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_MESSAGE_TYPE_ZERO);
+                        buf.clear();
+                        return;
+                    case CONNACK:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a CONNACK message. This is invalid because clients are not allowed to send CONNACKs. Disconnecting client.",
+                                "Sent a CONNACK message",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_CONNACK_RECEIVED);
+                        buf.clear();
+                        return;
+                    case SUBACK:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a SUBACK message. This is invalid because clients are not allowed to send SUBACKs. Disconnecting client.",
+                                "Sent a SUBACK message",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_SUBACK_RECEIVED);
+                        buf.clear();
+                        return;
+                    case UNSUBACK:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a UNSUBACK message. This is invalid because clients are not allowed to send UNSUBACKs. Disconnecting client.",
+                                "Sent a UNSUBACK message",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_UNSUBACK_RECEIVED);
+                        buf.clear();
+                        return;
+                    case PINGRESP:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a PINGRESP message. This is invalid because clients are not allowed to send PINGRESPs. Disconnecting client.",
+                                "Sent a PINGRESP message",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_PINGRESP_RECEIVED);
+                        buf.clear();
+                        return;
+                    case AUTH:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) sent a message with an invalid message type '15'. This message type is reserved. Disconnecting client.",
+                                "Sent a message with message type '15'",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_MESSAGE_TYPE_FIFTEEN);
+                        buf.clear();
+                        return;
+                    default:
+                        mqttServerDisconnector.disconnect(channel,
+                                "A client (IP: {}) connected but the message type could not get determined. Disconnecting client.",
+                                "Sent a message with invalid message type",
+                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                ReasonStrings.DISCONNECT_MESSAGE_TYPE_INVALID);
+                        buf.clear();
+                        return;
                 }
-            case PUBLISH:
-                message = mqttDecoders.decoder(PUBLISH.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case PUBACK:
-                message = mqttDecoders.decoder(PUBACK.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case PUBREC:
-                message = mqttDecoders.decoder(PUBREC.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case PUBREL:
-                message = mqttDecoders.decoder(PUBREL.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case PUBCOMP:
-                message = mqttDecoders.decoder(PUBCOMP.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case SUBSCRIBE:
-                message = mqttDecoders.decoder(SUBSCRIBE.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case SUBACK:
-                if (strict) {
-                    mqttServerDisconnector.disconnect(channel,
-                            "A client (IP: {}) sent a SUBACK message. This is invalid because clients are not allowed to send SUBACKs. Disconnecting client.",
-                            "Sent a SUBACK message",
-                            Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                            ReasonStrings.DISCONNECT_SUBACK_RECEIVED);
-                    buf.clear();
-                    return;
-                } else {
-                    message = mqttDecoders.decoder(SUBACK.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                    break;
-                }
-            case UNSUBSCRIBE:
-                message = mqttDecoders.decoder(UNSUBSCRIBE.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case UNSUBACK:
-                if (strict) {
-                    mqttServerDisconnector.disconnect(channel,
-                            "A client (IP: {}) sent a UNSUBACK message. This is invalid because clients are not allowed to send UNSUBACKs. Disconnecting client.",
-                            "Sent a UNSUBACK message",
-                            Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                            ReasonStrings.DISCONNECT_UNSUBACK_RECEIVED);
-                    buf.clear();
-                    return;
-                } else {
-                    message = mqttDecoders.decoder(UNSUBACK.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                    break;
-                }
-            case PINGREQ:
-                message = mqttDecoders.decoder(PINGREQ.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case PINGRESP:
-                mqttServerDisconnector.disconnect(channel,
-                        "A client (IP: {}) sent a PINGRESP message. This is invalid because clients are not allowed to send PINGRESPs. Disconnecting client.",
-                        "Sent a PINGRESP message",
-                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                        ReasonStrings.DISCONNECT_PINGRESP_RECEIVED);
-                buf.clear();
-                return;
-            case DISCONNECT:
-                message = mqttDecoders.decoder(DISCONNECT.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                break;
-            case AUTH:
-                if (ProtocolVersion.MQTTv5 == protocolVersion) {
-                    message = mqttDecoders.decoder(AUTH.class, protocolVersion).decode(channel, messageBuffer, fixedHeader);
-                } else {
-                    mqttServerDisconnector.disconnect(channel,
-                            "A client (IP: {}) sent a message with an invalid message type '15'. This message type is reserved. Disconnecting client.",
-                            "Sent a message with message type '15'",
-                            Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                            ReasonStrings.DISCONNECT_MESSAGE_TYPE_FIFTEEN);
-                    buf.clear();
-                    return;
-                }
-                break;
-            default:
-                mqttServerDisconnector.disconnect(channel,
-                        "A client (IP: {}) connected but the message type could not get determined. Disconnecting client.",
-                        "Sent a message with invalid message type",
-                        Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                        ReasonStrings.DISCONNECT_MESSAGE_TYPE_INVALID);
-                buf.clear();
-                return;
+            }
         }
 
         if (message == null) {
