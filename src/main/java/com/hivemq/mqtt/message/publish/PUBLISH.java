@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.message.publish;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
@@ -408,7 +409,9 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         size += ObjectMemoryEstimation.stringSize(contentType);
 
         size += 24; //User Properties Overhead
-        for (final MqttUserProperty userProperty : getUserProperties().asList()) {
+        final ImmutableList<MqttUserProperty> userProperties = getUserProperties().asList();
+        for (int i = 0; i < userProperties.size(); i++) {
+            final MqttUserProperty userProperty = userProperties.get(i);
             size += 24; //UserProperty Object Overhead
             size += ObjectMemoryEstimation.stringSize(userProperty.getName());
             size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
