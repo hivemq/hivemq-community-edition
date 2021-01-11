@@ -22,14 +22,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import util.InitFutureUtilsExecutorRule;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Lukas Brandl
@@ -38,28 +35,6 @@ public class FutureUtilsTest {
 
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
-
-    @Test
-    public void test_void_future_from_any_future_success() throws Exception {
-        final SettableFuture<Object> future = SettableFuture.create();
-
-        final ListenableFuture<Void> voidFuture = FutureUtils.voidFutureFromAnyFuture(future);
-        assertEquals(false, voidFuture.isDone());
-        future.set(new Object());
-        assertEquals(true, voidFuture.isDone());
-        voidFuture.get();
-    }
-
-    @Test(expected = ExecutionException.class)
-    public void test_void_future_from_any_future_failure() throws Exception {
-        final SettableFuture<Object> future = SettableFuture.create();
-
-        final ListenableFuture<Void> voidFuture = FutureUtils.voidFutureFromAnyFuture(future);
-        assertEquals(false, voidFuture.isDone());
-        future.setException(new RuntimeException());
-        assertEquals(true, voidFuture.isDone());
-        voidFuture.get();
-    }
 
     @Test
     public void test_future_merge() throws Exception {
