@@ -33,10 +33,6 @@ public class FutureUtils {
     @Inject
     public static AbstractFutureUtils delegate;
 
-    public static @NotNull ListenableFuture<Void> voidFutureFromAnyFuture(final @NotNull ListenableFuture<?> anyFuture) {
-        return delegate.voidFutureFromAnyFuture(anyFuture);
-    }
-
     public static @NotNull ListenableFuture<Void> mergeVoidFutures(
             final @NotNull ListenableFuture<Void> future1, final @NotNull ListenableFuture<Void> future2) {
         return delegate.mergeVoidFutures(future1, future2);

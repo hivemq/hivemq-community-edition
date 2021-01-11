@@ -38,13 +38,6 @@ public abstract class AbstractFutureUtils {
     private static final Logger log = LoggerFactory.getLogger(AbstractFutureUtils.class);
     private static final AnyToVoidFunction ANY_TO_VOID_FUNCTION = new AnyToVoidFunction();
 
-    public abstract @NotNull ListenableFuture<Void> voidFutureFromAnyFuture(@NotNull ListenableFuture<?> anyFuture);
-
-    public @NotNull ListenableFuture<Void> voidFutureFromAnyFuture(
-            final @NotNull ListenableFuture<?> anyFuture, final @NotNull Executor executor) {
-        return Futures.transform(anyFuture, ANY_TO_VOID_FUNCTION, executor);
-    }
-
     public @NotNull ListenableFuture<Void> mergeVoidFutures(
             final @NotNull ListenableFuture<Void> future1, final @NotNull ListenableFuture<Void> future2) {
         return voidFutureFromList(ImmutableList.of(future1, future2));

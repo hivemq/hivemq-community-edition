@@ -39,11 +39,6 @@ public class FutureUtilsImpl extends AbstractFutureUtils {
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> voidFutureFromAnyFuture(final @NotNull ListenableFuture<?> anyFuture) {
-        return super.voidFutureFromAnyFuture(anyFuture, persistenceExecutorService);
-    }
-
-    @Override
     public <T> void addPersistenceCallback(
             final @NotNull ListenableFuture<T> future, final @NotNull FutureCallback<? super T> callback) {
         super.addPersistenceCallback(future, callback, persistenceExecutorService);

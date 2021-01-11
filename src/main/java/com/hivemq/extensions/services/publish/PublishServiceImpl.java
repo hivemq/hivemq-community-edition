@@ -101,7 +101,7 @@ public class PublishServiceImpl implements PublishService {
 
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
         final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService.publish(internalPublish, globalManagedExtensionExecutorService, null);
-        return ListenableFutureConverter.toCompletable(FutureUtils.voidFutureFromAnyFuture(publishFuture), globalManagedExtensionExecutorService);
+        return ListenableFutureConverter.toVoidCompletable(publishFuture, globalManagedExtensionExecutorService);
     }
 
     @Override
