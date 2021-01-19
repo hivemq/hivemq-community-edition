@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.handler.connect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -39,6 +40,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -50,6 +52,7 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
+import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.*;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -97,6 +100,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull PluginAuthenticatorService pluginAuthenticatorService;
     private final @NotNull PluginAuthorizerService pluginAuthorizerService;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+    private final @NotNull MessageIDPools messageIDPools;
 
     private int maxClientIdLength;
     private long configuredSessionExpiryInterval;
@@ -123,7 +127,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull PluginAuthenticatorService pluginAuthenticatorService,
             final @NotNull Authorizers authorizers,
             final @NotNull PluginAuthorizerService pluginAuthorizerService,
-            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull MessageIDPools messageIDPools) {
 
         this.onSecondConnectHandler = onSecondConnectHandler;
         this.clientSessionPersistence = clientSessionPersistence;
@@ -139,6 +144,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.authorizers = authorizers;
         this.pluginAuthorizerService = pluginAuthorizerService;
         this.mqttServerDisconnector = mqttServerDisconnector;
+        this.messageIDPools = messageIDPools;
     }
 
     @PostConstruct
@@ -291,11 +297,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     }
 
     @Override
-    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt)
-            throws Exception {
-        if (evt instanceof ConnectPersistenceUpdateHandler.FinishedConnectPersistence) {
-            handleFinishedConnectPersistence(ctx, (ConnectPersistenceUpdateHandler.FinishedConnectPersistence) evt);
-        } else if (evt instanceof AuthorizeWillResultEvent) {
+    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) throws Exception {
+        if (evt instanceof AuthorizeWillResultEvent) {
             final AuthorizeWillResultEvent resultEvent = (AuthorizeWillResultEvent) evt;
             afterPublishAuthorizer(ctx, resultEvent.getConnect(), resultEvent.getResult());
         } else {
@@ -303,11 +306,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void handleFinishedConnectPersistence(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull ConnectPersistenceUpdateHandler.FinishedConnectPersistence evt) {
-
-        afterPersistSession(ctx, evt.getMessage(), evt.isSessionPresent());
+    @NotNull
+    private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart,
+            @NotNull final String clientId,
+            final long sessionExpiryInterval,
+            @Nullable final MqttWillPublish willPublish,
+            @Nullable final Long queueSizeMaximum) {
+        return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish, queueSizeMaximum);
     }
 
     private boolean checkClientId(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
@@ -517,21 +522,25 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 true);
     }
 
-    private void afterTakeover(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
+    @VisibleForTesting
+    void afterTakeover(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
 
+        final Long queueSizeMaximum = ctx.channel().attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+        final long sessionExpiryInterval =
+                msg.getSessionExpiryInterval() > configuredSessionExpiryInterval ?
+                        configuredSessionExpiryInterval : msg.getSessionExpiryInterval();
+
+        final boolean existent;
         if (msg.isCleanStart()) {
-            ctx.fireUserEventTriggered(new ConnectPersistenceUpdateHandler.StartConnectPersistence(msg, false,
-                    msg.getSessionExpiryInterval()));
+            existent = false;
         } else {
-            final boolean existent = clientSessionPersistence.isExistent(msg.getClientIdentifier());
-
-            final long sessionExpiryInterval =
-                    msg.getSessionExpiryInterval() > configuredSessionExpiryInterval ?
-                            configuredSessionExpiryInterval : msg.getSessionExpiryInterval();
-            ctx.fireUserEventTriggered(
-                    new ConnectPersistenceUpdateHandler.StartConnectPersistence(msg, existent,
-                            sessionExpiryInterval));
+            existent = clientSessionPersistence.isExistent(msg.getClientIdentifier());
         }
+        final ListenableFuture<Void> future = updatePersistenceData(msg.isCleanStart(),
+                    msg.getClientIdentifier(), sessionExpiryInterval, msg.getWillPublish(),
+                    queueSizeMaximum);
+
+        FutureUtils.addPersistenceCallback(future, new UpdatePersistenceCallback(ctx, this, msg, existent));
     }
 
     private void afterPersistSession(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
@@ -746,9 +755,107 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
+    @Override
+    public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+        final Channel channel = ctx.channel();
+        if (channel == null) {
+            super.channelInactive(ctx);
+            return;
+        }
+
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+
+        final Boolean authenticated = ctx.channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).get();
+        final SettableFuture<Void> disconnectFuture = ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+
+        //only change the session information if user is authenticated
+        if (authenticated == null || !authenticated) {
+            if (disconnectFuture != null) {
+                disconnectFuture.set(null);
+            }
+            super.channelInactive(ctx);
+            return;
+        }
+
+        final Long sessionExpiryInterval = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+
+        if (clientId == null || sessionExpiryInterval == null) {
+            if (disconnectFuture != null) {
+                disconnectFuture.set(null);
+            }
+            // No CONNECT message was received yet, we don't have to clean up
+            super.channelInactive(ctx);
+            return;
+        }
+
+        final boolean persistent = sessionExpiryInterval > 0;
+
+        messageIDPools.remove(clientId);
+        sendClientDisconnect(channel, clientId, persistent, sessionExpiryInterval);
+
+        super.channelInactive(ctx);
+    }
+
+    private void sendClientDisconnect(final Channel channel, final @NotNull String clientId, final boolean persistent, final long sessionExpiryInterval) {
+
+
+        final boolean preventWill = channel.attr(ChannelAttributes.PREVENT_LWT).get() != null ? channel.attr(ChannelAttributes.PREVENT_LWT).get() : false;
+        final boolean sendWill = !preventWill && (channel.attr(ChannelAttributes.SEND_WILL).get() != null ? channel.attr(ChannelAttributes.SEND_WILL).get() : true);
+        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
+        FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(@Nullable final Void result) {
+                        if (!channel.attr(ChannelAttributes.TAKEN_OVER).get()) {
+                            channelPersistence.remove(clientId);
+                        }
+
+                        final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+                        if (disconnectFuture != null) {
+                            disconnectFuture.set(null);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull final Throwable throwable) {
+                        Exceptions.rethrowError("Unable to update client session data for disconnecting client " + clientId +
+                                " with clean session set to " + !persistent + ".", throwable);
+                    }
+                }
+        );
+    }
 
     private double getGracePeriod() {
         return InternalConfigurations.MQTT_CONNECTION_KEEP_ALIVE_FACTOR;
+    }
+
+    private static class UpdatePersistenceCallback implements FutureCallback<Void> {
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ConnectHandler connectHandler;
+        private final @NotNull CONNECT connect;
+        private final boolean sessionPresent;
+
+        public UpdatePersistenceCallback(final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ConnectHandler connectHandler,
+                final @NotNull CONNECT connect,
+                final boolean sessionPresent) {
+            this.ctx = ctx;
+            this.connectHandler = connectHandler;
+            this.connect = connect;
+            this.sessionPresent = sessionPresent;
+        }
+
+        @Override
+        public void onSuccess(@Nullable final Void aVoid) {
+            if (ctx.channel().isActive() && !ctx.executor().isShutdown()) {
+                connectHandler.afterPersistSession(ctx, connect, sessionPresent);
+            }
+        }
+
+        @Override
+        public void onFailure(@NotNull final Throwable throwable) {
+            Exceptions.rethrowError("Unable to handle client connection for id " + connect.getClientIdentifier() + ".", throwable);
+            ctx.channel().disconnect();
+        }
     }
 
 }

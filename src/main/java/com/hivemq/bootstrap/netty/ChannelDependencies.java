@@ -30,7 +30,6 @@ import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
 import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
@@ -61,7 +60,6 @@ public class ChannelDependencies {
     private final @NotNull NoConnectIdleHandler noConnectIdleHandler;
     private final @NotNull Provider<ConnectHandler> connectHandlerProvider;
     private final @NotNull ConnectionLimiterHandler connectionLimiterHandler;
-    private final @NotNull ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler;
     private final @NotNull DisconnectHandler disconnectHandler;
     private final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider;
     private final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider;
@@ -99,7 +97,6 @@ public class ChannelDependencies {
             final @NotNull NoConnectIdleHandler noConnectIdleHandler,
             final @NotNull Provider<ConnectHandler> connectHandlerProvider,
             final @NotNull ConnectionLimiterHandler connectionLimiterHandler,
-            final @NotNull ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler,
             final @NotNull DisconnectHandler disconnectHandler,
             final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider,
             final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider,
@@ -134,7 +131,6 @@ public class ChannelDependencies {
         this.noConnectIdleHandler = noConnectIdleHandler;
         this.connectHandlerProvider = connectHandlerProvider;
         this.connectionLimiterHandler = connectionLimiterHandler;
-        this.connectPersistenceUpdateHandler = connectPersistenceUpdateHandler;
         this.disconnectHandler = disconnectHandler;
         this.subscribeHandlerProvider = subscribeHandlerProvider;
         this.publishUserEventReceivedHandlerProvider = publishUserEventReceivedHandlerProvider;
@@ -244,11 +240,6 @@ public class ChannelDependencies {
     @NotNull
     public PingRequestHandler getPingRequestHandler() {
         return pingRequestHandler;
-    }
-
-    @NotNull
-    public ConnectPersistenceUpdateHandler getConnectPersistenceUpdateHandler() {
-        return connectPersistenceUpdateHandler;
     }
 
     @NotNull
