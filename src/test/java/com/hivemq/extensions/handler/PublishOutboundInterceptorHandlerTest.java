@@ -29,12 +29,14 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.interceptor.publish.parameter.PublishOutboundOutputImpl;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
+import com.hivemq.mqtt.handler.OutboundInterceptorHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -100,7 +102,16 @@ public class PublishOutboundInterceptorHandlerTest {
                 pluginTaskExecutorService,
                 hiveMQExtensions,
                 messageDroppedService);
-        channel.pipeline().addLast(handler);
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter(){
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                if(msg instanceof PUBLISH){
+                    handler.handlePublish(ctx, ((PUBLISH) msg), promise);
+                }else{
+                    super.write(ctx, msg, promise);
+                }
+            }
+        });
     }
 
     @Test(timeout = 5_000)
@@ -149,7 +160,7 @@ public class PublishOutboundInterceptorHandlerTest {
         final PublishOutboundOutputImpl publishOutboundOutput = new PublishOutboundOutputImpl(null, null);
         publishOutboundOutput.preventPublishDelivery();
 
-        final ChannelHandlerContext ctx = channel.pipeline().context(PublishOutboundInterceptorHandler.class);
+        final ChannelHandlerContext ctx = channel.pipeline().context("test");
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish();
 

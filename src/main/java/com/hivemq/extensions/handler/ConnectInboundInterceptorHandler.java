@@ -64,8 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
+public class ConnectInboundInterceptorHandler{
 
     private static final Logger log = LoggerFactory.getLogger(ConnectInboundInterceptorHandler.class);
 
@@ -99,14 +98,6 @@ public class ConnectInboundInterceptorHandler extends ChannelInboundHandlerAdapt
         this.connacker = connacker;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (msg instanceof CONNECT) {
-            readConnect(ctx, (CONNECT) msg);
-        } else {
-            ctx.fireChannelRead(msg);
-        }
-    }
 
     public void readConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
         final Channel channel = ctx.channel();

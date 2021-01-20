@@ -54,8 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
+public class DisconnectInterceptorHandler  {
 
     private static final Logger log = LoggerFactory.getLogger(DisconnectInterceptorHandler.class);
 
@@ -77,29 +76,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof DISCONNECT)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundDisconnect(ctx, (DISCONNECT) msg);
-    }
-
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof DISCONNECT)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundDisconnect(ctx, (DISCONNECT) msg, promise);
-    }
-
-    private void handleInboundDisconnect(
+    public void handleInboundDisconnect(
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
@@ -153,7 +130,7 @@ public class DisconnectInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundDisconnect(
+    public void handleOutboundDisconnect(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull DISCONNECT disconnect,
             final @NotNull ChannelPromise promise) {

@@ -53,8 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PubackInterceptorHandler extends ChannelDuplexHandler {
+public class PubackInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubackInterceptorHandler.class);
 
@@ -76,29 +75,8 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof PUBACK)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundPuback(ctx, (PUBACK) msg);
-    }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof PUBACK)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundPuback(ctx, (PUBACK) msg, promise);
-    }
-
-    private void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
+    public void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -144,7 +122,7 @@ public class PubackInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundPuback(
+    public void handleOutboundPuback(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBACK puback,
             final @NotNull ChannelPromise promise) {

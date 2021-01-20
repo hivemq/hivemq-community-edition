@@ -127,7 +127,9 @@ public class ChannelHandlerNames {
 
     public static final String EXCEPTION_HANDLER = "exception_handler";
     public static final String CONNECTION_LIMITER = "connection_limiter";
-    public static final String CHANNEL_INTERCEPTOR_MULTIPLEXER = "interceptor_multiplexer";
+    public static final String CHANNEL_INBOUND_INTERCEPTOR_MULTIPLEXER = "interceptor_inbound_multiplexer";
+    public static final String CHANNEL_OUTBOUND_INTERCEPTOR_MULTIPLEXER = "interceptor_outbound_multiplexer";
+
 
 }
 

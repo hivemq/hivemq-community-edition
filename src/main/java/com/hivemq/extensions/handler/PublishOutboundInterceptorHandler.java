@@ -54,8 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
+public class PublishOutboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PublishOutboundInterceptorHandler.class);
 
@@ -80,21 +79,7 @@ public class PublishOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         this.messageDroppedService = messageDroppedService;
     }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof PUBLISH)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handlePublish(ctx, (PUBLISH) msg, promise);
-    }
-
-    // Returns true if the publish is handled by the outbound interceptor handling
-    private void handlePublish(
+    public void handlePublish(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBLISH publish,
             final @NotNull ChannelPromise promise) {

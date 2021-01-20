@@ -50,8 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PingInterceptorHandler extends ChannelDuplexHandler {
+public class PingInterceptorHandler  {
 
     private static final Logger log = LoggerFactory.getLogger(PingInterceptorHandler.class);
 
@@ -70,29 +69,10 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         this.hiveMQExtensions = hiveMQExtensions;
     }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
 
-        if (!(msg instanceof PINGRESP)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundPingResp(ctx, (PINGRESP) msg, promise);
-    }
 
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof PINGREQ)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundPingReq(ctx, ((PINGREQ) msg));
-    }
 
-    private void handleInboundPingReq(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGREQ pingreq) {
+    public void handleInboundPingReq(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGREQ pingreq) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -132,7 +112,7 @@ public class PingInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundPingResp(
+    public void handleOutboundPingResp(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PINGRESP pingresp,
             final @NotNull ChannelPromise promise) {

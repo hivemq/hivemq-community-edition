@@ -57,8 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 4.2.0
  */
 @Singleton
-@ChannelHandler.Sharable
-public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
+public class ConnackOutboundInterceptorHandler{
 
     private static final Logger log = LoggerFactory.getLogger(ConnackOutboundInterceptorHandler.class);
 
@@ -87,19 +86,6 @@ public class ConnackOutboundInterceptorHandler extends ChannelOutboundHandlerAda
         this.interceptors = interceptors;
         this.serverInformation = serverInformation;
         this.eventLog = eventLog;
-    }
-
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (msg instanceof CONNACK) {
-            writeConnack(ctx, (CONNACK) msg, promise);
-        } else {
-            ctx.write(msg, promise);
-        }
     }
 
     public void writeConnack(

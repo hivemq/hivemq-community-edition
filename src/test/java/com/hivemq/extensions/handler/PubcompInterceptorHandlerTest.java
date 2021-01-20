@@ -39,9 +39,14 @@ import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.reason.Mqtt5PubCompReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -108,8 +113,18 @@ public class PubcompInterceptorHandlerTest {
 
         handler = new PubcompInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);
-        channel.pipeline().addFirst(handler);
-    }
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter(){
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                handler.handleOutboundPubcomp(ctx, ((PUBCOMP) msg), promise);
+            }
+        });
+        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter(){
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                handler.handleInboundPubcomp(ctx, ((PUBCOMP) msg));
+            }
+        });    }
 
     @Test(timeout = 5000)
     public void test_inbound_client_id_not_set() {

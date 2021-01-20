@@ -39,7 +39,12 @@ import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -119,8 +124,13 @@ public class ConnackOutboundInterceptorHandlerTest {
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
 
         handler = new ConnackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService, interceptors, serverInformation, eventLog);
-        channel.pipeline().addFirst(handler);
-    }
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter(){
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                handler.writeConnack(ctx, ((CONNACK) msg), promise);
+            }
+        });
+     }
 
     @Test(timeout = 5000)
     public void test_client_id_not_set() {

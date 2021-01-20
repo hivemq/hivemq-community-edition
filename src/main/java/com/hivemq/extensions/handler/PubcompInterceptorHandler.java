@@ -52,8 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PubcompInterceptorHandler extends ChannelDuplexHandler {
+public class PubcompInterceptorHandler{
 
     private static final Logger log = LoggerFactory.getLogger(PubcompInterceptorHandler.class);
 
@@ -75,29 +74,8 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof PUBCOMP)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundPubcomp(ctx, (PUBCOMP) msg);
-    }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof PUBCOMP)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundPubcomp(ctx, (PUBCOMP) msg, promise);
-    }
-
-    private void handleInboundPubcomp(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBCOMP pubcomp) {
+    public void handleInboundPubcomp(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBCOMP pubcomp) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -144,7 +122,7 @@ public class PubcompInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundPubcomp(
+    public void handleOutboundPubcomp(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBCOMP pubcomp,
             final @NotNull ChannelPromise promise) {

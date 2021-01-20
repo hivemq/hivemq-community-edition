@@ -57,8 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerAdapter {
+public class UnsubscribeInboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeInboundInterceptorHandler.class);
 
@@ -80,16 +79,8 @@ public class UnsubscribeInboundInterceptorHandler extends ChannelInboundHandlerA
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof UNSUBSCRIBE)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundUnsubscribe(ctx, (UNSUBSCRIBE) msg);
-    }
 
-    private void handleInboundUnsubscribe(
+    public void handleInboundUnsubscribe(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull UNSUBSCRIBE unsubscribe) {
 

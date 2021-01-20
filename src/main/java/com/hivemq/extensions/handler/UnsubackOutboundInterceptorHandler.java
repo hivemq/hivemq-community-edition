@@ -49,8 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class UnsubackOutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
+public class UnsubackOutboundInterceptorHandler{
 
     private static final Logger log = LoggerFactory.getLogger(UnsubackOutboundInterceptorHandler.class);
 
@@ -72,20 +71,7 @@ public class UnsubackOutboundInterceptorHandler extends ChannelOutboundHandlerAd
         this.executorService = executorService;
     }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof UNSUBACK)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundUnsuback(ctx, (UNSUBACK) msg, promise);
-    }
-
-    private void handleOutboundUnsuback(
+    public void handleOutboundUnsuback(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull UNSUBACK unsuback,
             final @NotNull ChannelPromise promise) {

@@ -52,8 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PubrecInterceptorHandler extends ChannelDuplexHandler {
+public class PubrecInterceptorHandler{
 
     private static final Logger log = LoggerFactory.getLogger(PubrecInterceptorHandler.class);
 
@@ -75,29 +74,8 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof PUBREC)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundPubrec(ctx, (PUBREC) msg);
-    }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
-
-        if (!(msg instanceof PUBREC)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundPubrec(ctx, (PUBREC) msg, promise);
-    }
-
-    private void handleInboundPubrec(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREC pubrec) {
+    public void handleInboundPubrec(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREC pubrec) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -143,7 +121,7 @@ public class PubrecInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundPubrec(
+    public void handleOutboundPubrec(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBREC pubrec,
             final @NotNull ChannelPromise promise) {
