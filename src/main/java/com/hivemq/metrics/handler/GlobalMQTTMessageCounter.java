@@ -20,23 +20,18 @@ import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * This handler gathers statistics about MQTT messages.
+ * Gathers statistics about inbound and outbound MQTT messages.
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
  */
-@ChannelHandler.Sharable
 @Singleton
-public class GlobalMQTTMessageCounter extends ChannelDuplexHandler {
+public class GlobalMQTTMessageCounter {
 
     private final @NotNull MetricsHolder metricsHolder;
 
@@ -45,38 +40,21 @@ public class GlobalMQTTMessageCounter extends ChannelDuplexHandler {
         this.metricsHolder = metricsHolder;
     }
 
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
-
-        if (msg instanceof Message) {
-
-            metricsHolder.getIncomingMessageCounter().inc();
-
-            if (msg instanceof CONNECT) {
-                metricsHolder.getIncomingConnectCounter().inc();
-            }
-
-            if (msg instanceof PUBLISH) {
-                metricsHolder.getIncomingPublishCounter().inc();
-            }
+    public void countInbound(final @NotNull Message message) {
+        metricsHolder.getIncomingMessageCounter().inc();
+        if (message instanceof CONNECT) {
+            metricsHolder.getIncomingConnectCounter().inc();
         }
-
-        super.channelRead(ctx, msg);
+        if (message instanceof PUBLISH) {
+            metricsHolder.getIncomingPublishCounter().inc();
+        }
     }
 
-    @Override
-    public void write(final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
-
-        if (msg instanceof Message) {
-
-            metricsHolder.getOutgoingMessageCounter().inc();
-
-            if (msg instanceof PUBLISH) {
-                metricsHolder.getOutgoingPublishCounter().inc();
-            }
+    public void countOutbound(final @NotNull Message message) {
+        metricsHolder.getOutgoingMessageCounter().inc();
+        if (message instanceof PUBLISH) {
+            metricsHolder.getOutgoingPublishCounter().inc();
         }
-
-        super.write(ctx, msg, promise);
     }
 
 }

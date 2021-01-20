@@ -20,7 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 import javax.inject.Inject;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.ALL_CHANNELS_GROUP_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.GLOBAL_TRAFFIC_COUNTER;
 
 /**
  * The statistics initializer which is responsible for adding
@@ -32,20 +33,16 @@ public class MetricsInitializer extends ChannelHandlerAdapter {
 
 
     private final GlobalTrafficCounter globalTrafficCounter;
-    private final GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
     @Inject
-    MetricsInitializer(final GlobalTrafficCounter globalTrafficCounter,
-                       final GlobalMQTTMessageCounter globalMQTTMessageCounter) {
+    MetricsInitializer(final GlobalTrafficCounter globalTrafficCounter) {
         this.globalTrafficCounter = globalTrafficCounter;
-        this.globalMQTTMessageCounter = globalMQTTMessageCounter;
     }
 
     @Override
     public void handlerAdded(final ChannelHandlerContext ctx) throws Exception {
 
         ctx.pipeline().addAfter(ALL_CHANNELS_GROUP_HANDLER, GLOBAL_TRAFFIC_COUNTER, globalTrafficCounter);
-        ctx.pipeline().addAfter(MQTT_MESSAGE_ENCODER, GLOBAL_MQTT_MESSAGE_COUNTER, globalMQTTMessageCounter);
 
         //We're removing ourselves after the statistic handlers were added
         ctx.pipeline().remove(this);

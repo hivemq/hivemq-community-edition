@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -30,19 +32,30 @@ import io.netty.handler.codec.MessageToByteEncoder;
 public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
 
     private final @NotNull EncoderFactory encoderFactory;
+    private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
     @Inject
-    public MQTTMessageEncoder(final @NotNull EncoderFactory encoderFactory) {
+    public MQTTMessageEncoder(
+            final @NotNull EncoderFactory encoderFactory,
+            final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.encoderFactory = encoderFactory;
+        this.globalMQTTMessageCounter = globalMQTTMessageCounter;
     }
 
     @Override
-    protected void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final @NotNull ByteBuf out) {
+    protected void encode(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Message msg,
+            final @NotNull ByteBuf out) {
+        globalMQTTMessageCounter.countOutbound(msg);
         encoderFactory.encode(ctx, msg, out);
     }
 
     @Override
-    protected @NotNull ByteBuf allocateBuffer(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final boolean preferDirect) {
+    protected @NotNull ByteBuf allocateBuffer(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Message msg,
+            final boolean preferDirect) {
         return encoderFactory.allocateBuffer(ctx, msg, preferDirect);
     }
 }

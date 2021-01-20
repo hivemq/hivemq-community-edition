@@ -96,7 +96,6 @@ public class ChannelHandlerNames {
      *     Both    *
      ***************/
 
-    public static final String GLOBAL_MQTT_MESSAGE_COUNTER = "global_mqtt_message_counter";
     public static final String GLOBAL_TRAFFIC_COUNTER = "global_traffic_counter";
     public static final String MQTT_CONNECTION_COUNTER_HANDLER = "mqtt_connection_counter_handler";
     public static final String MQTT_MESSAGE_BARRIER = "mqtt_message_barrier";

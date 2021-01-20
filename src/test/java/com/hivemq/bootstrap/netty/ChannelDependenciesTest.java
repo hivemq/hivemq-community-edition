@@ -23,6 +23,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.metrics.handler.MetricsInitializer;
 import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
@@ -159,6 +160,9 @@ public class ChannelDependenciesTest {
     @Mock
     private InterceptorHandler interceptorHandler;
 
+    @Mock
+    private GlobalMQTTMessageCounter globalMQTTMessageCounter;
+
     @Before
     public void setUp() throws Exception {
 
@@ -197,7 +201,8 @@ public class ChannelDependenciesTest {
                 () -> incomingSubscribeHandler,
                 () -> messageExpiryHandler,
                 mqttServerDisconnector,
-                interceptorHandler);
+                interceptorHandler,
+                globalMQTTMessageCounter);
 
     }
 
@@ -236,5 +241,7 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
         assertNotNull(channelDependencies.getConnectionLimiterHandler());
         assertNotNull(channelDependencies.getMqttServerDisconnector());
+        assertNotNull(channelDependencies.getInterceptorHandler());
+        assertNotNull(channelDependencies.getGlobalMQTTMessageCounter());
     }
 }

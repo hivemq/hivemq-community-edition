@@ -19,6 +19,7 @@ import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.MessageType;
@@ -65,6 +66,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
     private final @NotNull MqttConfigurationService mqttConfig;
     private final @NotNull MqttDecoders mqttDecoders;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+    private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
     private final boolean strict;
 
@@ -72,12 +74,14 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                               final boolean strict,
                               final @NotNull MqttConfigurationService mqttConfig,
                               final @NotNull MqttDecoders mqttDecoders,
-                              final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+                              final @NotNull MqttServerDisconnector mqttServerDisconnector,
+                              final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.connectDecoder = connectDecoder;
         this.mqttConfig = mqttConfig;
         this.strict = strict;
         this.mqttDecoders = mqttDecoders;
         this.mqttServerDisconnector = mqttServerDisconnector;
+        this.globalMQTTMessageCounter = globalMQTTMessageCounter;
     }
 
     public MQTTMessageDecoder(final ChannelDependencies channelDependencies) {
@@ -85,7 +89,8 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                 true,
                 channelDependencies.getConfigurationService().mqttConfiguration(),
                 channelDependencies.getMqttDecoders(),
-                channelDependencies.getMqttServerDisconnector());
+                channelDependencies.getMqttServerDisconnector(),
+                channelDependencies.getGlobalMQTTMessageCounter());
     }
 
     @Override
@@ -287,6 +292,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
+        globalMQTTMessageCounter.countInbound(message);
         out.add(message);
 
     }

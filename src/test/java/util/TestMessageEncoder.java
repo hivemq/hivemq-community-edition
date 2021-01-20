@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package util;
 
+import com.codahale.metrics.MetricRegistry;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;
@@ -22,6 +24,8 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGREQ;
@@ -40,13 +44,23 @@ public class TestMessageEncoder extends MQTTMessageEncoder {
 
     private final PingreqEncoder pingreqEncoder;
 
-    public TestMessageEncoder(final MessageDroppedService messageDroppedService, final SecurityConfigurationService securityConfigurationService) {
-        super(new EncoderFactory(messageDroppedService, securityConfigurationService, new MqttServerDisconnectorImpl(new EventLog(), new HivemqId())));
+    public TestMessageEncoder(
+            final MessageDroppedService messageDroppedService,
+            final SecurityConfigurationService securityConfigurationService) {
+        super(
+                new EncoderFactory(
+                        messageDroppedService,
+                        securityConfigurationService,
+                        new MqttServerDisconnectorImpl(new EventLog(), new HivemqId())),
+                new GlobalMQTTMessageCounter(new MetricsHolder(new MetricRegistry())));
         pingreqEncoder = new PingreqEncoder();
     }
 
     @Override
-    protected void encode(@NotNull final ChannelHandlerContext ctx, @NotNull final Message msg, @NotNull final ByteBuf out) {
+    protected void encode(
+            @NotNull final ChannelHandlerContext ctx,
+            @NotNull final Message msg,
+            @NotNull final ByteBuf out) {
         if (msg instanceof PINGREQ) {
             pingreqEncoder.encode(ctx, (PINGREQ) msg, out);
         } else {
