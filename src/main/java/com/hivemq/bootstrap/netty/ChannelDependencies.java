@@ -26,6 +26,7 @@ import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
+import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
@@ -101,6 +102,8 @@ public class ChannelDependencies {
     private final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
     private final @NotNull PingInterceptorHandler pingInterceptorHandler;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+    private final @NotNull InterceptorHandler interceptorHandler;
+
 
     @Inject
     public ChannelDependencies(
@@ -148,7 +151,7 @@ public class ChannelDependencies {
             final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
             final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
             final @NotNull PingInterceptorHandler pingInterceptorHandler,
-            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+            final @NotNull MqttServerDisconnector mqttServerDisconnector, @NotNull InterceptorHandler interceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.noConnectIdleHandler = noConnectIdleHandler;
@@ -195,6 +198,7 @@ public class ChannelDependencies {
         this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
         this.pingInterceptorHandler = pingInterceptorHandler;
         this.mqttServerDisconnector = mqttServerDisconnector;
+        this.interceptorHandler = interceptorHandler;
     }
 
     @NotNull
@@ -420,5 +424,10 @@ public class ChannelDependencies {
     @NotNull
     public MqttServerDisconnector getMqttServerDisconnector() {
         return mqttServerDisconnector;
+    }
+
+    @NotNull
+    public InterceptorHandler getInterceptorMultiplexer() {
+        return interceptorHandler;
     }
 }

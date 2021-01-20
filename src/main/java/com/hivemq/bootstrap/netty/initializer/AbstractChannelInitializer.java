@@ -84,7 +84,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         // before connack outbound interceptor as it initializes the client context after the connack
         ch.pipeline().addLast(PLUGIN_INITIALIZER_HANDLER, channelDependencies.getPluginInitializerHandler());
 
-        ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
+
+        ch.pipeline().addLast(CHANNEL_INTERCEPTOR_MULTIPLEXER, channelDependencies.getInterceptorMultiplexer());
+
+
+      //  ch.pipeline().addLast(CONNECT_INBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnectInboundInterceptorHandler());
         ch.pipeline().addLast(CONNACK_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getConnackOutboundInterceptorHandler());
         ch.pipeline().addLast(PING_INTERCEPTOR_HANDLER, channelDependencies.getPingInterceptorHandler());
         ch.pipeline().addLast(PUBLISH_OUTBOUND_INTERCEPTOR_HANDLER, channelDependencies.getPublishOutboundInterceptorHandler());

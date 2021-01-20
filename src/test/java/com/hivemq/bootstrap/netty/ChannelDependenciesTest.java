@@ -24,6 +24,7 @@ import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
+import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
@@ -195,6 +196,9 @@ public class ChannelDependenciesTest {
     @Mock
     private MqttServerDisconnector mqttServerDisconnector;
 
+    @Mock
+    private InterceptorHandler interceptorHandler;
+
     @Before
     public void setUp() throws Exception {
 
@@ -245,9 +249,9 @@ public class ChannelDependenciesTest {
                 unsubackOutboundInterceptorHandler,
                 unsubscribeInboundInterceptorHandler,
                 pingInterceptorHandler,
-                mqttServerDisconnector
+                mqttServerDisconnector,
 
-        );
+                interceptorHandler);
 
     }
 
