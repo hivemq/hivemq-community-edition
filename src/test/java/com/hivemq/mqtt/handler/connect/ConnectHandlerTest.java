@@ -1582,8 +1582,7 @@ public class ConnectHandlerTest {
         final Provider<FlowControlHandler> flowControlHandlerProvider =
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
 
-        handler = new ConnectHandler(new DisconnectClientOnConnectMessageHandler(eventLog),
-                clientSessionPersistence,
+        handler = new ConnectHandler(clientSessionPersistence,
                 channelPersistence,
                 configurationService,
                 orderedTopicHandlerProvider,

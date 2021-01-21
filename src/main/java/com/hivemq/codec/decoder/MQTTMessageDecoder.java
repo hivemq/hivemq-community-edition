@@ -178,6 +178,15 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
+        if(strict && protocolVersion != null && messageType == CONNECT) {
+            mqttServerDisconnector.logAndClose(channel,
+                    "A client (IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
+                    "Sent second CONNECT message"
+                    );
+            buf.clear();
+            return;
+        }
+
         globalMQTTMessageCounter.countInboundTraffic(readableBytes);
         switch (messageType) {
             case RESERVED_ZERO:

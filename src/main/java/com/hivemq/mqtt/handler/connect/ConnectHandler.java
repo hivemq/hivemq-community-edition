@@ -85,7 +85,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
     private static final int MAX_TAKEOVER_RETRIES = 100;
 
-    private final @NotNull DisconnectClientOnConnectMessageHandler onSecondConnectHandler;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull FullConfigurationService configurationService;
@@ -112,7 +111,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     @Inject
     public ConnectHandler(
-            final @NotNull DisconnectClientOnConnectMessageHandler onSecondConnectHandler,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence,
             final @NotNull FullConfigurationService configurationService,
@@ -127,7 +125,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull PluginAuthorizerService pluginAuthorizerService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
-        this.onSecondConnectHandler = onSecondConnectHandler;
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.configurationService = configurationService;
@@ -160,20 +157,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     @Override
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect)
             throws Exception {
-
-        try {
-
-            ctx.pipeline().addAfter(MQTT_MESSAGE_DECODER, MQTT_DISALLOW_SECOND_CONNECT, onSecondConnectHandler);
-
-        } catch (final IllegalArgumentException e) {
-            /*  When this happens, the client sent two CONNECT messages in a *very* short time because we
-                have a race condition that the second CONNECT arrived before the second disallow handler
-                was added to the pipeline. We're just resending the message again to the begin of the pipeline
-                so the MQTT second connect disallow handler can kick in
-            */
-            ctx.pipeline().firstContext().fireChannelRead(connect);
-            return;
-        }
 
         overwriteNotSetValues(connect);
 

@@ -37,6 +37,9 @@ public class MQTTMessageDecoderTest {
         MockitoAnnotations.initMocks(this);
 
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
+        //setting version to fake connected
+        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
     }
 
     /* ***********************
@@ -46,6 +49,7 @@ public class MQTTMessageDecoderTest {
 
     @Test
     public void test_reserved_zero_received() {
+
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0000_0000);
@@ -126,5 +130,47 @@ public class MQTTMessageDecoderTest {
         assertNull(embeddedChannel.readInbound());
 
         assertEquals(false, embeddedChannel.isActive());
+    }
+
+    @Test
+    public void test_second_connect_received() {
+
+        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(null);
+
+        final byte[] connect = {
+                // fixed header
+                //   type, reserved
+                0b0001_0000,
+                // remaining length
+                17,
+                // variable header
+                //   protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                //   protocol version
+                5,
+                //   connect flags
+                (byte) 0b0000_0000,
+                //   keep alive
+                0, 0,
+                //   properties
+                0,
+                // payload
+                //   client identifier
+                0, 4, 't', 'e', 's', 't'
+        };
+
+        final ByteBuf buf = Unpooled.buffer();
+        buf.writeBytes(connect);
+        embeddedChannel.writeInbound(buf);
+
+        assertEquals(true, embeddedChannel.isOpen());
+
+        final ByteBuf buf2 = Unpooled.buffer();
+        buf2.writeBytes(connect);
+        embeddedChannel.writeInbound(buf2);
+
+        //verify that the client was disconnected
+        assertEquals(false, embeddedChannel.isOpen());
+
     }
 }
