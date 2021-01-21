@@ -1565,93 +1565,6 @@ public class ConnectHandlerTest {
         assertFalse(embeddedChannel.isOpen());
     }
 
-    @Test
-    public void test_DisconnectFutureListener_send_lwt() throws Exception {
-
-        when(clientSessionPersistence.clientDisconnected(anyString(),
-                anyBoolean(),
-                anyLong())).thenReturn(Futures.immediateFuture(null));
-        when(channelFuture.channel()).thenReturn(embeddedChannel);
-        embeddedChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
-        embeddedChannel.attr(ChannelAttributes.SEND_WILL).set(true);
-        embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).set(false);
-        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
-
-
-        final CONNECT connect = new CONNECT.Mqtt3Builder().withClientIdentifier("client")
-                .withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withCleanStart(true)
-                .build();
-
-        handler.afterTakeover(ctx, connect);
-
-        handler.channelInactive(ctx);
-
-        while (singleWriterService.getGlobalTaskCount().get() > 0) {
-            Thread.sleep(10);
-        }
-
-        verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), eq(true), anyLong());
-    }
-
-    @Test
-    public void test_DisconnectFutureListener_client_session_persistence_failed() throws Exception {
-        when(clientSessionPersistence.clientDisconnected(
-                anyString(),
-                anyBoolean(),
-                anyLong())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
-
-        final CONNECT connect = new CONNECT.Mqtt3Builder().withClientIdentifier("client")
-                .withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withCleanStart(true)
-                .build();
-
-        handler.afterTakeover(ctx, connect);
-
-        handler.channelInactive(ctx);
-
-        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-    }
-
-    @Test
-    public void test_DisconnectFutureListener_future_channel_not_authenticated() throws Exception {
-        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-        when(clientSessionPersistence.clientDisconnected(
-                anyString(),
-                anyBoolean(),
-                anyLong())).thenReturn(Futures.immediateFuture(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(false);
-        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-
-        handler.channelInactive(ctx);
-
-        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-        assertTrue(disconnectFuture.isDone());
-    }
-
-    @Test
-    public void test_DisconnectFutureListener_future_client_id_null() throws Exception {
-        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-        when(clientSessionPersistence.clientDisconnected(
-                anyString(),
-                anyBoolean(),
-                anyLong())).thenReturn(Futures.immediateFuture(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(null);
-        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(false);
-        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-
-        handler.channelInactive(ctx);
-
-        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-        assertTrue(disconnectFuture.isDone());
-    }
-
     private void createHandler() {
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_CONNECT_HANDLER);
@@ -1682,8 +1595,7 @@ public class ConnectHandlerTest {
                 internalAuthServiceImpl,
                 authorizers,
                 pluginAuthorizerService,
-                serverDisconnector,
-                messageIDPools);
+                serverDisconnector);
 
         handler.postConstruct();
         embeddedChannel.pipeline()
