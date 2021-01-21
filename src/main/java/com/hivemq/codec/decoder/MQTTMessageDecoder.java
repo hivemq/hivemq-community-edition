@@ -178,6 +178,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
+        globalMQTTMessageCounter.countInboundTraffic(readableBytes);
         switch (messageType) {
             case RESERVED_ZERO:
                 mqttServerDisconnector.disconnect(channel,

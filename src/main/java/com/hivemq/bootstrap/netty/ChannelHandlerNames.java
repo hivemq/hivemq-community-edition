@@ -29,7 +29,6 @@ public class ChannelHandlerNames {
 
     public static final String ALL_CHANNELS_GROUP_HANDLER = "all_channel_group_handler";
 
-    public static final String STATISTICS_INITIALIZER = "statistics_initializer";
     public static final String MQTT_MESSAGE_DECODER = "mqtt_message_decoder";
 
     public static final String GLOBAL_THROTTLING_HANDLER = "global_throttling_handler";

@@ -44,7 +44,6 @@ import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
-import com.hivemq.metrics.handler.GlobalTrafficCounter;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
@@ -109,7 +108,6 @@ public class ExtensionModuleTest {
                 bind(SharedSubscriptionService.class).toInstance(mock(SharedSubscriptionService.class));
                 bind(IncomingMessageFlowPersistence.class).toInstance(mock(IncomingMessageFlowPersistence.class));
                 bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
-                bind(GlobalTrafficCounter.class).toInstance(mock(GlobalTrafficCounter.class));
                 bind(GlobalTrafficShapingHandler.class).toInstance(mock(GlobalTrafficShapingHandler.class));
                 bind(MetricsHolder.class).toInstance(metricsHolder);
                 bind(PublishPayloadPersistence.class).toInstance(mock(PublishPayloadPersistence.class));

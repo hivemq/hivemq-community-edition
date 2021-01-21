@@ -18,13 +18,12 @@ package com.hivemq.metrics.ioc;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.SingletonModule;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.MetricsShutdownHook;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
 import com.hivemq.metrics.gauges.RetainedMessagesGauge;
 import com.hivemq.metrics.gauges.SessionsGauge;
-import com.hivemq.metrics.handler.GlobalTrafficCounter;
-import com.hivemq.metrics.ioc.provider.GlobalTrafficCounterProvider;
 import com.hivemq.metrics.ioc.provider.OpenConnectionsGaugeProvider;
 import com.hivemq.metrics.ioc.provider.RetainedMessagesGaugeProvider;
 import com.hivemq.metrics.ioc.provider.SessionsGaugeProvider;
@@ -35,15 +34,14 @@ import com.hivemq.metrics.jmx.JmxReporterBootstrap;
  *
  * @author Dominik Obermaier
  */
-public class MetricsModule extends SingletonModule {
+public class MetricsModule extends SingletonModule<Class<MetricsModule>> {
 
-    private final MetricRegistry metricRegistry;
-    private final Injector persistenceInjector;
+    private final @NotNull MetricRegistry metricRegistry;
+    private final @NotNull Injector persistenceInjector;
 
-    public MetricsModule(final MetricRegistry metricRegistry, final Injector persistenceInjector) {
+    public MetricsModule(final @NotNull MetricRegistry metricRegistry, final @NotNull Injector persistenceInjector) {
         super(MetricsModule.class);
         this.metricRegistry = metricRegistry;
-
         this.persistenceInjector = persistenceInjector;
     }
 
@@ -56,7 +54,6 @@ public class MetricsModule extends SingletonModule {
         //because the metrics need to be available when OnBrokerStart callbacks get called.
         bind(MetricsHolder.class).toInstance(persistenceInjector.getInstance(MetricsHolder.class));
         bind(SessionsGauge.class).toProvider(SessionsGaugeProvider.class).asEagerSingleton();
-        bind(GlobalTrafficCounter.class).toProvider(GlobalTrafficCounterProvider.class).asEagerSingleton();
         bind(OpenConnectionsGauge.class).toProvider(OpenConnectionsGaugeProvider.class).asEagerSingleton();
         bind(RetainedMessagesGauge.class).toProvider(RetainedMessagesGaugeProvider.class).asEagerSingleton();
         bind(JmxReporterBootstrap.class).asEagerSingleton();

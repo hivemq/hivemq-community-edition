@@ -50,11 +50,20 @@ public class GlobalMQTTMessageCounter {
         }
     }
 
+    public void countInboundTraffic(final int bytes) {
+        metricsHolder.getTotalBytesReadCounter().inc(bytes);
+    }
+
     public void countOutbound(final @NotNull Message message) {
         metricsHolder.getOutgoingMessageCounter().inc();
         if (message instanceof PUBLISH) {
             metricsHolder.getOutgoingPublishCounter().inc();
         }
     }
+
+    public void countOutboundTraffic(final int bytes) {
+        metricsHolder.getTotalBytesWrittenCounter().inc(bytes);
+    }
+
 
 }

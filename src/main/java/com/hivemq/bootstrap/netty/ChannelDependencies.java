@@ -56,7 +56,6 @@ import javax.inject.Provider;
  */
 public class ChannelDependencies {
 
-    private final @NotNull Provider<MetricsInitializer> statisticsInitializer;
     private final @NotNull NoConnectIdleHandler noConnectIdleHandler;
     private final @NotNull Provider<ConnectHandler> connectHandlerProvider;
     private final @NotNull ConnectionLimiterHandler connectionLimiterHandler;
@@ -94,7 +93,6 @@ public class ChannelDependencies {
 
     @Inject
     public ChannelDependencies(
-            final @NotNull Provider<MetricsInitializer> statisticsInitializer,
             final @NotNull NoConnectIdleHandler noConnectIdleHandler,
             final @NotNull Provider<ConnectHandler> connectHandlerProvider,
             final @NotNull ConnectionLimiterHandler connectionLimiterHandler,
@@ -129,7 +127,6 @@ public class ChannelDependencies {
             final @NotNull InterceptorHandler interceptorHandler,
             final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
 
-        this.statisticsInitializer = statisticsInitializer;
         this.noConnectIdleHandler = noConnectIdleHandler;
         this.connectHandlerProvider = connectHandlerProvider;
         this.connectionLimiterHandler = connectionLimiterHandler;
@@ -163,11 +160,6 @@ public class ChannelDependencies {
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.interceptorHandler = interceptorHandler;
         this.globalMQTTMessageCounter = globalMQTTMessageCounter;
-    }
-
-    @NotNull
-    public MetricsInitializer getStatisticsInitializer() {
-        return statisticsInitializer.get();
     }
 
     @NotNull

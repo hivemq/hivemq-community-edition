@@ -49,6 +49,7 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
             final @NotNull ByteBuf out) {
         globalMQTTMessageCounter.countOutbound(msg);
         encoderFactory.encode(ctx, msg, out);
+        globalMQTTMessageCounter.countOutboundTraffic(out.readableBytes());
     }
 
     @Override
