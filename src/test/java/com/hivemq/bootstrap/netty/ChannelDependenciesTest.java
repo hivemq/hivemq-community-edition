@@ -156,42 +156,6 @@ public class ChannelDependenciesTest {
     private IncomingSubscribeHandler incomingSubscribeHandler;
 
     @Mock
-    private PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
-
-    @Mock
-    private ConnectInboundInterceptorHandler connectInterceptorHandler;
-
-    @Mock
-    private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-
-    @Mock
-    private DisconnectInterceptorHandler disconnectInterceptorHandler;
-
-    @Mock
-    private PubackInterceptorHandler pubackInterceptorHandler;
-
-    @Mock
-    private PubrecInterceptorHandler pubrecInterceptorHandler;
-
-    @Mock
-    private PubrelInterceptorHandler pubrelInterceptorHandler;
-
-    @Mock
-    private PubcompInterceptorHandler pubcompInterceptorHandler;
-
-    @Mock
-    private SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
-
-    @Mock
-    private UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
-
-    @Mock
-    private UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
-
-    @Mock
-    private PingInterceptorHandler pingInterceptorHandler;
-
-    @Mock
     private ConnectionLimiterHandler connectionLimiterHandler;
 
     @Mock
