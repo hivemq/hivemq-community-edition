@@ -87,11 +87,9 @@ import static org.mockito.Mockito.*;
  */
 public class IncomingPublishHandlerTest {
 
-    private IncomingPublishHandler incomingPublishHandler;
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
+    private IncomingPublishHandler incomingPublishHandler;
     private PluginTaskExecutorService pluginTaskExecutorService;
 
     private PluginTaskExecutor executor1;
@@ -423,7 +421,7 @@ public class IncomingPublishHandlerTest {
 
     }
 
-    @Test(timeout =  5000)
+    @Test(timeout = 5000)
     public void test_read_publish_context_has_interceptors_change_topic_mqtt5() throws Exception {
 
         final ClientContextImpl clientContext =

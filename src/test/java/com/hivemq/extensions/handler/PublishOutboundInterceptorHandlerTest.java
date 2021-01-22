@@ -29,7 +29,6 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.interceptor.publish.parameter.PublishOutboundOutputImpl;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
-import com.hivemq.mqtt.handler.OutboundInterceptorHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -102,12 +101,12 @@ public class PublishOutboundInterceptorHandlerTest {
                 pluginTaskExecutorService,
                 hiveMQExtensions,
                 messageDroppedService);
-        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter(){
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-                if(msg instanceof PUBLISH){
+                if (msg instanceof PUBLISH) {
                     handler.handlePublish(ctx, ((PUBLISH) msg), promise);
-                }else{
+                } else {
                     super.write(ctx, msg, promise);
                 }
             }

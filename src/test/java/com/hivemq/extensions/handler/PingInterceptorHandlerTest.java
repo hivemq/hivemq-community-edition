@@ -36,7 +36,6 @@ import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -67,14 +66,11 @@ import static org.mockito.Mockito.when;
  */
 public class PingInterceptorHandlerTest {
 
-    private PluginTaskExecutor executor1;
-    private EmbeddedChannel channel;
-
     public static AtomicBoolean isTriggered = new AtomicBoolean();
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
+    private PluginTaskExecutor executor1;
+    private EmbeddedChannel channel;
     @Mock
     private PluginOutPutAsyncer asyncer;
 
@@ -104,13 +100,13 @@ public class PingInterceptorHandlerTest {
 
         final PingInterceptorHandler handler =
                 new PingInterceptorHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions);
-        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter(){
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                 handler.handleOutboundPingResp(ctx, ((PINGRESP) msg), promise);
             }
         });
-        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter(){
+        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 handler.handleInboundPingReq(ctx, ((PINGREQ) msg));

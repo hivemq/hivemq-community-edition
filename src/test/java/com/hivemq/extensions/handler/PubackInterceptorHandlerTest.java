@@ -40,10 +40,12 @@ import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.puback.PUBACK;
-import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.*;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -107,13 +109,13 @@ public class PubackInterceptorHandlerTest {
 
         handler = new PubackInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);
-        channel.pipeline().addLast("test1", new ChannelOutboundHandlerAdapter(){
+        channel.pipeline().addLast("test1", new ChannelOutboundHandlerAdapter() {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                 handler.handleOutboundPuback(ctx, ((PUBACK) msg), promise);
             }
         });
-        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter(){
+        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 handler.handleInboundPuback(ctx, ((PUBACK) msg));
