@@ -241,18 +241,6 @@ public class ChannelDependenciesTest {
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
                 () -> messageExpiryHandler,
-                publishOutboundInterceptorHandler,
-                connectInterceptorHandler,
-                connackOutboundInterceptorHandler,
-                disconnectInterceptorHandler,
-                pubackInterceptorHandler,
-                pubrecInterceptorHandler,
-                pubrelInterceptorHandler,
-                pubcompInterceptorHandler,
-                subAckOutboundInterceptorHandler,
-                unsubackOutboundInterceptorHandler,
-                unsubscribeInboundInterceptorHandler,
-                pingInterceptorHandler,
                 mqttServerDisconnector,
                 inboundInterceptorHandler,
                 outboundInterceptorHandler);
@@ -293,17 +281,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getClientLifecycleEventHandler());
         assertNotNull(channelDependencies.getIncomingPublishHandler());
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
-        assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getDisconnectInterceptorHandler());
-        assertNotNull(channelDependencies.getPubackInterceptorHandler());
-        assertNotNull(channelDependencies.getPubrecInterceptorHandler());
-        assertNotNull(channelDependencies.getPubrelInterceptorHandler());
-        assertNotNull(channelDependencies.getPubcompInterceptorHandler());
-        assertNotNull(channelDependencies.getSubackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getUnsubackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getPingInterceptorHandler());
         assertNotNull(channelDependencies.getConnectionLimiterHandler());
         assertNotNull(channelDependencies.getMqttServerDisconnector());
     }
