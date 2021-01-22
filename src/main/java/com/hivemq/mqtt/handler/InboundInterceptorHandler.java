@@ -36,14 +36,15 @@ public class InboundInterceptorHandler extends ChannelInboundHandlerAdapter {
     private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
 
     @Inject
-    public InboundInterceptorHandler(final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
-                                     final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
-                                     final @NotNull PingInterceptorHandler pingInterceptorHandler,
-                                     final @NotNull PubackInterceptorHandler pubackInterceptorHandler,
-                                     final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler,
-                                     final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler,
-                                     final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler,
-                                     final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler) {
+    public InboundInterceptorHandler(
+            final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
+            final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
+            final @NotNull PingInterceptorHandler pingInterceptorHandler,
+            final @NotNull PubackInterceptorHandler pubackInterceptorHandler,
+            final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler,
+            final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler,
+            final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler,
+            final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler) {
         this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
         this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
         this.pingInterceptorHandler = pingInterceptorHandler;
@@ -68,7 +69,7 @@ public class InboundInterceptorHandler extends ChannelInboundHandlerAdapter {
             pubrecInterceptorHandler.handleInboundPubrec(ctx, ((PUBREC) msg));
         } else if (msg instanceof PUBCOMP) {
             pubcompInterceptorHandler.handleInboundPubcomp(ctx, ((PUBCOMP) msg));
-        } else if(msg instanceof PUBREL){
+        } else if (msg instanceof PUBREL) {
             pubrelInterceptorHandler.handleInboundPubrel(ctx, ((PUBREL) msg));
         } else if (msg instanceof DISCONNECT) {
             disconnectInterceptorHandler.handleInboundDisconnect(ctx, ((DISCONNECT) msg));

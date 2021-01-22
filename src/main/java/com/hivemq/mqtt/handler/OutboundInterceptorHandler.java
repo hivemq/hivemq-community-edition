@@ -39,18 +39,18 @@ public class OutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
     private final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler;
     private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
 
-
     @Inject
-    public OutboundInterceptorHandler(final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
-                                      final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
-                                      final @NotNull SubackOutboundInterceptorHandler subackOutboundInterceptorHandler,
-                                      final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
-                                      final @NotNull PingInterceptorHandler pingInterceptorHandler,
-                                      final @NotNull PubackInterceptorHandler pubackInterceptorHandler,
-                                      final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler,
-                                      final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler,
-                                      final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler,
-                                      final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler) {
+    public OutboundInterceptorHandler(
+            final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
+            final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
+            final @NotNull SubackOutboundInterceptorHandler subackOutboundInterceptorHandler,
+            final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
+            final @NotNull PingInterceptorHandler pingInterceptorHandler,
+            final @NotNull PubackInterceptorHandler pubackInterceptorHandler,
+            final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler,
+            final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler,
+            final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler,
+            final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler) {
         this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
         this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
         this.subackOutboundInterceptorHandler = subackOutboundInterceptorHandler;
@@ -70,13 +70,13 @@ public class OutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
             final @NotNull ChannelPromise promise) {
         if (msg instanceof CONNACK) {
             connackOutboundInterceptorHandler.writeConnack(ctx, (CONNACK) msg, promise);
-        }else if(msg instanceof PUBLISH){
+        } else if (msg instanceof PUBLISH) {
             publishOutboundInterceptorHandler.handlePublish(ctx, (PUBLISH) msg, promise);
-        }else if (msg instanceof SUBACK){
+        } else if (msg instanceof SUBACK) {
             subackOutboundInterceptorHandler.handleOutboundSuback(ctx, (SUBACK) msg, promise);
-        }else if (msg instanceof UNSUBACK){
+        } else if (msg instanceof UNSUBACK) {
             unsubackOutboundInterceptorHandler.handleOutboundUnsuback(ctx, (UNSUBACK) msg, promise);
-        }  else if (msg instanceof PINGRESP) {
+        } else if (msg instanceof PINGRESP) {
             pingInterceptorHandler.handleOutboundPingResp(ctx, ((PINGRESP) msg), promise);
         } else if (msg instanceof PUBACK) {
             pubackInterceptorHandler.handleOutboundPuback(ctx, ((PUBACK) msg), promise);
@@ -84,9 +84,9 @@ public class OutboundInterceptorHandler extends ChannelOutboundHandlerAdapter {
             pubrecInterceptorHandler.handleOutboundPubrec(ctx, ((PUBREC) msg), promise);
         } else if (msg instanceof PUBCOMP) {
             pubcompInterceptorHandler.handleOutboundPubcomp(ctx, ((PUBCOMP) msg), promise);
-        } else if (msg instanceof PUBREL){
+        } else if (msg instanceof PUBREL) {
             pubrelInterceptorHandler.handleOutboundPubrel(ctx, (PUBREL) msg, promise);
-        }else if (msg instanceof DISCONNECT) {
+        } else if (msg instanceof DISCONNECT) {
             disconnectInterceptorHandler.handleOutboundDisconnect(ctx, ((DISCONNECT) msg), promise);
         } else {
             ctx.write(msg, promise);
