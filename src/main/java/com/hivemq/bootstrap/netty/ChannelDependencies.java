@@ -39,8 +39,6 @@ import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
-import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
-import com.hivemq.mqtt.handler.publish.qos.QoSSenderHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -63,8 +61,6 @@ public class ChannelDependencies {
     private final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider;
     private final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider;
     private final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider;
-    private final @NotNull Provider<QoSReceiverHandler> qoSReceiverHandlerProvider;
-    private final @NotNull Provider<QoSSenderHandler> qoSSenderHandlerProvider;
     private final @NotNull ChannelGroup channelGroup;
     private final @NotNull FullConfigurationService fullConfigurationService;
     private final @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler;
@@ -100,8 +96,6 @@ public class ChannelDependencies {
             final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider,
             final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider,
             final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider,
-            final @NotNull Provider<QoSReceiverHandler> qoSReceiverHandlerProvider,
-            final @NotNull Provider<QoSSenderHandler> qoSSenderHandlerProvider,
             final @NotNull ChannelGroup channelGroup,
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler,
@@ -134,8 +128,6 @@ public class ChannelDependencies {
         this.subscribeHandlerProvider = subscribeHandlerProvider;
         this.publishUserEventReceivedHandlerProvider = publishUserEventReceivedHandlerProvider;
         this.unsubscribeHandlerProvider = unsubscribeHandlerProvider;
-        this.qoSReceiverHandlerProvider = qoSReceiverHandlerProvider;
-        this.qoSSenderHandlerProvider = qoSSenderHandlerProvider;
         this.channelGroup = channelGroup;
         this.fullConfigurationService = fullConfigurationService;
         this.globalTrafficShapingHandler = globalTrafficShapingHandler;
@@ -195,16 +187,6 @@ public class ChannelDependencies {
     @NotNull
     public UnsubscribeHandler getUnsubscribeHandler() {
         return unsubscribeHandlerProvider.get();
-    }
-
-    @NotNull
-    public QoSSenderHandler getQoSSenderHandler() {
-        return qoSSenderHandlerProvider.get();
-    }
-
-    @NotNull
-    public QoSReceiverHandler getQoSReceiverHandler() {
-        return qoSReceiverHandlerProvider.get();
     }
 
     @NotNull

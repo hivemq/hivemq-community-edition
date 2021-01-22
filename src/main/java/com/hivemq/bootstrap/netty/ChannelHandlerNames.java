@@ -47,8 +47,7 @@ public class ChannelHandlerNames {
     public static final String MQTT_UNSUBSCRIBE_HANDLER = "mqtt_unsubscribe_handler";
     public static final String MQTT_PINGREQ_HANDLER = "mqtt_pingreq_handler";
 
-    public static final String MQTT_QOS_RECEIVER_HANDLER = "mqtt_qos_receiver_handler";
-    public static final String MQTT_QOS_SENDER_HANDLER = "mqtt_qos_sender_handler";
+    public static final String MQTT_PUBLISH_FLOW_HANDLER = "mqtt_publish_flow_handler";
 
     public static final String MQTT_DISALLOW_SECOND_CONNECT = "mqtt_disallow_second_connect";
 
@@ -59,7 +58,6 @@ public class ChannelHandlerNames {
     public static final String INCOMING_PUBLISH_HANDLER = "incoming_publish_handler";
     public static final String INCOMING_SUBSCRIBE_HANDLER = "incoming_subscribe_handler";
 
-    public static final String MQTT_ORDERED_TOPIC_HANDLER = "mqtt_ordered_topic_handler";
     public static final String MQTT_MESSAGE_ID_RETURN_HANDLER = "mqtt_message_id_return_handler";
 
     public static final String HTTP_SERVER_CODEC = "http_server_codec";

@@ -20,8 +20,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -52,7 +52,6 @@ import util.TestChannelAttribute;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,7 +60,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -222,7 +220,7 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_poll_shared_publishes() throws NoMessageIdAvailableException {
-        final OrderedTopicHandler orderedTopicHandler = mock(OrderedTopicHandler.class);
+        final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
         final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1),
@@ -239,9 +237,7 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(inFlightCount));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
-        when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
-
+        when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
 
         publishPollService.pollSharedPublishes("group/topic");
 
@@ -279,7 +275,7 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_poll_shared_publishes_messages_qos0_in_flight() throws NoMessageIdAvailableException {
-        final OrderedTopicHandler orderedTopicHandler = mock(OrderedTopicHandler.class);
+        final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
         final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
@@ -288,8 +284,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
 
-        when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
+        when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(1)));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
@@ -300,13 +295,12 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_remove_shared_qos0_downgrade() throws NoMessageIdAvailableException {
-        final OrderedTopicHandler orderedTopicHandler = mock(OrderedTopicHandler.class);
+        final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
 
         when(channel.isActive()).thenReturn(true);
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
-        when(pipeline.get(OrderedTopicHandler.class)).thenReturn(orderedTopicHandler);
-        when(orderedTopicHandler.unacknowledgedMessages()).thenReturn(new HashSet<>());
+        when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish(QoS.AT_LEAST_ONCE);
         when(clientQueuePersistence.readShared(eq("group/topic"), anyInt(), anyLong())).thenReturn(Futures.immediateFuture(

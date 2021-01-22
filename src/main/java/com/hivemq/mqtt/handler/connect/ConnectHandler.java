@@ -37,9 +37,9 @@ import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.mqtt.handler.MessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
-import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -88,7 +88,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull FullConfigurationService configurationService;
-    private final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider;
+    private final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider;
     private final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider;
     private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
@@ -114,7 +114,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence,
             final @NotNull FullConfigurationService configurationService,
-            final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider,
+            final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider,
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
             final @NotNull MqttConnacker mqttConnacker,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
@@ -128,7 +128,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.configurationService = configurationService;
-        this.orderedTopicHandlerProvider = orderedTopicHandlerProvider;
+        this.publishFlowHandlerProvider = publishFlowHandlerProvider;
         this.flowControlHandlerProvider = flowControlHandlerProvider;
         this.mqttConnacker = mqttConnacker;
         this.topicAliasLimiter = topicAliasLimiter;
@@ -183,7 +183,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
 
-        addOrderedTopicHandler(ctx, connect);
+        addPublishFlowHandler(ctx, connect);
 
         ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(true);
         ctx.channel().attr(ChannelAttributes.AUTH_CONNECT).set(connect);
@@ -261,12 +261,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void addOrderedTopicHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
+    private void addPublishFlowHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
 
         ctx.channel()
                 .pipeline()
-                .addAfter(MQTT_MESSAGE_ID_RETURN_HANDLER, MQTT_ORDERED_TOPIC_HANDLER,
-                        orderedTopicHandlerProvider.get());
+                .addAfter(MQTT_MESSAGE_ID_RETURN_HANDLER, MQTT_PUBLISH_FLOW_HANDLER,
+                        publishFlowHandlerProvider.get());
         if (ProtocolVersion.MQTTv5 == connect.getProtocolVersion()) {
             ctx.channel()
                     .pipeline()

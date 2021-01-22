@@ -13,28 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.mqtt.handler.ordering;
+package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.event.PublishDroppedEvent;
-import com.hivemq.mqtt.event.PubrelDroppedEvent;
-import com.hivemq.mqtt.handler.publish.PublishStatus;
-import com.hivemq.mqtt.message.MessageWithID;
-import com.hivemq.mqtt.message.puback.PUBACK;
-import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
-import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
@@ -51,44 +41,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Dominik Obermaier
  * @author Christoph Schäbel
+ * @author Florian Limpöck
  */
-public class OrderedTopicHandler extends ChannelDuplexHandler {
+public class OrderedTopicService {
 
-    private static final Logger log = LoggerFactory.getLogger(OrderedTopicHandler.class);
-    private static final ClosedChannelException CLOSED_CHANNEL_EXCEPTION = new ClosedChannelException();
+    private static final @NotNull Logger log = LoggerFactory.getLogger(OrderedTopicService.class);
+    private static final @NotNull ClosedChannelException CLOSED_CHANNEL_EXCEPTION = new ClosedChannelException();
 
     static {
         //remove the stacktrace from the static exception
         CLOSED_CHANNEL_EXCEPTION.setStackTrace(new StackTraceElement[0]);
     }
 
-
-    private final Map<Integer, SettableFuture<PublishStatus>> messageIdToFutureMap = new ConcurrentHashMap<>();
+    private final @NotNull Map<Integer, SettableFuture<PublishStatus>> messageIdToFutureMap = new ConcurrentHashMap<>();
 
     @VisibleForTesting
-    final Queue<QueuedMessage> queue = new ArrayDeque<>();
+    final @NotNull Queue<QueuedMessage> queue = new ArrayDeque<>();
 
-    private final AtomicBoolean closedAlready = new AtomicBoolean(false);
-    private final Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
+    private final @NotNull AtomicBoolean closedAlready = new AtomicBoolean(false);
+    private final @NotNull Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
 
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
 
-        if (msg instanceof PUBACK || msg instanceof PUBCOMP) {
-            messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
-        }
-        if (msg instanceof PUBREC) {
-            final PUBREC pubrec = (PUBREC) msg;
-            if (pubrec.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS &&
-                    pubrec.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
-                messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
-            }
-        }
-
-        super.channelRead(ctx, msg);
-    }
-
-    private void messageFlowComplete(@NotNull final ChannelHandlerContext ctx, final int packetId){
+    public void messageFlowComplete(@NotNull final ChannelHandlerContext ctx, final int packetId){
         final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
 
         if (publishStatusFuture != null) {
@@ -117,37 +91,18 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         } while (unacknowledgedMessages.size() < maxInflightWindow);
     }
 
-    @Override
-    public void userEventTriggered(@NotNull final ChannelHandlerContext ctx, @NotNull final Object evt) throws Exception {
-        if (evt instanceof PublishDroppedEvent) {
-            final PublishDroppedEvent publishDroppedEvent = (PublishDroppedEvent) evt;
-            // Already logged, just proceeded with with the next message
-            messageFlowComplete(ctx, publishDroppedEvent.getMessage().getPacketIdentifier());
-            return;
-        } else if (evt instanceof PubrelDroppedEvent) {
-            final PubrelDroppedEvent pubrelDroppedEvent = (PubrelDroppedEvent) evt;
-            messageFlowComplete(ctx, pubrelDroppedEvent.getMessage().getPacketIdentifier());
-            return;
-        }
-        super.userEventTriggered(ctx, evt);
-    }
-
-    @Override
-    public void write(final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise) throws Exception {
+    public boolean handlePublish(final @NotNull Channel channel, @NotNull final Object msg, @NotNull final ChannelPromise promise) {
 
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
             messageIdToFutureMap.put(pubrelWithFuture.getPacketIdentifier(), pubrelWithFuture.getFuture());
-            super.write(ctx, pubrelWithFuture, promise);
-            return;
+            return false;
         }
 
         if (!(msg instanceof PUBLISH)) {
-            super.write(ctx, msg, promise);
-            return;
+            return false;
         }
 
-        final Channel channel = ctx.channel();
         SettableFuture<PublishStatus> future = null;
         if (msg instanceof PublishWithFuture) {
             final PublishWithFuture publishWithFuture = (PublishWithFuture) msg;
@@ -162,32 +117,34 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         }
 
         if (qosNumber < 1) {
-            handleQosZero(ctx, publish, promise, future);
-            return;
+            if (future != null) {
+                future.set(PublishStatus.DELIVERED);
+            }
+            return false;
         }
 
         if (future != null) {
             messageIdToFutureMap.put(publish.getPacketIdentifier(), future);
         }
 
-        //do not store in OrderedTopicHandler if channelInactive has been called already
+        //do not store in OrderedTopicService if channelInactive has been called already
         if (closedAlready.get()) {
             promise.setFailure(CLOSED_CHANNEL_EXCEPTION);
-            return;
+            return true;
         }
 
 
-        final int maxInflightWindow = ChannelUtils.maxInflightWindow(ctx.channel());
+        final int maxInflightWindow = ChannelUtils.maxInflightWindow(channel);
         if (unacknowledgedMessages.size() >= maxInflightWindow) {
             queueMessage(promise, publish, clientId);
+            return true;
         } else {
             unacknowledgedMessages.add(publish.getPacketIdentifier());
-            super.write(ctx, publish, promise);
+            return false;
         }
     }
 
-    @Override
-    public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+    public void handleInactive() {
 
         closedAlready.set(true);
 
@@ -205,8 +162,6 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
             final SettableFuture<PublishStatus> publishStatusFuture = entry.getValue();
             publishStatusFuture.set(PublishStatus.NOT_CONNECTED);
         }
-
-        super.channelInactive(ctx);
     }
 
     private void queueMessage(@NotNull final ChannelPromise promise, @NotNull final PUBLISH publish, @NotNull final String clientId) {
@@ -219,13 +174,6 @@ public class OrderedTopicHandler extends ChannelDuplexHandler {
         }
 
         queue.add(new QueuedMessage(publish, promise));
-    }
-
-    private void handleQosZero(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @NotNull final ChannelPromise promise, @Nullable final SettableFuture<PublishStatus> future) throws Exception {
-        if (future != null) {
-            future.set(PublishStatus.DELIVERED);
-        }
-        super.write(ctx, publish, promise);
     }
 
     @NotNull

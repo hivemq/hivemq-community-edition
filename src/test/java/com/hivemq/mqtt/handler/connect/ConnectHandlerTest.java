@@ -46,8 +46,9 @@ import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
-import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
+import com.hivemq.mqtt.handler.publish.OrderedTopicService;
+import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -68,6 +69,7 @@ import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
+import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
@@ -79,6 +81,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.*;
 
@@ -199,52 +202,6 @@ public class ConnectHandlerTest {
     @After
     public void tearDown() {
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
-    }
-
-    @Test
-    public void test_disconnect_after_second_connect_message() {
-
-        final CONNECT connect1 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withClientIdentifier("1")
-                .build();
-        final CONNECT connect2 = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withClientIdentifier("2")
-                .build();
-
-        assertEquals(true, embeddedChannel.isOpen());
-        embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
-
-        // no need to check ordered topic handler in this test so we set the disconnect future immediately by expiry null
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(null);
-
-        embeddedChannel.writeInbound(connect2);
-
-        //We were disconnected after the second CONNECT message
-        assertEquals(false, embeddedChannel.isOpen());
-    }
-
-    @Test
-    public void test_disconnect_after_second_connect_message_mqtt5() {
-
-        final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("1")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .build();
-        final CONNECT connect2 = new CONNECT.Mqtt5Builder().withClientIdentifier("2")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .build();
-
-        assertEquals(true, embeddedChannel.isOpen());
-        embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
-
-        // no need to check ordered topic handler in this test so we set the disconnect future immediately by expiry null
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(null);
-
-        embeddedChannel.writeInbound(connect2);
-
-        //We were disconnected after the second CONNECT message
-        assertEquals(false, embeddedChannel.isOpen());
     }
 
     @Test
@@ -689,9 +646,6 @@ public class ConnectHandlerTest {
 
         System.out.println(embeddedChannel.pipeline().names());
         assertEquals(false, embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
-        assertEquals(
-                true,
-                embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_DISALLOW_SECOND_CONNECT));
     }
 
     @Test(timeout = 5_000)
@@ -1578,14 +1532,18 @@ public class ConnectHandlerTest {
 
         configurationService.mqttConfiguration().setServerReceiveMaximum(10);
 
-        final Provider<OrderedTopicHandler> orderedTopicHandlerProvider = () -> new OrderedTopicHandlerDummy();
+        final Provider<PublishFlowHandler> publishFlowHandlerProvider =
+                () -> new PublishFlowHandler(Mockito.mock(PublishPollService.class),
+                        mock(IncomingMessageFlowPersistence.class),
+                        mock(OrderedTopicService.class));
+
         final Provider<FlowControlHandler> flowControlHandlerProvider =
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
 
         handler = new ConnectHandler(clientSessionPersistence,
                 channelPersistence,
                 configurationService,
-                orderedTopicHandlerProvider,
+                publishFlowHandlerProvider,
                 flowControlHandlerProvider,
                 mqttConnacker,
                 new TopicAliasLimiterImpl(),
@@ -1635,10 +1593,6 @@ public class ConnectHandlerTest {
         ctx = embeddedChannel.pipeline().context(ConnectHandler.class);
 
         embeddedChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-    }
-
-    private static class OrderedTopicHandlerDummy extends OrderedTopicHandler {
-
     }
 
     private static class TestDisconnectEventHandler extends SimpleChannelInboundHandler<CONNECT> {
