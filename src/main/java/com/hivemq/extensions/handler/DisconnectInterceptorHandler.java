@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-public class DisconnectInterceptorHandler  {
+public class DisconnectInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DisconnectInterceptorHandler.class);
 

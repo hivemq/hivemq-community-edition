@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-public class PubrecInterceptorHandler{
+public class PubrecInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubrecInterceptorHandler.class);
 

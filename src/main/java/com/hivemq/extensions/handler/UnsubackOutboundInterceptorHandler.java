@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-public class UnsubackOutboundInterceptorHandler{
+public class UnsubackOutboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubackOutboundInterceptorHandler.class);
 

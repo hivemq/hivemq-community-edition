@@ -64,7 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-public class ConnectInboundInterceptorHandler{
+public class ConnectInboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConnectInboundInterceptorHandler.class);
 

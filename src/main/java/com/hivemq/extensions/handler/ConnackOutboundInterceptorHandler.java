@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 4.2.0
  */
 @Singleton
-public class ConnackOutboundInterceptorHandler{
+public class ConnackOutboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConnackOutboundInterceptorHandler.class);
 
