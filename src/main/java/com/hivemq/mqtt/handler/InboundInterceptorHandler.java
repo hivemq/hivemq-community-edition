@@ -28,8 +28,8 @@ public class InboundInterceptorHandler extends ChannelInboundHandlerAdapter {
 
     private final @NotNull PubackInterceptorHandler pubackInterceptorHandler;
     private final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler;
-    private final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler;
     private final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler;
+    private final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler;
 
     private final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
     private final @NotNull PingInterceptorHandler pingInterceptorHandler;
