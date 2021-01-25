@@ -40,7 +40,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_5_FLOW_CONTROL_HANDLER = "mqtt_5_flow_control_handler";
 
     public static final String MQTT_CONNECT_HANDLER = "mqtt_connect_handler";
-    public static final String MQTT_CONNECT_PERSISTENCE_HANDLER = "mqtt_connect_persistence_handler";
 
     public static final String MQTT_DISCONNECT_HANDLER = "mqtt_disconnect_handler";
     public static final String MQTT_SUBSCRIBE_HANDLER = "mqtt_subscribe_handler";
@@ -58,8 +57,6 @@ public class ChannelHandlerNames {
     public static final String INCOMING_PUBLISH_HANDLER = "incoming_publish_handler";
     public static final String INCOMING_SUBSCRIBE_HANDLER = "incoming_subscribe_handler";
 
-    public static final String MQTT_MESSAGE_ID_RETURN_HANDLER = "mqtt_message_id_return_handler";
-
     public static final String HTTP_SERVER_CODEC = "http_server_codec";
     public static final String HTTP_OBJECT_AGGREGATOR = "http_object_aggregator";
     public static final String WEBSOCKET_SERVER_PROTOCOL_HANDLER = "websocket_server_protocol_handler";
@@ -72,8 +69,6 @@ public class ChannelHandlerNames {
     public static final String NON_SSL_HANDLER = "no_ssl_handler";
     public static final String SSL_CLIENT_CERTIFICATE_HANDLER = "ssl_client_certificate_handler";
     public static final String SSL_PARAMETER_HANDLER = "ssl_parameter_handler";
-
-    public static final String LISTENER_ATTRIBUTE_ADDER = "listener_attribute_adder";
 
     public static final String MQTT_AUTH_HANDLER = "mqtt_auth_handler";
     public static final String AUTH_IN_PROGRESS_MESSAGE_HANDLER = "auth_in_progress_message_handler";
@@ -93,8 +88,6 @@ public class ChannelHandlerNames {
      *     Both    *
      ***************/
 
-    public static final String GLOBAL_TRAFFIC_COUNTER = "global_traffic_counter";
-    public static final String MQTT_CONNECTION_COUNTER_HANDLER = "mqtt_connection_counter_handler";
     public static final String MQTT_MESSAGE_BARRIER = "mqtt_message_barrier";
     public static final String MQTT_SUBSCRIBE_MESSAGE_BARRIER = "mqtt_subscribe_message_barrier";
 

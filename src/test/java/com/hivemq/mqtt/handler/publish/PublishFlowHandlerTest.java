@@ -19,10 +19,12 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -65,6 +67,12 @@ public class PublishFlowHandlerTest {
     @Mock
     private PublishPollService publishPollService;
 
+    @Mock
+    private MessageIDPools messageIDPools;
+
+    @Mock
+    private MessageIDPool pool;
+
     private OrderedTopicService orderedTopicService;
 
     private EmbeddedChannel embeddedChannel;
@@ -73,14 +81,53 @@ public class PublishFlowHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 5;
+        when(pool.takeNextId()).thenReturn(100);
+        when(messageIDPools.forClientOrNull(anyString())).thenReturn(pool);
         orderedTopicService = new OrderedTopicService();
-        embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService, incomingMessageFlowPersistence, orderedTopicService));
+        embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService, incomingMessageFlowPersistence, orderedTopicService, messageIDPools));
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(CLIENT_ID);
     }
 
     @After
     public void tearDown() throws Exception {
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
+    }
+
+    @Test
+    public void test_return_qos_1_message_id() throws Exception {
+
+        final PUBACK puback = new PUBACK(pool.takeNextId());
+        embeddedChannel.writeInbound(puback);
+
+        verify(pool).returnId(eq(100));
+
+    }
+
+    @Test
+    public void test_return_qos_2_message_id() throws Exception {
+
+        final PUBCOMP pubcomp = new PUBCOMP(pool.takeNextId());
+        embeddedChannel.writeInbound(pubcomp);
+
+        verify(pool).returnId(eq(100));
+    }
+
+    @Test
+    public void test_dont_return_message_id() throws Exception {
+
+        final PUBREL pubrel = new PUBREL(pool.takeNextId());
+        embeddedChannel.writeInbound(pubrel);
+
+        verify(pool, never()).returnId(anyInt());
+    }
+
+    @Test
+    public void test_dont_return_invalid_message_id() {
+
+        final PUBACK puback = new PUBACK(-1);
+        embeddedChannel.writeInbound(puback);
+
+        verify(pool, never()).returnId(anyInt());
     }
 
     @Test

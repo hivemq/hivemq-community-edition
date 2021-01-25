@@ -1526,8 +1526,8 @@ public class ConnectHandlerTest {
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_BARRIER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_BARRIER);
         }
-        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER)) {
-            embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER);
+        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_AUTH_HANDLER)) {
+            embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_AUTH_HANDLER);
         }
 
         configurationService.mqttConfiguration().setServerReceiveMaximum(10);
@@ -1535,7 +1535,8 @@ public class ConnectHandlerTest {
         final Provider<PublishFlowHandler> publishFlowHandlerProvider =
                 () -> new PublishFlowHandler(Mockito.mock(PublishPollService.class),
                         mock(IncomingMessageFlowPersistence.class),
-                        mock(OrderedTopicService.class));
+                        mock(OrderedTopicService.class),
+                        mock(MessageIDPools.class));
 
         final Provider<FlowControlHandler> flowControlHandlerProvider =
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
@@ -1562,7 +1563,7 @@ public class ConnectHandlerTest {
                         ChannelHandlerNames.MQTT_MESSAGE_BARRIER,
                         new DummyHandler());
         embeddedChannel.pipeline().addBefore(ChannelHandlerNames.MQTT_MESSAGE_BARRIER,
-                ChannelHandlerNames.MQTT_MESSAGE_ID_RETURN_HANDLER,
+                ChannelHandlerNames.MQTT_AUTH_HANDLER,
                 new DummyHandler());
 
         doAnswer(invocation -> {

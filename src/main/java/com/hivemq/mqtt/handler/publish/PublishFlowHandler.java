@@ -6,8 +6,10 @@ import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -43,18 +45,21 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull IncomingMessageFlowPersistence persistence;
     private final @NotNull OrderedTopicService orderedTopicService;
     private final @NotNull PublishPollService publishPollService;
+    private final @NotNull MessageIDPools messageIDPools;
 
     private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
 
     @VisibleForTesting
     @Inject
     public PublishFlowHandler(final @NotNull PublishPollService publishPollService,
-                       final @NotNull IncomingMessageFlowPersistence persistence,
-                       final @NotNull OrderedTopicService orderedTopicService) {
+                              final @NotNull IncomingMessageFlowPersistence persistence,
+                              final @NotNull OrderedTopicService orderedTopicService,
+                              final @NotNull MessageIDPools messageIDPools) {
         this.publishPollService = publishPollService;
         this.persistence = persistence;
         this.orderedTopicService = orderedTopicService;
         this.qos1And2AlreadySentMap = new HashMap<>();
+        this.messageIDPools = messageIDPools;
     }
 
     @Override
@@ -100,7 +105,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         }
 
         final boolean flowComplete = orderedTopicService.handlePublish(ctx.channel(), msg, promise);
-        if(flowComplete){
+        if (flowComplete) {
             return;
         }
 
@@ -195,6 +200,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         log.trace("Client {}: Received PUBACK", client);
         final int messageId = msg.getPacketIdentifier();
         orderedTopicService.messageFlowComplete(ctx, messageId);
+        returnMessageId(msg, client);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBACK remove message id:[{}] ", client, messageId);
@@ -233,9 +239,27 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         log.trace("Client {}: Received PUBCOMP", client);
 
         orderedTopicService.messageFlowComplete(ctx, msg.getPacketIdentifier());
+        returnMessageId(msg, client);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBCOMP remove message id:[{}]", client, msg.getPacketIdentifier());
+        }
+
+    }
+
+    private void returnMessageId(final @NotNull MessageWithID msg, final @NotNull String clientId) {
+
+        final int messageId = msg.getPacketIdentifier();
+
+        //Such a message ID must never be zero, but better be safe than sorry
+        if (messageId > 0) {
+            final MessageIDPool messageIDPool = messageIDPools.forClientOrNull(clientId);
+            if (messageIDPool != null) {
+                messageIDPool.returnId(messageId);
+            }
+            if (log.isTraceEnabled()) {
+                log.trace("Returning Message ID {} for client {} because of a {} message was received", messageId, clientId, msg.getClass().getSimpleName());
+            }
         }
 
     }

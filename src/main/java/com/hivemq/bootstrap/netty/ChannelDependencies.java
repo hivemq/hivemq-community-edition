@@ -38,7 +38,6 @@ import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
 import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
-import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -69,7 +68,6 @@ public class ChannelDependencies {
     private final @NotNull PingRequestHandler pingRequestHandler;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull MqttConnectDecoder mqttConnectDecoder;
-    private final @NotNull ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler;
     private final @NotNull MQTTMessageEncoder mqttMessageEncoder;
     private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
     private final @NotNull EventLog eventLog;
@@ -104,7 +102,6 @@ public class ChannelDependencies {
             final @NotNull PingRequestHandler pingRequestHandler,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
             final @NotNull MqttConnectDecoder mqttConnectDecoder,
-            final @NotNull ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler,
             final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider,
             final @NotNull EventLog eventLog,
             final @NotNull SslParameterHandler sslParameterHandler,
@@ -136,7 +133,6 @@ public class ChannelDependencies {
         this.pingRequestHandler = pingRequestHandler;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqttConnectDecoder = mqttConnectDecoder;
-        this.returnMessageIdToPoolHandler = returnMessageIdToPoolHandler;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory, globalMQTTMessageCounter);
         this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
         this.eventLog = eventLog;
@@ -227,11 +223,6 @@ public class ChannelDependencies {
     @NotNull
     public MqttConnectDecoder getMqttConnectDecoder() {
         return mqttConnectDecoder;
-    }
-
-    @NotNull
-    public ReturnMessageIdToPoolHandler getReturnMessageIdToPoolHandler() {
-        return returnMessageIdToPoolHandler;
     }
 
     @NotNull
