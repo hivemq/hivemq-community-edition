@@ -18,7 +18,9 @@ package com.hivemq.mqtt.services;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -66,6 +68,11 @@ public class PublishDistributorImplTest {
     private ClientSessionPersistence clientSessionPersistence;
     @Mock
     private MqttConfigurationService mqttConfigurationService;
+    @Mock
+    private FullConfigurationService fullConfigurationService;
+
+    @Mock
+    private PersistenceConfigurationService persistenceConfigurationService;
 
     private PublishDistributorImpl publishDistributor;
     private SingleWriterService singleWriterService;
@@ -74,8 +81,10 @@ public class PublishDistributorImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
+        when(fullConfigurationService.persistenceConfigurationService()).thenReturn(persistenceConfigurationService);
+        when(persistenceConfigurationService.getMode()).thenReturn(PersistenceConfigurationService.PersistenceMode.IN_MEMORY);
         publishDistributor = new PublishDistributorImpl(payloadPersistence, clientQueuePersistence, clientSessionPersistence,
-                singleWriterService, mqttConfigurationService);
+                singleWriterService, mqttConfigurationService,fullConfigurationService );
     }
 
     @Test(timeout = 5000)

@@ -21,7 +21,10 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.ConfigurationService;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -62,18 +65,22 @@ public class PublishDistributorImpl implements PublishDistributor {
     private final SingleWriterService singleWriterService;
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
+    @NotNull
+    final boolean persistenceInMemory;
 
     @Inject
     public PublishDistributorImpl(@NotNull final PublishPayloadPersistence payloadPersistence,
                                   @NotNull final ClientQueuePersistence clientQueuePersistence,
                                   @NotNull final ClientSessionPersistence clientSessionPersistence,
                                   @NotNull final SingleWriterService singleWriterService,
-                                  @NotNull final MqttConfigurationService mqttConfigurationService) {
+                                  @NotNull final MqttConfigurationService mqttConfigurationService,
+                                  @NotNull final FullConfigurationService configurationService) {
         this.payloadPersistence = payloadPersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.clientSessionPersistence = clientSessionPersistence;
         this.singleWriterService = singleWriterService;
         this.mqttConfigurationService = mqttConfigurationService;
+        this.persistenceInMemory = configurationService.persistenceConfigurationService().getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY;
     }
 
     @NotNull
