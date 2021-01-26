@@ -140,7 +140,7 @@ public class IncomingSubscribeHandlerTest {
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         channel.pipeline().addFirst(incomingSubscribeHandler);
-        channelHandlerContext = channel.pipeline().context(IncomingPublishHandler.class);
+        channelHandlerContext = channel.pipeline().context(IncomingSubscribeHandler.class);
     }
 
     @Test(timeout = 5000, expected = ClosedChannelException.class)

@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.message.MessageIDPools;
@@ -25,10 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
 /**
@@ -46,6 +49,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull OrderedTopicService orderedTopicService;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull MessageIDPools messageIDPools;
+    private final @NotNull IncomingPublishHandler incomingPublishHandler;
+    private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
 
     private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
 
@@ -54,12 +59,16 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     public PublishFlowHandler(final @NotNull PublishPollService publishPollService,
                               final @NotNull IncomingMessageFlowPersistence persistence,
                               final @NotNull OrderedTopicService orderedTopicService,
-                              final @NotNull MessageIDPools messageIDPools) {
+                              final @NotNull MessageIDPools messageIDPools,
+                              final @NotNull IncomingPublishHandler incomingPublishHandler,
+                              final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider) {
         this.publishPollService = publishPollService;
         this.persistence = persistence;
         this.orderedTopicService = orderedTopicService;
         this.qos1And2AlreadySentMap = new HashMap<>();
         this.messageIDPools = messageIDPools;
+        this.incomingPublishHandler = incomingPublishHandler;
+        this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
     }
 
     @Override
@@ -69,7 +78,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         if (msg instanceof PUBLISH) {
 
-            handlePublish(ctx, (PUBLISH) msg);
+            handlePublish(ctx, (PUBLISH) msg, client);
 
         } else if (msg instanceof PUBACK) {
 
@@ -96,6 +105,11 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     @Override
     public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
 
+        if(!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)){
+            super.write(ctx, msg, promise);
+            return;
+        }
+
         if (msg instanceof PUBACK) {
             final PUBACK puback = (PUBACK) msg;
             final String client = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
@@ -109,6 +123,12 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             return;
         }
 
+        if(DROP_MESSAGES_QOS_0){
+            final boolean messageDropped = dropOutgoingPublishesHandlerProvider.get().checkChannelNotWritable(ctx, msg, promise);
+            if(messageDropped){
+                return;
+            }
+        }
         super.write(ctx, msg, promise);
     }
 
@@ -119,7 +139,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             // Already logged, just proceeded with with the next message
             orderedTopicService.messageFlowComplete(ctx, publishDroppedEvent.getMessage().getPacketIdentifier());
             return;
-        } else if (evt instanceof PubrelDroppedEvent) {
+        }
+        if (evt instanceof PubrelDroppedEvent) {
             final PubrelDroppedEvent pubrelDroppedEvent = (PubrelDroppedEvent) evt;
             orderedTopicService.messageFlowComplete(ctx, pubrelDroppedEvent.getMessage().getPacketIdentifier());
             return;
@@ -144,13 +165,12 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         super.channelInactive(ctx);
     }
 
-    private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish) throws Exception {
+    private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
-            super.channelRead(ctx, publish);
+            incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
             // QoS 1 or 2 duplicate delivery handling
         } else {
             UNACKNOWLEDGED_PUBLISHES_COUNTER.incrementAndGet();
-            final String client = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
             final int messageId = publish.getPacketIdentifier();
             final MessageWithID savedMessage = persistence.get(client, messageId);
 
@@ -169,7 +189,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     private void firstPublishForMessageIdReceived(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client, final int messageId) throws Exception {
         persistence.addOrReplace(client, messageId, publish);
-        super.channelRead(ctx, publish);
+        incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
         qos1And2AlreadySentMap.put(messageId, true);
         log.trace("Client {} sent a publish message with id {} which was not forwarded before. This message is processed normally", client, messageId);
     }
@@ -190,7 +210,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         log.debug("Client {} sent a new PUBLISH with QoS {} and a message identifier which is already in process ({}) by another flow! Starting new flow",
                 client, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());
         persistence.addOrReplace(client, publish.getPacketIdentifier(), publish);
-        super.channelRead(ctx, publish);
+        incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
         qos1And2AlreadySentMap.put(publish.getPacketIdentifier(), true);
     }
 
@@ -233,7 +253,6 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(new PUBCOMP(messageId)).addListener(
                 new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
     }
-
 
     private void handlePubcomp(final @NotNull ChannelHandlerContext ctx, @NotNull final PUBCOMP msg, @NotNull final String client) {
         log.trace("Client {}: Received PUBCOMP", client);

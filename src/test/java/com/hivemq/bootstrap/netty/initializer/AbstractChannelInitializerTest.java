@@ -113,7 +113,6 @@ public class AbstractChannelInitializerTest {
         verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_BARRIER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_SUBSCRIBE_MESSAGE_BARRIER), any(ChannelHandler.class));
-        verify(pipeline).addLast(eq(CHANNEL_INACTIVE_HANDLER), any(ChannelHandler.class));
 
     }
 

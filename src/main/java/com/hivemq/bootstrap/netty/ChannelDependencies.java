@@ -35,9 +35,7 @@ import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
-import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
-import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -58,7 +56,6 @@ public class ChannelDependencies {
     private final @NotNull ConnectionLimiterHandler connectionLimiterHandler;
     private final @NotNull DisconnectHandler disconnectHandler;
     private final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider;
-    private final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider;
     private final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider;
     private final @NotNull ChannelGroup channelGroup;
     private final @NotNull FullConfigurationService fullConfigurationService;
@@ -69,7 +66,6 @@ public class ChannelDependencies {
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull MqttConnectDecoder mqttConnectDecoder;
     private final @NotNull MQTTMessageEncoder mqttMessageEncoder;
-    private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
     private final @NotNull EventLog eventLog;
     private final @NotNull SslParameterHandler sslParameterHandler;
     private final @NotNull MqttDecoders mqttDecoders;
@@ -92,7 +88,6 @@ public class ChannelDependencies {
             final @NotNull ConnectionLimiterHandler connectionLimiterHandler,
             final @NotNull DisconnectHandler disconnectHandler,
             final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider,
-            final @NotNull Provider<PublishUserEventReceivedHandler> publishUserEventReceivedHandlerProvider,
             final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider,
             final @NotNull ChannelGroup channelGroup,
             final @NotNull FullConfigurationService fullConfigurationService,
@@ -102,7 +97,6 @@ public class ChannelDependencies {
             final @NotNull PingRequestHandler pingRequestHandler,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
             final @NotNull MqttConnectDecoder mqttConnectDecoder,
-            final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider,
             final @NotNull EventLog eventLog,
             final @NotNull SslParameterHandler sslParameterHandler,
             final @NotNull MqttDecoders mqttDecoders,
@@ -123,7 +117,6 @@ public class ChannelDependencies {
         this.connectionLimiterHandler = connectionLimiterHandler;
         this.disconnectHandler = disconnectHandler;
         this.subscribeHandlerProvider = subscribeHandlerProvider;
-        this.publishUserEventReceivedHandlerProvider = publishUserEventReceivedHandlerProvider;
         this.unsubscribeHandlerProvider = unsubscribeHandlerProvider;
         this.channelGroup = channelGroup;
         this.fullConfigurationService = fullConfigurationService;
@@ -134,7 +127,6 @@ public class ChannelDependencies {
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqttConnectDecoder = mqttConnectDecoder;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory, globalMQTTMessageCounter);
-        this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
         this.eventLog = eventLog;
         this.sslParameterHandler = sslParameterHandler;
         this.mqttDecoders = mqttDecoders;
@@ -173,11 +165,6 @@ public class ChannelDependencies {
     @NotNull
     public SubscribeHandler getSubscribeHandler() {
         return subscribeHandlerProvider.get();
-    }
-
-    @NotNull
-    public PublishUserEventReceivedHandler getPublishUserEventReceivedHandler() {
-        return publishUserEventReceivedHandlerProvider.get();
     }
 
     @NotNull
@@ -228,11 +215,6 @@ public class ChannelDependencies {
     @NotNull
     public MQTTMessageEncoder getMqttMessageEncoder() {
         return mqttMessageEncoder;
-    }
-
-    @NotNull
-    public DropOutgoingPublishesHandler getDropOutgoingPublishesHandler() {
-        return dropOutgoingPublishesHandlerProvider.get();
     }
 
     @NotNull

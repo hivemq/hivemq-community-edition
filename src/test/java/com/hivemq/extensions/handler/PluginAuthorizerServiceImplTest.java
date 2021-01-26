@@ -87,8 +87,6 @@ public class PluginAuthorizerServiceImplTest {
     @Mock
     private SubscribeHandler subscribeHandler;
     @Mock
-    private IncomingPublishHandler incomingPublishHandler;
-    @Mock
     private IncomingSubscribeHandler incomingSubscribeHandler;
     @Mock
     private ServerInformation serverInformation;
@@ -143,7 +141,6 @@ public class PluginAuthorizerServiceImplTest {
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
         channel.pipeline().addLast(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER, subscribeHandler);
-        channel.pipeline().addLast(ChannelHandlerNames.INCOMING_PUBLISH_HANDLER, incomingPublishHandler);
         channel.pipeline().addLast(ChannelHandlerNames.INCOMING_SUBSCRIBE_HANDLER, incomingSubscribeHandler);
         channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
     }
@@ -563,7 +560,6 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private void clearHandlers() {
-        channel.pipeline().remove(ChannelHandlerNames.INCOMING_PUBLISH_HANDLER);
         channel.pipeline().remove(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER);
     }
 

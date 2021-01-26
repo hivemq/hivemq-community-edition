@@ -54,7 +54,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_KEEPALIVE_IDLE_HANDLER = "mqtt_keepalive_idle_handler";
 
     public static final String MQTT_PUBLISH_USER_EVENT_HANDLER = "mqtt_publish_user_event_handler";
-    public static final String INCOMING_PUBLISH_HANDLER = "incoming_publish_handler";
     public static final String INCOMING_SUBSCRIBE_HANDLER = "incoming_subscribe_handler";
 
     public static final String HTTP_SERVER_CODEC = "http_server_codec";

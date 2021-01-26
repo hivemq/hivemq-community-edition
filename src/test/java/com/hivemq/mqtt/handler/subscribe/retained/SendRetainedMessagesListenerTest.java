@@ -20,14 +20,12 @@ import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.MqttConfigurationService;
-import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
@@ -90,7 +88,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions =
                 newArrayList(subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         final RetainedMessage nullMessage = null;
 
         when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(nullMessage));
@@ -148,7 +146,7 @@ public class SendRetainedMessagesListenerTest {
 
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -164,7 +162,7 @@ public class SendRetainedMessagesListenerTest {
                 subResult(anothertopic, false));
         ignoredTopics.add(anothertopic);
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(
@@ -196,7 +194,7 @@ public class SendRetainedMessagesListenerTest {
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE, false, false, Mqtt5RetainHandling.SEND, 1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
@@ -227,7 +225,7 @@ public class SendRetainedMessagesListenerTest {
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE, false, false, Mqtt5RetainHandling.DO_NOT_SEND, 1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -251,7 +249,7 @@ public class SendRetainedMessagesListenerTest {
                         1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, true));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -276,7 +274,7 @@ public class SendRetainedMessagesListenerTest {
                         1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
@@ -310,7 +308,7 @@ public class SendRetainedMessagesListenerTest {
                 subResult(new Topic("topic", QoS.EXACTLY_ONCE), false),
                 subResult(new Topic("topic2", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
@@ -349,7 +347,7 @@ public class SendRetainedMessagesListenerTest {
 
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -373,7 +371,7 @@ public class SendRetainedMessagesListenerTest {
 
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.EXACTLY_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
         embeddedChannel.runPendingTasks();
@@ -385,7 +383,7 @@ public class SendRetainedMessagesListenerTest {
     @Test
     public void test_on_failure_exception_handling() {
 
-        final EmbeddedChannel channel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel channel = new EmbeddedChannel();
 
         final SendRetainedMessageResultListener sendRetainedMessageResultListener =
                 createSendRetainedMessageSingleListener(channel);
@@ -409,7 +407,7 @@ public class SendRetainedMessagesListenerTest {
     @Test
     public void test_on_failure_throwable_handling() {
 
-        final EmbeddedChannel channel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel channel = new EmbeddedChannel();
         createSendRetainedMessageSingleListener(channel).onFailure(new Throwable("test"));
 
         // tests if the test finish successfully. No need for assertion.
@@ -418,7 +416,7 @@ public class SendRetainedMessagesListenerTest {
     @Test(expected = Error.class)
     public void test_on_failure_error_handling() {
 
-        final EmbeddedChannel channel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel channel = new EmbeddedChannel();
         createSendRetainedMessageSingleListener(channel).onFailure(new Error());
     }
 
@@ -435,7 +433,7 @@ public class SendRetainedMessagesListenerTest {
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE);
         final List<SubscriptionResult> subscriptions = newArrayList(new SubscriptionResult(topic, false, "shareName"));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -462,7 +460,7 @@ public class SendRetainedMessagesListenerTest {
                 subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false),
                 subResult(new Topic("topic2", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new PublishUserEventReceivedHandler());
+        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
@@ -496,7 +494,7 @@ public class SendRetainedMessagesListenerTest {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mock(PublishPollService.class), mqttConfigurationService);
+                messageIDPools, mqttConfigurationService);
 
         return new SendRetainedMessagesListener(
                 subscriptions, ignoredTopics, retainedMessagePersistence, retainedMessagesSender);
@@ -510,7 +508,7 @@ public class SendRetainedMessagesListenerTest {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mock(PublishPollService.class), mqttConfigurationService);
+                messageIDPools, mqttConfigurationService);
 
         return new SendRetainedMessageResultListener(channel, topic, retainedMessagesSender);
 

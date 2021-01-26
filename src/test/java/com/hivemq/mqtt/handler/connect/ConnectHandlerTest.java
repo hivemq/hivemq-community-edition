@@ -33,6 +33,7 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
+import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
@@ -46,6 +47,7 @@ import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
+import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
 import com.hivemq.mqtt.handler.publish.OrderedTopicService;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
@@ -1536,7 +1538,9 @@ public class ConnectHandlerTest {
                 () -> new PublishFlowHandler(Mockito.mock(PublishPollService.class),
                         mock(IncomingMessageFlowPersistence.class),
                         mock(OrderedTopicService.class),
-                        mock(MessageIDPools.class));
+                        mock(MessageIDPools.class),
+                        mock(IncomingPublishHandler.class),
+                        () -> mock(DropOutgoingPublishesHandler.class));
 
         final Provider<FlowControlHandler> flowControlHandlerProvider =
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);

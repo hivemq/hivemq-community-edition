@@ -23,7 +23,6 @@ import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
-import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
-import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
 
 /**
  * @author Dominik Obermaier
@@ -85,27 +83,19 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
 
-        if (DROP_MESSAGES_QOS_0) {
-            ch.pipeline().addLast(DROP_OUTGOING_PUBLISHES_HANDLER, channelDependencies.getDropOutgoingPublishesHandler());
-        }
-
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
         ch.pipeline().addLast(CONNECTION_LIMITER, channelDependencies.getConnectionLimiterHandler());
         ch.pipeline().addLast(MQTT_CONNECT_HANDLER, channelDependencies.getConnectHandler());
 
 
-        ch.pipeline().addLast(INCOMING_PUBLISH_HANDLER, channelDependencies.getIncomingPublishHandler());
         ch.pipeline().addLast(INCOMING_SUBSCRIBE_HANDLER, channelDependencies.getIncomingSubscribeHandler());
 
         ch.pipeline().addLast(MQTT_PINGREQ_HANDLER, channelDependencies.getPingRequestHandler());
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
-        ch.pipeline().addLast(MQTT_PUBLISH_USER_EVENT_HANDLER, channelDependencies.getPublishUserEventReceivedHandler());
-
         ch.pipeline().addLast(MQTT_UNSUBSCRIBE_HANDLER, channelDependencies.getUnsubscribeHandler());
         ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
-        ch.pipeline().addLast(CHANNEL_INACTIVE_HANDLER, new ChannelInactiveHandler());
 
         addSpecialHandlers(ch);
 

@@ -33,9 +33,7 @@ import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
-import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
-import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -70,9 +68,6 @@ public class ChannelDependenciesTest {
     private SubscribeHandler subscribeHandler;
 
     @Mock
-    private PublishUserEventReceivedHandler publishUserEventReceivedHandler;
-
-    @Mock
     private UnsubscribeHandler unsubscribeHandler;
 
     @Mock
@@ -101,9 +96,6 @@ public class ChannelDependenciesTest {
 
     @Mock
     private EncoderFactory encoderFactory;
-
-    @Mock
-    private DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
     @Mock
     private EventLog eventLog;
@@ -158,7 +150,6 @@ public class ChannelDependenciesTest {
                 connectionLimiterHandler,
                 disconnectHandler,
                 () -> subscribeHandler,
-                () -> publishUserEventReceivedHandler,
                 () -> unsubscribeHandler,
                 channelGroup,
                 fullConfigurationService,
@@ -168,7 +159,6 @@ public class ChannelDependenciesTest {
                 pingRequestHandler,
                 restrictionsConfigurationService,
                 mqttConnectDecoder,
-                () -> dropOutgoingPublishesHandler,
                 eventLog,
                 sslParameterHandler,
                 mqttDecoders,
@@ -193,7 +183,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getConnectHandler());
         assertNotNull(channelDependencies.getDisconnectHandler());
         assertNotNull(channelDependencies.getSubscribeHandler());
-        assertNotNull(channelDependencies.getPublishUserEventReceivedHandler());
         assertNotNull(channelDependencies.getUnsubscribeHandler());
         assertNotNull(channelDependencies.getChannelGroup());
         assertNotNull(channelDependencies.getConfigurationService());
@@ -204,7 +193,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getRestrictionsConfigurationService());
         assertNotNull(channelDependencies.getMqttConnectDecoder());
         assertNotNull(channelDependencies.getMqttMessageEncoder());
-        assertNotNull(channelDependencies.getDropOutgoingPublishesHandler());
         assertNotNull(channelDependencies.getPublishMessageExpiryHandler());
         assertNotNull(channelDependencies.getEventLog());
         assertNotNull(channelDependencies.getSslParameterHandler());

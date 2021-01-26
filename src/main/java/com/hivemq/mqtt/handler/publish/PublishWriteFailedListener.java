@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.Exceptions;
 import io.netty.handler.codec.EncoderException;
 import io.netty.util.concurrent.Future;
@@ -23,13 +24,16 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PublishWritePromiseListener implements GenericFutureListener<Future<? super Void>> {
+/**
+ * @author Florian Limpöck
+ */
+public class PublishWriteFailedListener implements GenericFutureListener<Future<? super Void>> {
 
-    private static final Logger log = LoggerFactory.getLogger(PublishWritePromiseListener.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(PublishWriteFailedListener.class);
 
-    private final SettableFuture<PublishStatus> statusFuture;
+    private final @NotNull SettableFuture<PublishStatus> statusFuture;
 
-    public PublishWritePromiseListener(final SettableFuture<PublishStatus> statusFuture) {
+    public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> statusFuture) {
         this.statusFuture = statusFuture;
     }
 

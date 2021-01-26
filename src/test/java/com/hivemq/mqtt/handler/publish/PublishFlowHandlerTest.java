@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.publish;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
@@ -73,6 +74,9 @@ public class PublishFlowHandlerTest {
     @Mock
     private MessageIDPool pool;
 
+    @Mock
+    private IncomingPublishHandler incomingPublishHandler;
+
     private OrderedTopicService orderedTopicService;
 
     private EmbeddedChannel embeddedChannel;
@@ -84,7 +88,9 @@ public class PublishFlowHandlerTest {
         when(pool.takeNextId()).thenReturn(100);
         when(messageIDPools.forClientOrNull(anyString())).thenReturn(pool);
         orderedTopicService = new OrderedTopicService();
-        embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService, incomingMessageFlowPersistence, orderedTopicService, messageIDPools));
+        embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
+                incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
+                () -> mock(DropOutgoingPublishesHandler.class)));
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(CLIENT_ID);
     }
 

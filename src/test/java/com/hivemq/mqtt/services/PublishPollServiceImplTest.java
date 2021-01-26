@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
@@ -38,6 +37,7 @@ import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.Attribute;
@@ -90,10 +90,10 @@ public class PublishPollServiceImplTest {
     Channel channel;
 
     @Mock
-    ChannelPipeline pipeline;
+    ChannelFuture channelFuture;
 
     @Mock
-    ChannelInactiveHandler channelInactiveHandler;
+    ChannelPipeline pipeline;
 
     @Mock
     MessageDroppedService messageDroppedService;
@@ -109,8 +109,8 @@ public class PublishPollServiceImplTest {
         when(messageIDPools.forClient(anyString())).thenReturn(messageIDPool);
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
-        when(pipeline.get(ChannelInactiveHandler.class)).thenReturn(channelInactiveHandler);
         when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
+        when(channel.writeAndFlush(any())).thenReturn(channelFuture);
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
 
@@ -129,8 +129,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(48)).returnId(anyInt());
-        verify(pipeline, times(2)).fireUserEventTriggered(any(PUBLISH.class));
-        verify(channelInactiveHandler, times(2)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+        verify(channel, times(2)).writeAndFlush(any(PUBLISH.class));
     }
 
 
@@ -149,8 +148,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(9)).returnId(anyInt()); // 10 messages are polled because the client receive max is 10
-        verify(pipeline, times(1)).fireUserEventTriggered(any(PUBLISH.class));
-        verify(channelInactiveHandler, times(1)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
     }
 
     @Test
@@ -165,8 +163,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(50)).returnId(anyInt()); // The id must be returned
-        verify(pipeline, never()).fireUserEventTriggered(any(PUBLISH.class));
-        verify(channelInactiveHandler, times(1)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+        verify(channel, never()).writeAndFlush(any(PUBLISH.class));
     }
 
     @Test
@@ -183,8 +180,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(2)).takeIfAvailable(anyInt());
-        verify(pipeline, times(1)).fireUserEventTriggered(any(PUBLISH.class));
-        verify(channelInactiveHandler, times(1)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
         verify(channel).writeAndFlush(any(PubrelWithFuture.class));
     }
 
@@ -200,8 +196,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(1)).takeIfAvailable(anyInt());
-        verify(pipeline, times(1)).fireUserEventTriggered(any(PUBLISH.class));
-        verify(channelInactiveHandler, times(1)).addCallback(anyString(), any(ChannelInactiveHandler.ChannelInactiveCallback.class));
+        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
         verify(messageIDPool).returnId(2);
     }
 
@@ -242,7 +237,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollSharedPublishes("group/topic");
 
         final ArgumentCaptor<PUBLISH> captor = ArgumentCaptor.forClass(PUBLISH.class);
-        verify(pipeline, times(3)).fireUserEventTriggered(captor.capture());
+        verify(channel, times(3)).writeAndFlush(captor.capture());
         verify(messageIDPool, times(2)).takeNextId();
 
         final List<PUBLISH> values = captor.getAllValues();
