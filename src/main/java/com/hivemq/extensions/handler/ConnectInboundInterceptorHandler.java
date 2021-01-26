@@ -99,7 +99,7 @@ public class ConnectInboundInterceptorHandler {
     }
 
 
-    public void readConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
+    public void handleInboundConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {

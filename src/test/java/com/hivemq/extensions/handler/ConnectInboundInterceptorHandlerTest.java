@@ -119,7 +119,7 @@ public class ConnectInboundInterceptorHandlerTest {
         channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                handler.readConnect(ctx, ((CONNECT) msg));
+                handler.handleInboundConnect(ctx, ((CONNECT) msg));
             }
         });
     }

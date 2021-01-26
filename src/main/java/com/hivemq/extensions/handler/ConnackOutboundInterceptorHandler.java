@@ -88,7 +88,7 @@ public class ConnackOutboundInterceptorHandler {
         this.eventLog = eventLog;
     }
 
-    public void writeConnack(
+    public void handleOutboundConnack(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull CONNACK connack,
             final @NotNull ChannelPromise promise) {

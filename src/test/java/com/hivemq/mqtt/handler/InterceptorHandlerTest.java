@@ -104,7 +104,7 @@ public class InterceptorHandlerTest {
     @Test
     public void test_read_connect() {
         interceptorHandler.channelRead(channelHandlerContext, mock(CONNECT.class));
-        verify(connectInboundInterceptorHandler, times(1)).readConnect(any(), any());
+        verify(connectInboundInterceptorHandler, times(1)).handleInboundConnect(any(), any());
     }
 
     @Test
@@ -159,13 +159,13 @@ public class InterceptorHandlerTest {
     @Test
     public void test_write_connack() {
         interceptorHandler.write(channelHandlerContext, mock(CONNACK.class), channelPromise);
-        verify(connackOutboundInterceptorHandler, times(1)).writeConnack(any(), any(), any());
+        verify(connackOutboundInterceptorHandler, times(1)).handleOutboundConnack(any(), any(), any());
     }
 
     @Test
     public void test_write_publish() {
         interceptorHandler.write(channelHandlerContext, mock(PUBLISH.class), channelPromise);
-        verify(publishOutboundInterceptorHandler, times(1)).handlePublish(any(), any(), any());
+        verify(publishOutboundInterceptorHandler, times(1)).handleOutboundPublish(any(), any(), any());
     }
 
     @Test

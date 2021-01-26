@@ -79,7 +79,7 @@ public class PublishOutboundInterceptorHandler {
         this.messageDroppedService = messageDroppedService;
     }
 
-    public void handlePublish(
+    public void handleOutboundPublish(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBLISH publish,
             final @NotNull ChannelPromise promise) {

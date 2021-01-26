@@ -105,7 +105,7 @@ public class PublishOutboundInterceptorHandlerTest {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                 if (msg instanceof PUBLISH) {
-                    handler.handlePublish(ctx, ((PUBLISH) msg), promise);
+                    handler.handleOutboundPublish(ctx, ((PUBLISH) msg), promise);
                 } else {
                     super.write(ctx, msg, promise);
                 }

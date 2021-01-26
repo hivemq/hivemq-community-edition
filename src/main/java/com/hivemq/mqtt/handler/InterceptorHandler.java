@@ -17,7 +17,6 @@ package com.hivemq.mqtt.handler;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.*;
-import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -108,7 +107,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         } else if (msg instanceof DISCONNECT) {
             disconnectInterceptorHandler.handleInboundDisconnect(ctx, ((DISCONNECT) msg));
         } else if (msg instanceof CONNECT) {
-            connectInboundInterceptorHandler.readConnect(ctx, (CONNECT) msg);
+            connectInboundInterceptorHandler.handleInboundConnect(ctx, (CONNECT) msg);
         } else {
             ctx.fireChannelRead(msg);
         }
@@ -121,7 +120,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
             final @NotNull ChannelPromise promise) {
         //the order is important: it has to be ordered by the expected frequency to avoid instance of checks
         if (msg instanceof PUBLISH) {
-            publishOutboundInterceptorHandler.handlePublish(ctx, (PUBLISH) msg, promise);
+            publishOutboundInterceptorHandler.handleOutboundPublish(ctx, (PUBLISH) msg, promise);
         } else if (msg instanceof PUBACK) {
             pubackInterceptorHandler.handleOutboundPuback(ctx, ((PUBACK) msg), promise);
         } else if (msg instanceof PUBREC) {
@@ -137,7 +136,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         } else if (msg instanceof UNSUBACK) {
             unsubackOutboundInterceptorHandler.handleOutboundUnsuback(ctx, (UNSUBACK) msg, promise);
         } else if (msg instanceof CONNACK) {
-            connackOutboundInterceptorHandler.writeConnack(ctx, (CONNACK) msg, promise);
+            connackOutboundInterceptorHandler.handleOutboundConnack(ctx, (CONNACK) msg, promise);
         } else if (msg instanceof DISCONNECT) {
             disconnectInterceptorHandler.handleOutboundDisconnect(ctx, ((DISCONNECT) msg), promise);
         } else {

@@ -125,7 +125,7 @@ public class ConnackOutboundInterceptorHandlerTest {
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
             public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-                handler.writeConnack(ctx, ((CONNACK) msg), promise);
+                handler.handleOutboundConnack(ctx, ((CONNACK) msg), promise);
             }
         });
     }
