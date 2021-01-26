@@ -90,7 +90,10 @@ public class InterceptorHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
         //the order is important: it has to be ordered by the expected frequency to avoid instance of checks
-        if (msg instanceof PUBACK) {
+        if (msg instanceof PUBLISH) {
+            //shortcut for publish
+            ctx.fireChannelRead(msg);
+        }else if (msg instanceof PUBACK) {
             pubackInterceptorHandler.handleInboundPuback(ctx, ((PUBACK) msg));
         } else if (msg instanceof PUBREC) {
             pubrecInterceptorHandler.handleInboundPubrec(ctx, ((PUBREC) msg));
