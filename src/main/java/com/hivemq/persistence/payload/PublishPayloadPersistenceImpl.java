@@ -215,14 +215,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @NotNull
-    public List<Long> getAllIds() {
-        return localPersistence.getAllIds();
-    }
 
     @Override
     public void closeDB() {

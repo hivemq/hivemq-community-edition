@@ -82,14 +82,6 @@ public interface PublishPayloadPersistence {
     void decrementReferenceCounter(long id);
 
     /**
-     * Returns the IDs of all payloads that currently exist in the persistence.
-     *
-     * @return A List off all IDs.
-     */
-    @NotNull
-    List<Long> getAllIds();
-
-    /**
      * close the persistence with all buckets.
      */
     void closeDB();

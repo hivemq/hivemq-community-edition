@@ -98,14 +98,6 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
         //NOOP
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @NotNull
-    public List<Long> getAllIds() {
-        throw new UnsupportedOperationException("getAllIds iys not supported for in-memory persistence");
-    }
 
     @Override
     public void closeDB() {
