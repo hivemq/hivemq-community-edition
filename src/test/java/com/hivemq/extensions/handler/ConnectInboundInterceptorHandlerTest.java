@@ -75,7 +75,7 @@ import static org.mockito.Mockito.*;
  * @author Lukas Brandl
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class ConnectInterceptorHandlerTest {
+public class ConnectInboundInterceptorHandlerTest {
 
     private final HivemqId hivemqId = new HivemqId();
     @Rule
