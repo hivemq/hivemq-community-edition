@@ -577,11 +577,11 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         }
 
         for (final PublishWithRetained qos0Message : messages.qos0Messages) {
+            payloadPersistence.decrementReferenceCounter(qos0Message.getPublishId());
             final int estimatedSize = qos0Message.getEstimatedSize();
             increaseQos0MessagesMemory(-estimatedSize);
-            increaseClientQos0MessagesMemory(messages, -estimatedSize); // TODO can be removed
+            // increaseClientQos0MessagesMemory not necessary as messages are removed completely
             increaseMessagesMemory(-estimatedSize);
-            payloadPersistence.decrementReferenceCounter(qos0Message.getPublishId());
         }
     }
 
@@ -603,9 +603,10 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         for (final PublishWithRetained publishWithRetained : messages.qos0Messages) {
             payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
             increaseQos0MessagesMemory(-publishWithRetained.getEstimatedSize());
-            increaseClientQos0MessagesMemory(messages, -publishWithRetained.getEstimatedSize()); // TODO set to 0 instead
+            // increaseClientQos0MessagesMemory not necessary as messages.qos0Memory = 0 below
             increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
         }
+        messages.qos0Memory = 0;
     }
 
     /**
