@@ -23,6 +23,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
@@ -30,6 +31,7 @@ import util.TestMqttDecoder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@Ignore("A CONNACK is never decoded by HiveMQ")
 public class Mqtt3ConnackDecoderTest {
 
     private EmbeddedChannel embeddedChannel;
@@ -39,7 +41,7 @@ public class Mqtt3ConnackDecoderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create(false));
+        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
 
     }

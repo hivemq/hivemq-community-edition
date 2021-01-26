@@ -41,14 +41,11 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy.DISCARD;
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy.DISCARD_OLDEST;
-import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.SHARED_IN_FLIGHT_MARKER;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
@@ -831,7 +828,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
         final int size = new PublishWithRetained(publish1, false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead() +
                 new PublishWithRetained(publish2, false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead() +
-                new PublishWithRetained(publish3, false).getEstimatedSize() +  ObjectMemoryEstimation.linkedListNodeOverhead();
+                new PublishWithRetained(publish3, false).getEstimatedSize() + ObjectMemoryEstimation.linkedListNodeOverhead();
 
         assertEquals(size, gauge.getValue().longValue());
 
@@ -964,7 +961,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableList.Builder<PUBLISH> publishes1 = ImmutableList.builder();
         final ImmutableList.Builder<PUBLISH> publishes2 = ImmutableList.builder();
         for (int i = 0; i < 10; i++) {
-            if(i < 5) {
+            if (i < 5) {
                 publishes1.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
             } else {
                 publishes2.add(createPublish(1, QoS.AT_LEAST_ONCE, "topic" + i));
@@ -1010,73 +1007,12 @@ public class ClientQueueMemoryLocalPersistenceTest {
     }
 
     @Test(timeout = 5000)
-    public void test_increase_negative_size() {
-
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNull(clientQos0MemoryMap.get("client"));
-
-    }
-
-    @Test(timeout = 5000)
-    public void test_increase_positive_size() {
-
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNotNull(clientQos0MemoryMap.get("client"));
-
-    }
-
-    @Test(timeout = 5000)
-    public void test_multiple_increases() {
-
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNull(clientQos0MemoryMap.get("client"));
-
-    }
-
-    @Test(timeout = 5000)
-    public void test_increase_decrease_increase_decrease_increase() {
-
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), -10000);
-        persistence.increaseClientQos0MessagesMemory(new Key("client", false), 10000);
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNotNull(clientQos0MemoryMap.get("client"));
-
-    }
-
-    @Test(timeout = 5000)
     public void test_add_qos_0_per_client_exceeded() {
 
         persistence.add("client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic", 1, 500), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
         persistence.add("client", false, createBigPublish(1, QoS.AT_MOST_ONCE, "topic", 1, 500), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
 
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic"), eq(0), anyLong(), eq(1024L));
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNotNull(clientQos0MemoryMap.get("client"));
 
         final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
         assertTrue(gauge.getValue() > 0);
@@ -1095,10 +1031,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         persistence.add("client", false, createPublish(2, QoS.AT_MOST_ONCE, "topic", 2), 1000, DISCARD, false, BucketUtils.getBucket("client", 4));
 
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic"), eq(0), anyLong(), eq(1024L));
-
-        final Map<String, AtomicInteger> clientQos0MemoryMap = persistence.getClientQos0MemoryMap();
-
-        assertNotNull(clientQos0MemoryMap.get("client"));
 
         final Gauge<Long> gauge = metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
         assertTrue(gauge.getValue() > 0);
@@ -1148,7 +1080,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertTrue(gauge.getValue() > 0);
 
         int byteLimit = totalPublishBytes / 2;
-        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
 
         final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52, 100), byteLimit, 0);
@@ -1182,10 +1114,10 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
         int byteLimit = totalPublishBytes / 2;
         System.out.println(byteLimit);
-        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
 
-        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52, 100), byteLimit, 0);
         assertEquals(49, allReadPublishes2.size());
 
         assertTrue(gauge.getValue() > 0);
@@ -1224,14 +1156,14 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertTrue(gauge.getValue() > 0);
 
         int byteLimit = totalPublishBytes / 2;
-        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes = persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
 
         for (final PUBLISH pub : allReadPublishes) {
             persistence.remove("client", pub.getPacketIdentifier(), pub.getUniqueId(), 0);
         }
 
-        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes2 = persistence.readNew("client", false, createPacketIds(52, 100), byteLimit, 0);
         assertEquals(48, allReadPublishes2.size());
         assertTrue(gauge.getValue() > 0);
 
@@ -1240,7 +1172,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         }
 
         //last qos0 message
-        final ImmutableList<PUBLISH> allReadPublishes3 = persistence.readNew("client", false, createPacketIds(100,100), byteLimit, 0);
+        final ImmutableList<PUBLISH> allReadPublishes3 = persistence.readNew("client", false, createPacketIds(100, 100), byteLimit, 0);
         assertEquals(1, allReadPublishes3.size());
         assertEquals(0, gauge.getValue().longValue());
 

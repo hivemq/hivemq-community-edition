@@ -832,7 +832,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setSubscriptionIdentifierEnabled(false);
-        channel = new EmbeddedChannel(TestMqttDecoder.create(false, fullConfig));
+        channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved

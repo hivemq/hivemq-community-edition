@@ -43,22 +43,14 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_MA
 public class TestMqttDecoder {
 
     public static MQTTMessageDecoder create() {
-        return create(true);
-    }
-
-    public static MQTTMessageDecoder create(final boolean strict) {
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.securityConfiguration().setValidateUTF8(true);
         fullConfig.mqttConfiguration().setMaxSessionExpiryInterval(SESSION_EXPIRY_MAX);
         fullConfig.mqttConfiguration().setMaxMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_MAX);
-        return create(strict, fullConfig);
+        return create(fullConfig);
     }
 
-    public static MQTTMessageDecoder create(final FullConfigurationService fullMqttConfigurationService) {
-        return create(true, fullMqttConfigurationService);
-    }
-
-    public static MQTTMessageDecoder create(final boolean strict, final FullConfigurationService fullConfigurationService) {
+    public static MQTTMessageDecoder create(final FullConfigurationService fullConfigurationService) {
 
         final EventLog eventLog = new EventLog();
         final HivemqId hiveMQId = new HivemqId();
@@ -73,7 +65,6 @@ public class TestMqttDecoder {
 
         return new MQTTMessageDecoder(
                 mqttConnectDecoder,
-                strict,
                 fullConfigurationService.mqttConfiguration(),
                 new MqttDecoders(new Mqtt3ConnackDecoder(eventLog),
                         new Mqtt3PublishDecoder(hiveMQId, disconnector, fullConfigurationService),
