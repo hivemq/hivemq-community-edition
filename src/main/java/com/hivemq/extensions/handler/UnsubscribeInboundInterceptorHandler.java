@@ -187,7 +187,7 @@ public class UnsubscribeInboundInterceptorHandler {
                 prevent(output);
             } else {
                 final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.from(inputHolder.get().getUnsubscribePacket());
-                ctx.channel().writeAndFlush(unsubscribe);
+                ctx.fireChannelRead(unsubscribe);
             }
         }
 
@@ -197,7 +197,7 @@ public class UnsubscribeInboundInterceptorHandler {
             for (int i = 0; i < size; i++) {
                 reasonCodesBuilder.add(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
             }
-            ctx.writeAndFlush(new UNSUBACK(
+            ctx.channel().writeAndFlush(new UNSUBACK(
                     output.getUnsubscribePacket().getPacketIdentifier(),
                     reasonCodesBuilder.build(),
                     ReasonStrings.UNSUBACK_EXTENSION_PREVENTED));
