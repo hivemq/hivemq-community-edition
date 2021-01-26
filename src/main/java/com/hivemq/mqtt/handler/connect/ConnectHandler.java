@@ -265,7 +265,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         ctx.channel()
                 .pipeline()
-                .addAfter(MQTT_AUTH_HANDLER, MQTT_PUBLISH_FLOW_HANDLER,
+                .addBefore(MESSAGE_EXPIRY_HANDLER, MQTT_PUBLISH_FLOW_HANDLER,
                         publishFlowHandlerProvider.get());
         if (ProtocolVersion.MQTTv5 == connect.getProtocolVersion()) {
             ctx.channel()

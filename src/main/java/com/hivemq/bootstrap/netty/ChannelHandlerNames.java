@@ -53,7 +53,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER = "mqtt_keepalive_idle_notifier_handler";
     public static final String MQTT_KEEPALIVE_IDLE_HANDLER = "mqtt_keepalive_idle_handler";
 
-    public static final String MQTT_PUBLISH_USER_EVENT_HANDLER = "mqtt_publish_user_event_handler";
     public static final String INCOMING_SUBSCRIBE_HANDLER = "incoming_subscribe_handler";
 
     public static final String HTTP_SERVER_CODEC = "http_server_codec";
@@ -79,8 +78,6 @@ public class ChannelHandlerNames {
 
     public static final String MQTT_MESSAGE_ENCODER = "mqtt_message_encoder";
     public static final String MQTT_WEBSOCKET_ENCODER = "mqtt_websocket_encoder";
-    public static final String DROP_OUTGOING_PUBLISHES_HANDLER = "drop_outgoing_publishes_handler";
-    public static final String CHANNEL_INACTIVE_HANDLER = "channel_inactive_handler";
     public static final String MESSAGE_EXPIRY_HANDLER = "message_expiry_handler";
 
     /* *************
