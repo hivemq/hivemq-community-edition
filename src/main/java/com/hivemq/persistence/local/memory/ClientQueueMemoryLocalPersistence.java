@@ -44,8 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -76,9 +74,6 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         long qos0Memory = 0;
     }
 
-    //must be concurrent
-    private final @NotNull Map<String, AtomicInteger> clientQos0MemoryMap;
-
     private final int qos0ClientMemoryLimit;
     private final long qos0MemoryLimit;
     private final int retainedMessageMax;
@@ -100,8 +95,6 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         this.payloadPersistence = payloadPersistence;
         this.qos0MemoryLimit = getQos0MemoryLimit();
 
-        //must be concurrent as it is not protected by bucket access
-        this.clientQos0MemoryMap = new ConcurrentHashMap<>();
         this.totalMemorySize = new AtomicLong();
         this.qos0MessagesMemory = new AtomicLong();
 
@@ -692,17 +685,12 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         }
     }
 
-    public @NotNull Map<String, AtomicInteger> getClientQos0MemoryMap() {
-        return clientQos0MemoryMap;
-    }
-
     @Override
     @ExecuteInSingleWriter
     public void closeDB(final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         buckets[bucketIndex].clear();
         sharedBuckets[bucketIndex].clear();
-        clientQos0MemoryMap.clear();
         totalMemorySize.set(0L);
         qos0MessagesMemory.set(0L);
     }
