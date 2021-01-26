@@ -116,8 +116,4 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
         return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
     }
 
-    @FunctionalInterface
-    private interface BucketAccessCallback {
-        void call();
-    }
 }
