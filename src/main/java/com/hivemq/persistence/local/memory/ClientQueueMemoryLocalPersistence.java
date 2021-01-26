@@ -52,6 +52,7 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
  * @author Florian Limpöck
+ * @author Silvio Giebl
  */
 @LazySingleton
 public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersistence {
@@ -60,22 +61,21 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
     private static final int NO_PACKET_ID = 0;
 
-    private final @NotNull MessageDroppedService messageDroppedService;
-
-    private final @NotNull PublishPayloadPersistence payloadPersistence;
-
-    final private @NotNull Map<String, Messages> @NotNull [] buckets;
-    final private @NotNull Map<String, Messages> @NotNull [] sharedBuckets;
+    private final @NotNull Map<String, Messages> @NotNull [] buckets;
+    private final  @NotNull Map<String, Messages> @NotNull [] sharedBuckets;
 
     private static class Messages {
         final @NotNull LinkedList<MessageWithID> qos1Or2Messages = new LinkedList<>();
         final @NotNull LinkedList<PublishWithRetained> qos0Messages = new LinkedList<>();
-        int retainedQos1Or2QueueSize = 0;
+        int retainedQos1Or2Messages = 0;
         long qos0Memory = 0;
     }
 
-    private final int qos0ClientMemoryLimit;
+    private final @NotNull PublishPayloadPersistence payloadPersistence;
+    private final @NotNull MessageDroppedService messageDroppedService;
+
     private final long qos0MemoryLimit;
+    private final int qos0ClientMemoryLimit;
     private final int retainedMessageMax;
 
     private final @NotNull AtomicLong qos0MessagesMemory;
@@ -87,26 +87,25 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull MetricRegistry metricRegistry) {
 
-        retainedMessageMax = InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.get();
-        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.get();
-
         final int bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
-        this.messageDroppedService = messageDroppedService;
-        this.payloadPersistence = payloadPersistence;
-        this.qos0MemoryLimit = getQos0MemoryLimit();
-
-        this.totalMemorySize = new AtomicLong();
-        this.qos0MessagesMemory = new AtomicLong();
-
         //noinspection unchecked
-        this.buckets = new HashMap[bucketCount];
+        buckets = new HashMap[bucketCount];
         //noinspection unchecked
-        this.sharedBuckets = new HashMap[bucketCount];
-
+        sharedBuckets = new HashMap[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new HashMap<>();
             sharedBuckets[i] = new HashMap<>();
         }
+
+        this.payloadPersistence = payloadPersistence;
+        this.messageDroppedService = messageDroppedService;
+
+        qos0MemoryLimit = getQos0MemoryLimit();
+        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.get();
+        retainedMessageMax = InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.get();
+
+        qos0MessagesMemory = new AtomicLong();
+        totalMemorySize = new AtomicLong();
 
         metricRegistry.register(
                 HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
@@ -179,7 +178,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             if (publish.getQoS() == QoS.AT_MOST_ONCE) {
                 addQos0Publish(queueId, shared, messages, publishWithRetained);
             } else {
-                final int qos1And2QueueSize = messages.qos1Or2Messages.size() - messages.retainedQos1Or2QueueSize;
+                final int qos1And2QueueSize = messages.qos1Or2Messages.size() - messages.retainedQos1Or2Messages;
                 if ((qos1And2QueueSize >= max) && !retained) {
                     if (strategy == QueuedMessagesStrategy.DISCARD) {
                         logAndDecrementPayloadReference(publish, shared, queueId);
@@ -192,7 +191,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                             continue;
                         }
                     }
-                } else if ((messages.retainedQos1Or2QueueSize >= retainedMessageMax) && retained) {
+                } else if ((messages.retainedQos1Or2Messages >= retainedMessageMax) && retained) {
                     if (strategy == QueuedMessagesStrategy.DISCARD) {
                         logAndDecrementPayloadReference(publish, shared, queueId);
                         continue;
@@ -206,7 +205,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     }
                 } else {
                     if (retained) {
-                        messages.retainedQos1Or2QueueSize++;
+                        messages.retainedQos1Or2Messages++;
                     }
                 }
 
@@ -299,7 +298,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 iterator.remove();
                 payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 if (publishWithRetained.retained) {
-                    messages.retainedQos1Or2QueueSize--;
+                    messages.retainedQos1Or2Messages--;
                 }
                 increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
                 //do not return here, because we could have a QoS 0 message left
@@ -508,7 +507,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     removedId = publish.getUniqueId();
                 }
                 if (isRetained(messageWithID)) {
-                    messages.retainedQos1Or2QueueSize--;
+                    messages.retainedQos1Or2Messages--;
                 }
                 increaseMessagesMemory(-getMessageSize(messageWithID));
                 iterator.remove();
@@ -647,7 +646,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 }
                 payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 if (publish.retained) {
-                    messages.retainedQos1Or2QueueSize--;
+                    messages.retainedQos1Or2Messages--;
                 }
                 increaseMessagesMemory(-publish.getEstimatedSize());
                 iterator.remove();
@@ -832,7 +831,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     continue;
                 }
                 if (pubrel.retained) {
-                    messages.retainedQos1Or2QueueSize--;
+                    messages.retainedQos1Or2Messages--;
                 }
                 increaseMessagesMemory(-pubrel.getEstimatedSize());
                 qos12iterator.remove();
@@ -845,7 +844,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (drop) {
                     payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     if (publish.retained) {
-                        messages.retainedQos1Or2QueueSize--;
+                        messages.retainedQos1Or2Messages--;
                     }
                     increaseMessagesMemory(-publish.getEstimatedSize());
                     qos12iterator.remove();
