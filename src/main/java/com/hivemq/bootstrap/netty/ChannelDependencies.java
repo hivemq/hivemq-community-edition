@@ -26,8 +26,7 @@ import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
-import com.hivemq.mqtt.handler.InboundInterceptorHandler;
-import com.hivemq.mqtt.handler.OutboundInterceptorHandler;
+import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
@@ -91,8 +90,7 @@ public class ChannelDependencies {
     private final @NotNull Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
     private final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-    private final @NotNull InboundInterceptorHandler inboundInterceptorHandler;
-    private final @NotNull OutboundInterceptorHandler outboundInterceptorHandler;
+    private final @NotNull InterceptorHandler interceptorHandler;
 
 
     @Inject
@@ -130,8 +128,7 @@ public class ChannelDependencies {
             final @NotNull Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
-            final @NotNull InboundInterceptorHandler inboundInterceptorHandler,
-            final @NotNull OutboundInterceptorHandler outboundInterceptorHandler) {
+            final @NotNull InterceptorHandler interceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.noConnectIdleHandler = noConnectIdleHandler;
@@ -166,8 +163,7 @@ public class ChannelDependencies {
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
         this.mqttServerDisconnector = mqttServerDisconnector;
-        this.inboundInterceptorHandler = inboundInterceptorHandler;
-        this.outboundInterceptorHandler = outboundInterceptorHandler;
+        this.interceptorHandler = interceptorHandler;
     }
 
     @NotNull
@@ -335,14 +331,8 @@ public class ChannelDependencies {
         return mqttServerDisconnector;
     }
 
-
     @NotNull
-    public OutboundInterceptorHandler getOutboundInterceptorHandler() {
-        return outboundInterceptorHandler;
-    }
-
-    @NotNull
-    public InboundInterceptorHandler getInboundInterceptorHandler() {
-        return inboundInterceptorHandler;
+    public InterceptorHandler getInterceptorHandler() {
+        return interceptorHandler;
     }
 }

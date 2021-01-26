@@ -187,7 +187,7 @@ public class UnsubscribeInboundInterceptorHandler {
                 prevent(output);
             } else {
                 final UNSUBSCRIBE unsubscribe = UNSUBSCRIBE.from(inputHolder.get().getUnsubscribePacket());
-                ctx.fireChannelRead(unsubscribe);
+                ctx.channel().writeAndFlush(unsubscribe);
             }
         }
 

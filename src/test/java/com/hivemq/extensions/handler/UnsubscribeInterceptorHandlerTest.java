@@ -62,7 +62,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class UnsubscribeInboundInterceptorHandlerTest {
+public class UnsubscribeInterceptorHandlerTest {
 
     public static AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule

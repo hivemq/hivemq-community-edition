@@ -69,7 +69,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Robin Atherton
  */
-public class DisconnectInboundInterceptorHandlerTest {
+public class DisconnectInterceptorHandlerTest {
 
     public static AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule
