@@ -62,7 +62,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     private static final int NO_PACKET_ID = 0;
 
     private final @NotNull Map<String, Messages> @NotNull [] buckets;
-    private final  @NotNull Map<String, Messages> @NotNull [] sharedBuckets;
+    private final @NotNull Map<String, Messages> @NotNull [] sharedBuckets;
 
     private static class Messages {
         final @NotNull LinkedList<MessageWithID> qos1Or2Messages = new LinkedList<>();
@@ -598,6 +598,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             // increaseClientQos0MessagesMemory not necessary as messages.qos0Memory = 0 below
             increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
         }
+        messages.qos0Messages.clear();
         messages.qos0Memory = 0;
     }
 
@@ -749,8 +750,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
     /**
      * @param size the amount of bytes the currently used qos 0 memory will be increased by. May be negative.
      */
-    @VisibleForTesting
-    void increaseClientQos0MessagesMemory(final @NotNull Messages messages, final int size) {
+    private void increaseClientQos0MessagesMemory(final @NotNull Messages messages, final int size) {
         if (size < 0) {
             messages.qos0Memory += size - ObjectMemoryEstimation.linkedListNodeOverhead();
         } else {
@@ -800,7 +800,6 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         logMessageDropped(publish, shared, queueId);
         payloadPersistence.decrementReferenceCounter(publish.getPublishId());
     }
-
 
     private void cleanExpiredMessages(final @NotNull Messages messages) {
 
