@@ -246,6 +246,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
             pubrels[i] = new PUBREL(i + 1);
         }
         for (final PUBREL pubrel : pubrels) {
+            persistence.add("client1", false, createPublish(pubrel.getPacketIdentifier(), QoS.EXACTLY_ONCE, "topic"), 100L, DISCARD, false, 0);
             persistence.replace("client1", pubrel, 0);
         }
 
@@ -260,6 +261,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
             pubrels[i] = new PUBREL(i + 1);
         }
         for (final PUBREL pubrel : pubrels) {
+            persistence.add("client1", false, createPublish(pubrel.getPacketIdentifier(), QoS.EXACTLY_ONCE, "topic"), 100L, DISCARD, false, 0);
             persistence.replace("client1", pubrel, 0);
         }
         final PUBLISH[] publishes = new PUBLISH[4];
