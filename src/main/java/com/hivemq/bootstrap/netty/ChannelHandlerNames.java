@@ -116,7 +116,7 @@ public class ChannelHandlerNames {
 
     public static final String EXCEPTION_HANDLER = "exception_handler";
     public static final String CONNECTION_LIMITER = "connection_limiter";
-    public static final String INTERCEPTORS = "interceptors";
+    public static final String INTERCEPTOR_HANDLER = "interceptor_handler";
 
 
 }
