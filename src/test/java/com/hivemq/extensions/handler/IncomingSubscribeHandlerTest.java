@@ -34,6 +34,7 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
+import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -86,6 +87,7 @@ public class IncomingSubscribeHandlerTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private SubscribeHandler subscribeHandler;
     private IncomingSubscribeHandler incomingSubscribeHandler;
     private PluginTaskExecutorService pluginTaskExecutorService;
 
@@ -127,6 +129,8 @@ public class IncomingSubscribeHandlerTest {
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
         incomingSubscribeHandler = new IncomingSubscribeHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions, pluginAuthorizerService, configurationService);
 
+        subscribeHandler = new SubscribeHandler(incomingSubscribeHandler);
+
         createChannel();
     }
 
@@ -139,8 +143,8 @@ public class IncomingSubscribeHandlerTest {
     private void createChannel() {
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
-        channel.pipeline().addFirst(incomingSubscribeHandler);
-        channelHandlerContext = channel.pipeline().context(IncomingSubscribeHandler.class);
+        channel.pipeline().addFirst(subscribeHandler);
+        channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
     }
 
     @Test(timeout = 5000, expected = ClosedChannelException.class)

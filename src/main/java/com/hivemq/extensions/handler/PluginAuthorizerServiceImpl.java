@@ -35,9 +35,11 @@ import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
+import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.ChannelAttributes;
@@ -66,6 +68,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull ExtensionPriorityComparator extensionPriorityComparator;
     private final @NotNull IncomingPublishService incomingPublishService;
+    private final @NotNull IncomingSubscribeService incomingSubscribeService;
 
     private final boolean allowDollarTopics;
 
@@ -77,7 +80,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull ServerInformation serverInformation,
             final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
-            final @NotNull IncomingPublishService incomingPublishService) {
+            final @NotNull IncomingPublishService incomingPublishService,
+            final @NotNull IncomingSubscribeService incomingSubscribeService) {
 
         this.authorizers = authorizers;
         this.asyncer = asyncer;
@@ -86,6 +90,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.incomingPublishService = incomingPublishService;
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
+        this.incomingSubscribeService = incomingSubscribeService;
         this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
     }
 
@@ -107,21 +112,20 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
 
-        final Runnable defaultProcessTask = () -> incomingPublishService.processPublish(ctx, msg, null);
         if (clientId == null) {
             //we must process the msg in every case !
-            ctx.executor().execute(defaultProcessTask);
+            incomingPublishService.processPublish(ctx, msg, null);
             return;
         }
 
         if (!authorizers.areAuthorizersAvailable()) {
-            ctx.executor().execute(defaultProcessTask);
+            incomingPublishService.processPublish(ctx, msg, null);
             return;
         }
 
         final Map<String, AuthorizerProvider> providerMap = authorizers.getAuthorizerProviderMap();
         if (providerMap.isEmpty()) {
-            ctx.executor().execute(defaultProcessTask);
+            incomingPublishService.processPublish(ctx, msg, null);
             return;
         }
 
@@ -216,13 +220,13 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         }
 
         if (!authorizers.areAuthorizersAvailable()) {
-            ctx.fireChannelRead(msg);
+            incomingSubscribeService.processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], false);
             return;
         }
 
         final Map<String, AuthorizerProvider> providerMap = authorizers.getAuthorizerProviderMap();
         if (providerMap.isEmpty()) {
-            ctx.fireChannelRead(msg);
+            incomingSubscribeService.processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], false);
             return;
         }
 
@@ -255,10 +259,9 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             }
         }
 
+        final AllTopicsProcessedTask allTopicsProcessedTask = new AllTopicsProcessedTask(msg, listenableFutures, ctx, mqttServerDisconnector, incomingSubscribeService);
         Futures.whenAllComplete(listenableFutures)
-                .run(
-                        new AllTopicsProcessedTask(msg, listenableFutures, ctx, mqttServerDisconnector),
-                        MoreExecutors.directExecutor());
+                .run(allTopicsProcessedTask, MoreExecutors.directExecutor());
     }
 
     @NotNull

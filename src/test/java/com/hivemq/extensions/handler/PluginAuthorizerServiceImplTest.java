@@ -16,7 +16,6 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -36,6 +35,7 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
+import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -85,9 +85,9 @@ public class PluginAuthorizerServiceImplTest {
     @Mock
     private Authorizers authorizers;
     @Mock
-    private SubscribeHandler subscribeHandler;
+    private IncomingSubscribeService incomingSubscribeService;
     @Mock
-    private IncomingSubscribeHandler incomingSubscribeHandler;
+    private SubscribeHandler incomingSubscribeHandler;
     @Mock
     private ServerInformation serverInformation;
     @Mock
@@ -136,13 +136,13 @@ public class PluginAuthorizerServiceImplTest {
                 serverInformation,
                 hiveMQExtensions,
                 mqttServerDisconnector,
-                incomingPublishService);
+                incomingPublishService,
+                incomingSubscribeService);
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
-        channel.pipeline().addLast(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER, subscribeHandler);
-        channel.pipeline().addLast(ChannelHandlerNames.INCOMING_SUBSCRIBE_HANDLER, incomingSubscribeHandler);
-        channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
+//        channel.pipeline().addLast(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER, incomingSubscribeService);
+        channelHandlerContext = channel.pipeline().context(CollectUserEventsHandler.class);
     }
 
     @Test(timeout = 2000)
@@ -227,7 +227,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
-        verify(channelHandlerContext).fireChannelRead(fullMqtt5Subscribe);
+        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), any(), any(), anyBoolean());
     }
 
     @Test(timeout = 2000)
@@ -275,7 +275,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
-        verify(channelHandlerContext).fireChannelRead(fullMqtt5Subscribe);
+        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), any(), any(), anyBoolean());
     }
 
     @Test(timeout = 2000)
@@ -290,19 +290,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        doAnswer(invocation -> {
-            latch.countDown();
-            return null;
-        }).when(incomingPublishService).processPublish(channelHandlerContext, publish, null);
-
-        while (latch.getCount() != 0) {
-            channel.runPendingTasks();
-            channel.runScheduledPendingTasks();
-        }
-
-        assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
+        verify(incomingPublishService).processPublish(channelHandlerContext, publish, null);
 
     }
 
@@ -560,7 +548,7 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private void clearHandlers() {
-        channel.pipeline().remove(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER);
+//        channel.pipeline().remove(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER);
     }
 
     @NotNull

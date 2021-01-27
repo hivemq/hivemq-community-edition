@@ -53,8 +53,6 @@ public class ChannelHandlerNames {
     public static final String MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER = "mqtt_keepalive_idle_notifier_handler";
     public static final String MQTT_KEEPALIVE_IDLE_HANDLER = "mqtt_keepalive_idle_handler";
 
-    public static final String INCOMING_SUBSCRIBE_HANDLER = "incoming_subscribe_handler";
-
     public static final String HTTP_SERVER_CODEC = "http_server_codec";
     public static final String HTTP_OBJECT_AGGREGATOR = "http_object_aggregator";
     public static final String WEBSOCKET_SERVER_PROTOCOL_HANDLER = "websocket_server_protocol_handler";

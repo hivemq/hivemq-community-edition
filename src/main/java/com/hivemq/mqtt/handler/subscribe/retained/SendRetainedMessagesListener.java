@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
@@ -42,7 +43,7 @@ import static com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling.SEND_IF_SUBSCRIP
 
 /**
  * A {@link io.netty.channel.ChannelFutureListener} which sends out all retained messages for the client. This listener
- * is probably most useful for the {@link com.hivemq.mqtt.handler.subscribe.SubscribeHandler}
+ * is probably most useful for the {@link IncomingSubscribeService}
  *
  * @author Dominik Obermaier
  * @author Christoph Schäbel

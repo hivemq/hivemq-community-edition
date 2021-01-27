@@ -1531,6 +1531,9 @@ public class ConnectHandlerTest {
         if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_AUTH_HANDLER)) {
             embeddedChannel.pipeline().remove(ChannelHandlerNames.MQTT_AUTH_HANDLER);
         }
+        if (embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MESSAGE_EXPIRY_HANDLER)) {
+            embeddedChannel.pipeline().remove(ChannelHandlerNames.MESSAGE_EXPIRY_HANDLER);
+        }
 
         configurationService.mqttConfiguration().setServerReceiveMaximum(10);
 
@@ -1568,6 +1571,9 @@ public class ConnectHandlerTest {
                         new DummyHandler());
         embeddedChannel.pipeline().addBefore(ChannelHandlerNames.MQTT_MESSAGE_BARRIER,
                 ChannelHandlerNames.MQTT_AUTH_HANDLER,
+                new DummyHandler());
+        embeddedChannel.pipeline().addBefore(ChannelHandlerNames.MQTT_MESSAGE_BARRIER,
+                ChannelHandlerNames.MESSAGE_EXPIRY_HANDLER,
                 new DummyHandler());
 
         doAnswer(invocation -> {

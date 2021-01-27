@@ -219,7 +219,7 @@ public class IncomingPublishHandler {
                 dropMessage(output);
             } else {
                 final PUBLISH finalPublish = PUBLISHFactory.merge(inputHolder.get().getPublishPacket(), publish);
-                ctx.executor().execute(() -> authorizerService.authorizePublish(ctx, finalPublish));
+                authorizerService.authorizePublish(ctx, finalPublish);
             }
         }
 

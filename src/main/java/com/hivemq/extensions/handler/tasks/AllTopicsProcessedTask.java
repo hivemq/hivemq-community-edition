@@ -17,11 +17,10 @@ package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
-import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
+import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -42,17 +41,20 @@ public class AllTopicsProcessedTask implements Runnable {
     private final @NotNull List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures;
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+    private final @NotNull IncomingSubscribeService incomingSubscribeService;
 
     public AllTopicsProcessedTask(
             final @NotNull SUBSCRIBE msg,
             final @NotNull List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures,
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull IncomingSubscribeService incomingSubscribeService) {
 
         this.msg = msg;
         this.listenableFutures = listenableFutures;
         this.ctx = ctx;
         this.mqttServerDisconnector = mqttServerDisconnector;
+        this.incomingSubscribeService = incomingSubscribeService;
     }
 
     @Override
@@ -102,10 +104,9 @@ public class AllTopicsProcessedTask implements Runnable {
                 }
             }
 
-            final SubscribeHandler handler = (SubscribeHandler) ctx.pipeline().get(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER);
             final boolean finalAuthorizersPresent = authorizersPresent;
-            if (handler != null && ctx.channel().isActive()) {
-                ctx.executor().execute(() -> handler.processSubscribe(ctx, msg, answerCodes, reasonStrings, finalAuthorizersPresent));
+            if (ctx.channel().isActive()) {
+                ctx.executor().execute(() -> incomingSubscribeService.processSubscribe(ctx, msg, answerCodes, reasonStrings, finalAuthorizersPresent));
             }
 
         } catch (final Exception e) {
