@@ -40,9 +40,9 @@ public interface PublishPayloadPersistence {
      * @param payload        The payload that will be persisted.
      * @param referenceCount The initial amount of references for the payload.
      * @param payloadId      The publish ID is used a the payload ID
-     * @return The id associated with the payload.
+     * @return true: payload may be removed from the publish, false: dont remove the payload
      */
-    void add(@NotNull byte[] payload, long referenceCount, long payloadId);
+    boolean add(@NotNull byte[] payload, long referenceCount, long payloadId);
 
     /**
      * Get the persisted payload for an id.

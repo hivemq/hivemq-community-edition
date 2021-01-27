@@ -47,7 +47,8 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
      * {@inheritDoc}
      */
     @Override
-    public void add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
+    public boolean add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
+        return false;
     }
 
     /**

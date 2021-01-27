@@ -103,7 +103,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      * {@inheritDoc}
      */
     @Override
-    public void add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
+    public boolean add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
         checkNotNull(payload, "Payload must not be null");
         accessBucket(payloadId, () -> {
             final AtomicLong counter = referenceCounter.get(payloadId);
@@ -119,6 +119,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                 localPersistence.put(payloadId, payload);
             }
         });
+        return true;
     }
 
     /**
