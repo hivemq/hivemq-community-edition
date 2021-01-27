@@ -71,7 +71,7 @@ public class EmbeddedHiveMQImplTest {
         TestExtensionUtil.shrinkwrapExtension(extensions, extensionName, Main.class, true);
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void embeddedHiveMQ_readsConfig() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -87,7 +87,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void embeddedHiveMQ_usesDataFolder() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -97,7 +97,7 @@ public class EmbeddedHiveMQImplTest {
         assertEquals(1, files.length);
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void embeddedHiveMQ_usesExtensionsFolder() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -111,7 +111,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void start_multipleStartsAreIdempotent() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         final CountDownLatch blockingLatch = new CountDownLatch(1);
@@ -129,7 +129,7 @@ public class EmbeddedHiveMQImplTest {
         embeddedHiveMQ.stop().join();
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void stop_multipleStopsAreIdempotent() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -148,7 +148,7 @@ public class EmbeddedHiveMQImplTest {
         future.join();
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void start_startCancelsStop() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
@@ -169,7 +169,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(stop.isCompletedExceptionally());
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void stop_stopCancelsStart() {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -189,7 +189,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(start.isCompletedExceptionally());
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void close_preventsStart() throws ExecutionException, InterruptedException {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -199,7 +199,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(start.isCompletedExceptionally());
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void close_preventsStop() throws ExecutionException, InterruptedException {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
 
@@ -209,7 +209,7 @@ public class EmbeddedHiveMQImplTest {
         assertTrue(stop.isCompletedExceptionally());
     }
 
-    @Test(timeout = 10000L)
+    @Test(timeout = 20000L)
     public void close_calledMultipleTimes() throws InterruptedException {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         final CountDownLatch blockingLatch = new CountDownLatch(1);
@@ -244,7 +244,7 @@ public class EmbeddedHiveMQImplTest {
         assertEquals(2, runnableList.size());
     }
 
-    @Test
+    @Test(timeout = 20000L)
     public void test_hivemq_uses_embedded_extension_with_normal() throws ExecutionException, InterruptedException {
 
         final EmbeddedMain embeddedMain = new EmbeddedMain();
@@ -266,6 +266,7 @@ public class EmbeddedHiveMQImplTest {
         assertNotNull(extension1);
         assertNotNull(extension2);
 
+        embeddedHiveMQ.stop().get();
 
     }
 
