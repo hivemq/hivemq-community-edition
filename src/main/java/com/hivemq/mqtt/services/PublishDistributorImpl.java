@@ -194,7 +194,9 @@ public class PublishDistributorImpl implements PublishDistributor {
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder()
                 .fromPublish(publish)
-                .withPayload(null) // not needed anymore as we just put it in the payload persistence.
+                //in file: not needed the payload anymore as we just put it in the payload persistence.
+                //in-memory: we must set the payload, as the payload persistence is NOOP
+                .withPayload(persistenceInMemory?publish.getPayload():null)
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)
                 .withSubscriptionIdentifiers(identifiers);

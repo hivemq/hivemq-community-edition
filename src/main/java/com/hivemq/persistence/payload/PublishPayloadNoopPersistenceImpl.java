@@ -16,30 +16,15 @@
 package com.hivemq.persistence.payload;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableScheduledFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.message.publish.PUBLISH;
-import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Daniel Krüger
@@ -109,11 +94,6 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
     @VisibleForTesting
     public ImmutableMap<Long, AtomicLong> getReferenceCountersAsMap() {
         throw new UnsupportedOperationException("getAllIds iys not supported for in-memory persistence");
-    }
-
-
-    public static long createId() {
-        return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
     }
 
 }
