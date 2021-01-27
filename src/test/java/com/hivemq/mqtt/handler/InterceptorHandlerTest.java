@@ -76,8 +76,6 @@ public class InterceptorHandlerTest {
     
     private @NotNull InterceptorHandler interceptorHandler;
 
-
-    
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
