@@ -92,20 +92,20 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         if (msg instanceof PUBLISH) {
             //shortcut for publish
             ctx.fireChannelRead(msg);
-        }else if (msg instanceof PUBACK) {
-            pubackInterceptorHandler.handleInboundPuback(ctx, ((PUBACK) msg));
+        } else if (msg instanceof PUBACK) {
+            pubackInterceptorHandler.handleInboundPuback(ctx, (PUBACK) msg);
         } else if (msg instanceof PUBREC) {
-            pubrecInterceptorHandler.handleInboundPubrec(ctx, ((PUBREC) msg));
+            pubrecInterceptorHandler.handleInboundPubrec(ctx, (PUBREC) msg);
         } else if (msg instanceof PUBREL) {
-            pubrelInterceptorHandler.handleInboundPubrel(ctx, ((PUBREL) msg));
+            pubrelInterceptorHandler.handleInboundPubrel(ctx, (PUBREL) msg);
         } else if (msg instanceof PUBCOMP) {
-            pubcompInterceptorHandler.handleInboundPubcomp(ctx, ((PUBCOMP) msg));
+            pubcompInterceptorHandler.handleInboundPubcomp(ctx, (PUBCOMP) msg);
         } else if (msg instanceof PINGREQ) {
-            pingInterceptorHandler.handleInboundPingReq(ctx, ((PINGREQ) msg));
+            pingInterceptorHandler.handleInboundPingReq(ctx, (PINGREQ) msg);
         } else if (msg instanceof UNSUBSCRIBE) {
             unsubscribeInboundInterceptorHandler.handleInboundUnsubscribe(ctx, (UNSUBSCRIBE) msg);
         } else if (msg instanceof DISCONNECT) {
-            disconnectInterceptorHandler.handleInboundDisconnect(ctx, ((DISCONNECT) msg));
+            disconnectInterceptorHandler.handleInboundDisconnect(ctx, (DISCONNECT) msg);
         } else if (msg instanceof CONNECT) {
             connectInboundInterceptorHandler.handleInboundConnect(ctx, (CONNECT) msg);
         } else {
@@ -122,15 +122,15 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         if (msg instanceof PUBLISH) {
             publishOutboundInterceptorHandler.handleOutboundPublish(ctx, (PUBLISH) msg, promise);
         } else if (msg instanceof PUBACK) {
-            pubackInterceptorHandler.handleOutboundPuback(ctx, ((PUBACK) msg), promise);
+            pubackInterceptorHandler.handleOutboundPuback(ctx, (PUBACK) msg, promise);
         } else if (msg instanceof PUBREC) {
-            pubrecInterceptorHandler.handleOutboundPubrec(ctx, ((PUBREC) msg), promise);
+            pubrecInterceptorHandler.handleOutboundPubrec(ctx, (PUBREC) msg, promise);
         } else if (msg instanceof PUBREL) {
             pubrelInterceptorHandler.handleOutboundPubrel(ctx, (PUBREL) msg, promise);
         } else if (msg instanceof PUBCOMP) {
-            pubcompInterceptorHandler.handleOutboundPubcomp(ctx, ((PUBCOMP) msg), promise);
+            pubcompInterceptorHandler.handleOutboundPubcomp(ctx, (PUBCOMP) msg, promise);
         } else if (msg instanceof PINGRESP) {
-            pingInterceptorHandler.handleOutboundPingResp(ctx, ((PINGRESP) msg), promise);
+            pingInterceptorHandler.handleOutboundPingResp(ctx, (PINGRESP) msg, promise);
         } else if (msg instanceof SUBACK) {
             subackOutboundInterceptorHandler.handleOutboundSuback(ctx, (SUBACK) msg, promise);
         } else if (msg instanceof UNSUBACK) {
@@ -138,7 +138,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         } else if (msg instanceof CONNACK) {
             connackOutboundInterceptorHandler.handleOutboundConnack(ctx, (CONNACK) msg, promise);
         } else if (msg instanceof DISCONNECT) {
-            disconnectInterceptorHandler.handleOutboundDisconnect(ctx, ((DISCONNECT) msg), promise);
+            disconnectInterceptorHandler.handleOutboundDisconnect(ctx, (DISCONNECT) msg, promise);
         } else {
             ctx.write(msg, promise);
         }

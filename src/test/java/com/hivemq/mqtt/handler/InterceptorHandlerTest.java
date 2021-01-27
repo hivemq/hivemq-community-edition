@@ -94,11 +94,6 @@ public class InterceptorHandlerTest {
                 disconnectInterceptorHandler);
     }
 
-
-
-
-
-
     @Test
     public void test_read_connect() {
         interceptorHandler.channelRead(channelHandlerContext, mock(CONNECT.class));
@@ -146,7 +141,6 @@ public class InterceptorHandlerTest {
         interceptorHandler.channelRead(channelHandlerContext, mock(DISCONNECT.class));
         verify(disconnectInterceptorHandler, times(1)).handleInboundDisconnect(any(), any());
     }
-
 
     @Test
     public void test_read_without_responsible_interceptor() {
