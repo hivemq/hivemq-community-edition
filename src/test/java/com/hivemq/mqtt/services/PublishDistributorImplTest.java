@@ -84,7 +84,7 @@ public class PublishDistributorImplTest {
         when(fullConfigurationService.persistenceConfigurationService()).thenReturn(persistenceConfigurationService);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceConfigurationService.PersistenceMode.IN_MEMORY);
         publishDistributor = new PublishDistributorImpl(payloadPersistence, clientQueuePersistence, clientSessionPersistence,
-                singleWriterService, mqttConfigurationService,fullConfigurationService );
+                singleWriterService, mqttConfigurationService);
     }
 
     @Test(timeout = 5000)

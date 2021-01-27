@@ -65,22 +65,18 @@ public class PublishDistributorImpl implements PublishDistributor {
     private final SingleWriterService singleWriterService;
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
-    @NotNull
-    final boolean persistenceInMemory;
 
     @Inject
     public PublishDistributorImpl(@NotNull final PublishPayloadPersistence payloadPersistence,
                                   @NotNull final ClientQueuePersistence clientQueuePersistence,
                                   @NotNull final ClientSessionPersistence clientSessionPersistence,
                                   @NotNull final SingleWriterService singleWriterService,
-                                  @NotNull final MqttConfigurationService mqttConfigurationService,
-                                  @NotNull final FullConfigurationService configurationService) {
+                                  @NotNull final MqttConfigurationService mqttConfigurationService) {
         this.payloadPersistence = payloadPersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.clientSessionPersistence = clientSessionPersistence;
         this.singleWriterService = singleWriterService;
         this.mqttConfigurationService = mqttConfigurationService;
-        this.persistenceInMemory = configurationService.persistenceConfigurationService().getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY;
     }
 
     @NotNull
@@ -184,7 +180,7 @@ public class PublishDistributorImpl implements PublishDistributor {
 
     @NotNull
     private PUBLISH createPublish(@NotNull final PUBLISH publish, final int subscriptionQos, final boolean retainAsPublished, @Nullable final ImmutableIntArray subscriptionIdentifier) {
-        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+        final boolean removePayload = payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
         final ImmutableIntArray identifiers;
         if (subscriptionIdentifier == null) {
             identifiers = ImmutableIntArray.of();
@@ -196,7 +192,7 @@ public class PublishDistributorImpl implements PublishDistributor {
                 .fromPublish(publish)
                 //in file: not needed the payload anymore as we just put it in the payload persistence.
                 //in-memory: we must set the payload, as the payload persistence is NOOP
-                .withPayload(persistenceInMemory?publish.getPayload():null)
+                .withPayload(removePayload?null:publish.getPayload())
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)
                 .withSubscriptionIdentifiers(identifiers);
