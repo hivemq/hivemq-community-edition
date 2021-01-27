@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.ChannelPersistence;
@@ -31,7 +30,6 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
 import com.hivemq.persistence.clientsession.*;
 import com.hivemq.persistence.ioc.provider.local.IncomingMessageFlowPersistenceLocalProvider;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadNoopPersistenceImpl;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
@@ -94,36 +92,11 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bind(ClientQueuePersistence.class).to(ClientQueuePersistenceImpl.class).in(LazySingleton.class);
 
         /* Payload Persistence */
-        if(persistenceConfigurationService.getMode()==PersistenceConfigurationService.PersistenceMode.IN_MEMORY){
-            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class));
-            bind(PublishPayloadNoopPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
-                    PublishPayloadNoopPersistenceImpl.class));
-        }else{
-            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
-            bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
-                    PublishPayloadPersistenceImpl.class));
-        }
+        bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
+        bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
+                PublishPayloadPersistenceImpl.class));
 
         /* Startup */
         bind(PersistenceStartup.class).toInstance(persistenceInjector.getInstance(PersistenceStartup.class));
-
-    }
-
-    private void bindLocalPersistence(
-            final @NotNull Class localPersistenceClass,
-            final @NotNull Class localPersistenceImplClass,
-            final @Nullable Class localPersistenceProviderClass) {
-
-        final Object instance = persistenceInjector.getInstance(localPersistenceImplClass);
-        if (instance != null) {
-            bind(localPersistenceImplClass).toInstance(instance);
-            bind(localPersistenceClass).toInstance(instance);
-        } else {
-            if (localPersistenceProviderClass != null) {
-                bind(localPersistenceClass).toProvider(localPersistenceProviderClass).in(Singleton.class);
-            } else {
-                bind(localPersistenceClass).to(localPersistenceImplClass).in(Singleton.class);
-            }
-        }
     }
 }
