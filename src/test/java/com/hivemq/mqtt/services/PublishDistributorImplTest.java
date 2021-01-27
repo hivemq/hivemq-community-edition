@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -58,31 +59,27 @@ import static org.mockito.Mockito.when;
 public class PublishDistributorImplTest {
 
     @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
+    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
-    private PublishPayloadPersistence payloadPersistence;
+    private @NotNull PublishPayloadPersistence payloadPersistence;
     @Mock
-    private ClientQueuePersistence clientQueuePersistence;
+    private @NotNull ClientQueuePersistence clientQueuePersistence;
     @Mock
-    private ClientSessionPersistence clientSessionPersistence;
+    private @NotNull ClientSessionPersistence clientSessionPersistence;
     @Mock
-    private MqttConfigurationService mqttConfigurationService;
-    @Mock
-    private FullConfigurationService fullConfigurationService;
+    private @NotNull MqttConfigurationService mqttConfigurationService;
 
-    @Mock
-    private PersistenceConfigurationService persistenceConfigurationService;
+    private @NotNull PublishDistributorImpl publishDistributor;
+    private @NotNull SingleWriterService singleWriterService;
 
-    private PublishDistributorImpl publishDistributor;
-    private SingleWriterService singleWriterService;
+    public PublishDistributorImplTest() {
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        when(fullConfigurationService.persistenceConfigurationService()).thenReturn(persistenceConfigurationService);
-        when(persistenceConfigurationService.getMode()).thenReturn(PersistenceConfigurationService.PersistenceMode.IN_MEMORY);
         publishDistributor = new PublishDistributorImpl(payloadPersistence, clientQueuePersistence, clientSessionPersistence,
                 singleWriterService, mqttConfigurationService);
     }
@@ -177,18 +174,13 @@ public class PublishDistributorImplTest {
         verify(clientQueuePersistence).add(eq("name/topic2"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong());
     }
 
-    private PUBLISH createPublish(final QoS qos) {
+    private PUBLISH createPublish(final @NotNull QoS qos) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(0)
                 .withQoS(qos)
                 .withPayload("message".getBytes())
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .build();
-    }
-
-    private void waitForSingleWriter() {
-        while (singleWriterService.getGlobalTaskCount().get() != 0) {
-        }
     }
 
 }
