@@ -38,6 +38,8 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -69,24 +71,19 @@ import static org.mockito.Mockito.when;
  */
 public class DisconnectInboundInterceptorHandlerTest {
 
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Mock
     private HiveMQExtension extension;
-
     @Mock
     private HiveMQExtensions hiveMQExtensions;
-
     @Mock
     private ClientContextImpl clientContext;
-
     @Mock
     private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor;
     private EmbeddedChannel channel;
-    public static AtomicBoolean isTriggered = new AtomicBoolean();
     private DisconnectInterceptorHandler handler;
 
     @Before
@@ -108,7 +105,13 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         handler = new DisconnectInterceptorHandler(
                 configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
-        channel.pipeline().addFirst(handler);
+
+        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                handler.handleInboundDisconnect(ctx, ((DISCONNECT) msg));
+            }
+        });
     }
 
     @After

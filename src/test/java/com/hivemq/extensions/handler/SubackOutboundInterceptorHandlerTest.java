@@ -39,6 +39,9 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -65,24 +68,19 @@ import static org.mockito.MockitoAnnotations.initMocks;
  */
 public class SubackOutboundInterceptorHandlerTest {
 
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Mock
     private HiveMQExtension extension;
-
     @Mock
     private HiveMQExtensions hiveMQExtensions;
-
     @Mock
     private ClientContextImpl clientContext;
-
     @Mock
     private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor;
     private EmbeddedChannel channel;
-    public static AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Before
     public void setup() {
@@ -103,7 +101,12 @@ public class SubackOutboundInterceptorHandlerTest {
 
         final SubackOutboundInterceptorHandler handler = new SubackOutboundInterceptorHandler(
                 configurationService, asyncer, hiveMQExtensions, pluginTaskExecutorService);
-        channel.pipeline().addFirst(handler);
+        channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                handler.handleOutboundSuback(ctx, ((SUBACK) msg), promise);
+            }
+        });
     }
 
     @After

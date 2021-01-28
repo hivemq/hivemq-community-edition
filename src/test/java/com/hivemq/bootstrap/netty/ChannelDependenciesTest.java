@@ -24,6 +24,7 @@ import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
+import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
@@ -154,46 +155,13 @@ public class ChannelDependenciesTest {
     private IncomingSubscribeHandler incomingSubscribeHandler;
 
     @Mock
-    private PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
-
-    @Mock
-    private ConnectInboundInterceptorHandler connectInterceptorHandler;
-
-    @Mock
-    private ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-
-    @Mock
-    private DisconnectInterceptorHandler disconnectInterceptorHandler;
-
-    @Mock
-    private PubackInterceptorHandler pubackInterceptorHandler;
-
-    @Mock
-    private PubrecInterceptorHandler pubrecInterceptorHandler;
-
-    @Mock
-    private PubrelInterceptorHandler pubrelInterceptorHandler;
-
-    @Mock
-    private PubcompInterceptorHandler pubcompInterceptorHandler;
-
-    @Mock
-    private SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
-
-    @Mock
-    private UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
-
-    @Mock
-    private UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
-
-    @Mock
-    private PingInterceptorHandler pingInterceptorHandler;
-
-    @Mock
     private ConnectionLimiterHandler connectionLimiterHandler;
 
     @Mock
     private MqttServerDisconnector mqttServerDisconnector;
+
+    @Mock
+    private InterceptorHandler interceptorHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -233,21 +201,8 @@ public class ChannelDependenciesTest {
                 () -> incomingPublishHandler,
                 () -> incomingSubscribeHandler,
                 () -> messageExpiryHandler,
-                publishOutboundInterceptorHandler,
-                connectInterceptorHandler,
-                connackOutboundInterceptorHandler,
-                disconnectInterceptorHandler,
-                pubackInterceptorHandler,
-                pubrecInterceptorHandler,
-                pubrelInterceptorHandler,
-                pubcompInterceptorHandler,
-                subAckOutboundInterceptorHandler,
-                unsubackOutboundInterceptorHandler,
-                unsubscribeInboundInterceptorHandler,
-                pingInterceptorHandler,
-                mqttServerDisconnector
-
-        );
+                mqttServerDisconnector,
+                interceptorHandler);
 
     }
 
@@ -285,17 +240,6 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getClientLifecycleEventHandler());
         assertNotNull(channelDependencies.getIncomingPublishHandler());
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
-        assertNotNull(channelDependencies.getConnectInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getConnackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getDisconnectInterceptorHandler());
-        assertNotNull(channelDependencies.getPubackInterceptorHandler());
-        assertNotNull(channelDependencies.getPubrecInterceptorHandler());
-        assertNotNull(channelDependencies.getPubrelInterceptorHandler());
-        assertNotNull(channelDependencies.getPubcompInterceptorHandler());
-        assertNotNull(channelDependencies.getSubackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getUnsubackOutboundInterceptorHandler());
-        assertNotNull(channelDependencies.getUnsubscribeInboundInterceptorHandler());
-        assertNotNull(channelDependencies.getPingInterceptorHandler());
         assertNotNull(channelDependencies.getConnectionLimiterHandler());
         assertNotNull(channelDependencies.getMqttServerDisconnector());
     }

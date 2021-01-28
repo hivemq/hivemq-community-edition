@@ -52,8 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Silvio Giebl
  */
 @Singleton
-@ChannelHandler.Sharable
-public class PubrelInterceptorHandler extends ChannelDuplexHandler {
+public class PubrelInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubrelInterceptorHandler.class);
 
@@ -75,29 +74,9 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         this.executorService = executorService;
     }
 
-    @Override
-    public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
-        if (!(msg instanceof PUBREL)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-        handleInboundPubrel(ctx, (PUBREL) msg);
-    }
 
-    @Override
-    public void write(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Object msg,
-            final @NotNull ChannelPromise promise) {
 
-        if (!(msg instanceof PUBREL)) {
-            ctx.write(msg, promise);
-            return;
-        }
-        handleOutboundPubrel(ctx, (PUBREL) msg, promise);
-    }
-
-    private void handleInboundPubrel(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREL pubrel) {
+    public void handleInboundPubrel(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREL pubrel) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {
@@ -143,7 +122,7 @@ public class PubrelInterceptorHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void handleOutboundPubrel(
+    public void handleOutboundPubrel(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBREL pubrel,
             final @NotNull ChannelPromise promise) {

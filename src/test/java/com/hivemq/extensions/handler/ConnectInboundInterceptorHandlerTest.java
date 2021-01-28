@@ -43,6 +43,8 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -75,37 +77,25 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class ConnectInboundInterceptorHandlerTest {
 
+    private final HivemqId hivemqId = new HivemqId();
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Mock
     private HiveMQExtensions hiveMQExtensions;
-
     @Mock
     private HiveMQExtension plugin;
-
     @Mock
     private Interceptors interceptors;
-
     @Mock
     private ServerInformation serverInformation;
-
     @Mock
     private MqttConnacker connacker;
-
     private PluginOutPutAsyncer asyncer;
-
     private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor1;
-
     private EmbeddedChannel channel;
-
     private PluginTaskExecutorService pluginTaskExecutorService;
-
     private ConnectInboundInterceptorHandler handler;
-
-    private final HivemqId hivemqId = new HivemqId();
 
     @Before
     public void setUp() throws Exception {
@@ -125,7 +115,13 @@ public class ConnectInboundInterceptorHandlerTest {
         handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService,
                 hivemqId, interceptors, serverInformation, connacker);
-        channel.pipeline().addFirst(handler);
+
+        channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                handler.handleInboundConnect(ctx, ((CONNECT) msg));
+            }
+        });
     }
 
     @Test(timeout = 5000)

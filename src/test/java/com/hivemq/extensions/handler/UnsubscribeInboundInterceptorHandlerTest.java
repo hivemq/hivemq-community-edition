@@ -37,6 +37,8 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -62,25 +64,19 @@ import static org.mockito.Mockito.when;
 
 public class UnsubscribeInboundInterceptorHandlerTest {
 
+    public static AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Mock
     private HiveMQExtension extension;
-
     @Mock
     private HiveMQExtensions extensions;
-
     @Mock
     private ClientContextImpl clientContext;
-
     @Mock
     private FullConfigurationService configurationService;
-
     private PluginTaskExecutor executor;
     private EmbeddedChannel channel;
-
-    public static AtomicBoolean isTriggered = new AtomicBoolean();
     private UnsubscribeInboundInterceptorHandler handler;
 
     @Before
@@ -104,7 +100,12 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         handler =
                 new UnsubscribeInboundInterceptorHandler(configurationService, asyncer, extensions,
                         pluginTaskExecutorService);
-        channel.pipeline().addFirst(handler);
+        channel.pipeline().addLast("test", new ChannelInboundHandlerAdapter() {
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                handler.handleInboundUnsubscribe(ctx, ((UNSUBSCRIBE) msg));
+            }
+        });
     }
 
     @After

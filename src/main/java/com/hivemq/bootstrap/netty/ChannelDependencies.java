@@ -26,6 +26,7 @@ import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.MetricsInitializer;
+import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
@@ -88,19 +89,9 @@ public class ChannelDependencies {
     private final @NotNull Provider<IncomingPublishHandler> incomingPublishHandlerProvider;
     private final @NotNull Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider;
     private final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider;
-    private final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
-    private final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
-    private final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-    private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
-    private final @NotNull PubackInterceptorHandler pubackInterceptorHandler;
-    private final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler;
-    private final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler;
-    private final @NotNull PubcompInterceptorHandler pubcompInterceptorhandler;
-    private final @NotNull SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler;
-    private final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
-    private final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
-    private final @NotNull PingInterceptorHandler pingInterceptorHandler;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
+    private final @NotNull InterceptorHandler interceptorHandler;
+
 
     @Inject
     public ChannelDependencies(
@@ -136,19 +127,8 @@ public class ChannelDependencies {
             final @NotNull Provider<IncomingPublishHandler> incomingPublishHandlerProvider,
             final @NotNull Provider<IncomingSubscribeHandler> incomingSubscribeHandlerProvider,
             final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider,
-            final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
-            final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
-            final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
-            final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler,
-            final @NotNull PubackInterceptorHandler pubackInterceptorHandler,
-            final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler,
-            final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler,
-            final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler,
-            final @NotNull SubackOutboundInterceptorHandler subAckOutboundInterceptorHandler,
-            final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler,
-            final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler,
-            final @NotNull PingInterceptorHandler pingInterceptorHandler,
-            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull InterceptorHandler interceptorHandler) {
 
         this.statisticsInitializer = statisticsInitializer;
         this.noConnectIdleHandler = noConnectIdleHandler;
@@ -182,19 +162,8 @@ public class ChannelDependencies {
         this.incomingPublishHandlerProvider = incomingPublishHandlerProvider;
         this.incomingSubscribeHandlerProvider = incomingSubscribeHandlerProvider;
         this.publishMessageExpiryHandlerProvider = publishMessageExpiryHandlerProvider;
-        this.publishOutboundInterceptorHandler = publishOutboundInterceptorHandler;
-        this.connectInboundInterceptorHandler = connectInboundInterceptorHandler;
-        this.connackOutboundInterceptorHandler = connackOutboundInterceptorHandler;
-        this.disconnectInterceptorHandler = disconnectInterceptorHandler;
-        this.pubackInterceptorHandler = pubackInterceptorHandler;
-        this.pubrecInterceptorHandler = pubrecInterceptorHandler;
-        this.pubrelInterceptorHandler = pubrelInterceptorHandler;
-        this.pubcompInterceptorhandler = pubcompInterceptorHandler;
-        this.subAckOutboundInterceptorHandler = subAckOutboundInterceptorHandler;
-        this.unsubackOutboundInterceptorHandler = unsubackOutboundInterceptorHandler;
-        this.unsubscribeInboundInterceptorHandler = unsubscribeInboundInterceptorHandler;
-        this.pingInterceptorHandler = pingInterceptorHandler;
         this.mqttServerDisconnector = mqttServerDisconnector;
+        this.interceptorHandler = interceptorHandler;
     }
 
     @NotNull
@@ -358,67 +327,12 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PublishOutboundInterceptorHandler getPublishOutboundInterceptorHandler() {
-        return publishOutboundInterceptorHandler;
-    }
-
-    @NotNull
-    public ConnectInboundInterceptorHandler getConnectInboundInterceptorHandler() {
-        return connectInboundInterceptorHandler;
-    }
-
-    @NotNull
-    public ConnackOutboundInterceptorHandler getConnackOutboundInterceptorHandler() {
-        return connackOutboundInterceptorHandler;
-    }
-
-    @NotNull
-    public DisconnectInterceptorHandler getDisconnectInterceptorHandler() {
-        return disconnectInterceptorHandler;
-    }
-
-    @NotNull
-    public PubackInterceptorHandler getPubackInterceptorHandler() {
-        return pubackInterceptorHandler;
-    }
-
-    @NotNull
-    public PubrecInterceptorHandler getPubrecInterceptorHandler() {
-        return pubrecInterceptorHandler;
-    }
-
-    @NotNull
-    public PubrelInterceptorHandler getPubrelInterceptorHandler() {
-        return pubrelInterceptorHandler;
-    }
-
-    @NotNull
-    public PubcompInterceptorHandler getPubcompInterceptorHandler() {
-        return pubcompInterceptorhandler;
-    }
-
-    @NotNull
-    public SubackOutboundInterceptorHandler getSubackOutboundInterceptorHandler() {
-        return subAckOutboundInterceptorHandler;
-    }
-
-    @NotNull
-    public UnsubackOutboundInterceptorHandler getUnsubackOutboundInterceptorHandler() {
-        return unsubackOutboundInterceptorHandler;
-    }
-
-    @NotNull
-    public UnsubscribeInboundInterceptorHandler getUnsubscribeInboundInterceptorHandler() {
-        return unsubscribeInboundInterceptorHandler;
-    }
-
-    @NotNull
-    public PingInterceptorHandler getPingInterceptorHandler() {
-        return pingInterceptorHandler;
-    }
-
-    @NotNull
     public MqttServerDisconnector getMqttServerDisconnector() {
         return mqttServerDisconnector;
+    }
+
+    @NotNull
+    public InterceptorHandler getInterceptorHandler() {
+        return interceptorHandler;
     }
 }
