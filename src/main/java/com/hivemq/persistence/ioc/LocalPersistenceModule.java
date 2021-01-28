@@ -93,11 +93,11 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bind(ClientQueuePersistence.class).to(ClientQueuePersistenceImpl.class).in(LazySingleton.class);
 
         /* Payload Persistence */
-        if(persistenceConfigurationService.getMode()==PersistenceConfigurationService.PersistenceMode.IN_MEMORY){
+        if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) {
             bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class));
             bind(PublishPayloadNoopPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
                     PublishPayloadNoopPersistenceImpl.class));
-        }else{
+        } else {
             bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
             bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
                     PublishPayloadPersistenceImpl.class));
