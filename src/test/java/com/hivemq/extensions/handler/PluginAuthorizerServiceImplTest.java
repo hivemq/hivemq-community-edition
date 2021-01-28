@@ -36,7 +36,6 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
 import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
-import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -86,8 +85,6 @@ public class PluginAuthorizerServiceImplTest {
     private Authorizers authorizers;
     @Mock
     private IncomingSubscribeService incomingSubscribeService;
-    @Mock
-    private SubscribeHandler incomingSubscribeHandler;
     @Mock
     private ServerInformation serverInformation;
     @Mock
@@ -141,7 +138,6 @@ public class PluginAuthorizerServiceImplTest {
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
-//        channel.pipeline().addLast(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER, incomingSubscribeService);
         channelHandlerContext = channel.pipeline().context(CollectUserEventsHandler.class);
     }
 
@@ -218,9 +214,6 @@ public class PluginAuthorizerServiceImplTest {
         when(authorizers.areAuthorizersAvailable()).thenReturn(false);
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
-
-        clearHandlers();
-
         channelHandlerContext = mock(ChannelHandlerContext.class);
 
         when(channelHandlerContext.channel()).thenReturn(channel);
@@ -236,9 +229,6 @@ public class PluginAuthorizerServiceImplTest {
         when(authorizers.areAuthorizersAvailable()).thenReturn(false);
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
-
-        clearHandlers();
-
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
     }
@@ -250,7 +240,6 @@ public class PluginAuthorizerServiceImplTest {
 
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
-        clearHandlers();
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
         channel.runPendingTasks();
@@ -266,9 +255,6 @@ public class PluginAuthorizerServiceImplTest {
         when(authorizers.getAuthorizerProviderMap()).thenReturn(new HashMap<>());
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
-
-        clearHandlers();
-
         channelHandlerContext = mock(ChannelHandlerContext.class);
 
         when(channelHandlerContext.channel()).thenReturn(channel);
@@ -285,9 +271,6 @@ public class PluginAuthorizerServiceImplTest {
         when(authorizers.getAuthorizerProviderMap()).thenReturn(new HashMap<>());
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
-
-        clearHandlers();
-
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         verify(incomingPublishService).processPublish(channelHandlerContext, publish, null);
@@ -302,7 +285,6 @@ public class PluginAuthorizerServiceImplTest {
 
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
-        clearHandlers();
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
         channel.runPendingTasks();
@@ -400,7 +382,6 @@ public class PluginAuthorizerServiceImplTest {
 
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
-        clearHandlers();
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
         while (channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 2) {
@@ -545,10 +526,6 @@ public class PluginAuthorizerServiceImplTest {
                 (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
                         .newInstance(countDownLatch);
         return testProvider;
-    }
-
-    private void clearHandlers() {
-//        channel.pipeline().remove(ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER);
     }
 
     @NotNull
