@@ -15,6 +15,7 @@
  */
 package com.hivemq.metrics.handler;
 
+import com.codahale.metrics.Gauge;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.Message;
@@ -23,6 +24,10 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.concurrent.atomic.LongAdder;
+
+import static com.hivemq.metrics.HiveMQMetrics.BYTES_READ_TOTAL;
+import static com.hivemq.metrics.HiveMQMetrics.BYTES_WRITE_TOTAL;
 
 /**
  * Gathers statistics about inbound and outbound MQTT messages.
@@ -35,9 +40,17 @@ public class GlobalMQTTMessageCounter {
 
     private final @NotNull MetricsHolder metricsHolder;
 
+    private final @NotNull LongAdder bytesReadTotal;
+    private final @NotNull LongAdder bytesWrittenTotal;
+
     @Inject
     public GlobalMQTTMessageCounter(final @NotNull MetricsHolder metricsHolder) {
         this.metricsHolder = metricsHolder;
+        this.bytesReadTotal = new LongAdder();
+        this.bytesWrittenTotal = new LongAdder();
+
+        metricsHolder.getMetricRegistry().register(BYTES_READ_TOTAL.name(), (Gauge<Long>) bytesReadTotal::longValue);
+        metricsHolder.getMetricRegistry().register(BYTES_WRITE_TOTAL.name(), (Gauge<Long>) bytesWrittenTotal::longValue);
     }
 
     public void countInbound(final @NotNull Message message) {
@@ -51,7 +64,7 @@ public class GlobalMQTTMessageCounter {
     }
 
     public void countInboundTraffic(final int bytes) {
-        metricsHolder.getTotalBytesReadCounter().inc(bytes);
+        bytesReadTotal.add(bytes);
     }
 
     public void countOutbound(final @NotNull Message message) {
@@ -62,7 +75,7 @@ public class GlobalMQTTMessageCounter {
     }
 
     public void countOutboundTraffic(final int bytes) {
-        metricsHolder.getTotalBytesWrittenCounter().inc(bytes);
+        bytesWrittenTotal.add(bytes);
     }
 
 

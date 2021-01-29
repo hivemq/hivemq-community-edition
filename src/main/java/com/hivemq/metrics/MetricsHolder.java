@@ -45,10 +45,6 @@ public class MetricsHolder {
 
     private final @NotNull Counter closedConnectionsCounter;
 
-    private final @NotNull Counter totalBytesReadCounter;
-    private final @NotNull Counter totalBytesWrittenCounter;
-
-
     public MetricsHolder(final MetricRegistry metricRegistry) {
 
         this.metricRegistry = metricRegistry;
@@ -67,8 +63,6 @@ public class MetricsHolder {
 
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
 
-        totalBytesReadCounter = metricRegistry.counter(HiveMQMetrics.BYTES_READ_TOTAL.name());
-        totalBytesWrittenCounter = metricRegistry.counter(HiveMQMetrics.BYTES_WRITE_TOTAL.name());
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {
@@ -107,11 +101,4 @@ public class MetricsHolder {
         return closedConnectionsCounter;
     }
 
-    public Counter getTotalBytesReadCounter() {
-        return totalBytesReadCounter;
-    }
-
-    public Counter getTotalBytesWrittenCounter() {
-        return totalBytesWrittenCounter;
-    }
 }

@@ -82,20 +82,20 @@ public class HiveMQMetrics {
             HiveMQMetric.gaugeValue("com.hivemq.messages.retained.current");
 
     /**
-     * represents a {@link Counter}, which counts every read byte
+     * represents a {@link Gauge}, which holds the total amount of read bytes
      *
      * @since 3.0
      */
-    public static final HiveMQMetric<Counter> BYTES_READ_TOTAL =
-            HiveMQMetric.valueOf("com.hivemq.networking.bytes.read.total", Counter.class);
+    public static final HiveMQMetric<Gauge<Number>> BYTES_READ_TOTAL =
+            HiveMQMetric.gaugeValue("com.hivemq.networking.bytes.read.total");
 
     /**
-     * represents a {@link Counter}, which counts every written byte
+     * represents a {@link Gauge}, which holds total of written bytes
      *
      * @since 3.0
      */
-    public static final HiveMQMetric<Counter> BYTES_WRITE_TOTAL =
-            HiveMQMetric.valueOf("com.hivemq.networking.bytes.write.total", Counter.class);
+    public static final HiveMQMetric<Gauge<Number>> BYTES_WRITE_TOTAL =
+            HiveMQMetric.gaugeValue("com.hivemq.networking.bytes.write.total");
 
     /**
      * represents a {@link Gauge}, which holds the current total number of connections
