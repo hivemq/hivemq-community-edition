@@ -21,8 +21,6 @@ import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,9 +29,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @LazySingleton
 public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersistence {
-
-    @VisibleForTesting
-    static final Logger log = LoggerFactory.getLogger(PublishPayloadNoopPersistenceImpl.class);
 
     @Inject
     public PublishPayloadNoopPersistenceImpl() {
