@@ -95,8 +95,6 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         /* Payload Persistence */
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) {
             bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class));
-            bind(PublishPayloadNoopPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
-                    PublishPayloadNoopPersistenceImpl.class));
         } else {
             bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
             bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(

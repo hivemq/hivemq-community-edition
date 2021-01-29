@@ -73,9 +73,6 @@ public class PublishDistributorImplTest {
     private @NotNull PublishDistributorImpl publishDistributor;
     private @NotNull SingleWriterService singleWriterService;
 
-    public PublishDistributorImplTest() {
-    }
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
