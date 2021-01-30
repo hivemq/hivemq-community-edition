@@ -161,8 +161,8 @@ dependencies {
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:1.3.71")
-        implementation("org.apache.commons:commons-compress:1.20")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:${property('kotlin.version')}")
+        implementation("org.apache.commons:commons-compress:${property('commons-compress.version')}")
     }
 
     testImplementation("junit:junit:${property('junit.version')}")
