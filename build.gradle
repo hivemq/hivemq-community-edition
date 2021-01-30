@@ -332,29 +332,23 @@ javadocLinks {
 
 /* ******************** checks ******************** */
 
-ext {
-    jacocoVersion = '0.8.5'
-    pmdVersion = '6.22.0'
-    spotbugsVersion = '3.1.12'
-}
-
 if (!System.properties['java.version'].startsWith('11')) {
     throw new RuntimeException('Incompatible JRE version: ' + System.properties['java.version'] + '. Use JRE 11 instead.')
 }
 
 jacoco {
-    toolVersion = jacocoVersion
+    toolVersion = "${property("jacoco.version")}"
 }
 
 pmd {
-    toolVersion = pmdVersion
+    toolVersion = "${property("pmd.version")}"
     sourceSets = [sourceSets.main]
     ignoreFailures = true
     rulePriority = 3
 }
 
 spotbugs {
-    toolVersion = spotbugsVersion
+    toolVersion = "${property("spotbugs.version")}"
     sourceSets = [sourceSets.main]
     ignoreFailures = true
     reportsDir = file("${buildDir}/reports/findbugs")
