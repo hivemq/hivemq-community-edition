@@ -190,19 +190,18 @@ tasks.test {
     minHeapSize = "128m"
     maxHeapSize = "2048m"
 
-    /* Use inclusions, exclusions from file so we can run in parallel */
+    File inclusions = new File("inclusions.txt")
     File exclusions = new File("exclusions.txt")
-    if (exclusions.exists()) {
-        def lines = exclusions.readLines()
-        exclude lines
-        logger.lifecycle("Excluded " + lines.size() + " tests for this execution")
+    if (inclusions.exists()) {
+        include(inclusions.readLines())
+    } else if (exclusions.exists()) {
+        exclude(exclusions.readLines())
     }
 
     testLogging {
         events("STARTED", "FAILED", "SKIPPED")
+        exceptionFormat("full")
     }
-
-    testLogging.exceptionFormat("full")
 
     /* use tmpdir from gradle property or the same tmpdir as the runner */
     if (project.hasProperty("test_temp_dir")) {
