@@ -348,11 +348,10 @@ pmd {
 }
 
 spotbugs {
-    toolVersion = "${property("spotbugs.version")}"
-    sourceSets = [sourceSets.main]
-    ignoreFailures = true
-    reportsDir = file("${buildDir}/reports/findbugs")
-    reportLevel = 'medium'
+    toolVersion.set("${property("spotbugs.version")}")
+    ignoreFailures.set(true)
+    reportsDir.fileValue(file("${buildDir}/reports/findbugs"))
+    reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
 }
 
 dependencyCheck {
