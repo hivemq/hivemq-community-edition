@@ -21,12 +21,14 @@ import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
+import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
@@ -161,9 +163,11 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         publishPollService.pollNewMessages("client");
+        final ArgumentCaptor<PublishWithFuture> argumentCaptor = ArgumentCaptor.forClass(PublishWithFuture.class);
 
+        verify(channel, times(1)).writeAndFlush(argumentCaptor.capture());
+        argumentCaptor.getValue().getFuture().set(PublishStatus.NOT_CONNECTED);
         verify(messageIDPool, times(50)).returnId(anyInt()); // The id must be returned
-        verify(channel, never()).writeAndFlush(any(PUBLISH.class));
     }
 
     @Test

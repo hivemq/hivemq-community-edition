@@ -270,11 +270,6 @@ public class RetainedMessagesSender {
                 }
             }, MoreExecutors.directExecutor());
 
-            if (!channel.isActive()) {
-                publishFuture.set(PublishStatus.NOT_CONNECTED);
-                return resultFuture;
-            }
-
             final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
             channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
 

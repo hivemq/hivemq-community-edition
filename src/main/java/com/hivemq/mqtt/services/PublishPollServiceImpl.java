@@ -382,12 +382,6 @@ public class PublishPollServiceImpl implements PublishPollService {
         Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
                 this, shared, queueId, publish, messageIDPool, channel, client), MoreExecutors.directExecutor());
 
-        // The client could disconnect while we add the callback
-        if (!channel.isActive()) {
-            publishFuture.set(PublishStatus.NOT_CONNECTED);
-            return;
-        }
-
         final PublishWithFuture message = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
         channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
     }
