@@ -24,6 +24,7 @@ import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.*;
+import com.hivemq.configuration.service.impl.PersistenceConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -130,8 +131,10 @@ public class LocalPersistenceModuleTest {
         when(persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class)).thenReturn(mock(
                 PublishPayloadXodusLocalPersistence.class));
 
-        when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
+        when(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class)).thenReturn(new PublishPayloadNoopPersistenceImpl());
 
+        when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
+        when(persistenceInjector.getInstance(PersistenceConfigurationService.class)).thenReturn(persistenceConfigurationService);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.FILE);
 
     }

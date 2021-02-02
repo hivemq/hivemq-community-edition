@@ -18,7 +18,10 @@ package com.hivemq.mqtt.services;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -56,19 +59,19 @@ import static org.mockito.Mockito.when;
 public class PublishDistributorImplTest {
 
     @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
+    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
-    private PublishPayloadPersistence payloadPersistence;
+    private @NotNull PublishPayloadPersistence payloadPersistence;
     @Mock
-    private ClientQueuePersistence clientQueuePersistence;
+    private @NotNull ClientQueuePersistence clientQueuePersistence;
     @Mock
-    private ClientSessionPersistence clientSessionPersistence;
+    private @NotNull ClientSessionPersistence clientSessionPersistence;
     @Mock
-    private MqttConfigurationService mqttConfigurationService;
+    private @NotNull MqttConfigurationService mqttConfigurationService;
 
-    private PublishDistributorImpl publishDistributor;
-    private SingleWriterService singleWriterService;
+    private @NotNull PublishDistributorImpl publishDistributor;
+    private @NotNull SingleWriterService singleWriterService;
 
     @Before
     public void setUp() throws Exception {
@@ -168,18 +171,13 @@ public class PublishDistributorImplTest {
         verify(clientQueuePersistence).add(eq("name/topic2"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong());
     }
 
-    private PUBLISH createPublish(final QoS qos) {
+    private PUBLISH createPublish(final @NotNull QoS qos) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(0)
                 .withQoS(qos)
                 .withPayload("message".getBytes())
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .build();
-    }
-
-    private void waitForSingleWriter() {
-        while (singleWriterService.getGlobalTaskCount().get() != 0) {
-        }
     }
 
 }

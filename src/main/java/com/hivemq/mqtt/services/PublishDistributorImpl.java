@@ -21,7 +21,10 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.ConfigurationService;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -177,7 +180,7 @@ public class PublishDistributorImpl implements PublishDistributor {
 
     @NotNull
     private PUBLISH createPublish(@NotNull final PUBLISH publish, final int subscriptionQos, final boolean retainAsPublished, @Nullable final ImmutableIntArray subscriptionIdentifier) {
-        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+        final boolean removePayload = payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
         final ImmutableIntArray identifiers;
         if (subscriptionIdentifier == null) {
             identifiers = ImmutableIntArray.of();
@@ -187,7 +190,9 @@ public class PublishDistributorImpl implements PublishDistributor {
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder()
                 .fromPublish(publish)
-                .withPayload(null) // not needed anymore as we just put it in the payload persistence.
+                //in file: the payload is not needed anymore as we just put it in the payload persistence.
+                //in-memory: we must set the payload, as the payload persistence is NOOP
+                .withPayload(removePayload ? null : publish.getPayload())
                 .withPersistence(payloadPersistence)
                 .withRetain(publish.isRetain() && retainAsPublished)
                 .withSubscriptionIdentifiers(identifiers);
