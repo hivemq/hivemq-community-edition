@@ -122,9 +122,9 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
-            removeHandler(ctx);
             ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null);
             ctx.writeAndFlush(msg, promise);
+            removeHandler(ctx);
             return;
         }
 
@@ -175,6 +175,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
+                ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
                 removeHandler(ctx);
             }
 
@@ -183,6 +184,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
                 Exceptions.rethrowError(t);
                 log.error("Calling initializer failed", t);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
+                ctx.writeAndFlush(msg, promise);
                 removeHandler(ctx);
             }
         }, ctx.executor());
