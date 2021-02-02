@@ -146,11 +146,10 @@ public class TlsTcpChannelInitializerTest {
 
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
 
+        assertEquals(3, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
-        assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
-        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
     }
 
 

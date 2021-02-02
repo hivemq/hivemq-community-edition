@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.unsubscribe;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyHandler;
 import util.InitFutureUtilsExecutorRule;
 
 import java.util.Arrays;
@@ -71,6 +73,7 @@ public class UnsubscribeHandlerTest {
         MockitoAnnotations.initMocks(this);
         unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         channel = new EmbeddedChannel(unsubscribeHandler);
+        channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_ID).set("myTestClient");
         when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), Matchers.any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));

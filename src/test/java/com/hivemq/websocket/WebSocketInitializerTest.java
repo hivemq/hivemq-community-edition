@@ -17,11 +17,9 @@ package com.hivemq.websocket;
 
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.entity.WebsocketListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 
@@ -36,15 +34,14 @@ public class WebSocketInitializerTest {
 
     private EmbeddedChannel channel;
 
-    @Mock
-    private ChannelHandler dummyHandler;
-
     private WebsocketListener websocketListener;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        channel = new EmbeddedChannel(new DummyHandler());
+        channel = new EmbeddedChannel();
+
+        channel.pipeline().addLast("dummy", new DummyHandler());
 
         websocketListener = new WebsocketListener.Builder()
                 .port(8000)
@@ -57,7 +54,7 @@ public class WebSocketInitializerTest {
 
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
 
-        webSocketInitializer.addHandlers(channel);
+        webSocketInitializer.addHandlers(channel, "dummy");
 
         final List<String> handlerNames = channel.pipeline().names();
 
@@ -75,7 +72,7 @@ public class WebSocketInitializerTest {
 
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
 
-        webSocketInitializer.addHandlers(channel);
+        webSocketInitializer.addHandlers(channel, "dummy");
 
         final List<String> handlerNames = channel.pipeline().names();
 
