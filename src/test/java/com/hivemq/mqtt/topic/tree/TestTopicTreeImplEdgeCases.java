@@ -54,7 +54,7 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
 
-        assertEquals(0, topicTree.getSubscribers("").size());
+        assertEquals(0, topicTree.getTopicSubscribers("").getSubscribers().size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
@@ -68,7 +68,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("subscriber", new Topic("a/d", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("a/e", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        assertEquals(0, topicTree.getSubscribers("a/c").size());
+        assertEquals(0, topicTree.getTopicSubscribers("a/c").getSubscribers().size());
 
         assertEquals(3, topicTree.subscriptionCounter.getCount());
     }
@@ -82,7 +82,7 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.removeSubscriber("subscriber", "/+", null);
 
-        assertEquals(0, topicTree.getSubscribers("/a").size());
+        assertEquals(0, topicTree.getTopicSubscribers("/a").getSubscribers().size());
 
         assertEquals(2, topicTree.subscriptionCounter.getCount());
     }
@@ -94,7 +94,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("subscriber2", new Topic("a/test", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("+/test", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a/test");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a/test").getSubscribers();
         assertEquals(3, subscribers.size());
     }
 
@@ -105,7 +105,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("subscriber2", new Topic("a/b/test", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("a/+/test", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a/b/test");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a/b/test").getSubscribers();
         assertEquals(3, subscribers.size());
     }
 
@@ -116,7 +116,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("subscriber2", new Topic("a/test/b", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("a/test/+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a/test/b");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a/test/b").getSubscribers();
         assertEquals(3, subscribers.size());
     }
 
@@ -125,7 +125,7 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic("/", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("/");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("/").getSubscribers();
         assertEquals(false, subscribers.isEmpty());
         assertThat(subscribers, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
     }
@@ -133,7 +133,7 @@ public class TestTopicTreeImplEdgeCases {
     @Test
     public void test_edge_case_slash_topic_wildcard_match() throws Exception {
         topicTree.addTopic("subscriber", new Topic("+/+", QoS.AT_MOST_ONCE), (byte) 0, null);
-        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getSubscribers("/");
+        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getTopicSubscribers("/").getSubscribers();
 
         assertEquals(false, subscribers2.isEmpty());
         assertThat(subscribers2, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
@@ -144,11 +144,11 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic("/////", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("/////");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("/////").getSubscribers();
         assertEquals(false, subscribers.isEmpty());
         assertThat(subscribers, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
 
-        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getSubscribers("////");
+        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getTopicSubscribers("////").getSubscribers();
         assertEquals(true, subscribers2.isEmpty());
     }
 
@@ -157,19 +157,19 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic("+/+/+/+/+/+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("/////");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("/////").getSubscribers();
         assertEquals(false, subscribers.isEmpty());
         assertThat(subscribers, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
 
         topicTree.addTopic("subscriber2", new Topic("+/+/+/+/+/", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getSubscribers("/////");
+        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getTopicSubscribers("/////").getSubscribers();
         assertEquals(false, subscribers2.isEmpty());
         assertThat(subscribers2, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
 
         topicTree.addTopic("subscriber3", new Topic("/+/+/+/+/", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers3 = topicTree.getSubscribers("/////");
+        final Set<SubscriberWithIdentifiers> subscribers3 = topicTree.getTopicSubscribers("/////").getSubscribers();
         assertEquals(false, subscribers3.isEmpty());
         assertThat(subscribers3, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
 
@@ -182,12 +182,12 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic("a/+/b", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a//b");
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a//b").getSubscribers();
         assertEquals(false, subscribers.isEmpty());
         assertThat(subscribers, hasItem(new SubscriberWithIdentifiers("subscriber", 0, (byte) 0, null, ImmutableList.of(), null)));
 
         topicTree.addTopic("subscriber2", new Topic("a/b/+", QoS.AT_MOST_ONCE), (byte) 0, null);
-        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getSubscribers("a/b/");
+        final Set<SubscriberWithIdentifiers> subscribers2 = topicTree.getTopicSubscribers("a/b/").getSubscribers();
         assertEquals(false, subscribers2.isEmpty());
         assertThat(subscribers2, hasItem(new SubscriberWithIdentifiers("subscriber2", 0, (byte) 0, null, ImmutableList.of(), null)));
     }
@@ -202,7 +202,7 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("subscriber", new Topic(topic, QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers(topic);
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers(topic).getSubscribers();
 
         assertEquals(0, subscribers.size());
     }
@@ -213,7 +213,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client1", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client1", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("any").size());
+        assertEquals(1, topicTree.getTopicSubscribers("any").getSubscribers().size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
@@ -225,7 +225,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client1", new Topic("#", QoS.AT_LEAST_ONCE), (byte) 0, null);
         topicTree.addTopic("client1", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("any").size());
+        assertEquals(1, topicTree.getTopicSubscribers("any").getSubscribers().size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
@@ -240,22 +240,22 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client3", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client3", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(3, topicTree.getSubscribers("#").size());
+        assertEquals(3, topicTree.getTopicSubscribers("#").getSubscribers().size());
         assertEquals(3, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client3", "#", null);
 
-        assertEquals(2, topicTree.getSubscribers("#").size());
+        assertEquals(2, topicTree.getTopicSubscribers("#").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client2", "#", null);
 
-        assertEquals(1, topicTree.getSubscribers("#").size());
+        assertEquals(1, topicTree.getTopicSubscribers("#").getSubscribers().size());
         assertEquals(1, topicTree.subscriptionCounter.getCount());
 
         topicTree.addTopic("client3", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(2, topicTree.getSubscribers("#").size());
+        assertEquals(2, topicTree.getTopicSubscribers("#").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
     }
 
@@ -265,7 +265,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client1", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client1", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
@@ -277,7 +277,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client1", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client1", new Topic("a/b", QoS.AT_LEAST_ONCE), (byte) 0, null);
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a/b");
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a/b").getSubscribers();
         assertEquals(1, subscribers.size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
@@ -297,7 +297,7 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("client1", new Topic("a/b", QoS.AT_LEAST_ONCE), (byte) 0, null);
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("a/b");
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("a/b").getSubscribers();
         assertEquals(33, subscribers.size());
 
         assertEquals(33, topicTree.subscriptionCounter.getCount());
@@ -325,22 +325,22 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client3", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client3", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(3, topicTree.getSubscribers("a/b").size());
+        assertEquals(3, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(3, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client3", "a/b", null);
 
-        assertEquals(2, topicTree.getSubscribers("a/b").size());
+        assertEquals(2, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client2", "a/b", null);
 
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(1, topicTree.subscriptionCounter.getCount());
 
         topicTree.addTopic("client3", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(2, topicTree.getSubscribers("a/b").size());
+        assertEquals(2, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
     }
 
@@ -350,7 +350,7 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client1", new Topic("a/+/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client1", new Topic("a/+/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("a/+/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/+/b").getSubscribers().size());
 
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
@@ -365,22 +365,22 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.addTopic("client3", new Topic("a/+/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         topicTree.addTopic("client3", new Topic("a/+/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(3, topicTree.getSubscribers("a/+/b").size());
+        assertEquals(3, topicTree.getTopicSubscribers("a/+/b").getSubscribers().size());
         assertEquals(3, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client3", "a/+/b", null);
 
-        assertEquals(2, topicTree.getSubscribers("a/+/b").size());
+        assertEquals(2, topicTree.getTopicSubscribers("a/+/b").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client2", "a/+/b", null);
 
-        assertEquals(1, topicTree.getSubscribers("a/+/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/+/b").getSubscribers().size());
         assertEquals(1, topicTree.subscriptionCounter.getCount());
 
         topicTree.addTopic("client3", new Topic("a/+/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(2, topicTree.getSubscribers("a/+/b").size());
+        assertEquals(2, topicTree.getTopicSubscribers("a/+/b").getSubscribers().size());
         assertEquals(2, topicTree.subscriptionCounter.getCount());
     }
 
@@ -389,17 +389,17 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("client3", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(1, topicTree.subscriptionCounter.getCount());
 
         topicTree.removeSubscriber("client3", "a/b", null);
 
-        assertEquals(0, topicTree.getSubscribers("a/b").size());
+        assertEquals(0, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(0, topicTree.subscriptionCounter.getCount());
 
         topicTree.addTopic("client3", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
 
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         assertEquals(1, topicTree.subscriptionCounter.getCount());
     }
 
@@ -407,11 +407,11 @@ public class TestTopicTreeImplEdgeCases {
     public void test_remove_wildcard() throws Exception {
 
         topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null);
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
         topicTree.removeSubscriber("client", "#", null);
-        assertEquals(1, topicTree.getSubscribers("a/b").size());
+        assertEquals(1, topicTree.getTopicSubscribers("a/b").getSubscribers().size());
     }
 
     @Test
@@ -422,8 +422,8 @@ public class TestTopicTreeImplEdgeCases {
         topicTree.removeSubscriber("client1", "a/b", null);
 
         topicTree.addTopic("client2", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
-        assertEquals(QoS.EXACTLY_ONCE.getQosNumber(), topicTree.getSubscribers("a/b").asList().get(0).getQos());
-        assertEquals("client2", topicTree.getSubscribers("a/b").asList().get(0).getSubscriber());
+        assertEquals(QoS.EXACTLY_ONCE.getQosNumber(), topicTree.getTopicSubscribers("a/b").getSubscribers().asList().get(0).getQos());
+        assertEquals("client2", topicTree.getTopicSubscribers("a/b").getSubscribers().asList().get(0).getSubscriber());
 
     }
 

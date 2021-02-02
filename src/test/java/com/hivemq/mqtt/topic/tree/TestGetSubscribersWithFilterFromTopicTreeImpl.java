@@ -417,8 +417,9 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
         topicTree.addTopic("client", new Topic("topic/+", QoS.AT_LEAST_ONCE), sharedFlag, "group");
         topicTree.addTopic("client", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "group");
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("topic/a");
-        assertEquals(3, subscribers.size());
+        final TopicSubscribers topicSubscribers = topicTree.getTopicSubscribers("topic/a");
+        assertEquals(0, topicSubscribers.getSubscribers().size());
+        assertEquals(3, topicSubscribers.getSharedSubscriptions().size());
     }
 
 
@@ -472,8 +473,9 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
         topicTree.addTopic("client", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
         topicTree.addTopic("client", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "name");
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers("topic");
-        assertEquals(2, subscribers.size());
+        final TopicSubscribers topicSubscribers = topicTree.getTopicSubscribers("topic");
+        assertEquals(1, topicSubscribers.getSubscribers().size());
+        assertEquals(1, topicSubscribers.getSharedSubscriptions().size());
     }
 
     @Test
@@ -538,11 +540,6 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @NotNull
     public LocalTopicTree.ItemFilter getMatchAllFilter() {
-        return new LocalTopicTree.ItemFilter() {
-            @Override
-            public boolean checkItem(@NotNull final SubscriberWithQoS subscriber) {
-                return true;
-            }
-        };
+        return subscriber -> true;
     }
 }
