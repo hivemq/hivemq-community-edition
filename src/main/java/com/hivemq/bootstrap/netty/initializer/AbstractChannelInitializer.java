@@ -70,7 +70,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
-        if(throttlingEnabled){
+        if (throttlingEnabled) {
             ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
         }
         ch.pipeline().addLast(MQTT_MESSAGE_DECODER, new MQTTMessageDecoder(channelDependencies));
