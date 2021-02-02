@@ -41,9 +41,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -93,6 +91,9 @@ public class PluginInitializerHandlerTest {
     private ChannelPromise channelPromise;
 
     @Mock
+    private ChannelPipeline channelPipeline;
+
+    @Mock
     private InitializersImpl initializers;
 
     @Mock
@@ -122,11 +123,13 @@ public class PluginInitializerHandlerTest {
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
+
         embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
+        when(channelHandlerContext.pipeline()).thenReturn(channelPipeline);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(ClassLoader.class))).thenReturn(hiveMQExtension);
@@ -199,6 +202,7 @@ public class PluginInitializerHandlerTest {
 
         verify(initializers, timeout(5000).times(1)).getClientInitializerMap();
         verify(channelHandlerContext, timeout(5000)).writeAndFlush(any(Object.class), eq(channelPromise));
+        verify(channelPipeline).remove(any(ChannelHandler.class));
 
     }
 
@@ -241,6 +245,7 @@ public class PluginInitializerHandlerTest {
         verify(mqttConnacker, timeout(5000)).connackError(any(Channel.class), anyString(), anyString(),
                 eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), anyString(), eq(Mqtt5UserProperties.NO_USER_PROPERTIES), eq(true));
 
+        verify(channelPipeline).remove(any(ChannelHandler.class));
         assertEquals(true, embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).get());
     }
 
@@ -272,6 +277,7 @@ public class PluginInitializerHandlerTest {
 
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
+        verify(channelPipeline).remove(any(ChannelHandler.class));
         assertNull(embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).get());
     }
 

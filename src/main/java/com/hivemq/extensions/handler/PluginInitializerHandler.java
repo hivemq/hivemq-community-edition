@@ -122,6 +122,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
+            removeHandler(ctx);
             ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null);
             ctx.writeAndFlush(msg, promise);
             return;
@@ -174,12 +175,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
-                ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
-                try {
-                    ctx.pipeline().remove(PluginInitializerHandler.this);
-                } catch (final NoSuchElementException e) {
-                    //noop since handler has already been removed
-                }
+                removeHandler(ctx);
             }
 
             @Override
@@ -187,12 +183,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
                 Exceptions.rethrowError(t);
                 log.error("Calling initializer failed", t);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
-                ctx.writeAndFlush(msg, promise);
-                try {
-                    ctx.pipeline().remove(PluginInitializerHandler.this);
-                } catch (final NoSuchElementException e) {
-                    //noop since handler has already been removed
-                }
+                removeHandler(ctx);
             }
         }, ctx.executor());
     }
@@ -252,6 +243,14 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             }
 
         }, ctx.executor());
+    }
+
+    private void removeHandler(final @NotNull ChannelHandlerContext ctx){
+        try {
+            ctx.pipeline().remove(PluginInitializerHandler.this);
+        } catch (final NoSuchElementException e) {
+            //noop since handler has already been removed
+        }
     }
 
     private static class MultiInitializerTaskContext extends PluginInOutTaskContext<ClientContextPluginImpl> {
