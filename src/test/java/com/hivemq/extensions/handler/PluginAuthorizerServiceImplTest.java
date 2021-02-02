@@ -220,7 +220,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
-        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), any(), any(), anyBoolean());
+        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), eq(false));
     }
 
     @Test(timeout = 2000)
@@ -261,7 +261,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
-        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), any(), any(), anyBoolean());
+        verify(incomingSubscribeService).processSubscribe(eq(channelHandlerContext), eq(fullMqtt5Subscribe), eq(false));
     }
 
     @Test(timeout = 2000)

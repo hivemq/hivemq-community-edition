@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.Lists;
+import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -61,6 +62,7 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import util.DummyHandler;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
 
@@ -118,7 +120,6 @@ public class IncomingSubscribeHandlerTest {
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
-
         asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -144,6 +145,7 @@ public class IncomingSubscribeHandlerTest {
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         channel.pipeline().addFirst(subscribeHandler);
+        channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
     }
 
