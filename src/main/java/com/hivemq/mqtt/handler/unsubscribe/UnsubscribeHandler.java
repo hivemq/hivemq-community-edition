@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
@@ -51,12 +52,12 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeHandler.class);
 
-    private final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-    private final SharedSubscriptionService sharedSubscriptionService;
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService;
 
     @Inject
-    public UnsubscribeHandler(@NotNull final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
-                              @NotNull final SharedSubscriptionService sharedSubscriptionService) {
+    public UnsubscribeHandler(final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+                              final @NotNull SharedSubscriptionService sharedSubscriptionService) {
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.sharedSubscriptionService = sharedSubscriptionService;
     }
@@ -64,6 +65,9 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
 
     @Override
     protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final UNSUBSCRIBE msg) throws Exception {
+
+        SubscribeMessageBarrier.addToPipeline(ctx);
+
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
         final ProtocolVersion protocolVersion = ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get();
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();

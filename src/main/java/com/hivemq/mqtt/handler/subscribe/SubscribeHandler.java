@@ -17,19 +17,16 @@ package com.hivemq.mqtt.handler.subscribe;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.IncomingSubscribeHandler;
+import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
  */
-@Singleton
-@ChannelHandler.Sharable
 public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
 
     private final @NotNull IncomingSubscribeHandler incomingSubscribeHandler;
@@ -41,7 +38,7 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
 
     @Override
     protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final SUBSCRIBE msg) throws Exception {
+        SubscribeMessageBarrier.addToPipeline(ctx);
         incomingSubscribeHandler.interceptOrDelegate(ctx, msg);
     }
-
 }
