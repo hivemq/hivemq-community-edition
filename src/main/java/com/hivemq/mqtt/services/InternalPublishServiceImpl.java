@@ -28,6 +28,7 @@ import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import com.hivemq.mqtt.topic.tree.TopicSubscribers;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
@@ -132,31 +133,34 @@ public class InternalPublishServiceImpl implements InternalPublishService {
     @NotNull
     private ListenableFuture<PublishReturnCode> handlePublish(@NotNull final PUBLISH publish, @NotNull final ExecutorService executorService, @Nullable final String sender) {
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getSubscribers(publish.getTopic());
+        final TopicSubscribers topicSubscribers = topicTree.getTopicSubscribers(publish.getTopic());
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicSubscribers.getSubscribers();
+        final ImmutableSet<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
 
-        if (subscribers.size() < 1) {
+        if (subscribers.size() < 1 && sharedSubscriptions.size() < 1) {
             return Futures.immediateFuture(PublishReturnCode.NO_MATCHING_SUBSCRIBERS);
         }
 
 
         if (!acknowledgeAfterPersist) {
-            deliverPublish(subscribers, sender, publish, executorService, null);
+            deliverPublish(topicSubscribers, sender, publish, executorService, null);
             return Futures.immediateFuture(PublishReturnCode.DELIVERED);
         }
+
         final SettableFuture<PublishReturnCode> returnCodeFuture = SettableFuture.create();
-        deliverPublish(subscribers, sender, publish, executorService, returnCodeFuture);
+        deliverPublish(topicSubscribers, sender, publish, executorService, returnCodeFuture);
         return returnCodeFuture;
     }
 
-    private void deliverPublish(final ImmutableSet<SubscriberWithIdentifiers> subscribers,
+    private void deliverPublish(@NotNull final TopicSubscribers topicSubscribers,
                                 @Nullable final String sender,
                                 @NotNull final PUBLISH publish,
                                 @NotNull final ExecutorService executorService,
                                 @Nullable final SettableFuture<PublishReturnCode> returnCodeFuture) {
-        Set<String> sharedSubscriptions = null;
-        final Map<String, SubscriberWithIdentifiers> notSharedSubscribers = new HashMap<>(subscribers.size());
+        final Set<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
+        final Map<String, SubscriberWithIdentifiers> notSharedSubscribers = new HashMap<>(topicSubscribers.getSubscribers().size());
 
-        for (final SubscriberWithIdentifiers subscriber : subscribers) {
+        for (final SubscriberWithIdentifiers subscriber : topicSubscribers.getSubscribers()) {
             if (!subscriber.isSharedSubscription()) {
 
                 if (subscriber.isNoLocal() && sender != null && sender.equals(subscriber.getSubscriber())) {
@@ -165,15 +169,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
                 }
 
                 notSharedSubscribers.put(subscriber.getSubscriber(), subscriber);
-                continue;
             }
-
-            //only instantiate list if shared subscribers are available
-            if (sharedSubscriptions == null) {
-                sharedSubscriptions = new HashSet<>(subscribers.size());
-            }
-
-            sharedSubscriptions.add(subscriber.getSharedName() + "/" + subscriber.getTopicFilter());
         }
 
         //Send out the messages to the channel of the subscribers

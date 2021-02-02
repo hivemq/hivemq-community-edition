@@ -56,7 +56,7 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
     @Test
     public void test_empty_topic_tree_get_subscribers() throws Exception {
 
-        final Set<SubscriberWithIdentifiers> any = topicTree.getSubscribers("any");
+        final Set<SubscriberWithIdentifiers> any = topicTree.getTopicSubscribers("any").getSubscribers();
         assertEquals(true, any.isEmpty());
     }
 

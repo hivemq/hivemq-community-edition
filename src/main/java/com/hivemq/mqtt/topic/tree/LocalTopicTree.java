@@ -37,7 +37,10 @@ public interface LocalTopicTree {
      * @return the subscribers interested in this topic with all their identifiers
      */
     @NotNull
-    ImmutableSet<SubscriberWithIdentifiers> getSubscribers(@NotNull String topic);
+    TopicSubscribers getTopicSubscribers(@NotNull String topic);
+
+    @NotNull
+    TopicSubscribers getTopicSubscribers(@NotNull String topic, boolean excludeRootLevelWildcard);
 
     /**
      * All subscribers that have subscribed to this exact topic filter
@@ -60,7 +63,6 @@ public interface LocalTopicTree {
     ImmutableSet<String> getSubscribersForTopic(@NotNull String topic, @NotNull ItemFilter itemFilter, boolean excludeRootLevelWildcard);
 
     @NotNull
-    ImmutableSet<SubscriberWithIdentifiers> getSubscribers(@NotNull String topic, boolean excludeRootLevelWildcard);
 
     /**
      * Remove a subscription for a client
