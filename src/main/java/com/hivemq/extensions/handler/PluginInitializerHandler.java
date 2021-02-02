@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.nio.channels.ClosedChannelException;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -108,6 +107,8 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             }
 
             fireInitialize(ctx, connack, promise);
+            //not needed anymore
+            ctx.pipeline().remove(this);
         } else {
             super.write(ctx, msg, promise);
         }
@@ -124,7 +125,6 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         if (pluginInitializerMap.isEmpty() && msg != null) {
             ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null);
             ctx.writeAndFlush(msg, promise);
-            removeHandler(ctx);
             return;
         }
 
@@ -176,7 +176,6 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
-                removeHandler(ctx);
             }
 
             @Override
@@ -185,7 +184,6 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
                 log.error("Calling initializer failed", t);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
                 ctx.writeAndFlush(msg, promise);
-                removeHandler(ctx);
             }
         }, ctx.executor());
     }
@@ -245,14 +243,6 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             }
 
         }, ctx.executor());
-    }
-
-    private void removeHandler(final @NotNull ChannelHandlerContext ctx){
-        try {
-            ctx.pipeline().remove(PluginInitializerHandler.this);
-        } catch (final NoSuchElementException e) {
-            //noop since handler has already been removed
-        }
     }
 
     private static class MultiInitializerTaskContext extends PluginInOutTaskContext<ClientContextPluginImpl> {
