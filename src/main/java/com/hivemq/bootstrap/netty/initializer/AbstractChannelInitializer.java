@@ -18,6 +18,7 @@ package com.hivemq.bootstrap.netty.initializer;
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -46,18 +47,21 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
-    public static final String FIRST_ABSTRACT_HANDLER = ALL_CHANNELS_GROUP_HANDLER;
-
     @NotNull
     private final ChannelDependencies channelDependencies;
     @NotNull
     private final Listener listener;
+
+    private final boolean throttlingEnabled;
 
     public AbstractChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
             @NotNull final Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
+        final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
+        final boolean outgoingEnabled = InternalConfigurations.OUTGOING_BANDWIDTH_THROTTLING_DEFAULT > 0;
+        this.throttlingEnabled = incomingEnabled || outgoingEnabled;
     }
 
     @Override
@@ -66,8 +70,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         Preconditions.checkNotNull(ch, "Channel must never be null");
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
-        ch.pipeline().addLast(FIRST_ABSTRACT_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
-        ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
+
+        if(throttlingEnabled){
+            ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
+        }
         ch.pipeline().addLast(MQTT_MESSAGE_DECODER, new MQTTMessageDecoder(channelDependencies));
         ch.pipeline().addLast(MQTT_MESSAGE_ENCODER, channelDependencies.getMqttMessageEncoder());
         addNoConnectIdleHandler(ch);

@@ -16,7 +16,6 @@
 package com.hivemq.websocket;
 
 import com.google.common.collect.Lists;
-import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
 import com.hivemq.configuration.service.entity.WebsocketListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -46,8 +45,6 @@ public class WebSocketInitializerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel(new DummyHandler());
-
-        channel.pipeline().addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
 
         websocketListener = new WebsocketListener.Builder()
                 .port(8000)

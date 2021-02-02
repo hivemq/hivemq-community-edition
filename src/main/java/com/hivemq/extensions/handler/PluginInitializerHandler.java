@@ -43,8 +43,8 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.nio.channels.ClosedChannelException;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -60,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class PluginInitializerHandler extends ChannelDuplexHandler {
+public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(PluginInitializerHandler.class);
 
@@ -174,6 +175,11 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
+                try {
+                    ctx.pipeline().remove(PluginInitializerHandler.this);
+                } catch (final NoSuchElementException e) {
+                    //noop since handler has already been removed
+                }
             }
 
             @Override
@@ -182,6 +188,11 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
                 log.error("Calling initializer failed", t);
                 ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
                 ctx.writeAndFlush(msg, promise);
+                try {
+                    ctx.pipeline().remove(PluginInitializerHandler.this);
+                } catch (final NoSuchElementException e) {
+                    //noop since handler has already been removed
+                }
             }
         }, ctx.executor());
     }

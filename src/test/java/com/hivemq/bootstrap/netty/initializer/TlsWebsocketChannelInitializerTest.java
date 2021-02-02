@@ -19,6 +19,7 @@ import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
@@ -37,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.DummyHandler;
 import util.TlsTestUtil;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
@@ -72,6 +72,9 @@ public class TlsWebsocketChannelInitializerTest {
     private FullConfigurationService fullConfigurationService;
 
     @Mock
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+
+    @Mock
     private TlsWebsocketListener mockListener;
 
     @Mock
@@ -92,6 +95,9 @@ public class TlsWebsocketChannelInitializerTest {
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(mockListener.getTls()).thenReturn(tls);
         when(ssl.getSslHandler(any(SocketChannel.class), any(Tls.class))).thenReturn(sslHandler);
+        when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
+        when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
+        when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
 
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
 
@@ -104,20 +110,52 @@ public class TlsWebsocketChannelInitializerTest {
         final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
                 .bindAddress("")
                 .port(0)
-                .tls(TlsTestUtil.createDefaultTLS())
+                .tls(TlsTestUtil.createTLS(0))
                 .build();
 
         final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl);
 
-        pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
 
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
 
+        assertEquals(10, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
         assertEquals(HTTP_SERVER_CODEC, pipeline.names().get(3));
-        assertEquals(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, pipeline.names().get(pipeline.names().size() - 3));
+        assertEquals(HTTP_OBJECT_AGGREGATOR, pipeline.names().get(4));
+        assertEquals(WEBSOCKET_SERVER_PROTOCOL_HANDLER, pipeline.names().get(5));
+        assertEquals(WEBSOCKET_BINARY_FRAME_HANDLER, pipeline.names().get(6));
+        assertEquals(WEBSOCKET_TEXT_FRAME_HANDLER, pipeline.names().get(7));
+        assertEquals(MQTT_WEBSOCKET_ENCODER, pipeline.names().get(8));
+        assertEquals(WEBSOCKET_CONTINUATION_FRAME_HANDLER, pipeline.names().get(9));
+    }
+
+    @Test
+    public void test_add_special_handlers_with_timeout() {
+
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
+                .bindAddress("")
+                .port(0)
+                .tls(TlsTestUtil.createTLS(10))
+                .build();
+
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl);
+
+
+        tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
+
+        assertEquals(12, pipeline.names().size());
+        assertEquals(SSL_HANDLER, pipeline.names().get(0));
+        assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
+        assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
+        assertEquals(HTTP_SERVER_CODEC, pipeline.names().get(3));
+        assertEquals(HTTP_OBJECT_AGGREGATOR, pipeline.names().get(4));
+        assertEquals(WEBSOCKET_SERVER_PROTOCOL_HANDLER, pipeline.names().get(5));
+        assertEquals(WEBSOCKET_BINARY_FRAME_HANDLER, pipeline.names().get(6));
+        assertEquals(WEBSOCKET_TEXT_FRAME_HANDLER, pipeline.names().get(7));
+        assertEquals(MQTT_WEBSOCKET_ENCODER, pipeline.names().get(8));
+        assertEquals(WEBSOCKET_CONTINUATION_FRAME_HANDLER, pipeline.names().get(9));
         assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
         assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
     }

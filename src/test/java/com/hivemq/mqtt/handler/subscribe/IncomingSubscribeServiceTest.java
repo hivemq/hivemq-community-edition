@@ -128,7 +128,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 //        channel.writeInbound(subscribe);
 
         final Queue<Object> objects = channel.outboundMessages();
@@ -152,7 +152,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -175,7 +175,7 @@ public class IncomingSubscribeServiceTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -200,7 +200,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -227,7 +227,7 @@ public class IncomingSubscribeServiceTest {
 
         final ImmutableSet<Topic> persistedTopics = ImmutableSet.of(topic1, topic3);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -247,7 +247,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("t1", QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_LEAST_ONCE))), 1);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
     }
 
     @Test
@@ -255,7 +255,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))), 1);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         //We need to make sure we got disconnected
         assertEquals(false, channel.isActive());
@@ -285,7 +285,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         
@@ -301,7 +301,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         
@@ -317,7 +317,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
@@ -332,7 +332,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -349,7 +349,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -366,7 +366,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -386,7 +386,7 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
 
@@ -408,7 +408,7 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
 
@@ -432,7 +432,7 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(3, response.getReasonCodes().size());
@@ -458,7 +458,7 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(3, response.getReasonCodes().size());
@@ -491,7 +491,7 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(4, response.getReasonCodes().size());
@@ -519,7 +519,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1)), 10);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe, new Mqtt5SubAckReasonCode[subscribe.getTopics().size()], new String[subscribe.getTopics().size()], false);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
     }

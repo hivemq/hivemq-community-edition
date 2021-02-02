@@ -17,6 +17,8 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.security.ssl.NonSslHandler;
@@ -26,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.DummyHandler;
 
 import javax.inject.Provider;
 
@@ -50,6 +51,12 @@ public class WebsocketChannelInitializerTest {
     @Mock
     private MqttServerDisconnector disconnector;
 
+    @Mock
+    private FullConfigurationService fullConfigurationService;
+
+    @Mock
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+
     private ChannelPipeline pipeline;
 
     @Before
@@ -60,6 +67,9 @@ public class WebsocketChannelInitializerTest {
 
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(nonSslHandlerProvider.get()).thenReturn(new NonSslHandler(disconnector));
+        when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
+        when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
+        when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
     }
 
     @Test
@@ -72,13 +82,10 @@ public class WebsocketChannelInitializerTest {
 
         final WebsocketChannelInitializer websocketChannelInitializer = new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider);
 
-        pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
-
         websocketChannelInitializer.addSpecialHandlers(socketChannel);
 
         assertEquals(NON_SSL_HANDLER, pipeline.names().get(0));
         assertEquals(HTTP_SERVER_CODEC, pipeline.names().get(1));
-        assertEquals(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
     }
 
 }

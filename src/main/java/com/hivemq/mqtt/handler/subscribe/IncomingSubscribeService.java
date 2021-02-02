@@ -125,6 +125,10 @@ public class IncomingSubscribeService {
         this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
+    public void processSubscribe(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg, final boolean authorizersPresent){
+        processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], authorizersPresent);
+    }
+
     public void processSubscribe(final @NotNull ChannelHandlerContext ctx,
                                  final @NotNull SUBSCRIBE msg,
                                  final @NotNull Mqtt5SubAckReasonCode[] providedCodes,

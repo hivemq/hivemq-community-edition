@@ -17,7 +17,6 @@ package com.hivemq.websocket;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
 import com.hivemq.configuration.service.entity.WebsocketListener;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -42,7 +41,7 @@ public class WebSocketInitializer {
     }
 
     public void addHandlers(final Channel ch) {
-        ch.pipeline().addBefore(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, HTTP_SERVER_CODEC, new HttpServerCodec());
+        ch.pipeline().addLast(HTTP_SERVER_CODEC, new HttpServerCodec());
         ch.pipeline().addAfter(HTTP_SERVER_CODEC, HTTP_OBJECT_AGGREGATOR, new HttpObjectAggregator(WEBSOCKET_MAX_CONTENT_LENGTH));
 
         final String webSocketPath = websocketListener.getPath();

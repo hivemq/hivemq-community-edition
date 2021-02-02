@@ -75,10 +75,6 @@ public class TlsTcpChannelInitializer extends AbstractChannelInitializer {
         final int handshakeTimeout = tlsTcpListener.getTls().getHandshakeTimeout();
         final IdleStateHandler idleStateHandler = new IdleStateHandler(handshakeTimeout, 0, 0, TimeUnit.MILLISECONDS);
         final NoTlsHandshakeIdleHandler noTlsHandshakeIdleHandler = new NoTlsHandshakeIdleHandler(channelDependencies.getMqttServerDisconnector());
-        if (handshakeTimeout > 0) {
-            ch.pipeline().addLast(NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
-            ch.pipeline().addLast(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, noTlsHandshakeIdleHandler);
-        }
 
         final Tls tls = tlsTcpListener.getTls();
         final SslHandler sslHandler = sslFactory.getSslHandler(ch, tls);
@@ -91,6 +87,11 @@ public class TlsTcpChannelInitializer extends AbstractChannelInitializer {
         });
 
         new SslInitializer(sslHandler, tls, channelDependencies.getMqttServerDisconnector(), sslParameterHandler).addHandlers(ch);
+
+        if (handshakeTimeout > 0) {
+            ch.pipeline().addLast(NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
+            ch.pipeline().addLast(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, noTlsHandshakeIdleHandler);
+        }
     }
 
 }

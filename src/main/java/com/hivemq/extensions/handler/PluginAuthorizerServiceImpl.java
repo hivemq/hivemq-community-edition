@@ -39,7 +39,6 @@ import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.ChannelAttributes;
@@ -220,13 +219,13 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         }
 
         if (!authorizers.areAuthorizersAvailable()) {
-            incomingSubscribeService.processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], false);
+            incomingSubscribeService.processSubscribe(ctx, msg, false);
             return;
         }
 
         final Map<String, AuthorizerProvider> providerMap = authorizers.getAuthorizerProviderMap();
         if (providerMap.isEmpty()) {
-            incomingSubscribeService.processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], false);
+            incomingSubscribeService.processSubscribe(ctx, msg, false);
             return;
         }
 
