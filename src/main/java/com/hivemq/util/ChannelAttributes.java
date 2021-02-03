@@ -16,6 +16,7 @@
 package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
@@ -121,6 +122,10 @@ public class ChannelAttributes {
      */
     public static final AttributeKey<AtomicInteger> IN_FLIGHT_MESSAGES = AttributeKey.valueOf("Client.InFlightMessages");
 
+    /**
+     * Representation of information regarding the connection of a single client
+     */
+    public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("CLIENT.connection");
 
     /* *****************
      *      MQTT 5     *

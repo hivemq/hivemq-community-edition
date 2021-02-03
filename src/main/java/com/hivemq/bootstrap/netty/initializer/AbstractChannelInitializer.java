@@ -68,6 +68,9 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
 
+        //   final PublishSendHandler publishSendHandler = new PublishSendHandler();
+        //   ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishSendHandler));
+
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
         if (throttlingEnabled) {
@@ -84,6 +87,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(INTERCEPTOR_HANDLER, channelDependencies.getInterceptorHandler());
 
         //MQTT_PUBLISH_FLOW_HANDLER is added here after CONNECT
+        //     ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
 
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
