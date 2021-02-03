@@ -62,7 +62,7 @@ public class OrderedTopicService {
     private final @NotNull Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
 
 
-    public void messageFlowComplete(@NotNull final ChannelHandlerContext ctx, final int packetId){
+    public void messageFlowComplete(final @NotNull ChannelHandlerContext ctx, final int packetId) {
         final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
 
         if (publishStatusFuture != null) {
@@ -91,7 +91,7 @@ public class OrderedTopicService {
         } while (unacknowledgedMessages.size() < maxInflightWindow);
     }
 
-    public boolean handlePublish(final @NotNull Channel channel, @NotNull final Object msg, @NotNull final ChannelPromise promise) {
+    public boolean handlePublish(final @NotNull Channel channel, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
 
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
@@ -164,7 +164,7 @@ public class OrderedTopicService {
         }
     }
 
-    private void queueMessage(@NotNull final ChannelPromise promise, @NotNull final PUBLISH publish, @NotNull final String clientId) {
+    private void queueMessage(final @NotNull ChannelPromise promise, final @NotNull PUBLISH publish, final @NotNull String clientId) {
 
         if (log.isTraceEnabled()) {
             final String topic = publish.getTopic();
@@ -190,7 +190,7 @@ public class OrderedTopicService {
         @NotNull
         private final ChannelPromise promise;
 
-        QueuedMessage(@NotNull final PUBLISH publish, @NotNull final ChannelPromise promise) {
+        QueuedMessage(final @NotNull PUBLISH publish, final @NotNull ChannelPromise promise) {
 
             this.publish = publish;
             this.promise = promise;

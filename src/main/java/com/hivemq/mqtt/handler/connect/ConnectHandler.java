@@ -51,7 +51,6 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
-import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.*;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -519,7 +518,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                     msg.getClientIdentifier(), sessionExpiryInterval, msg.getWillPublish(),
                     queueSizeMaximum);
 
-        FutureUtils.addPersistenceCallback(future, new UpdatePersistenceCallback(ctx, this, msg, existent));
+        Futures.addCallback(future, new UpdatePersistenceCallback(ctx, this, msg, existent), ctx.executor());
     }
 
     private void afterPersistSession(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {

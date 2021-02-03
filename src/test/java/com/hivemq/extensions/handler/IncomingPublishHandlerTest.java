@@ -156,7 +156,7 @@ public class IncomingPublishHandlerTest {
                 mock(OrderedTopicService.class),
                 mock(MessageIDPools.class),
                 incomingPublishHandler,
-                () -> mock(DropOutgoingPublishesHandler.class));
+                mock(DropOutgoingPublishesHandler.class));
         channel.pipeline().addFirst(publishFlowHandler);
         channelHandlerContext = channel.pipeline().context(PublishFlowHandler.class);
     }

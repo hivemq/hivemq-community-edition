@@ -90,7 +90,7 @@ public class PublishFlowHandlerTest {
         orderedTopicService = new OrderedTopicService();
         embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
-                () -> mock(DropOutgoingPublishesHandler.class)));
+                mock(DropOutgoingPublishesHandler.class)));
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(CLIENT_ID);
     }
 

@@ -75,7 +75,7 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
                 public void operationComplete(final @NotNull ChannelFuture future) {
                     if (future.isSuccess()) {
                         final boolean allMessagesReleased = releaseQueuedMessages(ctx);
-                        if(allMessagesReleased){
+                        if (allMessagesReleased){
                             ctx.channel().config().setAutoRead(true);
                             ctx.pipeline().remove(SubscribeMessageBarrier.this);
                         }
@@ -85,11 +85,9 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
                 private boolean releaseQueuedMessages(final @NotNull ChannelHandlerContext ctx) {
                     while (messageQueue.size() > 0) {
                         final Message message = messageQueue.poll();
+                        ctx.fireChannelRead(message);
                         if (message instanceof SUBSCRIBE || message instanceof UNSUBSCRIBE) {
-                            ctx.fireChannelRead(message);
                             return false;
-                        } else {
-                            ctx.fireChannelRead(message);
                         }
                     }
                     return true;

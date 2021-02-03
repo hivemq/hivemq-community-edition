@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,7 +64,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull MessageIDPools messageIDPools;
     private final @NotNull IncomingPublishHandler incomingPublishHandler;
-    private final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider;
+    private final @NotNull DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
     private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
 
@@ -76,14 +75,14 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
                               final @NotNull OrderedTopicService orderedTopicService,
                               final @NotNull MessageIDPools messageIDPools,
                               final @NotNull IncomingPublishHandler incomingPublishHandler,
-                              final @NotNull Provider<DropOutgoingPublishesHandler> dropOutgoingPublishesHandlerProvider) {
+                              final @NotNull DropOutgoingPublishesHandler dropOutgoingPublishesHandler) {
         this.publishPollService = publishPollService;
         this.persistence = persistence;
         this.orderedTopicService = orderedTopicService;
         this.qos1And2AlreadySentMap = new HashMap<>();
         this.messageIDPools = messageIDPools;
         this.incomingPublishHandler = incomingPublishHandler;
-        this.dropOutgoingPublishesHandlerProvider = dropOutgoingPublishesHandlerProvider;
+        this.dropOutgoingPublishesHandler = dropOutgoingPublishesHandler;
     }
 
     @Override
@@ -139,7 +138,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         }
 
         if(DROP_MESSAGES_QOS_0){
-            final boolean messageDropped = dropOutgoingPublishesHandlerProvider.get().checkChannelNotWritable(ctx, msg, promise);
+            final boolean messageDropped = dropOutgoingPublishesHandler.checkChannelNotWritable(ctx, msg, promise);
             if(messageDropped){
                 return;
             }

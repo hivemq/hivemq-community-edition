@@ -67,7 +67,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -140,7 +139,6 @@ public class ConnectHandlerTest {
     private ConnectHandler handler;
     private ModifiableDefaultPermissions defaultPermissions;
 
-    private final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
     private MqttServerDisconnectorImpl serverDisconnector;
 
     @Before
@@ -170,14 +168,6 @@ public class ConnectHandlerTest {
                 mqttConnacker));
 
         defaultPermissions = new ModifiableDefaultPermissionsImpl();
-
-//        when(embeddedChannel.pipeline()).thenReturn(pipeline);
-//        when(ctx.channel()).thenReturn(embeddedChannel);
-//        when(ctx.pipeline()).thenReturn(pipeline);
-//        when(embeddedChannel.closeFuture()).thenReturn(channelFuture);
-//        when(embeddedChannel.attr(eq(ChannelAttributes.TAKEN_OVER))).thenReturn(new TestChannelAttribute<Boolean>(false));
-//        when(embeddedChannel.attr(eq(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED))).thenReturn(new TestChannelAttribute<Boolean>(true));
-//        when(embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
 
         when(clientSessionPersistence.clientConnected(
                 anyString(),
@@ -1517,6 +1507,8 @@ public class ConnectHandlerTest {
         assertTrue(embeddedChannel.isOpen());
 
         handler.afterTakeover(ctx, connect);
+        embeddedChannel.runScheduledPendingTasks();
+        embeddedChannel.runPendingTasks();
 
         assertFalse(embeddedChannel.isOpen());
     }
@@ -1543,7 +1535,7 @@ public class ConnectHandlerTest {
                         mock(OrderedTopicService.class),
                         mock(MessageIDPools.class),
                         mock(IncomingPublishHandler.class),
-                        () -> mock(DropOutgoingPublishesHandler.class));
+                        mock(DropOutgoingPublishesHandler.class));
 
         final Provider<FlowControlHandler> flowControlHandlerProvider =
                 () -> new FlowControlHandler(configurationService.mqttConfiguration(), serverDisconnector);
