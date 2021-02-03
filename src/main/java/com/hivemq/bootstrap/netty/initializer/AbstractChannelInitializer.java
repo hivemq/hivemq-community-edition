@@ -88,12 +88,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(INTERCEPTOR_HANDLER, channelDependencies.getInterceptorHandler());
 
         //MQTT_PUBLISH_FLOW_HANDLER is added here after CONNECT
-        ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
-
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
 
+        ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
         // after connect inbound interceptor as it intercepts the connect
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
