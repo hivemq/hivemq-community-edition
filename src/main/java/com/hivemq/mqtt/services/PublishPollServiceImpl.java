@@ -24,8 +24,8 @@ import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
+import com.hivemq.mqtt.handler.publish.PublishSendHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
-import com.hivemq.mqtt.handler.publish.PublishWriteFailedListener;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
@@ -181,12 +181,19 @@ public class PublishPollServiceImpl implements PublishPollService {
                 for (int i = usedIds; i < messageIds.length(); i++) {
                     messageIDPool.returnId(messageIds.get(i));
                 }
-
+                final List<PublishWithFuture> publishesToSend = new ArrayList<>();
                 final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
                 for (final PUBLISH publish : publishes) {
                     inFlightMessages.incrementAndGet();
                     try {
-                        sendOutPublish(publish, false, channel, client, messageIDPool, client);
+                        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+                        PUBLISH publish2 = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPersistence(payloadPersistence).build();
+                        //The client is connected locally
+                        final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
+                        Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
+                                PublishPollServiceImpl.this, false, client, publish2, messageIDPool, channel, client), MoreExecutors.directExecutor());
+                        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish2, publishFuture, false, payloadPersistence);
+                        publishesToSend.add(publishWithFuture);
                     } catch (final PayloadPersistenceException e) {
                         // We don't prevent other messages form being published in case the reference is missing
                         log.error("Payload reference error for publish on topic: " + publish.getTopic(), e);
@@ -197,6 +204,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
+                sendOutPublishes(publishesToSend, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler());
             }
 
             @Override
@@ -223,6 +231,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 }
 
                 final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
+                final List<PublishWithFuture> publishesToSend = new ArrayList<>();
                 for (final MessageWithID message : messages) {
                     inFlightMessageCount.incrementAndGet();
                     final MessageIDPool messageIDPool = messageIDPools.forClient(client);
@@ -243,7 +252,14 @@ public class PublishPollServiceImpl implements PublishPollService {
                     if (message instanceof PUBLISH) {
                         final PUBLISH publish = (PUBLISH) message;
                         try {
-                            sendOutPublish(publish, false, channel, client, messageIDPool, client);
+                            payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+                            PUBLISH publish2 = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPersistence(payloadPersistence).build();
+                            //The client is connected locally
+                            final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
+                            Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
+                                    PublishPollServiceImpl.this, false, client, publish2, messageIDPool, channel, client), MoreExecutors.directExecutor());
+                            final PublishWithFuture publishWithFuture = new PublishWithFuture(publish2, publishFuture, false, payloadPersistence);
+                            publishesToSend.add(publishWithFuture);
                         } catch (final PayloadPersistenceException e) {
                             // We don't prevent other messages form being published in case on reference is missing
                             log.error("Payload reference error for publish on topic: " + publish.getTopic(), e);
@@ -261,6 +277,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         Futures.addCallback(settableFuture, new PubrelResendCallback(client, message, messageIDPool, channel), MoreExecutors.directExecutor());
                     }
                 }
+                sendOutPublishes(publishesToSend, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler());
             }
 
             @Override
@@ -320,6 +337,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 }
                 final MessageIDPool messageIDPool = messageIDPools.forClient(client);
                 final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
+                final List<PublishWithFuture> publishesToSend = new ArrayList<>();
                 for (PUBLISH publish : publishes) {
                     try {
                         inFlightMessages.incrementAndGet();
@@ -349,7 +367,14 @@ public class PublishPollServiceImpl implements PublishPollService {
                         return;
                     }
                     try {
-                        sendOutPublish(publish, true, channel, sharedSubscription, messageIDPool, client);
+                        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
+                        PUBLISH publish2 = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPersistence(payloadPersistence).build();
+                        //The client is connected locally
+                        final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
+                        Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
+                                PublishPollServiceImpl.this, true, sharedSubscription, publish2, messageIDPool, channel, client), MoreExecutors.directExecutor());
+                        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish2, publishFuture, false, payloadPersistence);
+                        publishesToSend.add(publishWithFuture);
                     } catch (final PayloadPersistenceException e) {
                         // We don't prevent other messages form being published in case on reference is missing
                         log.error("Payload reference error for publish on topic: " + publish.getTopic(), e);
@@ -360,6 +385,8 @@ public class PublishPollServiceImpl implements PublishPollService {
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
+                sendOutPublishes(publishesToSend, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler());
+
             }
 
             @Override
@@ -370,20 +397,8 @@ public class PublishPollServiceImpl implements PublishPollService {
         }, singleWriterService.callbackExecutor(client));
     }
 
-    private void sendOutPublish(PUBLISH publish, final boolean shared, @NotNull final Channel channel, @NotNull final String queueId,
-                                @NotNull final MessageIDPool messageIDPool, @NotNull final String client) {
-
-        payloadPersistence.add(publish.getPayload(), 1, publish.getPublishId());
-        publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish).withPersistence(payloadPersistence).build();
-
-        //The client is connected locally
-        final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
-
-        Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
-                this, shared, queueId, publish, messageIDPool, channel, client), MoreExecutors.directExecutor());
-
-        final PublishWithFuture message = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
-        channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
+    private void sendOutPublishes(List<PublishWithFuture> publishes, @NotNull final PublishSendHandler publishSendHandler) {
+        publishSendHandler.sendPublish(publishes);
     }
 
     /**
