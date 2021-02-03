@@ -91,7 +91,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_retained_message_remove() throws Exception {
 
-        when(topicTree.getTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
         publishService = new InternalPublishServiceImpl(retainedMessagePersistence, topicTree, publishDistributor);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
@@ -107,7 +107,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_retained_message_remove_failed() throws Exception {
 
-        when(topicTree.getTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
         publishService = new InternalPublishServiceImpl(retainedMessagePersistence, topicTree, publishDistributor);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
@@ -122,7 +122,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_no_subs() throws ExecutionException, InterruptedException {
 
-        when(topicTree.getTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers(anyString())).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -140,7 +140,7 @@ public class InternalPublishServiceImplTest {
         final SubscriberWithIdentifiers sub1 = new SubscriberWithIdentifiers("sub1", 1, noLocalFlag, null);
         final SubscriberWithIdentifiers sub2 = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -162,7 +162,7 @@ public class InternalPublishServiceImplTest {
         final SubscriberWithIdentifiers sub1 = new SubscriberWithIdentifiers("sub1", 1, (byte) 0, null);
         final SubscriberWithIdentifiers sub2 = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -184,7 +184,7 @@ public class InternalPublishServiceImplTest {
         final SubscriberWithIdentifiers sub1 = new SubscriberWithIdentifiers("sub1", 1, (byte) 0, null);
         final SubscriberWithIdentifiers sub2 = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
         publish.setDuplicateDelivery(true);
@@ -205,7 +205,7 @@ public class InternalPublishServiceImplTest {
         final SubscriberWithIdentifiers sub1 = new SubscriberWithIdentifiers("sub1", 1, (byte) 0, null);
         final SubscriberWithIdentifiers sub2 = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -219,7 +219,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_shared_subs_different_groups() {
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of("group1/topic", "group2/topic")));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of("group1/topic", "group2/topic")));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -239,7 +239,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_shared_subs_same_group() {
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of("group1/topic", "group1/#")));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of("group1/topic", "group1/#")));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 
@@ -261,7 +261,7 @@ public class InternalPublishServiceImplTest {
 
         final SubscriberWithIdentifiers sub = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 
-        when(topicTree.getTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub), ImmutableSet.of("group1/topic")));
+        when(topicTree.findTopicSubscribers("topic")).thenReturn(new TopicSubscribers(ImmutableSet.of(sub), ImmutableSet.of("group1/topic")));
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
 

@@ -119,7 +119,7 @@ public class PublishServiceImpl implements PublishService {
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
 
         final SettableFuture<PublishToClientResult> sendPublishFuture = SettableFuture.create();
-        final SubscriberWithIdentifiers subscriber = topicTree.getSubscriber(clientId, publish.getTopic());
+        final SubscriberWithIdentifiers subscriber = topicTree.findSubscriber(clientId, publish.getTopic());
 
         if (subscriber == null) {
             sendPublishFuture.set(PublishToClientResult.NOT_SUBSCRIBED);

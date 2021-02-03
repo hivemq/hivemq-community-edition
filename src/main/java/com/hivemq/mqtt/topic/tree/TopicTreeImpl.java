@@ -68,7 +68,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     private final int mapCreationThreshold;
 
     @Inject
-    public TopicTreeImpl(@NotNull final MetricsHolder metricsHolder) {
+    public TopicTreeImpl(final @NotNull MetricsHolder metricsHolder) {
 
         this.subscriptionCounter = metricsHolder.getSubscriptionCounter();
         this.mapCreationThreshold = TOPIC_TREE_MAP_CREATION_THRESHOLD.get();
@@ -85,7 +85,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * {@inheritDoc}
      */
     @Override
-    public boolean addTopic(@NotNull final String subscriber, @NotNull final Topic topic, final byte flags, @Nullable final String sharedGroup) {
+    public boolean addTopic(final @NotNull String subscriber, final @NotNull Topic topic, final byte flags, @Nullable final String sharedGroup) {
 
         checkNotNull(subscriber, "Subscriber must not be null");
         checkNotNull(topic, "Topic must not be null");
@@ -141,7 +141,7 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
     }
 
-    private boolean addNode(@NotNull final SubscriberWithQoS subscriber, @NotNull final String[] contents, @NotNull final Node node, final int i) {
+    private boolean addNode(final @NotNull SubscriberWithQoS subscriber, final @NotNull String[] contents, final @NotNull Node node, final int i) {
 
         final String content = contents[i];
 
@@ -168,12 +168,12 @@ public class TopicTreeImpl implements LocalTopicTree {
      */
     @Override
     @NotNull
-    public TopicSubscribers getTopicSubscribers(@NotNull final String topic) {
-        return getTopicSubscribers(topic, false);
+    public TopicSubscribers findTopicSubscribers(final @NotNull String topic) {
+        return findTopicSubscribers(topic, false);
     }
 
     @NotNull
-    public TopicSubscribers getTopicSubscribers(@NotNull final String topic, final boolean excludeRootLevelWildcard) {
+    public TopicSubscribers findTopicSubscribers(final @NotNull String topic, final boolean excludeRootLevelWildcard) {
         final ImmutableList.Builder<SubscriberWithQoS> subscribers = ImmutableList.builder();
         final ImmutableSet.Builder<String> sharedSubscriptions = ImmutableSet.builder();
 
@@ -181,7 +181,7 @@ public class TopicTreeImpl implements LocalTopicTree {
             addWithTopicFilter(subscribers, sharedSubscriptions, subscriberWithQoS, topicFilter);
         };
 
-        getTopicSubscribers(topic, excludeRootLevelWildcard, subscriberConsumer);
+        findTopicSubscribers(topic, excludeRootLevelWildcard, subscriberConsumer);
 
         final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = createDistinctSubscribers(subscribers.build());
 
@@ -189,8 +189,8 @@ public class TopicTreeImpl implements LocalTopicTree {
     }
 
     @NotNull
-    private void getTopicSubscribers(@NotNull final String topic, final boolean excludeRootLevelWildcard,
-                                     @NotNull final BiConsumer<SubscriberWithQoS, String> subscriberAndTopicConsumer) {
+    private void findTopicSubscribers(final @NotNull String topic, final boolean excludeRootLevelWildcard,
+                                      final @NotNull BiConsumer<SubscriberWithQoS, String> subscriberAndTopicConsumer) {
 
         checkNotNull(topic, "Topic must not be null");
 
@@ -244,10 +244,10 @@ public class TopicTreeImpl implements LocalTopicTree {
      * Add a subscriber to the first given builder.
      * In case it is a shared subscription, the shared subscription string is added to the second builder.
      */
-    private void addWithTopicFilter(@NotNull final ImmutableList.Builder<SubscriberWithQoS> subscribersBuilder,
-                                    @NotNull final ImmutableSet.Builder<String> sharedSubscriptionsBuilder,
-                                    @NotNull final SubscriberWithQoS subscriber,
-                                    @NotNull final String topicFilter) {
+    private void addWithTopicFilter(final @NotNull ImmutableList.Builder<SubscriberWithQoS> subscribersBuilder,
+                                    final @NotNull ImmutableSet.Builder<String> sharedSubscriptionsBuilder,
+                                    final @NotNull SubscriberWithQoS subscriber,
+                                    final @NotNull String topicFilter) {
 
         if (subscriber.isSharedSubscription()) {
             final String sharedSubscription = subscriber.getSharedName() + "/" + topicFilter;
@@ -261,8 +261,8 @@ public class TopicTreeImpl implements LocalTopicTree {
      * Add a subscriber to the given builder.
      * In case it is a shared subscription, the subscriber is copied and the topic filter is added to the copy.
      */
-    private void addWithTopicFilter(@NotNull final ImmutableList.Builder<SubscriberWithQoS> builder, final SubscriberWithQoS subscriber,
-                                    @NotNull final String[] topicParts, final int topicIndex, @NotNull final String topicPrefix) {
+    private void addWithTopicFilter(final @NotNull ImmutableList.Builder<SubscriberWithQoS> builder, final SubscriberWithQoS subscriber,
+                                    final @NotNull String[] topicParts, final int topicIndex, final @NotNull String topicPrefix) {
         if (!subscriber.isSharedSubscription()) {
             builder.add(subscriber);
             return;
@@ -289,7 +289,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @return a immutable Set of distinct Subscribers with the maximum QoS.
      */
     @NotNull
-    private ImmutableSet<SubscriberWithIdentifiers> createDistinctSubscribers(@NotNull final ImmutableList<SubscriberWithQoS> subscribers) {
+    private ImmutableSet<SubscriberWithIdentifiers> createDistinctSubscribers(final @NotNull ImmutableList<SubscriberWithQoS> subscribers) {
 
 
         final ImmutableSet.Builder<SubscriberWithIdentifiers> newSet = ImmutableSet.builder();
@@ -334,15 +334,15 @@ public class TopicTreeImpl implements LocalTopicTree {
         return newSet.build();
     }
 
-    private boolean equalSubscription(@NotNull final SubscriberWithQoS first, @NotNull final SubscriberWithIdentifiers second) {
+    private boolean equalSubscription(final @NotNull SubscriberWithQoS first, final @NotNull SubscriberWithIdentifiers second) {
         return equalSubscription(first, second.getSubscriber(), second.getTopicFilter(), second.getSharedName());
     }
 
-    private boolean equalSubscription(@NotNull final SubscriberWithQoS first, @NotNull final SubscriberWithQoS second) {
+    private boolean equalSubscription(final @NotNull SubscriberWithQoS first, final @NotNull SubscriberWithQoS second) {
         return equalSubscription(first, second.getSubscriber(), second.getTopicFilter(), second.getSharedName());
     }
 
-    private boolean equalSubscription(@NotNull final SubscriberWithQoS first, @NotNull final String secondClient, @Nullable final String secondTopicFilter, @Nullable final String secondSharedName) {
+    private boolean equalSubscription(final @NotNull SubscriberWithQoS first, final @NotNull String secondClient, @Nullable final String secondTopicFilter, @Nullable final String secondSharedName) {
         if (!first.getSubscriber().equals(secondClient)) {
             return false;
         }
@@ -353,7 +353,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     }
 
 
-    private void traverseTree(@NotNull final Node node, @NotNull final BiConsumer<SubscriberWithQoS, String> subscriberAndTopicConsumer,
+    private void traverseTree(final @NotNull Node node, final @NotNull BiConsumer<SubscriberWithQoS, String> subscriberAndTopicConsumer,
                               final String[] topicPart, final int depth, @NotNull String topic) {
 
         if (!topicPart[depth].equals(node.getTopicPart()) && !"+".equals(node.getTopicPart())) {
@@ -456,7 +456,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param subscriber the clientId
      * @return if there was already a subscription for this client
      */
-    private boolean removeRootWildcardSubscriber(@NotNull final String subscriber, @Nullable final String sharedName) {
+    private boolean removeRootWildcardSubscriber(final @NotNull String subscriber, @Nullable final String sharedName) {
         final ImmutableList.Builder<SubscriberWithQoS> foundSubscribers = ImmutableList.builder();
         for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
             if (rootWildcardSubscriber.getSubscriber().equals(subscriber) &&
@@ -479,7 +479,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * {@inheritDoc}
      */
     @Override
-    public void removeSubscriber(@NotNull final String subscriber, @NotNull final String topic, @Nullable final String sharedName) {
+    public void removeSubscriber(final @NotNull String subscriber, final @NotNull String topic, @Nullable final String sharedName) {
         checkNotNull(subscriber);
         checkNotNull(topic);
 
@@ -571,7 +571,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     }
 
     @Nullable
-    private Node getLastNode(@NotNull final Node[] nodes) {
+    private Node getLastNode(final @NotNull Node[] nodes) {
         //Search for the last node which is not null
         for (int i = nodes.length - 1; i >= 0; i--) {
             final Node node = nodes[i];
@@ -594,7 +594,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param results    the result array
      * @param depth      the current topic level depth
      */
-    private void iterateChildNodesForSubscriberRemoval(@NotNull final Node node, @NotNull final String[] topicParts, @NotNull final Node[] results, final int depth) {
+    private void iterateChildNodesForSubscriberRemoval(final @NotNull Node node, final @NotNull String[] topicParts, final @NotNull Node[] results, final int depth) {
 
         //Note dobermai: We don't need to check for "+" subscribers explicitly, because unsubscribes are always absolute
 
@@ -640,7 +640,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      */
     @Override
     @NotNull
-    public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(@NotNull final String group, @NotNull final String topicFilter) {
+    public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(final @NotNull String group, final @NotNull String topicFilter) {
         return getSubscriptionsByTopicFilter(topicFilter, subscriber -> {
             return subscriber.isSharedSubscription()
                     && subscriber.getSharedName() != null
@@ -650,12 +650,12 @@ public class TopicTreeImpl implements LocalTopicTree {
 
     @Override
     @NotNull
-    public ImmutableSet<String> getSubscribersWithFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
+    public ImmutableSet<String> getSubscribersWithFilter(final @NotNull String topicFilter, final @NotNull ItemFilter itemFilter) {
         return createDistinctSubscriberIds(getSubscriptionsByTopicFilter(topicFilter, itemFilter));
     }
 
     @Override
-    public @NotNull ImmutableSet<String> getSubscribersForTopic(@NotNull final String topic, @NotNull final ItemFilter itemFilter, final boolean excludeRootLevelWildcard) {
+    public @NotNull ImmutableSet<String> getSubscribersForTopic(final @NotNull String topic, final @NotNull ItemFilter itemFilter, final boolean excludeRootLevelWildcard) {
         checkNotNull(topic, "Topic must not be null");
 
         final ImmutableSet.Builder<String> subscribers = ImmutableSet.builder();
@@ -707,8 +707,8 @@ public class TopicTreeImpl implements LocalTopicTree {
     }
 
 
-    private void traverseTreeWithFilter(@NotNull final Node node, @NotNull final ImmutableSet.Builder<String> subscribers,
-                                        final String[] topicPart, final int depth, @NotNull final ItemFilter itemFilter) {
+    private void traverseTreeWithFilter(final @NotNull Node node, final @NotNull ImmutableSet.Builder<String> subscribers,
+                                        final String[] topicPart, final int depth, final @NotNull ItemFilter itemFilter) {
 
         if (!topicPart[depth].equals(node.getTopicPart()) && !"+".equals(node.getTopicPart())) {
             return;
@@ -803,7 +803,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     }
 
     @NotNull
-    private ImmutableSet<SubscriberWithQoS> getSubscriptionsByTopicFilter(@NotNull final String topicFilter, @NotNull final ItemFilter itemFilter) {
+    private ImmutableSet<SubscriberWithQoS> getSubscriptionsByTopicFilter(final @NotNull String topicFilter, final @NotNull ItemFilter itemFilter) {
         final ImmutableSet.Builder<SubscriberWithQoS> subscribers = ImmutableSet.builder();
         if (topicFilter.equals("#")) {
             for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
@@ -888,8 +888,8 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
     }
 
-    private void addAfterCallback(@NotNull final ItemFilter itemFilter,
-                                  @NotNull final ImmutableSet.Builder<SubscriberWithQoS> subscribers,
+    private void addAfterCallback(final @NotNull ItemFilter itemFilter,
+                                  final @NotNull ImmutableSet.Builder<SubscriberWithQoS> subscribers,
                                   @Nullable final SubscriberWithQoS subscriber) {
         if (subscriber != null) {
             if (itemFilter.checkItem(subscriber)) {
@@ -898,8 +898,8 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
     }
 
-    private void addAfterItemCallback(@NotNull final ItemFilter itemFilter,
-                                      @NotNull final ImmutableSet.Builder<String> subscribers,
+    private void addAfterItemCallback(final @NotNull ItemFilter itemFilter,
+                                      final @NotNull ImmutableSet.Builder<String> subscribers,
                                       @Nullable final SubscriberWithQoS subscriber) {
         if (subscriber != null) {
             if (itemFilter.checkItem(subscriber)) {
@@ -913,7 +913,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      */
     @Override
     @Nullable
-    public SubscriberWithIdentifiers getSubscriber(@NotNull final String client, @NotNull final String topic) {
+    public SubscriberWithIdentifiers findSubscriber(final @NotNull String client, final @NotNull String topic) {
 
         class SubscriberConsumer implements BiConsumer<SubscriberWithQoS, String> {
 
@@ -948,7 +948,7 @@ public class TopicTreeImpl implements LocalTopicTree {
 
         final SubscriberConsumer subscriberConsumer = new SubscriberConsumer();
 
-        getTopicSubscribers(topic, false, subscriberConsumer);
+        findTopicSubscribers(topic, false, subscriberConsumer);
 
         return subscriberConsumer.getMatchingSubscriber();
     }

@@ -24,11 +24,11 @@ import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
  */
 public class TopicSubscribers {
 
-    private final ImmutableSet<SubscriberWithIdentifiers> subscriber;
-    private final ImmutableSet<String> sharedSubscriptions;
+    private final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber;
+    private final @NotNull ImmutableSet<String> sharedSubscriptions;
 
-    public TopicSubscribers(@NotNull final ImmutableSet<SubscriberWithIdentifiers> subscriber,
-                            @NotNull final ImmutableSet<String> sharedSubscriptions) {
+    public TopicSubscribers(final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber,
+                            final @NotNull  ImmutableSet<String> sharedSubscriptions) {
         this.subscriber = subscriber;
         this.sharedSubscriptions = sharedSubscriptions;
     }
