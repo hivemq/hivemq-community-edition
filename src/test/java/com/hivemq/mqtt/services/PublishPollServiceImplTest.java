@@ -19,8 +19,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
+import com.hivemq.mqtt.handler.publish.PublishSendHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
@@ -103,6 +105,9 @@ public class PublishPollServiceImplTest {
     @Mock
     SharedSubscriptionService sharedSubscriptionService;
 
+    @Mock
+    PublishSendHandler publishSendHandler;
+
     private PublishPollService publishPollService;
 
     @Before
@@ -113,6 +118,8 @@ public class PublishPollServiceImplTest {
         when(channel.pipeline()).thenReturn(pipeline);
         when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(publishSendHandler)));
+
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
 
@@ -131,7 +138,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(48)).returnId(anyInt());
-        verify(channel, times(2)).writeAndFlush(any(PUBLISH.class));
+        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
     }
 
 
@@ -147,10 +154,11 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
+
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(9)).returnId(anyInt()); // 10 messages are polled because the client receive max is 10
-        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
+        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
     }
 
     @Test
@@ -163,10 +171,10 @@ public class PublishPollServiceImplTest {
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         publishPollService.pollNewMessages("client");
-        final ArgumentCaptor<PublishWithFuture> argumentCaptor = ArgumentCaptor.forClass(PublishWithFuture.class);
+        final ArgumentCaptor<List<PublishWithFuture>> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-        verify(channel, times(1)).writeAndFlush(argumentCaptor.capture());
-        argumentCaptor.getValue().getFuture().set(PublishStatus.NOT_CONNECTED);
+        verify(publishSendHandler, times(1)).sendPublish(argumentCaptor.capture());
+        argumentCaptor.getValue().get(0).getFuture().set(PublishStatus.NOT_CONNECTED);
         verify(messageIDPool, times(50)).returnId(anyInt()); // The id must be returned
     }
 
@@ -184,7 +192,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(2)).takeIfAvailable(anyInt());
-        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
+        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
         verify(channel).writeAndFlush(any(PubrelWithFuture.class));
     }
 
@@ -200,7 +208,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(1)).takeIfAvailable(anyInt());
-        verify(channel, times(1)).writeAndFlush(any(PUBLISH.class));
+        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
         verify(messageIDPool).returnId(2);
     }
 
@@ -240,11 +248,11 @@ public class PublishPollServiceImplTest {
 
         publishPollService.pollSharedPublishes("group/topic");
 
-        final ArgumentCaptor<PUBLISH> captor = ArgumentCaptor.forClass(PUBLISH.class);
-        verify(channel, times(3)).writeAndFlush(captor.capture());
+        final ArgumentCaptor<List<PublishWithFuture>> captor = ArgumentCaptor.forClass(List.class);
+        verify(publishSendHandler, times(1)).sendPublish(captor.capture());
         verify(messageIDPool, times(2)).takeNextId();
 
-        final List<PUBLISH> values = captor.getAllValues();
+        final List<PublishWithFuture> values = captor.getValue();
         assertEquals(2, values.get(0).getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, values.get(0).getQoS());
         assertEquals(1, values.get(0).getSubscriptionIdentifiers().get(0));
