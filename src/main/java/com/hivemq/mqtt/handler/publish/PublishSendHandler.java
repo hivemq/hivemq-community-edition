@@ -34,8 +34,10 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter {
 
     public void sendPublish(final @NotNull List<PublishWithFuture> publishes) {
         assert ctx != null : "Context must not be null";
-        messagesToWrite.addAll(publishes);
-        consumeQueue();
+        ctx.channel().eventLoop().execute(() -> {
+            messagesToWrite.addAll(publishes);
+            consumeQueue();
+        });
     }
 
     public void consumeQueue() {
