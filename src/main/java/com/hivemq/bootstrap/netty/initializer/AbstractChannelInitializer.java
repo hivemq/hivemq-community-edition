@@ -16,6 +16,7 @@
 package com.hivemq.bootstrap.netty.initializer;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -23,6 +24,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
+import com.hivemq.mqtt.handler.publish.PublishSendHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -67,9 +69,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     protected void initChannel(@NotNull final Channel ch) throws Exception {
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
-
-        //   final PublishSendHandler publishSendHandler = new PublishSendHandler();
-        //   ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishSendHandler));
+        final PublishSendHandler publishSendHandler = new PublishSendHandler();
+        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishSendHandler));
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
@@ -87,7 +88,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(INTERCEPTOR_HANDLER, channelDependencies.getInterceptorHandler());
 
         //MQTT_PUBLISH_FLOW_HANDLER is added here after CONNECT
-        //     ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
+        ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
 
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
