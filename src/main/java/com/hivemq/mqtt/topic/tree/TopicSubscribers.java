@@ -28,7 +28,7 @@ public class TopicSubscribers {
     private final @NotNull ImmutableSet<String> sharedSubscriptions;
 
     public TopicSubscribers(final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber,
-                            final @NotNull  ImmutableSet<String> sharedSubscriptions) {
+                            final @NotNull ImmutableSet<String> sharedSubscriptions) {
         this.subscriber = subscriber;
         this.sharedSubscriptions = sharedSubscriptions;
     }
