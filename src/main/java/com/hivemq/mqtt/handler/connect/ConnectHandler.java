@@ -528,7 +528,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         sharedSubscriptionService.invalidateSharedSubscriptionCache(msg.getClientIdentifier());
 
         addKeepAliveHandler(ctx, msg);
-
         sendConnackSuccess(ctx, msg, sessionPresent);
 
         //We're removing ourselves
@@ -537,7 +536,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         } catch (final NoSuchElementException e) {
             //noop since handler has already been removed
         }
-        ctx.fireChannelRead(msg);
     }
 
     private void sendConnackSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
