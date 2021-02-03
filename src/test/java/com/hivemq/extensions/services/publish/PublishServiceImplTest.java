@@ -148,7 +148,7 @@ public class PublishServiceImplTest {
     public void test_publish_to_client() throws Exception {
         final byte subscriptionFlags = SubscriptionFlags.getDefaultFlags(false, false, false);
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
-        when(topicTree.getSubscriber("client", "topic")).thenReturn(
+        when(topicTree.findSubscriber("client", "topic")).thenReturn(
                 new SubscriberWithIdentifiers("client", 1, subscriptionFlags, null));
         when(publishDistributor.sendMessageToSubscriber(any(PUBLISH.class), anyString(), anyInt(), anyBoolean(), anyBoolean(),
                 any(ImmutableIntArray.class))).thenReturn(Futures.immediateFuture(PublishStatus.DELIVERED));
@@ -159,7 +159,7 @@ public class PublishServiceImplTest {
     @Test(timeout = 10000)
     public void test_publish_to_client_not_subscribed() throws Exception {
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
-        when(topicTree.getSubscriber("client", "topic")).thenReturn(null);
+        when(topicTree.findSubscriber("client", "topic")).thenReturn(null);
         final PublishToClientResult result = publishService.publishToClient(publish, "client").get();
         assertEquals(PublishToClientResult.NOT_SUBSCRIBED, result);
     }

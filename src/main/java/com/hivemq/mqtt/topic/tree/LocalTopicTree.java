@@ -37,10 +37,10 @@ public interface LocalTopicTree {
      * @return the subscribers interested in this topic with all their identifiers
      */
     @NotNull
-    TopicSubscribers getTopicSubscribers(@NotNull String topic);
+    TopicSubscribers findTopicSubscribers(@NotNull String topic);
 
     @NotNull
-    TopicSubscribers getTopicSubscribers(@NotNull String topic, boolean excludeRootLevelWildcard);
+    TopicSubscribers findTopicSubscribers(@NotNull String topic, boolean excludeRootLevelWildcard);
 
     /**
      * All subscribers that have subscribed to this exact topic filter
@@ -93,7 +93,7 @@ public interface LocalTopicTree {
      * or null if no subscription match for the client
      */
     @Nullable
-    SubscriberWithIdentifiers getSubscriber(@NotNull String client, @NotNull String topic);
+    SubscriberWithIdentifiers findSubscriber(@NotNull String client, @NotNull String topic);
 
 
     interface ItemFilter {
@@ -103,6 +103,6 @@ public interface LocalTopicTree {
          * @param subscriber the current subscriber
          * @return true if the current subscriber should be added to the result set, false if not
          */
-        boolean checkItem(@NotNull final SubscriberWithQoS subscriber);
+        boolean checkItem(final @NotNull SubscriberWithQoS subscriber);
     }
 }

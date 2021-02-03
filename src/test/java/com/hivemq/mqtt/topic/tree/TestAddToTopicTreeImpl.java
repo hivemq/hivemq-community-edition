@@ -345,7 +345,7 @@ public class TestAddToTopicTreeImpl {
         topicTree.addTopic("subscriber2", new Topic("topic1/+", QoS.AT_LEAST_ONCE), SubscriptionFlags.getDefaultFlags(false, true, true), null);
         topicTree.addTopic("subscriber3", new Topic("+/1", QoS.AT_LEAST_ONCE), SubscriptionFlags.getDefaultFlags(false, false, false), null);
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.getTopicSubscribers("topic1/1").getSubscribers();
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("topic1/1").getSubscribers();
         assertEquals(3, subscribers.size());
     }
 }

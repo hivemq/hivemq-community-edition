@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -133,7 +132,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
     @NotNull
     private ListenableFuture<PublishReturnCode> handlePublish(@NotNull final PUBLISH publish, @NotNull final ExecutorService executorService, @Nullable final String sender) {
 
-        final TopicSubscribers topicSubscribers = topicTree.getTopicSubscribers(publish.getTopic());
+        final TopicSubscribers topicSubscribers = topicTree.findTopicSubscribers(publish.getTopic());
         final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicSubscribers.getSubscribers();
         final ImmutableSet<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
 

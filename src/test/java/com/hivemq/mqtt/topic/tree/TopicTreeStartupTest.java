@@ -94,9 +94,9 @@ public class TopicTreeStartupTest {
 
         topicTreeStartup.postConstruct();
 
-        final Set<SubscriberWithIdentifiers> subscribersForTopic1 = topicTree.getTopicSubscribers("topic1").getSubscribers();
-        final Set<SubscriberWithIdentifiers> subscribersForTopic2 = topicTree.getTopicSubscribers("topic2").getSubscribers();
-        final Set<SubscriberWithIdentifiers> subscribersForTopic3 = topicTree.getTopicSubscribers("topic3").getSubscribers();
+        final Set<SubscriberWithIdentifiers> subscribersForTopic1 = topicTree.findTopicSubscribers("topic1").getSubscribers();
+        final Set<SubscriberWithIdentifiers> subscribersForTopic2 = topicTree.findTopicSubscribers("topic2").getSubscribers();
+        final Set<SubscriberWithIdentifiers> subscribersForTopic3 = topicTree.findTopicSubscribers("topic3").getSubscribers();
 
         assertThat(subscribersForTopic1, hasItems(new SubscriberWithIdentifiers("client1", 1, (byte) 0, null, ImmutableList.of(), null),
                 new SubscriberWithIdentifiers("client2", 1, (byte) 0, null, ImmutableList.of(), null)));
@@ -117,8 +117,8 @@ public class TopicTreeStartupTest {
         verify(clientSessionSubscriptionPersistence).removeAllLocally("client1");
         verify(clientSessionSubscriptionPersistence).removeAllLocally("client2");
 
-        final Set<SubscriberWithIdentifiers> subscribersForTopic1 = topicTree.getTopicSubscribers("topic1").getSubscribers();
-        final Set<SubscriberWithIdentifiers> subscribersForTopic2 = topicTree.getTopicSubscribers("topic2").getSubscribers();
+        final Set<SubscriberWithIdentifiers> subscribersForTopic1 = topicTree.findTopicSubscribers("topic1").getSubscribers();
+        final Set<SubscriberWithIdentifiers> subscribersForTopic2 = topicTree.findTopicSubscribers("topic2").getSubscribers();
 
         assertTrue(subscribersForTopic1.isEmpty());
         assertTrue(subscribersForTopic2.isEmpty());
