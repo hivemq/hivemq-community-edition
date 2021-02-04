@@ -46,7 +46,7 @@ import static com.hivemq.util.ChannelUtils.getChannelIP;
 @Singleton
 public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
-    public static final Logger log = LoggerFactory.getLogger(MqttServerDisconnectorImpl.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(MqttServerDisconnectorImpl.class);
 
     private final boolean disconnectWithReasonCode;
     private final boolean disconnectWithReasonString;
