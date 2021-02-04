@@ -24,7 +24,6 @@ import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.*;
-import com.hivemq.configuration.service.impl.PersistenceConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -199,7 +198,6 @@ public class LocalPersistenceModuleTest {
         final Injector injector =
                 createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
 
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadMemoryLocalPersistence);
         assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
     }
 
