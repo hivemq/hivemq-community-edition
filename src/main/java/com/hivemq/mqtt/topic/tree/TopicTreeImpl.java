@@ -85,7 +85,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * {@inheritDoc}
      */
     @Override
-    public boolean addTopic(final @NotNull String subscriber, final @NotNull Topic topic, final byte flags, @Nullable final String sharedGroup) {
+    public boolean addTopic(final @NotNull String subscriber, final @NotNull Topic topic, final byte flags, final @Nullable String sharedGroup) {
 
         checkNotNull(subscriber, "Subscriber must not be null");
         checkNotNull(topic, "Topic must not be null");
@@ -342,7 +342,7 @@ public class TopicTreeImpl implements LocalTopicTree {
         return equalSubscription(first, second.getSubscriber(), second.getTopicFilter(), second.getSharedName());
     }
 
-    private boolean equalSubscription(final @NotNull SubscriberWithQoS first, final @NotNull String secondClient, @Nullable final String secondTopicFilter, @Nullable final String secondSharedName) {
+    private boolean equalSubscription(final @NotNull SubscriberWithQoS first, final @NotNull String secondClient, final @Nullable String secondTopicFilter, final @Nullable String secondSharedName) {
         if (!first.getSubscriber().equals(secondClient)) {
             return false;
         }
@@ -456,7 +456,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param subscriber the clientId
      * @return if there was already a subscription for this client
      */
-    private boolean removeRootWildcardSubscriber(final @NotNull String subscriber, @Nullable final String sharedName) {
+    private boolean removeRootWildcardSubscriber(final @NotNull String subscriber, final @Nullable String sharedName) {
         final ImmutableList.Builder<SubscriberWithQoS> foundSubscribers = ImmutableList.builder();
         for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
             if (rootWildcardSubscriber.getSubscriber().equals(subscriber) &&
@@ -479,7 +479,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * {@inheritDoc}
      */
     @Override
-    public void removeSubscriber(final @NotNull String subscriber, final @NotNull String topic, @Nullable final String sharedName) {
+    public void removeSubscriber(final @NotNull String subscriber, final @NotNull String topic, final @Nullable String sharedName) {
         checkNotNull(subscriber);
         checkNotNull(topic);
 
@@ -890,7 +890,7 @@ public class TopicTreeImpl implements LocalTopicTree {
 
     private void addAfterCallback(final @NotNull ItemFilter itemFilter,
                                   final @NotNull ImmutableSet.Builder<SubscriberWithQoS> subscribers,
-                                  @Nullable final SubscriberWithQoS subscriber) {
+                                  final @Nullable SubscriberWithQoS subscriber) {
         if (subscriber != null) {
             if (itemFilter.checkItem(subscriber)) {
                 subscribers.add(subscriber);
@@ -900,7 +900,7 @@ public class TopicTreeImpl implements LocalTopicTree {
 
     private void addAfterItemCallback(final @NotNull ItemFilter itemFilter,
                                       final @NotNull ImmutableSet.Builder<String> subscribers,
-                                      @Nullable final SubscriberWithQoS subscriber) {
+                                      final @Nullable SubscriberWithQoS subscriber) {
         if (subscriber != null) {
             if (itemFilter.checkItem(subscriber)) {
                 subscribers.add(subscriber.getSubscriber());
@@ -915,38 +915,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     @Nullable
     public SubscriberWithIdentifiers findSubscriber(final @NotNull String client, final @NotNull String topic) {
 
-        class SubscriberConsumer implements BiConsumer<SubscriberWithQoS, String> {
-
-            @Nullable public SubscriberWithIdentifiers sharedSubscriber = null;
-            @NotNull ImmutableList.Builder<SubscriberWithQoS> subscribers = ImmutableList.builder();
-            private boolean normalSubscriberFound = false;
-
-            @Override
-            public void accept(final SubscriberWithQoS subscriberWithQoS, final String s) {
-                if (subscriberWithQoS.getSubscriber().equals(client)) {
-                    if (!subscriberWithQoS.isSharedSubscription()) {
-                        subscribers.add(subscriberWithQoS);
-                        normalSubscriberFound = true;
-                    } else if (!normalSubscriberFound && (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos())) {
-                        sharedSubscriber = new SubscriberWithIdentifiers(subscriberWithQoS);
-                    }
-                }
-            }
-
-            @Nullable
-            public SubscriberWithIdentifiers getMatchingSubscriber() {
-                final ImmutableList<SubscriberWithQoS> subscribers = this.subscribers.build();
-                if (!subscribers.isEmpty()) {
-                    final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = createDistinctSubscribers(subscribers);
-                    return distinctSubscribers.asList().get(0);
-                }
-                else {
-                    return sharedSubscriber;
-                }
-            }
-        }
-
-        final SubscriberConsumer subscriberConsumer = new SubscriberConsumer();
+        final FindSubscriberConsumer subscriberConsumer = new FindSubscriberConsumer(client);
 
         findTopicSubscribers(topic, false, subscriberConsumer);
 
@@ -1006,7 +975,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param array the array to check. Can be <code>null</code>.
      * @return <code>true</code> if the array does not have any values, <code>false</code> otherwise
      */
-    private boolean isEmptyArray(@Nullable final Object[] array) {
+    private boolean isEmptyArray(final @Nullable Object[] array) {
         if (array == null) {
             //Easy: When the array is null, its of course empty
             return true;
@@ -1019,6 +988,42 @@ public class TopicTreeImpl implements LocalTopicTree {
             }
         }
         return true;
+    }
+
+    class FindSubscriberConsumer implements BiConsumer<SubscriberWithQoS, String> {
+
+        private final @NotNull String client;
+        private @Nullable SubscriberWithIdentifiers sharedSubscriber = null;
+        private final @NotNull ImmutableList.Builder<SubscriberWithQoS> subscribers = ImmutableList.builder();
+        private boolean normalSubscriberFound = false;
+
+        public FindSubscriberConsumer(final @NotNull String client) {
+            this.client = client;
+        }
+
+        @Override
+        public void accept(final SubscriberWithQoS subscriberWithQoS, final String s) {
+            if (subscriberWithQoS.getSubscriber().equals(client)) {
+                if (!subscriberWithQoS.isSharedSubscription()) {
+                    subscribers.add(subscriberWithQoS);
+                    normalSubscriberFound = true;
+                } else if (!normalSubscriberFound && (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos())) {
+                    sharedSubscriber = new SubscriberWithIdentifiers(subscriberWithQoS);
+                }
+            }
+        }
+
+        @Nullable
+        public SubscriberWithIdentifiers getMatchingSubscriber() {
+            final ImmutableList<SubscriberWithQoS> subscribers = this.subscribers.build();
+            if (!subscribers.isEmpty()) {
+                final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = createDistinctSubscribers(subscribers);
+                return distinctSubscribers.asList().get(0);
+            }
+            else {
+                return sharedSubscriber;
+            }
+        }
     }
 
 }
