@@ -17,6 +17,8 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelInitializerFactoryImpl;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
@@ -32,6 +34,7 @@ import javax.inject.Provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import static util.TlsTestUtil.createDefaultTLS;
 
 @SuppressWarnings("NullabilityAnnotations")
@@ -54,11 +57,20 @@ public class ChannelInitializerFactoryImplTest {
     @Mock
     private EventLog eventLog;
 
+    @Mock
+    private FullConfigurationService fullConfigurationService;
+
+    @Mock
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+
     private ChannelInitializerFactoryImpl channelInitializerFactory;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
+        when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
+        when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
         channelInitializerFactory = new TestChannelInitializerFactory(channelDependencies,
                 sslFactory,
                 nonSslHandlerProvider);

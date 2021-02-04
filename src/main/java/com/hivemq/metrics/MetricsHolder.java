@@ -62,6 +62,7 @@ public class MetricsHolder {
         closedConnectionsCounter = metricRegistry.counter(CONNECTIONS_CLOSED_COUNT.name());
 
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
+
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {
@@ -99,4 +100,5 @@ public class MetricsHolder {
     public @NotNull Counter getClosedConnectionsCounter() {
         return closedConnectionsCounter;
     }
+
 }

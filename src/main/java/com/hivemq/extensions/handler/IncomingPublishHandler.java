@@ -48,9 +48,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +79,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 4.0.0
  */
 @Singleton
-@ChannelHandler.Sharable
-public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH> {
+public class IncomingPublishHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IncomingPublishHandler.class);
 
@@ -113,11 +110,6 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
         this.configurationService = configurationService;
     }
 
-    @Override
-    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) {
-        interceptOrDelegate(ctx, msg);
-    }
-
     /**
      * intercepts the publish message when the channel is active, the client id is set and interceptors are available,
      * otherwise delegates to authorizer
@@ -125,12 +117,8 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
      * @param ctx     the context of the channel handler
      * @param publish the publish to process
      */
-    private void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish) {
+    public void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String clientId) {
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
-        if (clientId == null) {
-            return;
-        }
 
         final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
         if (clientContext == null) {
@@ -231,7 +219,7 @@ public class IncomingPublishHandler extends SimpleChannelInboundHandler<PUBLISH>
                 dropMessage(output);
             } else {
                 final PUBLISH finalPublish = PUBLISHFactory.merge(inputHolder.get().getPublishPacket(), publish);
-                ctx.executor().execute(() -> authorizerService.authorizePublish(ctx, finalPublish));
+                authorizerService.authorizePublish(ctx, finalPublish);
             }
         }
 

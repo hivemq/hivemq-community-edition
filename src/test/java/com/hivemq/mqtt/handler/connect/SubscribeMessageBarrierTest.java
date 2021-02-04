@@ -50,14 +50,15 @@ public class SubscribeMessageBarrierTest {
 
     @Test
     public void test_default() {
-        assertEquals(false, subscribeMessageBarrier.getSubscribeInProcess());
+        assertEquals(false, embeddedChannel.config().isAutoRead());
     }
 
     @Test
     public void test_subscribe_sent() {
 
         embeddedChannel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
-        assertEquals(true, subscribeMessageBarrier.getSubscribeInProcess());
+        assertEquals(false, embeddedChannel.config().isAutoRead());
+        assertEquals(1, subscribeMessageBarrier.getQueue().size());
     }
 
     @Test
@@ -68,14 +69,12 @@ public class SubscribeMessageBarrierTest {
         embeddedChannel.writeInbound(new PUBACK(0));
         embeddedChannel.writeInbound(new DISCONNECT());
 
-        assertEquals(true, subscribeMessageBarrier.getSubscribeInProcess());
-        assertEquals(3, subscribeMessageBarrier.getQueue().size());
+        assertEquals(false, embeddedChannel.config().isAutoRead());
+        assertEquals(4, subscribeMessageBarrier.getQueue().size());
     }
 
     @Test
     public void test_messages_sent_queued_publishes() {
-
-        embeddedChannel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
 
         embeddedChannel.writeInbound(TestMessageUtil.createMqtt3Publish());
         embeddedChannel.writeInbound(TestMessageUtil.createMqtt3Publish());
@@ -100,8 +99,6 @@ public class SubscribeMessageBarrierTest {
     @Test
     public void test_messages_sent_publishes_and_subscribe() {
 
-        embeddedChannel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
-
         embeddedChannel.writeInbound(TestMessageUtil.createMqtt3Publish());
         embeddedChannel.writeInbound(TestMessageUtil.createMqtt3Publish());
 
@@ -124,8 +121,8 @@ public class SubscribeMessageBarrierTest {
 
         embeddedChannel.writeOutbound(new SUBACK(1, fromCode(1)));
 
-        assertEquals(2, counter.get());
         assertEquals(2, subscribeMessageBarrier.getQueue().size());
+        assertEquals(2, counter.get());
 
         embeddedChannel.writeOutbound(new SUBACK(2, fromCode(1)));
 

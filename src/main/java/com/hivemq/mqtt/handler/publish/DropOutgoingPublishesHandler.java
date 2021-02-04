@@ -25,9 +25,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ChannelAttributes;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -39,8 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.hivemq.configuration.service.InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE;
 
 @LazySingleton
-@ChannelHandler.Sharable
-public class DropOutgoingPublishesHandler extends ChannelOutboundHandlerAdapter {
+public class DropOutgoingPublishesHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DropOutgoingPublishesHandler.class);
 
@@ -58,17 +55,14 @@ public class DropOutgoingPublishesHandler extends ChannelOutboundHandlerAdapter 
         this.notWritableQueueSize = NOT_WRITABLE_QUEUE_SIZE.get();
     }
 
-
-    @Override
-    public void write(final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+    public boolean checkChannelNotWritable(final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
         if (!ctx.channel().isWritable()) {
 
             if (msg instanceof PUBLISH) {
                 if (notWritableMessages.get() < notWritableQueueSize) {
                     notWritableMessages.incrementAndGet();
                     promise.addListeners(decrementCounterListener);
-                    super.write(ctx, msg, promise);
-                    return;
+                    return false;
                 }
 
                 final PUBLISH publish = (PUBLISH) msg;
@@ -91,12 +85,12 @@ public class DropOutgoingPublishesHandler extends ChannelOutboundHandlerAdapter 
                     } else {
                         publishPayloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     }
-                    return;
+                    return true;
                 }
             }
         }
 
-        super.write(ctx, msg, promise);
+        return false;
     }
 
 

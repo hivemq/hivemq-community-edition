@@ -40,9 +40,7 @@ import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 4.1.0
  */
 @Singleton
-@ChannelHandler.Sharable
-public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
+public class IncomingSubscribeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IncomingSubscribeHandler.class);
 
@@ -84,11 +81,6 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
         this.configurationService = configurationService;
     }
 
-    @Override
-    public void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg) {
-        interceptOrDelegate(ctx, msg);
-    }
-
     /**
      * intercepts the subscribe message when the channel is active, the client id is set and interceptors are available,
      * otherwise delegates to authorizer
@@ -96,7 +88,7 @@ public class IncomingSubscribeHandler extends SimpleChannelInboundHandler<SUBSCR
      * @param ctx       the context of the channel handler
      * @param subscribe the subscribe to process
      */
-    private void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE subscribe) {
+    public void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE subscribe) {
         final Channel channel = ctx.channel();
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         if (clientId == null) {

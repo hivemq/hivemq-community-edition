@@ -15,15 +15,25 @@
  */
 package com.hivemq.mqtt.handler.disconnect;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.events.OnClientDisconnectEvent;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
+import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.clientsession.ClientSessionPersistence;
+import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -46,16 +56,29 @@ import static com.hivemq.util.ChannelAttributes.*;
 public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
     private static final Logger log = LoggerFactory.getLogger(DisconnectHandler.class);
-    private final EventLog eventLog;
-    private final MetricsHolder metricsHolder;
-    private final TopicAliasLimiter topicAliasLimiter;
+    private final @NotNull EventLog eventLog;
+    private final @NotNull MetricsHolder metricsHolder;
+    private final @NotNull TopicAliasLimiter topicAliasLimiter;
+    private final @NotNull MessageIDPools messageIDPools;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence;
+    private final @NotNull ChannelPersistence channelPersistence;
+
     private final boolean logClientReasonString;
 
     @Inject
-    public DisconnectHandler(final EventLog eventLog, final MetricsHolder metricsHolder, final TopicAliasLimiter topicAliasLimiter) {
+    public DisconnectHandler(
+            final @NotNull EventLog eventLog,
+            final @NotNull MetricsHolder metricsHolder,
+            final @NotNull TopicAliasLimiter topicAliasLimiter,
+            final @NotNull MessageIDPools messageIDPools,
+            final @NotNull ClientSessionPersistence clientSessionPersistence,
+            final @NotNull ChannelPersistence channelPersistence) {
         this.eventLog = eventLog;
         this.metricsHolder = metricsHolder;
         this.topicAliasLimiter = topicAliasLimiter;
+        this.messageIDPools = messageIDPools;
+        this.clientSessionPersistence = clientSessionPersistence;
+        this.channelPersistence = channelPersistence;
         this.logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
     }
 
@@ -90,6 +113,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
 
         final Channel channel = ctx.channel();
+        handleInactive(channel, ctx);
         final String[] topicAliasMapping = channel.attr(TOPIC_ALIAS_MAPPING).get();
         final boolean gracefulDisconnect = channel.attr(GRACEFUL_DISCONNECT).get() != null;
         final boolean preventLwt = channel.attr(PREVENT_LWT).get() != null ? channel.attr(PREVENT_LWT).get() : false;
@@ -118,5 +142,67 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         }
 
         super.channelInactive(ctx);
+    }
+
+    private void handleInactive(final @NotNull Channel channel, final @NotNull ChannelHandlerContext ctx){
+
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+
+        final Boolean authenticated = ctx.channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).get();
+        final SettableFuture<Void> disconnectFuture = ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+
+        //only change the session information if user is authenticated
+        if (authenticated == null || !authenticated) {
+            if (disconnectFuture != null) {
+                disconnectFuture.set(null);
+            }
+            return;
+        }
+
+        final Long sessionExpiryInterval = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+
+        if (clientId == null || sessionExpiryInterval == null) {
+            if (disconnectFuture != null) {
+                disconnectFuture.set(null);
+            }
+            // No CONNECT message was received yet, we don't have to clean up
+            return;
+        }
+
+        final boolean persistent = sessionExpiryInterval > 0;
+
+        persistDisconnectState(channel, clientId, persistent, sessionExpiryInterval);
+    };
+
+    private void persistDisconnectState(
+            final Channel channel,
+            final @NotNull String clientId,
+            final boolean persistent,
+            final long sessionExpiryInterval) {
+
+        messageIDPools.remove(clientId);
+        final boolean preventWill = channel.attr(ChannelAttributes.PREVENT_LWT).get() != null ? channel.attr(ChannelAttributes.PREVENT_LWT).get() : false;
+        final boolean sendWill = !preventWill && (channel.attr(ChannelAttributes.SEND_WILL).get() != null ? channel.attr(ChannelAttributes.SEND_WILL).get() : true);
+        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
+        FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
+                @Override
+                public void onSuccess(@Nullable final Void result) {
+                    if (!channel.attr(ChannelAttributes.TAKEN_OVER).get()) {
+                        channelPersistence.remove(clientId);
+                    }
+
+                    final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+                    if (disconnectFuture != null) {
+                        disconnectFuture.set(null);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NotNull final Throwable throwable) {
+                    Exceptions.rethrowError("Unable to update client session data for disconnecting client " + clientId +
+                            " with clean session set to " + !persistent + ".", throwable);
+                }
+            }
+        );
     }
 }

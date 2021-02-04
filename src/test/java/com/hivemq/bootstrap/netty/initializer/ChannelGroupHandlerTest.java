@@ -17,6 +17,7 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.group.ChannelGroup;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,9 @@ public class ChannelGroupHandlerTest {
     @Mock
     ChannelHandlerContext ctx;
 
+    @Mock
+    ChannelPipeline channelPipeline;
+
     private ChannelGroupHandler channelGroupHandler;
 
     @Before
@@ -44,6 +48,7 @@ public class ChannelGroupHandlerTest {
         channelGroupHandler = new ChannelGroupHandler(channelGroup);
 
         when(ctx.channel()).thenReturn(channel);
+        when(ctx.pipeline()).thenReturn(channelPipeline);
     }
 
     @Test
@@ -51,6 +56,7 @@ public class ChannelGroupHandlerTest {
         channelGroupHandler.channelActive(ctx);
 
         verify(channelGroup, times(1)).add(any(Channel.class));
+        verify(channelPipeline).remove(any(ChannelGroupHandler.class));
     }
 
 }

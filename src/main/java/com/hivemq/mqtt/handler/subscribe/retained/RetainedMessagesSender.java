@@ -22,19 +22,15 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
-import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
-import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
+import com.hivemq.mqtt.handler.publish.PublishWriteFailedListener;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
-import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -52,7 +48,6 @@ import java.nio.channels.ClosedChannelException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Utility methods for using retained messages
@@ -74,7 +69,6 @@ public class RetainedMessagesSender {
     private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence;
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
-    private final @NotNull PublishPollService publishPollService;
     private final @NotNull MessageIDPools messageIDPools;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
 
@@ -85,7 +79,6 @@ public class RetainedMessagesSender {
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull MessageIDPools messageIDPools,
-            final @NotNull PublishPollService publishPollService,
             final @NotNull MqttConfigurationService mqttConfigurationService) {
 
         this.hiveMQId = hiveMQId;
@@ -93,7 +86,6 @@ public class RetainedMessagesSender {
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.messageIDPools = messageIDPools;
-        this.publishPollService = publishPollService;
         this.mqttConfigurationService = mqttConfigurationService;
     }
 
@@ -123,7 +115,7 @@ public class RetainedMessagesSender {
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         Futures.addCallback(retainedMessagesFuture, new SendRetainedMessageCallback(subscribedTopics, hiveMQId,
                 publishPayloadPersistence, messageIDPools, clientId, resultFuture, channel, clientQueuePersistence,
-                publishPollService, mqttConfigurationService), channel.eventLoop());
+                mqttConfigurationService), channel.eventLoop());
 
         return resultFuture;
 
@@ -139,7 +131,6 @@ public class RetainedMessagesSender {
         private final @NotNull SettableFuture<Void> resultFuture;
         private final @NotNull Channel channel;
         private final @NotNull ClientQueuePersistence clientQueuePersistence;
-        private final @NotNull PublishPollService publishPollService;
         private final @NotNull MqttConfigurationService mqttConfigurationService;
 
         SendRetainedMessageCallback(
@@ -151,7 +142,6 @@ public class RetainedMessagesSender {
                 final @NotNull SettableFuture<Void> resultFuture,
                 final @NotNull Channel channel,
                 final @NotNull ClientQueuePersistence clientQueuePersistence,
-                final @NotNull PublishPollService publishPollService,
                 final @NotNull MqttConfigurationService mqttConfigurationService) {
 
             this.subscribedTopics = subscribedTopics;
@@ -162,7 +152,6 @@ public class RetainedMessagesSender {
             this.resultFuture = resultFuture;
             this.channel = channel;
             this.clientQueuePersistence = clientQueuePersistence;
-            this.publishPollService = publishPollService;
             this.mqttConfigurationService = mqttConfigurationService;
         }
 
@@ -214,9 +203,9 @@ public class RetainedMessagesSender {
             sendOutMessages(builder.build());
         }
 
-        private void sendOutMessages(final @NotNull List<PUBLISH> publishs) {
+        private void sendOutMessages(final @NotNull List<PUBLISH> retainedPublishes) {
             if (!channel.isActive()) {
-                for (final PUBLISH publish : publishs) {
+                for (final PUBLISH publish : retainedPublishes) {
                     payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                 }
                 resultFuture.setException(CLOSED_CHANNEL_EXCEPTION);
@@ -229,9 +218,9 @@ public class RetainedMessagesSender {
             }
             final ImmutableList.Builder<PUBLISH> builder = ImmutableList.builder();
             final ImmutableList.Builder<ListenableFuture<Void>> futures = ImmutableList.builder();
-            for (final PUBLISH publish : publishs) {
+            for (final PUBLISH publish : retainedPublishes) {
                 if (publish.getQoS() == QoS.AT_MOST_ONCE) {
-                    futures.add(sendPublishDirectly(publish));
+                    futures.add(sendQos0PublishDirectly(publish));
                     continue;
                 }
                 builder.add(publish);
@@ -247,23 +236,13 @@ public class RetainedMessagesSender {
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
         }
 
-        private ListenableFuture<Void> sendPublishDirectly(final @NotNull PUBLISH publish) {
+        private ListenableFuture<Void> sendQos0PublishDirectly(final @NotNull PUBLISH qos0Publish) {
             final SettableFuture<Void> resultFuture = SettableFuture.create();
             final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
 
             Futures.addCallback(publishFuture, new FutureCallback<>() {
                 @Override
                 public void onSuccess(final @Nullable PublishStatus status) {
-                    // remove PubRel from client queue
-                    if (publish.getQoS() == QoS.EXACTLY_ONCE) {
-                        final ListenableFuture<Void> future =
-                                publishPollService.removeMessageFromQueue(clientId, publish.getPacketIdentifier());
-                        FutureUtils.addExceptionLogger(future);
-                        // check for new messages as the queue was not empty because of the PubRel
-                        if (status != PublishStatus.NOT_CONNECTED) {
-                            checkForNewMessages();
-                        }
-                    }
 
                     if (status == PublishStatus.DELIVERED) {
                         resultFuture.set(null);
@@ -271,21 +250,13 @@ public class RetainedMessagesSender {
                         resultFuture.setException(new ClosedChannelException());
                     }
 
-                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
-                    if (publish.getPacketIdentifier() != 0) {
+                    payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
+                    if (qos0Publish.getPacketIdentifier() != 0) {
                         final MessageIDPool messageIDPool = messageIDPools.forClientOrNull(clientId);
                         if (messageIDPool != null) {
-                            messageIDPool.returnId(publish.getPacketIdentifier());
+                            messageIDPool.returnId(qos0Publish.getPacketIdentifier());
                         }
                     }
-                }
-
-                private void checkForNewMessages() {
-                    final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).get();
-                    if (inFlightMessages != null && inFlightMessages.decrementAndGet() > 0) {
-                        return;
-                    }
-                    publishPollService.pollMessages(clientId, channel);
                 }
 
                 @Override
@@ -295,34 +266,13 @@ public class RetainedMessagesSender {
                         //response has already been sent by callback from ChannelInactiveHandler
                         return;
                     }
-                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
+                    payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                 }
             }, MoreExecutors.directExecutor());
 
-            if (publish.getQoS() != QoS.AT_MOST_ONCE) {
-                try {
-                    publish.setPacketIdentifier(messageIDPools.forClient(clientId).takeNextId());
-                } catch (final NoMessageIdAvailableException e) {
-                    resultFuture.setException(e);
-                }
-            }
-            final ChannelInactiveHandler channelInactiveHandler = channel.pipeline().get(ChannelInactiveHandler.class);
-            final ChannelInactiveHandler.ChannelInactiveCallback channelInactiveCallback =
-                    new PublishChannelInactiveCallback(publishFuture);
-            if (channelInactiveHandler != null) {
-                Futures.addCallback(
-                        publishFuture, new PublishStoredInPersistenceCallback(channelInactiveHandler, publish),
-                        MoreExecutors.directExecutor());
-                channelInactiveHandler.addCallback(publish.getUniqueId(), channelInactiveCallback);
-            }
-            if (!channel.isActive()) {
-                channelInactiveCallback.channelInactive();
-                return resultFuture;
-            }
+            final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
+            channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
 
-            final PublishWithFuture event =
-                    new PublishWithFuture(publish, publishFuture, false, payloadPersistence);
-            channel.pipeline().fireUserEventTriggered(event);
             return resultFuture;
         }
 

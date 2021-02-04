@@ -15,68 +15,68 @@
  */
 package com.hivemq.metrics.handler;
 
+import com.codahale.metrics.Gauge;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.concurrent.atomic.LongAdder;
+
+import static com.hivemq.metrics.HiveMQMetrics.BYTES_READ_TOTAL;
+import static com.hivemq.metrics.HiveMQMetrics.BYTES_WRITE_TOTAL;
 
 /**
- * This handler gathers statistics about MQTT messages.
+ * Gathers statistics about inbound and outbound MQTT messages.
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
  */
-@ChannelHandler.Sharable
 @Singleton
-public class GlobalMQTTMessageCounter extends ChannelDuplexHandler {
+public class GlobalMQTTMessageCounter {
 
     private final @NotNull MetricsHolder metricsHolder;
+
+    private final @NotNull LongAdder bytesReadTotal;
+    private final @NotNull LongAdder bytesWrittenTotal;
 
     @Inject
     public GlobalMQTTMessageCounter(final @NotNull MetricsHolder metricsHolder) {
         this.metricsHolder = metricsHolder;
+        this.bytesReadTotal = new LongAdder();
+        this.bytesWrittenTotal = new LongAdder();
+
+        metricsHolder.getMetricRegistry().register(BYTES_READ_TOTAL.name(), (Gauge<Long>) bytesReadTotal::longValue);
+        metricsHolder.getMetricRegistry().register(BYTES_WRITE_TOTAL.name(), (Gauge<Long>) bytesWrittenTotal::longValue);
     }
 
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
-
-        if (msg instanceof Message) {
-
-            metricsHolder.getIncomingMessageCounter().inc();
-
-            if (msg instanceof CONNECT) {
-                metricsHolder.getIncomingConnectCounter().inc();
-            }
-
-            if (msg instanceof PUBLISH) {
-                metricsHolder.getIncomingPublishCounter().inc();
-            }
+    public void countInbound(final @NotNull Message message) {
+        metricsHolder.getIncomingMessageCounter().inc();
+        if (message instanceof CONNECT) {
+            metricsHolder.getIncomingConnectCounter().inc();
         }
-
-        super.channelRead(ctx, msg);
-    }
-
-    @Override
-    public void write(final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
-
-        if (msg instanceof Message) {
-
-            metricsHolder.getOutgoingMessageCounter().inc();
-
-            if (msg instanceof PUBLISH) {
-                metricsHolder.getOutgoingPublishCounter().inc();
-            }
+        if (message instanceof PUBLISH) {
+            metricsHolder.getIncomingPublishCounter().inc();
         }
-
-        super.write(ctx, msg, promise);
     }
+
+    public void countInboundTraffic(final int bytes) {
+        bytesReadTotal.add(bytes);
+    }
+
+    public void countOutbound(final @NotNull Message message) {
+        metricsHolder.getOutgoingMessageCounter().inc();
+        if (message instanceof PUBLISH) {
+            metricsHolder.getOutgoingPublishCounter().inc();
+        }
+    }
+
+    public void countOutboundTraffic(final int bytes) {
+        bytesWrittenTotal.add(bytes);
+    }
+
 
 }

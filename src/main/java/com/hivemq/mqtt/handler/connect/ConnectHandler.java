@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.handler.connect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -36,9 +37,9 @@ import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.mqtt.handler.MessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
-import com.hivemq.mqtt.handler.ordering.OrderedTopicHandler;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -83,11 +84,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
     private static final int MAX_TAKEOVER_RETRIES = 100;
 
-    private final @NotNull DisconnectClientOnConnectMessageHandler onSecondConnectHandler;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull FullConfigurationService configurationService;
-    private final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider;
+    private final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider;
     private final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider;
     private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
@@ -110,11 +110,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     @Inject
     public ConnectHandler(
-            final @NotNull DisconnectClientOnConnectMessageHandler onSecondConnectHandler,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence,
             final @NotNull FullConfigurationService configurationService,
-            final @NotNull Provider<OrderedTopicHandler> orderedTopicHandlerProvider,
+            final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider,
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
             final @NotNull MqttConnacker mqttConnacker,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
@@ -125,11 +124,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull PluginAuthorizerService pluginAuthorizerService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
-        this.onSecondConnectHandler = onSecondConnectHandler;
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.configurationService = configurationService;
-        this.orderedTopicHandlerProvider = orderedTopicHandlerProvider;
+        this.publishFlowHandlerProvider = publishFlowHandlerProvider;
         this.flowControlHandlerProvider = flowControlHandlerProvider;
         this.mqttConnacker = mqttConnacker;
         this.topicAliasLimiter = topicAliasLimiter;
@@ -159,20 +157,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect)
             throws Exception {
 
-        try {
-
-            ctx.pipeline().addAfter(MQTT_MESSAGE_DECODER, MQTT_DISALLOW_SECOND_CONNECT, onSecondConnectHandler);
-
-        } catch (final IllegalArgumentException e) {
-            /*  When this happens, the client sent two CONNECT messages in a *very* short time because we
-                have a race condition that the second CONNECT arrived before the second disallow handler
-                was added to the pipeline. We're just resending the message again to the begin of the pipeline
-                so the MQTT second connect disallow handler can kick in
-            */
-            ctx.pipeline().firstContext().fireChannelRead(connect);
-            return;
-        }
-
         overwriteNotSetValues(connect);
 
         if (!checkClientId(ctx, connect)) {
@@ -198,7 +182,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
 
-        addOrderedTopicHandler(ctx, connect);
+        addPublishFlowHandler(ctx, connect);
 
         ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(true);
         ctx.channel().attr(ChannelAttributes.AUTH_CONNECT).set(connect);
@@ -276,12 +260,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void addOrderedTopicHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
+    private void addPublishFlowHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
 
         ctx.channel()
                 .pipeline()
-                .addAfter(MQTT_MESSAGE_ID_RETURN_HANDLER, MQTT_ORDERED_TOPIC_HANDLER,
-                        orderedTopicHandlerProvider.get());
+                .addBefore(MESSAGE_EXPIRY_HANDLER, MQTT_PUBLISH_FLOW_HANDLER,
+                        publishFlowHandlerProvider.get());
         if (ProtocolVersion.MQTTv5 == connect.getProtocolVersion()) {
             ctx.channel()
                     .pipeline()
@@ -291,11 +275,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     }
 
     @Override
-    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt)
-            throws Exception {
-        if (evt instanceof ConnectPersistenceUpdateHandler.FinishedConnectPersistence) {
-            handleFinishedConnectPersistence(ctx, (ConnectPersistenceUpdateHandler.FinishedConnectPersistence) evt);
-        } else if (evt instanceof AuthorizeWillResultEvent) {
+    public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) throws Exception {
+        if (evt instanceof AuthorizeWillResultEvent) {
             final AuthorizeWillResultEvent resultEvent = (AuthorizeWillResultEvent) evt;
             afterPublishAuthorizer(ctx, resultEvent.getConnect(), resultEvent.getResult());
         } else {
@@ -303,11 +284,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void handleFinishedConnectPersistence(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull ConnectPersistenceUpdateHandler.FinishedConnectPersistence evt) {
-
-        afterPersistSession(ctx, evt.getMessage(), evt.isSessionPresent());
+    @NotNull
+    private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart,
+            @NotNull final String clientId,
+            final long sessionExpiryInterval,
+            @Nullable final MqttWillPublish willPublish,
+            @Nullable final Long queueSizeMaximum) {
+        return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish, queueSizeMaximum);
     }
 
     private boolean checkClientId(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
@@ -517,21 +500,25 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 true);
     }
 
-    private void afterTakeover(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
+    @VisibleForTesting
+    void afterTakeover(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
 
+        final Long queueSizeMaximum = ctx.channel().attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+        final long sessionExpiryInterval =
+                msg.getSessionExpiryInterval() > configuredSessionExpiryInterval ?
+                        configuredSessionExpiryInterval : msg.getSessionExpiryInterval();
+
+        final boolean existent;
         if (msg.isCleanStart()) {
-            ctx.fireUserEventTriggered(new ConnectPersistenceUpdateHandler.StartConnectPersistence(msg, false,
-                    msg.getSessionExpiryInterval()));
+            existent = false;
         } else {
-            final boolean existent = clientSessionPersistence.isExistent(msg.getClientIdentifier());
-
-            final long sessionExpiryInterval =
-                    msg.getSessionExpiryInterval() > configuredSessionExpiryInterval ?
-                            configuredSessionExpiryInterval : msg.getSessionExpiryInterval();
-            ctx.fireUserEventTriggered(
-                    new ConnectPersistenceUpdateHandler.StartConnectPersistence(msg, existent,
-                            sessionExpiryInterval));
+            existent = clientSessionPersistence.isExistent(msg.getClientIdentifier());
         }
+        final ListenableFuture<Void> future = updatePersistenceData(msg.isCleanStart(),
+                    msg.getClientIdentifier(), sessionExpiryInterval, msg.getWillPublish(),
+                    queueSizeMaximum);
+
+        Futures.addCallback(future, new UpdatePersistenceCallback(ctx, this, msg, existent), ctx.executor());
     }
 
     private void afterPersistSession(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
@@ -541,7 +528,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         sharedSubscriptionService.invalidateSharedSubscriptionCache(msg.getClientIdentifier());
 
         addKeepAliveHandler(ctx, msg);
-
         sendConnackSuccess(ctx, msg, sessionPresent);
 
         //We're removing ourselves
@@ -550,7 +536,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         } catch (final NoSuchElementException e) {
             //noop since handler has already been removed
         }
-        ctx.fireChannelRead(msg);
     }
 
     private void sendConnackSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
@@ -746,9 +731,38 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-
     private double getGracePeriod() {
         return InternalConfigurations.MQTT_CONNECTION_KEEP_ALIVE_FACTOR;
+    }
+
+    private static class UpdatePersistenceCallback implements FutureCallback<Void> {
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull ConnectHandler connectHandler;
+        private final @NotNull CONNECT connect;
+        private final boolean sessionPresent;
+
+        public UpdatePersistenceCallback(final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ConnectHandler connectHandler,
+                final @NotNull CONNECT connect,
+                final boolean sessionPresent) {
+            this.ctx = ctx;
+            this.connectHandler = connectHandler;
+            this.connect = connect;
+            this.sessionPresent = sessionPresent;
+        }
+
+        @Override
+        public void onSuccess(@Nullable final Void aVoid) {
+            if (ctx.channel().isActive() && !ctx.executor().isShutdown()) {
+                connectHandler.afterPersistSession(ctx, connect, sessionPresent);
+            }
+        }
+
+        @Override
+        public void onFailure(@NotNull final Throwable throwable) {
+            Exceptions.rethrowError("Unable to handle client connection for id " + connect.getClientIdentifier() + ".", throwable);
+            ctx.channel().disconnect();
+        }
     }
 
 }

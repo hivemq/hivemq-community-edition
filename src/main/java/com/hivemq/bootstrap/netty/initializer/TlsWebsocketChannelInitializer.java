@@ -31,8 +31,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 
 /**
  * @author Christoph Schäbel
@@ -94,6 +93,8 @@ public class TlsWebsocketChannelInitializer extends AbstractChannelInitializer {
 
         new SslInitializer(sslHandler, tls, channelDependencies.getMqttServerDisconnector(), sslParameterHandler).addHandlers(ch);
 
-        new WebSocketInitializer(tlsWebsocketListener).addHandlers(ch);
+        final String handlerName = !Tls.ClientAuthMode.NONE.equals(tls.getClientAuthMode()) ? SSL_CLIENT_CERTIFICATE_HANDLER : SSL_PARAMETER_HANDLER;
+
+        new WebSocketInitializer(tlsWebsocketListener).addHandlers(ch, handlerName);
     }
 }

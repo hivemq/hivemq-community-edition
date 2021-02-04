@@ -43,7 +43,7 @@ public class TcpChannelInitializer extends AbstractChannelInitializer {
 
     @Override
     protected void addSpecialHandlers(@NotNull final Channel ch) {
-        ch.pipeline().addBefore(FIRST_ABSTRACT_HANDLER, NON_SSL_HANDLER, nonSslHandlerProvider.get());
+        ch.pipeline().addFirst(NON_SSL_HANDLER, nonSslHandlerProvider.get());
     }
 
 }

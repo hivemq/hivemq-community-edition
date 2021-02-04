@@ -15,7 +15,6 @@
  */
 package com.hivemq.security.ssl;
 
-import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -46,7 +45,7 @@ public class SslInitializer {
 
     public void addHandlers(final Channel ch) {
 
-        ch.pipeline().addBefore(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, SSL_HANDLER, sslHandler);
+        ch.pipeline().addFirst(SSL_HANDLER, sslHandler);
         ch.pipeline().addAfter(SSL_HANDLER, SSL_EXCEPTION_HANDLER, new SslExceptionHandler(mqttServerDisconnector));
         ch.pipeline().addAfter(SSL_EXCEPTION_HANDLER, SSL_PARAMETER_HANDLER, sslParameterHandler);
 

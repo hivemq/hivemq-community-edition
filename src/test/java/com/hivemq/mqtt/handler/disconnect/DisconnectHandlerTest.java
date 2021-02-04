@@ -16,38 +16,56 @@
 package com.hivemq.mqtt.handler.disconnect;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.security.auth.ClientData;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import util.InitFutureUtilsExecutorRule;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class DisconnectHandlerTest {
 
+    @Rule
+    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     private EmbeddedChannel embeddedChannel;
 
     EventLog eventLog;
 
     @Mock
-    TopicAliasLimiter topicAliasLimiter;
+    private TopicAliasLimiter topicAliasLimiter;
+
+    @Mock
+    private MessageIDPools messageIDPools;
+
+    @Mock
+    private ClientSessionPersistence clientSessionPersistence;
+
+    @Mock
+    private ChannelPersistence channelPersistence;
 
     MetricsHolder metricsHolder;
 
@@ -59,7 +77,7 @@ public class DisconnectHandlerTest {
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
 
-        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter);
+        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, messageIDPools, clientSessionPersistence, channelPersistence);
         embeddedChannel = new EmbeddedChannel(disconnectHandler);
     }
 
@@ -183,5 +201,79 @@ public class DisconnectHandlerTest {
 
         verify(eventLog, times(1)).clientDisconnected(embeddedChannel, disconnectReason);
         verify(eventLog, Mockito.never()).clientDisconnected(embeddedChannel, null);
+    }
+
+
+    @Test
+    public void test_DisconnectFutureListener_send_lwt() throws Exception {
+
+        when(clientSessionPersistence.clientDisconnected(anyString(),
+                anyBoolean(),
+                anyLong())).thenReturn(Futures.immediateFuture(null));
+        embeddedChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
+        embeddedChannel.attr(ChannelAttributes.SEND_WILL).set(true);
+        embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).set(false);
+
+        //make the client connected
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
+        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+
+        embeddedChannel.disconnect().get();
+
+        verify(clientSessionPersistence, Mockito.times(1)).clientDisconnected(eq("client"), eq(true), anyLong());
+    }
+
+    @Test
+    public void test_DisconnectFutureListener_client_session_persistence_failed() throws Exception {
+
+        //make the client connected
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
+        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+
+        when(clientSessionPersistence.clientDisconnected(
+                anyString(),
+                anyBoolean(),
+                anyLong())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
+
+        embeddedChannel.disconnect().get();
+
+        verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), anyBoolean(), anyLong());
+        verify(channelPersistence, never()).remove("client");
+    }
+
+    @Test
+    public void test_DisconnectFutureListener_future_channel_not_authenticated() throws Exception {
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(false);
+        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+
+        embeddedChannel.disconnect().get();
+
+        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
+        assertTrue(disconnectFuture.isDone());
+    }
+
+    @Test
+    public void test_DisconnectFutureListener_future_client_id_null() throws Exception {
+        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
+
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+
+        embeddedChannel.disconnect().get();
+
+        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
+        assertTrue(disconnectFuture.isDone());
     }
 }

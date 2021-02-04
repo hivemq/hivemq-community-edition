@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
@@ -24,16 +25,17 @@ import io.netty.channel.group.ChannelGroup;
  */
 public class ChannelGroupHandler extends ChannelInboundHandlerAdapter {
 
-    private final ChannelGroup channelGroup;
+    private final @NotNull ChannelGroup channelGroup;
 
-    public ChannelGroupHandler(final ChannelGroup channelGroup) {
+    public ChannelGroupHandler(final @NotNull ChannelGroup channelGroup) {
         this.channelGroup = channelGroup;
     }
 
     @Override
-    public void channelActive(final ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(final ChannelHandlerContext ctx) {
         channelGroup.add(ctx.channel());
         ctx.fireChannelActive();
+        ctx.pipeline().remove(this);
     }
 
 }

@@ -36,7 +36,11 @@ import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
+import com.hivemq.mqtt.handler.publish.OrderedTopicService;
+import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.Message;
+import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -46,6 +50,8 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
+import com.hivemq.mqtt.services.PublishPollService;
+import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -144,8 +150,15 @@ public class IncomingPublishHandlerTest {
                 new IncomingPublishHandler(pluginTaskExecutorService, asyncer, hiveMQExtensions, messageDroppedService,
                         pluginAuthorizerService, mqttServerDisconnector, configurationService);
 
-        channel.pipeline().addFirst(incomingPublishHandler);
-        channelHandlerContext = channel.pipeline().context(IncomingPublishHandler.class);
+        final PublishFlowHandler publishFlowHandler = new PublishFlowHandler(
+                mock(PublishPollService.class),
+                mock(IncomingMessageFlowPersistence.class),
+                mock(OrderedTopicService.class),
+                mock(MessageIDPools.class),
+                incomingPublishHandler,
+                mock(DropOutgoingPublishesHandler.class));
+        channel.pipeline().addFirst(publishFlowHandler);
+        channelHandlerContext = channel.pipeline().context(PublishFlowHandler.class);
     }
 
     @After

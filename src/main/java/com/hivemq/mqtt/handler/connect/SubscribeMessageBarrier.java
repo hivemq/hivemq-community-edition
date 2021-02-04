@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.PINGREQ;
@@ -29,36 +30,35 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * After a subscribe message arrived, we have to queue all messages until the subscribe was handled.
  * Otherwise the subscription would be ignored for publishes that are sent shortly after the subscribe message.
  *
  * @author Lukas Brandl
+ * @author Florian Limpöck
  */
 public class SubscribeMessageBarrier extends ChannelDuplexHandler {
 
-    private final AtomicBoolean subscribeInProcess = new AtomicBoolean(false);
+    private final @NotNull Queue<Message> messageQueue = new LinkedList<>();
 
-    private final Queue<Message> messageQueue = new LinkedList<>();
+    public static void addToPipeline(@NotNull ChannelHandlerContext ctx) {
+        if(!ctx.pipeline().names().contains(ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER)){
+            final SubscribeMessageBarrier subscribeMessageBarrier = new SubscribeMessageBarrier();
+            ctx.pipeline().addAfter(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER, subscribeMessageBarrier);
+        }
+    }
+
+    @Override
+    public void handlerAdded(final @NotNull ChannelHandlerContext ctx) {
+        ctx.channel().config().setAutoRead(false);
+    }
 
     @Override
     public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
-
         if (msg instanceof Message && !(msg instanceof PINGREQ)) {
-
-            if ((msg instanceof SUBSCRIBE || msg instanceof UNSUBSCRIBE) &&
-                    subscribeInProcess.compareAndSet(false, true)) {
-                ctx.channel().config().setAutoRead(false);
-                super.channelRead(ctx, msg);
-                return;
-            }
-
-            if (subscribeInProcess.get()) {
-                messageQueue.add((Message) msg);
-                return;
-            }
+            messageQueue.add((Message) msg);
+            return;
         }
 
         super.channelRead(ctx, msg);
@@ -72,11 +72,13 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
         if (msg instanceof SUBACK || msg instanceof UNSUBACK) {
             promise.addListener(new ChannelFutureListener() {
                 @Override
-                public void operationComplete(final @NotNull ChannelFuture future) throws Exception {
+                public void operationComplete(final @NotNull ChannelFuture future) {
                     if (future.isSuccess()) {
                         final boolean allMessagesReleased = releaseQueuedMessages(ctx);
-                        subscribeInProcess.set(!allMessagesReleased);
-                        ctx.channel().config().setAutoRead(allMessagesReleased);
+                        if (allMessagesReleased){
+                            ctx.channel().config().setAutoRead(true);
+                            ctx.pipeline().remove(SubscribeMessageBarrier.this);
+                        }
                     }
                 }
 
@@ -95,13 +97,6 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
 
         super.write(ctx, msg, promise);
     }
-
-
-    @VisibleForTesting
-    boolean getSubscribeInProcess() {
-        return subscribeInProcess.get();
-    }
-
 
     @VisibleForTesting
     @NotNull Collection<Message> getQueue() {

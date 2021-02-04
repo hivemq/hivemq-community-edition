@@ -15,6 +15,7 @@
  */
 package util;
 
+import com.codahale.metrics.MetricRegistry;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;
@@ -25,6 +26,8 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -61,6 +64,7 @@ public class TestMqttDecoder {
         final HivemqId hiveMQId = new HivemqId();
         final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog, hiveMQId);
         final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
+        final MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 
         final MqttConnectDecoder mqttConnectDecoder = new MqttConnectDecoder(mqttConnacker,
                 fullConfigurationService,
@@ -92,7 +96,8 @@ public class TestMqttDecoder {
                         new Mqtt5PubcompDecoder(disconnector, fullConfigurationService),
                         new Mqtt5AuthDecoder(disconnector, fullConfigurationService),
                         new Mqtt5UnsubscribeDecoder(disconnector, fullConfigurationService))
-                , disconnector);
+                , disconnector,
+                new GlobalMQTTMessageCounter(metricsHolder));
     }
 
 }

@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
@@ -43,6 +44,14 @@ import static org.junit.Assert.*;
  * @author Florian Limpöck
  */
 public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
+
+    @Override
+    @Before
+    public void setUp() {
+        super.setUp();
+        //protocol version must not be set when a CONNECT is sent.
+        channel.attr(ChannelAttributes.MQTT_VERSION).set(null);
+    }
 
     @Test
     public void test_decode_all_properties() {

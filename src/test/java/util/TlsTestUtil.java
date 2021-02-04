@@ -15,8 +15,8 @@
  */
 package util;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.entity.Tls;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -29,6 +29,19 @@ public class TlsTestUtil {
                 .withKeystoreType("JKS")
                 .withPrivateKeyPassword("")
                 .withHandshakeTimeout(10)
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withProtocols(new ArrayList<>())
+                .build();
+    }
+
+    public static @NotNull Tls createTLS(int timeout) {
+        return new Tls.Builder()
+                .withKeystorePath("")
+                .withKeystorePassword("")
+                .withKeystoreType("JKS")
+                .withPrivateKeyPassword("")
+                .withHandshakeTimeout(timeout)
                 .withClientAuthMode(Tls.ClientAuthMode.NONE)
                 .withCipherSuites(new ArrayList<>())
                 .withProtocols(new ArrayList<>())

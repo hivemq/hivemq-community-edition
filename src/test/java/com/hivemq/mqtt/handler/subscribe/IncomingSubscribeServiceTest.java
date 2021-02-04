@@ -66,7 +66,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ALL")
-public class SubscribeHandlerTest {
+public class IncomingSubscribeServiceTest {
 
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
@@ -99,7 +99,7 @@ public class SubscribeHandlerTest {
     private RestrictionsConfigurationService restrictionsConfigurationService;
 
     private EmbeddedChannel channel;
-    private SubscribeHandler handler;
+    private IncomingSubscribeService incomingSubscribeService;
     private HivemqId hivemqId;
 
     @Before
@@ -107,9 +107,9 @@ public class SubscribeHandlerTest {
 
         MockitoAnnotations.initMocks(this);
         hivemqId = new HivemqId();
-        handler = new SubscribeHandler(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog, hivemqId));
+        incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog, hivemqId));
 
-        channel = new EmbeddedChannel(handler);
+        channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
 
         when(clientSessionSubscriptionPersistence.addSubscription(anyString(), any(Topic.class))).thenReturn(Futures.immediateFuture(null));
@@ -128,7 +128,8 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
+//        channel.writeInbound(subscribe);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -151,7 +152,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -174,7 +175,7 @@ public class SubscribeHandlerTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -199,7 +200,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -226,7 +227,7 @@ public class SubscribeHandlerTest {
 
         final ImmutableSet<Topic> persistedTopics = ImmutableSet.of(topic1, topic3);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final Queue<Object> objects = channel.outboundMessages();
 
@@ -246,7 +247,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("t1", QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_LEAST_ONCE))), 1);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
     }
 
     @Test
@@ -254,7 +255,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))), 1);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         //We need to make sure we got disconnected
         assertEquals(false, channel.isActive());
@@ -262,27 +263,17 @@ public class SubscribeHandlerTest {
     }
 
     @Test
-    public void test_wrong_event_is_passed_through() throws Exception {
-
-        final String test = "test";
-
-        handler.userEventTriggered(ctx, test);
-
-        verify(ctx, atLeastOnce()).fireUserEventTriggered(eq(test));
-    }
-
-    @Test
     public void single_topic_dont_batch() throws Exception {
 
         final HashSet<Topic> topics = Sets.newHashSet(Topic.topicFromString("topic1"));
-        assertFalse(handler.batch(topics));
+        assertFalse(incomingSubscribeService.batch(topics));
     }
 
     @Test
     public void test_batch() throws Exception {
 
         final HashSet<Topic> topics = Sets.newHashSet(Topic.topicFromString("topic1"), Topic.topicFromString("topic2"));
-        assertTrue(handler.batch(topics));
+        assertTrue(incomingSubscribeService.batch(topics));
     }
 
     @Test
@@ -294,7 +285,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         
@@ -310,7 +301,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         
@@ -326,7 +317,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
         verify(clientSessionSubscriptionPersistence, never()).addSubscriptions(any(), any());
@@ -341,7 +332,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -358,7 +349,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -375,7 +366,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
 
@@ -395,7 +386,7 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
 
@@ -417,7 +408,7 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
 
@@ -441,7 +432,7 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(3, response.getReasonCodes().size());
@@ -467,7 +458,7 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(3, response.getReasonCodes().size());
@@ -500,7 +491,7 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         final SUBACK response = channel.readOutbound();
         assertEquals(4, response.getReasonCodes().size());
@@ -528,7 +519,7 @@ public class SubscribeHandlerTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1)), 10);
 
-        channel.writeInbound(subscribe);
+        incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
         assertFalse(channel.isActive());
     }
@@ -536,7 +527,7 @@ public class SubscribeHandlerTest {
     @Test
     public void test_process_authorizers_present_no_default() throws Exception {
 
-        final ArgumentCaptor<ImmutableSet> captor = ArgumentCaptor.forClass(ImmutableSet.class);
+        final ArgumentCaptor<ImmutableSet> authorizedTopicsCaptor = ArgumentCaptor.forClass(ImmutableSet.class);
         final Topic topic1 = new Topic("test1", QoS.AT_LEAST_ONCE);
         final Topic topic2 = new Topic("test2", QoS.AT_MOST_ONCE);
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
@@ -545,25 +536,19 @@ public class SubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(null);
 
-        final ArgumentCaptor<SUBACK> captor1 = ArgumentCaptor.forClass(SUBACK.class);
-
-        final SubscribeHandler subscribeHandler = channel.pipeline().get(SubscribeHandler.class);
-//        final ChannelHandlerContext context = channel.pipeline().context(subscribeHandler);
-        subscribeHandler.processSubscribe(ctx, subscribe,
+        incomingSubscribeService.processSubscribe(ctx, subscribe,
                 new Mqtt5SubAckReasonCode[]{Mqtt5SubAckReasonCode.GRANTED_QOS_1, null, null},
                 new String[3], true);
 
-        verify(ctx).writeAndFlush(captor1.capture());
-
-        final SUBACK response = captor1.getValue();
+        final SUBACK response = channel.readOutbound();
 
         assertEquals(3, response.getReasonCodes().size());
         assertEquals(Mqtt5SubAckReasonCode.GRANTED_QOS_1, response.getReasonCodes().get(0));
         assertEquals(Mqtt5SubAckReasonCode.NOT_AUTHORIZED, response.getReasonCodes().get(1));
         assertEquals(Mqtt5SubAckReasonCode.NOT_AUTHORIZED, response.getReasonCodes().get(2));
 
-        verify(clientSessionSubscriptionPersistence).addSubscriptions(eq("client"), captor.capture());
-        assertEquals(1, captor.getValue().size());
+        verify(clientSessionSubscriptionPersistence).addSubscriptions(eq("client"), authorizedTopicsCaptor.capture());
+        assertEquals(1, authorizedTopicsCaptor.getValue().size());
     }
 
 }

@@ -197,13 +197,13 @@ public class IncomingPublishService {
                 final PUBACK puback = new PUBACK(publish.getPacketIdentifier(),
                         reasonCode != null ? Mqtt5PubAckReasonCode.from(reasonCode) : Mqtt5PubAckReasonCode.NOT_AUTHORIZED,
                         reasonString != null ? reasonString : reason, Mqtt5UserProperties.NO_USER_PROPERTIES);
-                ctx.writeAndFlush(puback);
+                ctx.pipeline().writeAndFlush(puback);
                 break;
             case EXACTLY_ONCE:
                 final PUBREC pubrec = new PUBREC(publish.getPacketIdentifier(),
                         reasonCode != null ? Mqtt5PubRecReasonCode.from(reasonCode) : Mqtt5PubRecReasonCode.NOT_AUTHORIZED,
                         reasonString != null ? reasonString : reason, Mqtt5UserProperties.NO_USER_PROPERTIES);
-                ctx.writeAndFlush(pubrec);
+                ctx.pipeline().writeAndFlush(pubrec);
                 break;
         }
 
@@ -243,18 +243,18 @@ public class IncomingPublishService {
                 break;
             case AT_LEAST_ONCE:
                 if (publishReturnCode == PublishReturnCode.NO_MATCHING_SUBSCRIBERS) {
-                    ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier(), Mqtt5PubAckReasonCode.NO_MATCHING_SUBSCRIBERS,
+                    ctx.pipeline().writeAndFlush(new PUBACK(publish.getPacketIdentifier(), Mqtt5PubAckReasonCode.NO_MATCHING_SUBSCRIBERS,
                             null, Mqtt5UserProperties.NO_USER_PROPERTIES));
                 } else {
-                    ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier()));
+                    ctx.pipeline().writeAndFlush(new PUBACK(publish.getPacketIdentifier()));
                 }
                 break;
             case EXACTLY_ONCE:
                 if (publishReturnCode == PublishReturnCode.NO_MATCHING_SUBSCRIBERS) {
-                    ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier(), Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS,
+                    ctx.pipeline().writeAndFlush(new PUBREC(publish.getPacketIdentifier(), Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS,
                             null, Mqtt5UserProperties.NO_USER_PROPERTIES));
                 } else {
-                    ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier()));
+                    ctx.pipeline().writeAndFlush(new PUBREC(publish.getPacketIdentifier()));
                 }
                 break;
         }

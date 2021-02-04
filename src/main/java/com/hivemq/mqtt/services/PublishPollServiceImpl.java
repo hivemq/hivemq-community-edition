@@ -23,11 +23,9 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.callback.PublishChannelInactiveCallback;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
-import com.hivemq.mqtt.callback.PublishStoredInPersistenceCallback;
-import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
+import com.hivemq.mqtt.handler.publish.PublishWriteFailedListener;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
@@ -384,27 +382,8 @@ public class PublishPollServiceImpl implements PublishPollService {
         Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
                 this, shared, queueId, publish, messageIDPool, channel, client), MoreExecutors.directExecutor());
 
-        //Add listener to get notified when channel is closed before publish sent
-        final ChannelInactiveHandler channelInactiveHandler = channel.pipeline().get(ChannelInactiveHandler.class);
-        final ChannelInactiveHandler.ChannelInactiveCallback channelInactiveCallback = new PublishChannelInactiveCallback(publishFuture);
-        if (channelInactiveHandler != null) {
-
-            //add callback which removes listener on channel close if publish delivery is complete
-            //use direct executor here to force this callback to be executed from within the netty event loop to prevent race conditions
-            Futures.addCallback(publishFuture, new PublishStoredInPersistenceCallback(channelInactiveHandler, publish), MoreExecutors.directExecutor());
-
-            //add callback which queues the publish to prevent a publish from being lost when the channel is closed before the user event is handled
-            channelInactiveHandler.addCallback(publish.getUniqueId(), channelInactiveCallback);
-        }
-        // The client could disconnect while we add the callback
-        // In this case we just call the callback directly, which will result in the same handling as if the client disconnected while the callback was already added
-        if (!channel.isActive()) {
-            channelInactiveCallback.channelInactive();
-            return;
-        }
-
-        final PublishWithFuture event = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
-        channel.pipeline().fireUserEventTriggered(event);
+        final PublishWithFuture message = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
+        channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
     }
 
     /**

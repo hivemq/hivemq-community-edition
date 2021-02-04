@@ -43,8 +43,8 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class PluginInitializerHandler extends ChannelDuplexHandler {
+public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(PluginInitializerHandler.class);
 
@@ -107,6 +107,8 @@ public class PluginInitializerHandler extends ChannelDuplexHandler {
             }
 
             fireInitialize(ctx, connack, promise);
+            //not needed anymore
+            ctx.pipeline().remove(this);
         } else {
             super.write(ctx, msg, promise);
         }

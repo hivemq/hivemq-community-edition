@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Lukas Brandl
  */
-public class PublishWritePromiseListenerTest {
+public class PublishWriteFailedListenerTest {
 
     @Mock
     ChannelFuture channelFuture;
@@ -46,7 +46,7 @@ public class PublishWritePromiseListenerTest {
         final SettableFuture<PublishStatus> statusFuture = SettableFuture.create();
         when(channelFuture.cause()).thenReturn(new EncoderException());
 
-        final PublishWritePromiseListener promiseListener = new PublishWritePromiseListener(statusFuture);
+        final PublishWriteFailedListener promiseListener = new PublishWriteFailedListener(statusFuture);
         promiseListener.operationComplete(channelFuture);
 
         assertEquals(PublishStatus.FAILED, statusFuture.get());
@@ -59,7 +59,7 @@ public class PublishWritePromiseListenerTest {
         storedInPersistenceFuture.set(null);
         when(channelFuture.cause()).thenReturn(new ClosedChannelException());
 
-        final PublishWritePromiseListener promiseListener = new PublishWritePromiseListener(statusFuture);
+        final PublishWriteFailedListener promiseListener = new PublishWriteFailedListener(statusFuture);
         promiseListener.operationComplete(channelFuture);
 
         assertEquals(PublishStatus.NOT_CONNECTED, statusFuture.get());

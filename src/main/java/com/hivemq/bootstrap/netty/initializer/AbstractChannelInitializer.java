@@ -18,12 +18,11 @@ package com.hivemq.bootstrap.netty.initializer;
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
-import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
-import com.hivemq.mqtt.handler.publish.ChannelInactiveHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
-import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
 
 /**
  * @author Dominik Obermaier
@@ -48,18 +46,21 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
-    public static final String FIRST_ABSTRACT_HANDLER = ALL_CHANNELS_GROUP_HANDLER;
-
     @NotNull
     private final ChannelDependencies channelDependencies;
     @NotNull
     private final Listener listener;
+
+    private final boolean throttlingEnabled;
 
     public AbstractChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
             @NotNull final Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
+        final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
+        final boolean outgoingEnabled = InternalConfigurations.OUTGOING_BANDWIDTH_THROTTLING_DEFAULT > 0;
+        this.throttlingEnabled = incomingEnabled || outgoingEnabled;
     }
 
     @Override
@@ -68,50 +69,38 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         Preconditions.checkNotNull(ch, "Channel must never be null");
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
-        ch.pipeline().addLast(FIRST_ABSTRACT_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
-        ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
+
+        ch.pipeline().addLast(ALL_CHANNELS_GROUP_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
+        if (throttlingEnabled) {
+            ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
+        }
         ch.pipeline().addLast(MQTT_MESSAGE_DECODER, new MQTTMessageDecoder(channelDependencies));
         ch.pipeline().addLast(MQTT_MESSAGE_ENCODER, channelDependencies.getMqttMessageEncoder());
         addNoConnectIdleHandler(ch);
+        //MQTT_5_FLOW_CONTROL_HANDLER is added here after CONNECT
         ch.pipeline().addLast(MQTT_MESSAGE_BARRIER, new MessageBarrier(channelDependencies.getMqttServerDisconnector()));
-        ch.pipeline().addLast(MQTT_SUBSCRIBE_MESSAGE_BARRIER, new SubscribeMessageBarrier());
         // before connack outbound interceptor as it initializes the client context after the connack
         ch.pipeline().addLast(PLUGIN_INITIALIZER_HANDLER, channelDependencies.getPluginInitializerHandler());
 
         ch.pipeline().addLast(INTERCEPTOR_HANDLER, channelDependencies.getInterceptorHandler());
 
+        //MQTT_PUBLISH_FLOW_HANDLER is added here after CONNECT
+
+        ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
+
+        ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
+
         // after connect inbound interceptor as it intercepts the connect
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
         ch.pipeline().addLast(MQTT_AUTH_HANDLER, channelDependencies.getAuthHandler());
-
-        ch.pipeline().addLast(MQTT_MESSAGE_ID_RETURN_HANDLER, channelDependencies.getReturnMessageIdToPoolHandler());
-
-        if (DROP_MESSAGES_QOS_0) {
-            ch.pipeline().addLast(DROP_OUTGOING_PUBLISHES_HANDLER, channelDependencies.getDropOutgoingPublishesHandler());
-        }
-
-        ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
-
         ch.pipeline().addLast(CONNECTION_LIMITER, channelDependencies.getConnectionLimiterHandler());
         ch.pipeline().addLast(MQTT_CONNECT_HANDLER, channelDependencies.getConnectHandler());
 
-        ch.pipeline().addLast(MQTT_CONNECT_PERSISTENCE_HANDLER, channelDependencies.getConnectPersistenceUpdateHandler());
-        ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
 
-        ch.pipeline().addLast(MQTT_QOS_RECEIVER_HANDLER, channelDependencies.getQoSReceiverHandler());
-        ch.pipeline().addLast(MQTT_QOS_SENDER_HANDLER, channelDependencies.getQoSSenderHandler());
         ch.pipeline().addLast(MQTT_PINGREQ_HANDLER, channelDependencies.getPingRequestHandler());
-        ch.pipeline().addLast(CHANNEL_INACTIVE_HANDLER, new ChannelInactiveHandler());
-
-        ch.pipeline().addLast(INCOMING_PUBLISH_HANDLER, channelDependencies.getIncomingPublishHandler());
-        ch.pipeline().addLast(INCOMING_SUBSCRIBE_HANDLER, channelDependencies.getIncomingSubscribeHandler());
-
-        ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
-        ch.pipeline().addLast(MQTT_PUBLISH_USER_EVENT_HANDLER, channelDependencies.getPublishUserEventReceivedHandler());
-
         ch.pipeline().addLast(MQTT_UNSUBSCRIBE_HANDLER, channelDependencies.getUnsubscribeHandler());
-        ch.pipeline().addLast(STATISTICS_INITIALIZER, channelDependencies.getStatisticsInitializer());
+        ch.pipeline().addLast(MQTT_DISCONNECT_HANDLER, channelDependencies.getDisconnectHandler());
 
         addSpecialHandlers(ch);
 

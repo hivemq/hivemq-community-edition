@@ -23,23 +23,17 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extensions.handler.*;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
-import com.hivemq.metrics.handler.MetricsInitializer;
+import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
-import com.hivemq.mqtt.handler.connect.ConnectPersistenceUpdateHandler;
 import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
 import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
-import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
-import com.hivemq.mqtt.handler.publish.PublishUserEventReceivedHandler;
-import com.hivemq.mqtt.handler.publish.ReturnMessageIdToPoolHandler;
-import com.hivemq.mqtt.handler.publish.qos.QoSReceiverHandler;
-import com.hivemq.mqtt.handler.publish.qos.QoSSenderHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -62,16 +56,10 @@ public class ChannelDependenciesTest {
     private ChannelDependencies channelDependencies;
 
     @Mock
-    private MetricsInitializer statisticsInitializer;
-
-    @Mock
     private NoConnectIdleHandler noConnectIdleHandler;
 
     @Mock
     private ConnectHandler connectHandler;
-
-    @Mock
-    private ConnectPersistenceUpdateHandler connectPersistenceUpdateHandler;
 
     @Mock
     private DisconnectHandler disconnectHandler;
@@ -80,16 +68,7 @@ public class ChannelDependenciesTest {
     private SubscribeHandler subscribeHandler;
 
     @Mock
-    private PublishUserEventReceivedHandler publishUserEventReceivedHandler;
-
-    @Mock
     private UnsubscribeHandler unsubscribeHandler;
-
-    @Mock
-    private QoSReceiverHandler qoSReceiverHandler;
-
-    @Mock
-    private QoSSenderHandler qoSSenderHandler;
 
     @Mock
     private ChannelGroup channelGroup;
@@ -116,13 +95,7 @@ public class ChannelDependenciesTest {
     private MqttConnectDecoder mqttConnectDecoder;
 
     @Mock
-    private ReturnMessageIdToPoolHandler returnMessageIdToPoolHandler;
-
-    @Mock
     private EncoderFactory encoderFactory;
-
-    @Mock
-    private DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
     @Mock
     private EventLog eventLog;
@@ -163,23 +136,21 @@ public class ChannelDependenciesTest {
     @Mock
     private InterceptorHandler interceptorHandler;
 
+    @Mock
+    private GlobalMQTTMessageCounter globalMQTTMessageCounter;
+
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
 
         channelDependencies = new ChannelDependencies(
-                () -> statisticsInitializer,
                 noConnectIdleHandler,
                 () -> connectHandler,
                 connectionLimiterHandler,
-                connectPersistenceUpdateHandler,
                 disconnectHandler,
                 () -> subscribeHandler,
-                () -> publishUserEventReceivedHandler,
                 () -> unsubscribeHandler,
-                () -> qoSReceiverHandler,
-                () -> qoSSenderHandler,
                 channelGroup,
                 fullConfigurationService,
                 globalTrafficShapingHandler,
@@ -188,8 +159,6 @@ public class ChannelDependenciesTest {
                 pingRequestHandler,
                 restrictionsConfigurationService,
                 mqttConnectDecoder,
-                returnMessageIdToPoolHandler,
-                () -> dropOutgoingPublishesHandler,
                 eventLog,
                 sslParameterHandler,
                 mqttDecoders,
@@ -202,34 +171,28 @@ public class ChannelDependenciesTest {
                 () -> incomingSubscribeHandler,
                 () -> messageExpiryHandler,
                 mqttServerDisconnector,
-                interceptorHandler);
+                interceptorHandler,
+                globalMQTTMessageCounter);
 
     }
 
     @Test
     public void test_all_provided() {
 
-        assertNotNull(channelDependencies.getStatisticsInitializer());
         assertNotNull(channelDependencies.getNoConnectIdleHandler());
         assertNotNull(channelDependencies.getConnectHandler());
         assertNotNull(channelDependencies.getDisconnectHandler());
         assertNotNull(channelDependencies.getSubscribeHandler());
-        assertNotNull(channelDependencies.getPublishUserEventReceivedHandler());
         assertNotNull(channelDependencies.getUnsubscribeHandler());
-        assertNotNull(channelDependencies.getQoSSenderHandler());
-        assertNotNull(channelDependencies.getQoSReceiverHandler());
         assertNotNull(channelDependencies.getChannelGroup());
         assertNotNull(channelDependencies.getConfigurationService());
         assertNotNull(channelDependencies.getGlobalTrafficShapingHandler());
         assertNotNull(channelDependencies.getMetricsHolder());
         assertNotNull(channelDependencies.getExceptionHandler());
         assertNotNull(channelDependencies.getPingRequestHandler());
-        assertNotNull(channelDependencies.getConnectPersistenceUpdateHandler());
         assertNotNull(channelDependencies.getRestrictionsConfigurationService());
         assertNotNull(channelDependencies.getMqttConnectDecoder());
-        assertNotNull(channelDependencies.getReturnMessageIdToPoolHandler());
         assertNotNull(channelDependencies.getMqttMessageEncoder());
-        assertNotNull(channelDependencies.getDropOutgoingPublishesHandler());
         assertNotNull(channelDependencies.getPublishMessageExpiryHandler());
         assertNotNull(channelDependencies.getEventLog());
         assertNotNull(channelDependencies.getSslParameterHandler());
@@ -242,5 +205,7 @@ public class ChannelDependenciesTest {
         assertNotNull(channelDependencies.getIncomingSubscribeHandler());
         assertNotNull(channelDependencies.getConnectionLimiterHandler());
         assertNotNull(channelDependencies.getMqttServerDisconnector());
+        assertNotNull(channelDependencies.getInterceptorHandler());
+        assertNotNull(channelDependencies.getGlobalMQTTMessageCounter());
     }
 }

@@ -19,6 +19,7 @@ import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
@@ -37,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.DummyHandler;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 import static org.junit.Assert.assertEquals;
@@ -76,6 +76,9 @@ public class TlsTcpChannelInitializerTest {
     @Mock
     private FullConfigurationService fullConfigurationService;
 
+    @Mock
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+
     private ChannelPipeline pipeline;
 
     private TlsTcpChannelInitializer tlstcpChannelInitializer;
@@ -93,6 +96,9 @@ public class TlsTcpChannelInitializerTest {
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(socketChannel.isActive()).thenReturn(true);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
+        when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
+        when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
+
 
         final MqttServerDisconnector mqttServerDisconnector =new MqttServerDisconnectorImpl(eventLog, new HivemqId());
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
@@ -104,32 +110,47 @@ public class TlsTcpChannelInitializerTest {
     @Test
     public void test_add_special_handlers() throws Exception {
 
-        pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
-
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
 
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
 
+        assertEquals(4, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
         assertEquals(SSL_CLIENT_CERTIFICATE_HANDLER, pipeline.names().get(3));
-        assertEquals(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, pipeline.names().get(4));
+    }
+
+    @Test
+    public void test_add_special_handlers_with_timeout() throws Exception {
+
+        when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
+        when(tls.getHandshakeTimeout()).thenReturn(30);
+
+        tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
+
+        assertEquals(6, pipeline.names().size());
+        assertEquals(SSL_HANDLER, pipeline.names().get(0));
+        assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
+        assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
+        assertEquals(SSL_CLIENT_CERTIFICATE_HANDLER, pipeline.names().get(3));
+        assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
+        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
     }
 
     @Test
     public void test_add_special_handlers_no_cert() throws Exception {
 
-        pipeline.addLast(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, new DummyHandler());
 
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.NONE);
 
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
 
+        assertEquals(3, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
-        assertEquals(AbstractChannelInitializer.FIRST_ABSTRACT_HANDLER, pipeline.names().get(3));
     }
+
 
 }
