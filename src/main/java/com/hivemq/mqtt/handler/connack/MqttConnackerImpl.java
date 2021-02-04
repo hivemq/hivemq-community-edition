@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.handler.connack;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -50,8 +49,7 @@ import static com.hivemq.util.ChannelUtils.getChannelIP;
 @Singleton
 public class MqttConnackerImpl implements MqttConnacker {
 
-    @VisibleForTesting
-    public static final Logger log = LoggerFactory.getLogger(MqttConnackerImpl.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(MqttConnackerImpl.class);
 
     private final boolean connackWithReasonCode;
     private final boolean connackWithReasonString;
@@ -109,7 +107,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
         final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
         logConnack(channel, logMessage, eventLogMessage);
-        if(protocolVersion == null){
+        if (protocolVersion == null) {
             channel.close();
         } else if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
             connackError3(channel, connackWithReasonCode, reasonCode, reasonString, isAuthentication);
@@ -200,7 +198,7 @@ public class MqttConnackerImpl implements MqttConnacker {
                             final @Nullable Mqtt5ConnAckReasonCode reasonCode,
                             final @Nullable String reasonString,
                             final @NotNull Mqtt5UserProperties userProperties,
-                            final boolean isAuthentication){
+                            final boolean isAuthentication) {
         if ((channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null) &&
                 (channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null)) {
             final DisconnectedReasonCode disconnectedReasonCode =
@@ -213,7 +211,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
     @Nullable
     private Mqtt3ConnAckReturnCode transformReasonCode(final @Nullable Mqtt5ConnAckReasonCode reasonCode) {
-        if(reasonCode == null){
+        if (reasonCode == null) {
             return null;
         }
         switch (reasonCode) {

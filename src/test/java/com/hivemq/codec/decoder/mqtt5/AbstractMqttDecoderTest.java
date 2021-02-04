@@ -19,6 +19,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 import util.LogbackCapturingAppender;
 import util.TestMqttDecoder;
 
@@ -29,7 +30,7 @@ public class AbstractMqttDecoderTest {
 
     @Before
     public void setUp() {
-        logCapture = LogbackCapturingAppender.Factory.weaveInto(MqttServerDisconnectorImpl.log);
+        logCapture = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttServerDisconnectorImpl.class));
         createChannel();
     }
 

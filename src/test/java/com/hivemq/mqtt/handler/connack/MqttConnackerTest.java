@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.LoggerFactory;
 import util.DummyHandler;
 import util.LogbackCapturingAppender;
 
@@ -63,7 +64,7 @@ public class MqttConnackerTest {
         mqttConnacker = new MqttConnackerImpl(eventLog);
         channel = new EmbeddedChannel();
         channel.pipeline().addLast(new DummyHandler());
-        logbackCapturingAppender = LogbackCapturingAppender.Factory.weaveInto(MqttConnackerImpl.log);
+        logbackCapturingAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttConnackerImpl.class));
     }
 
     @After
