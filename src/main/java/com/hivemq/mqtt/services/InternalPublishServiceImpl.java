@@ -71,7 +71,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
     }
 
     @NotNull
-    public ListenableFuture<PublishReturnCode> publish(@NotNull final PUBLISH publish, @NotNull final ExecutorService executorService, @Nullable final String sender) {
+    public ListenableFuture<PublishReturnCode> publish(final @NotNull PUBLISH publish, final @NotNull ExecutorService executorService, final @Nullable String sender) {
 
         Preconditions.checkNotNull(publish, "PUBLISH can not be null");
         Preconditions.checkNotNull(executorService, "executorService can not be null");
@@ -109,12 +109,12 @@ public class InternalPublishServiceImpl implements InternalPublishService {
 
                 Futures.addCallback(persistFuture, new FutureCallback<>() {
                     @Override
-                    public void onSuccess(@Nullable final Void aVoid) {
+                    public void onSuccess(final @Nullable Void aVoid) {
                         persistSettableFuture.set(null);
                     }
 
                     @Override
-                    public void onFailure(@NotNull final Throwable throwable) {
+                    public void onFailure(final @NotNull Throwable throwable) {
                         Exceptions.rethrowError("Unable able to store retained message for topic " + publish.getTopic()
                                 + " with message id " + publish.getUniqueId() + ".", throwable);
                         persistSettableFuture.set(null);
@@ -130,13 +130,13 @@ public class InternalPublishServiceImpl implements InternalPublishService {
     }
 
     @NotNull
-    private ListenableFuture<PublishReturnCode> handlePublish(@NotNull final PUBLISH publish, @NotNull final ExecutorService executorService, @Nullable final String sender) {
+    private ListenableFuture<PublishReturnCode> handlePublish(final @NotNull PUBLISH publish, final @NotNull ExecutorService executorService, final @Nullable String sender) {
 
         final TopicSubscribers topicSubscribers = topicTree.findTopicSubscribers(publish.getTopic());
         final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicSubscribers.getSubscribers();
         final ImmutableSet<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
 
-        if (subscribers.size() < 1 && sharedSubscriptions.size() < 1) {
+        if (subscribers.isEmpty() && sharedSubscriptions.isEmpty()) {
             return Futures.immediateFuture(PublishReturnCode.NO_MATCHING_SUBSCRIBERS);
         }
 
@@ -151,11 +151,11 @@ public class InternalPublishServiceImpl implements InternalPublishService {
         return returnCodeFuture;
     }
 
-    private void deliverPublish(@NotNull final TopicSubscribers topicSubscribers,
-                                @Nullable final String sender,
-                                @NotNull final PUBLISH publish,
-                                @NotNull final ExecutorService executorService,
-                                @Nullable final SettableFuture<PublishReturnCode> returnCodeFuture) {
+    private void deliverPublish(final @NotNull TopicSubscribers topicSubscribers,
+                                final @Nullable String sender,
+                                final @NotNull PUBLISH publish,
+                                final @NotNull ExecutorService executorService,
+                                final @Nullable SettableFuture<PublishReturnCode> returnCodeFuture) {
         final Set<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
         final Map<String, SubscriberWithIdentifiers> notSharedSubscribers = new HashMap<>(topicSubscribers.getSubscribers().size());
 
@@ -184,14 +184,14 @@ public class InternalPublishServiceImpl implements InternalPublishService {
 
         Futures.addCallback(FutureUtils.mergeVoidFutures(publishFinishedFutureNonShared, publishFinishedFutureShared), new FutureCallback<>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final @Nullable Void result) {
                 if (returnCodeFuture != null) {
                     returnCodeFuture.set(PublishReturnCode.DELIVERED);
                 }
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable throwable) {
+            public void onFailure(final @NotNull Throwable throwable) {
                 Exceptions.rethrowError("Unable to publish message for topic " + publish.getTopic() + " with message id" + publish.getUniqueId() + ".", throwable);
                 if (returnCodeFuture != null) {
                     returnCodeFuture.set(PublishReturnCode.FAILED);
