@@ -70,6 +70,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
+        ch.pipeline().addLast(ALL_CHANNELS_GROUP_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
         if (throttlingEnabled) {
             ch.pipeline().addLast(GLOBAL_THROTTLING_HANDLER, channelDependencies.getGlobalTrafficShapingHandler());
         }
