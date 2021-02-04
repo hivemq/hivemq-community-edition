@@ -915,7 +915,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     @Nullable
     public SubscriberWithIdentifiers findSubscriber(final @NotNull String client, final @NotNull String topic) {
 
-        final FindSubscriberConsumer subscriberConsumer = new FindSubscriberConsumer(client);
+        final FindSubscriberConsumer subscriberConsumer = new FindSubscriberConsumer(client, this);
 
         findTopicSubscribers(topic, false, subscriberConsumer);
 
@@ -990,15 +990,17 @@ public class TopicTreeImpl implements LocalTopicTree {
         return true;
     }
 
-    class FindSubscriberConsumer implements BiConsumer<SubscriberWithQoS, String> {
+    static class FindSubscriberConsumer implements BiConsumer<SubscriberWithQoS, String> {
 
         private final @NotNull String client;
+        private final @NotNull TopicTreeImpl topicTree;
         private @Nullable SubscriberWithIdentifiers sharedSubscriber = null;
         private final @NotNull ImmutableList.Builder<SubscriberWithQoS> subscribers = ImmutableList.builder();
         private boolean normalSubscriberFound = false;
 
-        public FindSubscriberConsumer(final @NotNull String client) {
+        public FindSubscriberConsumer(final @NotNull String client, final @NotNull TopicTreeImpl topicTree) {
             this.client = client;
+            this.topicTree = topicTree;
         }
 
         @Override
@@ -1017,7 +1019,7 @@ public class TopicTreeImpl implements LocalTopicTree {
         public SubscriberWithIdentifiers getMatchingSubscriber() {
             final ImmutableList<SubscriberWithQoS> subscribers = this.subscribers.build();
             if (!subscribers.isEmpty()) {
-                final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = createDistinctSubscribers(subscribers);
+                final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = topicTree.createDistinctSubscribers(subscribers);
                 return distinctSubscribers.asList().get(0);
             }
             else {
