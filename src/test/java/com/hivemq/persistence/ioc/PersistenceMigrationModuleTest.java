@@ -26,8 +26,6 @@ import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadMemoryLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadNoopPersistenceImpl;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
@@ -96,6 +94,5 @@ public class PersistenceMigrationModuleTest {
                 });
         assertTrue(injector.getInstance(PublishPayloadPersistence.class) instanceof PublishPayloadNoopPersistenceImpl);
         assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadMemoryLocalPersistence);
     }
 }
