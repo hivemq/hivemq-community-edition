@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -100,6 +101,20 @@ public class PublishSendHandlerTest {
         publishSendHandler.channelWritabilityChanged(channelHandlerContext);
         verify(channelHandlerContext, timeout(1000)).flush();
         verify(channelHandlerContext, timeout(1000)).write(any());
-
     }
+
+    @Test
+    public void whenMaxPublishesBeforeFlushIsOne_thenFlushIsTriggeredAfterEachPublish() {
+        when(channel.isWritable()).thenReturn(true);
+        InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.set(1);
+        publishSendHandler.handlerAdded(channelHandlerContext);
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
+        final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
+        final PublishWithFuture publishWithFuture2 = new PublishWithFuture(publish, publishStatusSettableFuture, false);
+        publishSendHandler.sendPublish(List.of(publishWithFuture, publishWithFuture2));
+        verify(channelHandlerContext, timeout(10000).times(2)).write(any());
+        verify(channelHandlerContext, timeout(10000).times(2)).flush();
+    }
+
 }

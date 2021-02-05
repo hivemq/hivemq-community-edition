@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.handler.publish;
 
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
@@ -62,6 +63,10 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter {
             final PublishWithFuture publishFuture = messagesToWrite.poll();
             ctx.write(publishFuture).addListener(new PublishWriteFailedListener(publishFuture.getFuture()));
             written++;
+            if (written >= InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.get()) {
+                ctx.flush();
+                written = 0;
+            }
         }
         if (written > 0) {
             ctx.flush();
