@@ -36,6 +36,7 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
     private final @NotNull LinkedList<PublishWithFuture> messagesToWrite = new LinkedList<>();
     private final @NotNull Counter channelNotWritable;
     private @Nullable ChannelHandlerContext ctx;
+    private boolean wasWritable = true;
 
     public PublishSendHandler(final @NotNull MetricsHolder metricsHolder) {
         channelNotWritable = metricsHolder.getChannelNotWritableCounter();
@@ -55,6 +56,11 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
     public void channelWritabilityChanged(final @NotNull ChannelHandlerContext ctx) {
         final Channel channel = ctx.channel();
         if (channel.isWritable()) {
+            if (!wasWritable) {
+                wasWritable = true;
+                channelNotWritable.dec();
+            }
+
             channel.eventLoop().execute(this);
         }
         ctx.fireChannelWritabilityChanged();
@@ -73,7 +79,10 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
         int written = 0;
         while (!messagesToWrite.isEmpty()) {
             if (!ctx.channel().isWritable()) {
-                channelNotWritable.inc();
+                if (wasWritable) {
+                    wasWritable = false;
+                    channelNotWritable.inc();
+                }
                 break;
             }
             final PublishWithFuture publishFuture = messagesToWrite.poll();

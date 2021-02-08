@@ -100,14 +100,14 @@ public class PublishSendHandlerTest {
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
         publishSendHandler.sendPublishes(List.of(publishWithFuture));
+        assertEquals(1, metricsHolder.getChannelNotWritableCounter().getCount());
         verify(channel, never()).flush();
         verify(channelHandlerContext, never()).write(any());
         when(channel.isWritable()).thenReturn(true);
         publishSendHandler.channelWritabilityChanged(channelHandlerContext);
         verify(channelHandlerContext, timeout(1000)).flush();
         verify(channelHandlerContext, timeout(1000)).write(any());
-        assertEquals(1, metricsHolder.getChannelNotWritableCounter().getCount());
-
+        assertEquals(0, metricsHolder.getChannelNotWritableCounter().getCount());
     }
 
     @Test
@@ -123,5 +123,6 @@ public class PublishSendHandlerTest {
         verify(channelHandlerContext, timeout(10000).times(2)).write(any());
         verify(channelHandlerContext, timeout(10000).times(2)).flush();
     }
+
 
 }
