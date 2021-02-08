@@ -168,6 +168,6 @@ public class HiveMQMetrics {
      * represents a {@link Counter}, for the number of channel which are not writable when sending out a publish to a subscriber
      */
     public static final HiveMQMetric<Gauge<Number>> NETTY_CHANNEL_NOT_WRITABLE =
-            HiveMQMetric.gaugeValue("com.hivemq.mqtt.connection.not-writable.count");
+            HiveMQMetric.gaugeValue("com.hivemq.mqtt.connection.not-writable.current");
 }
 
