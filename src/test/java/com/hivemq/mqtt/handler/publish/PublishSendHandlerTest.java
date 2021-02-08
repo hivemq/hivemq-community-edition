@@ -15,9 +15,11 @@
  */
 package com.hivemq.mqtt.handler.publish;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
@@ -59,11 +61,14 @@ public class PublishSendHandlerTest {
     @Captor
     private @NotNull ArgumentCaptor<Runnable> runnableArgumentCaptor;
 
-    private final @NotNull PublishSendHandler publishSendHandler = new PublishSendHandler();
+    private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
+
+    private final @NotNull PublishSendHandler publishSendHandler = new PublishSendHandler(metricsHolder);
 
     @Before
     public void setUp() {
         initMocks(this);
+
         when(channelHandlerContext.channel()).thenReturn(channel);
         when(channel.eventLoop()).thenReturn(eventLoop);
         doAnswer(invocation -> {
@@ -101,6 +106,8 @@ public class PublishSendHandlerTest {
         publishSendHandler.channelWritabilityChanged(channelHandlerContext);
         verify(channelHandlerContext, timeout(1000)).flush();
         verify(channelHandlerContext, timeout(1000)).write(any());
+        assertEquals(1, metricsHolder.getChannelNotWritableCounter().getCount());
+
     }
 
     @Test

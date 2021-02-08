@@ -45,6 +45,9 @@ public class MetricsHolder {
 
     private final @NotNull Counter closedConnectionsCounter;
 
+    private final @NotNull Counter channelNotWritableCounter;
+
+
     public MetricsHolder(final MetricRegistry metricRegistry) {
 
         this.metricRegistry = metricRegistry;
@@ -63,6 +66,7 @@ public class MetricsHolder {
 
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
 
+        channelNotWritableCounter = metricRegistry.counter(NETTY_CHANNEL_NOT_WRITABLE.name());
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {
@@ -101,4 +105,7 @@ public class MetricsHolder {
         return closedConnectionsCounter;
     }
 
+    public @NotNull Counter getChannelNotWritableCounter() {
+        return channelNotWritableCounter;
+    }
 }

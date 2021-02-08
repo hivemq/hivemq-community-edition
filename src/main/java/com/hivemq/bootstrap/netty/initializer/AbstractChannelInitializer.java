@@ -69,7 +69,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     protected void initChannel(@NotNull final Channel ch) throws Exception {
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
-        final PublishSendHandler publishSendHandler = new PublishSendHandler();
+        final PublishSendHandler publishSendHandler = channelDependencies.getPublishSendHandler();
         ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishSendHandler));
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);

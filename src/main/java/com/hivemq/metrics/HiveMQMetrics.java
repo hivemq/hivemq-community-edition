@@ -163,5 +163,11 @@ public class HiveMQMetrics {
      */
     public static final HiveMQMetric<Gauge<Number>> QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE =
             HiveMQMetric.gaugeValue("com.hivemq.persistence.queued-messages.in-memory.total-size");
+
+    /**
+     * represents a {@link Counter}, which measures the occurrences, where a Netty Channel was not writable when sending out a publish to a subscriber
+     */
+    public static final HiveMQMetric<Gauge<Number>> NETTY_CHANNEL_NOT_WRITABLE =
+            HiveMQMetric.gaugeValue("com.hivemq.mqtt.connection.not-writable.count");
 }
 

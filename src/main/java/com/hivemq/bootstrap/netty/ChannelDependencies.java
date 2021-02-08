@@ -22,7 +22,10 @@ import com.hivemq.codec.encoder.MQTTMessageEncoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.handler.*;
+import com.hivemq.extensions.handler.ClientLifecycleEventHandler;
+import com.hivemq.extensions.handler.IncomingPublishHandler;
+import com.hivemq.extensions.handler.IncomingSubscribeHandler;
+import com.hivemq.extensions.handler.PluginInitializerHandler;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
@@ -36,6 +39,7 @@ import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
+import com.hivemq.mqtt.handler.publish.PublishSendHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -280,5 +284,9 @@ public class ChannelDependencies {
     @NotNull
     public GlobalMQTTMessageCounter getGlobalMQTTMessageCounter() {
         return globalMQTTMessageCounter;
+    }
+
+    public @NotNull PublishSendHandler getPublishSendHandler() {
+        return new PublishSendHandler(metricsHolder);
     }
 }
