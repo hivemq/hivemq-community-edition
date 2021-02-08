@@ -79,7 +79,7 @@ public class PublishSendHandlerTest {
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublish(List.of(publishWithFuture));
+        publishSendHandler.sendPublishes(List.of(publishWithFuture));
         embeddedChannel.finish();
         assertFalse(embeddedChannel.outboundMessages().isEmpty());
         final PublishWithFuture polled = (PublishWithFuture) embeddedChannel.outboundMessages().poll();
@@ -94,7 +94,7 @@ public class PublishSendHandlerTest {
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublish(List.of(publishWithFuture));
+        publishSendHandler.sendPublishes(List.of(publishWithFuture));
         verify(channel, never()).flush();
         verify(channelHandlerContext, never()).write(any());
         when(channel.isWritable()).thenReturn(true);
@@ -112,7 +112,7 @@ public class PublishSendHandlerTest {
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
         final PublishWithFuture publishWithFuture2 = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublish(List.of(publishWithFuture, publishWithFuture2));
+        publishSendHandler.sendPublishes(List.of(publishWithFuture, publishWithFuture2));
         verify(channelHandlerContext, timeout(10000).times(2)).write(any());
         verify(channelHandlerContext, timeout(10000).times(2)).flush();
     }

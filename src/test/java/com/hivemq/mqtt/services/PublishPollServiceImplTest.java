@@ -138,7 +138,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(48)).returnId(anyInt());
-        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
+        verify(publishSendHandler, times(1)).sendPublishes(any(List.class));
     }
 
 
@@ -158,7 +158,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
 
         verify(messageIDPool, times(9)).returnId(anyInt()); // 10 messages are polled because the client receive max is 10
-        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
+        verify(publishSendHandler, times(1)).sendPublishes(any(List.class));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollNewMessages("client");
         final ArgumentCaptor<List<PublishWithFuture>> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-        verify(publishSendHandler, times(1)).sendPublish(argumentCaptor.capture());
+        verify(publishSendHandler, times(1)).sendPublishes(argumentCaptor.capture());
         argumentCaptor.getValue().get(0).getFuture().set(PublishStatus.NOT_CONNECTED);
         verify(messageIDPool, times(50)).returnId(anyInt()); // The id must be returned
     }
@@ -192,7 +192,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(2)).takeIfAvailable(anyInt());
-        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
+        verify(publishSendHandler, times(1)).sendPublishes(any(List.class));
         verify(channel).writeAndFlush(any(PubrelWithFuture.class));
     }
 
@@ -208,7 +208,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, times(1)).takeIfAvailable(anyInt());
-        verify(publishSendHandler, times(1)).sendPublish(any(List.class));
+        verify(publishSendHandler, times(1)).sendPublishes(any(List.class));
         verify(messageIDPool).returnId(2);
     }
 
@@ -249,7 +249,7 @@ public class PublishPollServiceImplTest {
         publishPollService.pollSharedPublishes("group/topic");
 
         final ArgumentCaptor<List<PublishWithFuture>> captor = ArgumentCaptor.forClass(List.class);
-        verify(publishSendHandler, times(1)).sendPublish(captor.capture());
+        verify(publishSendHandler, times(1)).sendPublishes(captor.capture());
         verify(messageIDPool, times(2)).takeNextId();
 
         final List<PublishWithFuture> values = captor.getValue();

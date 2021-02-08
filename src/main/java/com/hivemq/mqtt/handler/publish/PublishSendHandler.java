@@ -29,10 +29,15 @@ import java.util.List;
 /**
  * @author Daniel Krüger
  */
-public class PublishSendHandler extends ChannelInboundHandlerAdapter {
+public class PublishSendHandler extends ChannelInboundHandlerAdapter implements Runnable {
 
     private @Nullable ChannelHandlerContext ctx;
     private final @NotNull LinkedList<PublishWithFuture> messagesToWrite = new LinkedList<>();
+
+    @Override
+    public void run() {
+        consumeQueue();
+    }
 
     @Override
     public void handlerAdded(final @NotNull ChannelHandlerContext ctx) {
@@ -43,12 +48,12 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter {
     public void channelWritabilityChanged(final @NotNull ChannelHandlerContext ctx) {
         final Channel channel = ctx.channel();
         if (channel.isWritable()) {
-            channel.eventLoop().execute(this::consumeQueue);
+            channel.eventLoop().execute(this);
         }
         ctx.fireChannelWritabilityChanged();
     }
 
-    public void sendPublish(final @NotNull List<PublishWithFuture> publishes) {
+    public void sendPublishes(final @NotNull List<PublishWithFuture> publishes) {
         assert ctx != null : "Context must not be null";
         ctx.channel().eventLoop().execute(() -> {
             messagesToWrite.addAll(publishes);
@@ -56,7 +61,7 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter {
         });
     }
 
-    public void consumeQueue() {
+    private void consumeQueue() {
         assert ctx != null : "Context must not be null";
         int written = 0;
         while (ctx.channel().isWritable() && !messagesToWrite.isEmpty()) {

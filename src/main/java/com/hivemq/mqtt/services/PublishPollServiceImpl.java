@@ -388,8 +388,8 @@ public class PublishPollServiceImpl implements PublishPollService {
         }, singleWriterService.callbackExecutor(client));
     }
 
-    private void sendOutPublishes(List<PublishWithFuture> publishes, @NotNull final PublishSendHandler publishSendHandler) {
-        publishSendHandler.sendPublish(publishes);
+    private void sendOutPublishes(final @NotNull List<PublishWithFuture> publishes, @NotNull final PublishSendHandler publishSendHandler) {
+        publishSendHandler.sendPublishes(publishes);
     }
 
     /**
