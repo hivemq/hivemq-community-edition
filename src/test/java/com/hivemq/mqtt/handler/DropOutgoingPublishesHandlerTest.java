@@ -98,7 +98,6 @@ public class DropOutgoingPublishesHandlerTest {
         assertEquals(PublishStatus.CHANNEL_NOT_WRITABLE, future.get());
         verify(promise).setSuccess();
         verify(messageDroppedService).notWritable("clientId", "topic", 0);
-        verify(publishPayloadPersistence).decrementReferenceCounter(1);
     }
 
     @Test
