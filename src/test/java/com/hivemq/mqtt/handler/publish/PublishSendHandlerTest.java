@@ -36,6 +36,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -56,14 +57,10 @@ public class PublishSendHandlerTest {
     private @NotNull ChannelHandlerContext channelHandlerContext;
     @Mock
     private @NotNull EventLoop eventLoop;
-    @Captor
-    private @NotNull ArgumentCaptor<PublishWithFuture> publishWithFutureArgumentCaptor;
-    @Captor
-    private @NotNull ArgumentCaptor<Runnable> runnableArgumentCaptor;
 
     private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 
-    private final @NotNull PublishSendHandler publishSendHandler = new PublishSendHandler(metricsHolder);
+    private @NotNull PublishSendHandler publishSendHandler = new PublishSendHandler(metricsHolder);
 
     @Before
     public void setUp() {
@@ -114,6 +111,7 @@ public class PublishSendHandlerTest {
     public void whenMaxPublishesBeforeFlushIsOne_thenFlushIsTriggeredAfterEachPublish() {
         when(channel.isWritable()).thenReturn(true);
         InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.set(1);
+        publishSendHandler = new PublishSendHandler(metricsHolder);
         publishSendHandler.handlerAdded(channelHandlerContext);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
