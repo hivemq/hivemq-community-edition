@@ -36,10 +36,12 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
     private @Nullable ChannelHandlerContext ctx;
     private final @NotNull LinkedList<PublishWithFuture> messagesToWrite = new LinkedList<>();
     private final @NotNull Counter channelNotWritable;
+    private final int maxWritesBeforeFlush;
     private boolean wasWritable = true; // will only ever be updated in the channel's eventloop
 
     public PublishSendHandler(final @NotNull MetricsHolder metricsHolder) {
         channelNotWritable = metricsHolder.getChannelNotWritableCounter();
+        maxWritesBeforeFlush = InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.get();
     }
 
     @Override
@@ -86,7 +88,7 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
             final PublishWithFuture publish = messagesToWrite.poll();
             ctx.write(publish).addListener(new PublishWriteFailedListener(publish.getFuture()));
             written++;
-            if (written >= InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.get()) {
+            if (written >= maxWritesBeforeFlush) {
                 ctx.flush();
                 written = 0;
             }
