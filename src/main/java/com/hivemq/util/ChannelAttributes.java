@@ -125,7 +125,7 @@ public class ChannelAttributes {
     /**
      * Representation of information regarding the connection of a single client
      */
-    public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("CLIENT.connection");
+    public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("Client.Connection");
 
     /* *****************
      *      MQTT 5     *

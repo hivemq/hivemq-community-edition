@@ -66,7 +66,7 @@ public class MetricsHolder {
 
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
 
-        channelNotWritableCounter = metricRegistry.counter(NETTY_CHANNEL_NOT_WRITABLE.name());
+        channelNotWritableCounter = metricRegistry.counter(MQTT_CONNECTION_NOT_WRITABLE_CURRENT.name());
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {

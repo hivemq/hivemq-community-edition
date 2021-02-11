@@ -48,16 +48,15 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
-    @NotNull
-    private final ChannelDependencies channelDependencies;
-    @NotNull
-    private final Listener listener;
+
+    private final @NotNull ChannelDependencies channelDependencies;
+    private final @NotNull Listener listener;
 
     private final boolean throttlingEnabled;
 
     public AbstractChannelInitializer(
-            @NotNull final ChannelDependencies channelDependencies,
-            @NotNull final Listener listener) {
+            final @NotNull ChannelDependencies channelDependencies,
+            final @NotNull Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
         final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
@@ -66,7 +65,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     }
 
     @Override
-    protected void initChannel(@NotNull final Channel ch) throws Exception {
+    protected void initChannel(final @NotNull Channel ch) throws Exception {
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
         final PublishSendHandler publishSendHandler = channelDependencies.getPublishSendHandler();
@@ -111,7 +110,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(EXCEPTION_HANDLER, channelDependencies.getExceptionHandler());
     }
 
-    protected void addNoConnectIdleHandler(@NotNull final Channel ch) {
+    protected void addNoConnectIdleHandler(final @NotNull Channel ch) {
 
         //get timeout value from internal config
         final RestrictionsConfigurationService restrictionsConfig =
@@ -129,10 +128,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         }
     }
 
-    protected abstract void addSpecialHandlers(@NotNull final Channel ch) throws Exception;
+    protected abstract void addSpecialHandlers(final @NotNull Channel ch) throws Exception;
 
     @Override
-    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, @NotNull final Throwable cause) throws Exception {
+    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) throws Exception {
         if (cause instanceof SslException) {
             log.error(
                     "{}. Disconnecting client {} ", cause.getMessage(),

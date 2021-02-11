@@ -286,7 +286,8 @@ public class ChannelDependencies {
         return globalMQTTMessageCounter;
     }
 
-    public @NotNull PublishSendHandler getPublishSendHandler() {
+    @NotNull
+    public PublishSendHandler getPublishSendHandler() {
         return new PublishSendHandler(metricsHolder);
     }
 }

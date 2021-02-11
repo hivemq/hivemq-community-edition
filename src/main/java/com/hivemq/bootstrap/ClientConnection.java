@@ -23,14 +23,15 @@ import com.hivemq.mqtt.handler.publish.PublishSendHandler;
  */
 public class ClientConnection {
 
-    final @NotNull PublishSendHandler publishSendHandler;
+    private final @NotNull PublishSendHandler publishSendHandler;
 
     public ClientConnection(@NotNull final PublishSendHandler publishSendHandler) {
         this.publishSendHandler = publishSendHandler;
     }
 
 
-    public @NotNull PublishSendHandler getPublishSendHandler() {
+    @NotNull
+    public PublishSendHandler getPublishSendHandler() {
         return publishSendHandler;
     }
 }
