@@ -89,6 +89,7 @@ public class PublishFlushHandlerTest {
     @Test
     public void whenQueueIsNotEmpty_thenWriteAndFlushAfterChannelIsWritable() {
         when(channel.isWritable()).thenReturn(false);
+        when(channel.isActive()).thenReturn(true);
         publishFlushHandler.handlerAdded(channelHandlerContext);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
@@ -107,6 +108,7 @@ public class PublishFlushHandlerTest {
     @Test
     public void whenMaxPublishesBeforeFlushIsOne_thenFlushIsTriggeredAfterEachPublish() {
         when(channel.isWritable()).thenReturn(true);
+        when(channel.isActive()).thenReturn(true);
         InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.set(1);
         publishFlushHandler = new PublishFlushHandler(metricsHolder);
         publishFlushHandler.handlerAdded(channelHandlerContext);
