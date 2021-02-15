@@ -93,7 +93,7 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
         consumeQueue();
     }
 
-    public void consumeQueue() {
+    private void consumeQueue() {
         assert ctx != null : "ctx can not be null because consumeQueue is called after handlerAdded";
         int written = 0;
         while (!messagesToWrite.isEmpty()) {
