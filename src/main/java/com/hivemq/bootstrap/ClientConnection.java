@@ -16,22 +16,20 @@
 package com.hivemq.bootstrap;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.mqtt.handler.publish.PublishSendHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 
 /**
  * @author Daniel Krüger
  */
 public class ClientConnection {
 
-    private final @NotNull PublishSendHandler publishSendHandler;
+    private final @NotNull PublishFlushHandler publishFlushHandler;
 
-    public ClientConnection(@NotNull final PublishSendHandler publishSendHandler) {
-        this.publishSendHandler = publishSendHandler;
+    public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
+        this.publishFlushHandler = publishFlushHandler;
     }
 
-
-    @NotNull
-    public PublishSendHandler getPublishSendHandler() {
-        return publishSendHandler;
+    public @NotNull PublishFlushHandler getPublishFlushHandler() {
+        return publishFlushHandler;
     }
 }

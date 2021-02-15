@@ -39,7 +39,7 @@ import com.hivemq.mqtt.handler.disconnect.DisconnectHandler;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.ping.PingRequestHandler;
 import com.hivemq.mqtt.handler.publish.MessageExpiryHandler;
-import com.hivemq.mqtt.handler.publish.PublishSendHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.handler.subscribe.SubscribeHandler;
 import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
@@ -287,7 +287,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PublishSendHandler getPublishSendHandler() {
-        return new PublishSendHandler(metricsHolder);
+    public PublishFlushHandler getPublishFlushHandler() {
+        return new PublishFlushHandler(metricsHolder);
     }
 }

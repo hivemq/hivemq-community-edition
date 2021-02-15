@@ -24,7 +24,6 @@ import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
-import com.hivemq.mqtt.handler.publish.PublishSendHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
@@ -195,7 +194,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler().sendPublishes(publishesToSend);
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishFlushHandler().sendPublishes(publishesToSend);
             }
 
             @Override
@@ -266,7 +265,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         Futures.addCallback(settableFuture, new PubrelResendCallback(client, message, messageIDPool, channel), MoreExecutors.directExecutor());
                     }
                 }
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler().sendPublishes(publishesToSend);
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishFlushHandler().sendPublishes(publishesToSend);
             }
 
             @Override
@@ -372,7 +371,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishSendHandler().sendPublishes(publishesToSend);
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishFlushHandler().sendPublishes(publishesToSend);
             }
 
             @Override

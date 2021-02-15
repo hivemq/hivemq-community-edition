@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * @author Daniel Krüger
  */
-public class PublishSendHandler extends ChannelInboundHandlerAdapter implements Runnable {
+public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements Runnable {
 
     private @Nullable ChannelHandlerContext ctx;
     private final @NotNull LinkedList<PublishWithFuture> messagesToWrite = new LinkedList<>();
@@ -39,7 +39,7 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
     private final int maxWritesBeforeFlush;
     private boolean wasWritable = true; // will only ever be updated in the channel's eventloop
 
-    public PublishSendHandler(final @NotNull MetricsHolder metricsHolder) {
+    public PublishFlushHandler(final @NotNull MetricsHolder metricsHolder) {
         channelNotWritable = metricsHolder.getChannelNotWritableCounter();
         maxWritesBeforeFlush = InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.get();
     }
@@ -61,11 +61,30 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
         ctx.fireChannelWritabilityChanged();
     }
 
+    @Override
+    public void channelInactive(final @NotNull ChannelHandlerContext ctx) throws Exception {
+        handleChannelInactiveState();
+        super.channelInactive(ctx);
+    }
+
+    private void handleChannelInactiveState() {
+        for (final PublishWithFuture publish : messagesToWrite) {
+            publish.getFuture().set(PublishStatus.NOT_CONNECTED);
+        }
+        messagesToWrite.clear();
+    }
+
     public void sendPublishes(final @NotNull List<PublishWithFuture> publishes) {
         assert ctx != null : "ctx can not be null because sendPublishes is called after handlerAdded";
         ctx.channel().eventLoop().execute(() -> {
-            messagesToWrite.addAll(publishes);
-            consumeQueue();
+            if (ctx.channel().isActive()) {
+                messagesToWrite.addAll(publishes);
+                consumeQueue();
+            } else {
+                for (final PublishWithFuture publish : publishes) {
+                    publish.getFuture().set(PublishStatus.NOT_CONNECTED);
+                }
+            }
         });
     }
 
@@ -74,10 +93,11 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
         consumeQueue();
     }
 
-    private void consumeQueue() {
+    public void consumeQueue() {
         assert ctx != null : "ctx can not be null because consumeQueue is called after handlerAdded";
         int written = 0;
         while (!messagesToWrite.isEmpty()) {
+
             if (!ctx.channel().isWritable()) {
                 if (wasWritable) {
                     wasWritable = false;
@@ -85,7 +105,9 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
                 }
                 break;
             }
+
             final PublishWithFuture publish = messagesToWrite.poll();
+
             ctx.write(publish).addListener(new PublishWriteFailedListener(publish.getFuture()));
             written++;
             if (written >= maxWritesBeforeFlush) {
@@ -93,7 +115,6 @@ public class PublishSendHandler extends ChannelInboundHandlerAdapter implements 
                 written = 0;
             }
         }
-
         if (written > 0) {
             ctx.flush();
         }

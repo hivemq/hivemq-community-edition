@@ -31,12 +31,9 @@ import io.netty.channel.EventLoop;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,7 +43,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * @author Daniel Krüger
  */
-public class PublishSendHandlerTest {
+public class PublishFlushHandlerTest {
 
 
     private final @NotNull EmbeddedChannel embeddedChannel = new EmbeddedChannel();
@@ -60,7 +57,7 @@ public class PublishSendHandlerTest {
 
     private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 
-    private @NotNull PublishSendHandler publishSendHandler = new PublishSendHandler(metricsHolder);
+    private @NotNull PublishFlushHandler publishFlushHandler = new PublishFlushHandler(metricsHolder);
 
     @Before
     public void setUp() {
@@ -77,11 +74,11 @@ public class PublishSendHandlerTest {
 
     @Test
     public void whenPublishesAreAdded_thenConsumptionIsTriggered() {
-        embeddedChannel.pipeline().addLast(publishSendHandler);
+        embeddedChannel.pipeline().addLast(publishFlushHandler);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublishes(List.of(publishWithFuture));
+        publishFlushHandler.sendPublishes(List.of(publishWithFuture));
         embeddedChannel.finish();
         assertFalse(embeddedChannel.outboundMessages().isEmpty());
         final PublishWithFuture polled = (PublishWithFuture) embeddedChannel.outboundMessages().poll();
@@ -92,16 +89,16 @@ public class PublishSendHandlerTest {
     @Test
     public void whenQueueIsNotEmpty_thenWriteAndFlushAfterChannelIsWritable() {
         when(channel.isWritable()).thenReturn(false);
-        publishSendHandler.handlerAdded(channelHandlerContext);
+        publishFlushHandler.handlerAdded(channelHandlerContext);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublishes(List.of(publishWithFuture));
+        publishFlushHandler.sendPublishes(List.of(publishWithFuture));
         assertEquals(1, metricsHolder.getChannelNotWritableCounter().getCount());
         verify(channel, never()).flush();
         verify(channelHandlerContext, never()).write(any());
         when(channel.isWritable()).thenReturn(true);
-        publishSendHandler.channelWritabilityChanged(channelHandlerContext);
+        publishFlushHandler.channelWritabilityChanged(channelHandlerContext);
         verify(channelHandlerContext, timeout(1000)).flush();
         verify(channelHandlerContext, timeout(1000)).write(any());
         assertEquals(0, metricsHolder.getChannelNotWritableCounter().getCount());
@@ -111,13 +108,13 @@ public class PublishSendHandlerTest {
     public void whenMaxPublishesBeforeFlushIsOne_thenFlushIsTriggeredAfterEachPublish() {
         when(channel.isWritable()).thenReturn(true);
         InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.set(1);
-        publishSendHandler = new PublishSendHandler(metricsHolder);
-        publishSendHandler.handlerAdded(channelHandlerContext);
+        publishFlushHandler = new PublishFlushHandler(metricsHolder);
+        publishFlushHandler.handlerAdded(channelHandlerContext);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
         final PublishWithFuture publishWithFuture2 = new PublishWithFuture(publish, publishStatusSettableFuture, false);
-        publishSendHandler.sendPublishes(List.of(publishWithFuture, publishWithFuture2));
+        publishFlushHandler.sendPublishes(List.of(publishWithFuture, publishWithFuture2));
         verify(channelHandlerContext, timeout(10000).times(2)).write(any());
         verify(channelHandlerContext, timeout(10000).times(2)).flush();
     }

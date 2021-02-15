@@ -24,7 +24,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
-import com.hivemq.mqtt.handler.publish.PublishSendHandler;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -68,8 +68,8 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     protected void initChannel(final @NotNull Channel ch) throws Exception {
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
-        final PublishSendHandler publishSendHandler = channelDependencies.getPublishSendHandler();
-        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishSendHandler));
+        final PublishFlushHandler publishFlushHandler = channelDependencies.getPublishFlushHandler();
+        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishFlushHandler));
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
@@ -92,7 +92,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
 
-        ch.pipeline().addLast(PUBLISH_SEND_HANDLER, publishSendHandler);
+        ch.pipeline().addLast(PUBLISH_FLUSH_HANDLER, publishFlushHandler);
         // after connect inbound interceptor as it intercepts the connect
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 

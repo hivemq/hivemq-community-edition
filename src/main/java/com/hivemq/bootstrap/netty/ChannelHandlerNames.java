@@ -68,7 +68,7 @@ public class ChannelHandlerNames {
 
     public static final String MQTT_AUTH_HANDLER = "mqtt_auth_handler";
     public static final String AUTH_IN_PROGRESS_MESSAGE_HANDLER = "auth_in_progress_message_handler";
-    public static final String PUBLISH_SEND_HANDLER = "mqtt_publish_send";
+    public static final String PUBLISH_FLUSH_HANDLER = "mqtt_publish_flush";
 
     /* *************
      *   Outgoing  *
