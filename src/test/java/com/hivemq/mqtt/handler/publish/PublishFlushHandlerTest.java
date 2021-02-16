@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -119,6 +120,20 @@ public class PublishFlushHandlerTest {
         publishFlushHandler.sendPublishes(List.of(publishWithFuture, publishWithFuture2));
         verify(channelHandlerContext, timeout(10000).times(2)).write(any());
         verify(channelHandlerContext, timeout(10000).times(2)).flush();
+    }
+
+    @Test
+    public void whenChannelInactive_thenPublishStatusesAreSetToNotConnected() throws ExecutionException, InterruptedException {
+        when(channel.isActive()).thenReturn(false);
+        publishFlushHandler.handlerAdded(channelHandlerContext);
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
+        final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
+        final PublishWithFuture publishWithFuture2 = new PublishWithFuture(publish, publishStatusSettableFuture, false);
+        publishFlushHandler.sendPublishes(List.of(publishWithFuture, publishWithFuture2));
+
+        assertEquals(PublishStatus.NOT_CONNECTED, publishWithFuture.getFuture().get());
+        assertEquals(PublishStatus.NOT_CONNECTED, publishWithFuture2.getFuture().get());
     }
 
 
