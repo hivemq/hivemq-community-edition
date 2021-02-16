@@ -68,22 +68,19 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
     }
 
     private void handleChannelInactiveState() {
-        for (final PublishWithFuture publish : messagesToWrite) {
-            publish.getFuture().set(PublishStatus.NOT_CONNECTED);
+        while (!messagesToWrite.isEmpty()) {
+            messagesToWrite.poll().getFuture().set(PublishStatus.NOT_CONNECTED);
         }
-        messagesToWrite.clear();
     }
 
     public void sendPublishes(final @NotNull List<PublishWithFuture> publishes) {
         assert ctx != null : "ctx can not be null because sendPublishes is called after handlerAdded";
         ctx.channel().eventLoop().execute(() -> {
+            messagesToWrite.addAll(publishes);
             if (ctx.channel().isActive()) {
-                messagesToWrite.addAll(publishes);
                 consumeQueue();
             } else {
-                for (final PublishWithFuture publish : publishes) {
-                    publish.getFuture().set(PublishStatus.NOT_CONNECTED);
-                }
+                handleChannelInactiveState();
             }
         });
     }
