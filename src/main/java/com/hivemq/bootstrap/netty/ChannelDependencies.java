@@ -287,7 +287,7 @@ public class ChannelDependencies {
     }
 
     @NotNull
-    public PublishFlushHandler getPublishFlushHandler() {
+    public PublishFlushHandler createPublishFlushHandler() {
         return new PublishFlushHandler(metricsHolder);
     }
 }
