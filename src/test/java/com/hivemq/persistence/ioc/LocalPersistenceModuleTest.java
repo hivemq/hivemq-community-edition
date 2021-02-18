@@ -33,6 +33,7 @@ import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.PersistenceStartup;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.SingleWriterServiceImpl;
 import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
 import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
@@ -222,7 +223,7 @@ public class LocalPersistenceModuleTest {
                         bind(MessageIDPools.class).toInstance(messageIDProducers);
                         bind(MetricsHolder.class).toInstance(metricsHolder);
                         bind(MetricRegistry.class).toInstance(new MetricRegistry());
-                        bind(SingleWriterServiceImpl.class).toInstance(singleWriterServiceImpl);
+                        bind(SingleWriterService.class).toInstance(singleWriterServiceImpl);
                         bind(EventLog.class).toInstance(eventLog);
                         bind(MessageDroppedService.class).toInstance(messageDroppedService);
                         bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());

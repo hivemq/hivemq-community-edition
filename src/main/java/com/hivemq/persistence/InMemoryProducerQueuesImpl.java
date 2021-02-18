@@ -52,10 +52,6 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
     private @Nullable ListenableFuture<Void> closeFuture;
     private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
-    public InMemoryProducerQueuesImpl(final @NotNull InMemorySingleWriterImpl singleWriterService, final int amountOfQueues, final boolean inMemory) {
-        this(singleWriterService, amountOfQueues);
-    }
-
     public InMemoryProducerQueuesImpl(final @NotNull InMemorySingleWriterImpl singleWriterService, final int amountOfQueues) {
         this.singleWriterServiceImpl = singleWriterService;
 
@@ -121,27 +117,6 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
             resultFuture = null;
         }
 
-//        singleWriterService.getCallbackExecutors()[queueIndex].execute(() -> {
-//            try {
-//                final R result = task.doTask(bucketIndex, queueBucketIndexes.get(queueIndex), queueIndex);
-//                if (resultFuture != null) {
-//                    resultFuture.set(result);
-//                } else {
-//                    if (successCallback != null) {
-//                        successCallback.afterTask(result);
-//                    }
-//                }
-//            } catch (final Exception e) {
-//                if (resultFuture != null) {
-//                    resultFuture.setException(e);
-//                } else {
-//                    if (failedCallback != null) {
-//                        failedCallback.afterTask(e);
-//                    }
-//                }
-//            }
-//        });
-
         final MpscUnboundedArrayQueue<Runnable> queue = singleWriterServiceImpl.queues[queueIndex];
         final AtomicInteger wip = singleWriterServiceImpl.wips[queueIndex];
         queue.offer(() -> {
@@ -164,6 +139,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
                 }
             }
         });
+
         if (wip.getAndIncrement() == 0) {
             int missed = 1;
             do {
@@ -178,13 +154,6 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
                 missed = wip.addAndGet(-missed);
             } while (missed != 0);
         }
-
-//        queue.add(new TaskWithFuture(resultFuture, task, bucketIndex, queueBucketIndexes.get(queueIndex), successCallback, failedCallback));
-//        taskCount.incrementAndGet();
-//        singleWriterService.getGlobalTaskCount().incrementAndGet();
-//        if (queueTaskCounter.get(queueIndex).getAndIncrement() == 0) {
-//            singleWriterService.incrementNonemptyQueueCounter();
-//        }
         return resultFuture;
     }
 

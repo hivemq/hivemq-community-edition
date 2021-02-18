@@ -75,7 +75,7 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
-            producers[i] = new InMemoryProducerQueuesImpl(this, amountOfQueues, false);
+            producers[i] = new InMemoryProducerQueuesImpl(this, amountOfQueues);
         }
 
         callbackExecutors = new ExecutorService[amountOfQueues];

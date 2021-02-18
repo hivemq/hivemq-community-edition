@@ -86,7 +86,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
-            producers[i] = new ProducerQueuesImpl(this, amountOfQueues, false);
+            producers[i] = new ProducerQueuesImpl(this, amountOfQueues);
         }
 
         callbackExecutors = new ExecutorService[amountOfQueues];

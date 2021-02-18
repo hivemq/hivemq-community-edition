@@ -68,9 +68,6 @@ public class ProducerQueuesImpl implements ProducerQueues {
     private @Nullable ListenableFuture<Void> closeFuture;
     private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
-    public ProducerQueuesImpl(final @NotNull SingleWriterServiceImpl singleWriterServiceImpl, final int amountOfQueues, final boolean inMemory) {
-        this(singleWriterServiceImpl, amountOfQueues);
-    }
 
     public ProducerQueuesImpl(final SingleWriterServiceImpl singleWriterServiceImpl, final int amountOfQueues) {
         this.singleWriterServiceImpl = singleWriterServiceImpl;
