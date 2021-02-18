@@ -37,7 +37,7 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.PersistenceShutdownHookInstaller;
 import com.hivemq.persistence.PersistenceStartup;
-import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.SingleWriterServiceImpl;
 import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -106,7 +106,7 @@ public class PersistenceModuleTest {
                 bind(TopicMatcher.class).toInstance(Mockito.mock(TopicMatcher.class));
                 bind(MessageIDPools.class).toInstance(Mockito.mock(MessageIDPools.class));
                 bind(MetricRegistry.class).toInstance(new MetricRegistry());
-                bind(SingleWriterService.class).toInstance(Mockito.mock(SingleWriterService.class));
+                bind(SingleWriterServiceImpl.class).toInstance(Mockito.mock(SingleWriterServiceImpl.class));
                 bind(EventLog.class).toInstance(Mockito.mock(EventLog.class));
                 bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
                 bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));

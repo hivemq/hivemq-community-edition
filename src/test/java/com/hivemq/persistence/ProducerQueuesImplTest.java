@@ -16,6 +16,7 @@
 package com.hivemq.persistence;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,22 +32,22 @@ import static org.mockito.Mockito.when;
 /**
  * @author Lukas Brandl
  */
-public class ProducerQueuesTest {
+public class ProducerQueuesImplTest {
 
     @Mock
-    SingleWriterService singleWriterService;
+    SingleWriterServiceImpl singleWriterServiceImpl;
 
-    ProducerQueues producerQueues;
+    ProducerQueuesImpl producerQueues;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(singleWriterService.getPersistenceBucketCount()).thenReturn(64);
-        when(singleWriterService.getThreadPoolSize()).thenReturn(4);
-        when(singleWriterService.getGlobalTaskCount()).thenReturn(new AtomicLong());
+        when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);
+        when(singleWriterServiceImpl.getThreadPoolSize()).thenReturn(4);
+        when(singleWriterServiceImpl.getGlobalTaskCount()).thenReturn(new AtomicLong());
 
-        producerQueues = new ProducerQueues(singleWriterService,4);
+        producerQueues = new ProducerQueuesImpl(singleWriterServiceImpl, 4);
     }
 
     @Test
@@ -70,27 +71,27 @@ public class ProducerQueuesTest {
 
     @Test
     public void submit_task() throws Exception {
-        producerQueues.submit("key", new SingleWriterService.Task<Object>() {
+        producerQueues.submit("key", new SingleWriterServiceImpl.Task<Object>() {
             @Override
-            public Object doTask(final int bucketIndex, final ImmutableList<Integer> queueBuckets, final int queueIndex) {
+            public Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
                 return null;
             }
         });
         final int queueIndex = producerQueues.getBucket("key") / producerQueues.bucketsPerQueue;
-        final Queue<ProducerQueues.TaskWithFuture> queue = producerQueues.queues.get(queueIndex);
+        final Queue<ProducerQueuesImpl.TaskWithFuture> queue = producerQueues.queues.get(queueIndex);
         assertEquals(1, queue.size());
     }
 
     @Test
     public void submit_task_to_all_queues() throws Exception {
-        producerQueues.submitToAllQueues(new SingleWriterService.Task<Object>() {
+        producerQueues.submitToAllQueues(new SingleWriterServiceImpl.Task<Object>() {
             @Override
-            public Object doTask(final int bucketIndex, final ImmutableList<Integer> queueBuckets, final int queueIndex) {
+            public Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
                 return null;
             }
         });
 
-        for (final Queue<ProducerQueues.TaskWithFuture> queue : producerQueues.queues) {
+        for (final Queue<ProducerQueuesImpl.TaskWithFuture> queue : producerQueues.queues) {
             assertEquals(1, queue.size());
         }
     }

@@ -33,10 +33,7 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ProducerQueues;
-import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.*;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
@@ -135,7 +132,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         checkNotNull(client, "Client id must not be null");
         final long timestamp = System.currentTimeMillis();
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        singleWriter.submit(client, (SingleWriterService.Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> {
+        singleWriter.submit(client, (SingleWriterServiceImpl.Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> {
             final ClientSession disconnectSession = localPersistence.disconnect(client, timestamp, sendWill, bucketIndex, sessionExpiry);
             if (sendWill) {
                 pendingWillMessages.addWill(client, disconnectSession);
