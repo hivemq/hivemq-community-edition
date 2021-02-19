@@ -76,15 +76,6 @@ public class DropOutgoingPublishesHandler {
                     log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable", clientId, publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
                     promise.setSuccess();
-                    if (publish instanceof PublishWithFuture) {
-                        //Don't decrement the reference count here because the message might be resent to an other client
-                        //The shared subscription handling will take care of the reference counting
-                        if (!((PublishWithFuture) publish).isShared()) {
-                            publishPayloadPersistence.decrementReferenceCounter(publish.getPublishId());
-                        }
-                    } else {
-                        publishPayloadPersistence.decrementReferenceCounter(publish.getPublishId());
-                    }
                     return true;
                 }
             }

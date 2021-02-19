@@ -219,6 +219,11 @@ public class InternalConfigurations {
     // The maximum size stats history buffer that is used to dump stats to the LOG file
     public static final int ROCKSDB_STATS_HISTORY_BUFFER_SIZE = 64 * 1024; // 64KB
 
+    /**
+     * The maximum number of publishes until a flush is triggered on the Netty pipeline.
+     */
+    public static final AtomicInteger MAX_PUBLISHES_BEFORE_FLUSH = new AtomicInteger(128);
+
 
     /**
      * The live time of a entry in the shared subscriber cache in milliseconds

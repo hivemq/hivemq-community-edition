@@ -163,5 +163,11 @@ public class HiveMQMetrics {
      */
     public static final HiveMQMetric<Gauge<Number>> QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE =
             HiveMQMetric.gaugeValue("com.hivemq.persistence.queued-messages.in-memory.total-size");
+
+    /**
+     * represents a {@link Counter} for the number of MQTT client channels which are currently not writable.
+     */
+    public static final HiveMQMetric<Counter> MQTT_CONNECTION_NOT_WRITABLE_CURRENT =
+            HiveMQMetric.valueOf("com.hivemq.mqtt.connection.not-writable.current", Counter.class);
 }
 

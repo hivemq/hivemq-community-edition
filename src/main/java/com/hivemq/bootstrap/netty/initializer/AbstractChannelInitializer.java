@@ -16,6 +16,7 @@
 package com.hivemq.bootstrap.netty.initializer;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -23,6 +24,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -46,16 +48,15 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
-    @NotNull
-    private final ChannelDependencies channelDependencies;
-    @NotNull
-    private final Listener listener;
+
+    private final @NotNull ChannelDependencies channelDependencies;
+    private final @NotNull Listener listener;
 
     private final boolean throttlingEnabled;
 
     public AbstractChannelInitializer(
-            @NotNull final ChannelDependencies channelDependencies,
-            @NotNull final Listener listener) {
+            final @NotNull ChannelDependencies channelDependencies,
+            final @NotNull Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
         final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
@@ -64,9 +65,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     }
 
     @Override
-    protected void initChannel(@NotNull final Channel ch) throws Exception {
+    protected void initChannel(final @NotNull Channel ch) throws Exception {
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
+        final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
+        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(publishFlushHandler));
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);
 
@@ -85,11 +88,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(INTERCEPTOR_HANDLER, channelDependencies.getInterceptorHandler());
 
         //MQTT_PUBLISH_FLOW_HANDLER is added here after CONNECT
-
         ch.pipeline().addLast(MESSAGE_EXPIRY_HANDLER, channelDependencies.getPublishMessageExpiryHandler());
 
         ch.pipeline().addLast(MQTT_SUBSCRIBE_HANDLER, channelDependencies.getSubscribeHandler());
 
+        ch.pipeline().addLast(PUBLISH_FLUSH_HANDLER, publishFlushHandler);
         // after connect inbound interceptor as it intercepts the connect
         ch.pipeline().addLast(CLIENT_LIFECYCLE_EVENT_HANDLER, channelDependencies.getClientLifecycleEventHandler());
 
@@ -107,7 +110,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         ch.pipeline().addLast(EXCEPTION_HANDLER, channelDependencies.getExceptionHandler());
     }
 
-    protected void addNoConnectIdleHandler(@NotNull final Channel ch) {
+    protected void addNoConnectIdleHandler(final @NotNull Channel ch) {
 
         //get timeout value from internal config
         final RestrictionsConfigurationService restrictionsConfig =
@@ -125,10 +128,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         }
     }
 
-    protected abstract void addSpecialHandlers(@NotNull final Channel ch) throws Exception;
+    protected abstract void addSpecialHandlers(final @NotNull Channel ch) throws Exception;
 
     @Override
-    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, @NotNull final Throwable cause) throws Exception {
+    public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) throws Exception {
         if (cause instanceof SslException) {
             log.error(
                     "{}. Disconnecting client {} ", cause.getMessage(),
