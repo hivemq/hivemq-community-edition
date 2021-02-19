@@ -4,15 +4,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.util.ThreadFactoryUtil;
 import io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,16 +43,10 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
     private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
 
-    private final @NotNull InMemoryProducerQueuesImpl @NotNull [] producers = new InMemoryProducerQueuesImpl[AMOUNT_OF_PRODUCERS];
 
+    private final @NotNull InMemoryProducerQueuesImpl @NotNull [] producers = new InMemoryProducerQueuesImpl[AMOUNT_OF_PRODUCERS];
     public final @NotNull MpscUnboundedArrayQueue<Runnable> @NotNull [] queues;
     public final @NotNull AtomicInteger @NotNull [] wips;
-
-
-    @VisibleForTesting
-    public final @NotNull ExecutorService @NotNull [] callbackExecutors;
-
-    private final int amountOfQueues;
 
     @Inject
     public InMemorySingleWriterImpl() {
@@ -65,19 +55,10 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
-
-
-        amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
+        final int amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new InMemoryProducerQueuesImpl(this, amountOfQueues);
-        }
-
-        callbackExecutors = new ExecutorService[amountOfQueues];
-        for (int i = 0; i < amountOfQueues; i++) {
-            final ThreadFactory callbackThreadFactory = ThreadFactoryUtil.create("single-writer-callback-" + i);
-            final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(callbackThreadFactory);
-            callbackExecutors[i] = executorService;
         }
 
         queues = new MpscUnboundedArrayQueue[amountOfQueues];
@@ -99,14 +80,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
             }
         }
         return persistenceBucketCount;
-    }
-
-    @NotNull
-    public ExecutorService callbackExecutor(@NotNull final String key) {
-        final int bucketsPerQueue = persistenceBucketCount / amountOfQueues;
-        final int bucketIndex = BucketUtils.getBucket(key, persistenceBucketCount);
-        final int queueIndex = bucketIndex / bucketsPerQueue;
-        return callbackExecutors[queueIndex];
     }
 
     public void decrementNonemptyQueueCounter() {
@@ -158,18 +131,9 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         return runningThreadsCount;
     }
 
-    @NotNull
-    public ExecutorService @NotNull [] getCallbackExecutors() {
-        return callbackExecutors;
-    }
-
     public void stop() {
-        final long start = System.currentTimeMillis();
         if (log.isTraceEnabled()) {
             log.trace("Shutting down single writer");
-        }
-        for (final ExecutorService callbackExecutor : callbackExecutors) {
-            callbackExecutor.shutdownNow();
         }
     }
 

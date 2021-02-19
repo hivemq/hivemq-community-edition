@@ -21,10 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutorService;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Daniel Krüger
@@ -48,7 +45,7 @@ public class InMemorySingleWriterServiceImplTest {
     }
 
     @Test
-    public void test_valid_amount_of_queues() throws Exception {
+    public void test_valid_amount_of_queues() {
         assertEquals(1, singleWriterServiceImpl.validAmountOfQueues(1, 64));
         assertEquals(2, singleWriterServiceImpl.validAmountOfQueues(2, 64));
         assertEquals(4, singleWriterServiceImpl.validAmountOfQueues(4, 64));
@@ -57,12 +54,5 @@ public class InMemorySingleWriterServiceImplTest {
         assertEquals(64, singleWriterServiceImpl.validAmountOfQueues(64, 64));
     }
 
-    @Test
-    public void stop_shutdownAllThreads() {
-        singleWriterServiceImpl.stop();
-        for (final ExecutorService callbackExecutor : singleWriterServiceImpl.callbackExecutors) {
-            assertTrue(callbackExecutor.isShutdown());
-        }
-    }
 
 }

@@ -202,7 +202,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 Exceptions.rethrowError("Exception in new messages handling", t);
                 channel.disconnect();
             }
-        }, singleWriterService.callbackExecutor(client));
+        }, MoreExecutors.directExecutor());
     }
 
     /**
@@ -272,7 +272,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             public void onFailure(final Throwable t) {
                 Exceptions.rethrowError("Exception in inflight messages handling", t);
             }
-        }, singleWriterService.callbackExecutor(client));
+        }, MoreExecutors.directExecutor());
     }
 
     private AtomicInteger inFlightMessageCount(final @NotNull Channel channel) {
@@ -381,7 +381,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 Exceptions.rethrowError("Exception in shared publishes poll handling for client " + client +
                         "for shared subscription " + sharedSubscription, t);
             }
-        }, singleWriterService.callbackExecutor(client));
+        }, MoreExecutors.directExecutor());
     }
 
     /**

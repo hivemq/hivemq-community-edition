@@ -73,7 +73,7 @@ public class ProducerQueuesImplTest {
     public void submit_task() throws Exception {
         producerQueues.submit("key", new SingleWriterServiceImpl.Task<Object>() {
             @Override
-            public Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
+            public @NotNull Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
                 return null;
             }
         });
@@ -86,7 +86,7 @@ public class ProducerQueuesImplTest {
     public void submit_task_to_all_queues() throws Exception {
         producerQueues.submitToAllQueues(new SingleWriterServiceImpl.Task<Object>() {
             @Override
-            public Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
+            public @NotNull Object doTask(final int bucketIndex, final @NotNull ImmutableList<Integer> queueBuckets, final int queueIndex) {
                 return null;
             }
         });
