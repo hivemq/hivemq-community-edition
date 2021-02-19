@@ -31,7 +31,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
     final int bucketsPerQueue;
     private final @NotNull AtomicLong taskCount = new AtomicLong(0);
     private final int amountOfQueues;
-    private final @NotNull NettyEventLoopSingleWriterImpl inMemorySingleWriter;
+    private final @NotNull NettyEventLoopSingleWriterImpl singleWriter;
 
     private final @NotNull ImmutableList<ImmutableList<Integer>> queueBucketIndexes;
 
@@ -43,9 +43,9 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
     private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
     public NettyEventLoopProducerQueuesImpl(final @NotNull NettyEventLoopSingleWriterImpl singleWriterService, final int amountOfQueues, final EventExecutor @NotNull [] eventExecutors) {
-        this.inMemorySingleWriter = singleWriterService;
+        this.singleWriter = singleWriterService;
         this.eventExecutors = eventExecutors;
-        final int bucketCount = inMemorySingleWriter.getPersistenceBucketCount();
+        final int bucketCount = singleWriter.getPersistenceBucketCount();
         this.amountOfQueues = amountOfQueues;
         bucketsPerQueue = bucketCount / amountOfQueues;
 
@@ -106,7 +106,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
         if ((eventExecutor.isShuttingDown() || eventExecutor.isShutdown()) && !ignoreShutdown) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > inMemorySingleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriter.getShutdownGracePeriod()) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final SettableFuture<R> resultFuture;
@@ -157,11 +157,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
                         }
                     }
             );
-
-
         }
-
-
         return resultFuture;
     }
 
@@ -177,7 +173,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
 
     @NotNull
     private <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task, final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > inMemorySingleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriter.getShutdownGracePeriod()) {
             return Collections.singletonList(SettableFuture.create()); // Future will never return since we are shutting down.
         }
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
@@ -191,7 +187,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
 
 
     public int getBucket(@NotNull final String key) {
-        return BucketUtils.getBucket(key, inMemorySingleWriter.getPersistenceBucketCount());
+        return BucketUtils.getBucket(key, singleWriter.getPersistenceBucketCount());
     }
 
     public void execute(final @NotNull SplittableRandom random) {
@@ -224,7 +220,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
                 Futures.allAsList(submitToAllQueues((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true)).get();
             }
             return null;
-        }, inMemorySingleWriter.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
+        }, singleWriter.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
 
         Futures.addCallback(closeFuture, new FutureCallback<>() {
             @Override

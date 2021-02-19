@@ -6,7 +6,6 @@ import com.hivemq.bootstrap.netty.NettyConfiguration;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.util.ThreadFactoryUtil;
 import io.netty.util.concurrent.EventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,9 +48,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
     private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
 
-    @VisibleForTesting
-    public final @NotNull ExecutorService @NotNull [] callbackExecutors;
-
     private final int amountOfQueues;
 
     private final EventExecutor @NotNull [] eventExecutors;
@@ -77,14 +72,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new NettyEventLoopProducerQueuesImpl(this, amountOfQueues, eventExecutors);
         }
-
-        callbackExecutors = new ExecutorService[amountOfQueues];
-        for (int i = 0; i < amountOfQueues; i++) {
-            final ThreadFactory callbackThreadFactory = ThreadFactoryUtil.create("single-writer-callback-" + i);
-            final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(callbackThreadFactory);
-            callbackExecutors[i] = executorService;
-        }
-
 
         final ThreadFactory checkThreadFactory =
                 new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
