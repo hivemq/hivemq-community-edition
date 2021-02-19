@@ -23,6 +23,8 @@ import static com.hivemq.configuration.service.InternalConfigurations.SINGLE_WRI
 
 /**
  * @author Daniel Krüger
+ *
+ * This SingleWriter implementation does not use ExecutorThreadpools but a trampoline approach like Reactive
  */
 public class InMemorySingleWriterImpl implements SingleWriterService {
 
