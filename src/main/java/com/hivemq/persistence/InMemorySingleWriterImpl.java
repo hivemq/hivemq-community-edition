@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,8 +55,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
     @VisibleForTesting
     public final @NotNull ExecutorService @NotNull [] callbackExecutors;
-    @VisibleForTesting
-    final @NotNull ScheduledExecutorService checkScheduler;
 
     private final int amountOfQueues;
 
@@ -92,7 +89,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
         final ThreadFactory checkThreadFactory =
                 new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
-        checkScheduler = Executors.newSingleThreadScheduledExecutor(checkThreadFactory);
     }
 
     @VisibleForTesting
@@ -157,9 +153,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         return globalTaskCount;
     }
 
-    public @NotNull AtomicLong getNonemptyQueueCounter() {
-        return nonemptyQueueCounter;
-    }
 
     public @NotNull AtomicInteger getRunningThreadsCount() {
         return runningThreadsCount;

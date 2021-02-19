@@ -39,7 +39,6 @@ public interface SingleWriterService {
 
     @NotNull AtomicLong getGlobalTaskCount();
 
-    @NotNull AtomicLong getNonemptyQueueCounter();
 
     @NotNull AtomicInteger getRunningThreadsCount();
 
