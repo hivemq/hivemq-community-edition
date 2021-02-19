@@ -93,7 +93,6 @@ public class PublishPollServiceImpl implements PublishPollService {
         this.payloadPersistence = payloadPersistence;
         this.messageDroppedService = messageDroppedService;
         this.sharedSubscriptionService = sharedSubscriptionService;
-        this.singleWriterService = singleWriterService;
     }
 
     /**

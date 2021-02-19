@@ -28,18 +28,18 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
  */
 public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
-    private static final int NO_SPECIFIC_BUCKET = -1;
+    private final @NotNull AtomicLong taskCount = new AtomicLong(0);
 
-    private final AtomicLong taskCount = new AtomicLong(0);
     private final int amountOfQueues;
+
     @VisibleForTesting
     final int bucketsPerQueue;
 
-    private final @NotNull ImmutableList<AtomicLong> queueTaskCounter;
     private final @NotNull InMemorySingleWriterImpl inMemorySingleWriter;
+
     private final @NotNull ImmutableList<ImmutableList<Integer>> queueBucketIndexes;
 
-    private final AtomicBoolean shutdown = new AtomicBoolean(false);
+    private final @NotNull AtomicBoolean shutdown = new AtomicBoolean(false);
 
     private @Nullable ListenableFuture<Void> closeFuture;
     private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
@@ -58,7 +58,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
             counterBuilder.add(new AtomicLong(0));
             bucketIndexListBuilder.add(createBucketIndexes(i, bucketsPerQueue));
         }
-        queueTaskCounter = counterBuilder.build();
+        @NotNull ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
         queueBucketIndexes = bucketIndexListBuilder.build();
     }
 
@@ -165,11 +165,6 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
     }
 
     @NotNull
-    private <R> ListenableFuture<List<R>> submitToAllQueuesAsList(final @NotNull Task<R> task, final boolean ignoreShutdown) {
-        return Futures.allAsList(submitToAllQueues(task, ignoreShutdown));
-    }
-
-    @NotNull
     private <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task, final boolean ignoreShutdown) {
         if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > inMemorySingleWriter.getShutdownGracePeriod()) {
             return Collections.singletonList(SettableFuture.create()); // Future will never return since we are shutting down.
@@ -212,9 +207,9 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         closeFuture = executorService.schedule(() -> {
             // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
             if (finalTask != null) {
-                submitToAllQueuesAsList(finalTask, true).get();
+                Futures.allAsList(submitToAllQueues(finalTask, true)).get();
             } else {
-                submitToAllQueuesAsList((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true).get();
+                Futures.allAsList(submitToAllQueues((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true)).get();
             }
             return null;
         }, inMemorySingleWriter.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
