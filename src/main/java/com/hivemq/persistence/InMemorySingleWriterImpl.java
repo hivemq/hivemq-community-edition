@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,6 +106,14 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
     public @NotNull ProducerQueues getAttributeStoreQueue() {
         return producers[ATTRIBUTE_STORE_QUEUE_INDEX];
+    }
+
+
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    @Override
+    public ExecutorService callbackExecutor(@NotNull String key) {
+        return executorService;
     }
 
     public int getPersistenceBucketCount() {

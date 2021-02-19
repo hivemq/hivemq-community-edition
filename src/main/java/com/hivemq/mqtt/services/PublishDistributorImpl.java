@@ -17,7 +17,10 @@ package com.hivemq.mqtt.services;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -168,7 +171,7 @@ public class PublishDistributorImpl implements PublishDistributor {
             public void onFailure(final Throwable t) {
                 statusFuture.set(FAILED);
             }
-        }, MoreExecutors.directExecutor());
+        }, singleWriterService.callbackExecutor(client));
         return statusFuture;
     }
 
