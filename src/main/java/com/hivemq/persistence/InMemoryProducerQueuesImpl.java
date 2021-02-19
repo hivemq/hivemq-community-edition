@@ -2,16 +2,18 @@ package com.hivemq.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
+import com.hivemq.util.ThreadFactoryUtil;
 import io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -96,12 +98,24 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         return submit(bucketIndex, task, null, null);
     }
 
+
     @Nullable
     public <R> ListenableFuture<R> submit(final int bucketIndex,
                                           @NotNull final Task<R> task,
                                           @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                           @Nullable final SingleWriterService.FailedCallback failedCallback) {
-        if (shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
+
+        return submit(bucketIndex, task, successCallback, failedCallback, false);
+    }
+
+
+    @Nullable
+    private <R> ListenableFuture<R> submit(final int bucketIndex,
+                                           @NotNull final Task<R> task,
+                                           @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
+                                           @Nullable final SingleWriterService.FailedCallback failedCallback,
+                                           boolean ignoreShutdown) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final int queueIndex = bucketIndex / bucketsPerQueue;
@@ -175,8 +189,8 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         }
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
         final List<ListenableFuture<R>> futures = new ArrayList<>();
-        for (int i = 0; i < 1; i++) {
-            final ListenableFuture<R> future = submit(i, task);
+        for (int i = 0; i < queues.size(); i++) {
+            final ListenableFuture<R> future = submit(i * bucketsPerQueue, task, null, null, ignoreShutdown);
             futures.add(future);
         }
         return futures;
@@ -235,9 +249,43 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
     @NotNull
     public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
-        final SettableFuture<Void> settableFuture = SettableFuture.create();
-        settableFuture.set(null);
-        return settableFuture;
+        if (shutdown.getAndSet(true)) {
+            //guard from being called twice
+            //needed for integration tests because shutdown hooks for every Embedded HiveMQ are added to the JVM
+            //if the persistence is stopped manually this would result in errors, because the shutdown hook might be called twice.
+            if (closeFuture != null) {
+                return closeFuture;
+            }
+            return Futures.immediateFuture(null);
+        }
+
+        shutdownStartTime = System.currentTimeMillis();
+        // We create a temporary single thread executor when we shut down, so we don't waste a thread at runtime.
+        final ThreadFactory threadFactory = ThreadFactoryUtil.create("persistence-shutdown-%d");
+        final ListeningScheduledExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
+
+        closeFuture = executorService.schedule(() -> {
+            // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
+            if (finalTask != null) {
+                submitToAllQueuesAsList(finalTask, true).get();
+            } else {
+                submitToAllQueuesAsList((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true).get();
+            }
+            return null;
+        }, singleWriterServiceImpl.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
+
+        Futures.addCallback(closeFuture, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable final Void aVoid) {
+                executorService.shutdown();
+            }
+
+            @Override
+            public void onFailure(final @NotNull Throwable throwable) {
+                executorService.shutdown();
+            }
+        }, executorService);
+        return closeFuture;
     }
 
     @NotNull
