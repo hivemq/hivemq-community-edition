@@ -30,6 +30,7 @@ import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -65,7 +66,10 @@ public class TlsTcpChannelInitializerTest {
     private Tls tls;
 
     @Mock
-    private SslFactory ssl;
+    private SslFactory sslFactory;
+
+    @Mock
+    private SslContext sslContext;
 
     @Mock
     private Future<Channel> future;
@@ -90,7 +94,8 @@ public class TlsTcpChannelInitializerTest {
         pipeline = new FakeChannelPipeline();
 
         when(tlsTcpListener.getTls()).thenReturn(tls);
-        when(ssl.getSslHandler(any(SocketChannel.class), any(Tls.class))).thenReturn(sslHandler);
+        when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(sslHandler);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
@@ -103,7 +108,7 @@ public class TlsTcpChannelInitializerTest {
         final MqttServerDisconnector mqttServerDisconnector =new MqttServerDisconnectorImpl(eventLog, new HivemqId());
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
 
-        tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, ssl);
+        tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, sslFactory);
 
     }
 

@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @since 3.0
  */
 @Immutable
-public class TlsWebsocketListener extends WebsocketListener {
+public class TlsWebsocketListener extends WebsocketListener implements TlsListener {
 
     private final Tls tls;
 
