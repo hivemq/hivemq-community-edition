@@ -129,6 +129,7 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         final int bucketIndex = BucketUtils.getBucket(key, persistenceBucketCount);
         final int queueIndex = bucketIndex / bucketsPerQueue;
         return callbackExecutors[queueIndex];
+       // return MoreExecutors.newDirectExecutorService();
     }
 
 
