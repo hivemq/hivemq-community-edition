@@ -382,7 +382,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
 
         Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
-                this, shared, queueId, publish, messageIDPool, channel, client), singleWriterService.callbackExecutor(client));
+                this, shared, queueId, publish, messageIDPool, channel, client), MoreExecutors.directExecutor());
 
         final PublishWithFuture message = new PublishWithFuture(publish, publishFuture, shared, payloadPersistence);
         channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
