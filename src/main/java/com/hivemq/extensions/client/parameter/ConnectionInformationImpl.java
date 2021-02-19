@@ -37,7 +37,7 @@ public class ConnectionInformationImpl implements ConnectionInformation {
     private final @NotNull ConnectionAttributeStore connectionAttributeStore;
     private final @Nullable InetAddress inetAddress;
     private final @Nullable Listener listener;
-    private final @Nullable TlsInformation tlsInformation;
+    private final @Nullable ClientTlsInformation tlsInformation;
 
     public ConnectionInformationImpl(final @NotNull Channel channel) {
         Preconditions.checkNotNull(channel);
@@ -79,6 +79,14 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     @Override
     public @NotNull Optional<TlsInformation> getTlsInformation() {
+        if (tlsInformation != null && tlsInformation.getClientCertificate().isPresent() && tlsInformation.getClientCertificateChain().isPresent()) {
+            return Optional.of((TlsInformation) tlsInformation);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Optional<ClientTlsInformation> getClientTlsInformation() {
         return Optional.ofNullable(tlsInformation);
     }
 }

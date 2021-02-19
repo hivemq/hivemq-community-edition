@@ -24,9 +24,9 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.*;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extensions.client.parameter.ClientInformationImpl;
+import com.hivemq.extensions.client.parameter.ClientTlsInformationImpl;
 import com.hivemq.extensions.client.parameter.ConnectionInformationImpl;
 import com.hivemq.extensions.client.parameter.ListenerImpl;
-import com.hivemq.extensions.client.parameter.TlsInformationImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
 import com.hivemq.util.ChannelAttributes;
@@ -110,24 +110,30 @@ public class ExtensionInformationUtil {
         }
     }
 
-    public static @Nullable TlsInformation getTlsInformationFromChannel(final @NotNull Channel channel) {
+    public static @Nullable ClientTlsInformation getTlsInformationFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
 
-        final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
-
-        if (sslClientCertificate == null) {
-            return null;
-        }
-
         try {
-            final X509Certificate certificate = (X509Certificate) sslClientCertificate.certificate();
-            final X509Certificate[] certificateChain = (X509Certificate[]) sslClientCertificate.certificateChain();
-
             final String cipher = channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).get();
             final String protocol = channel.attr(ChannelAttributes.AUTH_PROTOCOL).get();
+            final String sniHostname = channel.attr(ChannelAttributes.AUTH_SNI_HOSTNAME).get();
 
-            return new TlsInformationImpl(certificate, certificateChain, cipher, protocol);
+            final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
+
+            if(cipher == null || protocol == null){
+                return null;
+            }
+
+            if (sslClientCertificate == null) {
+                return new ClientTlsInformationImpl(null, null, cipher, protocol, sniHostname);
+
+            } else {
+                final X509Certificate certificate = (X509Certificate) sslClientCertificate.certificate();
+                final X509Certificate[] certificateChain = (X509Certificate[]) sslClientCertificate.certificateChain();
+
+                return new ClientTlsInformationImpl(certificate, certificateChain, cipher, protocol, sniHostname);
+            }
 
         } catch (final Exception e) {
             log.debug("Tls information creation failed: ", e);

@@ -30,6 +30,7 @@ import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -60,7 +61,10 @@ public class TlsWebsocketChannelInitializerTest {
     private SslHandler sslHandler;
 
     @Mock
-    private SslFactory ssl;
+    private SslFactory sslFactory;
+
+    @Mock
+    private SslContext sslContext;
 
     @Mock
     private Future<Channel> future;
@@ -92,9 +96,10 @@ public class TlsWebsocketChannelInitializerTest {
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(socketChannel.isActive()).thenReturn(true);
         when(sslHandler.handshakeFuture()).thenReturn(future);
+        when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(sslHandler);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(mockListener.getTls()).thenReturn(tls);
-        when(ssl.getSslHandler(any(SocketChannel.class), any(Tls.class))).thenReturn(sslHandler);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
@@ -113,7 +118,7 @@ public class TlsWebsocketChannelInitializerTest {
                 .tls(TlsTestUtil.createTLS(0))
                 .build();
 
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl);
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
 
 
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
@@ -140,7 +145,7 @@ public class TlsWebsocketChannelInitializerTest {
                 .tls(TlsTestUtil.createTLS(10))
                 .build();
 
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, ssl);
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
 
 
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);

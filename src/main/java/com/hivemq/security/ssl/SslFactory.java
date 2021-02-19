@@ -15,14 +15,13 @@
  */
 package com.hivemq.security.ssl;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -58,9 +57,9 @@ public class SslFactory {
     }
 
     @NotNull
-    public SslHandler getSslHandler(@NotNull final Channel ch, @NotNull final Tls tls) throws SslException {
+    public SslHandler getSslHandler(@NotNull final Channel ch, @NotNull final Tls tls, final @NotNull SslContext sslContext) throws SslException {
 
-        final SslHandler sslHandler = new SslHandler(getSslEngine(ch, tls));
+        final SslHandler sslHandler = new SslHandler(getSslEngine(ch, tls, sslContext));
 
         sslHandler.setHandshakeTimeoutMillis(tls.getHandshakeTimeout());
 
@@ -68,9 +67,9 @@ public class SslFactory {
     }
 
     @NotNull
-    protected SSLEngine getSslEngine(@NotNull final Channel ch, @NotNull final Tls tls) throws SslException {
+    protected SSLEngine getSslEngine(@NotNull final Channel ch, @NotNull final Tls tls, @NotNull final SslContext sslContext) throws SslException {
 
-        final SSLEngine sslEngine = getSslContext(tls).newEngine(ch.alloc());
+        final SSLEngine sslEngine = sslContext.newEngine(ch.alloc());
 
         //set chosen protocols if available
         enableProtocols(sslEngine, tls.getProtocols());
@@ -91,12 +90,12 @@ public class SslFactory {
     }
 
     @NotNull
-    @VisibleForTesting
-    SslContext getSslContext(@NotNull final Tls tls) throws SslException {
+    public SslContext getSslContext(@NotNull final Tls tls) throws SslException {
 
         try {
-            if (sslContextStore.contains(tls)) {
-                return sslContextStore.get(tls);
+            final SslContext sslContextFromCache = sslContextStore.get(tls);
+            if (sslContextFromCache != null) {
+                return sslContextFromCache;
             }
 
             final SslContext sslContext = sslContextFactory.createSslContext(tls);
@@ -151,7 +150,8 @@ public class SslFactory {
                 }
             }
         } catch (final Exception e) {
-            log.error("Not able to create SSL server context", e);
+            log.error("Not able to create SSL server context. Reason: {}", e.getMessage());
+            log.debug("Original exception", e);
             throw new UnrecoverableException(false);
         }
     }
