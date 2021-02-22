@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InMemorySingleWriterImpl implements SingleWriterService {
 
-
     private static final @NotNull Logger log = LoggerFactory.getLogger(SingleWriterServiceImpl.class);
 
     private static final int AMOUNT_OF_PRODUCERS = 5;
