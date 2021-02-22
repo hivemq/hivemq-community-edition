@@ -61,7 +61,7 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
         install(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
 
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY && InternalConfigurations.NETTY_EVENTLOOP_SINGLE_WRITER.get()) {
-            bind(SingleWriterService.class).to(NettyEventLoopSingleWriterImpl.class);
+            bind(SingleWriterService.class).to(InMemorySingleWriterImpl.class);
         } else {
             bind(SingleWriterService.class).to(SingleWriterServiceImpl.class);
         }
