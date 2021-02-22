@@ -5,14 +5,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.util.ThreadFactoryUtil;
 import io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,8 +45,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
     private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
 
-    @VisibleForTesting
-    public final @NotNull ExecutorService @NotNull [] callbackExecutors;
 
     private final int amountOfQueues;
 
@@ -68,13 +64,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new InMemoryProducerQueuesImpl(this, amountOfQueues);
-        }
-
-        callbackExecutors = new ExecutorService[amountOfQueues];
-        for (int i = 0; i < amountOfQueues; i++) {
-            final ThreadFactory callbackThreadFactory = ThreadFactoryUtil.create("single-writer-callback-" + i);
-            final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(callbackThreadFactory);
-            callbackExecutors[i] = executorService;
         }
 
         queues = new MpscUnboundedArrayQueue[amountOfQueues];
@@ -124,12 +113,17 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
 
     @NotNull
-    public ExecutorService callbackExecutor(@NotNull final String key) {
+    public Executor callbackExecutor(@NotNull final String key) {
         final int bucketsPerQueue = persistenceBucketCount / amountOfQueues;
         final int bucketIndex = BucketUtils.getBucket(key, persistenceBucketCount);
         final int queueIndex = bucketIndex / bucketsPerQueue;
-        return callbackExecutors[queueIndex];
-       // return MoreExecutors.newDirectExecutorService();
+        return command -> {
+            producers[ATTRIBUTE_STORE_QUEUE_INDEX].submit(key, (bucketIndex1, queueBuckets, queueIndex1) -> {
+                        command.run();
+                        return null;
+                    }
+            );
+        };
     }
 
     public int getPersistenceBucketCount() {

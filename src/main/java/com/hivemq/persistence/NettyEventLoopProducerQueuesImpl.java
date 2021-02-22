@@ -13,7 +13,6 @@ import io.netty.util.concurrent.EventExecutor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SplittableRandom;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -194,9 +193,6 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
         return BucketUtils.getBucket(key, singleWriter.getPersistenceBucketCount());
     }
 
-    public void execute(final @NotNull SplittableRandom random) {
-
-    }
 
     @NotNull
     public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {

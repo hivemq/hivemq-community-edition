@@ -5,7 +5,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.List;
-import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -29,9 +28,6 @@ public interface ProducerQueues {
     @NotNull <R> ListenableFuture<List<R>> submitToAllQueuesAsList(final @NotNull SingleWriterServiceImpl.Task<R> task);
 
     int getBucket(@NotNull final String key);
-
-    void execute(final @NotNull SplittableRandom random);
-
 
     @NotNull ListenableFuture<Void> shutdown(final @Nullable SingleWriterServiceImpl.Task<Void> finalTask);
 

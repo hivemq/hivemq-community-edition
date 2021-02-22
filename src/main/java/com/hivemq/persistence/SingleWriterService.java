@@ -3,7 +3,7 @@ package com.hivemq.persistence;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * @author Daniel Krüger
@@ -20,7 +20,7 @@ public interface SingleWriterService {
 
     @NotNull ProducerQueues getAttributeStoreQueue();
 
-    @NotNull ExecutorService callbackExecutor(@NotNull final String key);
+    @NotNull Executor callbackExecutor(@NotNull final String key);
 
     int getPersistenceBucketCount();
 

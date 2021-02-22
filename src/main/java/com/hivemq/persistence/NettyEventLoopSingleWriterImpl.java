@@ -53,7 +53,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new NettyEventLoopProducerQueuesImpl(this, amountOfQueues, eventExecutors);
         }
-
     }
 
     @VisibleForTesting
