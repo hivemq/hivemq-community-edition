@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -45,8 +43,6 @@ public class InMemoryProducerQueuesImplTest {
         MockitoAnnotations.initMocks(this);
 
         when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);
-        when(singleWriterServiceImpl.getThreadPoolSize()).thenReturn(4);
-        when(singleWriterServiceImpl.getGlobalTaskCount()).thenReturn(new AtomicLong());
 
         producerQueues = new InMemoryProducerQueuesImpl(singleWriterServiceImpl, 4);
     }
