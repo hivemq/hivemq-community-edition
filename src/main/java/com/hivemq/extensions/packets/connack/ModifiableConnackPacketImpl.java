@@ -26,6 +26,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
+import com.hivemq.util.Utf8Utils;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     private final boolean sessionPresent;
     private final long sessionExpiryInterval;
     private final int serverKeepAlive;
-    private final @Nullable String assignedClientId;
+    private @Nullable String assignedClientId;
 
     private final @Nullable String authenticationMethod;
     private final @Nullable ByteBuffer authenticationData;
@@ -140,6 +141,23 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     @Override
     public @NotNull Optional<String> getAssignedClientIdentifier() {
         return Optional.ofNullable(assignedClientId);
+    }
+
+    @Override
+    public void setAssignedClientIdentifier(final @Nullable String assignedClientIdentifier) {
+
+        if (assignedClientIdentifier != null) {
+            Preconditions.checkArgument(!Utf8Utils.containsMustNotCharacters(assignedClientIdentifier), assignedClientIdentifier + " is not a valid client id");
+            Preconditions.checkArgument(!Utf8Utils.hasControlOrNonCharacter(assignedClientIdentifier), assignedClientIdentifier + " is not a valid client id");
+            Preconditions.checkArgument(!assignedClientIdentifier.isEmpty(), "client ID must not be empty");
+        }
+
+        if (Objects.equals(this.assignedClientId, assignedClientIdentifier)) {
+            return;
+        }
+
+        this.assignedClientId = assignedClientIdentifier;
+        modified = true;
     }
 
     @Override
