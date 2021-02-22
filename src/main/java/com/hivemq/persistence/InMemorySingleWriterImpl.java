@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Daniel Krüger
@@ -32,19 +30,14 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
     private static final int QUEUED_MESSAGES_QUEUE_INDEX = 3;
     private static final int ATTRIBUTE_STORE_QUEUE_INDEX = 4;
 
-    private final int persistenceBucketCount;
-    private final long shutdownGracePeriod;
-
-    private final @NotNull AtomicBoolean postConstruct = new AtomicBoolean(true);
-    private final @NotNull AtomicLong nonemptyQueueCounter = new AtomicLong(0);
-    private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
-    private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
-
     private final @NotNull InMemoryProducerQueuesImpl @NotNull [] producers = new InMemoryProducerQueuesImpl[AMOUNT_OF_PRODUCERS];
     private final @NotNull InMemoryProducerQueuesImpl callbackProducerQueue;
 
     public final @NotNull MpscUnboundedArrayQueue<Runnable> @NotNull [] queues;
     public final @NotNull AtomicInteger @NotNull [] wips;
+
+    private final int persistenceBucketCount;
+    private final long shutdownGracePeriod;
 
     @Inject
     public InMemorySingleWriterImpl() {
