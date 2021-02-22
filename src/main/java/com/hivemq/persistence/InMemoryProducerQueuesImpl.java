@@ -58,7 +58,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
             counterBuilder.add(new AtomicLong(0));
             bucketIndexListBuilder.add(createBucketIndexes(i, bucketsPerQueue));
         }
-        @NotNull ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
+        @NotNull final ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
         queueBucketIndexes = bucketIndexListBuilder.build();
     }
 
@@ -121,9 +121,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
                 if (resultFuture != null) {
                     resultFuture.set(result);
                 } else {
-                    if (successCallback != null) {
-                        successCallback.afterTask(result);
-                    }
+                    successCallback.afterTask(result);
                 }
             } catch (final Exception e) {
                 if (resultFuture != null) {
