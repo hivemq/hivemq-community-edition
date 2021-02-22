@@ -1,7 +1,6 @@
 package com.hivemq.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hivemq.bootstrap.netty.NettyConfiguration;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -14,10 +13,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Daniel Krüger
@@ -38,27 +33,16 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
     private static final int ATTRIBUTE_STORE_QUEUE_INDEX = 4;
 
     private final int persistenceBucketCount;
-    private final int threadPoolSize;
-    private final int creditsPerExecution;
-    private final long shutdownGracePeriod;
-
-    private final @NotNull AtomicBoolean postConstruct = new AtomicBoolean(true);
-    private final @NotNull AtomicLong nonemptyQueueCounter = new AtomicLong(0);
-    private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
-    private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
-
     private final int amountOfQueues;
 
     private final EventExecutor @NotNull [] eventExecutors;
-
-    private final @NotNull ProducerQueues @NotNull [] producers = new ProducerQueues[AMOUNT_OF_PRODUCERS];
+    private final ProducerQueues @NotNull [] producers = new ProducerQueues[AMOUNT_OF_PRODUCERS];
 
     @Inject
     public NettyEventLoopSingleWriterImpl(final @NotNull NettyConfiguration nettyConfiguration) {
+        log.info("Instantiated NettyEventLoopSingleWriter.");
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
-        threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
-        creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
-        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
+        final int threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
         final List<EventExecutor> executors = new ArrayList<>();
         for (final EventExecutor executor : nettyConfiguration.getChildEventLoopGroup()) {
@@ -70,8 +54,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
             producers[i] = new NettyEventLoopProducerQueuesImpl(this, amountOfQueues, eventExecutors);
         }
 
-        final ThreadFactory checkThreadFactory =
-                new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
     }
 
     @VisibleForTesting
@@ -82,10 +64,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
             }
         }
         return persistenceBucketCount;
-    }
-
-    public void decrementNonemptyQueueCounter() {
-        nonemptyQueueCounter.decrementAndGet();
     }
 
     public @NotNull ProducerQueues getRetainedMessageQueue() {
@@ -118,27 +96,6 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
 
     public int getPersistenceBucketCount() {
         return persistenceBucketCount;
-    }
-
-    public int getCreditsPerExecution() {
-        return creditsPerExecution;
-    }
-
-    public long getShutdownGracePeriod() {
-        return shutdownGracePeriod;
-    }
-
-    public int getThreadPoolSize() {
-        return threadPoolSize;
-    }
-
-    public @NotNull AtomicLong getGlobalTaskCount() {
-        return globalTaskCount;
-    }
-
-
-    public @NotNull AtomicInteger getRunningThreadsCount() {
-        return runningThreadsCount;
     }
 
     public void stop() {

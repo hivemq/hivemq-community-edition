@@ -3,6 +3,7 @@ package com.hivemq.persistence;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.*;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -35,6 +36,8 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
 
     private final @NotNull ImmutableList<ImmutableList<Integer>> queueBucketIndexes;
 
+    private final int shutdownGracePeriod;
+
     private final EventExecutor @NotNull [] eventExecutors;
 
     private final @NotNull AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -46,6 +49,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
         this.singleWriter = singleWriterService;
         this.eventExecutors = eventExecutors;
         final int bucketCount = singleWriter.getPersistenceBucketCount();
+        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
         this.amountOfQueues = amountOfQueues;
         bucketsPerQueue = bucketCount / amountOfQueues;
 
@@ -106,7 +110,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
         if ((eventExecutor.isShuttingDown() || eventExecutor.isShutdown()) && !ignoreShutdown) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final SettableFuture<R> resultFuture;
@@ -173,7 +177,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
 
     @NotNull
     private <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task, final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > singleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
             return Collections.singletonList(SettableFuture.create()); // Future will never return since we are shutting down.
         }
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
@@ -220,7 +224,7 @@ public class NettyEventLoopProducerQueuesImpl implements ProducerQueues {
                 Futures.allAsList(submitToAllQueues((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true)).get();
             }
             return null;
-        }, singleWriter.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
+        }, shutdownGracePeriod + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
 
         Futures.addCallback(closeFuture, new FutureCallback<>() {
             @Override
