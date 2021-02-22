@@ -132,7 +132,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
        // return MoreExecutors.newDirectExecutorService();
     }
 
-
     public int getPersistenceBucketCount() {
         return persistenceBucketCount;
     }

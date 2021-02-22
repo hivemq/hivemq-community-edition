@@ -67,6 +67,10 @@ public class InternalConfigurations {
     public static final AtomicInteger SINGLE_WRITER_CREDITS_PER_EXECUTION = new AtomicInteger(65);
     public static final AtomicInteger SINGLE_WRITER_CHECK_SCHEDULE = new AtomicInteger(500);
 
+    // activates a different implementation for the SingleWriter for in-memory persistences.
+    public static final AtomicBoolean NETTY_EVENTLOOP_SINGLE_WRITER = new AtomicBoolean(true);
+
+
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRIES = new AtomicInteger(500);
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRY_INTERVAL = new AtomicInteger(100);
 

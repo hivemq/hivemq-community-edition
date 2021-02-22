@@ -22,6 +22,7 @@ import com.google.inject.Key;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.topic.tree.TopicTreeStartup;
@@ -59,7 +60,7 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
 
         install(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
 
-        if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) {
+        if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY && InternalConfigurations.NETTY_EVENTLOOP_SINGLE_WRITER.get()) {
             bind(SingleWriterService.class).to(NettyEventLoopSingleWriterImpl.class);
         } else {
             bind(SingleWriterService.class).to(SingleWriterServiceImpl.class);

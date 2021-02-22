@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
 
-
     private static final @NotNull Logger log = LoggerFactory.getLogger(SingleWriterServiceImpl.class);
 
     private static final int AMOUNT_OF_PRODUCERS = 5;
@@ -56,18 +55,16 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
 
     @Inject
     public NettyEventLoopSingleWriterImpl(final @NotNull NettyConfiguration nettyConfiguration) {
-
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
         amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
-        List<EventExecutor> executors = new ArrayList<>();
-        for (EventExecutor executor : nettyConfiguration.getChildEventLoopGroup()) {
+        final List<EventExecutor> executors = new ArrayList<>();
+        for (final EventExecutor executor : nettyConfiguration.getChildEventLoopGroup()) {
             executors.add(executor);
         }
         eventExecutors = executors.toArray(new EventExecutor[0]);
-
 
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new NettyEventLoopProducerQueuesImpl(this, amountOfQueues, eventExecutors);
@@ -111,14 +108,12 @@ public class NettyEventLoopSingleWriterImpl implements SingleWriterService {
         return producers[ATTRIBUTE_STORE_QUEUE_INDEX];
     }
 
-
     @NotNull
     public ExecutorService callbackExecutor(@NotNull final String key) {
         final int bucketsPerQueue = persistenceBucketCount / amountOfQueues;
         final int bucketIndex = BucketUtils.getBucket(key, persistenceBucketCount);
         final int queueIndex = bucketIndex / bucketsPerQueue;
         return eventExecutors[queueIndex % eventExecutors.length];
-        // return MoreExecutors.newDirectExecutorService();
     }
 
     public int getPersistenceBucketCount() {
