@@ -20,7 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Daniel Krüger
@@ -45,7 +44,5 @@ public interface ProducerQueues {
     int getBucket(@NotNull final String key);
 
     @NotNull ListenableFuture<Void> shutdown(final @Nullable SingleWriterServiceImpl.Task<Void> finalTask);
-
-    @NotNull AtomicLong getTaskCount();
 
 }

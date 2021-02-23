@@ -43,8 +43,6 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
  */
 public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
-    private final @NotNull AtomicLong taskCount = new AtomicLong(0);
-
     private final int amountOfQueues;
 
     @VisibleForTesting
@@ -241,8 +239,4 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         return closeFuture;
     }
 
-    @NotNull
-    public AtomicLong getTaskCount() {
-        return taskCount;
-    }
 }
