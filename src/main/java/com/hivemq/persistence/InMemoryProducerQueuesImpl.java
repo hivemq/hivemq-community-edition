@@ -18,6 +18,7 @@ package com.hivemq.persistence;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.*;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -56,6 +57,8 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
     private final @NotNull AtomicBoolean shutdown = new AtomicBoolean(false);
 
     private @Nullable ListenableFuture<Void> closeFuture;
+
+    private final long shutdownGracePeriod;
     private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
     public InMemoryProducerQueuesImpl(final @NotNull InMemorySingleWriterImpl singleWriterService, final int amountOfQueues) {
@@ -64,6 +67,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         final int bucketCount = inMemorySingleWriter.getPersistenceBucketCount();
         this.amountOfQueues = amountOfQueues;
         bucketsPerQueue = bucketCount / amountOfQueues;
+        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
 
         final ImmutableList.Builder<ImmutableList<Integer>> bucketIndexListBuilder = ImmutableList.builder();
         final ImmutableList.Builder<AtomicLong> counterBuilder = ImmutableList.builder();
@@ -116,7 +120,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
                                            @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                            @Nullable final SingleWriterService.FailedCallback failedCallback,
                                            final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > inMemorySingleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final int queueIndex = bucketIndex / bucketsPerQueue;
@@ -178,7 +182,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
     @NotNull
     private <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task, final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > inMemorySingleWriter.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
             return Collections.singletonList(SettableFuture.create()); // Future will never return since we are shutting down.
         }
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
@@ -221,7 +225,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
                 Futures.allAsList(submitToAllQueues((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true)).get();
             }
             return null;
-        }, inMemorySingleWriter.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
+        }, shutdownGracePeriod + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
 
         Futures.addCallback(closeFuture, new FutureCallback<>() {
             @Override

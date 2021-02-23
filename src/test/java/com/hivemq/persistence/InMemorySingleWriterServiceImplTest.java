@@ -69,7 +69,7 @@ public class InMemorySingleWriterServiceImplTest {
         // this is highly un-thread-safe, when this is concurrently executed
         // there are many sources for exceptions
         final Runnable runnable = () -> {
-            final Integer poll = list.poll();
+            final Integer poll = list.pollFirst();
             list.add(poll + 1);
         };
 
@@ -89,7 +89,7 @@ public class InMemorySingleWriterServiceImplTest {
         }
 
         // 4 threads with 10_000 adds = 40_000
-        assertEquals(40_000, (int) list.poll());
+        assertEquals(40_000, (int) list.pollFirst());
     }
 
     @Test

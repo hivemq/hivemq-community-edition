@@ -51,7 +51,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
     public final @NotNull AtomicInteger @NotNull [] wips;
 
     private final int persistenceBucketCount;
-    private final long shutdownGracePeriod;
 
     @Inject
     public InMemorySingleWriterImpl() {
@@ -59,7 +58,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         final int threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         final int creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
-        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
         final int amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
@@ -115,10 +113,6 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
 
     public int getPersistenceBucketCount() {
         return persistenceBucketCount;
-    }
-
-    public long getShutdownGracePeriod() {
-        return shutdownGracePeriod;
     }
 
     public void stop() {
