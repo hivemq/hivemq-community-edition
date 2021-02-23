@@ -315,7 +315,7 @@ public class PublishPollServiceImplTest {
 
         when(messageIDPool.takeNextId()).thenReturn(1);
 
-        publishPollService.pollSharedPublishesForClient("client", "group/topic", 0, null, channel);
+        publishPollService.pollSharedPublishesForClient("client", "group/topic", 0, false, null, channel);
 
         // Poll and remove
         verify(clientQueuePersistence).removeShared("group/topic", publish.getUniqueId());

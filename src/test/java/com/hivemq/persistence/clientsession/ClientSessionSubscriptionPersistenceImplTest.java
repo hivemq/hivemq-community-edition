@@ -132,7 +132,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(channelPersistence.get("client")).thenReturn(null);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
 
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyInt(), any(Channel.class));
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), anyInt(), any(Channel.class));
 
     }
 
@@ -145,7 +145,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(channelPersistence.get("client")).thenReturn(embeddedChannel);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
 
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyInt(), any(Channel.class));
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), anyInt(), any(Channel.class));
 
     }
 
@@ -157,7 +157,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(channelPersistence.get("client")).thenReturn(embeddedChannel);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
 
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyInt(), any(Channel.class));
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), anyInt(), any(Channel.class));
 
         embeddedChannel.close();
 
@@ -171,7 +171,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(channelPersistence.get("client")).thenReturn(embeddedChannel);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of(new Subscription(new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 2, "group")));
 
-        verify(publishPollService).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), any(), any(Channel.class));
+        verify(publishPollService).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), any(), any(Channel.class));
         verify(sharedSubscriptionService).invalidateSharedSubscriberCache("group/topic");
         verify(sharedSubscriptionService).invalidateSharedSubscriptionCache("client");
 
