@@ -325,10 +325,6 @@ tasks.javadoc {
     }
 }
 
-javadocLinks {
-    configuration = 'api'
-}
-
 
 /* ******************** checks ******************** */
 
