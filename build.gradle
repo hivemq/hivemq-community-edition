@@ -355,15 +355,13 @@ dependencyCheck {
         centralEnabled = false
     }
     format = 'ALL'
-    scanConfigurations = ['compile']
+    scanConfigurations = ['runtimeClasspath']
     suppressionFile = "${projectDir}/gradle/dependency-check/suppress.xml"
-    failOnError = false
 }
 check.dependsOn dependencyCheckAnalyze
 
 forbiddenApis {
     bundledSignatures = ['jdk-system-out']
-    ignoreFailures = false
 }
 
 forbiddenApisMain {
