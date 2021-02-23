@@ -351,7 +351,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 final Topic topic = sharedSub.getTopic();
 
                 final String sharedSubId = sharedSub.getSharedGroup() + "/" + topic.getTopic();
-                publishPollService.pollSharedPublishesForClient(clientId, sharedSubId, topic.getQoS().getQosNumber(), topic.getSubscriptionIdentifier(), channel);
+                publishPollService.pollSharedPublishesForClient(clientId, sharedSubId, topic.getQoS().getQosNumber(), topic.isRetainAsPublished(), topic.getSubscriptionIdentifier(), channel);
                 sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                 sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubId);
                 channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).set(false);

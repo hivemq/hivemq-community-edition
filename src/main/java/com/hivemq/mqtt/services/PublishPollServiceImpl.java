@@ -68,7 +68,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_PO
 @LazySingleton
 public class PublishPollServiceImpl implements PublishPollService {
 
-    
+
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishPollService.class);
 
     private final @NotNull MessageIDPools messageIDPools;
@@ -120,7 +120,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 for (final Topic topic : topics) {
                     final String sharedSubscriptions = sharedSubscriptionService.removePrefix(topic.getTopic());
                     pollSharedPublishesForClient(client, sharedSubscriptions, topic.getQoS().getQosNumber(),
-                            topic.getSubscriptionIdentifier(), channel);
+                            topic.isRetainAsPublished(), topic.getSubscriptionIdentifier(), channel);
                 }
             } catch (final ExecutionException e) {
                 log.error("Exception while reading shared subscriptions for client " + client, e);
@@ -298,7 +298,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             if (channel == null) {
                 continue; // client is disconnected
             }
-            pollSharedPublishesForClient(subscriber.getSubscriber(), sharedSubscription, subscriber.getQos(), subscriber.getSubscriptionIdentifier(), channel);
+            pollSharedPublishesForClient(subscriber.getSubscriber(), sharedSubscription, subscriber.getQos(), subscriber.isRetainAsPublished(), subscriber.getSubscriptionIdentifier(), channel);
         }
     }
 
@@ -309,6 +309,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     public void pollSharedPublishesForClient(final @NotNull String client,
                                              final @NotNull String sharedSubscription,
                                              final int qos,
+                                             final boolean retainAsPublished,
                                              final @Nullable Integer subscriptionIdentifier,
                                              final @NotNull Channel channel) {
         if (ChannelUtils.messagesInFlight(channel)) {
@@ -346,6 +347,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                                 .withPacketIdentifier(packetId)
                                 .withQoS(minQos)
+                                .withRetain(publish.isRetain() && retainAsPublished)
                                 .withSubscriptionIdentifiers(subscriptionIdentifiers)
                                 .build();
                     } catch (final NoMessageIdAvailableException e) {

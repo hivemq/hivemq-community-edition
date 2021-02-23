@@ -109,7 +109,7 @@ public class PublishDistributorImpl implements PublishDistributor {
 
         for (final String sharedSubscriber : sharedSubscribers) {
             final SettableFuture<Void> publishFinishedFuture = SettableFuture.create();
-            final ListenableFuture<PublishStatus> future = sendMessageToSubscriber(publish, sharedSubscriber, publish.getQoS().getQosNumber(), true, false, null);
+            final ListenableFuture<PublishStatus> future = sendMessageToSubscriber(publish, sharedSubscriber, publish.getQoS().getQosNumber(), true, true, null);
             publishResultFutureBuilder.add(publishFinishedFuture);
             Futures.addCallback(future, new StandardPublishCallback(sharedSubscriber, publish, publishFinishedFuture), executorService);
         }
