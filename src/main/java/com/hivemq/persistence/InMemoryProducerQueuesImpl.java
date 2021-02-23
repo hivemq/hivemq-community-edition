@@ -27,7 +27,6 @@ import io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SplittableRandom;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -196,9 +195,6 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         return BucketUtils.getBucket(key, inMemorySingleWriter.getPersistenceBucketCount());
     }
 
-    public void execute(final @NotNull SplittableRandom random) {
-
-    }
 
     @NotNull
     public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {

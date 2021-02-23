@@ -21,7 +21,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 /**
  * @author Daniel Krüger
@@ -32,8 +37,6 @@ public class InMemorySingleWriterServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(4);
-        InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.set(200);
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(200);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
         singleWriterServiceImpl = new InMemorySingleWriterImpl();
@@ -55,4 +58,62 @@ public class InMemorySingleWriterServiceImplTest {
     }
 
 
+    @Test
+    public void test_callbackExecutor_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws InterruptedException {
+        final LinkedList<Integer> list = new LinkedList<>();
+        list.add(0);
+
+        final List<Thread> threads = new ArrayList<>();
+        final int numberOfConcurrentThreads = 4;
+
+        // this is highly un-thread-safe, when this is concurrently executed
+        // there are many sources for exceptions
+        final Runnable runnable = () -> {
+            final Integer poll = list.poll();
+            list.add(poll + 1);
+        };
+
+        for (int j = 0; j < 4; j++) {
+            final Thread thread = new Thread(() -> {
+                for (int i = 0; i < 10_000; i++) {
+                    singleWriterServiceImpl.callbackExecutor("sameKey").execute(runnable);
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+
+        //wait for all threads to finish their submissions
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        // 4 threads with 10_000 adds = 40_000
+        assertEquals(40_000, (int) list.poll());
+    }
+
+    @Test
+    public void test_getQueues_thenQueuesAreDifferentForDifferent() {
+        final ArrayList<ProducerQueues> queues = new ArrayList<>();
+
+        final ProducerQueues attributeStoreQueue = singleWriterServiceImpl.getAttributeStoreQueue();
+        queues.add(attributeStoreQueue);
+        final ProducerQueues clientSessionQueue = singleWriterServiceImpl.getClientSessionQueue();
+        queues.add(clientSessionQueue);
+        final ProducerQueues queuedMessagesQueue = singleWriterServiceImpl.getQueuedMessagesQueue();
+        queues.add(queuedMessagesQueue);
+        final ProducerQueues retainedMessageQueue = singleWriterServiceImpl.getRetainedMessageQueue();
+        queues.add(retainedMessageQueue);
+        final ProducerQueues subscriptionQueue = singleWriterServiceImpl.getSubscriptionQueue();
+        queues.add(subscriptionQueue);
+
+        for (int i = 0; i < queues.size(); i++) {
+            for (int j = 0; j < queues.size(); j++) {
+                if (i == j) {
+                    continue;
+                }
+                assertNotSame(queues.get(i), queues.get(j));
+            }
+        }
+    }
 }

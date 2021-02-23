@@ -19,21 +19,19 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Daniel Krüger
  */
 public class InMemoryProducerQueuesImplTest {
-
-    @Mock
-    @NotNull
-    private InMemorySingleWriterImpl singleWriterServiceImpl;
 
     @NotNull
     private InMemoryProducerQueuesImpl producerQueues;
@@ -41,9 +39,7 @@ public class InMemoryProducerQueuesImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);
-
+        @NotNull final InMemorySingleWriterImpl singleWriterServiceImpl = new InMemorySingleWriterImpl();
         producerQueues = new InMemoryProducerQueuesImpl(singleWriterServiceImpl, 4);
     }
 
@@ -65,4 +61,43 @@ public class InMemoryProducerQueuesImplTest {
         assertTrue(indexes2.contains(0));
         assertEquals(1, indexes2.size());
     }
+
+    @Test
+    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws InterruptedException {
+
+        final LinkedList<Integer> list = new LinkedList<>();
+        list.add(0);
+
+        final List<Thread> threads = new ArrayList<>();
+        final int numberOfConcurrentThreads = 4;
+
+        // this is highly un-thread-safe, when this is concurrently executed
+        // there are many sources for exceptions
+        final Runnable runnable = () -> {
+            final Integer poll = list.pollFirst();
+            list.add(poll + 1);
+        };
+
+        for (int j = 0; j < 4; j++) {
+            final Thread thread = new Thread(() -> {
+                for (int i = 0; i < 10_000; i++) {
+                    producerQueues.submit("same", (bucketIndex, queueBuckets, queueIndex) -> {
+                        runnable.run();
+                        return null;
+                    });
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+
+        //wait for all threads to finish their submissions
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        // 4 threads with 10_000 adds = 40_000
+        assertEquals(40_000, (int) list.getFirst());
+    }
+
 }
