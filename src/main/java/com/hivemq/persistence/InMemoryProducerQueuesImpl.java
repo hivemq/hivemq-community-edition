@@ -78,9 +78,8 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         queueBucketIndexes = bucketIndexListBuilder.build();
     }
 
-    @NotNull
     @VisibleForTesting
-    ImmutableList<Integer> createBucketIndexes(final int queueIndex, final int bucketsPerQueue) {
+    @NotNull ImmutableList<Integer> createBucketIndexes(final int queueIndex, final int bucketsPerQueue) {
         final ImmutableList.Builder<Integer> builder = ImmutableList.builder();
         for (int i = bucketsPerQueue * queueIndex; i < bucketsPerQueue * (queueIndex + 1); i++) {
             builder.add(i);
@@ -88,22 +87,19 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         return builder.build();
     }
 
-    @NotNull
-    public <R> ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
-        //noinspection ConstantConditions (futuer is never null if the callbacks are null)
+    public <R> @NotNull ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
+        //noinspection ConstantConditions (future is never null if the callbacks are null)
         return submit(getBucket(key), task, null, null);
     }
 
-    @NotNull
-    public <R> ListenableFuture<R> submit(final int bucketIndex,
+    public <R> @NotNull ListenableFuture<R> submit(final int bucketIndex,
                                           @NotNull final Task<R> task) {
         //noinspection ConstantConditions (futuer is never null if the callbacks are null)
         return submit(bucketIndex, task, null, null);
     }
 
 
-    @Nullable
-    public <R> ListenableFuture<R> submit(final int bucketIndex,
+    public <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
                                           @NotNull final Task<R> task,
                                           @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                           @Nullable final SingleWriterService.FailedCallback failedCallback) {
@@ -112,8 +108,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
     }
 
 
-    @Nullable
-    private <R> ListenableFuture<R> submit(final int bucketIndex,
+    private <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
                                            @NotNull final Task<R> task,
                                            @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                            @Nullable final SingleWriterService.FailedCallback failedCallback,

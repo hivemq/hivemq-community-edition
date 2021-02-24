@@ -39,7 +39,7 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
 /**
  * @author Lukas Brandl
  * <p>
- * The PersistneceQueues class is a part of the single writer conzept. There is one Instance of this class for each
+ * The ProducerQueuesImpl class is a part of the single writer concept. There is one Instance of this class for each
  * persistence that utilizes the single writer service.
  */
 @SuppressWarnings("unchecked")
@@ -53,8 +53,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
     final int bucketsPerQueue;
 
     @VisibleForTesting
-    @NotNull
-    final ImmutableList<Queue<TaskWithFuture>> queues;
+    final @NotNull ImmutableList<Queue<TaskWithFuture>> queues;
 
     // Atomic booleans are more efficient than locks here, since we never actually wait for the lock.
     // Lock.tryLock() seams to park and unpark the thread each time :(
@@ -277,24 +276,19 @@ public class ProducerQueuesImpl implements ProducerQueues {
 
     @VisibleForTesting
     static class TaskWithFuture<T> {
-        @Nullable
-        private final SettableFuture<T> future;
-        @NotNull
-        private final Task task;
+        private final @Nullable SettableFuture<T> future;
+        private final @NotNull Task task;
         private final int bucketIndex;
-        @NotNull
-        private final ImmutableList<Integer> queueBuckets;
-        @Nullable
-        private final SingleWriterServiceImpl.SuccessCallback<T> successCallback;
-        @Nullable
-        private final SingleWriterServiceImpl.FailedCallback failedCallback;
+        private final @NotNull ImmutableList<Integer> queueBuckets;
+        private final @Nullable SingleWriterServiceImpl.SuccessCallback<T> successCallback;
+        private final @Nullable SingleWriterServiceImpl.FailedCallback failedCallback;
 
-        private TaskWithFuture(@Nullable final SettableFuture<T> future,
-                               @NotNull final Task task,
+        private TaskWithFuture(final @Nullable SettableFuture<T> future,
+                               final @NotNull Task task,
                                final int bucketIndex,
-                               @NotNull final ImmutableList<Integer> queueBuckets,
-                               @Nullable final SingleWriterServiceImpl.SuccessCallback<T> successCallback,
-                               @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback) {
+                               final @NotNull ImmutableList<Integer> queueBuckets,
+                               final @Nullable SingleWriterServiceImpl.SuccessCallback<T> successCallback,
+                               final @Nullable  SingleWriterServiceImpl.FailedCallback failedCallback) {
             this.future = future;
             this.task = task;
             this.bucketIndex = bucketIndex;

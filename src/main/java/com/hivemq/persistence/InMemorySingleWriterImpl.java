@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Daniel Krüger
  * <p>
- * This SingleWriter implementation does not use ExecutorThreadpools, but a trampoline approach like RxJava Schedulers.trampoline()
+ * This SingleWriterService implementation does not use ExecutorThreadpools, but a trampoline approach like RxJava Schedulers.trampoline()
  * The advantage is that there are less thread switches (resulting in context switches).
  * The requirement is that no submitted task is blocking (that is only true for in-memory persistences)
  */
@@ -104,7 +104,7 @@ public class InMemorySingleWriterImpl implements SingleWriterService {
     }
 
     public @NotNull Executor callbackExecutor(@NotNull final String key) {
-        return command -> callbackProducerQueue.submit(key, (bucketIndex1, queueBuckets, queueIndex1) -> {
+        return command -> callbackProducerQueue.submit(key, (bucketIndex, queueBuckets, queueIndex) -> {
                     command.run();
                     return null; // this is fine, because Executors dont return anything. The return value will not be used.
                 }

@@ -65,8 +65,10 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
     @VisibleForTesting
     @NotNull ExecutorService singleWriterExecutor;
+    
     @VisibleForTesting
     public final @NotNull ExecutorService @NotNull [] callbackExecutors;
+    
     @VisibleForTesting
     final @NotNull ScheduledExecutorService checkScheduler;
 
@@ -208,8 +210,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         return runningThreadsCount;
     }
 
-    @NotNull
-    public ExecutorService @NotNull [] getCallbackExecutors() {
+    public @NotNull ExecutorService @NotNull [] getCallbackExecutors() {
         return callbackExecutors;
     }
 
