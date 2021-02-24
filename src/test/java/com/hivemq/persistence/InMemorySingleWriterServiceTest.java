@@ -93,7 +93,7 @@ public class InMemorySingleWriterServiceTest {
     }
 
     @Test
-    public void test_getQueues_thenQueuesAreDifferentForDifferent() {
+    public void test_getQueues_queuesAreDifferentPerType() {
         final ArrayList<ProducerQueues> queues = new ArrayList<>();
 
         final ProducerQueues attributeStoreQueue = singleWriterServiceImpl.getAttributeStoreQueue();
