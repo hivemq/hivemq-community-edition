@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNotSame;
 /**
  * @author Daniel Krüger
  */
-public class InMemorySingleWriterServiceImplTest {
+public class InMemorySingleWriterServiceTest {
 
     private @NotNull InMemorySingleWriter singleWriterServiceImpl;
 
