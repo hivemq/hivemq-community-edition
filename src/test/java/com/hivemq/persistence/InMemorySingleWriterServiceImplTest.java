@@ -33,13 +33,13 @@ import static org.junit.Assert.assertNotSame;
  */
 public class InMemorySingleWriterServiceImplTest {
 
-    private @NotNull InMemorySingleWriterImpl singleWriterServiceImpl;
+    private @NotNull InMemorySingleWriter singleWriterServiceImpl;
 
     @Before
     public void setUp() throws Exception {
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(200);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
-        singleWriterServiceImpl = new InMemorySingleWriterImpl();
+        singleWriterServiceImpl = new InMemorySingleWriter();
     }
 
     @After

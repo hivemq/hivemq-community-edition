@@ -31,16 +31,15 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Daniel Krüger
  */
-public class InMemoryProducerQueuesImplTest {
+public class InMemoryProducerQueuesTest {
 
     @NotNull
-    private InMemoryProducerQueuesImpl producerQueues;
+    private InMemoryProducerQueues producerQueues;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        @NotNull final InMemorySingleWriterImpl singleWriterServiceImpl = new InMemorySingleWriterImpl();
-        producerQueues = new InMemoryProducerQueuesImpl(singleWriterServiceImpl, 4);
+        producerQueues = new InMemoryProducerQueues(64, 4);
     }
 
     @Test

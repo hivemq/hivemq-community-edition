@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
+import static com.hivemq.persistence.SingleWriterService.Task;
 
 
 /**
@@ -47,14 +47,11 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
  * by the thread that is currently working in the bucket. This way the access is single-threaded, non-blocking and context switches are
  * avoided.
  */
-public class InMemoryProducerQueuesImpl implements ProducerQueues {
+public class InMemoryProducerQueues implements ProducerQueues {
 
     private final int amountOfQueues;
 
-    @VisibleForTesting
-    final int bucketsPerQueue;
-
-    private final @NotNull InMemorySingleWriterImpl inMemorySingleWriter;
+    private final int bucketsPerQueue;
 
     private final @NotNull ImmutableList<ImmutableList<Integer>> queueBucketIndexes;
 
@@ -62,25 +59,37 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
     private @Nullable ListenableFuture<Void> closeFuture;
 
+    private final int persistenceBucketCount;
+
+    public final @NotNull MpscUnboundedArrayQueue<Runnable> @NotNull [] queues;
+    public final @NotNull AtomicInteger @NotNull [] wips;
+
     private final long shutdownGracePeriod;
-    private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
+    private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure that the grace period condition is not met, when shutdown is true but the start time is not yet set.
 
-    public InMemoryProducerQueuesImpl(final @NotNull InMemorySingleWriterImpl singleWriterService, final int amountOfQueues) {
-        this.inMemorySingleWriter = singleWriterService;
+    public InMemoryProducerQueues(final int persistenceBucketCount, final int amountOfQueues) {
 
-        final int bucketCount = inMemorySingleWriter.getPersistenceBucketCount();
+        this.persistenceBucketCount = persistenceBucketCount;
         this.amountOfQueues = amountOfQueues;
-        bucketsPerQueue = bucketCount / amountOfQueues;
+        bucketsPerQueue = persistenceBucketCount / amountOfQueues;
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
 
         final ImmutableList.Builder<ImmutableList<Integer>> bucketIndexListBuilder = ImmutableList.builder();
         final ImmutableList.Builder<AtomicLong> counterBuilder = ImmutableList.builder();
 
+        queues = new MpscUnboundedArrayQueue[amountOfQueues];
+        wips = new AtomicInteger[amountOfQueues];
+        for (int i = 0; i < amountOfQueues; i++) {
+            queues[i] = new MpscUnboundedArrayQueue<>(32);
+            wips[i] = new AtomicInteger();
+        }
+
+
         for (int i = 0; i < amountOfQueues; i++) {
             counterBuilder.add(new AtomicLong(0));
             bucketIndexListBuilder.add(createBucketIndexes(i, bucketsPerQueue));
         }
-        @NotNull final ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
+        final @NotNull ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
         queueBucketIndexes = bucketIndexListBuilder.build();
     }
 
@@ -93,7 +102,7 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
         return builder.build();
     }
 
-    public <R> @NotNull ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
+    public <R> @NotNull ListenableFuture<R> submit(final @NotNull String key, final @NotNull Task<R> task) {
         //noinspection ConstantConditions (future is never null if the callbacks are null)
         return submit(getBucket(key), task, null, null);
     }
@@ -106,19 +115,19 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
 
     public <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
-                                          @NotNull final Task<R> task,
-                                          @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
-                                          @Nullable final SingleWriterService.FailedCallback failedCallback) {
+                                                    final @NotNull Task<R> task,
+                                                    @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
+                                                    @Nullable final SingleWriterService.FailedCallback failedCallback) {
 
         return submit(bucketIndex, task, successCallback, failedCallback, false);
     }
 
 
     private <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
-                                           @NotNull final Task<R> task,
-                                           @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
-                                           @Nullable final SingleWriterService.FailedCallback failedCallback,
-                                           final boolean ignoreShutdown) {
+                                                     final @NotNull Task<R> task,
+                                                     @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
+                                                     @Nullable final SingleWriterService.FailedCallback failedCallback,
+                                                     final boolean ignoreShutdown) {
         if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
@@ -130,8 +139,8 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
             resultFuture = null;
         }
 
-        final MpscUnboundedArrayQueue<Runnable> queue = inMemorySingleWriter.queues[queueIndex];
-        final AtomicInteger wip = inMemorySingleWriter.wips[queueIndex];
+        final MpscUnboundedArrayQueue<Runnable> queue = queues[queueIndex];
+        final AtomicInteger wip = wips[queueIndex];
         queue.offer(() -> {
             try {
                 final R result = task.doTask(bucketIndex, queueBucketIndexes.get(queueIndex), queueIndex);
@@ -151,6 +160,13 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
             }
         });
 
+        // here is the big difference between the the ProducerQueueImpl and the InMemoryProducerQueue
+        // 1. test, whether another thread is already accessing the bucket (wip would be !=0)
+        // 2. Consume the Queue
+        // 3. Double check,
+        //    first check: queue empty?, if true get out of the inner loop, else keep on consuming
+        //    second check: check again whether another thread has queued a task meanwhile. If yes, return to work and consume the queue.
+        //    these two checks are necessary, because queue poll/add and wip increase/decrease are not atomic
         if (wip.getAndIncrement() == 0) {
             int missed = 1;
             do {
@@ -194,8 +210,8 @@ public class InMemoryProducerQueuesImpl implements ProducerQueues {
     }
 
 
-    public int getBucket(@NotNull final String key) {
-        return BucketUtils.getBucket(key, inMemorySingleWriter.getPersistenceBucketCount());
+    public int getBucket(final @NotNull String key) {
+        return BucketUtils.getBucket(key, persistenceBucketCount);
     }
 
 

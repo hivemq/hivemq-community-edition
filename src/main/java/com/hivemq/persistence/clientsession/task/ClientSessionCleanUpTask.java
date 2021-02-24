@@ -17,6 +17,7 @@ package com.hivemq.persistence.clientsession.task;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
@@ -38,7 +39,7 @@ public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> 
     }
 
     @Override
-    public @NotNull Void doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
+    public @Nullable Void doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
 
         final Set<String> expiredSessions = localPersistence.cleanUp(bucketIndex);
         for (final String expiredSession : expiredSessions) {
