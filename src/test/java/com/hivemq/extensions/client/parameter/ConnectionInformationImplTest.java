@@ -17,6 +17,7 @@ package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.entity.*;
+import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
 import com.hivemq.extension.sdk.api.client.parameter.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ListenerType;
 import com.hivemq.extension.sdk.api.client.parameter.TlsInformation;
@@ -239,6 +240,89 @@ public class ConnectionInformationImplTest {
         assertArrayEquals(chain, tls.getCertificateChain());
         assertEquals("cipher", tls.getCipherSuite());
         assertEquals("1.3", tls.getProtocol());
+
+    }
+
+    @Test
+    public void test_full_client_tls_information() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        channel.attr(AUTH_SNI_HOSTNAME).set("sni-hostname");
+        channel.attr(AUTH_PROTOCOL).set("1.3");
+
+        final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
+
+        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+
+        final X509Certificate[] chain = new X509Certificate[3];
+        chain[0] = new TestCert();
+        chain[1] = new TestCert();
+        chain[2] = new TestCert();
+
+        final TestCert testCert = new TestCert();
+
+        when(clientCertificate.certificate()).thenReturn(testCert);
+        when(clientCertificate.certificateChain()).thenReturn(chain);
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
+
+        //testing real values with integration test
+        final Optional<ClientTlsInformation> tlsInformation = connectionInformation.getClientTlsInformation();
+        assertTrue(tlsInformation.isPresent());
+        final ClientTlsInformation tls = tlsInformation.get();
+
+        assertTrue(tls.getClientCertificate().isPresent());
+        assertTrue(tls.getClientCertificateChain().isPresent());
+        assertTrue(tls.getHostname().isPresent());
+
+        assertEquals(testCert, tls.getClientCertificate().get());
+        assertArrayEquals(chain, tls.getClientCertificateChain().get());
+
+        assertEquals("cipher", tls.getCipherSuite());
+        assertEquals("1.3", tls.getProtocol());
+        assertEquals("sni-hostname", tls.getHostname().get());
+
+    }
+
+    @Test
+    public void test_cipher_protocol_only_client_tls_information() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(AUTH_CIPHER_SUITE).set("random-ecdsa-cipher");
+        channel.attr(AUTH_PROTOCOL).set("1.3");
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
+
+        //testing real values with integration test
+        final Optional<ClientTlsInformation> tlsInformation = connectionInformation.getClientTlsInformation();
+        assertTrue(tlsInformation.isPresent());
+        final ClientTlsInformation tls = tlsInformation.get();
+
+        assertFalse(tls.getClientCertificate().isPresent());
+        assertFalse(tls.getClientCertificateChain().isPresent());
+        assertFalse(tls.getHostname().isPresent());
+
+        assertEquals("random-ecdsa-cipher", tls.getCipherSuite());
+        assertEquals("1.3", tls.getProtocol());
+
+    }
+
+    @Test
+    public void test_cipher_protocol_only_tls_information() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(AUTH_CIPHER_SUITE).set("random-ecdsa-cipher");
+        channel.attr(AUTH_PROTOCOL).set("1.3");
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
+
+        //testing real values with integration test
+        final Optional<TlsInformation> tlsInformation = connectionInformation.getTlsInformation();
+        assertFalse(tlsInformation.isPresent());
 
     }
 
