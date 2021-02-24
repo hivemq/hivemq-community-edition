@@ -155,6 +155,10 @@ dependencies {
     /* jackson */
     implementation("com.fasterxml.jackson.core:jackson-databind:${property('jackson.version')}")
 
+    /* JCTools*/
+    implementation("org.jctools:jctools-core:${property('jctools.version')}")
+
+
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib:1.3.71")

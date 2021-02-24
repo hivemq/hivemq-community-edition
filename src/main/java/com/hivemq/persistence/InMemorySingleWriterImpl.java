@@ -18,7 +18,7 @@ package com.hivemq.persistence;
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.jctools.queues.MpscUnboundedArrayQueue
+import org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
