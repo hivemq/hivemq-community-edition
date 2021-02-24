@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.ThreadFactoryUtil;
-import io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue;
+import org.jctools.queues.MpscUnboundedArrayQueue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
  * <p>
  * This class is responsible for the access of the persistences when in-memory persistences are used.
  * Access must be single-threaded for each bucket. This is achieved by guarding the entrance with an AtomicInteger (wips).
- * If another thread wants to access the same bucket at the same time, it will put the task in a queue, which will gets cosumed
+ * If another thread wants to access the same bucket at the same time, it will put the task in a queue, which will be consumed
  * by the thread that is currently working in the bucket. This way the access is single-threaded, non-blocking and context switches are
  * avoided.
  */
