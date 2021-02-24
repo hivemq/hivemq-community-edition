@@ -40,6 +40,12 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
 
 /**
  * @author Daniel Krüger
+ * <p>
+ * This class is responsible for the access of the persistences when in-memory persistences are used.
+ * Access must be single-threaded for each bucket. This is achieved by guarding the entrance with an AtomicInteger (wips).
+ * If another thread wants to access the same bucket at the same time, it will put the task in a queue, which will gets cosumed
+ * by the thread that is currently working in the bucket. This way the access is single-threaded, non-blocking and context switches are
+ * avoided.
  */
 public class InMemoryProducerQueuesImpl implements ProducerQueues {
 
