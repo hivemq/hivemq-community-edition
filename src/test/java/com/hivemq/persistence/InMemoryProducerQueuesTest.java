@@ -16,41 +16,34 @@
 package com.hivemq.persistence;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 /**
- * @author Lukas Brandl
+ * @author Daniel Krüger
  */
-public class ProducerQueuesTest {
+public class InMemoryProducerQueuesTest {
 
-    @Mock
-    SingleWriterService singleWriterService;
-
-    ProducerQueues producerQueues;
+    @NotNull
+    private InMemoryProducerQueues producerQueues;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        when(singleWriterService.getPersistenceBucketCount()).thenReturn(64);
-        when(singleWriterService.getThreadPoolSize()).thenReturn(4);
-        when(singleWriterService.getGlobalTaskCount()).thenReturn(new AtomicLong());
-
-        producerQueues = new ProducerQueues(singleWriterService,4);
+        producerQueues = new InMemoryProducerQueues(64, 4);
     }
 
     @Test
-    public void test_create_bucket_indexes() throws Exception {
+    public void test_create_bucket_indexes() {
         final ImmutableList<Integer> indexes0 = producerQueues.createBucketIndexes(0, 3);
         assertTrue(indexes0.contains(0));
         assertTrue(indexes0.contains(1));
@@ -69,29 +62,41 @@ public class ProducerQueuesTest {
     }
 
     @Test
-    public void submit_task() throws Exception {
-        producerQueues.submit("key", new SingleWriterService.Task<Object>() {
-            @Override
-            public Object doTask(final int bucketIndex, final ImmutableList<Integer> queueBuckets, final int queueIndex) {
-                return null;
-            }
-        });
-        final int queueIndex = producerQueues.getBucket("key") / producerQueues.bucketsPerQueue;
-        final Queue<ProducerQueues.TaskWithFuture> queue = producerQueues.queues.get(queueIndex);
-        assertEquals(1, queue.size());
-    }
+    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws InterruptedException {
 
-    @Test
-    public void submit_task_to_all_queues() throws Exception {
-        producerQueues.submitToAllQueues(new SingleWriterService.Task<Object>() {
-            @Override
-            public Object doTask(final int bucketIndex, final ImmutableList<Integer> queueBuckets, final int queueIndex) {
-                return null;
-            }
-        });
+        final LinkedList<Integer> list = new LinkedList<>();
+        list.add(0);
 
-        for (final Queue<ProducerQueues.TaskWithFuture> queue : producerQueues.queues) {
-            assertEquals(1, queue.size());
+        final List<Thread> threads = new ArrayList<>();
+        final int numberOfConcurrentThreads = 4;
+
+        // this is highly un-thread-safe, when this is concurrently executed
+        // there are many sources for exceptions
+        final Runnable runnable = () -> {
+            final Integer poll = list.pollFirst();
+            list.add(poll + 1);
+        };
+
+        for (int j = 0; j < 4; j++) {
+            final Thread thread = new Thread(() -> {
+                for (int i = 0; i < 10_000; i++) {
+                    producerQueues.submit("same", (bucketIndex, queueBuckets, queueIndex) -> {
+                        runnable.run();
+                        return null;
+                    });
+                }
+            });
+            threads.add(thread);
+            thread.start();
         }
+
+        //wait for all threads to finish their submissions
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        // 4 threads with 10_000 adds = 40_000
+        assertEquals(40_000, (int) list.getFirst());
     }
+
 }

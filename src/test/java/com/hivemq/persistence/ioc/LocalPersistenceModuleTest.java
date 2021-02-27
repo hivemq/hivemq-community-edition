@@ -34,6 +34,7 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.SingleWriterServiceImpl;
 import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
 import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
@@ -87,7 +88,7 @@ public class LocalPersistenceModuleTest {
     private FullConfigurationService configurationService;
 
     @Mock
-    private SingleWriterService singleWriterService;
+    private SingleWriterServiceImpl singleWriterServiceImpl;
 
     @Mock
     private EventLog eventLog;
@@ -222,7 +223,7 @@ public class LocalPersistenceModuleTest {
                         bind(MessageIDPools.class).toInstance(messageIDProducers);
                         bind(MetricsHolder.class).toInstance(metricsHolder);
                         bind(MetricRegistry.class).toInstance(new MetricRegistry());
-                        bind(SingleWriterService.class).toInstance(singleWriterService);
+                        bind(SingleWriterService.class).toInstance(singleWriterServiceImpl);
                         bind(EventLog.class).toInstance(eventLog);
                         bind(MessageDroppedService.class).toInstance(messageDroppedService);
                         bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());

@@ -32,9 +32,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Lukas Brandl
  */
-public class SingleWriterServiceTest {
+public class SingleWriterServiceImplTest {
 
-    SingleWriterService singleWriterService;
+    SingleWriterServiceImpl singleWriterServiceImpl;
 
     @Before
     public void setUp() throws Exception {
@@ -43,61 +43,61 @@ public class SingleWriterServiceTest {
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(200);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
 
-        singleWriterService = new SingleWriterService();
+        singleWriterServiceImpl = new SingleWriterServiceImpl();
     }
 
     @After
     public void tearDown() throws Exception {
-        singleWriterService.stop();
+        singleWriterServiceImpl.stop();
     }
 
     @Test
     public void test_increment_non_empty_queue_count() throws Exception {
-        singleWriterService.singleWriterExecutor = new NoOpExecutor();
+        singleWriterServiceImpl.singleWriterExecutor = new NoOpExecutor();
 
-        assertEquals(0, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(0, singleWriterService.getRunningThreadsCount().get());
+        assertEquals(0, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(0, singleWriterServiceImpl.getRunningThreadsCount().get());
 
-        singleWriterService.incrementNonemptyQueueCounter();
-        assertEquals(1, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(1, singleWriterService.getRunningThreadsCount().get());
+        singleWriterServiceImpl.incrementNonemptyQueueCounter();
+        assertEquals(1, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(1, singleWriterServiceImpl.getRunningThreadsCount().get());
 
-        singleWriterService.incrementNonemptyQueueCounter();
-        assertEquals(2, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(2, singleWriterService.getRunningThreadsCount().get());
+        singleWriterServiceImpl.incrementNonemptyQueueCounter();
+        assertEquals(2, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(2, singleWriterServiceImpl.getRunningThreadsCount().get());
 
-        singleWriterService.incrementNonemptyQueueCounter();
-        assertEquals(3, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(3, singleWriterService.getRunningThreadsCount().get());
+        singleWriterServiceImpl.incrementNonemptyQueueCounter();
+        assertEquals(3, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(3, singleWriterServiceImpl.getRunningThreadsCount().get());
 
-        singleWriterService.incrementNonemptyQueueCounter();
-        assertEquals(4, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(4, singleWriterService.getRunningThreadsCount().get());
+        singleWriterServiceImpl.incrementNonemptyQueueCounter();
+        assertEquals(4, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(4, singleWriterServiceImpl.getRunningThreadsCount().get());
 
-        singleWriterService.incrementNonemptyQueueCounter();
-        assertEquals(5, singleWriterService.getNonemptyQueueCounter().get());
-        assertEquals(4, singleWriterService.getRunningThreadsCount().get());
+        singleWriterServiceImpl.incrementNonemptyQueueCounter();
+        assertEquals(5, singleWriterServiceImpl.getNonemptyQueueCounter().get());
+        assertEquals(4, singleWriterServiceImpl.getRunningThreadsCount().get());
     }
 
     @Test
     public void test_valid_amount_of_queues() throws Exception {
 
 
-        assertEquals(1, singleWriterService.validAmountOfQueues(1, 64));
-        assertEquals(2, singleWriterService.validAmountOfQueues(2, 64));
-        assertEquals(4, singleWriterService.validAmountOfQueues(4, 64));
-        assertEquals(8, singleWriterService.validAmountOfQueues(5, 64));
-        assertEquals(8, singleWriterService.validAmountOfQueues(8, 64));
-        assertEquals(64, singleWriterService.validAmountOfQueues(64, 64));
+        assertEquals(1, singleWriterServiceImpl.validAmountOfQueues(1, 64));
+        assertEquals(2, singleWriterServiceImpl.validAmountOfQueues(2, 64));
+        assertEquals(4, singleWriterServiceImpl.validAmountOfQueues(4, 64));
+        assertEquals(8, singleWriterServiceImpl.validAmountOfQueues(5, 64));
+        assertEquals(8, singleWriterServiceImpl.validAmountOfQueues(8, 64));
+        assertEquals(64, singleWriterServiceImpl.validAmountOfQueues(64, 64));
     }
 
     @Test
     public void stop_shutdownAllThreads() {
-        singleWriterService.stop();
-        assertTrue(singleWriterService.checkScheduler.isShutdown());
-        assertTrue(singleWriterService.singleWriterExecutor.isShutdown());
+        singleWriterServiceImpl.stop();
+        assertTrue(singleWriterServiceImpl.checkScheduler.isShutdown());
+        assertTrue(singleWriterServiceImpl.singleWriterExecutor.isShutdown());
 
-        for (final ExecutorService callbackExecutor : singleWriterService.callbackExecutors) {
+        for (final ExecutorService callbackExecutor : singleWriterServiceImpl.callbackExecutors) {
             assertTrue(callbackExecutor.isShutdown());
         }
     }

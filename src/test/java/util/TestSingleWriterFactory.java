@@ -18,6 +18,7 @@ package util;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.SingleWriterServiceImpl;
 
 /**
  * @author Lukas Brandl
@@ -32,13 +33,13 @@ public class TestSingleWriterFactory {
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(1000);
         InternalConfigurations.SINGLE_WRITER_CHECK_SCHEDULE.set(100);
 
-        final SingleWriterService singleWriterService = new SingleWriterService();
-        for (int i = 0; i < singleWriterService.callbackExecutors.length; i++) {
-            singleWriterService.callbackExecutors[i] = MoreExecutors.newDirectExecutorService();
+        final SingleWriterServiceImpl singleWriterServiceImpl = new SingleWriterServiceImpl();
+        for (int i = 0; i < singleWriterServiceImpl.callbackExecutors.length; i++) {
+            singleWriterServiceImpl.callbackExecutors[i] = MoreExecutors.newDirectExecutorService();
         }
 
-        singleWriterService.postConstruct();
+        singleWriterServiceImpl.postConstruct();
 
-        return singleWriterService;
+        return singleWriterServiceImpl;
     }
 }
