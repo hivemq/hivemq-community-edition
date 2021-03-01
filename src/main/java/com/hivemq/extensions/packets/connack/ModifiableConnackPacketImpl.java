@@ -26,7 +26,6 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
-import com.hivemq.util.Utf8Utils;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -145,13 +144,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public void setAssignedClientIdentifier(final @Nullable String assignedClientIdentifier) {
-
-        if (assignedClientIdentifier != null) {
-            Preconditions.checkArgument(!Utf8Utils.containsMustNotCharacters(assignedClientIdentifier), assignedClientIdentifier + " is not a valid client id");
-            Preconditions.checkArgument(!Utf8Utils.hasControlOrNonCharacter(assignedClientIdentifier), assignedClientIdentifier + " is not a valid client id");
-            Preconditions.checkArgument(!assignedClientIdentifier.isEmpty(), "client ID must not be empty");
-        }
-
+        PluginBuilderUtil.checkClientIdentifier(assignedClientIdentifier, configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.assignedClientId, assignedClientIdentifier)) {
             return;
         }

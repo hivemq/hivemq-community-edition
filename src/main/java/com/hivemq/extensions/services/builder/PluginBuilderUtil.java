@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.services.builder;
 
+import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -160,6 +161,21 @@ public class PluginBuilderUtil {
             throw new IllegalArgumentException("The topic (" + topic + ") is UTF-8 malformed");
         }
 
+    }
+
+    public static void checkClientIdentifier(final @Nullable String clientIdentifier, final boolean validateUtf8) {
+
+        if (clientIdentifier == null) {
+            return;
+        }
+
+        checkUtf8StringLength(clientIdentifier, "Client ID");
+
+        if (!isValidUtf8String(clientIdentifier, validateUtf8)) {
+            throw new IllegalArgumentException("The client ID (" + clientIdentifier + ") is UTF-8 malformed");
+        }
+
+        Preconditions.checkArgument(!clientIdentifier.isEmpty(), "Client ID must not be empty");
     }
 
     private static void checkUtf8StringLength(final @NotNull String utf8String, final @NotNull String type) {
