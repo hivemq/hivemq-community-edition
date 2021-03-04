@@ -15,6 +15,8 @@
  */
 package com.hivemq.extensions;
 
+import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
+import com.hivemq.extension.sdk.api.client.parameter.TlsInformation;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -29,7 +31,7 @@ import java.util.Date;
 import java.util.Set;
 
 import static com.hivemq.util.ChannelAttributes.*;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -88,6 +90,111 @@ public class ExtensionInformationUtilTest {
 
         assertNull(ExtensionInformationUtil.getTlsInformationFromChannel(channel));
 
+    }
+
+    @Test
+    public void test_get_tls_no_cert() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        assertNotNull(clientTlsInformation);
+        assertEquals("cipher", clientTlsInformation.getCipherSuite());
+        assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
+        assertTrue(clientTlsInformation.getHostname().isEmpty());
+        assertTrue(clientTlsInformation.getClientCertificate().isEmpty());
+    }
+
+    @Test
+    public void test_get_tls_with_cert() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+
+        final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
+
+        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+
+        final X509Certificate[] chain = new X509Certificate[3];
+        chain[0] = new TestCert();
+        chain[1] = new TestCert();
+        chain[2] = new TestCert();
+
+        final TestCert testCert = new TestCert();
+
+        when(clientCertificate.certificate()).thenReturn(testCert);
+        when(clientCertificate.certificateChain()).thenReturn(chain);
+
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        assertNotNull(clientTlsInformation);
+        assertEquals("cipher", clientTlsInformation.getCipherSuite());
+        assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
+        assertTrue(clientTlsInformation.getHostname().isEmpty());
+        assertTrue(clientTlsInformation.getClientCertificate().isPresent());
+        assertNotNull(((TlsInformation)clientTlsInformation).getCertificate());
+        assertNotNull(((TlsInformation)clientTlsInformation).getCertificateChain());
+    }
+
+    @Test
+    public void test_get_tls_with_sni() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
+
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        assertNotNull(clientTlsInformation);
+        assertEquals("cipher", clientTlsInformation.getCipherSuite());
+        assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
+        assertTrue(clientTlsInformation.getHostname().isPresent());
+        assertEquals("test.hostname.domain", clientTlsInformation.getHostname().get());
+        assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
+        assertTrue(clientTlsInformation.getClientCertificate().isEmpty());
+    }
+
+    @Test
+    public void test_get_tls_with_everything() {
+
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+
+        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
+
+        final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
+
+        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+
+        final X509Certificate[] chain = new X509Certificate[3];
+        chain[0] = new TestCert();
+        chain[1] = new TestCert();
+        chain[2] = new TestCert();
+
+        final TestCert testCert = new TestCert();
+
+        when(clientCertificate.certificate()).thenReturn(testCert);
+        when(clientCertificate.certificateChain()).thenReturn(chain);
+
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        assertNotNull(clientTlsInformation);
+        assertEquals("cipher", clientTlsInformation.getCipherSuite());
+        assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
+        assertTrue(clientTlsInformation.getHostname().isPresent());
+        assertEquals("test.hostname.domain", clientTlsInformation.getHostname().get());
+        assertTrue(clientTlsInformation.getClientCertificate().isPresent());
+        assertNotNull(((TlsInformation)clientTlsInformation).getCertificate());
+        assertNotNull(((TlsInformation)clientTlsInformation).getCertificateChain());
     }
 
 

@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @since 3.0
  */
 @Immutable
-public class TlsTcpListener extends TcpListener {
+public class TlsTcpListener extends TcpListener implements TlsListener {
 
     private final @NotNull Tls tls;
 
