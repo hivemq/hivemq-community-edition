@@ -42,7 +42,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     private final boolean sessionPresent;
     private final long sessionExpiryInterval;
     private final int serverKeepAlive;
-    private final @Nullable String assignedClientId;
+    private @Nullable String assignedClientId;
 
     private final @Nullable String authenticationMethod;
     private final @Nullable ByteBuffer authenticationData;
@@ -140,6 +140,17 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     @Override
     public @NotNull Optional<String> getAssignedClientIdentifier() {
         return Optional.ofNullable(assignedClientId);
+    }
+
+    @Override
+    public void setAssignedClientIdentifier(final @Nullable String assignedClientIdentifier) {
+        PluginBuilderUtil.checkClientIdentifier(assignedClientIdentifier, configurationService.securityConfiguration().validateUTF8());
+        if (Objects.equals(this.assignedClientId, assignedClientIdentifier)) {
+            return;
+        }
+
+        this.assignedClientId = assignedClientIdentifier;
+        modified = true;
     }
 
     @Override
