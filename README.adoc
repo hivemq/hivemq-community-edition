@@ -54,7 +54,7 @@ The ideal place for questions or discussions about the HiveMQ Community Edition 
 
 === Quick Start
 
-* Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2020.2/hivemq-ce-2020.2.zip[HiveMQ CE binary package].
+* Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2021.1/hivemq-ce-2021.1.zip[HiveMQ CE binary package].
 * Unzip the package.
 * Run the run.sh (Linux/OSX) or run.bat (Windows) in the bin folder of the package.
 
@@ -157,7 +157,7 @@ If you use Gradle, include the following code in your `build.gradle` file.
 ----
 
 dependencies {
-    implementation 'com.hivemq:hivemq-community-edition-embedded:2020.5'
+    implementation 'com.hivemq:hivemq-community-edition-embedded:2021.1'
 }
 ----
 
@@ -173,7 +173,7 @@ If you use Maven, include the following code in your `pom.xml` file.
         <dependency>
             <groupId>com.hivemq</groupId>
             <artifactId>hivemq-community-edition-embedded</artifactId>
-            <version>2020.5</version>
+            <version>2021.1</version>
         </dependency>
     </dependencies>
     ...
