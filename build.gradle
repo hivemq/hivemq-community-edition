@@ -26,44 +26,44 @@ description = 'HiveMQ CE is a Java-based open source MQTT broker that fully supp
 ext.mainClassName = 'com.hivemq.HiveMQServer'
 
 metadata {
-    readableName = "HiveMQ Community Edition"
+    readableName.set("HiveMQ Community Edition")
     organization {
-        name = "HiveMQ GmbH"
-        url = "https://www.hivemq.com/"
+        name.set("HiveMQ GmbH")
+        url.set("https://www.hivemq.com/")
     }
     license {
         apache2()
     }
     developers {
         developer {
-            it.id = "cschaebe"
-            it.name = "Christoph Schaebel"
-            it.email = "christoph.schaebel@hivemq.com"
+            it.id.set("cschaebe")
+            it.name.set("Christoph Schaebel")
+            it.email.set("christoph.schaebel@hivemq.com")
         }
         developer {
-            it.id = "lbrandl"
-            it.name = "Lukas Brandl"
-            it.email = "lukas.brandl@hivemq.com"
+            it.id.set("lbrandl")
+            it.name.set("Lukas Brandl")
+            it.email.set("lukas.brandl@hivemq.com")
         }
         developer {
-            it.id = "flimpoeck"
-            it.name = "Florian Limpoeck"
-            it.email = "florian.limpoeck@hivemq.com"
+            it.id.set("flimpoeck")
+            it.name.set("Florian Limpoeck")
+            it.email.set("florian.limpoeck@hivemq.com")
         }
         developer {
-            it.id = "sauroter"
-            it.name = "Georg Held"
-            it.email = "georg.held@hivemq.com"
+            it.id.set("sauroter")
+            it.name.set("Georg Held")
+            it.email.set("georg.held@hivemq.com")
         }
         developer {
-            it.id = "SgtSilvio"
-            it.name = "Silvio Giebl"
-            it.email = "silvio.giebl@hivemq.com"
+            it.id.set("SgtSilvio")
+            it.name.set("Silvio Giebl")
+            it.email.set("silvio.giebl@hivemq.com")
         }
     }
     github {
-        org = "hivemq"
-        repo = "hivemq-community-edition"
+        org.set("hivemq")
+        repo.set("hivemq-community-edition")
         issues()
     }
 }
@@ -227,7 +227,7 @@ ext {
 tasks.jar {
     manifest {
         attributes 'Implementation-Title': 'HiveMQ'
-        attributes 'Implementation-Vendor': metadata.organization.name
+        attributes 'Implementation-Vendor': metadata.organization.name.get()
         attributes 'Implementation-Version': project.version
         attributes 'HiveMQ-Version': project.version
         attributes 'Main-Class': project.mainClassName
@@ -506,10 +506,10 @@ bintray {
         repo = 'HiveMQ'
         name = 'hivemq-community-edition-embedded'
         desc = project.description
-        websiteUrl = metadata.url
-        issueTrackerUrl = metadata.issueManagement.url
-        vcsUrl = metadata.scm.url
-        licenses = [metadata.license.shortName]
+        websiteUrl = metadata.url.get()
+        issueTrackerUrl = metadata.issueManagement.url.get()
+        vcsUrl = metadata.scm.url.get()
+        licenses = [metadata.license.shortName.get()]
         labels = ['hivemq', 'mqtt-broker', 'mqtt-server', 'mqtt', 'mqtt5', 'broker', 'messaging', 'pubsub']
         version {
             released = new Date().toString()
