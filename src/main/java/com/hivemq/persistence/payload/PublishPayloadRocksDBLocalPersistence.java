@@ -46,7 +46,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     @VisibleForTesting
     static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
-    private static final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
+    private final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
 
     public static final String PERSISTENCE_VERSION = "040500_R";
     private final long memtableSize;
