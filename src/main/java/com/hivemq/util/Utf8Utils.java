@@ -73,7 +73,7 @@ public class Utf8Utils {
      * @param bytes The bytes to test.
      * @return true if the array contains a control character or a non character, else false.
      */
-    public static boolean hasControlOrNonCharacter(final byte[] bytes) {
+    public static boolean hasControlOrNonCharacter(final byte @NotNull [] bytes) {
         Preconditions.checkNotNull(bytes);
 
         for (int i = 0; i < bytes.length; i++) {
@@ -95,7 +95,7 @@ public class Utf8Utils {
                     return false;
                 }
 
-                if (byte1 == (byte) 0xC2 && bytes[i + 1] >= (byte) 0x80 && bytes[i + 1] <= (byte) 0x9F) {
+                if (byte1 == (byte) 0xC2 && bytes[i + 1] <= (byte) 0x9F) {
                     return true;
                 }
 
@@ -156,7 +156,7 @@ public class Utf8Utils {
      * @param text The string to test
      * @return true if the text contains a control character or a non character else false
      */
-    public static boolean hasControlOrNonCharacter(final String text) {
+    public static boolean hasControlOrNonCharacter(final @NotNull String text) {
         Preconditions.checkNotNull(text);
 
         for (int i = 0; i < text.length(); i++) {
@@ -236,7 +236,7 @@ public class Utf8Utils {
     /**
      * ByteBuf implementation of guavas Utf8.isWellFormed(final byte[] bytes)
      */
-    public static boolean isWellFormed(final ByteBuf byteBuf, final int utf8StringLength) {
+    public static boolean isWellFormed(final @NotNull ByteBuf byteBuf, final int utf8StringLength) {
 
         Preconditions.checkNotNull(byteBuf);
 
