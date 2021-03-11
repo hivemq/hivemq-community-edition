@@ -402,4 +402,5 @@ public class InternalConfigurations {
      */
     public static final AtomicInteger AUTH_PROCESS_TIMEOUT = new AtomicInteger(30);
 
+    public static final AtomicBoolean PUBLISH_PAYLOAD_FORCE_FLUSH = new AtomicBoolean(true);
 }
