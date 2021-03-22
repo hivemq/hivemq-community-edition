@@ -50,7 +50,7 @@ public class ExtensionStartStopExecutorProvider implements Provider<ExecutorServ
         return executorService;
     }
 
-    private static class ExtensionStartStopExecutorShutdownHook extends HiveMQShutdownHook {
+    private static class ExtensionStartStopExecutorShutdownHook implements HiveMQShutdownHook {
 
         private final ExecutorService executorService;
 

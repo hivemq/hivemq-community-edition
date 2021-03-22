@@ -26,17 +26,14 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  *
  * @author Dominik Obermaier
  */
-public abstract class HiveMQShutdownHook extends Thread {
-
+public interface HiveMQShutdownHook extends Runnable {
 
     /**
      * The name of the shutdown hook. This name is used for logging purposes
      *
      * @return the name of the HiveMQ shutdown hook
      */
-    @NotNull
-    public abstract String name();
-
+    @NotNull String name();
 
     /**
      * The {@link HiveMQShutdownHook.Priority} of the shutdown hook. This is only relevant if the execution of this
@@ -45,8 +42,9 @@ public abstract class HiveMQShutdownHook extends Thread {
      *
      * @return the {@link HiveMQShutdownHook.Priority} of the shutdown hook.
      */
-    @NotNull
-    public abstract Priority priority();
+    default @NotNull Priority priority() {
+        return Priority.DOES_NOT_MATTER;
+    }
 
     /**
      * If the Shutdown hook should be executed asynchronous. This is only
@@ -60,12 +58,11 @@ public abstract class HiveMQShutdownHook extends Thread {
      *
      * @return <code>true</code> if the shutdown hook should be executed asynchronous, <code>false</code> otherwise.
      */
-    public abstract boolean isAsynchronous();
+    default boolean isAsynchronous() {
+        return false;
+    }
 
-    @Override
-    public abstract void run();
-
-    public enum Priority {
+    enum Priority {
         FIRST(Integer.MAX_VALUE),
         CRITICAL(1_000_000),
         VERY_HIGH(500_000),
@@ -75,22 +72,20 @@ public abstract class HiveMQShutdownHook extends Thread {
         VERY_LOW(5_000),
         DOES_NOT_MATTER(Integer.MIN_VALUE);
 
-        private final int intValue;
+        private final int value;
 
-        Priority(final int intValue) {
+        Priority(final int value) {
 
-            this.intValue = intValue;
+            this.value = value;
         }
 
-        public int getIntValue() {
-            return intValue;
+        public int getValue() {
+            return value;
         }
 
         @Override
         public String toString() {
-            return name() + " (" + getIntValue() + ")";
+            return name() + " (" + getValue() + ")";
         }
     }
-
-
 }

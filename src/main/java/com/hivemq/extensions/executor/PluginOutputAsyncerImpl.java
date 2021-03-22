@@ -84,7 +84,7 @@ public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
     }
 
 
-    static class PluginOutputAsyncerShutdownHook extends HiveMQShutdownHook {
+    static class PluginOutputAsyncerShutdownHook implements HiveMQShutdownHook {
         @NotNull
         private final ScheduledExecutorService scheduledExecutor;
 

@@ -111,7 +111,7 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
         // not checking for authenticator safety
     }
 
-    private static class ExtensionSystemShutdownHook extends HiveMQShutdownHook {
+    private static class ExtensionSystemShutdownHook implements HiveMQShutdownHook {
 
         private static final Logger log = LoggerFactory.getLogger(ExtensionSystemShutdownHook.class);
 

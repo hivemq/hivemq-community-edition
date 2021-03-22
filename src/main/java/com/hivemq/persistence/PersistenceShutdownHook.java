@@ -42,7 +42,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENC
 /**
  * @author Lukas Brandl
  */
-public class PersistenceShutdownHook extends HiveMQShutdownHook {
+public class PersistenceShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(PersistenceShutdownHook.class);
 

@@ -16,10 +16,11 @@
 package com.hivemq.common.shutdown;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.*;
-import com.hivemq.annotations.ReadOnly;
-import com.hivemq.configuration.info.SystemInformation;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Ordering;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MarkerFactory;
@@ -28,8 +29,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,36 +44,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * If you add a synchronous shutdown hook, the shutdown hook is added to the registry. Please note that the
  * synchronous shutdown hook is <b>not</b> executed by itself when HiveMQ is shutting down.
  * <p>
- *When you add an asynchronous shutdown hook, <b>the shutdown hook is immediately registered to the JVM</b>. You can get a
- * read-only collection of all asynchronous shutdown hooks for further reference, though.
+ * When you add an asynchronous shutdown hook, <b>the shutdown hook is immediately registered to the JVM</b>.
+ * You can get a read-only collection of all asynchronous shutdown hooks for further reference, though.
  *
  * @author Dominik Obermaier
  */
 @Singleton
 public class ShutdownHooks {
 
-    private static final @NotNull Logger log = LoggerFactory.getLogger(ShutdownHooks.class);
-    public static final @NotNull String SHUTDOWN_HOOK_THREAD_NAME = "shutdown-executor";
-
-    private final @NotNull Multimap<Integer, HiveMQShutdownHook> registry;
-    private final @NotNull CopyOnWriteArraySet<HiveMQShutdownHook> asynchronousHooks;
-    private @NotNull Thread hivemqShutdownThread;
-    private final @NotNull SystemInformation systemInformation;
-    private final AtomicBoolean constructed = new AtomicBoolean(false);
-
     public static final AtomicBoolean SHUTTING_DOWN = new AtomicBoolean(false);
 
-    @Inject
-    ShutdownHooks(final @NotNull SystemInformation systemInformation) {
-        this.systemInformation = systemInformation;
-        final ListMultimap<Integer, HiveMQShutdownHook> multimap = MultimapBuilder.SortedSetMultimapBuilder.
-                treeKeys(Ordering.natural().reverse()). //High priorities first
-                arrayListValues().
-                build();
+    private static final Logger log = LoggerFactory.getLogger(ShutdownHooks.class);
 
-        //Synchronize the multimap so we don't run into concurrency issues
-        registry = Multimaps.synchronizedListMultimap(multimap);
-        asynchronousHooks = new CopyOnWriteArraySet<>();
+    private static final String SHUTDOWN_HOOK_THREAD_NAME = "shutdown-executor";
+
+    private final @NotNull AtomicBoolean constructed;
+    private final @NotNull Map<HiveMQShutdownHook, Thread> asynchronousHooks;
+    private final @NotNull Multimap<Integer, HiveMQShutdownHook> synchronousHooks;
+
+    private @Nullable Thread hivemqShutdownThread;
+
+    @Inject
+    ShutdownHooks() {
+        constructed = new AtomicBoolean(false);
+
+        asynchronousHooks = new HashMap<>();
+        synchronousHooks = MultimapBuilder.SortedSetMultimapBuilder
+                .treeKeys(Ordering.natural().reverse()) //High priorities first
+                .arrayListValues()
+                .build();
     }
 
     @PostConstruct
@@ -98,7 +98,7 @@ public class ShutdownHooks {
                     () -> log.info(
                             "Still shutting down HiveMQ. Waiting for remaining tasks to be executed. Do not shutdown HiveMQ."),
                     10, 10, TimeUnit.SECONDS);
-            for (final HiveMQShutdownHook runnable : registry.values()) {
+            for (final HiveMQShutdownHook runnable : synchronousHooks.values()) {
                 log.trace(MarkerFactory.getMarker("SHUTDOWN_HOOK"), "Running shutdown hook {}", runnable.name());
                 //Although these shutdown hooks are threads, we're calling only the blocking run method
                 runnable.run();
@@ -112,25 +112,28 @@ public class ShutdownHooks {
      *
      * @param hiveMQShutdownHook the {@link HiveMQShutdownHook} to add
      */
-    public synchronized void add(@NotNull final HiveMQShutdownHook hiveMQShutdownHook) {
+    public synchronized void add(final @NotNull HiveMQShutdownHook hiveMQShutdownHook) {
         if (SHUTTING_DOWN.get()) {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
-        if (!hiveMQShutdownHook.isAsynchronous()) {
-            hiveMQShutdownHook.setName(hiveMQShutdownHook.name());
+
+        if (hiveMQShutdownHook.isAsynchronous()) {
+            log.trace("Registering asynchronous shutdown hook {} ", hiveMQShutdownHook.name());
+
+            final Thread shutdownHookThread = new Thread(hiveMQShutdownHook);
+            shutdownHookThread.setName(hiveMQShutdownHook.name());
+            // We didn't set the priority of shutdown hooks until now. This would be a behavior change and also
+            // the values of HiveMQShutdownHook.Priority are not valid for thread priorities.
+            // shutdownHookThread.setPriority(hiveMQShutdownHook.priority().getValue());
+
+            asynchronousHooks.put(hiveMQShutdownHook, shutdownHookThread);
+            Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+        } else {
             log.trace("Adding synchronous shutdown hook {} with priority {}", hiveMQShutdownHook.name(),
                     hiveMQShutdownHook.priority());
-            registry.put(hiveMQShutdownHook.priority().getIntValue(), hiveMQShutdownHook);
-        } else {
-            log.trace("Registering asynchronous shutdown hook {} ", hiveMQShutdownHook.name());
-            //We have to set the threads name manually thanks to the Java Thread API....
-            hiveMQShutdownHook.setName(hiveMQShutdownHook.name());
-            asynchronousHooks.add(hiveMQShutdownHook);
-
-            Runtime.getRuntime().addShutdownHook(hiveMQShutdownHook);
+            synchronousHooks.put(hiveMQShutdownHook.priority().getValue(), hiveMQShutdownHook);
         }
-
     }
 
     /**
@@ -143,16 +146,16 @@ public class ShutdownHooks {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
-        if (!hiveMQShutdownHook.isAsynchronous()) {
+
+        if (hiveMQShutdownHook.isAsynchronous()) {
+            log.trace("Removing asynchronous shutdown hook {} ", hiveMQShutdownHook.name());
+
+            final Thread shutdownHookThread = asynchronousHooks.remove(hiveMQShutdownHook);
+            Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
+        } else {
             log.trace("Removing synchronous shutdown hook {} with priority {}", hiveMQShutdownHook.name(),
                     hiveMQShutdownHook.priority());
-            registry.values().remove(hiveMQShutdownHook);
-        } else {
-            log.trace("Removing asynchronous shutdown hook {} ", hiveMQShutdownHook.name());
-            //We have to set the threads name manually thanks to the Java Thread API....
-            asynchronousHooks.remove(hiveMQShutdownHook);
-
-            Runtime.getRuntime().removeShutdownHook(hiveMQShutdownHook);
+            synchronousHooks.values().remove(hiveMQShutdownHook);
         }
     }
 
@@ -160,35 +163,33 @@ public class ShutdownHooks {
      * Clears all asynchronous shutdown hooks and the registered thread for the synchronous shutdown hooks.
      */
     public synchronized void clearRuntime() {
-        asynchronousHooks.forEach(Runtime.getRuntime()::removeShutdownHook);
+        asynchronousHooks.values().forEach(Runtime.getRuntime()::removeShutdownHook);
 
         Runtime.getRuntime().removeShutdownHook(hivemqShutdownThread);
     }
 
     /**
-     * Returns the registry with all shutdown hooks. Note that the registry only contains all of the synchronous shutdown
-     * hooks.
+     * Returns the registry with all Shutdown Hooks. Note, that the registry only contains
+     * all synchronous shutdown hooks.
      *
      * @return A registry of all synchronous Shutdown Hooks.
      */
-    public Multimap<Integer, HiveMQShutdownHook> getRegistry() {
-        return registry;
+    public @NotNull Multimap<Integer, HiveMQShutdownHook> getSynchronousHooks() {
+        return synchronousHooks;
     }
 
     /**
-     * Provides a Set of all asynchronous shutdown hooks. Async Shutdown Hooks are already registered to the JVM, so
-     * this Set is read only
+     * Provides a Set of all asynchronous shutdown hooks. Async Shutdown Hooks are already registered to the JVM,
+     * so this Set is read only
      *
      * @return a read only set of shutdown hooks
      */
-    @ReadOnly
-    public Set<HiveMQShutdownHook> getAsyncShutdownHooks() {
-        return Collections.unmodifiableSet(asynchronousHooks);
+    public @NotNull Map<HiveMQShutdownHook, Thread> getAsyncShutdownHooks() {
+        return Collections.unmodifiableMap(asynchronousHooks);
     }
 
     @VisibleForTesting
     Thread hivemqShutdownThread() {
         return hivemqShutdownThread;
     }
-
 }

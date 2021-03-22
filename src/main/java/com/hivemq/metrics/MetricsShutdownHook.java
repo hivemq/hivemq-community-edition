@@ -28,7 +28,7 @@ import javax.inject.Singleton;
  * @author Lukas Brandl
  */
 @Singleton
-public class MetricsShutdownHook extends HiveMQShutdownHook {
+public class MetricsShutdownHook implements HiveMQShutdownHook {
 
     private final ShutdownHooks shutdownHooks;
     private final JmxReporterBootstrap jmxReporterBootstrap;

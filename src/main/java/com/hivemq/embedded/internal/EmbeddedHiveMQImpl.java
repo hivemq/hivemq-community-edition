@@ -189,7 +189,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             final long startTime = System.currentTimeMillis();
             final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
 
-            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getRegistry().values()) {
+            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getSynchronousHooks().values()) {
                 try {
                     // We call run, as we want to execute the hooks now, in this thread
                     //noinspection CallToThreadRun
@@ -204,7 +204,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 }
             }
 
-            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks()) {
+            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks().keySet()) {
                 try {
                     // We call run, as we want to execute the hooks now, in this thread
                     //noinspection CallToThreadRun
