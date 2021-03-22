@@ -52,13 +52,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 public class ShutdownHooks {
 
-    public static final AtomicBoolean SHUTTING_DOWN = new AtomicBoolean(false);
-
     private static final Logger log = LoggerFactory.getLogger(ShutdownHooks.class);
 
     private static final String SHUTDOWN_HOOK_THREAD_NAME = "shutdown-executor";
 
     private final @NotNull AtomicBoolean constructed;
+    private final @NotNull AtomicBoolean shuttingDown;
     private final @NotNull Map<HiveMQShutdownHook, Thread> asynchronousHooks;
     private final @NotNull Multimap<Integer, HiveMQShutdownHook> synchronousHooks;
 
@@ -67,6 +66,7 @@ public class ShutdownHooks {
     @Inject
     ShutdownHooks() {
         constructed = new AtomicBoolean(false);
+        shuttingDown = new AtomicBoolean(false);
 
         asynchronousHooks = new HashMap<>();
         synchronousHooks = MultimapBuilder.SortedSetMultimapBuilder
@@ -77,8 +77,9 @@ public class ShutdownHooks {
 
     @PostConstruct
     public void postConstruct() {
-
-        //Protect from multiple calls to postConstruct
+        // During the HiveMQ start we are creating a persistence injector and later than a full injector.
+        // ShutdownHooks is bound in both injectors and each time it is bound the PostConstruct is called by the
+        // LifecycleModule.
         if (constructed.getAndSet(true)) {
             return;
         }
@@ -88,9 +89,13 @@ public class ShutdownHooks {
         Runtime.getRuntime().addShutdownHook(hivemqShutdownThread);
     }
 
+    public boolean isShuttingDown() {
+        return shuttingDown.get();
+    }
+
     private void createShutdownThread() {
         hivemqShutdownThread = new Thread(() -> {
-            SHUTTING_DOWN.set(true);
+            shuttingDown.set(true);
             log.info("Shutting down HiveMQ. Please wait, this could take a while...");
             log.trace("Running synchronous shutdown hook");
             final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -113,7 +118,7 @@ public class ShutdownHooks {
      * @param hiveMQShutdownHook the {@link HiveMQShutdownHook} to add
      */
     public synchronized void add(final @NotNull HiveMQShutdownHook hiveMQShutdownHook) {
-        if (SHUTTING_DOWN.get()) {
+        if (shuttingDown.get()) {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
@@ -142,7 +147,7 @@ public class ShutdownHooks {
      * @param hiveMQShutdownHook the {@link HiveMQShutdownHook} to add
      */
     public synchronized void remove(@NotNull final HiveMQShutdownHook hiveMQShutdownHook) {
-        if (SHUTTING_DOWN.get()) {
+        if (shuttingDown.get()) {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");

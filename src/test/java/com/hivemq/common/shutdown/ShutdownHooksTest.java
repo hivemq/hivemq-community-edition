@@ -25,7 +25,6 @@ public class ShutdownHooksTest {
         executions = new ArrayList<>();
         shutdownHooks = new ShutdownHooks();
         shutdownHooks.postConstruct();
-        ShutdownHooks.SHUTTING_DOWN.set(false);
     }
 
     @After
