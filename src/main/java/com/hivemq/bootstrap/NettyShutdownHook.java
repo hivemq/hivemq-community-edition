@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  *
  */
-public class NettyShutdownHook extends HiveMQShutdownHook {
+public class NettyShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(NettyShutdownHook.class);
 

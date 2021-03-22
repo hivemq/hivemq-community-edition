@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class ManagedPluginExecutorShutdownHook extends HiveMQShutdownHook {
+public class ManagedPluginExecutorShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(ManagedPluginExecutorShutdownHook.class);
 

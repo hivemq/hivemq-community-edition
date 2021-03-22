@@ -107,7 +107,7 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         return taskExecutors[bucket];
     }
 
-    private static class PluginTaskExecutorServiceShutdownHook extends HiveMQShutdownHook {
+    private static class PluginTaskExecutorServiceShutdownHook implements HiveMQShutdownHook {
 
         private final @NotNull PluginTaskExecutor[] taskExecutors;
 

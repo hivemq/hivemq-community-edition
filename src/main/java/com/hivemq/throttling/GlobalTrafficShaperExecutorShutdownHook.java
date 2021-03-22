@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author Florian Limpoeck
  */
-public class GlobalTrafficShaperExecutorShutdownHook extends HiveMQShutdownHook {
+public class GlobalTrafficShaperExecutorShutdownHook implements HiveMQShutdownHook {
 
 
     private final ScheduledExecutorService executor;

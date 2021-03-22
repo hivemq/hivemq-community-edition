@@ -35,7 +35,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENC
  * @since 4.0.0
  */
 @Singleton
-public class PersistenceStartup extends HiveMQShutdownHook {
+public class PersistenceStartup implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(PersistenceStartup.class);
 

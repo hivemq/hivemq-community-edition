@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Dominik Obermaier
  */
-public class LifecycleHiveMQShutdownHook extends HiveMQShutdownHook {
+public class LifecycleHiveMQShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleHiveMQShutdownHook.class);
 
