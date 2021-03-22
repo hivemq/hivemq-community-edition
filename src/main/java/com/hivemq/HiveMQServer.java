@@ -139,8 +139,9 @@ public class HiveMQServer {
                 GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hiveMQId, configService);
         //blocks until all persistences started
         persistenceInjector.getInstance(PersistenceStartup.class).finish();
+        final ShutdownHooks shutdownHooks = persistenceInjector.getInstance(ShutdownHooks.class);
 
-        if (ShutdownHooks.SHUTTING_DOWN.get()) {
+        if (shutdownHooks.isShuttingDown()) {
             return;
         }
         if (configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
@@ -176,7 +177,7 @@ public class HiveMQServer {
             return;
         }
 
-        if (ShutdownHooks.SHUTTING_DOWN.get()) {
+        if (shutdownHooks.isShuttingDown()) {
             return;
         }
         final HiveMQServer instance = injector.getInstance(HiveMQServer.class);
@@ -189,7 +190,7 @@ public class HiveMQServer {
             log.trace("Finished initial garbage collection after startup in {}ms", System.currentTimeMillis() - start);
         }
 
-        if (ShutdownHooks.SHUTTING_DOWN.get()) {
+        if (shutdownHooks.isShuttingDown()) {
             return;
         }
 
@@ -198,13 +199,13 @@ public class HiveMQServer {
         LoggingBootstrap.addLoglevelModifiers();
         instance.start(null);
 
-        if (ShutdownHooks.SHUTTING_DOWN.get()) {
+        if (shutdownHooks.isShuttingDown()) {
             return;
         }
 
         log.info("Started HiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
 
-        if (ShutdownHooks.SHUTTING_DOWN.get()) {
+        if (shutdownHooks.isShuttingDown()) {
             return;
         }
 
