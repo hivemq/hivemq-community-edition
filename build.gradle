@@ -10,6 +10,10 @@ plugins {
     id 'com.github.sgtsilvio.gradle.metadata'
     id 'com.github.sgtsilvio.gradle.javadoc-links'
 
+    /* Publishing Plugins */
+    id 'io.github.gradle-nexus.publish-plugin'
+    id 'signing'
+
     /* Code Quality Plugins */
     id 'jacoco'
     id 'pmd'
@@ -496,26 +500,18 @@ publishing {
     }
 }
 
-bintray {
-    user = "${project.findProperty('bintrayUser') ?: System.getenv('BINTRAY_USER')}"
-    key = "${project.findProperty('bintrayKey') ?: System.getenv('BINTRAY_KEY')}"
-    publications = ['embedded']
-    publish = true
-    pkg {
-        userOrg = 'hivemq'
-        repo = 'HiveMQ'
-        name = 'hivemq-community-edition-embedded'
-        desc = project.description
-        websiteUrl = metadata.url.get()
-        issueTrackerUrl = metadata.issueManagement.url.get()
-        vcsUrl = metadata.scm.url.get()
-        licenses = [metadata.license.shortName.get()]
-        labels = ['hivemq', 'mqtt-broker', 'mqtt-server', 'mqtt', 'mqtt5', 'broker', 'messaging', 'pubsub']
-        version {
-            released = new Date().toString()
-            gpg {
-                sign = true
-            }
-        }
+signing {
+    sign publishing.publications.embedded
+    String signingKey = project.findProperty('signKey')
+    String signingPassword = project.findProperty('signKeyPass')
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
     }
 }
+
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}
+
