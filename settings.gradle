@@ -1,6 +1,5 @@
 pluginManagement {
     plugins {
-        id 'com.jfrog.bintray' version "${getProperty("plugin.bintray.version")}"
         id 'com.github.johnrengelman.shadow' version "${getProperty("plugin.shadow.version")}"
         id 'com.github.hierynomus.license' version "${getProperty("plugin.license.version")}"
         id 'org.owasp.dependencycheck' version "${getProperty("plugin.dependencycheck.version")}"

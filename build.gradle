@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'com.jfrog.bintray'
     id 'com.github.johnrengelman.shadow'
     id 'com.github.hierynomus.license'
     id 'org.owasp.dependencycheck'
