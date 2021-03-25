@@ -22,10 +22,12 @@ import io.netty.channel.group.ChannelGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 /**
  * @author Christoph Schäbel
  */
+@Singleton
 public class OpenConnectionsGaugeProvider implements Provider<OpenConnectionsGauge> {
 
     private final MetricRegistry metricRegistry;

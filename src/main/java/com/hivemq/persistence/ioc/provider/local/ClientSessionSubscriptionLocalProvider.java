@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 /**
  * The provider which is responsible for creating and providing the
@@ -29,6 +30,7 @@ import javax.inject.Provider;
  *
  * @author Dominik Obermaier
  */
+@Singleton
 public class ClientSessionSubscriptionLocalProvider implements Provider<ClientSessionSubscriptionLocalPersistence> {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionLocalProvider.class);

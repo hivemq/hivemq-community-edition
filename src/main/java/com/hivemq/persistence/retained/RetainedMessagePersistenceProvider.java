@@ -23,6 +23,7 @@ import javax.inject.Provider;
 /**
  * @author Christoph Schäbel
  */
+@LazySingleton
 public class RetainedMessagePersistenceProvider implements Provider<RetainedMessagePersistence> {
 
     private final Provider<RetainedMessagePersistenceImpl> provider;

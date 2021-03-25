@@ -18,6 +18,7 @@ package com.hivemq.security.ssl;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.exceptions.UnrecoverableException;
@@ -41,6 +42,7 @@ import java.util.Set;
 /**
  * @author Christoph Schäbel
  */
+@LazySingleton
 public class SslFactory {
 
     private final @NotNull SslContextStore sslContextStore;

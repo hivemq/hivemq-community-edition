@@ -20,10 +20,12 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
  */
+@Singleton
 public class PersistenceStartupShutdownHookInstaller {
 
     private final @NotNull ShutdownHooks shutdownHooks;

@@ -16,6 +16,7 @@
 package com.hivemq.extensions.services.interceptor;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
@@ -27,6 +28,7 @@ import javax.inject.Inject;
  * @author Lukas Brandl
  * @since 4.2.0
  */
+@LazySingleton
 public class GlobalInterceptorRegistryImpl implements GlobalInterceptorRegistry {
 
     @NotNull

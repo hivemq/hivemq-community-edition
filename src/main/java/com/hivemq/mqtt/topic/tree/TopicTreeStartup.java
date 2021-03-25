@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Set;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
@@ -38,6 +39,7 @@ import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl
  *
  * @author Dominik Obermaier
  */
+@Singleton
 public class TopicTreeStartup {
 
     private static final Logger log = LoggerFactory.getLogger(TopicTreeStartup.class);

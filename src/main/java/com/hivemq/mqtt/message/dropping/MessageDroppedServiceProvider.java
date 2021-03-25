@@ -20,10 +20,12 @@ import com.hivemq.metrics.MetricsHolder;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 /**
  * @author Georg Held
  */
+@Singleton
 public class MessageDroppedServiceProvider implements Provider<MessageDroppedService> {
 
     private final MetricsHolder metricsHolder;

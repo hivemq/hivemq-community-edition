@@ -27,6 +27,7 @@ import javax.inject.Singleton;
 /**
  * @author Christoph Schäbel
  */
+@Singleton
 public class SessionsGaugeProvider implements Provider<SessionsGauge> {
 
     private final MetricRegistry metricRegistry;

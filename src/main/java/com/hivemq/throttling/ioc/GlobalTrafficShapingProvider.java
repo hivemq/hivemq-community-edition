@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -37,6 +38,7 @@ import java.util.concurrent.ThreadFactory;
  * @author Florian Limpoeck
  * @author Dominik Obermaier
  */
+@Singleton
 public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapingHandler> {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalTrafficShapingProvider.class);
@@ -44,14 +46,12 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
     private final @NotNull ShutdownHooks registry;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
 
-
     @Inject
     GlobalTrafficShapingProvider(final @NotNull ShutdownHooks registry,
                                  final @NotNull RestrictionsConfigurationService restrictionsConfigurationService) {
 
         this.registry = registry;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
-
     }
 
     @Override

@@ -27,6 +27,7 @@ import javax.inject.Singleton;
 /**
  * @author Christoph Schäbel
  */
+@Singleton
 public class RetainedMessagesGaugeProvider implements Provider<RetainedMessagesGauge> {
 
     private final RetainedMessagePersistence retainedMessagePersistence;
