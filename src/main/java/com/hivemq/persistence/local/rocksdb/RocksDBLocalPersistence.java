@@ -15,11 +15,11 @@
  */
 package com.hivemq.persistence.local.rocksdb;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.FilePersistence;
 import com.hivemq.persistence.LocalPersistence;
-import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -42,7 +42,6 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     protected final @NotNull RocksDB[] buckets;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull PersistenceStartup persistenceStartup;
-    private final AtomicBoolean constructed = new AtomicBoolean(false);
     private final int bucketCount;
     private final int memtableSizePortion;
     private final int blockCacheSizePortion;
@@ -84,11 +83,6 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     }
 
     protected void postConstruct() {
-
-        //Protect from multiple calls to post construct
-        if (constructed.getAndSet(true)) {
-            return;
-        }
         RocksDB.loadLibrary();
         if (enabled) {
             persistenceStartup.submitPersistenceStart(this);
@@ -193,7 +187,6 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         init();
 
     }
-
 
 
     protected abstract void init();
