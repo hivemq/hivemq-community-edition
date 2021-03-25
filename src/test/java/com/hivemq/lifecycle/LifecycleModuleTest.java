@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Singleton;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -30,18 +31,23 @@ import static org.junit.Assert.assertEquals;
 
 public class LifecycleModuleTest {
 
+    private LifecycleModule lifecycleModule;
     private Injector injector;
 
     @Before
     public void setUp() throws Exception {
-        injector = Guice.createInjector(LifecycleModule.get(),new AbstractModule() {
+        lifecycleModule = new LifecycleModule();
+        inject();
+    }
+
+    private void inject() {
+        injector = Guice.createInjector(lifecycleModule, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(SystemInformation.class).toInstance(new SystemInformationImpl());
             }
         });
     }
-
 
     /* **********************
      * @PostConstruct tests *
@@ -53,6 +59,18 @@ public class LifecycleModuleTest {
         final WithPostConstruct instance = injector.getInstance(WithPostConstruct.class);
 
         assertEquals(0, instance.getLatch().getCount());
+    }
+
+    @Test
+    public void postConstructWhenSingletonClassThenOnce() throws Exception {
+
+        final SingletonWithPostConstruct instance = injector.getInstance(SingletonWithPostConstruct.class);
+        assertEquals(0, instance.getLatch().getCount());
+
+        inject();
+
+        final SingletonWithPostConstruct instance2 = injector.getInstance(SingletonWithPostConstruct.class);
+        assertEquals(1, instance2.getLatch().getCount());
     }
 
     @Test
@@ -101,8 +119,22 @@ public class LifecycleModuleTest {
         injector.getInstance(WithRuntimeException.class);
     }
 
-
     static class WithPostConstruct {
+
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        @PostConstruct
+        public void postConstruct() {
+            latch.countDown();
+        }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+    }
+
+    @Singleton
+    static class SingletonWithPostConstruct {
 
         private final CountDownLatch latch = new CountDownLatch(1);
 
@@ -121,7 +153,6 @@ public class LifecycleModuleTest {
         @PostConstruct
         public void postConstruct(final String param) {
         }
-
     }
 
     static class WithTwoPostConstructs {
@@ -185,11 +216,9 @@ public class LifecycleModuleTest {
         }
     }
 
-
     /* ***************************************
      * @Postconstruct tests with inheritance *
      * ***************************************/
-
 
     @Test
     public void test_postConstruct_inheritance() throws Exception {
@@ -251,11 +280,9 @@ public class LifecycleModuleTest {
         }
     }
 
-
     /* **********************
      * @PreDestroy tests *
      * ******************+**/
-
 
     @Test
     public void test_predestroy() throws Exception {
@@ -266,6 +293,26 @@ public class LifecycleModuleTest {
         registry.executePreDestroy().get(1, TimeUnit.SECONDS);
 
         assertEquals(0, instance.getLatch().getCount());
+    }
+
+    @Test
+    public void preDestroyWhenSingletonClassThenOnce() throws Exception {
+
+        final SingletonWithPreDestroy instance = injector.getInstance(SingletonWithPreDestroy.class);
+
+        final LifecycleRegistry registry = injector.getInstance(LifecycleRegistry.class);
+        registry.executePreDestroy().get(1, TimeUnit.SECONDS);
+
+        assertEquals(0, instance.getLatch().getCount());
+
+        inject();
+
+        final SingletonWithPreDestroy instance2 = injector.getInstance(SingletonWithPreDestroy.class);
+
+        final LifecycleRegistry registry2 = injector.getInstance(LifecycleRegistry.class);
+        registry2.executePreDestroy().get(1, TimeUnit.SECONDS);
+
+        assertEquals(1, instance2.getLatch().getCount());
     }
 
     @Test
@@ -306,6 +353,20 @@ public class LifecycleModuleTest {
         }
     }
 
+    @Singleton
+    static class SingletonWithPreDestroy {
+
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        @PreDestroy
+        public void preDestory() {
+            latch.countDown();
+        }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+    }
 
     static class WithTwoPreDestroys {
 
@@ -326,12 +387,9 @@ public class LifecycleModuleTest {
         }
     }
 
-
-
     /* **************************************
      * @PreDestroy and @PostConstruct tests *
      * ***********************************+**/
-
 
     @Test
     public void test_predestroy_and_postconstruct() throws Exception {
@@ -345,7 +403,54 @@ public class LifecycleModuleTest {
         assertEquals(0, instance.getPreDestroyLatch().getCount());
     }
 
+    @Test
+    public void lifecycleMethodsWhenSingletonClassThenOnce() throws Exception {
+        final SingletonWithPreDestroyAndPostConstruct instance = injector.getInstance(SingletonWithPreDestroyAndPostConstruct.class);
+        assertEquals(1, instance.getPreDestroyLatch().getCount());
+        assertEquals(0, instance.getPostConstructLatch().getCount());
+
+        final LifecycleRegistry registry = injector.getInstance(LifecycleRegistry.class);
+        registry.executePreDestroy().get(1, TimeUnit.SECONDS);
+
+        assertEquals(0, instance.getPreDestroyLatch().getCount());
+
+        inject();
+
+        final SingletonWithPreDestroyAndPostConstruct instance2 = injector.getInstance(SingletonWithPreDestroyAndPostConstruct.class);
+        assertEquals(1, instance2.getPostConstructLatch().getCount());
+
+        final LifecycleRegistry registry2 = injector.getInstance(LifecycleRegistry.class);
+        registry2.executePreDestroy().get(1, TimeUnit.SECONDS);
+
+        assertEquals(1, instance2.getPreDestroyLatch().getCount());
+    }
+
     static class WithPreDestroyAndPostConstruct {
+
+        private final CountDownLatch preDestroyLatch = new CountDownLatch(1);
+        private final CountDownLatch postConstructLatch = new CountDownLatch(1);
+
+        @PreDestroy
+        public void preDestroy() {
+            preDestroyLatch.countDown();
+        }
+
+        @PostConstruct
+        public void postConstruct() {
+            postConstructLatch.countDown();
+        }
+
+        CountDownLatch getPreDestroyLatch() {
+            return preDestroyLatch;
+        }
+
+        CountDownLatch getPostConstructLatch() {
+            return postConstructLatch;
+        }
+    }
+
+    @Singleton
+    static class SingletonWithPreDestroyAndPostConstruct {
 
         private final CountDownLatch preDestroyLatch = new CountDownLatch(1);
         private final CountDownLatch postConstructLatch = new CountDownLatch(1);

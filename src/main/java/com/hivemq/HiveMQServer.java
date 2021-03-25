@@ -32,6 +32,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extensions.ExtensionBootstrap;
 import com.hivemq.extensions.services.admin.AdminServiceImpl;
+import com.hivemq.lifecycle.LifecycleModule;
 import com.hivemq.metrics.MetricRegistryLogger;
 import com.hivemq.migration.MigrationUnit;
 import com.hivemq.migration.Migrations;
@@ -134,9 +135,12 @@ public class HiveMQServer {
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
         final Set<MigrationUnit> valueMigrations = Migrations.checkForValueMigration(systemInformation);
 
+        final LifecycleModule lifecycleModule = new LifecycleModule();
+
         log.trace("Initializing persistences");
         final Injector persistenceInjector =
-                GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hiveMQId, configService);
+                GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hiveMQId, configService,
+                        lifecycleModule);
         //blocks until all persistences started
         persistenceInjector.getInstance(PersistenceStartup.class).finish();
         final ShutdownHooks shutdownHooks = persistenceInjector.getInstance(ShutdownHooks.class);
@@ -168,11 +172,8 @@ public class HiveMQServer {
         }
 
         log.trace("Initializing Guice");
-        final Injector injector = GuiceBootstrap.bootstrapInjector(systemInformation,
-                metricRegistry,
-                hiveMQId,
-                configService,
-                persistenceInjector);
+        final Injector injector = GuiceBootstrap.bootstrapInjector(systemInformation, metricRegistry, hiveMQId,
+                configService, persistenceInjector, lifecycleModule);
         if (injector == null) {
             return;
         }

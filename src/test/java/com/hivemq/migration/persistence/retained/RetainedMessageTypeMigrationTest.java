@@ -25,6 +25,7 @@ import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.lifecycle.LifecycleModule;
 import com.hivemq.migration.MigrationUnit;
 import com.hivemq.migration.Migrations;
 import com.hivemq.migration.logging.PayloadExceptionLogging;
@@ -159,7 +160,8 @@ public class RetainedMessageTypeMigrationTest {
         final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
-                configurationService);
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
@@ -210,7 +212,8 @@ public class RetainedMessageTypeMigrationTest {
         final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
-                configurationService);
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
@@ -266,7 +269,8 @@ public class RetainedMessageTypeMigrationTest {
         final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
-                configurationService);
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
@@ -292,7 +296,6 @@ public class RetainedMessageTypeMigrationTest {
         assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getRetainedMessagesPersistenceVersion());
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
-
     }
 
     @NotNull

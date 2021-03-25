@@ -16,7 +16,6 @@
 package com.hivemq.bootstrap.ioc;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -59,7 +58,8 @@ public class GuiceBootstrap {
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull HivemqId hiveMQId,
             final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull Injector persistenceInjector) {
+            final @NotNull Injector persistenceInjector,
+            final @NotNull LifecycleModule lifecycleModule) {
 
         if (!Boolean.parseBoolean(System.getProperty("diagnosticMode"))) {
             log.trace("Turning Guice stack traces off");
@@ -68,29 +68,11 @@ public class GuiceBootstrap {
 
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
 
-        return getInjector(systemInformation,
-                metricRegistry,
-                hiveMQId,
-                fullConfigurationService,
-                modules,
-                persistenceInjector);
-    }
-
-    @Nullable
-    @VisibleForTesting
-    private static Injector getInjector(
-            final @NotNull SystemInformation systemInformation,
-            final @NotNull MetricRegistry metricRegistry,
-            final @NotNull HivemqId hiveMQId,
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull ImmutableList.Builder<AbstractModule> modules,
-            final @NotNull Injector persistenceInjector) {
-
         modules.add(new SystemInformationModule(systemInformation),
                 /* For supporting lazy singletons */
                 new LazySingletonModule(),
                 /* Adds lifecycle methods like @PostConstruct */
-                LifecycleModule.get(),
+                lifecycleModule,
                 /* Binds the configuration service */
                 new ConfigurationModule(fullConfigurationService, hiveMQId),
                 /* Binds netty specific classes */
@@ -129,14 +111,15 @@ public class GuiceBootstrap {
             final @NotNull SystemInformation systemInformation,
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull HivemqId hiveMQId,
-            final @NotNull FullConfigurationService configService) {
+            final @NotNull FullConfigurationService configService,
+            final @NotNull LifecycleModule lifecycleModule) {
 
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
 
         modules.add(new SystemInformationModule(systemInformation),
                 new ConfigurationModule(configService, hiveMQId),
                 new LazySingletonModule(),
-                LifecycleModule.get(),
+                lifecycleModule,
                 new PersistenceMigrationModule(metricRegistry, configService.persistenceConfigurationService()));
 
         return Guice.createInjector(Stage.PRODUCTION, modules.build());

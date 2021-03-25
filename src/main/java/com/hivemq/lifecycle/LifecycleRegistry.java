@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,39 +46,71 @@ public class LifecycleRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleRegistry.class);
 
+    private final @NotNull Map<String, InvokeStatus> singletonClassInvokedStatusList;
+    private final @NotNull List<PreDestroyInvokable> preDestroyInvokables;
 
-    private final List<PreDestroyInvokable> preDestroyInvokables;
+    private @Nullable ListeningExecutorService listeningExecutorService;
 
     LifecycleRegistry() {
-        final List<PreDestroyInvokable> preDestroyInvokables = new ArrayList<>();
-        this.preDestroyInvokables = Collections.synchronizedList(preDestroyInvokables);
+        singletonClassInvokedStatusList = new ConcurrentHashMap<>();
+        preDestroyInvokables = Collections.synchronizedList(new ArrayList<>());
     }
 
-    public void addPreDestroyMethod(@NotNull final Method preDestroyMethod, @NotNull final Object onObject) {
+    public void shutdown() {
+        if (listeningExecutorService != null) {
+            listeningExecutorService.shutdown();
+        }
+    }
+
+    public void addSingletonClass(final @NotNull Class<?> clazz) {
+        singletonClassInvokedStatusList.putIfAbsent(clazz.getCanonicalName(), new InvokeStatus());
+    }
+
+    public void addPreDestroyMethod(final @NotNull Method preDestroyMethod, final @NotNull Object onObject) {
         checkNotNull(preDestroyMethod);
         checkNotNull(onObject);
-
         preDestroyInvokables.add(new PreDestroyInvokable(preDestroyMethod, onObject));
     }
 
+    public <T> boolean canInvokePostConstruct(final @NotNull Class<T> clazz) {
+        final InvokeStatus invokeStatus = singletonClassInvokedStatusList.get(clazz.getCanonicalName());
+        if (invokeStatus != null) {
+            final boolean postConstructed = invokeStatus.isPostConstructed();
+            invokeStatus.setPostConstruct();
+            return !postConstructed;
+        }
+        return true;
+    }
+
+    public <T> boolean canInvokePreDestroy(final @NotNull Class<T> clazz) {
+        final InvokeStatus invokeStatus = singletonClassInvokedStatusList.get(clazz.getCanonicalName());
+        if (invokeStatus != null) {
+            final boolean preDestroyed = invokeStatus.isPreDestroyed();
+            invokeStatus.setPreDestroy();
+            return !preDestroyed;
+        }
+        return true;
+    }
 
     /**
      * Executes the preDestroy methods in parallel. This method does not block and
      * you have to synchronize yourself if you want so with the returned {@link com.google.common.util.concurrent.ListenableFuture}
      * <p>
-     * There are no guarantees of the return type when you wait for the future. Most likely you'll get Void or null, though.
+     * There are no guarantees of the return type when you wait for the future. Most likely you'll get Void or null,
+     * though.
      *
      * @return a {@link com.google.common.util.concurrent.ListenableFuture} of all preDestroy executions
      */
-    public ListenableFuture<?> executePreDestroy() {
-        final ExecutorService executorService = Executors.newFixedThreadPool(3, ThreadFactoryUtil.create("PreDestroy-%d"));
+    public @NotNull ListenableFuture<?> executePreDestroy() {
 
-        final ListeningExecutorService executorService1 = MoreExecutors.listeningDecorator(executorService);
+        final ExecutorService executorService =
+                Executors.newFixedThreadPool(3, ThreadFactoryUtil.create("PreDestroy-%d"));
+        listeningExecutorService = MoreExecutors.listeningDecorator(executorService);
 
-        final List<ListenableFuture<?>> futures = new ArrayList<>();
+        final List<ListenableFuture<?>> futures = new ArrayList<>(preDestroyInvokables.size());
 
         for (final PreDestroyInvokable preDestroyInvokable : preDestroyInvokables) {
-            futures.add(executorService1.submit(new Runnable() {
+            futures.add(listeningExecutorService.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -86,25 +121,46 @@ public class LifecycleRegistry {
                 }
             }));
         }
-
         return Futures.allAsList(futures);
     }
 
+    private static final class InvokeStatus {
+
+        private boolean postConstruct;
+        private boolean preDestroy;
+
+        public boolean isPostConstructed() {
+            return postConstruct;
+        }
+
+        public void setPostConstruct() {
+            postConstruct = true;
+        }
+
+        public boolean isPreDestroyed() {
+            return preDestroy;
+        }
+
+        public void setPreDestroy() {
+            preDestroy = true;
+        }
+    }
 
     private static final class PreDestroyInvokable {
-        private final Method preDestroyMethod;
-        private final Object onObject;
 
-        public PreDestroyInvokable(@NotNull final Method preDestroyMethod, @NotNull final Object onObject) {
+        private final @NotNull Method preDestroyMethod;
+        private final @NotNull Object onObject;
+
+        public PreDestroyInvokable(final @NotNull Method preDestroyMethod, final @NotNull Object onObject) {
             this.preDestroyMethod = preDestroyMethod;
             this.onObject = onObject;
         }
 
-        public Method getPreDestroyMethod() {
+        public @NotNull Method getPreDestroyMethod() {
             return preDestroyMethod;
         }
 
-        public Object getOnObject() {
+        public @NotNull Object getOnObject() {
             return onObject;
         }
     }
