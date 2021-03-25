@@ -19,10 +19,12 @@ import com.hivemq.common.shutdown.ShutdownHooks;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * @author Dominik Obermaier
  */
+@Singleton
 public class LifecycleShutdownRegistration {
 
     private final ShutdownHooks shutdownHooks;

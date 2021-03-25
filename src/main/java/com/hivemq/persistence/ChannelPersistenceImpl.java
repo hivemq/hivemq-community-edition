@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
 
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Dominik Obermaier
  */
+@Singleton
 public class ChannelPersistenceImpl implements ChannelPersistence {
 
     private final @NotNull Map<String, Channel> channelMap;

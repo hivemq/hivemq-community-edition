@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.services.admin;
 
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
@@ -27,6 +28,7 @@ import javax.inject.Inject;
 /**
  * @author Lukas Brandl
  */
+@LazySingleton
 public class AdminServiceImpl implements AdminService {
 
     @NotNull

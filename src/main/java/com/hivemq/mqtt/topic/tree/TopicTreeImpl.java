@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -50,6 +51,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.TOPIC_TREE
  *
  * @author Dominik Obermaier
  */
+@Singleton
 public class TopicTreeImpl implements LocalTopicTree {
 
 

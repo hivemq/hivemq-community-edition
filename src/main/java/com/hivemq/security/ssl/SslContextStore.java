@@ -20,6 +20,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -49,6 +50,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD
 /**
  * @author Christoph Schäbel
  */
+@LazySingleton
 public class SslContextStore {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(SslContextStore.class);

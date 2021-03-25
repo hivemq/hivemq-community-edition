@@ -23,12 +23,14 @@ import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.ioc.annotation.Persistence;
 
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Set;
 
 /**
  * @author Lukas Brandl
  */
+@Singleton
 public class FutureUtilsImpl extends AbstractFutureUtils {
 
     private final @NotNull ListeningExecutorService persistenceExecutorService;
