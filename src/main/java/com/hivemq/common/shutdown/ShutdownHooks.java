@@ -56,7 +56,6 @@ public class ShutdownHooks {
 
     private static final String SHUTDOWN_HOOK_THREAD_NAME = "shutdown-executor";
 
-    private final @NotNull AtomicBoolean constructed;
     private final @NotNull AtomicBoolean shuttingDown;
     private final @NotNull Map<HiveMQShutdownHook, Thread> asynchronousHooks;
     private final @NotNull Multimap<Integer, HiveMQShutdownHook> synchronousHooks;
@@ -65,7 +64,6 @@ public class ShutdownHooks {
 
     @Inject
     ShutdownHooks() {
-        constructed = new AtomicBoolean(false);
         shuttingDown = new AtomicBoolean(false);
 
         asynchronousHooks = new HashMap<>();
@@ -77,13 +75,6 @@ public class ShutdownHooks {
 
     @PostConstruct
     public void postConstruct() {
-        // During the HiveMQ start we are creating a persistence injector and later than a full injector.
-        // ShutdownHooks is bound in both injectors and each time it is bound the PostConstruct is called by the
-        // LifecycleModule.
-        if (constructed.getAndSet(true)) {
-            return;
-        }
-
         log.trace("Registering synchronous shutdown hook");
         createShutdownThread();
         Runtime.getRuntime().addShutdownHook(hivemqShutdownThread);

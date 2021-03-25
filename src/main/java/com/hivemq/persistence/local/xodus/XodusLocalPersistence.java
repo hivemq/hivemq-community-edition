@@ -15,8 +15,8 @@
  */
 package com.hivemq.persistence.local.xodus;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.FilePersistence;
 import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceStartup;
@@ -44,7 +44,6 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
     private final @NotNull EnvironmentUtil environmentUtil;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull PersistenceStartup persistenceStartup;
-    private final AtomicBoolean constructed = new AtomicBoolean(false);
     protected final AtomicBoolean stopped = new AtomicBoolean(false);
 
     protected @NotNull Bucket[] buckets;
@@ -89,12 +88,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
     protected abstract Logger getLogger();
 
     protected void postConstruct() {
-
-        //Protect from multiple calls to post construct
-        if (constructed.getAndSet(true)) {
-            return;
-        }
-        if(enabled) {
+        if (enabled) {
             persistenceStartup.submitPersistenceStart(this);
         } else {
             startExternal();

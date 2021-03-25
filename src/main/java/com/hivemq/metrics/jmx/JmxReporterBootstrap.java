@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Lukas Brandl
@@ -36,8 +35,6 @@ public class JmxReporterBootstrap {
     private static final Logger log = LoggerFactory.getLogger(JmxReporterBootstrap.class);
 
     private final MetricRegistry metricRegistry;
-
-    private static final AtomicBoolean constructed = new AtomicBoolean(false);
 
     @VisibleForTesting
     JmxReporter jmxReporter;
@@ -50,9 +47,6 @@ public class JmxReporterBootstrap {
 
     @PostConstruct
     public void postConstruct() {
-        if (!constructed.compareAndSet(false, true)) {
-            return;
-        }
         if (!InternalConfigurations.JMX_REPORTER_ENABLED) {
             return;
         }

@@ -56,7 +56,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
     private final int creditsPerExecution;
     private final long shutdownGracePeriod;
 
-    private final @NotNull AtomicBoolean postConstruct = new AtomicBoolean(true);
     private final @NotNull AtomicLong nonemptyQueueCounter = new AtomicLong(0);
     private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
@@ -106,11 +105,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
     @PostConstruct
     public void postConstruct() {
-
-        if (!postConstruct.getAndSet(false)) {
-            return;
-        }
-
         // Periodically check if there are pending tasks in the queues
         checkScheduler.scheduleAtFixedRate(() -> {
             try {
