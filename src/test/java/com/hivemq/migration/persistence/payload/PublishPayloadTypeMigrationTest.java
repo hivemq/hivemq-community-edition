@@ -25,6 +25,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.lifecycle.LifecycleModule;
 import com.hivemq.migration.MigrationUnit;
 import com.hivemq.migration.Migrations;
 import com.hivemq.migration.meta.MetaFileService;
@@ -105,7 +106,7 @@ public class PublishPayloadTypeMigrationTest {
         assertEquals(PersistenceType.FILE_NATIVE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
         final Injector persistenceInjector =
-                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
@@ -143,7 +144,7 @@ public class PublishPayloadTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertEquals(PersistenceType.FILE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
@@ -181,7 +182,7 @@ public class PublishPayloadTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertFalse(migrations.containsKey(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService);
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 

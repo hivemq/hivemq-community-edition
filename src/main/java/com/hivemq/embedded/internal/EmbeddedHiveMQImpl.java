@@ -34,6 +34,7 @@ import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.lifecycle.LifecycleModule;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
@@ -148,7 +149,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 try {
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
-                    if(configurationService.persistenceConfigurationService().getMode().equals(PersistenceConfigurationService.PersistenceMode.FILE)){
+                    if (configurationService.persistenceConfigurationService().getMode().equals(PersistenceConfigurationService.PersistenceMode.FILE)) {
                         log.info("Starting with file persistence mode.");
                     } else {
                         log.info("Starting with in-memory persistence mode.");
@@ -257,10 +258,12 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private void bootstrapInjector() {
         if (injector == null) {
             final HivemqId hiveMQId = new HivemqId();
+            final LifecycleModule lifecycleModule = new LifecycleModule();
             final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
                     metricRegistry,
                     hiveMQId,
-                    configurationService);
+                    configurationService,
+                    lifecycleModule);
 
             try {
                 persistenceInjector.getInstance(PersistenceStartup.class).finish();
@@ -272,7 +275,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     metricRegistry,
                     hiveMQId,
                     configurationService,
-                    persistenceInjector);
+                    persistenceInjector,
+                    lifecycleModule);
         }
     }
 
