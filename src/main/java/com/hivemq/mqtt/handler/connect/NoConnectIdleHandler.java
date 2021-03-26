@@ -16,7 +16,6 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -29,6 +28,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import java.util.NoSuchElementException;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;

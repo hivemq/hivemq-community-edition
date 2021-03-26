@@ -15,8 +15,9 @@
  */
 package com.hivemq.configuration;
 
-import com.google.inject.Singleton;
 import org.apache.commons.lang3.RandomStringUtils;
+
+import javax.inject.Singleton;
 
 /**
  * @author Christoph Schäbel

@@ -16,7 +16,6 @@
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.hivemq.codec.encoder.mqtt3.*;
 import com.hivemq.codec.encoder.mqtt5.*;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -48,6 +47,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
+
 /**
  * This factory is used to create encoders and encode messages.
  *
@@ -64,8 +65,8 @@ public class EncoderFactory {
 
     @Inject
     public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
-            final @NotNull SecurityConfigurationService securityConfigurationService,
-            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+                          final @NotNull SecurityConfigurationService securityConfigurationService,
+                          final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         mqtt5Instance = new Mqtt5EncoderFactory(messageDroppedService, securityConfigurationService);
         mqtt3Instance = new Mqtt3EncoderFactory(mqttServerDisconnector);
     }
