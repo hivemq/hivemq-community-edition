@@ -15,13 +15,13 @@
  */
 package com.hivemq.util;
 
-import com.google.inject.Singleton;
+import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.exceptions.UnrecoverableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

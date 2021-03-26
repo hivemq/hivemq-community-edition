@@ -18,7 +18,6 @@ package com.hivemq.extensions.handler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -52,6 +51,7 @@ import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
