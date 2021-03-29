@@ -36,7 +36,7 @@ import java.lang.reflect.Modifier;
 /**
  * The Guice module which allows to use lifecycle annotations.
  * Lifecycle annotations which are supported at the moment are
- * <br/>
+ * <br>
  * * {@link javax.annotation.PostConstruct}
  * * {@link javax.annotation.PreDestroy}
  *
@@ -49,6 +49,10 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
 
     private final @NotNull LifecycleRegistry lifecycleRegistry;
 
+    /**
+     * This class stores in the LifecycleRegistry for Singleton classes if their lifecycle methods are already invoked.
+     * Therefore should only one LifecycleModule object exist for the lifetime of the Application.
+     */
     public LifecycleModule() {
         super(LifecycleModule.class);
 
