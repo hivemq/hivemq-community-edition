@@ -62,7 +62,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void postConstructWhenNormalClassThenEveryTime() throws Exception {
+    public void postConstruct_whenNormalClass_thenEveryTime() throws Exception {
 
         final WithPostConstruct instance = injector.getInstance(WithPostConstruct.class);
         assertEquals(0, instance.getLatch().getCount());
@@ -74,7 +74,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void postConstructWhenJavaxSingletonClassThenOnce() throws Exception {
+    public void postConstruct_whenJavaxSingletonClass_thenOnce() throws Exception {
 
         final JavaxSingletonWithPostConstruct instance = injector.getInstance(JavaxSingletonWithPostConstruct.class);
         assertEquals(0, instance.getLatch().getCount());
@@ -86,7 +86,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void postConstructWhenGoogleSingletonClassThenOnce() throws Exception {
+    public void postConstruct_whenGoogleSingletonClass_thenOnce() throws Exception {
 
         final GoogleSingletonWithPostConstruct instance = injector.getInstance(GoogleSingletonWithPostConstruct.class);
         assertEquals(0, instance.getLatch().getCount());
@@ -98,7 +98,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void postConstructWhenLazySingletonClassThenOnce() throws Exception {
+    public void postConstruct_whenLazySingletonClass_thenOnce() throws Exception {
 
         final LazySingletonWithPostConstruct instance = injector.getInstance(LazySingletonWithPostConstruct.class);
         assertEquals(0, instance.getLatch().getCount());
@@ -362,7 +362,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void preDestroyWhenNormalClassThenEveryTime() throws Exception {
+    public void preDestroy_whenNormalClass_thenEveryTime() throws Exception {
 
         final WithPreDestroy instance = injector.getInstance(WithPreDestroy.class);
 
@@ -382,7 +382,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void preDestroyWhenJavaxSingletonClassThenOnce() throws Exception {
+    public void preDestroy_whenJavaxSingletonClass_thenOnce() throws Exception {
 
         final JavaxSingletonWithPreDestroy instance = injector.getInstance(JavaxSingletonWithPreDestroy.class);
 
@@ -402,7 +402,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void preDestroyWhenGoogleSingletonClassThenOnce() throws Exception {
+    public void preDestroy_whenGoogleSingletonClass_thenOnce() throws Exception {
 
         final GoogleSingletonWithPreDestroy instance = injector.getInstance(GoogleSingletonWithPreDestroy.class);
 
@@ -422,7 +422,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void preDestroyWhenLazySingletonClassThenOnce() throws Exception {
+    public void preDestroy_whenLazySingletonClass_thenOnce() throws Exception {
 
         final LazySingletonWithPreDestroy instance = injector.getInstance(LazySingletonWithPreDestroy.class);
 
@@ -560,7 +560,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void lifecycleMethodsWhenNormalClassThenEveryTime() throws Exception {
+    public void lifecycleMethods_whenNormalClass_thenEveryTime() throws Exception {
         final WithPreDestroyAndPostConstruct instance = injector.getInstance(WithPreDestroyAndPostConstruct.class);
         assertEquals(1, instance.getPreDestroyLatch().getCount());
         assertEquals(0, instance.getPostConstructLatch().getCount());
@@ -583,7 +583,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void lifecycleMethodsWhenJavaxSingletonClassThenOnce() throws Exception {
+    public void lifecycleMethods_whenJavaxSingletonClass_thenOnce() throws Exception {
         final JavaxSingletonWithPreDestroyAndPostConstruct instance = injector.getInstance(JavaxSingletonWithPreDestroyAndPostConstruct.class);
         assertEquals(1, instance.getPreDestroyLatch().getCount());
         assertEquals(0, instance.getPostConstructLatch().getCount());
@@ -605,7 +605,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void lifecycleMethodsWhenGoogleSingletonClassThenOnce() throws Exception {
+    public void lifecycleMethods_whenGoogleSingletonClass_thenOnce() throws Exception {
         final GoogleSingletonWithPreDestroyAndPostConstruct instance = injector.getInstance(GoogleSingletonWithPreDestroyAndPostConstruct.class);
         assertEquals(1, instance.getPreDestroyLatch().getCount());
         assertEquals(0, instance.getPostConstructLatch().getCount());
@@ -627,7 +627,7 @@ public class LifecycleModuleTest {
     }
 
     @Test
-    public void lifecycleMethodsWhenLazySingletonClassThenOnce() throws Exception {
+    public void lifecycleMethods_whenLazySingletonClass_thenOnce() throws Exception {
         final LazySingletonWithPreDestroyAndPostConstruct instance = injector.getInstance(LazySingletonWithPreDestroyAndPostConstruct.class);
         assertEquals(1, instance.getPreDestroyLatch().getCount());
         assertEquals(0, instance.getPostConstructLatch().getCount());
