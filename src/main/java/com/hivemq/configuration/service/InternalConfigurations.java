@@ -303,7 +303,7 @@ public class InternalConfigurations {
     public static final boolean SYSTEM_METRICS_ENABLED = true;
 
     // register metrics for jmx reporting on startup if enabled
-    public static final boolean JMX_REPORTER_ENABLED = true;
+    public static final AtomicBoolean JMX_REPORTER_ENABLED = new AtomicBoolean(true);
 
     /* *****************
      *      MQTT 5     *
