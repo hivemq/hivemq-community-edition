@@ -47,7 +47,7 @@ public class JmxReporterBootstrap {
 
     @PostConstruct
     public void postConstruct() {
-        if (!InternalConfigurations.JMX_REPORTER_ENABLED) {
+        if (!InternalConfigurations.JMX_REPORTER_ENABLED.get()) {
             return;
         }
         jmxReporter = JmxReporter.forRegistry(metricRegistry).build();
