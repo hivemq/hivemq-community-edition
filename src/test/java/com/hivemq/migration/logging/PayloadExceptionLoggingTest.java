@@ -18,6 +18,7 @@ package com.hivemq.migration.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.hivemq.migration.Migrations;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -43,7 +44,11 @@ public class PayloadExceptionLoggingTest {
         payloadExceptionLogging = new PayloadExceptionLogging();
         migrationLogger = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
         capturingAppender = LogbackCapturingAppender.Factory.weaveInto(migrationLogger);
+    }
 
+    @After
+    public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
     }
 
     @Test(timeout = 5000)

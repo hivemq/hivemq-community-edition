@@ -27,6 +27,7 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -63,6 +64,11 @@ public class MessageExpiryHandlerTest {
         channel.pipeline().addLast(messageExpiryHandler);
         when(ctx.channel()).thenReturn(channel);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(MessageExpiryHandler.log);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
     }
 
     @Test

@@ -19,6 +19,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -75,6 +76,11 @@ public class EventLogTest {
         when(channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED)).thenReturn(attributeDisconnectEventLogged);
 
         logMessageBuffer = new StringBuffer();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
     }
 
     @Test

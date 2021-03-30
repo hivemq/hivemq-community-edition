@@ -18,6 +18,7 @@ package com.hivemq.persistence.payload;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import net.openhft.hashing.LongHashFunction;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -61,6 +62,11 @@ public class PublishPayloadPersistenceImplTest {
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
         persistence.init();
         logCapture = LogbackCapturingAppender.Factory.weaveInto(PublishPayloadPersistenceImpl.log);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
     }
 
     @Test
