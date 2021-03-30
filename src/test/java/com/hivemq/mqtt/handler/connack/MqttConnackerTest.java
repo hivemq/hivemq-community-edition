@@ -69,6 +69,7 @@ public class MqttConnackerTest {
 
     @After
     public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
         InternalConfigurations.CONNACK_WITH_REASON_CODE.set(true);
         InternalConfigurations.CONNACK_WITH_REASON_STRING.set(true);
     }

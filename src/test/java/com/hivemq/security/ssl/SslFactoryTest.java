@@ -27,6 +27,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -74,6 +75,11 @@ public class SslFactoryTest {
         when(socketChannel.alloc()).thenReturn(byteBufAllocator);
 
         testKeyStoreGenerator = new TestKeyStoreGenerator();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
     }
 
     @Test

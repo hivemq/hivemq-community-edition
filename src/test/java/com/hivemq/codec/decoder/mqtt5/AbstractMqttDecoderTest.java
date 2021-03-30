@@ -36,6 +36,7 @@ public class AbstractMqttDecoderTest {
 
     @After
     public void tearDown() {
+        LogbackCapturingAppender.Factory.cleanUp();
         channel.close();
     }
 

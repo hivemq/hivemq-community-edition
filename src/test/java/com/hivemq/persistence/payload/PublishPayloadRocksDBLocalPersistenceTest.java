@@ -68,6 +68,7 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
 
     @After
     public void cleanUp() throws InterruptedException {
+        LogbackCapturingAppender.Factory.cleanUp();
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
         InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH.set(true);
         persistence.closeDB();

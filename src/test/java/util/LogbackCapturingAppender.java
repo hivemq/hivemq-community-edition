@@ -42,9 +42,13 @@ import java.util.List;
  *
  * @author Dominik Obermaier
  */
-public class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
+public final class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
     public static class Factory {
+
         private static final List<LogbackCapturingAppender> ALL = new ArrayList<LogbackCapturingAppender>();
+
+        private Factory() {
+        }
 
         public static LogbackCapturingAppender weaveInto(final org.slf4j.Logger sl4jLogger) {
             final LogbackCapturingAppender appender = new LogbackCapturingAppender(sl4jLogger);
@@ -58,7 +62,6 @@ public class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
                 appender.cleanUp();
             }
         }
-
     }
 
     private final Logger log;
@@ -67,7 +70,7 @@ public class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
     private final List<ILoggingEvent> allCaptured = new ArrayList<ILoggingEvent>();
 
     public LogbackCapturingAppender(final org.slf4j.Logger sl4jLogger) {
-        this.log = (Logger) sl4jLogger;
+        log = (Logger) sl4jLogger;
         addAppender(log);
         detachDefaultConsoleAppender();
     }
@@ -85,7 +88,7 @@ public class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
     private void addAppender(final Logger logger) {
         logger.setLevel(Level.ALL);
         logger.addAppender(this);
-        this.start();
+        start();
     }
 
     public ILoggingEvent getLastCapturedLog() {

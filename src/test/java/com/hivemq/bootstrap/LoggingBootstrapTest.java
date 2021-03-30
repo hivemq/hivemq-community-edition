@@ -60,6 +60,7 @@ public class LoggingBootstrapTest {
 
     @After
     public void tearDown() throws Exception {
+        LogbackCapturingAppender.Factory.cleanUp();
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
         logger.setLevel(level);
