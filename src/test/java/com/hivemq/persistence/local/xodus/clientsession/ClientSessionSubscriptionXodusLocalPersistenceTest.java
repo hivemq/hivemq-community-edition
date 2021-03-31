@@ -67,6 +67,8 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     private final int bucketCount = 4;
 
+    private PersistenceStartup persistenceStartup;
+
     @Before
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -76,17 +78,18 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
 
+        persistenceStartup = new PersistenceStartup();
+
         persistence = new ClientSessionSubscriptionXodusLocalPersistence(localPersistenceFileUtil,
                 new EnvironmentUtil(),
-                new PersistenceStartup());
+                persistenceStartup);
         persistence.start();
     }
 
     @After
-    public void cleanUp() {
-        for (int i = 0; i < bucketCount; i++) {
-            persistence.closeDB(i);
-        }
+    public void cleanUp() throws InterruptedException {
+        persistence.closeDB();
+        persistenceStartup.finish();
     }
 
     @Test

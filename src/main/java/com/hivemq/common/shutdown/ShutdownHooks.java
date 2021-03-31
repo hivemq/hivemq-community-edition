@@ -63,7 +63,7 @@ public class ShutdownHooks {
     private @Nullable Thread hivemqShutdownThread;
 
     @Inject
-    ShutdownHooks() {
+    public ShutdownHooks() {
         shuttingDown = new AtomicBoolean(false);
 
         asynchronousHooks = new HashMap<>();

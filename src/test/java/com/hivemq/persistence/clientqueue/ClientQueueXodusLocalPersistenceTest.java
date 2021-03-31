@@ -32,6 +32,7 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,6 +78,8 @@ public class ClientQueueXodusLocalPersistenceTest {
 
     private final long byteLimit = 5 * 1024 * 1024;
 
+    private PersistenceStartup persistenceStartup;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -91,14 +94,22 @@ public class ClientQueueXodusLocalPersistenceTest {
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024);
         InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
 
+        persistenceStartup = new PersistenceStartup();
+
         persistence = new ClientQueueXodusLocalPersistence(
                 payloadPersistence,
                 new EnvironmentUtil(),
                 localPersistenceFileUtil,
-                new PersistenceStartup(),
+                persistenceStartup,
                 messageDroppedService);
 
         persistence.start();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        persistence.stop();
+        persistenceStartup.finish();
     }
 
     @Test
@@ -1010,7 +1021,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 payloadPersistence,
                 new EnvironmentUtil(),
                 localPersistenceFileUtil,
-                new PersistenceStartup(),
+                persistenceStartup,
                 messageDroppedService);
 
         persistence.start();
@@ -1043,7 +1054,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 payloadPersistence,
                 new EnvironmentUtil(),
                 localPersistenceFileUtil,
-                new PersistenceStartup(),
+                persistenceStartup,
                 messageDroppedService);
 
         persistence.start();
@@ -1087,7 +1098,7 @@ public class ClientQueueXodusLocalPersistenceTest {
                 payloadPersistence,
                 new EnvironmentUtil(),
                 localPersistenceFileUtil,
-                new PersistenceStartup(),
+                persistenceStartup,
                 messageDroppedService);
 
         persistence.start();

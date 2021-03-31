@@ -27,12 +27,14 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.ChannelPersistenceImpl;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,12 +83,21 @@ public class ClientSessionPersistenceImplTest {
 
     private ClientSessionPersistenceImpl clientSessionPersistence;
 
+    private SingleWriterService singleWriterService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence, clientQueuePersistence,
-                TestSingleWriterFactory.defaultSingleWriter(), channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
+                singleWriterService, channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
                 mqttServerDisconnector, new Chunker());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        singleWriterService.stop();
+        clientSessionPersistence.closeDB();
     }
 
     @Test

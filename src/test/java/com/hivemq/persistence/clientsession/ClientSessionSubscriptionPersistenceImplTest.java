@@ -25,11 +25,13 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,11 +84,20 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
     private ClientSessionSubscriptionPersistenceImpl persistence;
 
+    private SingleWriterService singleWriterService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(topicTree.addTopic(anyString(), any(Topic.class), anyByte(), anyString())).thenReturn(true);
-        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence, topicTree, sharedSubscriptionService, TestSingleWriterFactory.defaultSingleWriter(), channelPersistence, eventLog, clientSessionLocalPersistence, publishPollService, new Chunker(), mock(MqttServerDisconnector.class));
+        singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
+        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence, topicTree, sharedSubscriptionService, singleWriterService, channelPersistence, eventLog, clientSessionLocalPersistence, publishPollService, new Chunker(), mock(MqttServerDisconnector.class));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        persistence.closeDB();
+        singleWriterService.stop();
     }
 
     @Test(timeout = 60000)

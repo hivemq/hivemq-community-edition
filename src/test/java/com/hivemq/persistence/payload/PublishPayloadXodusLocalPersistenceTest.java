@@ -50,6 +50,8 @@ public class PublishPayloadXodusLocalPersistenceTest {
 
     private PublishPayloadXodusLocalPersistence persistence;
 
+    private PersistenceStartup persistenceStartup;
+
     @Before
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -59,13 +61,16 @@ public class PublishPayloadXodusLocalPersistenceTest {
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(8);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
 
-        persistence = new PublishPayloadXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(), new PersistenceStartup());
+        persistenceStartup = new PersistenceStartup();
+
+        persistence = new PublishPayloadXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(), persistenceStartup);
         persistence.start();
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws InterruptedException {
         persistence.closeDB();
+        persistenceStartup.finish();
     }
 
     @Test

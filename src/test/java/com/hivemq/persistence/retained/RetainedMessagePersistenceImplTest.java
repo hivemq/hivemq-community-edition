@@ -19,8 +19,10 @@ import com.google.common.collect.Sets;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.RetainedMessage;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,13 +61,22 @@ public class RetainedMessagePersistenceImplTest {
 
     private RetainedMessage message;
 
+    private SingleWriterService singleWriterService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
+        singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         retainedMessagePersistence =
                 new RetainedMessagePersistenceImpl(localPersistence, topicMatcher, payloadPersistence,
-                        TestSingleWriterFactory.defaultSingleWriter(), new Chunker());
+                        singleWriterService, new Chunker());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        retainedMessagePersistence.closeDB();
+        singleWriterService.stop();
     }
 
     @Test(expected = NullPointerException.class)
