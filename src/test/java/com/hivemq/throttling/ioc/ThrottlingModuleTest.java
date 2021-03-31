@@ -35,7 +35,6 @@ public class ThrottlingModuleTest {
 
     private Injector injector;
 
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);

@@ -49,6 +49,7 @@ public class DiagnosticMode {
     private final DiagnosticData diagnosticData;
     private final SystemInformation systemInformation;
     private final MetricRegistry metricRegistry;
+    private ConsoleReporter metricReporter;
 
     @Inject
     DiagnosticMode(final DiagnosticData diagnosticData,
@@ -74,12 +75,18 @@ public class DiagnosticMode {
         }
     }
 
+    public void stop() {
+        if (metricReporter != null) {
+            metricReporter.stop();
+        }
+    }
+
     private void startLoggingMetrics(final File diagnosticFolder) {
         final File metricLog = new File(diagnosticFolder, FILE_NAME_METRIC_LOG);
 
         try {
             final PrintStream logStream = new PrintStream(metricLog, Charset.defaultCharset().name());
-            final ConsoleReporter metricReporter = ConsoleReporter.forRegistry(metricRegistry)
+            metricReporter = ConsoleReporter.forRegistry(metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.MILLISECONDS)
                     .outputTo(logStream)

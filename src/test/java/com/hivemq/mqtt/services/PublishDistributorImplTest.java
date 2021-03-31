@@ -32,6 +32,7 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -79,6 +80,11 @@ public class PublishDistributorImplTest {
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         publishDistributor = new PublishDistributorImpl(payloadPersistence, clientQueuePersistence, clientSessionPersistence,
                 singleWriterService, mqttConfigurationService);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        singleWriterService.stop();
     }
 
     @Test(timeout = 5000)

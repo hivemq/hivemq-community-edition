@@ -62,6 +62,8 @@ public class RetainedMessageXodusLocalPersistenceTest {
     @Mock
     private PublishPayloadPersistence payloadPersistence;
 
+    private PersistenceStartup persistenceStartup;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -83,17 +85,18 @@ public class RetainedMessageXodusLocalPersistenceTest {
         when(payloadPersistence.getPayloadOrNull(4)).thenReturn("message4".getBytes());
         when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
 
+        persistenceStartup = new PersistenceStartup();
+
         persistence = new RetainedMessageXodusLocalPersistence(localPersistenceFileUtil,
                 payloadPersistence, new EnvironmentUtil(),
-                new PersistenceStartup());
+                persistenceStartup);
         persistence.start();
     }
 
     @After
-    public void cleanUp() {
-        for (int i = 0; i < BUCKETSIZE; i++) {
-            persistence.closeDB(i);
-        }
+    public void cleanUp() throws InterruptedException {
+        persistence.closeDB();
+        persistenceStartup.finish();
     }
 
     @Test

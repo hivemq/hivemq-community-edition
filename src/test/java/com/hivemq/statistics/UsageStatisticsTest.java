@@ -15,6 +15,7 @@
  */
 package com.hivemq.statistics;
 
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import org.junit.Before;
@@ -41,6 +42,9 @@ public class UsageStatisticsTest {
     @Mock
     private SystemInformation systemInformation;
 
+    @Mock
+    private ShutdownHooks shutdownHooks;
+
     private UsageStatistics usageStatistics;
     private FullConfigurationService configurationService;
 
@@ -50,8 +54,7 @@ public class UsageStatisticsTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
-        usageStatistics = new UsageStatistics(collector, systemInformation, sender, configurationService);
-
+        usageStatistics = new UsageStatistics(collector, systemInformation, sender, configurationService, shutdownHooks);
     }
 
     @Test
@@ -63,7 +66,6 @@ public class UsageStatisticsTest {
         usageStatistics.start();
 
         verify(collector, never()).getJson(anyString());
-
     }
 
     @Test
@@ -100,7 +102,5 @@ public class UsageStatisticsTest {
         Thread.sleep(100);
 
         verify(collector, times(1)).getJson(eq("startup"));
-
     }
-
 }

@@ -35,6 +35,7 @@ import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -92,16 +93,24 @@ public class ClientQueuePersistenceImplTest {
 
     final int bucketSize = 64;
 
+    private SingleWriterService singleWriterService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        final SingleWriterService singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
+        singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         when(mqttConfigurationService.maxQueuedMessages()).thenReturn(1000L);
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
         clientQueuePersistence =
                 new ClientQueuePersistenceImpl(localPersistence, singleWriterService, mqttConfigurationService,
                         clientSessionLocalPersistence, messageDroppedService, topicTree, channelPersistence,
                         publishPollService);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        clientQueuePersistence.closeDB();
+        singleWriterService.stop();
     }
 
     @Test(timeout = 5000)

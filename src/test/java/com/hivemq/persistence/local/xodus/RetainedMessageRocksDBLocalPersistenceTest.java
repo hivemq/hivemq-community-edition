@@ -60,6 +60,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
     @Mock
     private PublishPayloadPersistence payloadPersistence;
 
+    private PersistenceStartup persistenceStartup;
 
     @Before
     public void setUp() throws Exception {
@@ -82,15 +83,16 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
         when(payloadPersistence.getPayloadOrNull(4)).thenReturn("message4".getBytes());
         when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
 
-        persistence = new RetainedMessageRocksDBLocalPersistence(localPersistenceFileUtil, payloadPersistence, new PersistenceStartup());
+        persistenceStartup = new PersistenceStartup();
+
+        persistence = new RetainedMessageRocksDBLocalPersistence(localPersistenceFileUtil, payloadPersistence, persistenceStartup);
         persistence.start();
     }
 
     @After
-    public void cleanUp() {
-        for (int i = 0; i < BUCKETSIZE; i++) {
-            persistence.closeDB(i);
-        }
+    public void cleanUp() throws InterruptedException {
+        persistence.closeDB();
+        persistenceStartup.finish();
     }
 
     @Test

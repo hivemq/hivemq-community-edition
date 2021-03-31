@@ -36,6 +36,7 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.SubscriptionFlags;
 import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -45,6 +46,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.Attribute;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -110,6 +112,8 @@ public class PublishPollServiceImplTest {
 
     private PublishPollService publishPollService;
 
+    private SingleWriterService singleWriterService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -123,8 +127,15 @@ public class PublishPollServiceImplTest {
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
 
+        singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
+
         publishPollService = new PublishPollServiceImpl(messageIDPools, clientQueuePersistence, channelPersistence,
-                publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, TestSingleWriterFactory.defaultSingleWriter());
+                publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, singleWriterService);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        singleWriterService.stop();
     }
 
     @Test

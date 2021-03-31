@@ -31,6 +31,7 @@ import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -64,13 +65,20 @@ public class RetainedMessageStoreImplTest {
     @Mock
     private AsyncIteratorFactory asyncIteratorFactory;
 
+    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        final GlobalManagedExtensionExecutorService managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
+        managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
         retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService, asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        managedPluginExecutorService.shutdown();
     }
 
     @Test(expected = RateLimitExceededException.class)

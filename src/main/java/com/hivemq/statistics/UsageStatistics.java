@@ -15,10 +15,12 @@
  */
 package com.hivemq.statistics;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +45,12 @@ public class UsageStatistics {
     private final @NotNull FullConfigurationService configurationService;
 
     @Inject
-    public UsageStatistics(final @NotNull UsageStatisticsCollector statisticsCollector,
-                           final @NotNull SystemInformation systemInformation,
-                           final @NotNull UsageStatisticsSender statisticsSender,
-                           final @NotNull FullConfigurationService configurationService) {
+    public UsageStatistics(
+            final @NotNull UsageStatisticsCollector statisticsCollector,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull UsageStatisticsSender statisticsSender,
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull ShutdownHooks shutdownHooks) {
         this.statisticsCollector = statisticsCollector;
         this.systemInformation = systemInformation;
         this.statisticsSender = statisticsSender;
@@ -55,6 +59,18 @@ public class UsageStatistics {
 
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("usage-statistics-%d");
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
+
+        shutdownHooks.add(new HiveMQShutdownHook() {
+            @Override
+            public @NotNull String name() {
+                return "Usage statistics shutdown";
+            }
+
+            @Override
+            public void run() {
+                stop();
+            }
+        });
     }
 
     public void start() {
@@ -73,7 +89,10 @@ public class UsageStatistics {
         //schedule first task
         scheduledExecutorService.execute(new SendStatisticsTask(statisticsSender, statisticsCollector,
                 scheduledExecutorService, "startup"));
+    }
 
+    public void stop() {
+        scheduledExecutorService.shutdownNow();
     }
 
     private static class SendStatisticsTask implements Runnable {

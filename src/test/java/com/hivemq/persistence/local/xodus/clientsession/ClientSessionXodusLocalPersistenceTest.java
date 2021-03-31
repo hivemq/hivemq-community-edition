@@ -74,6 +74,8 @@ public class ClientSessionXodusLocalPersistenceTest {
     @Mock
     private EventLog eventLog;
 
+    private PersistenceStartup persistenceStartup;
+
     @Before
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -83,17 +85,18 @@ public class ClientSessionXodusLocalPersistenceTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(BUCKET_COUNT);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
 
+        persistenceStartup = new PersistenceStartup();
+
         persistence = new ClientSessionXodusLocalPersistence(localPersistenceFileUtil, mqttConfigurationService,
                 new EnvironmentUtil(), payloadPersistence, eventLog,
-                new PersistenceStartup());
+                persistenceStartup);
         persistence.start();
     }
 
     @After
-    public void cleanUp() {
-        for (int i = 0; i < BUCKET_COUNT; i++) {
-            persistence.closeDB(i);
-        }
+    public void cleanUp() throws InterruptedException {
+        persistence.closeDB();
+        persistenceStartup.finish();
     }
 
     @Test
