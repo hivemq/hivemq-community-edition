@@ -196,7 +196,7 @@ public class InternalConfigurations {
      */
     public static final AtomicBoolean ACKNOWLEDGE_AFTER_PERSIST = new AtomicBoolean(true);
 
-    public static final boolean XODUS_LOG_CACHE_USE_NIO = true;
+    public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
 
     /**
      * The live time of a entry in the shared subscription cache in milliseconds
