@@ -501,8 +501,8 @@ publishing {
 
 signing {
     sign publishing.publications.embedded
-    String signingKey = project.findProperty('signKey')
-    String signingPassword = project.findProperty('signKeyPass')
+    String signingKey = project.findProperty('signingKey')
+    String signingPassword = project.findProperty('signingPassword')
     if (signingKey && signingPassword) {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
