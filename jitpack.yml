@@ -7,8 +7,7 @@ before_install:
   - git clone https://github.com/hivemq/hivemq-extension-sdk.git
   - cd hivemq-extension-sdk
   - git checkout $GIT_BRANCH || true
-  - cd ..
+  - cd ../hivemq-community-edition
 
 install:
-  - hivemq-community-edition/gradlew -p hivemq-community-edition publishToMavenLocal
-  - hivemq-extension-sdk/gradlew -p hivemq-extension-sdk publishToMavenLocal
+  - ./gradlew publishToMavenLocal -x signEmbeddedPublication :hivemq-extension-sdk:publishToMavenLocal -x :hivemq-extension-sdk:signMavenPublication
