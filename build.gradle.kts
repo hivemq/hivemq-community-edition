@@ -256,10 +256,7 @@ tasks.register<Zip>("packaging") {
 
     from("$projectDir/src/packaging") { exclude("**/.gitkeep") }
     from("$projectDir/src/main/resources/config.xml") { into("conf") }
-    from(tasks.shadowJar) {
-        into("bin")
-        rename { fileName -> fileName.replace(tasks.shadowJar.get().archiveFileName.get(), "hivemq.jar") }
-    }
+    from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
 }
 
