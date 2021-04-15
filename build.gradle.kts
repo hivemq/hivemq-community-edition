@@ -345,23 +345,8 @@ license {
 }
 
 downloadLicenses {
-    val apache_2 = license("Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0")
-    val mit = license("MIT License", "https://opensource.org/licenses/MIT")
-    val cddl_1_0 = license("CDDL, Version 1.0", "https://opensource.org/licenses/CDDL-1.0")
-    val cddl_1_1 = license("CDDL, Version 1.1", "https://oss.oracle.com/licenses/CDDL+GPL-1.1")
-    val lgpl_2_0 = license("LGPL, Version 2.0", "https://opensource.org/licenses/LGPL-2.0")
-    val lgpl_2_1 = license("LGPL, Version 2.1", "https://opensource.org/licenses/LGPL-2.1")
-    val lgpl_3_0 = license("LGPL, Version 3.0", "https://opensource.org/licenses/LGPL-3.0")
-    val epl_1_0 = license("EPL, Version 1.0", "https://opensource.org/licenses/EPL-1.0")
-    val epl_2_0 = license("EPL, Version 2.0", "https://opensource.org/licenses/EPL-2.0")
-    val edl_1_0 = license("EDL, Version 1.0", "https://www.eclipse.org/org/documents/edl-v10.php")
-    val bsd_3clause = license("BSD 3-Clause License", "https://opensource.org/licenses/BSD-3-Clause")
-    val bouncycastle = license("Bouncy Castle License", "https://www.bouncycastle.org/licence.html")
-    val w3c = license("W3C License", "https://opensource.org/licenses/W3C")
-    val cc0 = license("CC0", "https://creativecommons.org/publicdomain/zero/1.0/")
-
     aliases = mapOf(
-        apache_2 to listOf(
+        license("Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0") to listOf(
             "Apache 2",
             "Apache 2.0",
             "Apache License 2.0",
@@ -376,19 +361,19 @@ downloadLicenses {
             "Apache Software License, version 2.0",
             "The Apache Software License, Version 2.0"
         ),
-        mit to listOf(
+        license("MIT License", "https://opensource.org/licenses/MIT") to listOf(
             "MIT License",
             "MIT license",
             "The MIT License",
             "The MIT License (MIT)"
         ),
-        cddl_1_0 to listOf(
+        license("CDDL, Version 1.0", "https://opensource.org/licenses/CDDL-1.0") to listOf(
             "CDDL, Version 1.0",
             "Common Development and Distribution License 1.0",
             "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
             license("CDDL", "https://glassfish.dev.java.net/public/CDDLv1.0.html")
         ),
-        cddl_1_1 to listOf(
+        license("CDDL, Version 1.1", "https://oss.oracle.com/licenses/CDDL+GPL-1.1") to listOf(
             "CDDL 1.1",
             "CDDL, Version 1.1",
             "Common Development And Distribution License 1.1",
@@ -398,36 +383,36 @@ downloadLicenses {
             "CDDL or GPLv2 with exceptions",
             "CDDL/GPLv2+CE"
         ),
-        lgpl_2_0 to listOf(
+        license("LGPL, Version 2.0", "https://opensource.org/licenses/LGPL-2.0") to listOf(
             "LGPL, Version 2.0",
             "GNU General Public License, version 2"
         ),
-        lgpl_2_1 to listOf(
+        license("LGPL, Version 2.1", "https://opensource.org/licenses/LGPL-2.1") to listOf(
             "LGPL, Version 2.1",
             "LGPL, version 2.1",
             "GNU Lesser General Public License version 2.1 (LGPLv2.1)",
             license("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
         ),
-        lgpl_3_0 to listOf(
+        license("LGPL, Version 3.0", "https://opensource.org/licenses/LGPL-3.0") to listOf(
             "LGPL, Version 3.0",
             "Lesser General Public License, version 3 or greater"
         ),
-        epl_1_0 to listOf(
+        license("EPL, Version 1.0", "https://opensource.org/licenses/EPL-1.0") to listOf(
             "EPL, Version 1.0",
             "Eclipse Public License - v 1.0",
             "Eclipse Public License - Version 1.0",
             license("Eclipse Public License", "http://www.eclipse.org/legal/epl-v10.html")
         ),
-        epl_2_0 to listOf(
+        license("EPL, Version 2.0", "https://opensource.org/licenses/EPL-2.0") to listOf(
             "EPL 2.0",
             "EPL, Version 2.0"
         ),
-        edl_1_0 to listOf(
+        license("EDL, Version 1.0", "https://www.eclipse.org/org/documents/edl-v10.php") to listOf(
             "EDL 1.0",
             "EDL, Version 1.0",
             "Eclipse Distribution License - v 1.0"
         ),
-        bsd_3clause to listOf(
+        license("BSD 3-Clause License", "https://opensource.org/licenses/BSD-3-Clause") to listOf(
             "BSD 3-clause",
             "BSD-3-Clause",
             "BSD 3-Clause License",
@@ -437,13 +422,15 @@ downloadLicenses {
             license("BSD", "http://asm.objectweb.org/license.html"),
             license("BSD", "LICENSE.txt")
         ),
-        bouncycastle to listOf("Bouncy Castle Licence"),
-        w3c to listOf(
+        license("Bouncy Castle License", "https://www.bouncycastle.org/licence.html") to listOf(
+            "Bouncy Castle Licence"
+        ),
+        license("W3C License", "https://opensource.org/licenses/W3C") to listOf(
             "W3C License",
             "W3C Software Copyright Notice and License",
             "The W3C Software License"
         ),
-        cc0 to listOf(
+        license("CC0", "https://creativecommons.org/publicdomain/zero/1.0/") to listOf(
             "CC0",
             "Public Domain"
         )
