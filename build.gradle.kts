@@ -232,11 +232,6 @@ tasks.test {
 
 /* ******************** packaging ******************** */
 
-val projectString = "hivemq-ce-$version"
-val packagingDir = "$buildDir/package"
-val packagingProjectDir = "$packagingDir/$projectString"
-val zipDir = "$buildDir/zip"
-
 tasks.jar {
     manifest.attributes(
         "Implementation-Title" to "HiveMQ",
@@ -251,63 +246,21 @@ tasks.shadowJar {
     mergeServiceFiles()
 }
 
-tasks.register("cleanPackaging") {
-    group = "packaging"
-
-    doFirst {
-        delete(packagingDir)
-    }
-}
-
-tasks.register<Copy>("copyXml") {
-    group = "packaging"
-
-    mustRunAfter(tasks.named("cleanPackaging"))
-
-    from("$projectDir/src/main/resources/config.xml")
-    into("$packagingProjectDir/conf")
-}
-
-tasks.register<Copy>("copyPackaging") {
-    group = "packaging"
-
-    mustRunAfter(tasks.named("cleanPackaging"))
-
-    from("$projectDir/src/packaging")
-    into(packagingProjectDir)
-
-    doLast {
-        file("$packagingProjectDir/data").mkdirs()
-        file("$packagingProjectDir/log").mkdirs()
-    }
-}
-
-tasks.register<Copy>("copyJar") {
-    group = "packaging"
-
-    mustRunAfter(tasks.named("cleanPackaging"))
-    dependsOn(tasks.shadowJar)
-
-    from(tasks.shadowJar)
-    into("$packagingProjectDir/bin")
-
-    rename { fileName ->
-        fileName.replace(tasks.shadowJar.get().archiveFileName.get(), "hivemq.jar")
-    }
-}
-
 tasks.register<Zip>("packaging") {
     group = "packaging"
 
-    dependsOn(tasks.named("cleanPackaging"))
-    dependsOn(tasks.named("copyXml"))
-    dependsOn(tasks.named("copyPackaging"))
-    dependsOn(tasks.named("copyJar"))
+    val name = "hivemq-ce-${project.version}"
 
-    from(packagingDir)
-    destinationDirectory.set(file(zipDir))
-    archiveFileName.set("$projectString.zip")
-    include("**")
+    destinationDirectory.set(buildDir.resolve("zip"))
+    archiveFileName.set("$name.zip")
+
+    from("$projectDir/src/packaging") { exclude("**/.gitkeep") }
+    from("$projectDir/src/main/resources/config.xml") { into("conf") }
+    from(tasks.shadowJar) {
+        into("bin")
+        rename { fileName -> fileName.replace(tasks.shadowJar.get().archiveFileName.get(), "hivemq.jar") }
+    }
+    into(name)
 }
 
 defaultTasks("clean", "packaging")
