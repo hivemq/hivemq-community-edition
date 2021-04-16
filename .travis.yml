@@ -23,7 +23,7 @@ jobs:
   include:
     - stage: test
       install: skip
-      script: ./gradlew test license forbiddenApis javadoc packaging
+      script: ./gradlew test license forbiddenApis javadoc hivemqZip
     - stage: docker
       install: skip
       script: PUSH_IMAGE=true docker/build.sh
