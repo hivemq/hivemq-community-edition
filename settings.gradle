@@ -9,6 +9,7 @@ pluginManagement {
         id 'com.github.sgtsilvio.gradle.metadata' version "${getProperty("plugin.metadata.version")}"
         id 'com.github.sgtsilvio.gradle.javadoc-links' version "${getProperty("plugin.javadoc-links.version")}"
         id 'io.github.gradle-nexus.publish-plugin' version "${getProperty("plugin.nexus-publish.version")}"
+        id 'com.github.ben-manes.versions' version "${getProperty("plugin.versions.version")}"
     }
 }
 
