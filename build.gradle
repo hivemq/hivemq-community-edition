@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow'
     id 'com.github.hierynomus.license'
+    id("com.github.ben-manes.versions")
     id 'org.owasp.dependencycheck'
     id 'com.github.sgtsilvio.gradle.utf8'
     id 'com.github.sgtsilvio.gradle.metadata'
@@ -121,7 +122,7 @@ dependencies {
     }
 
     /* config - xml */
-    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property('jaxb.version')}")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property('jakarta.version')}")
     runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb.version')}")
 
     /* metrics */
