@@ -15,9 +15,9 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
@@ -46,7 +46,7 @@ public class Mqtt3ConnackEncoder extends FixedSizeMessageEncoder<Mqtt3CONNACK> i
         out.writeByte(CONNACK_REMAINING_LENGTH);
 
         final Mqtt3ConnAckReturnCode returnCode = msg.getReturnCode();
-        switch (ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get()) {
+        switch (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
             case MQTTv3_1:
                 out.writeByte(CONNACK_FLAGS_EMPTY);
                 break;

@@ -19,11 +19,13 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.auth.DefaultAuthorizationBehaviour;
@@ -141,6 +143,8 @@ public class ConnectHandlerTest {
 
     private MqttServerDisconnectorImpl serverDisconnector;
 
+    private @NotNull ClientConnection clientConnection;
+
     @Before
     public void setUp() throws Exception {
 
@@ -154,8 +158,9 @@ public class ConnectHandlerTest {
                 isNull())).thenReturn(Futures.immediateFuture(null));
 
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
-
+        clientConnection = new ClientConnection();
         embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(null);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
@@ -204,9 +209,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
 
@@ -222,9 +227,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
@@ -255,9 +260,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
@@ -306,9 +311,9 @@ public class ConnectHandlerTest {
         });
 
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
@@ -358,9 +363,9 @@ public class ConnectHandlerTest {
         });
 
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
 
@@ -389,9 +394,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Long maximumPacketSize = embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).get();
 
@@ -411,9 +416,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
 
@@ -434,9 +439,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final String[] mapping = embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
 
@@ -456,9 +461,9 @@ public class ConnectHandlerTest {
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .build();
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final String[] mapping = embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
         assertNull(mapping);
@@ -493,9 +498,9 @@ public class ConnectHandlerTest {
             }
         });
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         final Long expiryFromChannel = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
 
@@ -532,9 +537,9 @@ public class ConnectHandlerTest {
             }
         });
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         assertTrue(connackLatch.await(10, TimeUnit.SECONDS));
 
@@ -569,13 +574,13 @@ public class ConnectHandlerTest {
             }
         });
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         assertTrue(connackLatch.await(10, TimeUnit.SECONDS));
 
-        assertEquals(null, clientID.get());
+        assertNull(clientID.get());
     }
 
     @Test
@@ -607,9 +612,9 @@ public class ConnectHandlerTest {
             }
         });
 
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
         embeddedChannel.writeInbound(connect1);
-        assertEquals(true, embeddedChannel.isOpen());
+        assertTrue(embeddedChannel.isOpen());
 
         assertTrue(connackLatch.await(10, TimeUnit.SECONDS));
 
@@ -617,17 +622,15 @@ public class ConnectHandlerTest {
         assertEquals("name", userProps.get().asList().get(0).getName());
         assertEquals("value", userProps.get().asList().get(0).getValue());
 
-        assertEquals(null, embeddedChannel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).get());
+        assertNull(embeddedChannel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).get());
     }
 
     @Test
     public void test_connect_handler_removed_from_pipeline() {
 
         System.out.println(embeddedChannel.pipeline().names());
-        assertEquals(true, embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
-        assertEquals(
-                false,
-                embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_DISALLOW_SECOND_CONNECT));
+        assertTrue(embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
+        assertFalse(embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_DISALLOW_SECOND_CONNECT));
 
         final CONNECT connect = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("clientId")
@@ -637,7 +640,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect);
 
         System.out.println(embeddedChannel.pipeline().names());
-        assertEquals(false, embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
+        assertFalse(embeddedChannel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
     }
 
     @Test(timeout = 5_000)
@@ -650,7 +653,11 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+
+
+        final ClientConnection clientConnection = new ClientConnection();
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
@@ -689,7 +696,9 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
@@ -734,7 +743,9 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -782,7 +793,9 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-        oldChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+        final ClientConnection clientConnection = new ClientConnection();
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -832,8 +845,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel.writeInbound(connect);
 
-        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -860,8 +873,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel.writeInbound(connect);
 
-        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -888,8 +901,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel.writeInbound(connect);
 
-        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -914,8 +927,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel.writeInbound(connect);
 
-        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -961,8 +974,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel.writeInbound(connect);
 
-        assertEquals(true, latch.await(5, TimeUnit.SECONDS));
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -981,7 +994,7 @@ public class ConnectHandlerTest {
 
     @Test
     public void test_will_retain_not_supported_mqtt3() throws InterruptedException {
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         configurationService.mqttConfiguration().setRetainedMessagesEnabled(false);
 
@@ -1008,12 +1021,12 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED, connack.getReturnCode());
         assertFalse(embeddedChannel.isActive());
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
     public void test_will_retain_supported_mqtt3() {
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         configurationService.mqttConfiguration().setRetainedMessagesEnabled(true);
 
@@ -1039,12 +1052,12 @@ public class ConnectHandlerTest {
         assertEquals(Mqtt3ConnAckReturnCode.ACCEPTED, connack.getReturnCode());
         assertTrue(embeddedChannel.isActive());
 
-        assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get() != null);
+        assertNotNull(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get());
     }
 
     @Test
     public void test_will_retain_not_supported_mqtt5() throws InterruptedException {
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         configurationService.mqttConfiguration().setRetainedMessagesEnabled(false);
 
@@ -1068,12 +1081,12 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.RETAIN_NOT_SUPPORTED, connack.getReasonCode());
         assertFalse(embeddedChannel.isActive());
-        assertEquals(true, eventLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(eventLatch.await(5, TimeUnit.SECONDS));
     }
 
     @Test
     public void test_will_retain_supported_mqtt5() {
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         configurationService.mqttConfiguration().setRetainedMessagesEnabled(true);
 
@@ -1096,7 +1109,7 @@ public class ConnectHandlerTest {
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
 
-        assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get() != null);
+        assertNotNull(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get());
     }
 
     /* ******
@@ -1583,7 +1596,7 @@ public class ConnectHandlerTest {
         embeddedChannel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_DECODER, TestMqttDecoder.create());
         embeddedChannel.pipeline().addLast(ChannelHandlerNames.GLOBAL_THROTTLING_HANDLER, new DummyHandler());
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("clientId");
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         createHandler();
 

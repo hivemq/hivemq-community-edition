@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -122,6 +123,8 @@ public class ConnectInboundInterceptorHandlerTest {
                 handler.handleInboundConnect(ctx, ((CONNECT) msg));
             }
         });
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test(timeout = 5000)
@@ -140,7 +143,6 @@ public class ConnectInboundInterceptorHandlerTest {
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestModifyInboundInterceptor");
         when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
@@ -160,7 +162,6 @@ public class ConnectInboundInterceptorHandlerTest {
         final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestNullInterceptor");
         when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
@@ -182,7 +183,6 @@ public class ConnectInboundInterceptorHandlerTest {
         when(interceptors.connectInboundInterceptorProviders()).thenReturn(
                 ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         final AtomicInteger counter = new AtomicInteger();
         doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
                 .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
@@ -206,7 +206,6 @@ public class ConnectInboundInterceptorHandlerTest {
         when(interceptors.connectInboundInterceptorProviders()).thenReturn(
                 ImmutableMap.of("plugin", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
         final AtomicInteger counter = new AtomicInteger();
         doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
                 .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),

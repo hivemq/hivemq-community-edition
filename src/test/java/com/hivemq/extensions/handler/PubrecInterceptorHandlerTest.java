@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
@@ -75,22 +76,24 @@ import static org.mockito.Mockito.when;
 public class PubrecInterceptorHandlerTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
-    private HiveMQExtensions hiveMQExtensions;
+    private @NotNull HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private HiveMQExtension plugin;
+    private @NotNull HiveMQExtension plugin;
 
     @Mock
-    private ClientContextImpl clientContext;
+    private @NotNull ClientContextImpl clientContext;
 
-    private PluginTaskExecutor executor1;
+    private @NotNull PluginTaskExecutor executor1;
 
-    private EmbeddedChannel channel;
+    private @NotNull EmbeddedChannel channel;
 
-    private PubrecInterceptorHandler handler;
+    private @NotNull PubrecInterceptorHandler handler;
+
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
@@ -100,9 +103,11 @@ public class PubrecInterceptorHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection();
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         when(plugin.getId()).thenReturn("plugin");
 
         final FullConfigurationService configurationService =
@@ -114,7 +119,7 @@ public class PubrecInterceptorHandlerTest {
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+            public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) throws Exception {
                 handler.handleOutboundPubrec(ctx, ((PUBREC) msg), promise);
             }
         });
@@ -152,7 +157,7 @@ public class PubrecInterceptorHandlerTest {
     public void test_inbound_no_interceptors() {
 
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(ImmutableList.of());
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
         final PUBREC testPubrec = testPubrec();
@@ -176,7 +181,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
@@ -195,7 +200,7 @@ public class PubrecInterceptorHandlerTest {
 
         final PubrecInboundInterceptor interceptor = getInboundInterceptor("TestModifyInboundInterceptor");
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
 
@@ -220,7 +225,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
@@ -239,7 +244,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
@@ -259,7 +264,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
@@ -300,7 +305,7 @@ public class PubrecInterceptorHandlerTest {
     public void test_outbound_no_interceptors() {
 
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(ImmutableList.of());
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
         final PUBREC testPubrec = testPubrec();
@@ -324,7 +329,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
@@ -343,7 +348,7 @@ public class PubrecInterceptorHandlerTest {
 
         final PubrecOutboundInterceptor interceptor = getOutboundInterceptor("TestModifyOutboundInterceptor");
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
 
@@ -368,7 +373,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testPubrec());
 
@@ -388,7 +393,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
@@ -406,7 +411,7 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(plugin);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();

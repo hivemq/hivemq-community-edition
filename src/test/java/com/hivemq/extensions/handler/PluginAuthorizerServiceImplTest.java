@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -100,17 +101,20 @@ public class PluginAuthorizerServiceImplTest {
     private ChannelHandlerContext channelHandlerContext;
     private CollectUserEventsHandler<AuthorizeWillResultEvent> eventsHandler;
     private MqttServerDisconnector mqttServerDisconnector;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        clientConnection = new ClientConnection();
 
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final Map<String, HiveMQExtension> pluginMap = new HashMap<>();
         final HiveMQExtension plugin1 = getHiveMQPlugin(10);
@@ -448,7 +452,7 @@ public class PluginAuthorizerServiceImplTest {
                 getTestAuthorizerProvider("TestAuthorizerDisconnectProvider", authorizeLatch1)));
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
@@ -474,7 +478,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 

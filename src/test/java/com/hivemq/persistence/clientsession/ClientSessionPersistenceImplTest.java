@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -165,7 +166,9 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_connected() throws ExecutionException, InterruptedException {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         when(channelPersistence.get("client")).thenReturn(channel);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
@@ -179,7 +182,9 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_connected_reason_code_string() throws ExecutionException, InterruptedException {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         when(channelPersistence.get("client")).thenReturn(channel);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION, Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, "reason-string");

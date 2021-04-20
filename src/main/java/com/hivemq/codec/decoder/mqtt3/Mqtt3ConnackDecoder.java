@@ -28,7 +28,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 /**
@@ -49,7 +49,7 @@ public class Mqtt3ConnackDecoder extends MqttDecoder<CONNACK> {
 
     @Override
     public CONNACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
-        final boolean isMqtt311 = ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get();
+        final boolean isMqtt311 = ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion();
         final byte connectAcknowledgeFlags = buf.readByte();
         if (isMqtt311) {
             if (!validateHeader(header)) {

@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.auth.parameter;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -33,11 +34,14 @@ import static org.junit.Assert.assertNotNull;
 public class PublishAuthorizerInputImplTest {
 
     private Channel channel;
+    private ClientConnection clientConnection;
 
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
 

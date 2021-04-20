@@ -26,7 +26,6 @@ import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.client.parameter.ConnectionAttributes;
 import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
-import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
@@ -41,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ChannelAttributes {
 
-    public static final AttributeKey<ProtocolVersion> MQTT_VERSION = AttributeKey.valueOf("MQTT.Version");
     public static final AttributeKey<String> CLIENT_ID = AttributeKey.valueOf("MQTT.ClientId");
     public static final AttributeKey<Integer> CONNECT_KEEP_ALIVE = AttributeKey.valueOf("MQTT.KeepAlive");
     public static final AttributeKey<Boolean> CLEAN_START = AttributeKey.valueOf("MQTT.CleanStart");

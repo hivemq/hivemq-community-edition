@@ -126,7 +126,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             return;
         }
 
-        final ProtocolVersion version = channel.attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion version = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
 
         if (!withReasonCode) {
             reasonCode = null;

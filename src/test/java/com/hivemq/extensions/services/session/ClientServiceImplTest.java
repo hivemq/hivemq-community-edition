@@ -18,6 +18,7 @@ package com.hivemq.extensions.services.session;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
@@ -260,7 +261,9 @@ public class ClientServiceImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_disconnect_with_deprecated_reason_code() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientSessionPersistence.getSession(eq("client"), anyBoolean())).thenReturn(new ClientSession(true, 0));
         clientService.disconnectClient("client", true, DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                 "reason-string");
@@ -269,7 +272,9 @@ public class ClientServiceImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_disconnect_with_client_reason_code() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientSessionPersistence.getSession(eq("client"), anyBoolean())).thenReturn(new ClientSession(true, 0));
         clientService.disconnectClient("client", true, DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE,
                 "reason-string");

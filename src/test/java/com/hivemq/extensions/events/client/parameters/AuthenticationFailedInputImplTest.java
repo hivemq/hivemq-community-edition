@@ -16,6 +16,7 @@
 package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
@@ -38,7 +39,9 @@ public class AuthenticationFailedInputImplTest {
     @Test
     public void test_construction_null_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", null, null, null);
         assertEquals(input, input.get());
         assertEquals("client", input.getClientInformation().getClientId());
@@ -51,7 +54,9 @@ public class AuthenticationFailedInputImplTest {
     @Test
     public void test_construction_with_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input =
                 new AuthenticationFailedInputImpl(channel, "client", DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD,
                         "reason", UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "value"))));
@@ -69,7 +74,9 @@ public class AuthenticationFailedInputImplTest {
     @Test(expected = NullPointerException.class)
     public void test_construction_client_id_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         new AuthenticationFailedInputImpl(channel, null, null, null, null);
     }
 }

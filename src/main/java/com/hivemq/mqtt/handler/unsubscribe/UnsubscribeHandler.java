@@ -69,7 +69,7 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
         SubscribeMessageBarrier.addToPipeline(ctx);
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
-        final ProtocolVersion protocolVersion = ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion protocolVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
 
         final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[msg.getTopics().size()];

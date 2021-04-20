@@ -32,7 +32,7 @@ import io.netty.channel.Channel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Lukas Brandl
@@ -48,7 +48,7 @@ public class Mqtt3SubackDecoder extends AbstractMqttDecoder<SUBACK> {
 
     @Override
     public SUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
+        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(channel, MessageType.SUBACK);
                 buf.clear();

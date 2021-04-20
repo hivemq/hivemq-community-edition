@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.disconnect;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -195,7 +196,9 @@ public class DisconnectHandlerTest {
 
         final String disconnectReason = "disconnectReason";
         final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, disconnectReason, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 0);
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         embeddedChannel.writeInbound(disconnect);
 

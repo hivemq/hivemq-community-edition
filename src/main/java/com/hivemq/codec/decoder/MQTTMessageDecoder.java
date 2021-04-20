@@ -115,7 +115,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final int fixedHeaderSize = getFixedHeaderSize(remainingLength);
 
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
         //this is the message size HiveMQ allows for incoming messages
         if (remainingLength + fixedHeaderSize > mqttConfig.maxPacketSize()) {
 

@@ -18,7 +18,9 @@ package com.hivemq.mqtt.handler.unsubscribe;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
@@ -56,23 +58,26 @@ import static org.mockito.Mockito.when;
 public class UnsubscribeHandlerTest {
 
     @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
+    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
-    ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
+    @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
 
     @Mock
-    SharedSubscriptionService sharedSubscriptionService;
+    @NotNull SharedSubscriptionService sharedSubscriptionService;
 
-    private UnsubscribeHandler unsubscribeHandler;
+    private @NotNull UnsubscribeHandler unsubscribeHandler;
 
-    private EmbeddedChannel channel;
+    private @NotNull EmbeddedChannel channel;
+    private final @NotNull ClientConnection clientConnection = new ClientConnection();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         channel = new EmbeddedChannel(unsubscribeHandler);
+
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_ID).set("myTestClient");
         when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(Futures.immediateFuture(null));
@@ -100,7 +105,7 @@ public class UnsubscribeHandlerTest {
     @Test
     public void test_unsubscribe_single_and_acknowledge_mqtt5() {
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final String topic = "myTopic";
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList(topic), 10);
@@ -125,7 +130,7 @@ public class UnsubscribeHandlerTest {
 
         when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final String topic = "myTopic";
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList(topic), 10);
@@ -175,7 +180,7 @@ public class UnsubscribeHandlerTest {
     @Test
     public void test_unsubscribe_batched_and_acknowledge_mqtt5() {
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final String topic1 = "myTopic1";
         final String topic2 = "myTopic2";
@@ -209,7 +214,7 @@ public class UnsubscribeHandlerTest {
 
         when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), Matchers.any(ImmutableSet.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final String topic1 = "myTopic1";
         final String topic2 = "myTopic2";
@@ -255,7 +260,7 @@ public class UnsubscribeHandlerTest {
     static class UnsubscribeEventFiredHandler extends ChannelInboundHandlerAdapter {
 
         @Override
-        public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
+        public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) throws Exception {
             super.userEventTriggered(ctx, evt);
         }
     }

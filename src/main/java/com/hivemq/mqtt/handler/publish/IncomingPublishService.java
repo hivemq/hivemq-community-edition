@@ -45,7 +45,6 @@ import io.netty.channel.ChannelHandlerContext;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
 
 /**
  * This Service is responsible for PUBLISH message processing after interception and authorisation.
@@ -78,7 +77,7 @@ public class IncomingPublishService {
                                @NotNull final PUBLISH publish,
                                @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ProtocolVersion protocolVersion = ctx.channel().attr(MQTT_VERSION).get();
+        final ProtocolVersion protocolVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
 
         final int maxQos = mqttConfigurationService.maximumQos().getQosNumber();
         final int qos = publish.getQoS().getQosNumber();
@@ -174,7 +173,7 @@ public class IncomingPublishService {
                 + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain() + "'";
 
         //MQTT 3.x.x -> disconnect (without publish answer packet)
-        if (ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get() != ProtocolVersion.MQTTv5) {
+        if (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion() != ProtocolVersion.MQTTv5) {
 
             final String clientId = ChannelUtils.getClientId(ctx.channel());
             mqttServerDisconnector.disconnect(ctx.channel(),

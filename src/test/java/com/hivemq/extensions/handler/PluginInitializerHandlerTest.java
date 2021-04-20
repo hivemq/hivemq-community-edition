@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
@@ -126,7 +127,10 @@ public class PluginInitializerHandlerTest {
 
         embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        final ClientConnection clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
         when(channelHandlerContext.pipeline()).thenReturn(channelPipeline);

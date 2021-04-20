@@ -15,8 +15,10 @@
  */
 package com.hivemq.codec.encoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.Mqtt3SubackEncoder;
 import com.hivemq.configuration.HivemqId;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -42,23 +44,23 @@ import static org.junit.Assert.assertEquals;
 
 public class Mqtt3SubackEncoderTest {
 
-    private EmbeddedChannel channel;
-
-    private Mqtt3SubackEncoder mqtt3SubackEncoder;
+    private @NotNull EmbeddedChannel channel;
+    private @NotNull ClientConnection clientConnection;
+    private @NotNull Mqtt3SubackEncoder mqtt3SubackEncoder;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        clientConnection = new ClientConnection();
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
-
         mqtt3SubackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
         channel = new EmbeddedChannel(mqtt3SubackEncoder);
-
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @Test
     public void test_mqtt_3_1_return_codes() throws Exception {
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2));
         channel.writeOutbound(suback);
 
@@ -81,7 +83,7 @@ public class Mqtt3SubackEncoderTest {
 
     @Test
     public void test_mqtt_3_1_return_codes_huge_size() throws Exception {
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final List<Mqtt5SubAckReasonCode> objects = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             objects.add(GRANTED_QOS_0);
@@ -110,7 +112,7 @@ public class Mqtt3SubackEncoderTest {
 
     @Test
     public void test_mqtt_3_1_1_return_codes() throws Exception {
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
         channel.writeOutbound(suback);
 
@@ -133,7 +135,7 @@ public class Mqtt3SubackEncoderTest {
 
     @Test
     public void test_mqtt_5_suback_for_mqtt_3() throws Exception {
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR), "reason-string", Mqtt5UserProperties.of(MqttUserProperty.of("user", "prop")));
         channel.writeOutbound(suback);
 
@@ -158,7 +160,7 @@ public class Mqtt3SubackEncoderTest {
     public void test_invalid_mqtt_3_1_client_failure_code() throws Exception {
 
         try {
-            channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+            clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
             channel.writeOutbound(new SUBACK(10, UNSPECIFIED_ERROR));
             //This is ugly but in the meantime the channel could be closed
         } catch (final Exception e) {
@@ -174,7 +176,7 @@ public class Mqtt3SubackEncoderTest {
     public void test_invalid_send_wrong_byte() throws Exception {
 
         try {
-            channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+            clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
             channel.writeOutbound(new SUBACK(10, Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR));
             //This is ugly but in the meantime the channel could be closed
         } catch (final Exception e) {

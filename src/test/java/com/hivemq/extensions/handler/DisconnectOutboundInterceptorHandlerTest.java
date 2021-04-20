@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -65,28 +66,30 @@ import static org.mockito.Mockito.when;
 public class DisconnectOutboundInterceptorHandlerTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Mock
-    private HiveMQExtensions hiveMQExtensions;
+    private @NotNull HiveMQExtensions hiveMQExtensions;
 
     @Mock
-    private HiveMQExtension extension;
+    private @NotNull HiveMQExtension extension;
 
     @Mock
-    private ClientContextImpl clientContext;
+    private @NotNull ClientContextImpl clientContext;
 
-    private PluginOutPutAsyncer asyncer;
+    private @NotNull PluginOutPutAsyncer asyncer;
 
-    private FullConfigurationService configurationService;
+    private @NotNull FullConfigurationService configurationService;
 
-    private PluginTaskExecutor executor;
+    private @NotNull PluginTaskExecutor executor;
 
-    private EmbeddedChannel channel;
+    private @NotNull EmbeddedChannel channel;
 
-    private PluginTaskExecutorService pluginTaskExecutorService;
+    private @NotNull PluginTaskExecutorService pluginTaskExecutorService;
 
-    private DisconnectInterceptorHandler handler;
+    private @NotNull DisconnectInterceptorHandler handler;
+
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
@@ -96,9 +99,12 @@ public class DisconnectOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection();
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         when(extension.getId()).thenReturn("extension");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -109,7 +115,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+            public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) throws Exception {
                 handler.handleOutboundDisconnect(ctx, ((DISCONNECT) msg), promise);
             }
         });
@@ -135,7 +141,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
     @Test(timeout = 5000)
     public void test_no_interceptors() {
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(ImmutableList.of());
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
         final DISCONNECT disconnect = testDisconnect();
@@ -157,7 +163,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
         final DisconnectOutboundInterceptor interceptor =
                 getIsolatedOutboundInterceptor("TestModifyOutboundInterceptor");
         final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
 
@@ -183,7 +189,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(interceptors);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testDisconnect());
         channel.runPendingTasks();
@@ -207,7 +213,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(testDisconnect());
         channel.runPendingTasks();

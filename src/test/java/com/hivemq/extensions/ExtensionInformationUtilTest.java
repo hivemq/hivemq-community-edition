@@ -15,11 +15,14 @@
  */
 package com.hivemq.extensions;
 
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
 import com.hivemq.extension.sdk.api.client.parameter.TlsInformation;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -40,11 +43,18 @@ import static org.mockito.Mockito.when;
  */
 public class ExtensionInformationUtilTest {
 
+    private @NotNull EmbeddedChannel channel;
+
+    @Before
+    public void setUp() throws Exception {
+        channel = new EmbeddedChannel();
+        final ClientConnection clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(CLIENT_CONNECTION).set(clientConnection);
+    }
+
     @Test
     public void test_get_tls_fails_no_cipher() {
-
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.attr(AUTH_PROTOCOL).set("1.3");
 
@@ -68,10 +78,6 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_fails_no_protocol() {
-
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
@@ -94,10 +100,6 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_no_cert() {
-
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
         channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
 
@@ -111,9 +113,6 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_with_cert() {
-
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
         channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
@@ -145,9 +144,6 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_with_sni() {
 
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
         channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
         channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
@@ -164,9 +160,6 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_with_everything() {
-
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(MQTT_VERSION).set(ProtocolVersion.MQTTv5);
 
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
         channel.attr(AUTH_PROTOCOL).set("TLSv1.2");

@@ -1,20 +1,6 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.extensions.handler.tasks;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
@@ -58,15 +44,18 @@ public class PublishAuthorizationProcessedTaskTest {
 
     private PublishAuthorizationProcessedTask task;
     private EmbeddedChannel channel;
-    private ChannelHandlerContext ctx;
+    private ClientConnection clientConnection;
 
     private PublishAuthorizerOutputImpl output;
+    private PluginOutputAsyncerImpl asyncer;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel(new DummyHandler());
-        ctx = channel.pipeline().context(DummyHandler.class);
+        clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        final ChannelHandlerContext ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
         task = new PublishAuthorizationProcessedTask(publish, ctx, mqtt5ServerDisconnector, incomingPublishService);
 
@@ -77,9 +66,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_disconnect() {
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         output.disconnectClient();
         task.onSuccess(output);
 
@@ -89,9 +76,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_disconnect_code() {
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         output.disconnectClient(DisconnectReasonCode.QUOTA_EXCEEDED);
         task.onSuccess(output);
 
@@ -101,9 +86,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_disconnect_code_string() {
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         output.disconnectClient(DisconnectReasonCode.QUOTA_EXCEEDED, "test-string");
         task.onSuccess(output);
 
@@ -113,9 +96,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt3_disconnect() {
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         output.disconnectClient();
         task.onSuccess(output);
 
@@ -124,9 +105,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt3_1_disconnect() {
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         output.disconnectClient();
         task.onSuccess(output);
 
@@ -135,10 +114,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_fail() {
-
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         output.failAuthorization();
         task.onSuccess(output);
@@ -154,10 +131,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_fail_code() {
-
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         output.failAuthorization(AckReasonCode.TOPIC_NAME_INVALID);
         task.onSuccess(output);
@@ -173,10 +148,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_mqtt5_fail_code_string() {
-
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
-
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         output.failAuthorization(AckReasonCode.TOPIC_NAME_INVALID, "test-string");
         task.onSuccess(output);
@@ -195,7 +168,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
 
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         output.failAuthorization();
         task.onSuccess(output);
@@ -214,7 +187,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
 
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         output.failAuthorization();
         task.onSuccess(output);
@@ -295,10 +268,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
     @Test
     public void test_failure() {
-        ctx.channel().attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         task.onFailure(new RuntimeException("test"));
-
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
                 eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }

@@ -1,18 +1,3 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
@@ -45,12 +30,13 @@ import static org.junit.Assert.*;
  */
 public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
+
     @Override
     @Before
     public void setUp() {
         super.setUp();
         //protocol version must not be set when a CONNECT is sent.
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(null);
+        clientConnection.setProtocolVersion(null);
     }
 
     @Test
@@ -132,10 +118,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(10, connect.getTopicAliasMaximum());
         assertEquals(100, connect.getMaximumPacketSize());
         assertEquals(10, connect.getKeepAlive());
-        assertEquals(true, connect.isCleanStart());
+        assertTrue(connect.isCleanStart());
         assertEquals(10, connect.getSessionExpiryInterval());
-        assertEquals(true, connect.isResponseInformationRequested());
-        assertEquals(false, connect.isProblemInformationRequested());
+        assertTrue(connect.isResponseInformationRequested());
+        assertFalse(connect.isProblemInformationRequested());
         assertEquals("test", connect.getClientIdentifier());
 
         assertEquals("username", connect.getUsername());
@@ -157,7 +143,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("topic", willPublish.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, willPublish.getPayload());
         assertEquals(QoS.AT_LEAST_ONCE, willPublish.getQos());
-        assertEquals(true, willPublish.isRetain());
+        assertTrue(willPublish.isRetain());
         assertEquals(10, willPublish.getMessageExpiryInterval());
         assertEquals(Mqtt5PayloadFormatIndicator.UTF_8, willPublish.getPayloadFormatIndicator());
         assertEquals("text", willPublish.getContentType());
@@ -171,7 +157,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("test2", willUserProperties.get(2).getName());
         assertEquals("value", willUserProperties.get(2).getValue());
 
-        assertEquals(null, channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get());
+        assertNull(channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get());
         assertEquals("username", channel.attr(ChannelAttributes.AUTH_USERNAME).get());
         assertEquals("pass", new String(channel.attr(ChannelAttributes.AUTH_PASSWORD).get(), StandardCharsets.UTF_8));
 
@@ -1494,9 +1480,8 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.securityConfiguration().setAllowServerAssignedClientId(false);
-
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
@@ -2322,7 +2307,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxMessageExpiryInterval(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
@@ -3434,7 +3419,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
     }
 
     @NotNull
-    private CONNECT decodeInternal(final byte[] encoded) {
+    private CONNECT decodeInternal(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

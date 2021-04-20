@@ -28,7 +28,7 @@ import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Lukas Brandl
@@ -46,7 +46,7 @@ public class Mqtt3UnsubackDecoder extends AbstractMqttDecoder<UNSUBACK> {
     @Override
     public UNSUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
+        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(channel, MessageType.UNSUBACK);
                 buf.clear();

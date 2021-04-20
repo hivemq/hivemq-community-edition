@@ -105,7 +105,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
         logConnack(channel, logMessage, eventLogMessage);
         if (protocolVersion == null) {
             channel.close();

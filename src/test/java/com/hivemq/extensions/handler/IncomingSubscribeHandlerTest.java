@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.Lists;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -112,11 +113,13 @@ public class IncomingSubscribeHandlerTest {
     private ChannelHandlerContext channelHandlerContext;
 
     private AtomicReference<Message> messageAtomicReference;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
+        clientConnection = new ClientConnection();
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
@@ -146,6 +149,7 @@ public class IncomingSubscribeHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         channel.pipeline().addFirst(subscribeHandler);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
     }
 
@@ -201,7 +205,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
@@ -228,7 +232,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
@@ -254,7 +258,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(1));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
 
@@ -293,7 +297,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
 
@@ -332,7 +336,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
 
@@ -369,7 +373,7 @@ public class IncomingSubscribeHandlerTest {
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
 

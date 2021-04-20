@@ -1,21 +1,7 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
@@ -33,7 +19,7 @@ import static org.junit.Assert.*;
  */
 public class Mqtt5PubrecDecoderTest extends AbstractMqtt5DecoderTest {
 
-    private final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.SUCCESS;
+    private final @NotNull Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.SUCCESS;
 
     @Test
     public void test_fixed_header() {
@@ -343,7 +329,7 @@ public class Mqtt5PubrecDecoderTest extends AbstractMqtt5DecoderTest {
     }
 
     @NotNull
-    private PUBREC decode(final byte[] encoded) {
+    private PUBREC decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
@@ -555,7 +541,7 @@ public class Mqtt5PubrecDecoderTest extends AbstractMqtt5DecoderTest {
         decodeNullExpected(encoded);
     }
 
-    private void decodeChannelOpen(final byte[] encoded) {
+    private void decodeChannelOpen(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
@@ -566,7 +552,8 @@ public class Mqtt5PubrecDecoderTest extends AbstractMqtt5DecoderTest {
         assertTrue(channel.isOpen());
 
         createChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
     }
 

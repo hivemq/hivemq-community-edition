@@ -34,7 +34,7 @@ import io.netty.channel.Channel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Dominik Obermaier
@@ -52,14 +52,14 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
     @Override
     public UNSUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(MQTT_VERSION).get()) {
+        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
                 disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
-        } else if (ProtocolVersion.MQTTv3_1 == channel.attr(MQTT_VERSION).get()) {
+        } else if (ProtocolVersion.MQTTv3_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
                 disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
