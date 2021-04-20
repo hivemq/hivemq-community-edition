@@ -1,20 +1,7 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.codec.decoder;
 
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.util.ChannelAttributes;
@@ -31,18 +18,19 @@ import static org.junit.Assert.*;
 
 public class Mqtt3SubscribeDecoderTest {
 
-    private EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel embeddedChannel;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 
     @Test
-    public void test_subscribe_received() throws Exception {
+    public void test_subscribe_received() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -78,11 +66,11 @@ public class Mqtt3SubscribeDecoderTest {
         assertEquals(2, subscribe.getTopics().get(1).getQoS().getQosNumber());
         assertEquals("c/d", subscribe.getTopics().get(1).getTopic());
 
-        assertEquals(true, embeddedChannel.isActive());
+        assertTrue(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscribe_zero_message_id() throws Exception {
+    public void test_subscribe_zero_message_id() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -107,11 +95,11 @@ public class Mqtt3SubscribeDecoderTest {
 
         embeddedChannel.readInbound();
 
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_empty_subscribe() throws Exception {
+    public void test_empty_subscribe() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -129,11 +117,11 @@ public class Mqtt3SubscribeDecoderTest {
 
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscription_qos_higher_than_2_received() throws Exception {
+    public void test_subscription_qos_higher_than_2_received() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -163,11 +151,11 @@ public class Mqtt3SubscribeDecoderTest {
 
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscription_qos_lower_than_0_received() throws Exception {
+    public void test_subscription_qos_lower_than_0_received() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -196,11 +184,11 @@ public class Mqtt3SubscribeDecoderTest {
         assertNull(subscribe);
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscription_has_null_byte_received() throws Exception {
+    public void test_subscription_has_null_byte_received() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -229,11 +217,11 @@ public class Mqtt3SubscribeDecoderTest {
         assertNull(subscribe);
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscription_has_empty_topic() throws Exception {
+    public void test_subscription_has_empty_topic() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -257,11 +245,11 @@ public class Mqtt3SubscribeDecoderTest {
         assertNull(subscribe);
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscription_with_one_byte_message_id() throws Exception {
+    public void test_subscription_with_one_byte_message_id() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0010);
@@ -278,13 +266,44 @@ public class Mqtt3SubscribeDecoderTest {
         assertNull(subscribe);
 
         //Client got disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
-    public void test_subscribe_invalid_header_mqtt_311() throws Exception {
+    public void test_subscribe_invalid_header_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        final ByteBuf buf = Unpooled.buffer();
+        buf.writeByte(0b1000_0100);
+        //Remaining length
+        buf.writeByte(14);
+
+        //MessageID
+        buf.writeShort(55555);
+
+        // "a/b"
+        buf.writeBytes(new byte[]{0, 3, 0x61, 0x2F, 0x62});
+        //QoS 1
+        buf.writeByte(1);
+
+        // "c/d"
+        buf.writeBytes(new byte[]{0, 3, 0x63, 0x2F, 0x64});
+        //QoS 1
+        buf.writeByte(2);
+
+        embeddedChannel.writeInbound(buf);
+
+
+        //The client needs to get disconnected
+        assertFalse(embeddedChannel.isActive());
+    }
+
+    @Test
+    public void test_subscribe_invalid_header_mqtt_31() {
+
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1000_0100);
@@ -308,45 +327,15 @@ public class Mqtt3SubscribeDecoderTest {
 
 
         //The client needs to get disconnected
-        assertEquals(false, embeddedChannel.isActive());
-    }
-
-    @Test
-    public void test_subscribe_invalid_header_mqtt_31() throws Exception {
-
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
-
-        final ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0b1000_0100);
-        //Remaining length
-        buf.writeByte(14);
-
-        //MessageID
-        buf.writeShort(55555);
-
-        // "a/b"
-        buf.writeBytes(new byte[]{0, 3, 0x61, 0x2F, 0x62});
-        //QoS 1
-        buf.writeByte(1);
-
-        // "c/d"
-        buf.writeBytes(new byte[]{0, 3, 0x63, 0x2F, 0x64});
-        //QoS 1
-        buf.writeByte(2);
-
-        embeddedChannel.writeInbound(buf);
-
-
-        //The client needs to get disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
 
     @Test
-    public void test_subscribe_topic_length_max() throws Exception {
+    public void test_subscribe_topic_length_max() {
 
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
-
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final String maxTopic1 = RandomStringUtils.randomAlphabetic(65535);
 
         final ByteBuf buf = Unpooled.buffer();
@@ -378,7 +367,7 @@ public class Mqtt3SubscribeDecoderTest {
         assertEquals(1, subscribe.getTopics().get(0).getQoS().getQosNumber());
         assertEquals(maxTopic1, subscribe.getTopics().get(0).getTopic());
 
-        assertEquals(true, embeddedChannel.isActive());
+        assertTrue(embeddedChannel.isActive());
 
     }
 }

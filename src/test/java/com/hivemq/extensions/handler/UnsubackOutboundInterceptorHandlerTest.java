@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -68,19 +69,21 @@ import static org.mockito.MockitoAnnotations.initMocks;
  */
 public class UnsubackOutboundInterceptorHandlerTest {
 
-    public static AtomicBoolean isTriggered = new AtomicBoolean();
+    public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
     @Mock
-    private HiveMQExtension extension;
+    private @NotNull HiveMQExtension extension;
     @Mock
-    private HiveMQExtensions extensions;
+    private @NotNull HiveMQExtensions extensions;
     @Mock
-    private ClientContextImpl clientContext;
+    private @NotNull ClientContextImpl clientContext;
     @Mock
-    private FullConfigurationService configurationService;
-    private PluginTaskExecutor executor;
-    private EmbeddedChannel channel;
+    private @NotNull FullConfigurationService configurationService;
+    private @NotNull PluginTaskExecutor executor;
+    private @NotNull EmbeddedChannel channel;
+    private @NotNull ClientConnection clientConnection;
+
 
     @Before
     public void setUp() throws Exception {
@@ -93,6 +96,11 @@ public class UnsubackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
+
         when(extension.getId()).thenReturn("extension");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -104,7 +112,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
                         extensions, pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+            public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) throws Exception {
                 handler.handleOutboundUnsuback(ctx, ((UNSUBACK) msg), promise);
             }
         });
@@ -124,7 +132,6 @@ public class UnsubackOutboundInterceptorHandlerTest {
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -147,7 +154,6 @@ public class UnsubackOutboundInterceptorHandlerTest {
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -172,7 +178,6 @@ public class UnsubackOutboundInterceptorHandlerTest {
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 

@@ -16,6 +16,7 @@
 package com.hivemq.extensions.auth.parameter;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
@@ -40,12 +41,16 @@ import static org.junit.Assert.assertNotNull;
 public class SubscriptionAuthorizerInputImplTest {
 
     private Channel channel;
+    private ClientConnection clientConnection;
+
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection = new ClientConnection();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test

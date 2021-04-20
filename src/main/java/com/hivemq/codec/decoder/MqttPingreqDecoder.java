@@ -27,7 +27,7 @@ import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
-import static com.hivemq.util.ChannelAttributes.MQTT_VERSION;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Florian Limpöck
@@ -46,7 +46,7 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
     @Override
     public PINGREQ decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
 
-        final ProtocolVersion protocolVersion = channel.attr(MQTT_VERSION).get();
+        final ProtocolVersion protocolVersion = channel.attr(CLIENT_CONNECTION).get().getProtocolVersion();
 
         //Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (ProtocolVersion.MQTTv5 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {

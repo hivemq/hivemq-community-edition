@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
@@ -115,18 +116,20 @@ public class PluginAuthenticatorServiceImplTest {
     private PluginAuthenticatorService pluginAuthenticatorService;
     private SecurityConfigurationServiceImpl securityConfig;
     private EmbeddedChannel embeddedChannel;
-
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-
+        clientConnection = new ClientConnection();
         securityConfig = new SecurityConfigurationServiceImpl();
         embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(100);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
 
         embeddedChannel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, Mockito.mock(MQTTMessageDecoder.class));
 

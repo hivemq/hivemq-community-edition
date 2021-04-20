@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
@@ -73,7 +74,7 @@ public class FlowControlHandlerTest {
     public void test_disconnect_after_receiving_to_many_qos_1_publishes() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                 .withPayload(new byte[0]).withHivemqId("hivemqId1");
@@ -94,6 +95,7 @@ public class FlowControlHandlerTest {
     public void test_sending_publish_after_disconnect() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -224,6 +226,7 @@ public class FlowControlHandlerTest {
     public void test_disconnect_after_receiving_to_10_publishes_than_sending_10_pubrecs_with_success_pub() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)

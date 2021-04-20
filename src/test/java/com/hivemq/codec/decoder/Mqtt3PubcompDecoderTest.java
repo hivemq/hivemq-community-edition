@@ -1,20 +1,7 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.codec.decoder;
 
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.util.ChannelAttributes;
@@ -26,24 +13,24 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class Mqtt3PubcompDecoderTest {
 
-    private EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection();
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @Test
     public void test_pubcomp_received() {
-
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0111_0000);
         buf.writeByte(0b0000_0010);
@@ -54,14 +41,12 @@ public class Mqtt3PubcompDecoderTest {
 
         assertEquals(55555, pubcomp.getPacketIdentifier());
 
-        assertEquals(true, embeddedChannel.isActive());
+        assertTrue(embeddedChannel.isActive());
     }
 
     @Test
     public void test_pubcomp_invalid_header_mqtt_311() {
-
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1_1);
-
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0111_0010);
         buf.writeByte(0b0000_0010);
@@ -70,14 +55,14 @@ public class Mqtt3PubcompDecoderTest {
 
 
         //The client needs to get disconnected
-        assertEquals(false, embeddedChannel.isActive());
+        assertFalse(embeddedChannel.isActive());
     }
 
     @Test
     public void test_pubcomp_invalid_header_mqtt_31() {
 
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv3_1);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0111_0010);
@@ -89,7 +74,7 @@ public class Mqtt3PubcompDecoderTest {
 
         assertEquals(55555, pubcomp.getPacketIdentifier());
 
-        assertEquals(true, embeddedChannel.isActive());
+        assertTrue(embeddedChannel.isActive());
     }
 
 }

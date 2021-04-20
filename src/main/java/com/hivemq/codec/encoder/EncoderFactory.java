@@ -98,7 +98,7 @@ public class EncoderFactory {
     @Nullable
     private MqttEncoder getEncoder(final @NotNull Message msg, final @NotNull ChannelHandlerContext ctx) {
 
-        final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
         if (version == ProtocolVersion.MQTTv5) {
             return mqtt5Instance.getEncoder(msg);
         } else {

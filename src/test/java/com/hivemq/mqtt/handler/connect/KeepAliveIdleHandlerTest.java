@@ -15,9 +15,11 @@
  */
 package com.hivemq.mqtt.handler.connect;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -33,6 +35,7 @@ public class KeepAliveIdleHandlerTest {
     public void test_disconnect_when_idle() throws Exception {
         final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog(), new HivemqId()));
         final EmbeddedChannel channel = new EmbeddedChannel(keepAliveIdleHandler, new AnotherIdleHandler(false));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
 
         channel.pipeline().fireUserEventTriggered(IdleStateEvent.FIRST_READER_IDLE_STATE_EVENT);
 

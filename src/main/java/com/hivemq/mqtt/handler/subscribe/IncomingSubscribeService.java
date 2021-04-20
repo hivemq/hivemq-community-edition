@@ -238,7 +238,7 @@ public class IncomingSubscribeService {
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
         downgradeSharedSubscriptions(msg);
 
-        final ProtocolVersion mqttVersion = ctx.channel().attr(ChannelAttributes.MQTT_VERSION).get();
+        final ProtocolVersion mqttVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
         final Mqtt5SubAckReasonCode[] answerCodes = providedCodes != null ? providedCodes : new Mqtt5SubAckReasonCode[msg.getTopics().size()];
 
         final ImmutableList.Builder<ListenableFuture<SubscriptionResult>> singleAddFutures = ImmutableList.builder();

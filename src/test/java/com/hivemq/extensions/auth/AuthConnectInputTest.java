@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.auth;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -36,12 +37,15 @@ public class AuthConnectInputTest {
 
     private CONNECT connect;
     private AuthConnectInput taskInput;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection = new ClientConnection();
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         embeddedChannel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).set(12345L);
 
         connect = new CONNECT.Mqtt5Builder()

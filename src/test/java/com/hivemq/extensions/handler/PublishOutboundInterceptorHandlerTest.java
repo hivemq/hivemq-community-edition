@@ -17,6 +17,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
@@ -89,11 +90,15 @@ public class PublishOutboundInterceptorHandlerTest {
 
     private PublishOutboundInterceptorHandler handler;
 
+    private ClientConnection clientConnection;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection();
         channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
         handler = new PublishOutboundInterceptorHandler(asyncer,
@@ -141,7 +146,7 @@ public class PublishOutboundInterceptorHandlerTest {
         when(clientContext.getPublishOutboundInterceptors()).thenReturn(ImmutableList.of(interceptor));
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.writeOutbound(TestMessageUtil.createFullMqtt5Publish());
         final PUBLISH publish = channel.readOutbound();
         assertNotNull(publish);

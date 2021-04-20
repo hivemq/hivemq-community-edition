@@ -1,21 +1,7 @@
-/*
- * Copyright 2019-present HiveMQ GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -45,10 +31,10 @@ import static org.mockito.Mockito.when;
 public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Mock
-    private MessageDroppedService messageDroppedService;
+    private @NotNull MessageDroppedService messageDroppedService;
 
     @Mock
-    private SecurityConfigurationService securityConfigurationService;
+    private @NotNull SecurityConfigurationService securityConfigurationService;
 
     @Before
     public void before() {
@@ -156,7 +142,8 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(new TestMessageEncoder(messageDroppedService, securityConfigurationService));
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(disconnect);
         final ByteBuf buf = channel.readOutbound();
@@ -231,7 +218,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid fixed header"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid fixed header"));
 
     }
 
@@ -253,7 +240,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid reason code"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid reason code"));
 
     }
 
@@ -278,7 +265,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed properties length"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed properties length"));
 
     }
 
@@ -305,7 +292,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("remaining length too short"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("remaining length too short"));
 
     }
 
@@ -334,7 +321,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("with payload"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("with payload"));
 
     }
 
@@ -363,7 +350,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("session expiry interval was set to zero"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("session expiry interval was set to zero"));
 
     }
 
@@ -378,7 +365,8 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         //from connect
         channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(50L);
 
-        channel.attr(ChannelAttributes.MQTT_VERSION).set(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = new byte[]{
 
@@ -427,7 +415,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
 
     }
 
@@ -454,7 +442,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("remaining length too short"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("remaining length too short"));
 
     }
 
@@ -482,7 +470,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
 
     }
 
@@ -509,7 +497,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -536,7 +524,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -563,7 +551,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -590,7 +578,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -618,7 +606,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("included more than once"));
 
     }
 
@@ -645,7 +633,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -672,7 +660,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -699,7 +687,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -726,7 +714,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed UTF-8 string"));
 
     }
 
@@ -751,7 +739,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -775,7 +763,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -799,7 +787,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -823,7 +811,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -847,7 +835,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -871,7 +859,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -895,7 +883,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("malformed user property"));
     }
 
     @Test
@@ -919,11 +907,11 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
-        assertEquals(true, logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid property identifier '-1'"));
+        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid property identifier '-1'"));
     }
 
     @NotNull
-    private DISCONNECT decode(final byte[] encoded) {
+    private DISCONNECT decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
