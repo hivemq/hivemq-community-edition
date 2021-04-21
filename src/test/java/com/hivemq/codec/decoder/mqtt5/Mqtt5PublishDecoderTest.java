@@ -30,7 +30,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Before
     public void before() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test
@@ -1136,7 +1137,9 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Test
     public void decode_noTopicAliasFound_returnsNull() {
-
+        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(1024 * 1024 * 200);
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
 
         final byte[] encodedWithTopicName = {
