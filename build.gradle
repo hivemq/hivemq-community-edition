@@ -122,7 +122,7 @@ dependencies {
     }
 
     /* config - xml */
-    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property('jakarta.version')}")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property('jakarta-xml-bind.version')}")
     runtimeOnly("com.sun.xml.bind:jaxb-impl:${property('jaxb.version')}")
 
     /* metrics */
