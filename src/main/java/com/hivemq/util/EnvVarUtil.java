@@ -35,6 +35,8 @@ public class EnvVarUtil {
 
     private static final Logger log = LoggerFactory.getLogger(EnvVarUtil.class);
 
+    private static final @NotNull String ENV_VAR_PATTERN = "\\$\\{(ENV:)*(.*?)}";
+
     /**
      * Get a Java system property or system environment variable with the specified name.
      * If a variable with the same name exists in both targets the Java system property is returned.
@@ -53,7 +55,7 @@ public class EnvVarUtil {
     }
 
     /**
-     * Replaces placeholders like '${VAR_NAME}' with the according environment variables.
+     * Replaces placeholders like '${VAR_NAME}' and '${ENV:VAR_NAME}' with the according environment variables.
      *
      * @param text the text which contains placeholders (or not)
      * @return the text with all the placeholders replaced
@@ -63,19 +65,19 @@ public class EnvVarUtil {
 
         final StringBuffer resultString = new StringBuffer();
 
-        final Matcher matcher = Pattern.compile("\\$\\{(.*?)\\}")
+        final Matcher matcher = Pattern.compile(ENV_VAR_PATTERN)
                 .matcher(text);
 
         while (matcher.find()) {
 
-            if (matcher.groupCount() < 1) {
-                //this should never happen
+            if (matcher.groupCount() < 2) {
+                //this should never happen as we declared 2 groups in the ENV_VAR_PATTERN
                 log.warn("Found unexpected environment variable placeholder in config.xml");
                 matcher.appendReplacement(resultString, "");
                 continue;
             }
 
-            final String varName = matcher.group(1);
+            final String varName = matcher.group(2);
 
             final String replacement = getValue(varName);
 
