@@ -247,7 +247,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         checkNotNull(client, "Clientid must not be null");
         checkNotNull(topic, "Topic must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
-        removeSubscriptions(client, ImmutableSet.<String>builder().add(topic).build(), timestamp, bucketIndex);
+        removeSubscriptions(client, ImmutableSet.of(topic), timestamp, bucketIndex);
     }
 
     @Override
