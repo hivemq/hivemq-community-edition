@@ -109,14 +109,12 @@ dependencies {
     implementation("org.slf4j:jul-to-slf4j:${property("slf4j.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
 
-    /* security - bouncycastle */
+    /* security */
     implementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
     implementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
 
-    /* persistence - rocksdb */
+    /* persistence */
     implementation("org.rocksdb:rocksdbjni:${property("rocksdb.version")}")
-
-    /* persistence - xodus */
     implementation("org.jetbrains.xodus:xodus-openAPI:${property("xodus.version")}") {
         exclude("org.jetbrains", "annotations")
     }
@@ -124,7 +122,7 @@ dependencies {
         exclude("org.jetbrains", "annotations")
     }
 
-    /* config - xml */
+    /* config */
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property("jakarta-xml-bind.version")}")
     runtimeOnly("com.sun.xml.bind:jaxb-impl:${property("jaxb.version")}")
 
@@ -132,8 +130,6 @@ dependencies {
     api("io.dropwizard.metrics:metrics-core:${property("metrics.version")}")
     implementation("io.dropwizard.metrics:metrics-jmx:${property("metrics.version")}")
     runtimeOnly("io.dropwizard.metrics:metrics-logback:${property("metrics.version")}")
-
-    /* metrics - oshi */
     implementation("com.github.oshi:oshi-core:${property("oshi.version")}")
     // net.java.dev.jna:jna (transitive dependency of com.github.oshi:oshi-core) is used in imports
 
@@ -144,27 +140,18 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
     // javax.inject:javax.inject (transitive dependency of com.google.inject:guice) is used in imports
 
-    /* common - apache */
+    /* common */
     implementation("commons-io:commons-io:${property("commons-io.version")}")
     implementation("org.apache.commons:commons-lang3:${property("commons-lang.version")}")
-
-    /* common - guava */
     implementation("com.google.guava:guava:${property("guava.version")}") {
         exclude("org.checkerframework", "checker-qual")
         exclude("com.google.errorprone", "error_prone_annotations")
         exclude("org.codehaus.mojo", "animal-sniffer-annotations")
     }
     // com.google.code.findbugs:jsr305 (transitive dependency of com.google.guava:guava) is used in imports
-
-    /* hashing */
     implementation("net.openhft:zero-allocation-hashing:${property("zero-allocation-hashing.version")}")
-
-    /* jackson */
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
-
-    /* JCTools*/
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
-
 
     /* temporary dependencies to override transitive ones that have security vulnerabilities */
     constraints {
@@ -182,13 +169,12 @@ dependencies {
     testImplementation("nl.jqno.equalsverifier:equalsverifier:${property("equalsverifier.version")}")
     testImplementation("net.jodah:concurrentunit:${property("concurrentunit.version")}")
     testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property("shrinkwrap.version")}")
+    testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
     testImplementation("net.bytebuddy:byte-buddy:${property("bytebuddy.version")}")
     testImplementation("com.github.tomakehurst:wiremock-standalone:${property("wiremock.version")}")
     testImplementation("com.github.stefanbirkner:system-rules:${property("system-rules.version")}") {
         exclude("junit", "junit-dep")
     }
-
-    testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
 }
 
 tasks.test {
