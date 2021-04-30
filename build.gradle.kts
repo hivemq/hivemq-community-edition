@@ -171,7 +171,12 @@ dependencies {
         implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlin.version")}")
         implementation("org.apache.commons:commons-compress:${property("commons-compress.version")}")
     }
+}
 
+
+/* ******************** test ******************** */
+
+dependencies {
     testImplementation("junit:junit:${property("junit.version")}")
     testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
     testImplementation("nl.jqno.equalsverifier:equalsverifier:${property("equalsverifier.version")}")
@@ -184,13 +189,7 @@ dependencies {
     }
 
     testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
-
-    //plugins for spotbugs
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0")
 }
-
-
-/* ******************** test ******************** */
 
 tasks.test {
     jvmArgs(
@@ -301,6 +300,10 @@ spotbugs {
     toolVersion.set("${property("spotbugs.version")}")
     ignoreFailures.set(true)
     reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
+}
+
+dependencies {
+    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0")
 }
 
 dependencyCheck {
