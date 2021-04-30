@@ -224,7 +224,7 @@ tasks.test {
 }
 
 
-/* ******************** packaging ******************** */
+/* ******************** distribution ******************** */
 
 tasks.jar {
     manifest.attributes(
@@ -249,7 +249,7 @@ val hivemqZip by tasks.registering(Zip::class) {
     destinationDirectory.set(buildDir.resolve("zip"))
     archiveFileName.set("$name.zip")
 
-    from(projectDir.resolve("src/packaging")) { exclude("**/.gitkeep") }
+    from(projectDir.resolve("src/distribution")) { exclude("**/.gitkeep") }
     from(projectDir.resolve("src/main/resources/config.xml")) { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
@@ -438,8 +438,8 @@ val updateThirdPartyLicenses by tasks.registering {
             args(
                 "$projectDir/gradle/tools/license-third-party-tool-2.0.jar",
                 "$buildDir/reports/license/dependency-license.xml",
-                "$projectDir/src/packaging/third-party-licenses/licenses",
-                "$projectDir/src/packaging/third-party-licenses/licenses.html"
+                "$projectDir/src/distribution/third-party-licenses/licenses",
+                "$projectDir/src/distribution/third-party-licenses/licenses.html"
             )
         }
     }
