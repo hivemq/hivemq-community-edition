@@ -247,29 +247,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         checkNotNull(client, "Clientid must not be null");
         checkNotNull(topic, "Topic must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
-
-        final Bucket bucket = buckets[bucketIndex];
-        bucket.getEnvironment().executeInTransaction(txn -> {
-
-            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-
-                final ByteIterable clientByteIterable = bytesToByteIterable(serializer.serializeKey(client));
-                final ByteIterable topicByteIterable = bytesToByteIterable(serializer.serializeTopic(topic));
-
-                while (cursor.getSearchBothRange(clientByteIterable, topicByteIterable) != null) {
-
-                    final ByteIterable byteIterable = cursor.getValue();
-
-                    final Topic value = serializer.deserializeValue(byteIterable);
-
-                    if (value.getTopic().equals(topic)) {
-                        cursor.deleteCurrent();
-                    } else {
-                        return;
-                    }
-                }
-            }
-        });
+        removeSubscriptions(client, ImmutableSet.<String>builder().add(topic).build(), timestamp, bucketIndex);
     }
 
     @Override

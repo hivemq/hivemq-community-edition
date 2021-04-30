@@ -89,6 +89,54 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
         }
     }
 
+    @Test(timeout = 80_000)
+    public void remove_whenSubscriptionsAreNotPresent_thenRemoveCallTakesReasonableTime() {
+        final Topic topic1 = new Topic("topic", QoS.AT_LEAST_ONCE);
+        final long startPut = System.currentTimeMillis();
+
+        for (int i = 1; i < 1_000_000; i++) {
+            final String clientId = "client" + String.format("%010d", i);
+            persistence.addSubscription(clientId, topic1, 123L, 0);
+        }
+        System.out.println("Duration Put: " + (System.currentTimeMillis() - startPut) / 1000 + "s.");
+
+        // test client nt existing
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            // System.out.println("Remove " + i);
+            persistence.remove("client" + String.format("%010d", 0), "topic", 123L, 0);
+        }
+        System.out.println("Duration Remove client not existing: " + (System.currentTimeMillis() - start) / 1000 + "s.");
+
+        // test topic not existing
+        start = System.currentTimeMillis();
+        for (int i = 1; i < 11; i++) {
+            //   System.out.println("Remove " + i);
+            persistence.remove("client" + String.format("%010d", i), "topic_not_existing", 123L, 0);
+        }
+        System.out.println("Duration Remove topic not existing: " + (System.currentTimeMillis() - start) / 1000 + "s.");
+    }
+
+    @Test(timeout = 80_000)
+    public void remove_whenSubscriptionsArePresent_thenRemoveCallTakesReasonableTime() {
+        final Topic topic1 = new Topic("topic", QoS.AT_LEAST_ONCE);
+        final long startPut = System.currentTimeMillis();
+
+        for (int i = 1; i < 1_000_000; i++) {
+            final String clientId = "client" + String.format("%010d", i);
+            persistence.addSubscription(clientId, topic1, 123L, 0);
+        }
+        System.out.println("Duration Put: " + (System.currentTimeMillis() - startPut) / 1000 + "s.");
+
+        // test client nt existing
+        final long start = System.currentTimeMillis();
+        for (int i = 1; i < 10_000; i++) {
+            // System.out.println("Remove " + i);
+            persistence.remove("client" + String.format("%010d", i), "topic", 123L, 0);
+        }
+        System.out.println("Duration Remove client not existing: " + (System.currentTimeMillis() - start) / 1000 + "s.");
+    }
+
     @Test
     public void test_add_get_subscriptions() {
 
