@@ -16,10 +16,10 @@ HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x a
 HiveMQ CE is the foundation of the HiveMQ enterprise-connectivity and messaging platform and implements all MQTT features.
 This project is the technical core of many large MQTT deployments and is now available as open source software under the Apache 2 license.
 
-* Web Site: https://www.hivemq.com/
+* Website: https://www.hivemq.com/
 * Documentation: https://github.com/hivemq/hivemq-community-edition/wiki
 * Community Forum: https://community.hivemq.com/
-* Contribution Guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
+* Contribution guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
 * License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
 
 == Features
@@ -61,8 +61,12 @@ The ideal place for questions or discussions about the HiveMQ Community Edition 
 [source,bash]
 ----
 cd hivemq-ce-<version>
-./bin/run.sh
+bin/run.sh
 ----
+
+[IMPORTANT]
+At least Java version 11 is required to run HiveMQ CE.
+If you are in doubt, you can check the installed Java version by entering `java -version` on your command line.
 
 You can now connect MQTT clients to `<ip address>:1883`.
 
@@ -92,12 +96,6 @@ docker run --name hivemq-ce -e HIVEMQ_LOG_LEVEL=INFO -d -p 1883:1883 hivemq/hive
 
 === Building from Source
 
-==== Prerequisites
-
-At least Java version 11 is required to build and run HiveMQ CE.
-
-If you are in doubt, you can check the installed Java version by entering `java -version` on your command line.
-
 ==== Building the Binary Package
 
 Check out the git repository and build the binary package.
@@ -108,7 +106,7 @@ git clone https://github.com/hivemq/hivemq-community-edition.git
 
 cd hivemq-community-edition
 
-./gradlew clean packaging
+./gradlew
 ----
 
 The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
@@ -124,24 +122,11 @@ git clone https://github.com/hivemq/hivemq-community-edition.git
 cd hivemq-community-edition
 
 docker/build.sh
-
-docker run hivemq/hivemq-ce
 ----
 
 The Docker image `hivemq/hivemq-ce` is created locally.
 
 You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
-
-==== Start
-
-Unzip the created binary package
-
-[source,bash]
-----
-cd hivemq-ce-<version>
-
-./bin/run.sh
-----
 
 For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
 
@@ -149,19 +134,19 @@ For further development instructions see the link:CONTRIBUTING.adoc[contribution
 
 HiveMQ Community Edition offers an embedded mode and a programmatic API for integrating with Java/Java EE software.
 
-===== Gradle
+==== Gradle
 
-If you use Gradle, include the following code in your `build.gradle` file.
+If you use Gradle, include the following code in your `build.gradle(.kts)` file.
 
 [source,groovy]
 ----
 
 dependencies {
-    implementation 'com.hivemq:hivemq-community-edition-embedded:2021.1'
+    implementation("com.hivemq:hivemq-community-edition-embedded:2021.1")
 }
 ----
 
-===== Maven
+==== Maven
 
 If you use Maven, include the following code in your `pom.xml` file.
 

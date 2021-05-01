@@ -143,25 +143,3 @@ As soon as your code is ready for a https://help.github.com/en/articles/creating
 Once the continuous integration is successful and at least one member of the HiveMQ Development Team has approved the changes, you will be asked to rebase and squash before the pull request can be merged.
 
 We greatly appreciate your involvement and contribution.
-
-== Important gradle tasks
-
-To make it easier to develop HiveMQ CE and HiveMQ Extensions, we have provided some `gradle` tasks to help you get started quickly.
-
-.Build the complete HiveMQ CE zip file
-[source,gradle]
-----
-./gradlew packaging
-----
-
-.Perform all unit tests
-[source,gradle]
-----
-./gradlew check
-----
-
-.Publish the Extension SDK to your local maven repository
-[source,gradle]
-----
-./gradlew publishToMavenLocal
-----
