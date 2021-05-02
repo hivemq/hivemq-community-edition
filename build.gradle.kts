@@ -96,7 +96,7 @@ repositories {
 dependencies {
     api("com.hivemq:hivemq-extension-sdk:${property("hivemq-extension-sdk.version")}")
 
-    /* netty */
+    // netty
     implementation("io.netty:netty-buffer:${property("netty.version")}")
     implementation("io.netty:netty-codec:${property("netty.version")}")
     implementation("io.netty:netty-codec-http:${property("netty.version")}")
@@ -104,16 +104,16 @@ dependencies {
     implementation("io.netty:netty-handler:${property("netty.version")}")
     implementation("io.netty:netty-transport:${property("netty.version")}")
 
-    /* logging */
+    // logging
     implementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("org.slf4j:jul-to-slf4j:${property("slf4j.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
 
-    /* security */
+    // security
     implementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
     implementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
 
-    /* persistence */
+    // persistence
     implementation("org.rocksdb:rocksdbjni:${property("rocksdb.version")}")
     implementation("org.jetbrains.xodus:xodus-openAPI:${property("xodus.version")}") {
         exclude("org.jetbrains", "annotations")
@@ -121,26 +121,31 @@ dependencies {
     implementation("org.jetbrains.xodus:xodus-environment:${property("xodus.version")}") {
         exclude("org.jetbrains", "annotations")
     }
+    // override transitive dependencies of xodus that have security vulnerabilities
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlin.version")}")
+        implementation("org.apache.commons:commons-compress:${property("commons-compress.version")}")
+    }
 
-    /* config */
+    // config
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property("jakarta-xml-bind.version")}")
     runtimeOnly("com.sun.xml.bind:jaxb-impl:${property("jaxb.version")}")
 
-    /* metrics */
+    // metrics
     api("io.dropwizard.metrics:metrics-core:${property("metrics.version")}")
     implementation("io.dropwizard.metrics:metrics-jmx:${property("metrics.version")}")
     runtimeOnly("io.dropwizard.metrics:metrics-logback:${property("metrics.version")}")
     implementation("com.github.oshi:oshi-core:${property("oshi.version")}")
     // net.java.dev.jna:jna (transitive dependency of com.github.oshi:oshi-core) is used in imports
 
-    /* dependency injection */
+    // dependency injection
     implementation("com.google.inject:guice:${property("guice.version")}") {
         exclude("com.google.guava", "guava")
     }
     implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
     // javax.inject:javax.inject (transitive dependency of com.google.inject:guice) is used in imports
 
-    /* common */
+    // common
     implementation("commons-io:commons-io:${property("commons-io.version")}")
     implementation("org.apache.commons:commons-lang3:${property("commons-lang.version")}")
     implementation("com.google.guava:guava:${property("guava.version")}") {
@@ -152,12 +157,6 @@ dependencies {
     implementation("net.openhft:zero-allocation-hashing:${property("zero-allocation-hashing.version")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
-
-    /* temporary dependencies to override transitive ones that have security vulnerabilities */
-    constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlin.version")}")
-        implementation("org.apache.commons:commons-compress:${property("commons-compress.version")}")
-    }
 }
 
 
