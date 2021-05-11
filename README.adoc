@@ -106,7 +106,7 @@ git clone https://github.com/hivemq/hivemq-community-edition.git
 
 cd hivemq-community-edition
 
-./gradlew
+./gradlew hivemqZip
 ----
 
 The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
