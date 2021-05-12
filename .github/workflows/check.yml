@@ -25,4 +25,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Check
-        run: ./gradlew test license forbiddenApis javadoc packaging
+        run: ./gradlew test license forbiddenApis javadoc
