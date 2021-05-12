@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: 'hivemq/hivemq-extension-sdk'
-          path: '../hivemq-extension-sdk'
           ref: '${GITHUB_REF##*/}'
       - name: Setup Java
         uses: actions/setup-java@v2
