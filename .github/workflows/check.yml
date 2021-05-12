@@ -9,10 +9,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Checkout Extension SDK
-        uses: actions/checkout@v2
-        with:
-          repository: 'hivemq/hivemq-extension-sdk'
-          ref: '${GITHUB_REF##*/}'
+        run:
+          git clone https://github.com/hivemq/hivemq-extension-sdk.git ../hivemq-extension-sdk
+          cd ../hivemq-extension-sdk
+          git checkout ${GITHUB_REF##*/} || true
+          cd ../hivemq-community-edition
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
