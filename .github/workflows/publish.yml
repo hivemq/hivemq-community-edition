@@ -1,26 +1,38 @@
-name: Publish to Maven Central
+name: Publish to Maven Central and Dockerhub
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 jobs:
-  build:
+  publish:
+    environment: mavenCentralPublish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Checkout Extension SDK
+        uses: actions/checkout@v2
+        with:
+          repository: 'hivemq/hivemq-extension-sdk'
+          path: '../hivemq-extension-sdk'
+          ref: '${GITHUB_REF##*/}'
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '11'
-      - name: Check
-        run: ./graldew check
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Publish to Maven Central
         env:
           ORG_GRADLE_PROJECT_signKey: ${{ secrets.SIGN_KEY }}
           ORG_GRADLE_PROJECT_signKeyPass: ${{ secrets.SIGN_KEY_PASS }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
-        run: ./gradlew publishEmbeddedPublicationToSonatype closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+      - name: Push To Dockerhub
+        run: PUSH_IMAGE=true docker/build.sh
