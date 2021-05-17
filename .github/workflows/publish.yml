@@ -36,3 +36,11 @@ jobs:
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
       - name: Push To Docker Hub
         run: PUSH_IMAGE=true docker/build.sh
+      - name: Build HiveMQ Zip
+        run: ./gradlew hivemqZip
+      - name: Attach Zip to GitHub Release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: ./build/zip/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
