@@ -38,9 +38,11 @@ jobs:
         run: PUSH_IMAGE=true docker/build.sh
       - name: Build HiveMQ Zip
         run: ./gradlew hivemqZip
+      - name: Locate HiveMQ Zip
+        run: ZIP_NAME=$(printf '%s\n' build/zip/*.zip)
       - name: Attach Zip to GitHub Release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ./build/zip/*.zip
+          args: $${ env.ZIP_NAME }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
