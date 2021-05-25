@@ -39,7 +39,7 @@ jobs:
       - name: Build HiveMQ Zip
         run: |
           ./gradlew hivemqZip
-          ZIP_NAME=$(printf '%s\n' build/zip/*.zip)
+          export ZIP_NAME=$(printf '%s\n' build/zip/*.zip)
       - name: Attach Zip to GitHub Release
         uses: JasonEtco/upload-to-release@master
         with:
