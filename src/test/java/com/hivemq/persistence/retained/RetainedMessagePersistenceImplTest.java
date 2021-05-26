@@ -45,6 +45,8 @@ import static org.mockito.Mockito.*;
  */
 public class RetainedMessagePersistenceImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -65,7 +67,7 @@ public class RetainedMessagePersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         retainedMessagePersistence =
@@ -77,6 +79,7 @@ public class RetainedMessagePersistenceImplTest {
     public void tearDown() throws Exception {
         retainedMessagePersistence.closeDB();
         singleWriterService.stop();
+        closeableMock.close();
     }
 
     @Test(expected = NullPointerException.class)

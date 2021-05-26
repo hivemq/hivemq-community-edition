@@ -38,6 +38,8 @@ import static org.mockito.Mockito.when;
 
 public class DiagnosticModeTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -58,7 +60,7 @@ public class DiagnosticModeTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         hivemqHomeFolder = temporaryFolder.newFolder();
 
         when(diagnosticData.get()).thenReturn("value");
@@ -74,6 +76,7 @@ public class DiagnosticModeTest {
         if (diagnosticMode != null) {
             diagnosticMode.stop();
         }
+        closeableMock.close();
     }
 
     @Test(timeout = 5000)

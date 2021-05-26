@@ -50,6 +50,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class RetainedMessageXodusLocalPersistenceTest {
 
+    private AutoCloseable closeableMock;
+
     private static final int BUCKETSIZE = 4;
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -66,7 +68,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
@@ -94,9 +96,10 @@ public class RetainedMessageXodusLocalPersistenceTest {
     }
 
     @After
-    public void cleanUp() throws InterruptedException {
+    public void cleanUp() throws Exception {
         persistence.closeDB();
         persistenceStartup.finish();
+        closeableMock.close();
     }
 
     @Test

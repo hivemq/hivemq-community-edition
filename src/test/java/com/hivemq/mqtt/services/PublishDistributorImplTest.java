@@ -59,6 +59,8 @@ import static org.mockito.Mockito.when;
  */
 public class PublishDistributorImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -76,7 +78,7 @@ public class PublishDistributorImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         publishDistributor = new PublishDistributorImpl(payloadPersistence, clientQueuePersistence, clientSessionPersistence,
                 singleWriterService, mqttConfigurationService);
@@ -85,6 +87,7 @@ public class PublishDistributorImplTest {
     @After
     public void tearDown() throws Exception {
         singleWriterService.stop();
+        closeableMock.close();
     }
 
     @Test(timeout = 5000)

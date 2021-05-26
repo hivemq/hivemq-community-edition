@@ -24,6 +24,7 @@ import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -33,11 +34,13 @@ import static org.mockito.Mockito.mock;
 
 public class ThrottlingModuleTest {
 
+    private AutoCloseable closeableMock;
+
     private Injector injector;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -48,6 +51,11 @@ public class ThrottlingModuleTest {
                 bind(MqttConnacker.class).toInstance(mock(MqttConnacker.class));
             }
         });
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeableMock.close();
     }
 
     @Test

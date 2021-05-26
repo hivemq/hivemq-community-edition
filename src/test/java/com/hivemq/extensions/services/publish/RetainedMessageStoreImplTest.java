@@ -54,6 +54,8 @@ import static org.mockito.Mockito.when;
  */
 public class RetainedMessageStoreImplTest {
 
+    private AutoCloseable closeableMock;
+
     private RetainedMessageStore retainedMessageStore;
 
     @Mock
@@ -69,7 +71,7 @@ public class RetainedMessageStoreImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
         retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService, pluginServiceRateLimitService, asyncIteratorFactory);
@@ -79,6 +81,7 @@ public class RetainedMessageStoreImplTest {
     @After
     public void tearDown() throws Exception {
         managedPluginExecutorService.shutdown();
+        closeableMock.close();
     }
 
     @Test(expected = RateLimitExceededException.class)
