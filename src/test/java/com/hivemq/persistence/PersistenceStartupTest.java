@@ -34,6 +34,8 @@ import static org.mockito.Mockito.verify;
  */
 public class PersistenceStartupTest {
 
+    private AutoCloseable closeableMock;
+
     private PersistenceStartup persistenceStartup;
 
     @Mock
@@ -41,7 +43,7 @@ public class PersistenceStartupTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
     }
 
     @After
@@ -49,6 +51,7 @@ public class PersistenceStartupTest {
         if (persistenceStartup != null) {
             persistenceStartup.finish();
         }
+        closeableMock.close();
     }
 
     @Test

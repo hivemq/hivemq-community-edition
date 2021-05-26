@@ -57,6 +57,8 @@ import static org.mockito.Mockito.when;
  */
 public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -71,7 +73,7 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
@@ -87,9 +89,10 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
     }
 
     @After
-    public void cleanUp() throws InterruptedException {
+    public void cleanUp() throws Exception {
         persistence.closeDB();
         persistenceStartup.finish();
+        closeableMock.close();
     }
 
     @Test

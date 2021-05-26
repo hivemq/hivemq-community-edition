@@ -63,6 +63,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientQueuePersistenceImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -97,7 +99,7 @@ public class ClientQueuePersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         when(mqttConfigurationService.maxQueuedMessages()).thenReturn(1000L);
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
@@ -111,6 +113,7 @@ public class ClientQueuePersistenceImplTest {
     public void tearDown() throws Exception {
         clientQueuePersistence.closeDB();
         singleWriterService.stop();
+        closeableMock.close();
     }
 
     @Test(timeout = 5000)

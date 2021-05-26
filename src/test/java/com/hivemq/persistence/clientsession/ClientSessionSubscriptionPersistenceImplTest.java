@@ -58,6 +58,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientSessionSubscriptionPersistenceImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -88,7 +90,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         when(topicTree.addTopic(anyString(), any(Topic.class), anyByte(), anyString())).thenReturn(true);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence, topicTree, sharedSubscriptionService, singleWriterService, channelPersistence, eventLog, clientSessionLocalPersistence, publishPollService, new Chunker(), mock(MqttServerDisconnector.class));
@@ -98,6 +100,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void tearDown() throws Exception {
         persistence.closeDB();
         singleWriterService.stop();
+        closeableMock.close();
     }
 
     @Test(timeout = 60000)

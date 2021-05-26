@@ -60,6 +60,8 @@ import static org.mockito.Mockito.when;
  */
 public class ClientSessionPersistenceImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -87,7 +89,7 @@ public class ClientSessionPersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence, clientQueuePersistence,
                 singleWriterService, channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
@@ -98,6 +100,7 @@ public class ClientSessionPersistenceImplTest {
     public void tearDown() throws Exception {
         singleWriterService.stop();
         clientSessionPersistence.closeDB();
+        closeableMock.close();
     }
 
     @Test

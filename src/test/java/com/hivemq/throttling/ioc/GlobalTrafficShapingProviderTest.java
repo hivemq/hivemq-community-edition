@@ -29,6 +29,8 @@ import static org.mockito.Mockito.*;
 
 public class GlobalTrafficShapingProviderTest {
 
+    private AutoCloseable closeableMock;
+
     @Mock
     private RestrictionsConfigurationService configurationService;
 
@@ -36,7 +38,7 @@ public class GlobalTrafficShapingProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         when(configurationService.incomingLimit()).thenReturn(20L);
 
         shutdownHooks = new ShutdownHooks();
@@ -47,6 +49,7 @@ public class GlobalTrafficShapingProviderTest {
         for (final HiveMQShutdownHook hook : shutdownHooks.getSynchronousHooks().values()) {
             hook.run();
         }
+        closeableMock.close();
     }
 
     @Test

@@ -74,6 +74,8 @@ import static org.mockito.Mockito.*;
  */
 public class PublishPollServiceImplTest {
 
+    private AutoCloseable closeableMock;
+
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
@@ -116,7 +118,7 @@ public class PublishPollServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeableMock = MockitoAnnotations.openMocks(this);
         when(messageIDPools.forClient(anyString())).thenReturn(messageIDPool);
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
@@ -136,6 +138,7 @@ public class PublishPollServiceImplTest {
     @After
     public void tearDown() throws Exception {
         singleWriterService.stop();
+        closeableMock.close();
     }
 
     @Test
