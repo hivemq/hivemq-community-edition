@@ -9,12 +9,12 @@ plugins {
     signing
     id("io.github.gradle-nexus.publish-plugin")
     id("com.github.johnrengelman.shadow")
-    id("com.github.hierynomus.license")
-    id("org.owasp.dependencycheck")
     id("com.github.sgtsilvio.gradle.utf8")
     id("com.github.sgtsilvio.gradle.metadata")
     id("com.github.sgtsilvio.gradle.javadoc-links")
     id("com.github.breadmoirai.github-release")
+    id("com.github.hierynomus.license")
+    id("org.owasp.dependencycheck")
     id("com.github.ben-manes.versions")
 
     /* Code Quality Plugins */
@@ -145,7 +145,6 @@ dependencies {
     implementation("com.google.guava:guava:${property("guava.version")}") {
         exclude("org.checkerframework", "checker-qual")
         exclude("com.google.errorprone", "error_prone_annotations")
-        exclude("org.codehaus.mojo", "animal-sniffer-annotations")
     }
     // com.google.code.findbugs:jsr305 (transitive dependency of com.google.guava:guava) is used in imports
     implementation("net.openhft:zero-allocation-hashing:${property("zero-allocation-hashing.version")}")
@@ -171,6 +170,8 @@ dependencies {
 }
 
 tasks.test {
+    minHeapSize = "128m"
+    maxHeapSize = "2048m"
     jvmArgs(
         "-Dfile.encoding=UTF-8",
         "--add-opens",
@@ -184,8 +185,6 @@ tasks.test {
         "--add-exports",
         "java.base/jdk.internal.misc=ALL-UNNAMED"
     )
-    minHeapSize = "128m"
-    maxHeapSize = "2048m"
 
     val inclusions = rootDir.resolve("inclusions.txt")
     val exclusions = rootDir.resolve("exclusions.txt")
