@@ -35,12 +35,15 @@ public class MigrationsTest {
 
     @Test
     public void test_check_development_snapshot() {
-        assertEquals(0, Migrations.checkForTypeMigration(new SystemInformationImpl()).size());
+        final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
+        assertEquals(0, Migrations.checkForTypeMigration(systemInformation).size());
     }
 
     @Test
     public void test_check_no_data_folder_present() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         systemInformation.getDataFolder().delete();
         assertEquals(0, Migrations.checkForTypeMigration(systemInformation).size());
@@ -49,6 +52,7 @@ public class MigrationsTest {
     @Test
     public void test_check_no_meta_and_no_persistence_folder() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         assertEquals(0, Migrations.checkForTypeMigration(systemInformation).size());
     }
@@ -56,6 +60,7 @@ public class MigrationsTest {
     @Test
     public void test_check_no_meta_but_persistence_folder_but_no_previous_persistences_found() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
         assertEquals(0, Migrations.checkForTypeMigration(systemInformation).size());
@@ -64,6 +69,7 @@ public class MigrationsTest {
     @Test
     public void test_check_no_meta_but_persistence_folder_and_previous_payload_persistence_found() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("4.3.0");
         final File persistenceFolder = new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
         persistenceFolder.mkdir();
@@ -74,6 +80,7 @@ public class MigrationsTest {
     @Test
     public void test_check_no_meta_but_persistence_folder_and_previous_retained_persistence_found() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("4.3.0");
         final File persistenceFolder = new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
         persistenceFolder.mkdir();
@@ -84,6 +91,7 @@ public class MigrationsTest {
     @Test
     public void test_check_no_meta_but_persistence_folder_and_previous_retained_persistence_and_payload_found() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("4.3.0");
         final File persistenceFolder = new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
         persistenceFolder.mkdir();
@@ -95,6 +103,7 @@ public class MigrationsTest {
     @Test
     public void test_check_with_meta_was_file() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("4.3.0");
 
         final MetaInformation metaInformation = new MetaInformation();
@@ -113,6 +122,7 @@ public class MigrationsTest {
     @Test
     public void test_check_with_meta_was_file_native() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("4.3.0");
 
         final MetaInformation metaInformation = new MetaInformation();

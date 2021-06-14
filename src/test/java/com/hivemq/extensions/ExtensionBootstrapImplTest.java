@@ -83,11 +83,13 @@ public class ExtensionBootstrapImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
+        final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         extensionLifecycleHandler =
                 new ExtensionLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
         pluginBootstrap = new ExtensionBootstrapImpl(extensionLoader,
-                new SystemInformationImpl(),
+                systemInformation,
                 extensionLifecycleHandler,
                 hiveMQExtensions,
                 shutdownHooks,
