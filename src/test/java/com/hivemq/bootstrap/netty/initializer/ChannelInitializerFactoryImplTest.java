@@ -233,6 +233,11 @@ public class ChannelInitializerFactoryImplTest {
         }
 
         @Override
+        public void setPort(final int port) {
+
+        }
+
+        @Override
         public String getBindAddress() {
             return null;
         }

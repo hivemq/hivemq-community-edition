@@ -17,6 +17,7 @@ package com.hivemq.configuration.service.entity;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -31,9 +32,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class TcpListener implements Listener {
 
-    private final int port;
-    private final String name;
+    private int port;
 
+    private final @NotNull String name;
     private final @NotNull String bindAddress;
 
     /**
@@ -42,6 +43,7 @@ public class TcpListener implements Listener {
      * @param port        the port
      * @param bindAddress the bind address
      */
+    @Deprecated
     public TcpListener(final int port, @NotNull final String bindAddress) {
         this(port, bindAddress, "tcp-listener-" + port);
     }
@@ -53,38 +55,33 @@ public class TcpListener implements Listener {
      * @param bindAddress the bind address
      * @param name        the name of the listener
      */
-    public TcpListener(final int port, @NotNull final String bindAddress, final @NotNull String name) {
+    public TcpListener(final int port, final @NotNull String bindAddress, final @NotNull String name) {
 
         checkNotNull(bindAddress, "bindAddress must not be null");
+        checkNotNull(name, "name must not be null");
 
         this.port = port;
         this.bindAddress = bindAddress;
         this.name = name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getPort() {
         return port;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @NotNull
     @Override
-    public String getBindAddress() {
+    public void setPort(final int port) {
+        this.port = port;
+    }
+
+    @Override
+    public @NotNull String getBindAddress() {
         return bindAddress;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @NotNull
     @Override
-    public String readableName() {
+    public @NotNull String readableName() {
         return "TCP Listener";
     }
 
@@ -93,4 +90,49 @@ public class TcpListener implements Listener {
         return name;
     }
 
+    public static class Builder {
+
+        private @Nullable String name;
+        private @Nullable Integer port;
+        private @Nullable String bindAddress;
+
+        public Builder() {
+        }
+
+        public Builder(final @NotNull TcpListener tcpListener) {
+            port = tcpListener.getPort();
+            bindAddress = tcpListener.getBindAddress();
+            name = tcpListener.getName();
+        }
+
+        public @NotNull Builder port(final int port) {
+            this.port = port;
+            return this;
+        }
+
+        public @NotNull Builder bindAddress(final @NotNull String bindAddress) {
+            checkNotNull(bindAddress);
+            this.bindAddress = bindAddress;
+            return this;
+        }
+
+        public @NotNull Builder name(final @NotNull String name) {
+            checkNotNull(name);
+            this.name = name;
+            return this;
+        }
+
+        public @NotNull TcpListener build() throws IllegalStateException {
+            if (port == null) {
+                throw new IllegalStateException("The port for a TCP listener was not set.");
+            }
+            if (bindAddress == null) {
+                throw new IllegalStateException("The bind address for a TCP listener was not set.");
+            }
+            if (name == null) {
+                name = "tcp-listener-" + port;
+            }
+            return new TcpListener(port, bindAddress, name);
+        }
+    }
 }

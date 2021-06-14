@@ -15,9 +15,15 @@
  */
 package com.hivemq.configuration.service.entity;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 /**
  * @author Christoph Schäbel
  */
 public interface TlsListener extends Listener {
-    Tls getTls();
+
+    /**
+     * @return the TLS configuration
+     */
+    @NotNull Tls getTls();
 }

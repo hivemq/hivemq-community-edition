@@ -18,6 +18,7 @@ package com.hivemq.configuration.service.entity;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,25 +37,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class WebsocketListener implements Listener {
 
-    private final @NotNull Integer port;
-
+    private int port;
     private final @NotNull String bindAddress;
-
     private final @NotNull String path;
-
-    private final @NotNull Boolean allowExtensions;
-
+    private final boolean allowExtensions;
     private final @NotNull List<String> subprotocols;
-
     private final @NotNull String name;
 
     protected WebsocketListener(
             final int port,
-            final String bindAddress,
-            final String path,
+            final @NotNull String bindAddress,
+            final @NotNull String path,
             final boolean allowExtensions,
-            final List<String> subprotocols,
-            final String name) {
+            final @NotNull List<String> subprotocols,
+            final @NotNull String name) {
         this.port = port;
         this.bindAddress = bindAddress;
         this.path = path;
@@ -63,33 +59,26 @@ public class WebsocketListener implements Listener {
         this.name = name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getPort() {
         return port;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String getBindAddress() {
+    public void setPort(final int port) {
+        this.port = port;
+    }
+
+    @Override
+    public @NotNull String getBindAddress() {
         return bindAddress;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String readableName() {
+    public @NotNull String readableName() {
         return "Websocket Listener";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public @NotNull String getName() {
         return name;
@@ -98,21 +87,21 @@ public class WebsocketListener implements Listener {
     /**
      * @return the path of the websocket
      */
-    public String getPath() {
+    public @NotNull String getPath() {
         return path;
     }
 
     /**
      * @return if websocket extensions are allowed or not
      */
-    public Boolean getAllowExtensions() {
+    public boolean getAllowExtensions() {
         return allowExtensions;
     }
 
     /**
      * @return a list of all supported subprotocols
      */
-    public List<String> getSubprotocols() {
+    public @NotNull List<String> getSubprotocols() {
         return subprotocols;
     }
 
@@ -121,16 +110,28 @@ public class WebsocketListener implements Listener {
      */
     public static class Builder {
 
-        protected Integer port;
-        protected String bindAddress;
-        protected String path = "";
-        protected String name;
-        protected boolean allowExtensions = false;
-        protected List<String> subprotocols = new ArrayList<>();
+        protected @NotNull String path;
+        protected @NotNull List<String> subprotocols;
+
+        protected @Nullable String name;
+        protected @Nullable Integer port;
+        protected @Nullable String bindAddress;
+        protected boolean allowExtensions;
 
         public Builder() {
-            //Add default subprotocol which is required by the MQTT spec
-            subprotocols.add("mqtt");
+            path = "";
+            subprotocols = new ArrayList<>();
+            subprotocols.add("mqtt"); //Add default subprotocol which is required by the MQTT spec
+            allowExtensions = false;
+        }
+
+        public Builder(final @NotNull WebsocketListener websocketListener) {
+            port = websocketListener.getPort();
+            bindAddress = websocketListener.getBindAddress();
+            path = websocketListener.getPath();
+            name = websocketListener.getName();
+            allowExtensions = websocketListener.getAllowExtensions();
+            subprotocols = new ArrayList<>(websocketListener.getSubprotocols());
         }
 
         /**
@@ -139,8 +140,7 @@ public class WebsocketListener implements Listener {
          * @param port the port
          * @return the Builder
          */
-        @NotNull
-        public Builder port(final int port) {
+        public @NotNull Builder port(final int port) {
             this.port = port;
             return this;
         }
@@ -151,8 +151,7 @@ public class WebsocketListener implements Listener {
          * @param bindAddress the bind address
          * @return the Builder
          */
-        @NotNull
-        public Builder bindAddress(final @NotNull String bindAddress) {
+        public @NotNull Builder bindAddress(final @NotNull String bindAddress) {
             checkNotNull(bindAddress);
             this.bindAddress = bindAddress;
             return this;
@@ -164,8 +163,7 @@ public class WebsocketListener implements Listener {
          * @param path the path
          * @return the Builder
          */
-        @NotNull
-        public Builder path(final @NotNull String path) {
+        public @NotNull Builder path(final @NotNull String path) {
             checkNotNull(path);
             this.path = path;
             return this;
@@ -177,8 +175,7 @@ public class WebsocketListener implements Listener {
          * @param name the name
          * @return the Builder
          */
-        @NotNull
-        public Builder name(final @NotNull String name) {
+        public @NotNull Builder name(final @NotNull String name) {
             checkNotNull(name);
             this.name = name;
             return this;
@@ -190,8 +187,7 @@ public class WebsocketListener implements Listener {
          * @param allowExtensions if websocket extensions should be allowed or not
          * @return the Builder
          */
-        @NotNull
-        public Builder allowExtensions(final boolean allowExtensions) {
+        public @NotNull Builder allowExtensions(final boolean allowExtensions) {
             this.allowExtensions = allowExtensions;
             return this;
         }
@@ -204,8 +200,7 @@ public class WebsocketListener implements Listener {
          * @param subprotocols a list of websocket subprotocols
          * @return the Builder
          */
-        @NotNull
-        public Builder setSubprotocols(final @NotNull List<String> subprotocols) {
+        public @NotNull Builder setSubprotocols(final @NotNull List<String> subprotocols) {
             checkNotNull(subprotocols);
             this.subprotocols = ImmutableList.copyOf(subprotocols);
             return this;
@@ -216,20 +211,16 @@ public class WebsocketListener implements Listener {
          *
          * @return the Websocket Listener
          */
-        @NotNull
-        public WebsocketListener build() throws IllegalStateException {
+        public @NotNull WebsocketListener build() throws IllegalStateException {
             if (port == null) {
                 throw new IllegalStateException("The port for a Websocket listener was not set.");
             }
-
             if (bindAddress == null) {
                 throw new IllegalStateException("The bind address for a Websocket listener was not set.");
             }
-
             if (name == null) {
                 name = "websocket-listener-" + port;
             }
-
             return new WebsocketListener(port, bindAddress, path, allowExtensions, subprotocols, name);
         }
     }

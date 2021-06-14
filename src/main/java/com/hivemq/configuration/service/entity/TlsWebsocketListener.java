@@ -15,9 +15,10 @@
  */
 package com.hivemq.configuration.service.entity;
 
+import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.List;
 
@@ -35,9 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class TlsWebsocketListener extends WebsocketListener implements TlsListener {
 
-    private final Tls tls;
+    private final @NotNull Tls tls;
 
-    TlsWebsocketListener(
+    private TlsWebsocketListener(
             final int port,
             final @NotNull String bindAddress,
             final @NotNull String path,
@@ -49,20 +50,12 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
         this.tls = tls;
     }
 
-    /**
-     * @return the TLS configuration
-     */
-    @NotNull
-    public Tls getTls() {
+    public @NotNull Tls getTls() {
         return tls;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @NotNull
     @Override
-    public String readableName() {
+    public @NotNull String readableName() {
         return "Websocket Listener with TLS";
     }
 
@@ -73,14 +66,22 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
 
         private @Nullable Tls tls;
 
+        public Builder() {
+            super();
+        }
+
+        public Builder(final @NotNull TlsWebsocketListener tlsWebsocketListener) {
+            super(tlsWebsocketListener);
+            tls = tlsWebsocketListener.getTls();
+        }
+
         /**
          * Sets the TLS configuration of the TLS Websocket listener
          *
          * @param tls the TLS configuration
          * @return the Builder
          */
-        @NotNull
-        public Builder tls(final @NotNull Tls tls) {
+        public @NotNull Builder tls(final @NotNull Tls tls) {
             checkNotNull(tls);
             this.tls = tls;
             return this;
@@ -92,10 +93,9 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @param port the port
          * @return the Builder
          */
-        @NotNull
         @Override
-        public Builder port(final int port) {
-            super.port(port);
+        public @NotNull Builder port(final int port) {
+            this.port = port;
             return this;
         }
 
@@ -105,10 +105,10 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @param bindAddress the bind address
          * @return the Builder
          */
-        @NotNull
         @Override
-        public Builder bindAddress(final @NotNull String bindAddress) {
-            super.bindAddress(bindAddress);
+        public @NotNull Builder bindAddress(final @NotNull String bindAddress) {
+            checkNotNull(bindAddress);
+            this.bindAddress = bindAddress;
             return this;
         }
 
@@ -118,10 +118,10 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @param path the path
          * @return the Builder
          */
-        @NotNull
         @Override
-        public Builder path(final @NotNull String path) {
-            super.path(path);
+        public @NotNull Builder path(final @NotNull String path) {
+            checkNotNull(path);
+            this.path = path;
             return this;
         }
 
@@ -131,9 +131,8 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @param name the name
          * @return the Builder
          */
-        @NotNull
         @Override
-        public Builder name(final @NotNull String name) {
+        public @NotNull Builder name(final @NotNull String name) {
             checkNotNull(name);
             this.name = name;
             return this;
@@ -146,9 +145,8 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @return the Builder
          */
         @Override
-        @NotNull
-        public Builder allowExtensions(final boolean allowExtensions) {
-            super.allowExtensions(allowExtensions);
+        public @NotNull Builder allowExtensions(final boolean allowExtensions) {
+            this.allowExtensions = allowExtensions;
             return this;
         }
 
@@ -161,9 +159,9 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @return the Builder
          */
         @Override
-        @NotNull
-        public Builder setSubprotocols(final @NotNull List<String> subprotocols) {
-            super.setSubprotocols(subprotocols);
+        public @NotNull Builder setSubprotocols(final @NotNull List<String> subprotocols) {
+            checkNotNull(subprotocols);
+            this.subprotocols = ImmutableList.copyOf(subprotocols);
             return this;
         }
 
@@ -173,20 +171,20 @@ public class TlsWebsocketListener extends WebsocketListener implements TlsListen
          * @return the TLS Websocket Listener
          */
         @Override
-        @NotNull
-        public TlsWebsocketListener build() {
-            //For validation purposes
-            super.build();
-            if (tls == null) {
-                throw new IllegalStateException("The TLS settings for a TLS Websocket listener was not set.");
+        public @NotNull TlsWebsocketListener build() {
+            if (port == null) {
+                throw new IllegalStateException("The port for a TLS Websocket listener was not set.");
             }
-
+            if (bindAddress == null) {
+                throw new IllegalStateException("The bind address for a TLS Websocket listener was not set.");
+            }
             if (name == null) {
                 name = "tls-websocket-listener-" + port;
             }
-
+            if (tls == null) {
+                throw new IllegalStateException("The TLS settings for a TLS Websocket listener was not set.");
+            }
             return new TlsWebsocketListener(port, bindAddress, path, allowExtensions, subprotocols, tls, name);
         }
-
     }
 }

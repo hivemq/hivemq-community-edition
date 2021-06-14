@@ -112,7 +112,6 @@ public class AbstractChannelInitializerTest {
         verify(pipeline, never()).addLast(eq(GLOBAL_THROTTLING_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_BARRIER), any(ChannelHandler.class));
-
     }
 
     @Test
@@ -127,7 +126,6 @@ public class AbstractChannelInitializerTest {
 
         verify(pipeline).addLast(eq(GLOBAL_THROTTLING_HANDLER), any(ChannelHandler.class));
         verify(pipeline).addLast(eq(MQTT_MESSAGE_DECODER), any(ChannelHandler.class));
-
     }
 
     @Test
@@ -194,6 +192,11 @@ public class AbstractChannelInitializerTest {
                 }
 
                 @Override
+                public void setPort(final int port) {
+
+                }
+
+                @Override
                 public String getBindAddress() {
                     return null;
                 }
@@ -207,7 +210,6 @@ public class AbstractChannelInitializerTest {
                 public @NotNull String getName() {
                     return "listener";
                 }
-
             });
         }
 
@@ -224,6 +226,11 @@ public class AbstractChannelInitializerTest {
                 @Override
                 public int getPort() {
                     return 0;
+                }
+
+                @Override
+                public void setPort(final int port) {
+
                 }
 
                 @Override
