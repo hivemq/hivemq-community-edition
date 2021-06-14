@@ -16,6 +16,7 @@
 package com.hivemq.bootstrap;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
@@ -24,17 +25,20 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
+ * @author Dominik Obermaier
  */
 public class NettyShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(NettyShutdownHook.class);
 
-    private final EventLoopGroup workerGroup;
-    private final EventLoopGroup bossGroup;
+    private final @NotNull EventLoopGroup workerGroup;
+    private final @NotNull EventLoopGroup bossGroup;
     private final int timeout;
 
-    public NettyShutdownHook(final EventLoopGroup workerGroup, final EventLoopGroup bossGroup, final int timeout) {
+    public NettyShutdownHook(
+            final @NotNull EventLoopGroup workerGroup,
+            final @NotNull EventLoopGroup bossGroup,
+            final int timeout) {
         this.workerGroup = workerGroup;
         this.bossGroup = bossGroup;
         this.timeout = timeout;
