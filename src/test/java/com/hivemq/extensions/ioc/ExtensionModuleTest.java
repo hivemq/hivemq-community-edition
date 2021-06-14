@@ -29,7 +29,6 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
-import com.hivemq.configuration.service.impl.listener.InternalListenerConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
 import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
@@ -99,7 +98,6 @@ public class ExtensionModuleTest {
                 bind(FullConfigurationService.class).toInstance(new TestConfigurationBootstrap().getFullConfigurationService());
                 bind(MqttConfigurationService.class).toInstance(mock(MqttConfigurationService.class));
                 bind(RestrictionsConfigurationService.class).toInstance(mock(RestrictionsConfigurationService.class));
-                bind(InternalListenerConfigurationService.class).toInstance(mock(InternalListenerConfigurationService.class));
                 bind(SecurityConfigurationService.class).toInstance(mock(SecurityConfigurationService.class));
                 bind(TopicAliasLimiter.class).toInstance(mock(TopicAliasLimiter.class));
                 bind(MessageDroppedService.class).toInstance(mock(MessageDroppedService.class));
@@ -116,7 +114,8 @@ public class ExtensionModuleTest {
                 bind(LocalTopicTree.class).toInstance(mock(TopicTreeImpl.class));
                 bind(IncomingPublishService.class).toInstance(mock(IncomingPublishService.class));
                 bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));
-                bind(ListeningExecutorService.class).annotatedWith(Persistence.class).toInstance(mock(ListeningExecutorService.class));
+                bind(ListeningExecutorService.class).annotatedWith(Persistence.class)
+                        .toInstance(mock(ListeningExecutorService.class));
                 bind(InternalPublishService.class).toInstance(mock(InternalPublishService.class));
                 bind(ClientSessionSubscriptionPersistence.class).toInstance(mock(ClientSessionSubscriptionPersistence.class));
                 bind(ListenerConfigurationService.class).toInstance(mock(ListenerConfigurationService.class));

@@ -27,7 +27,6 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
-import com.hivemq.configuration.service.impl.listener.InternalListenerConfigurationService;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extensions.events.LifecycleEventListeners;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
@@ -67,7 +66,6 @@ import static org.mockito.Mockito.mock;
  */
 public class NettyModuleTest {
 
-
     @Before
     public void set_up() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -81,7 +79,8 @@ public class NettyModuleTest {
             protected void configure() {
                 install(new NettyModule());
                 bind(LifecycleEventListeners.class).toInstance(mock(LifecycleEventListeners.class));
-                bind(ScheduledExecutorService.class).annotatedWith(Security.class).toInstance(mock(ListeningScheduledExecutorService.class));
+                bind(ScheduledExecutorService.class).annotatedWith(Security.class)
+                        .toInstance(mock(ListeningScheduledExecutorService.class));
                 bind(RestrictionsConfigurationService.class).toInstance(mock(RestrictionsConfigurationService.class));
                 bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));
                 bind(Authorizers.class).toInstance(mock(Authorizers.class));
@@ -92,7 +91,6 @@ public class NettyModuleTest {
                 bind(ChannelPersistence.class).toInstance(mock(ChannelPersistence.class));
                 bind(ChannelDependencies.class).toInstance(mock(ChannelDependencies.class));
                 bind(SslContextFactory.class).toInstance(mock(SslContextFactory.class));
-                bind(InternalListenerConfigurationService.class).toInstance(mock(InternalListenerConfigurationService.class));
                 bind(PluginTaskExecutorService.class).toInstance(mock(PluginTaskExecutorService.class));
                 bind(ClientSessionPersistence.class).toInstance(mock(ClientSessionPersistence.class));
                 bind(MetricsHolder.class).toInstance(mock(MetricsHolder.class));
