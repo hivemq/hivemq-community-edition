@@ -64,6 +64,7 @@ public class UsageStatisticsCollectorImplTest {
                 new TestConfigurationBootstrap().getFullConfigurationService();
 
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         metricRegistry = new MetricRegistry();
         collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
                 new MetricsHolder(metricRegistry), new HivemqId(systemInformation), hiveMQExtensions);

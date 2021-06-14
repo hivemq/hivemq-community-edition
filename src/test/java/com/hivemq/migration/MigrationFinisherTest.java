@@ -45,6 +45,7 @@ public class MigrationFinisherTest {
     public void test_finish() {
 
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
         migrationFinisher = new MigrationFinisher(systemInformation);
@@ -68,6 +69,7 @@ public class MigrationFinisherTest {
     public void test_finish_xodus() {
 
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
+        systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
 
