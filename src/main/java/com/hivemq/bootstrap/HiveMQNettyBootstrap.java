@@ -274,7 +274,7 @@ public class HiveMQNettyBootstrap {
         private final @NotNull BindInformation bindInformation;
         private final @NotNull SettableFuture<ListenerStartupInformation> settableFuture;
 
-        public UpdateGivenFutureListener(
+        UpdateGivenFutureListener(
                 final @NotNull BindInformation bindInformation,
                 final @NotNull SettableFuture<ListenerStartupInformation> settableFuture) {
             this.bindInformation = bindInformation;
@@ -284,17 +284,12 @@ public class HiveMQNettyBootstrap {
         @Override
         public void operationComplete(final @NotNull ChannelFuture future) throws Exception {
             final Listener listener = bindInformation.getListener();
-            final int port;
-            final SocketAddress socketAddress = future.channel().localAddress();
-            if (socketAddress instanceof InetSocketAddress) {
-                port = ((InetSocketAddress) socketAddress).getPort();
-            } else {
-                port = listener.getPort();
-            }
+            final int bindPort = ((InetSocketAddress) future.channel().localAddress()).getPort();
+            listener.setPort(bindPort);
             if (future.isSuccess()) {
-                settableFuture.set(ListenerStartupInformation.successfulListenerStartup(port, listener));
+                settableFuture.set(ListenerStartupInformation.successfulListenerStartup(bindPort, listener));
             } else {
-                settableFuture.set(ListenerStartupInformation.failedListenerStartup(port, listener, future.cause()));
+                settableFuture.set(ListenerStartupInformation.failedListenerStartup(bindPort, listener, future.cause()));
             }
         }
     }
