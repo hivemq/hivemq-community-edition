@@ -16,26 +16,20 @@
 
 package com.hivemq.embedded.internal;
 
-import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
-import com.hivemq.bootstrap.ioc.GuiceBootstrap;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.ConfigurationBootstrap;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.embedded.EmbeddedHiveMQ;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.lifecycle.LifecycleModule;
-import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +52,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     final @NotNull ExecutorService stateChangeExecutor;
     private final @Nullable EmbeddedExtension embeddedExtension;
     private @Nullable FullConfigurationService configurationService;
-    private @Nullable Injector injector;
+    private @Nullable HiveMQServer hiveMQServer;
 
     private @NotNull State currentState = State.STOPPED;
     private @NotNull State desiredState = State.STOPPED;
@@ -149,15 +143,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 try {
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
-                    if (configurationService.persistenceConfigurationService().getMode().equals(PersistenceConfigurationService.PersistenceMode.FILE)) {
-                        log.info("Starting with file persistence mode.");
-                    } else {
-                        log.info("Starting with in-memory persistence mode.");
-                    }
-
-                    bootstrapInjector();
-                    final HiveMQServer hiveMQServer = injector.getInstance(HiveMQServer.class);
-
+                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, false);
+                    hiveMQServer.bootstrap();
                     hiveMQServer.start(embeddedExtension);
 
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
@@ -188,7 +175,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
         try {
             final long startTime = System.currentTimeMillis();
-            final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
+            final ShutdownHooks shutdownHooks = hiveMQServer.getInjector().getInstance(ShutdownHooks.class);
 
             for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getSynchronousHooks().values()) {
                 try {
@@ -221,8 +208,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             }
 
             shutdownHooks.clearRuntime();
-            metricRegistry.removeMatching(MetricFilter.ALL);
-            injector = null;
+            hiveMQServer = null;
             failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), startFutures);
             succeedFutureList(stopFutures);
             currentState = State.STOPPED;
@@ -252,31 +238,6 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private void succeedFutureList(final @NotNull List<CompletableFuture<Void>> futures) {
         for (final CompletableFuture<Void> future : futures) {
             future.complete(null);
-        }
-    }
-
-    private void bootstrapInjector() {
-        if (injector == null) {
-            final HivemqId hiveMQId = new HivemqId();
-            final LifecycleModule lifecycleModule = new LifecycleModule();
-            final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
-                    metricRegistry,
-                    hiveMQId,
-                    configurationService,
-                    lifecycleModule);
-
-            try {
-                persistenceInjector.getInstance(PersistenceStartup.class).finish();
-            } catch (final InterruptedException e) {
-                log.error("EmbeddedHiveMQ persistence Startup interrupted.");
-            }
-
-            injector = GuiceBootstrap.bootstrapInjector(systemInformation,
-                    metricRegistry,
-                    hiveMQId,
-                    configurationService,
-                    persistenceInjector,
-                    lifecycleModule);
         }
     }
 
@@ -315,7 +276,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     @VisibleForTesting
     @Nullable Injector getInjector() {
-        return injector;
+        return hiveMQServer.getInjector();
     }
 
     private static class AbortedStateChangeException extends Exception {
