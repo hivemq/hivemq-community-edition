@@ -18,8 +18,7 @@ package com.hivemq.configuration.service.entity;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * A marker interface for a listener. Any listener implementation must
- * implement this interface.
+ * A marker interface for a listener. Any listener implementation must implement this interface.
  *
  * @author Dominik Obermaier
  * @author Christoph Schaebel
@@ -36,21 +35,21 @@ public interface Listener {
      */
     int getPort();
 
+    void setPort(int port);
+
     /**
      * @return the bind address of a listener
      */
-    String getBindAddress();
+    @NotNull String getBindAddress();
 
     /**
      * @return the human readable, name of the listener
      */
-    String readableName();
+    @NotNull String readableName();
 
     /**
      * @return the name of the listener
      * @since 4.1
      */
-    @NotNull
-    String getName();
-
+    @NotNull String getName();
 }

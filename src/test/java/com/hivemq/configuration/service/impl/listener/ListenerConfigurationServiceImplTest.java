@@ -34,14 +34,12 @@ public class ListenerConfigurationServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-
         listenerConfigurationService = new ListenerConfigurationServiceImpl();
     }
 
     /*
      * Adding listeners
      */
-
     @Test
     public void test_add_listeners() {
 
@@ -58,7 +56,6 @@ public class ListenerConfigurationServiceImplTest {
                 .bindAddress("localhost")
                 .tls(createDefaultTLS())
                 .build();
-
 
         listenerConfigurationService.addListener(tcpListener);
         listenerConfigurationService.addListener(websocketListener);
@@ -78,7 +75,6 @@ public class ListenerConfigurationServiceImplTest {
         assertSame(listenerConfigurationService.getTlsTcpListeners().get(0), tlsTcpListener);
         assertSame(listenerConfigurationService.getWebsocketListeners().get(0), websocketListener);
         assertSame(listenerConfigurationService.getTlsWebsocketListeners().get(0), tlsWebsocketListener);
-
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -88,6 +84,11 @@ public class ListenerConfigurationServiceImplTest {
             @Override
             public int getPort() {
                 return 0;
+            }
+
+            @Override
+            public void setPort(final int port) {
+
             }
 
             @Override
@@ -132,7 +133,6 @@ public class ListenerConfigurationServiceImplTest {
         listenerConfigurationService.addListener(subclass);
     }
 
-
     @Test
     public void test_get_listeners_immutable() {
 
@@ -153,13 +153,11 @@ public class ListenerConfigurationServiceImplTest {
         } catch (final Exception e) {
             //Expected
         }
-
     }
 
     @Test(expected = NullPointerException.class)
     public void test_null_update_listener() {
         listenerConfigurationService.addUpdateListener(null);
-
     }
 
     @Test
@@ -186,7 +184,6 @@ public class ListenerConfigurationServiceImplTest {
         });
 
         assertTrue(latch.await(3, TimeUnit.SECONDS));
-
     }
 
     @Test
@@ -214,6 +211,5 @@ public class ListenerConfigurationServiceImplTest {
         listenerConfigurationService.addListener(listener);
 
         assertTrue(latch.await(3, TimeUnit.SECONDS));
-
     }
 }
