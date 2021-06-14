@@ -58,6 +58,7 @@ public class SystemInformationImplTest {
     @Test
     public void test_getHiveMQVersion() throws Exception {
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
         final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
@@ -73,6 +74,7 @@ public class SystemInformationImplTest {
     @Test
     public void test_getHiveMQVersion_from_system_information_with_path() throws Exception {
         systemInformation = new SystemInformationImpl(true);
+        systemInformation.init();
 
         //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
         final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
@@ -88,6 +90,7 @@ public class SystemInformationImplTest {
     public void test_getHiveMQHomeFolder() throws Exception {
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(tempFolderPath, systemInformation.getHiveMQHomeFolder().getAbsolutePath());
     }
@@ -96,6 +99,7 @@ public class SystemInformationImplTest {
     public void test_getHiveMQHomeFolder_from_system_information_with_path() throws Exception {
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(tempFolderPath, systemInformation.getHiveMQHomeFolder().getAbsolutePath());
     }
@@ -109,6 +113,7 @@ public class SystemInformationImplTest {
         setEnvironmentVariable(EnvironmentVariables.HIVEMQ_HOME, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         removeEnvironmentVariable(EnvironmentVariables.HIVEMQ_HOME);
 
@@ -119,6 +124,7 @@ public class SystemInformationImplTest {
     public void test_getConfigFolder_default() throws Exception {
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(tempFolderPath + File.separator + "conf", systemInformation.getConfigFolder().getAbsolutePath());
     }
@@ -131,6 +137,7 @@ public class SystemInformationImplTest {
         System.setProperty(SystemProperties.CONFIG_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(testfolder.getAbsolutePath(), systemInformation.getConfigFolder().getAbsolutePath());
     }
@@ -143,6 +150,7 @@ public class SystemInformationImplTest {
         setEnvironmentVariable(EnvironmentVariables.CONFIG_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         removeEnvironmentVariable(EnvironmentVariables.CONFIG_FOLDER);
 
@@ -153,6 +161,7 @@ public class SystemInformationImplTest {
     public void test_getLogFolder_default() throws Exception {
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(tempFolderPath + File.separator + "log", systemInformation.getLogFolder().getAbsolutePath());
     }
@@ -165,6 +174,7 @@ public class SystemInformationImplTest {
         System.setProperty(SystemProperties.LOG_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(testfolder.getAbsolutePath(), systemInformation.getLogFolder().getAbsolutePath());
     }
@@ -177,6 +187,7 @@ public class SystemInformationImplTest {
         setEnvironmentVariable(EnvironmentVariables.LOG_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         removeEnvironmentVariable(EnvironmentVariables.LOG_FOLDER);
 
@@ -188,6 +199,7 @@ public class SystemInformationImplTest {
     public void test_getDataFolder_default() throws Exception {
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(tempFolderPath + File.separator + "data", systemInformation.getDataFolder().getAbsolutePath());
     }
@@ -200,6 +212,7 @@ public class SystemInformationImplTest {
         System.setProperty(SystemProperties.DATA_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(testfolder.getAbsolutePath(), systemInformation.getDataFolder().getAbsolutePath());
     }
@@ -212,6 +225,7 @@ public class SystemInformationImplTest {
         setEnvironmentVariable(EnvironmentVariables.DATA_FOLDER, testfolder.getAbsolutePath());
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         removeEnvironmentVariable(EnvironmentVariables.DATA_FOLDER);
 
@@ -222,6 +236,7 @@ public class SystemInformationImplTest {
     public void test_create_plugin_folder_if_not_exists() throws Exception{
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(true, systemInformation.getExtensionsFolder().exists());
     }
@@ -230,6 +245,7 @@ public class SystemInformationImplTest {
     public void test_create_data_folder_if_not_exists() throws Exception{
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(true, systemInformation.getDataFolder().exists());
     }
@@ -238,6 +254,7 @@ public class SystemInformationImplTest {
     public void test_create_log_folder_if_not_exists() throws Exception{
 
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertEquals(true, systemInformation.getLogFolder().exists());
     }
@@ -245,6 +262,7 @@ public class SystemInformationImplTest {
     @Test
     public void test_get_core_count() {
         systemInformation = new SystemInformationImpl();
+        systemInformation.init();
 
         assertTrue(systemInformation.getProcessorCount() > 0);
     }
