@@ -28,6 +28,11 @@ import java.io.File;
 public interface SystemInformation {
 
     /**
+     * Sets home folder and HiveMQ version.
+     */
+    void init();
+
+    /**
      * @return the version string of HiveMQ
      */
     @NotNull

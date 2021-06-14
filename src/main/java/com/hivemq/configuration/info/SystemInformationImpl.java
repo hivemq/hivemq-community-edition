@@ -71,12 +71,13 @@ public class SystemInformationImpl implements SystemInformation {
         this.configFolder = configFolder;
         this.dataFolder = dataFolder;
         this.pluginFolder = pluginFolder;
-
-
         this.runningSince = System.currentTimeMillis();
+        processorCount = getPhysicalProcessorCount();
+    }
+
+    public void init() {
         setHiveMQVersion();
         setFolders();
-        processorCount = getPhysicalProcessorCount();
     }
 
     private int getPhysicalProcessorCount() {
@@ -99,24 +100,20 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = Objects.requireNonNullElse(
-                configFolder,
+        configFolder = Objects.requireNonNullElse(configFolder,
                 setUpHiveMQFolder(SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false));
 
         logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
 
-        dataFolder = Objects.requireNonNullElse(
-                dataFolder,
+        dataFolder = Objects.requireNonNullElse(dataFolder,
                 setUpHiveMQFolder(SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
 
-        pluginFolder = Objects.requireNonNullElse(
-                pluginFolder,
-                setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
-                        EnvironmentVariables.EXTENSION_FOLDER,
-                        "extensions",
-                        !embedded));
+        pluginFolder = Objects.requireNonNullElse(pluginFolder, setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
+                EnvironmentVariables.EXTENSION_FOLDER,
+                "extensions",
+                !embedded));
     }
 
     private void setHiveMQVersion() {
@@ -215,8 +212,7 @@ public class SystemInformationImpl implements SystemInformation {
      * @return value of the system property, if not present value of the environment variable, if not present null
      */
     private @Nullable String getSystemPropertyOrEnvironmentVariable(
-            final String propertyName,
-            final String variableName) {
+            final String propertyName, final String variableName) {
         final String systemProperty = System.getProperty(propertyName);
         if (systemProperty != null) {
             return systemProperty;

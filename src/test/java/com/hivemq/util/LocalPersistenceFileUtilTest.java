@@ -97,6 +97,11 @@ public class LocalPersistenceFileUtilTest {
     private SystemInformation createInfoForTest(final File dataFolder) {
         return new SystemInformation() {
 
+            @Override
+            public void init() {
+
+            }
+
             @NotNull
             @Override
             public String getHiveMQVersion() {
