@@ -18,6 +18,7 @@ package com.hivemq.configuration.service.impl.listener;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.exception.ConfigurationValidationException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.List;
 
@@ -31,45 +32,44 @@ import java.util.List;
  */
 public interface ListenerConfigurationService {
 
-
     /**
-     * Adds a new Listener at runtime
+     * Adds a new Listener at runtime.
      *
      * @param listener the listener
      * @param <T>      the concrete listener subclass
      * @throws ConfigurationValidationException if the validation of the listener wasn't successful
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException         when the listener has not a known type.
      */
-    <T extends Listener> void addListener(final T listener) throws ConfigurationValidationException, IllegalArgumentException;
+    <T extends Listener> void addListener(final @NotNull T listener)
+            throws ConfigurationValidationException, IllegalArgumentException;
 
     /**
      * @return a unmodifiable list of all active listeners
      */
     @ReadOnly
-    List<Listener> getListeners();
+    @NotNull List<Listener> getListeners();
 
     /**
      * @return a unmodifiable list of all active TCP listeners
      */
     @ReadOnly
-    List<TcpListener> getTcpListeners();
+    @NotNull List<TcpListener> getTcpListeners();
 
     /**
      * @return a unmodifiable list of all active TLS listeners
      */
     @ReadOnly
-    List<TlsTcpListener> getTlsTcpListeners();
+    @NotNull List<TlsTcpListener> getTlsTcpListeners();
 
     /**
      * @return a unmodifiable list of all active Websocket listeners
      */
     @ReadOnly
-    List<WebsocketListener> getWebsocketListeners();
+    @NotNull List<WebsocketListener> getWebsocketListeners();
 
     /**
      * @return a unmodifiable list of all active TLS Websocket listeners
      */
     @ReadOnly
-    List<TlsWebsocketListener> getTlsWebsocketListeners();
-
+    @NotNull List<TlsWebsocketListener> getTlsWebsocketListeners();
 }

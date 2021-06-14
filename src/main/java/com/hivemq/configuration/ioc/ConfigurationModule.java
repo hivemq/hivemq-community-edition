@@ -18,8 +18,8 @@ package com.hivemq.configuration.ioc;
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.*;
-import com.hivemq.configuration.service.impl.listener.InternalListenerConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.statistics.UsageStatisticsConfig;
 
 /**
@@ -33,7 +33,8 @@ public class ConfigurationModule extends SingletonModule {
     private final FullConfigurationService configurationService;
     private final HivemqId hiveMQId;
 
-    public ConfigurationModule(final FullConfigurationService configurationService, final HivemqId hiveMQId) {
+    public ConfigurationModule(
+            final @NotNull FullConfigurationService configurationService, final @NotNull HivemqId hiveMQId) {
         super(ConfigurationModule.class);
         this.configurationService = configurationService;
         this.hiveMQId = hiveMQId;
@@ -44,9 +45,7 @@ public class ConfigurationModule extends SingletonModule {
 
         bind(HivemqId.class).toInstance(hiveMQId);
 
-        final InternalListenerConfigurationService listenerConfigurationService = (InternalListenerConfigurationService) configurationService.listenerConfiguration();
-        bind(ListenerConfigurationService.class).toInstance(listenerConfigurationService);
-        bind(InternalListenerConfigurationService.class).toInstance(listenerConfigurationService);
+        bind(ListenerConfigurationService.class).toInstance(configurationService.listenerConfiguration());
 
         bind(MqttConfigurationService.class).toInstance(configurationService.mqttConfiguration());
 
@@ -60,5 +59,4 @@ public class ConfigurationModule extends SingletonModule {
 
         bind(SecurityConfigurationService.class).toInstance(configurationService.securityConfiguration());
     }
-
 }

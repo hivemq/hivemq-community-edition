@@ -17,6 +17,7 @@ package com.hivemq.configuration.service.impl.listener;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.service.entity.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,78 +25,65 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * The default implementation of the listener configuration service.
  *
  * @author Dominik Obermaier
  */
 @Singleton
-public class ListenerConfigurationServiceImpl implements InternalListenerConfigurationService {
+public class ListenerConfigurationServiceImpl implements ListenerConfigurationService {
 
     private static final Logger log = LoggerFactory.getLogger(ListenerConfigurationServiceImpl.class);
 
     /**
      * The actual listener. COWAL because we read a lot more than we write
      */
-    final List<Listener> listeners = new CopyOnWriteArrayList<>();
-
-    /**
-     * The update listeners that are called as soon as the listener config changes
-     */
-    final List<InternalListenerConfigurationService.UpdateListener> updateListeners = new CopyOnWriteArrayList<>();
+    private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 
     @Override
-    public <T extends Listener> void addListener(final T listener) {
-        if (listener.getClass().equals(TcpListener.class) ||
-                listener.getClass().equals(TlsTcpListener.class) ||
+    public <T extends Listener> void addListener(final @NotNull T listener) {
+        if (listener.getClass().equals(TcpListener.class) || listener.getClass().equals(TlsTcpListener.class) ||
                 listener.getClass().equals(WebsocketListener.class) ||
                 listener.getClass().equals(TlsWebsocketListener.class)) {
 
-            log.debug("Adding {} on bind address {} and port {}. Name: {}.",
-                    listener.readableName(), listener.getBindAddress(),
-                    listener.getPort(), listener.getName());
+            log.debug(
+                    "Adding {} on bind address {} and port {}. Name: {}.",
+                    listener.readableName(),
+                    listener.getBindAddress(),
+                    listener.getPort(),
+                    listener.getName());
+
             listeners.add(listener);
 
             final ImmutableList<Listener> allListeners = ImmutableList.copyOf(listeners);
             log.trace("Notifying {} update listeners for changes", allListeners.size());
-
-            //We're calling the Update Listeners in the same thread
-            for (final UpdateListener updateListener : updateListeners) {
-
-                log.trace("Notifying update listener {}", allListeners.getClass());
-                updateListener.update(listener, allListeners);
-            }
-
         } else {
             throw new IllegalArgumentException(listener.getClass().getName() + " is not a valid listener type");
         }
-
     }
 
     @Override
-    public ImmutableList<Listener> getListeners() {
+    public @NotNull ImmutableList<Listener> getListeners() {
         return ImmutableList.copyOf(listeners);
     }
 
     @Override
-    public ImmutableList<TcpListener> getTcpListeners() {
+    public @NotNull ImmutableList<TcpListener> getTcpListeners() {
         return filterListeners(TcpListener.class);
     }
 
     @Override
-    public ImmutableList<TlsTcpListener> getTlsTcpListeners() {
+    public @NotNull ImmutableList<TlsTcpListener> getTlsTcpListeners() {
         return filterListeners(TlsTcpListener.class);
     }
 
     @Override
-    public ImmutableList<WebsocketListener> getWebsocketListeners() {
+    public @NotNull ImmutableList<WebsocketListener> getWebsocketListeners() {
         return filterListeners(WebsocketListener.class);
     }
 
     @Override
-    public ImmutableList<TlsWebsocketListener> getTlsWebsocketListeners() {
+    public @NotNull ImmutableList<TlsWebsocketListener> getTlsWebsocketListeners() {
         return filterListeners(TlsWebsocketListener.class);
     }
 
@@ -103,28 +91,14 @@ public class ListenerConfigurationServiceImpl implements InternalListenerConfigu
         listeners.clear();
     }
 
-    <T extends Listener> ImmutableList<T> filterListeners(final Class<T> clazz) {
+    private <T extends Listener> @NotNull ImmutableList<T> filterListeners(final @NotNull Class<T> clazz) {
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (final Listener listener : listeners) {
             //We're interested in the actual class, not subclasses!
             if (listener.getClass().equals(clazz)) {
-                builder.add((T) listener);
+                builder.add(clazz.cast(listener));
             }
         }
         return builder.build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addUpdateListener(final UpdateListener listener) {
-        checkNotNull(listener, "Update Listener must not be null");
-
-        log.trace("Adding update listener {}", listener.getClass());
-        updateListeners.add(listener);
-
-        log.trace("Notifying update listener {}", listener.getClass());
-        listener.onRegister(ImmutableList.copyOf(listeners));
     }
 }
