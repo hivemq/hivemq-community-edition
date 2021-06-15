@@ -89,6 +89,15 @@ public class HiveMQServer {
         this.migrate = migrate;
     }
 
+    public static void main(final String @NotNull [] args) throws Exception {
+        final HiveMQServer server = new HiveMQServer();
+        try {
+            server.start();
+        } catch (final StartAbortedException ignored) {
+            // This exception is ignored as we throw it ourselves when HiveMQ shutdown is initiated during the startup.
+        }
+    }
+
     public void bootstrap() throws Exception {
         // Already bootstrapped.
         if (injector != null) {
@@ -169,11 +178,10 @@ public class HiveMQServer {
                 configService, persistenceInjector, lifecycleModule);
     }
 
-    public void start(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
+    public void startInstance(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
         if (injector == null) {
             throw new UnrecoverableException(true);
         }
-
         final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
         if (shutdownHooks.isShuttingDown()) {
             throw new StartAbortedException();
@@ -212,25 +220,16 @@ public class HiveMQServer {
         usageStatistics.start();
     }
 
-    public void startFully() throws Exception {
+    public void start() throws Exception {
 
         final long startTime = System.nanoTime();
 
         bootstrap();
-        start(null);
+        startInstance(null);
 
         log.info("Started HiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
 
         afterStart();
-    }
-
-    public static void main(final String @NotNull [] args) throws Exception {
-        final HiveMQServer server = new HiveMQServer();
-        try {
-            server.startFully();
-        } catch (final StartAbortedException ignored) {
-            // This exception is ignored as we throw it ourselves when HiveMQ shutdown is initiated during the startup.
-        }
     }
 
     public @Nullable Injector getInjector() {

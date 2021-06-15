@@ -57,12 +57,10 @@ public class HiveMQInstance {
     public void start(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
 
         payloadPersistence.init();
-
         extensionBootstrap.startExtensionSystem(embeddedExtension).get();
 
         final List<ListenerStartupInformation> startupInformation = nettyBootstrap.bootstrapServer().get();
         Checkpoints.checkpoint("listener-started");
-
         new StartupListenerVerifier(startupInformation).verifyAndPrint();
 
         ((AdminServiceImpl) adminService).hivemqStarted();

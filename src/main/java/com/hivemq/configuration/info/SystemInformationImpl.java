@@ -76,7 +76,7 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     public void init() {
-        setHiveMQVersion();
+        setHivemqVersion();
         setFolders();
     }
 
@@ -100,23 +100,42 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = Objects.requireNonNullElse(configFolder,
-                setUpHiveMQFolder(SystemProperties.CONFIG_FOLDER, EnvironmentVariables.CONFIG_FOLDER, "conf", false));
+        configFolder = Objects.requireNonNullElse(
+                configFolder,
+                setUpHiveMQFolder(
+                        SystemProperties.CONFIG_FOLDER,
+                        EnvironmentVariables.CONFIG_FOLDER,
+                        "conf",
+                        false
+                )
+        );
 
         logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
 
-        dataFolder = Objects.requireNonNullElse(dataFolder,
-                setUpHiveMQFolder(SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
+        dataFolder = Objects.requireNonNullElse(
+                dataFolder,
+                setUpHiveMQFolder(
+                        SystemProperties.DATA_FOLDER,
+                        EnvironmentVariables.DATA_FOLDER,
+                        "data",
+                        true
+                )
+        );
 
-        pluginFolder = Objects.requireNonNullElse(pluginFolder, setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
-                EnvironmentVariables.EXTENSION_FOLDER,
-                "extensions",
-                !embedded));
+        pluginFolder = Objects.requireNonNullElse(
+                pluginFolder,
+                setUpHiveMQFolder(
+                        SystemProperties.EXTENSIONS_FOLDER,
+                        EnvironmentVariables.EXTENSION_FOLDER,
+                        "extensions",
+                        !embedded
+                )
+        );
     }
 
-    private void setHiveMQVersion() {
+    private void setHivemqVersion() {
 
         hivemqVersion = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 

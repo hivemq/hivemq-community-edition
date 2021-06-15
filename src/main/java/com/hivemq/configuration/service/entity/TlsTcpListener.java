@@ -76,14 +76,12 @@ public class TlsTcpListener extends TcpListener implements TlsListener {
         private @Nullable String bindAddress;
         private @Nullable Tls tls;
 
-        public Builder() {
-        }
-
-        public Builder(final @NotNull TlsTcpListener tlsTcpListener) {
+        public @NotNull Builder from(final @NotNull TlsTcpListener tlsTcpListener) {
             port = tlsTcpListener.getPort();
             bindAddress = tlsTcpListener.getBindAddress();
             name = tlsTcpListener.getName();
             tls = tlsTcpListener.getTls();
+            return this;
         }
 
         public @NotNull Builder tls(final @NotNull Tls tls) {
