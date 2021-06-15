@@ -95,7 +95,7 @@ public class WebSocketInitializerTest {
         websocketListener = new WebsocketListener.Builder()
                 .port(8000)
                 .bindAddress("0.0.0.0")
-                .setSubprotocols(new ArrayList<String>())
+                .subprotocols(new ArrayList<String>())
                 .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
@@ -107,7 +107,7 @@ public class WebSocketInitializerTest {
         websocketListener = new WebsocketListener.Builder()
                 .port(8000)
                 .bindAddress("0.0.0.0")
-                .setSubprotocols(Lists.newArrayList("mqttv3.1"))
+                .subprotocols(Lists.newArrayList("mqttv3.1"))
                 .build();
 
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
@@ -120,7 +120,7 @@ public class WebSocketInitializerTest {
         websocketListener = new WebsocketListener.Builder()
                 .port(8000)
                 .bindAddress("0.0.0.0")
-                .setSubprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
+                .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
                 .build();
 
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);

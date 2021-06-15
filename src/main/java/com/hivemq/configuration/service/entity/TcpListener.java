@@ -96,13 +96,11 @@ public class TcpListener implements Listener {
         private @Nullable Integer port;
         private @Nullable String bindAddress;
 
-        public Builder() {
-        }
-
-        public Builder(final @NotNull TcpListener tcpListener) {
+        public @NotNull Builder from(final @NotNull TcpListener tcpListener) {
             port = tcpListener.getPort();
             bindAddress = tcpListener.getBindAddress();
             name = tcpListener.getName();
+            return this;
         }
 
         public @NotNull Builder port(final int port) {

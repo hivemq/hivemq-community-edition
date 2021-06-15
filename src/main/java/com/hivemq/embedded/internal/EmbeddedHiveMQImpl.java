@@ -145,7 +145,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
                     hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, false);
                     hiveMQServer.bootstrap();
-                    hiveMQServer.start(embeddedExtension);
+                    hiveMQServer.startInstance(embeddedExtension);
 
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);
                     succeedFutureList(localStartFutures);

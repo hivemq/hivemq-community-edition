@@ -125,13 +125,14 @@ public class WebsocketListener implements Listener {
             allowExtensions = false;
         }
 
-        public Builder(final @NotNull WebsocketListener websocketListener) {
+        public @NotNull Builder from(final @NotNull WebsocketListener websocketListener) {
             port = websocketListener.getPort();
             bindAddress = websocketListener.getBindAddress();
             path = websocketListener.getPath();
             name = websocketListener.getName();
             allowExtensions = websocketListener.getAllowExtensions();
             subprotocols = new ArrayList<>(websocketListener.getSubprotocols());
+            return this;
         }
 
         /**
@@ -200,7 +201,7 @@ public class WebsocketListener implements Listener {
          * @param subprotocols a list of websocket subprotocols
          * @return the Builder
          */
-        public @NotNull Builder setSubprotocols(final @NotNull List<String> subprotocols) {
+        public @NotNull Builder subprotocols(final @NotNull List<String> subprotocols) {
             checkNotNull(subprotocols);
             this.subprotocols = ImmutableList.copyOf(subprotocols);
             return this;

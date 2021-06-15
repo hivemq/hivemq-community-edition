@@ -97,7 +97,7 @@ public class ListenerConfigurator {
                 .bindAddress(entity.getBindAddress())
                 .path(entity.getPath())
                 .port(entity.getPort())
-                .setSubprotocols(entity.getSubprotocols())
+                .subprotocols(entity.getSubprotocols())
                 .name(getName(entity, "websocket-listener-"))
                 .build();
     }
@@ -115,7 +115,7 @@ public class ListenerConfigurator {
                 .path(entity.getPath())
                 .allowExtensions(entity.isAllowExtensions())
                 .tls(convertTls(entity.getTls()))
-                .setSubprotocols(entity.getSubprotocols())
+                .subprotocols(entity.getSubprotocols())
                 .name(getName(entity, "tls-websocket-listener-"))
                 .build();
     }
