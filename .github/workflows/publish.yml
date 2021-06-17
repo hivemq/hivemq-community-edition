@@ -4,10 +4,6 @@ on:
   release:
     types: [ published ]
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   publish:
     environment: mavenCentralPublish
@@ -37,7 +33,7 @@ jobs:
           ORG_GRADLE_PROJECT_signKeyPass: ${{ secrets.SIGN_KEY_PASS }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
-        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
       - name: Push To Docker Hub
         run: PUSH_IMAGE=true docker/build.sh
       - name: Build HiveMQ Zip
