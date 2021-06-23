@@ -141,6 +141,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 final long startTime = System.currentTimeMillis();
                 log.info("Starting EmbeddedHiveMQ.");
                 try {
+                    systemInformation.init();
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
                     hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, false);
