@@ -110,9 +110,12 @@ public class HiveMQServer {
 
         log.info("Starting HiveMQ Community Edition Server");
 
-        log.trace("Initializing HiveMQ home directory");
-        //Create SystemInformation this early because logging depends on it
-        systemInformation.init();
+        // Embedded has already called init as it is required to read the config file.
+        if (!systemInformation.isEmbedded()) {
+            log.trace("Initializing HiveMQ home directory");
+            //Create SystemInformation this early because logging depends on it
+            systemInformation.init();
+        }
 
         log.trace("Initializing Logging");
         LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
@@ -120,8 +123,8 @@ public class HiveMQServer {
         log.trace("Initializing Exception handlers");
         HiveMQExceptionHandlerBootstrap.addUnrecoverableExceptionHandler();
 
-        log.trace("Initializing configuration");
         if (configService == null) {
+            log.trace("Initializing configuration");
             configService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
         }
 
