@@ -466,11 +466,9 @@ nexusPublishing {
     }
 }
 
-tasks.getByName("githubRelease").dependsOn(hivemqZip)
-
 githubRelease.apply {
     token(System.getenv("GITHUB_TOKEN"))
     tagName(project.version.toString())
-    releaseAssets(buildDir.resolve("zip").listFiles())
+    releaseAssets(hivemqZip)
     allowUploadToExisting(true)
 }
