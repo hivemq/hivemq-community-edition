@@ -466,7 +466,7 @@ nexusPublishing {
     }
 }
 
-githubRelease.apply {
+githubRelease {
     token(System.getenv("GITHUB_TOKEN"))
     tagName(project.version.toString())
     releaseAssets(hivemqZip)
