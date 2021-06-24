@@ -17,6 +17,7 @@ plugins {
     /* Publishing Plugins */
     id("io.github.gradle-nexus.publish-plugin")
     id("signing")
+    id("com.github.breadmoirai.github-release")
 
     /* Code Quality Plugins */
     id("jacoco")
@@ -463,4 +464,13 @@ nexusPublishing {
     repositories {
         sonatype()
     }
+}
+
+tasks.getByName("githubRelease").dependsOn(hivemqZip)
+
+githubRelease.apply {
+    token(System.getenv("GITHUB_TOKEN"))
+    tagName(project.version.toString())
+    releaseAssets(buildDir.resolve("zip").listFiles())
+    allowUploadToExisting(true)
 }
