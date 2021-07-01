@@ -35,7 +35,7 @@ jobs:
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
       - name: Push To Docker Hub
-        run: PUSH_IMAGE=true docker/build.sh
+        run: PUSH_IMAGE=true docker/publish.sh
       - name: Attach HiveMQ Zip to GitHub Release
         run: ./gradlew githubRelease
         env:
