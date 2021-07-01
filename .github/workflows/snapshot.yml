@@ -1,13 +1,17 @@
-name: CI Check
+name: Publish Snapshot to Docker Hub
 
-on: [ push ]
+on:
+  push:
+    branches:
+      - master
 
 concurrency:
-  group: ${{ github.ref }}-check
+  group: ${{ github.ref }}-snapshot
   cancel-in-progress: true
 
 jobs:
-  check:
+  snapshot:
+    environment: mavenCentralPublish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,5 +32,5 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Check
-        run: ./gradlew test license forbiddenApis javadoc hivemqZip
+      - name: Push Snapshot To Docker Hub
+        run: PUSH_IMAGE=true docker/publish-snapshot.sh
