@@ -166,7 +166,7 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_connected() throws ExecutionException, InterruptedException {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         when(channelPersistence.get("client")).thenReturn(channel);
@@ -182,7 +182,7 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_connected_reason_code_string() throws ExecutionException, InterruptedException {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         when(channelPersistence.get("client")).thenReturn(channel);

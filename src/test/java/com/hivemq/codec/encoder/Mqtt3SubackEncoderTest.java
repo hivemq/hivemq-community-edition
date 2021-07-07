@@ -51,7 +51,7 @@ public class Mqtt3SubackEncoderTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
         mqtt3SubackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
         channel = new EmbeddedChannel(mqtt3SubackEncoder);

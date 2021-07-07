@@ -96,7 +96,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 

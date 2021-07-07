@@ -39,7 +39,7 @@ public class Mqtt3PubcompDecoderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 

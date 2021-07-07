@@ -158,7 +158,7 @@ public class ConnectHandlerTest {
                 isNull())).thenReturn(Futures.immediateFuture(null));
 
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(null);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
@@ -655,7 +655,7 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
 
 
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
@@ -696,7 +696,7 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
@@ -743,7 +743,7 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
@@ -793,7 +793,7 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 

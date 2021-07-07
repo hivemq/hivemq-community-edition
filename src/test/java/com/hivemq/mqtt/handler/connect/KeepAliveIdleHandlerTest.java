@@ -35,7 +35,7 @@ public class KeepAliveIdleHandlerTest {
     public void test_disconnect_when_idle() throws Exception {
         final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog(), new HivemqId()));
         final EmbeddedChannel channel = new EmbeddedChannel(keepAliveIdleHandler, new AnotherIdleHandler(false));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
         channel.pipeline().fireUserEventTriggered(IdleStateEvent.FIRST_READER_IDLE_STATE_EVENT);
 

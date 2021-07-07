@@ -143,7 +143,7 @@ public class PingInterceptorHandlerTest {
         clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
@@ -170,7 +170,7 @@ public class PingInterceptorHandlerTest {
         clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
@@ -196,7 +196,7 @@ public class PingInterceptorHandlerTest {
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 
@@ -222,7 +222,7 @@ public class PingInterceptorHandlerTest {
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
 

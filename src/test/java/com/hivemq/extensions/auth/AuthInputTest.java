@@ -51,7 +51,7 @@ public class AuthInputTest {
     public void setUp() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 

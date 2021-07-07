@@ -54,7 +54,7 @@ public class MqttConnectDecoderTest {
         MockitoAnnotations.initMocks(this);
         final HivemqId hiveMQId = new HivemqId();
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         decoder = new MqttConnectDecoder(mqttConnacker,
                 new TestConfigurationBootstrap().getFullConfigurationService(),

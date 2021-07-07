@@ -41,7 +41,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Before
     public void before() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
@@ -850,7 +850,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0x0B, 1,
 
         };
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final ByteBuf byteBuf = channel.alloc().buffer();

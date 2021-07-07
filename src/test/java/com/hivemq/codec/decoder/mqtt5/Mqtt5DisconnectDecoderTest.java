@@ -157,7 +157,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(new TestMessageEncoder(messageDroppedService, securityConfigurationService));
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(disconnect);
@@ -380,7 +380,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         //from connect
         channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(50L);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = new byte[]{

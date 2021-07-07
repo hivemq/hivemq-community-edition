@@ -38,7 +38,7 @@ public class MQTTMessageDecoderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         //setting version to fake "connected" state
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         embeddedChannel.attr(CLIENT_CONNECTION).set(clientConnection);

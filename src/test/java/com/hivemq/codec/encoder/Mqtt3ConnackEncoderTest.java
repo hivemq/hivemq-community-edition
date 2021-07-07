@@ -40,7 +40,7 @@ public class Mqtt3ConnackEncoderTest {
 
         encoder = new Mqtt3ConnackEncoder();
         channel = new EmbeddedChannel(encoder);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
     }
 
@@ -48,7 +48,7 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt311_connack_no_sp() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final CONNACK connack = new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED, false);
         channel.writeOutbound(connack);
@@ -76,7 +76,7 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt311_connack_session_present() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CONNACK connack = new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED, true);
@@ -132,7 +132,7 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt31_unacceptable_protocol_version() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final CONNACK connack = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
         channel.writeOutbound(connack);
@@ -161,7 +161,7 @@ public class Mqtt3ConnackEncoderTest {
     public void test_disconnected_after_identifier_rejected() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new Mqtt3ConnackEncoder());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         embeddedChannel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED));
 
@@ -172,7 +172,7 @@ public class Mqtt3ConnackEncoderTest {
     public void test_disconnected_after_unacceptable_protocol_version() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new Mqtt3ConnackEncoder());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         embeddedChannel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION));
 
@@ -183,7 +183,7 @@ public class Mqtt3ConnackEncoderTest {
     public void test_disconnected_after_bad_username_pasword() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new Mqtt3ConnackEncoder());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         embeddedChannel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_BAD_USERNAME_OR_PASSWORD));
 
@@ -194,7 +194,7 @@ public class Mqtt3ConnackEncoderTest {
     public void test_disconnected_after_not_authorized() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new Mqtt3ConnackEncoder());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         embeddedChannel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED));
 
@@ -205,7 +205,7 @@ public class Mqtt3ConnackEncoderTest {
     public void test_disconnected_after_server_unavailable() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel(new Mqtt3ConnackEncoder());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         embeddedChannel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_SERVER_UNAVAILABLE));
 

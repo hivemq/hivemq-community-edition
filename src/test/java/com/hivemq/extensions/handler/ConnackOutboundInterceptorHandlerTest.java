@@ -116,7 +116,7 @@ public class ConnackOutboundInterceptorHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 

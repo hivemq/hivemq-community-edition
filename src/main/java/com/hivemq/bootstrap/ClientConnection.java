@@ -25,13 +25,12 @@ import com.hivemq.mqtt.message.ProtocolVersion;
  */
 public class ClientConnection {
 
-    private @NotNull PublishFlushHandler publishFlushHandler;
+    private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
-    private @Nullable String clientId;
-    private boolean cleanStart;
 
 
-    public ClientConnection() {
+    public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
+        this.publishFlushHandler = publishFlushHandler;
     }
 
     public @NotNull PublishFlushHandler getPublishFlushHandler() {
@@ -42,27 +41,8 @@ public class ClientConnection {
         return protocolVersion;
     }
 
-    public void setProtocolVersion(@Nullable ProtocolVersion protocolVersion) {
+    public void setProtocolVersion(final @Nullable ProtocolVersion protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
-    public @Nullable String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(@Nullable String clientId) {
-        this.clientId = clientId;
-    }
-
-    public boolean isCleanStart() {
-        return cleanStart;
-    }
-
-    public void setCleanStart(boolean cleanStart) {
-        this.cleanStart = cleanStart;
-    }
-
-    public void setPublishFlushHandler(PublishFlushHandler publishFlushHandler) {
-        this.publishFlushHandler = publishFlushHandler;
-    }
 }

@@ -43,7 +43,7 @@ public class ClientInitiatedDisconnectInputImplTest {
     @Test
     public void test_construction_values_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client", channel, null, null, null, false);
@@ -59,7 +59,7 @@ public class ClientInitiatedDisconnectInputImplTest {
     @Test
     public void test_construction_values_set() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientInitiatedDisconnectInputImpl disconnectInput =

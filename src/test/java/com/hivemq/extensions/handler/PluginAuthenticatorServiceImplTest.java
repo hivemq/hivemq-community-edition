@@ -122,7 +122,7 @@ public class PluginAuthenticatorServiceImplTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         securityConfig = new SecurityConfigurationServiceImpl();
         embeddedChannel = new EmbeddedChannel();
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);

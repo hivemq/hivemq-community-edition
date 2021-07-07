@@ -116,7 +116,7 @@ public class PublishPollServiceImplTest {
 
     private SingleWriterService singleWriterService;
 
-    ClientConnection clientConnection = new ClientConnection();
+    ClientConnection clientConnection = new ClientConnection(null);
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);

@@ -61,7 +61,7 @@ public class MessageExpiryHandlerTest {
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_ID).set("ClientId");
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.pipeline().addLast(messageExpiryHandler);

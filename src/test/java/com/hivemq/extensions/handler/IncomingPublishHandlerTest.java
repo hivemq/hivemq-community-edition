@@ -150,7 +150,7 @@ public class IncomingPublishHandlerTest {
                 mock(DropOutgoingPublishesHandler.class));
         channel.pipeline().addFirst(publishFlowHandler);
         channel.pipeline().context(PublishFlowHandler.class);
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
