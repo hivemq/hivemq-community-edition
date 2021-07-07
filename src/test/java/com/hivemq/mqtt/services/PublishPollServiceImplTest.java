@@ -21,6 +21,7 @@ import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -74,49 +75,59 @@ import static org.mockito.Mockito.*;
  */
 public class PublishPollServiceImplTest {
 
-    private AutoCloseable closeableMock;
+    private @NotNull AutoCloseable closeableMock;
 
     @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
+    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
+    @NotNull
     MessageIDPools messageIDPools;
 
     @Mock
+    @NotNull
     MessageIDPool messageIDPool;
 
     @Mock
+    @NotNull
     ClientQueuePersistence clientQueuePersistence;
 
     @Mock
+    @NotNull
     ChannelPersistence channelPersistence;
 
     @Mock
+    @NotNull
     PublishPayloadPersistence publishPayloadPersistence;
 
     @Mock
+    @NotNull
     Channel channel;
 
     @Mock
+    @NotNull
     ChannelFuture channelFuture;
 
     @Mock
+    @NotNull
     ChannelPipeline pipeline;
 
     @Mock
+    @NotNull
     MessageDroppedService messageDroppedService;
 
     @Mock
+    @NotNull
     SharedSubscriptionService sharedSubscriptionService;
 
     @Mock
+    @NotNull
     PublishFlushHandler publishFlushHandler;
 
-    private PublishPollService publishPollService;
+    private @NotNull PublishPollService publishPollService;
 
-    private SingleWriterService singleWriterService;
+    private @NotNull SingleWriterService singleWriterService;
 
-    ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
@@ -125,6 +136,7 @@ public class PublishPollServiceImplTest {
         when(channel.pipeline()).thenReturn(pipeline);
         when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
+        final ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
