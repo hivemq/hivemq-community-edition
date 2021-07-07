@@ -116,7 +116,7 @@ public class PublishPollServiceImplTest {
 
     private SingleWriterService singleWriterService;
 
-    ClientConnection clientConnection = new ClientConnection(null);
+    ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
@@ -125,7 +125,6 @@ public class PublishPollServiceImplTest {
         when(channel.pipeline()).thenReturn(pipeline);
         when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
-        clientConnection.setPublishFlushHandler(publishFlushHandler);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
