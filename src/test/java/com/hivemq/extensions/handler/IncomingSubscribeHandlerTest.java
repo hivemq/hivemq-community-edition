@@ -119,7 +119,7 @@ public class IncomingSubscribeHandlerTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 

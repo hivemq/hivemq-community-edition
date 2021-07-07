@@ -82,7 +82,7 @@ public class Mqtt31ConnectDecoderTest {
         when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(clientIdAttr);
         when(clientIdAttr.get()).thenReturn("clientId");
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         when(clientConnectionAttribute.get()).thenReturn(clientConnection);
 

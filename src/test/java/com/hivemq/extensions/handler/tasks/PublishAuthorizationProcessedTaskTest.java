@@ -68,7 +68,7 @@ public class PublishAuthorizationProcessedTaskTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel(new DummyHandler());
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         final ChannelHandlerContext ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);

@@ -48,7 +48,7 @@ public class MqttPingreqDecoderTest {
     @Test
     public void test_ping_request_received_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0000);
@@ -65,7 +65,7 @@ public class MqttPingreqDecoderTest {
     @Test
     public void test_ping_request_received_mqtt_5() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final ByteBuf buf = Unpooled.buffer();
@@ -83,7 +83,7 @@ public class MqttPingreqDecoderTest {
     @Test
     public void test_ping_request_invalid_header_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0001);
@@ -98,7 +98,7 @@ public class MqttPingreqDecoderTest {
     @Test
     public void test_ping_request_invalid_header_mqtt_5() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final ByteBuf buf = Unpooled.buffer();
@@ -114,7 +114,7 @@ public class MqttPingreqDecoderTest {
     @Test
     public void test_ping_request_invalid_header_ignored_mqtt_31() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
 

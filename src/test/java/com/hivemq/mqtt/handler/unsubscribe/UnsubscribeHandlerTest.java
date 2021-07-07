@@ -69,7 +69,7 @@ public class UnsubscribeHandlerTest {
     private @NotNull UnsubscribeHandler unsubscribeHandler;
 
     private @NotNull EmbeddedChannel channel;
-    private final @NotNull ClientConnection clientConnection = new ClientConnection();
+    private final @NotNull ClientConnection clientConnection = new ClientConnection(null);
 
     @Before
     public void setUp() throws Exception {

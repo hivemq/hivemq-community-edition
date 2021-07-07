@@ -48,7 +48,7 @@ public class Mqtt3ConnectEncoderTest {
         channel = new EmbeddedChannel(mqtt3ConnectEncoder);
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
     }
 
@@ -115,7 +115,7 @@ public class Mqtt3ConnectEncoderTest {
 
         builder.withWillPublish(willBuilder.build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CONNECT connect = builder.build();
@@ -164,7 +164,7 @@ public class Mqtt3ConnectEncoderTest {
     @Test
     public void test_mqtt_3_1_1() {
         final CONNECT connect = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withCleanStart(false).withClientIdentifier("clientId").build();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
 
@@ -449,7 +449,7 @@ public class Mqtt3ConnectEncoderTest {
 
     @Test
     public void test_mqtt_3_1_1_will_and_username_and_pw_and_cleanSession() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CONNECT.Mqtt3Builder connectBuilder = new CONNECT.Mqtt3Builder()

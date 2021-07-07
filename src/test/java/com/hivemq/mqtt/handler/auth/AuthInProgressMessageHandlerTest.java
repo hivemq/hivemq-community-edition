@@ -58,7 +58,7 @@ public class AuthInProgressMessageHandlerTest {
         connacker = new MqttConnackerImpl(eventLog);
 
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection();
+        final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.pipeline().addFirst(new AuthInProgressMessageHandler(connacker));

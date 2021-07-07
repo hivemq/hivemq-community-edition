@@ -69,8 +69,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
         final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
-        final ClientConnection clientConnection = new ClientConnection();
-        clientConnection.setPublishFlushHandler(publishFlushHandler);
+        final ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
         ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         ch.attr(ChannelAttributes.LISTENER).set(listener);

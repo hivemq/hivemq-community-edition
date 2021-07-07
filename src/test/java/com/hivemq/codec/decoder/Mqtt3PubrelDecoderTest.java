@@ -43,7 +43,7 @@ public class Mqtt3PubrelDecoderTest {
     @Test
     public void test_pubrel_received() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0010);
@@ -61,7 +61,7 @@ public class Mqtt3PubrelDecoderTest {
     @Test
     public void test_pubrel_invalid_header_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0000);
@@ -78,7 +78,7 @@ public class Mqtt3PubrelDecoderTest {
     public void test_pubrel_invalid_header_mqtt_31() {
 
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0010);

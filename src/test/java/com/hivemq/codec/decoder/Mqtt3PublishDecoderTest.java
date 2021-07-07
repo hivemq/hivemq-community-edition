@@ -46,7 +46,7 @@ public class Mqtt3PublishDecoderTest {
         MockitoAnnotations.initMocks(this);
 
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        embeddedChannel.attr(CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 
@@ -173,7 +173,7 @@ public class Mqtt3PublishDecoderTest {
         fullConfig.mqttConfiguration().setRetainedMessagesEnabled(false);
 
         embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
 
         final String topic = "topic";

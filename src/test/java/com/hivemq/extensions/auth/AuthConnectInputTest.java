@@ -43,7 +43,7 @@ public class AuthConnectInputTest {
     public void setUp() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        clientConnection = new ClientConnection();
+        clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         embeddedChannel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).set(12345L);

@@ -39,7 +39,7 @@ public class ConnectionStartInputImplTest {
     @Test
     public void test_construction_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        ClientConnection clientConnection = new ClientConnection();
+        ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ConnectionStartInputImpl input = new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(), channel);

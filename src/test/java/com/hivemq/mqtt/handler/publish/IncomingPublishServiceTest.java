@@ -88,7 +88,7 @@ public class IncomingPublishServiceTest {
     @Mock
     private MqttServerDisconnectorImpl mqttServerDisconnector;
 
-    final ClientConnection clientConnection = new ClientConnection();
+    final ClientConnection clientConnection = new ClientConnection(null);
 
     @Before
     public void setUp() throws Exception {
