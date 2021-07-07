@@ -5,13 +5,8 @@ on:
     branches:
       - master
 
-concurrency:
-  group: ${{ github.ref }}-snapshot
-  cancel-in-progress: true
-
 jobs:
   snapshot:
-    environment: mavenCentralPublish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
