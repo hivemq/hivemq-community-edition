@@ -2,7 +2,8 @@
 
 set -eo pipefail
 
-IMAGE=${TARGET_IMAGE:-hivemq/hivemq-ce:}
+IMAGE_PREFIX="hivemq/hivemq-ce"
+LATEST_IMAGE="${IMAGE_PREFIX}:latest"
 
 cd "$(dirname $0)/../"
 HIVEMQ_VERSION=$(./gradlew properties | grep ^version: | sed -e "s/version: //")
@@ -10,22 +11,16 @@ echo "Building Docker image for HiveMQ ${HIVEMQ_VERSION}"
 ./gradlew hivemqZip
 cd docker
 cp ../build/zip/hivemq-ce-${HIVEMQ_VERSION}.zip .
-docker build --build-arg HIVEMQ_VERSION=${HIVEMQ_VERSION} -f Dockerfile -t ${IMAGE} .
+docker build --build-arg HIVEMQ_VERSION=${HIVEMQ_VERSION} -f Dockerfile -t ${LATEST_IMAGE} .
 rm -f hivemq-ce-${HIVEMQ_VERSION}.zip
 
 echo "Tagging image as ${HIVEMQ_VERSION}"
-TAGGED_IMAGE="${IMAGE//:*}:${HIVEMQ_VERSION}"
-docker tag ${IMAGE} "${TAGGED_IMAGE}"
+VERSIONED_IMAGE="${IMAGE_PREFIX}:${HIVEMQ_VERSION}"
+docker tag ${LATEST_IMAGE} "${VERSIONED_IMAGE}"
 
 if [[ ${PUSH_IMAGE} == true ]]; then
-    echo "Pushing image as ${TAGGED_IMAGE}"
-    docker push ${TAGGED_IMAGE}
-fi
-
-# If we're building a tagged commit, it will also be the new :latest image on Docker Hub.
-if [[ ${PUSH_IMAGE} == true ]]; then
-    echo "Tagging image as ${IMAGE//:*}:latest"
-    docker tag ${IMAGE} "${IMAGE//:*}:latest"
-    echo "Pushing image as ${IMAGE//:*}:latest"
-    docker push ${IMAGE//:*}:latest
+    echo "Pushing image as ${VERSIONED_IMAGE}"
+    docker push ${VERSIONED_IMAGE}
+    echo "Pushing image as ${LATEST_IMAGE}"
+    docker push ${LATEST_IMAGE}
 fi
