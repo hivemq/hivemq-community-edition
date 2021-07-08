@@ -28,4 +28,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Push Snapshot To Docker Hub
-        run: PUSH_IMAGE=true docker/publish-snapshot.sh
+        run: PUSH_IMAGE=true docker/build.sh

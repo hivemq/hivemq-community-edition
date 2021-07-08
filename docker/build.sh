@@ -12,3 +12,8 @@ cd docker
 cp ../build/zip/hivemq-ce-${HIVEMQ_VERSION}.zip .
 docker build --build-arg HIVEMQ_VERSION=${HIVEMQ_VERSION} -f Dockerfile -t ${IMAGE} .
 rm -f hivemq-ce-${HIVEMQ_VERSION}.zip
+
+if [[ ${PUSH_IMAGE} == true ]]; then
+    echo "Pushing image"
+    docker push ${IMAGE}
+fi
