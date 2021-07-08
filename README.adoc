@@ -124,9 +124,7 @@ cd hivemq-community-edition
 docker/build.sh
 ----
 
-The Docker image `hivemq/hivemq-ce` is created locally.
-
-You can tag the image or use the `TARGET_IMAGE` environment variable to manipulate the image name.
+The Docker image `hivemq/hivemq-ce:snapshot` is created locally.
 
 For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
 
