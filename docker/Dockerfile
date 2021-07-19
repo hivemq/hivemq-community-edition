@@ -32,7 +32,7 @@ RUN set -x \
         && curl -fSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu \
         && curl -fSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" -o /usr/local/bin/gosu.asc \
         && export GNUPGHOME="$(mktemp -d)" \
-        && gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+        && gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
         && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
         && rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
         && { command -v gpgconf && gpgconf --kill all || :; } \
