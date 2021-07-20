@@ -19,6 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.connect.CONNECT;
 
 /**
  * @author Daniel Krüger
@@ -27,6 +28,7 @@ public class ClientConnection {
 
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
+    private @Nullable CONNECT connectMessage;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
 
@@ -44,6 +46,14 @@ public class ClientConnection {
 
     public void setProtocolVersion(final @Nullable ProtocolVersion protocolVersion) {
         this.protocolVersion = protocolVersion;
+    }
+
+    public @Nullable CONNECT getConnectMessage() {
+        return connectMessage;
+    }
+
+    public void setConnectMessage(final @Nullable CONNECT connectMessage) {
+        this.connectMessage = connectMessage;
     }
 
     /**

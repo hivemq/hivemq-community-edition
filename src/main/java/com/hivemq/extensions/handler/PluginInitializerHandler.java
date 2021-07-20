@@ -175,14 +175,14 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
-                ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(null);
             }
 
             @Override
             public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError(t);
                 log.error("Calling initializer failed", t);
-                ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(null);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(null);
                 ctx.writeAndFlush(msg, promise);
             }
         }, ctx.executor());
@@ -193,7 +193,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @Nullable CONNACK msg,
             final @NotNull ChannelPromise promise) {
 
-        final CONNECT connect = ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).get();
+        final CONNECT connect = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectMessage();
         if (connect == null || connect.getWillPublish() == null) {
             ctx.writeAndFlush(msg, promise);
             return;
