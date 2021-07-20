@@ -64,7 +64,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_all_props() {
 
-        channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(150L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(150L);
 
         final byte[] expected = {
                 // fixed header
@@ -1204,7 +1204,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_propertyLengthExceeded_omitReasonString() {
 
         final int maxPacketSize = 130;
-        channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set((long) maxPacketSize);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) maxPacketSize);
 
         final int maxUserPropertiesCount = maxPacketSize / userPropertyBytes;
         final Mqtt5UserProperties maxUserProperties = getUserProperties(maxUserPropertiesCount);
@@ -1261,7 +1261,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void encode_maximumPacketSizeExceeded_omitUserProperties() {
         final int maxPacketSize = 130;
-        channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set((long) maxPacketSize);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) maxPacketSize);
 
         final MaximumPacketBuilder maxPacket = new MaximumPacketBuilder().build(maxPacketSize);
         final byte[] expected = {

@@ -176,7 +176,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
         if (connect.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
-            ctx.channel().attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(connect.getMaximumPacketSize());
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(connect.getMaximumPacketSize());
         }
 
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(connect.isResponseInformationRequested());

@@ -107,7 +107,7 @@ public class IncomingPublishService {
         }
 
         if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
-            final Long maxPublishSize = ctx.channel().attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).get();
+            final Long maxPublishSize = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getMaxPacketSizeSend();
             if (!isMessageSizeAllowed(maxPublishSize, publish)) {
                 final String clientId = ChannelUtils.getClientId(ctx.channel());
                 final String logMessage = "Client '" + clientId + "' (IP: {}) sent a PUBLISH with " + publish.getPayload().length + " bytes payload its max allowed size is " + maxPublishSize + " bytes. Disconnecting client.";

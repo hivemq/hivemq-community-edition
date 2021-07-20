@@ -386,7 +386,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Long maximumPacketSize = embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).get();
+        final Long maximumPacketSize = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMaxPacketSizeSend();
 
         assertNotNull(maximumPacketSize);
         assertEquals(300, maximumPacketSize.longValue());
