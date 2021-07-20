@@ -135,6 +135,6 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
             final @NotNull Channel channel) {
 
         channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(clientSettings.getClientReceiveMaximum());
-        channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(clientSettings.getQueueSizeMaximum());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
     }
 }
