@@ -315,7 +315,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         assertEquals(2,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -340,7 +340,7 @@ public class PluginAuthorizerServiceImplTest {
         channel.runScheduledPendingTasks();
 
         assertEquals(2,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 5000)
@@ -360,7 +360,7 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
-        while (channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 1) {
+        while (channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getPublishAuthorizersMap().size() != 1) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             Thread.sleep(100);
@@ -370,7 +370,7 @@ public class PluginAuthorizerServiceImplTest {
         assertFalse(authorizeLatch2.await(0, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -388,14 +388,14 @@ public class PluginAuthorizerServiceImplTest {
 
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
-        while (channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size() != 2) {
+        while (channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getPublishAuthorizersMap().size() != 2) {
             channel.runPendingTasks();
             channel.runScheduledPendingTasks();
             Thread.sleep(100);
         }
 
         assertEquals(2,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getPublishAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getPublishAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -418,7 +418,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         assertEquals(2,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -438,7 +438,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getSubscriptionAuthorizersMap().size());
     }
 
     @Test(timeout = 2000)
@@ -459,7 +459,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);
@@ -485,7 +485,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         assertEquals(1,
-                channel.attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get().getSubscriptionAuthorizersMap().size());
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers().getSubscriptionAuthorizersMap().size());
 
         while (channel.isActive()) {
             Thread.sleep(25);

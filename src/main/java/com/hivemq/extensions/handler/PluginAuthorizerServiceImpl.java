@@ -265,11 +265,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     @NotNull
     private ClientAuthorizers getClientAuthorizers(final @NotNull ChannelHandlerContext ctx) {
-        ClientAuthorizers clientAuthorizers = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).get();
+        ClientAuthorizers clientAuthorizers = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
         if (clientAuthorizers == null) {
 
             clientAuthorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
-            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHORIZERS).set(clientAuthorizers);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientAuthorizers(clientAuthorizers);
         }
         return clientAuthorizers;
     }
