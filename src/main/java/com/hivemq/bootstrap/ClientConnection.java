@@ -60,6 +60,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean authAuthenticated;
     private boolean authenticatedOrAuthenticationBypassed;
     private @Nullable ScheduledFuture<?> authFuture;
 
@@ -254,6 +255,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isAuthAuthenticated() {
+        return authAuthenticated;
+    }
+
+    public void setAuthAuthenticated(final boolean authAuthenticated) {
+        this.authAuthenticated = authAuthenticated;
     }
 
     public boolean isAuthenticatedOrAuthenticationBypassed() {

@@ -72,8 +72,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> AUTH_ONGOING = AttributeKey.valueOf("Auth.Ongoing");
     public static final AttributeKey<Boolean> RE_AUTH_ONGOING = AttributeKey.valueOf("ReAuth.Ongoing");
 
-    public static final AttributeKey<Boolean> AUTH_AUTHENTICATED = AttributeKey.valueOf("Auth.Authenticated");
-
     /**
      * Representation of information regarding the connection of a single client.
      */

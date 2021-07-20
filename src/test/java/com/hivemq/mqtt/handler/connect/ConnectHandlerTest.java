@@ -1116,7 +1116,7 @@ public class ConnectHandlerTest {
         handler.connectSuccessfulAuthenticated(ctx, connect, null);
 
         assertNull(embeddedChannel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
-        assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
+        assertTrue(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
     }
 
     @Test(timeout = 5000)
@@ -1156,7 +1156,7 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
-        assertFalse(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
+        assertFalse(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
     }
 
     @Test(timeout = 5000)
@@ -1440,7 +1440,7 @@ public class ConnectHandlerTest {
         clientSettings.setOverloadProtectionThrottlingLevel(NONE);
         handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
 
-        assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
+        assertTrue(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
         assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum().intValue());
         assertEquals(123, connect.getReceiveMaximum());
     }
