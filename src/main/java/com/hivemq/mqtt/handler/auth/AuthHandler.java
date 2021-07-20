@@ -73,8 +73,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg) {
 
         final Channel channel = ctx.channel();
-        final Boolean reAuth = channel.attr(ChannelAttributes.RE_AUTH_ONGOING).get();
-        final boolean reAuthOngoing = reAuth != null && reAuth;
+        final boolean reAuthOngoing = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isReAuthOngoing();
         final Boolean auth = channel.attr(ChannelAttributes.AUTH_ONGOING).get();
         final boolean authOngoing = auth != null && auth;
 
@@ -147,7 +146,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             return;
         }
 
-        ctx.channel().attr(ChannelAttributes.RE_AUTH_ONGOING).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
         authService.authenticateReAuth(ctx, msg);
     }
 }
