@@ -32,8 +32,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Wrapper class for all ClientLifecycleEventListeners added by extensions.
- * <p>
- * This is the object of the channel attribute {@link com.hivemq.util.ChannelAttributes#EXTENSION_CLIENT_EVENT_LISTENERS}.
  *
  * @author Florian Limpöck
  * @since 4.0.0
