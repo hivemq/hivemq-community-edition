@@ -109,7 +109,7 @@ public class IncomingPublishServiceTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("clientid");
-        embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(1000L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(1000L);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_publish_size_too_big() {
 
-        embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(5L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(5L);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final PUBLISH publish =
@@ -142,7 +142,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_publish_size_ok() {
 
-        embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(5L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(5L);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_MOST_ONCE);
 

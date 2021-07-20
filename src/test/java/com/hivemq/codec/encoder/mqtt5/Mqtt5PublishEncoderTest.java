@@ -75,7 +75,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_encode_all() {
 
-        channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(200L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(200L);
 
         final byte[] expected = {
                 // fixed header

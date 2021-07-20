@@ -145,7 +145,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> extends 
 
     private @NotNull Long calculateMaxMessageSize(final @NotNull Channel channel) {
         Preconditions.checkNotNull(channel, "A Channel must never be null");
-        final Long maxMessageSize = channel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).get();
+        final Long maxMessageSize = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMaxPacketSizeSend();
         return Objects.requireNonNullElse(maxMessageSize, (long) MAXIMUM_PACKET_SIZE_LIMIT);
     }
 

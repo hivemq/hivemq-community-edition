@@ -47,6 +47,7 @@ public class ClientConnection {
     private @Nullable Long queueSizeMaximum;
     private @Nullable Long clientSessionExpiryInterval;
     private @Nullable Long connectReceivedTimestamp;
+    private @Nullable Long maxPacketSizeSend;
     private @Nullable String[] topicAliasMapping;
     private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
@@ -157,6 +158,14 @@ public class ClientConnection {
 
     public void setConnectReceivedTimestamp(final @Nullable Long connectReceivedTimestamp) {
         this.connectReceivedTimestamp = connectReceivedTimestamp;
+    }
+
+    public @Nullable Long getMaxPacketSizeSend() {
+        return maxPacketSizeSend;
+    }
+
+    public void setMaxPacketSizeSend(final @Nullable Long maxPacketSizeSend) {
+        this.maxPacketSizeSend = maxPacketSizeSend;
     }
 
     public @Nullable String[] getTopicAliasMapping() {
