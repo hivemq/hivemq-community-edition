@@ -180,7 +180,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                         ReasonStrings.CONNACK_MALFORMED_PACKET_USERNAME);
                 return null;
             }
-            channel.attr(ChannelAttributes.AUTH_USERNAME).set(userName);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername(userName);
         } else {
             userName = null;
         }

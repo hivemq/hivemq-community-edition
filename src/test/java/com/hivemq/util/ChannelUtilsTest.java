@@ -100,7 +100,7 @@ public class ChannelUtilsTest {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
-        channel.attr(ChannelAttributes.AUTH_USERNAME).set("user");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
 
@@ -116,7 +116,7 @@ public class ChannelUtilsTest {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
-        channel.attr(ChannelAttributes.AUTH_USERNAME).set("user");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword("pass".getBytes(UTF_8));
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);

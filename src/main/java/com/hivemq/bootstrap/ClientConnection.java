@@ -62,6 +62,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable String authUsername;
     private byte @Nullable [] authPassword;
     private @Nullable CONNECT authConnect;
     private @Nullable String authMethod;
@@ -264,6 +265,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable String getAuthUsername() {
+        return authUsername;
+    }
+
+    public void setAuthUsername(final @Nullable String authUsername) {
+        this.authUsername = authUsername;
     }
 
     public byte @Nullable [] getAuthPassword() {

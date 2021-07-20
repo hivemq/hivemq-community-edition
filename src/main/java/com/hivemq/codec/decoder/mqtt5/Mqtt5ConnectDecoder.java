@@ -208,7 +208,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
                 return false;
             }
-            channel.attr(ChannelAttributes.AUTH_USERNAME).set(username);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername(username);
             connectBuilder.withUsername(username);
         }
         return true;
