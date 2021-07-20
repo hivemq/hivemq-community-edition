@@ -195,7 +195,7 @@ public class ConnectionInformationImplTest {
     public void test_full_tls_information() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
-        channel.attr(AUTH_PROTOCOL).set("1.3");
+        clientConnection.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -229,7 +229,7 @@ public class ConnectionInformationImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
         channel.attr(AUTH_SNI_HOSTNAME).set("sni-hostname");
-        channel.attr(AUTH_PROTOCOL).set("1.3");
+        clientConnection.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -270,7 +270,7 @@ public class ConnectionInformationImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.attr(AUTH_CIPHER_SUITE).set("random-ecdsa-cipher");
-        channel.attr(AUTH_PROTOCOL).set("1.3");
+        clientConnection.setAuthProtocol("1.3");
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 
@@ -293,7 +293,7 @@ public class ConnectionInformationImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.attr(AUTH_CIPHER_SUITE).set("random-ecdsa-cipher");
-        channel.attr(AUTH_PROTOCOL).set("1.3");
+        clientConnection.setAuthProtocol("1.3");
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 

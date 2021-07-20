@@ -57,7 +57,6 @@ public class ChannelAttributes {
     public static final AttributeKey<String> AUTH_SNI_HOSTNAME = AttributeKey.valueOf("Auth.Sni.Hostname");
     public static final AttributeKey<SslClientCertificate> AUTH_CERTIFICATE = AttributeKey.valueOf("Auth.Certificate");
     public static final AttributeKey<String> AUTH_CIPHER_SUITE = AttributeKey.valueOf("Auth.Cipher.Suite");
-    public static final AttributeKey<String> AUTH_PROTOCOL = AttributeKey.valueOf("Auth.Protocol");
 
     /**
      * Representation of information regarding the connection of a single client.

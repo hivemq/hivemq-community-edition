@@ -44,11 +44,12 @@ import static org.mockito.Mockito.when;
 public class ExtensionInformationUtilTest {
 
     private @NotNull EmbeddedChannel channel;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(CLIENT_CONNECTION).set(clientConnection);
     }
@@ -56,7 +57,7 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_fails_no_cipher() {
 
-        channel.attr(AUTH_PROTOCOL).set("1.3");
+        clientConnection.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -101,7 +102,7 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_no_cert() {
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
-        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        clientConnection.setAuthProtocol("TLSv1.2");
 
         final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
@@ -115,7 +116,7 @@ public class ExtensionInformationUtilTest {
     public void test_get_tls_with_cert() {
 
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
-        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        clientConnection.setAuthProtocol("TLSv1.2");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -145,7 +146,7 @@ public class ExtensionInformationUtilTest {
     public void test_get_tls_with_sni() {
 
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
-        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        clientConnection.setAuthProtocol("TLSv1.2");
         channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
 
         final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
@@ -162,7 +163,7 @@ public class ExtensionInformationUtilTest {
     public void test_get_tls_with_everything() {
 
         channel.attr(AUTH_CIPHER_SUITE).set("cipher");
-        channel.attr(AUTH_PROTOCOL).set("TLSv1.2");
+        clientConnection.setAuthProtocol("TLSv1.2");
         channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
