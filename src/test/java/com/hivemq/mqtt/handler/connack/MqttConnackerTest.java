@@ -32,8 +32,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 import util.DummyHandler;
 import util.LogbackCapturingAppender;
@@ -52,20 +50,17 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class MqttConnackerTest {
 
-    @Mock
     private EventLog eventLog;
-
     private MqttConnacker mqttConnacker;
     private EmbeddedChannel channel;
     private LogbackCapturingAppender logbackCapturingAppender;
-    final ClientConnection clientConnection = new ClientConnection(null);
+    private final ClientConnection clientConnection = new ClientConnection(null);
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        eventLog = mock(EventLog.class);
         mqttConnacker = new MqttConnackerImpl(eventLog);
-        channel = new EmbeddedChannel();
-        channel.pipeline().addLast(new DummyHandler());
+        channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         logbackCapturingAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttConnackerImpl.class));
     }
@@ -299,12 +294,12 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge");
@@ -326,12 +321,12 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge", Mqtt5UserProperties.NO_USER_PROPERTIES, true);
@@ -353,11 +348,11 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         assertTrue(channel.isActive());
 
@@ -380,12 +375,12 @@ public class MqttConnackerTest {
                 }
             }
         });
-        channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge", Mqtt5UserProperties.NO_USER_PROPERTIES, true);

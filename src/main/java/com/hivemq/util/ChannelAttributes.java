@@ -79,8 +79,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Long> MAX_PACKET_SIZE_SEND = AttributeKey.valueOf("Restriction.MaxPacketSize.Send");
 
-    public static final AttributeKey<Boolean> EXTENSION_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
-
     /**
      * Representation of information regarding the connection of a single client
      */
