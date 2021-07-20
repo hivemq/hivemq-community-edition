@@ -98,7 +98,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
 
         when(extension.getId()).thenReturn("extension");
@@ -131,7 +131,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestSimpleUnsubackInterceptor");
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -153,7 +153,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestModifyUnsubackInterceptor");
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -177,7 +177,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
                 getIsolatedOutboundInterceptor("TestExceptionUnsubackInterceptor");
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
         when(extensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 

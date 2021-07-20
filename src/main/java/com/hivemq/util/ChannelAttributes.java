@@ -17,8 +17,6 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.extensions.client.ClientContextImpl;
-import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
@@ -81,7 +79,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Long> MAX_PACKET_SIZE_SEND = AttributeKey.valueOf("Restriction.MaxPacketSize.Send");
 
-    public static final AttributeKey<ClientContextImpl> EXTENSION_CLIENT_CONTEXT = AttributeKey.valueOf("Extension.Client.Context");
     public static final AttributeKey<Boolean> EXTENSION_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
     public static final AttributeKey<Boolean> EXTENSION_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
 

@@ -145,7 +145,7 @@ public class PublishOutboundInterceptorHandlerTest {
         final PublishOutboundInterceptor interceptor = getIsolatedInterceptor();
         when(clientContext.getPublishOutboundInterceptors()).thenReturn(ImmutableList.of(interceptor));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.writeOutbound(TestMessageUtil.createFullMqtt5Publish());
         final PUBLISH publish = channel.readOutbound();
