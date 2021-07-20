@@ -97,8 +97,8 @@ public class PublishOutboundInterceptorHandlerTest {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(null);
-        channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
         handler = new PublishOutboundInterceptorHandler(asyncer,
@@ -127,7 +127,7 @@ public class PublishOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5_000)
     public void test_client_id_null() {
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
         channel.writeOutbound(TestMessageUtil.createFullMqtt5Publish());
         final PUBLISH publish = channel.readOutbound();
         assertNull(publish);

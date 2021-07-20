@@ -17,7 +17,7 @@ package com.hivemq.migration;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Florian Limpöck

@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -31,12 +30,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
@@ -53,45 +51,28 @@ public class Mqtt31ConnectDecoderTest {
     @Mock
     private @NotNull ChannelFuture channelFuture;
 
-    @Mock
-    private @NotNull EventLog eventLog;
-
     private @NotNull Mqtt31ConnectDecoder decoder;
 
     @Mock
     private @NotNull MqttConnacker connacker;
 
-    @Mock
-    private @NotNull Attribute<ClientConnection> clientConnectionAttribute;
-
-
-    @Mock
-    @NotNull
-    Attribute<String> clientIdAttr;
-
-
     private static final byte fixedHeader = 0b0001_0000;
-
-    public Mqtt31ConnectDecoderTest() {
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
-        when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(clientIdAttr);
-        when(clientIdAttr.get()).thenReturn("clientId");
+
         final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        when(clientConnectionAttribute.get()).thenReturn(clientConnection);
+        clientConnection.setClientId("clientId");
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
     }
-
 
     @Test
     public void test_decode_no_will_no_user_no_pw() {

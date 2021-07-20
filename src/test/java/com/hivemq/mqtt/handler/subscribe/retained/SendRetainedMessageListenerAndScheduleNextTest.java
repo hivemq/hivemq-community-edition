@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.subscribe.retained;
 
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
@@ -47,9 +48,13 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     @Mock
     private Channel channel;
 
+    private ClientConnection clientConnection;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        clientConnection = new ClientConnection(null);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
         when(channel.eventLoop()).thenReturn(new DefaultEventLoop(Executors.newSingleThreadExecutor()));
     }
 
@@ -90,7 +95,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     @Test
     public void failure() {
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(new TestChannelAttribute<>("client"));
+        clientConnection.setClientId("client");
         final Topic topic = new Topic("#", QoS.AT_LEAST_ONCE);
         final Queue<String> topics = new ArrayDeque<>();
         for (int i = 0; i < 90; i++) {
@@ -108,7 +113,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     @Test
     public void failure_no_more_message_id() {
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(new TestChannelAttribute<>("client"));
+        clientConnection.setClientId("client");
         when(retainedMessagesSender.writeRetainedMessages(any(Channel.class), Matchers.<Topic>anyVararg())).thenReturn(
                 Futures.immediateFuture(null));
         final Topic topic = new Topic("#", QoS.AT_LEAST_ONCE);

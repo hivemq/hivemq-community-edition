@@ -106,7 +106,7 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
                 channel.eventLoop().schedule(() -> {
                     if (log.isTraceEnabled()) {
                         log.trace("Retrying retained message for client '{}' on topic '{}'.",
-                                channel.attr(ChannelAttributes.CLIENT_ID).get(), subscription.getTopic());
+                                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(), subscription.getTopic());
                     }
                     send();
                 }, 1, TimeUnit.SECONDS);
@@ -114,7 +114,7 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
 
         } else {
             Exceptions.rethrowError("Unable to send retained message for subscription " + subscription.getTopic() +
-                    " to client " + channel.attr(ChannelAttributes.CLIENT_ID).get() + ".", throwable);
+                    " to client " + channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId() + ".", throwable);
             channel.disconnect();
         }
     }

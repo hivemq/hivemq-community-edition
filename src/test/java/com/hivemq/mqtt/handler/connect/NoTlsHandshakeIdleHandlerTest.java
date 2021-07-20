@@ -54,7 +54,7 @@ public class NoTlsHandshakeIdleHandlerTest {
         MockitoAnnotations.initMocks(this);
         handler = new NoTlsHandshakeIdleHandler(mqttServerDisconnector);
         userEventTriggered = new AtomicBoolean(false);
-        final ChannelInboundHandlerAdapter eventAdapter = new ChannelInboundHandlerAdapter(){
+        final ChannelInboundHandlerAdapter eventAdapter = new ChannelInboundHandlerAdapter() {
             @Override
             public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
                 userEventTriggered.set(true);

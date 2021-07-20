@@ -360,7 +360,8 @@ public class RetainedMessageXodusLocalPersistenceTest {
         final RetainedMessage retainedMessage = new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000);
         final int maxMemory = retainedMessage.getEstimatedSizeInMemory() * 2 - 1;
 
-        persistence.put(retainedMessage, "topic/1", 1);        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
+        persistence.put(retainedMessage, "topic/1", 1);
+        persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/3", 1);
 
         final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk1 = persistence.getAllRetainedMessagesChunk(1, null, maxMemory);

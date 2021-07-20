@@ -148,7 +148,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(false);
         }
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(clientId);
 
         final MqttWillPublish mqttWillPublish;
         if (will) {

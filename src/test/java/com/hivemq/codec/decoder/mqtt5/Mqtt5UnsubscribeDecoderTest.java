@@ -361,7 +361,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // topic filter
-                0, 1, 't','o'
+                0, 1, 't', 'o'
 
         };
 

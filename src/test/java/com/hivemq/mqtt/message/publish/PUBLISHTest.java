@@ -44,15 +44,15 @@ public class PUBLISHTest {
             ObjectMemoryEstimation.objectShellSize() +  // shell size
                     ObjectMemoryEstimation.intSize() +  // size size
                     ObjectMemoryEstimation.longSize() +  // timestamp
-            24 + // user props overhead
-            ObjectMemoryEstimation.booleanSize() +  // duplicateDelivery
-            ObjectMemoryEstimation.booleanSize() +  // retain
-            ObjectMemoryEstimation.booleanSize() +  // isNewTopicAlias
-            ObjectMemoryEstimation.longSize() +  // messageExpiryInterval
-            ObjectMemoryEstimation.longSize() +  // publishId
-            ObjectMemoryEstimation.longWrapperSize() + // payloadId
-            ObjectMemoryEstimation.enumSize() +  // QoS
-            ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
+                    24 + // user props overhead
+                    ObjectMemoryEstimation.booleanSize() +  // duplicateDelivery
+                    ObjectMemoryEstimation.booleanSize() +  // retain
+                    ObjectMemoryEstimation.booleanSize() +  // isNewTopicAlias
+                    ObjectMemoryEstimation.longSize() +  // messageExpiryInterval
+                    ObjectMemoryEstimation.longSize() +  // publishId
+                    ObjectMemoryEstimation.longWrapperSize() + // payloadId
+                    ObjectMemoryEstimation.enumSize() +  // QoS
+                    ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
 
     @Test(expected = NullPointerException.class)
     public void test_publish_qos_null() {

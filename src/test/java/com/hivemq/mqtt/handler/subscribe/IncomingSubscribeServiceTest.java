@@ -115,7 +115,7 @@ public class IncomingSubscribeServiceTest {
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         when(clientSessionSubscriptionPersistence.addSubscription(anyString(), any(Topic.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.addSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
@@ -284,7 +284,6 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_subscribe_wildcard_disabled_mqtt5() {
         when(mqttConfigurationService.wildcardSubscriptionsEnabled()).thenReturn(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE);
 
@@ -300,7 +299,6 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_subscribe_wildcard_disabled_mqtt3_1_1() {
         when(mqttConfigurationService.wildcardSubscriptionsEnabled()).thenReturn(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE);
 
@@ -316,7 +314,6 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_subscribe_wildcard_disabled_mqtt3_1() {
         when(mqttConfigurationService.wildcardSubscriptionsEnabled()).thenReturn(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE);
 
@@ -331,7 +328,6 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_shared_subscription_disabled_mqtt5() {
         when(mqttConfigurationService.sharedSubscriptionsEnabled()).thenReturn(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         final Topic topic = new Topic("$share/group1/topic1", QoS.EXACTLY_ONCE);
 
@@ -348,7 +344,6 @@ public class IncomingSubscribeServiceTest {
     public void test_shared_subscription_disabled_mqtt3_1_1() {
         when(mqttConfigurationService.sharedSubscriptionsEnabled()).thenReturn(false);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final Topic topic = new Topic("$share/group1/topic1", QoS.EXACTLY_ONCE);
 

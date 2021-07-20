@@ -88,7 +88,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, @NotNull final Object msg) throws Exception {
 
-        final String client = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         if (msg instanceof PUBLISH) {
 
@@ -126,7 +126,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         if (msg instanceof PUBACK) {
             final PUBACK puback = (PUBACK) msg;
-            final String client = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+            final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
             final int messageId = puback.getPacketIdentifier();
             persistence.addOrReplace(client, messageId, puback);
             promise.addListener(new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
@@ -171,7 +171,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         //remove incoming message flow for not persisted client
         if (sessionExpiryInterval != null && sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {
-            final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+            final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
             if (clientId != null) {   //Just to be save. The client id should never be null, if the persistent session is not null.
                 persistence.delete(clientId);
             }
@@ -259,7 +259,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void handlePubrel(final ChannelHandlerContext ctx, final PUBREL pubrel) {
-        final String client = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         final int messageId = pubrel.getPacketIdentifier();
 

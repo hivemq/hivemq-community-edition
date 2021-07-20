@@ -16,28 +16,28 @@
 package com.hivemq.codec.decoder.mqtt311;
 
 import com.google.common.primitives.Bytes;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
@@ -53,9 +53,6 @@ public class Mqtt311ConnectDecoderTest {
     Channel channel;
 
     @Mock
-    EventLog eventLog;
-
-    @Mock
     private FullConfigurationService fullConfiguration;
 
     @Mock
@@ -63,7 +60,6 @@ public class Mqtt311ConnectDecoderTest {
 
     @Mock
     private MqttConnacker connacker;
-
 
     private Mqtt311ConnectDecoder decoder;
 
@@ -74,7 +70,9 @@ public class Mqtt311ConnectDecoderTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
+
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
+
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);
 

@@ -235,7 +235,7 @@ public class IncomingSubscribeService {
                                               final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
                                               final @Nullable String reasonString) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         downgradeSharedSubscriptions(msg);
 
         final ProtocolVersion mqttVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();

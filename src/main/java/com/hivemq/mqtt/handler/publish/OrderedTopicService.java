@@ -110,7 +110,7 @@ public class OrderedTopicService {
         }
 
         final PUBLISH publish = (PUBLISH) msg;
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final int qosNumber = publish.getQoS().getQosNumber();
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}", clientId, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());

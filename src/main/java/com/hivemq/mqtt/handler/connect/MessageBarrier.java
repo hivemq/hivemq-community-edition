@@ -113,7 +113,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void suspendRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             log.trace("Suspending read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_ID).get(),
+                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
                     ChannelUtils.getChannelIP(channel).or("UNKNOWN"));
         }
         channel.config().setAutoRead(false);
@@ -122,7 +122,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void resumeRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             log.trace("Restarting read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_ID).get(),
+                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
                     ChannelUtils.getChannelIP(channel).or("UNKNOWN"));
         }
         channel.config().setAutoRead(true);

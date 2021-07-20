@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -130,7 +129,7 @@ public class PluginInitializerHandlerTest {
         final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
 
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
@@ -215,7 +214,8 @@ public class PluginInitializerHandlerTest {
     public void test_user_event_other_event() {
 
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         embeddedChannel.pipeline().addLast(pluginInitializerHandler);
 
         embeddedChannel.pipeline().fireUserEventTriggered("Hallo");

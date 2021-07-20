@@ -79,7 +79,7 @@ public class UnsubscribeHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_ID).set("myTestClient");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("myTestClient");
         when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), Matchers.any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
     }

@@ -92,9 +92,9 @@ public class PUBRELTest {
 
         final int userPropertiesSize =
                 3 * (
-                24 + // overhead
-                ObjectMemoryEstimation.stringSize("userx") +
-                ObjectMemoryEstimation.stringSize("valuex")
+                        24 + // overhead
+                                ObjectMemoryEstimation.stringSize("userx") +
+                                ObjectMemoryEstimation.stringSize("valuex")
                 );
 
         final String reasonString = "reasonString";

@@ -93,7 +93,7 @@ public class PublishFlowHandlerTest {
                 incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(CLIENT_ID);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
     }
 
     @After

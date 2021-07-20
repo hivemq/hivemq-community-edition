@@ -24,7 +24,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.local.LocalAddress;
 import org.junit.Test;
 import util.DummyHandler;
-import util.TestChannelAttribute;
 
 import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
@@ -68,7 +67,7 @@ public class ChannelUtilsTest {
     public void test_token_from_channel_only_client_id() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
 
@@ -83,7 +82,7 @@ public class ChannelUtilsTest {
     public void test_token_from_channel_client_id_and_cert() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthCertificate(new SslClientCertificateImpl(new Certificate[]{}));
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
@@ -99,7 +98,7 @@ public class ChannelUtilsTest {
     public void test_token_from_channel_client_id_and_username() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
@@ -115,7 +114,7 @@ public class ChannelUtilsTest {
     public void test_token_from_channel_client_id_and_username_and_password() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword("pass".getBytes(UTF_8));
 

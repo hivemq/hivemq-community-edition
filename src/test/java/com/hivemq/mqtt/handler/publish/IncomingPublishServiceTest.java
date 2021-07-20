@@ -108,7 +108,7 @@ public class IncomingPublishServiceTest {
         embeddedChannel = new EmbeddedChannel(triggeredUserEvents);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("clientid");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientid");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(1000L);
     }
 

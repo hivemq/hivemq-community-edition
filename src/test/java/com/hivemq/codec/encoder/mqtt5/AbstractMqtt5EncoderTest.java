@@ -49,7 +49,7 @@ public class AbstractMqtt5EncoderTest {
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_ID).set("clientId");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
     }
