@@ -215,9 +215,7 @@ public class ConnectInboundInterceptorHandler {
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
                 ctx.channel().attr(ChannelAttributes.CLIENT_ID).set(connect.getClientIdentifier());
-                ctx.channel()
-                        .attr(ChannelAttributes.EXTENSION_CLIENT_INFORMATION)
-                        .set(new ClientInformationImpl(connect.getClientIdentifier()));
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 ctx.channel().attr(ChannelAttributes.CLEAN_START).set(connect.isCleanStart());
                 ctx.channel().attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(connect.getKeepAlive());
                 ctx.channel().attr(ChannelAttributes.AUTH_USERNAME).set(connect.getUsername());

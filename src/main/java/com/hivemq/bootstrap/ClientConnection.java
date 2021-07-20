@@ -18,6 +18,7 @@ package com.hivemq.bootstrap;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.client.parameter.ConnectionAttributes;
@@ -53,6 +54,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable ClientInformation extensionClientInformation;
     private @Nullable ConnectionInformation extensionConnectionInformation;
 
     public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
@@ -229,6 +231,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable ClientInformation getExtensionClientInformation() {
+        return extensionClientInformation;
+    }
+
+    public void setExtensionClientInformation(final @Nullable ClientInformation extensionClientInformation) {
+        this.extensionClientInformation = extensionClientInformation;
     }
 
     public @Nullable ConnectionInformation getExtensionConnectionInformation() {
