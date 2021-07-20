@@ -171,7 +171,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        ctx.channel().attr(ChannelAttributes.TAKEN_OVER).set(false);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(false);
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(SettableFuture.create());
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
@@ -642,7 +642,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 channelPersistence.persist(msg.getClientIdentifier(), ctx.channel());
                 return Futures.immediateFuture(null);
             }
-            final Boolean takeOver = oldClient.attr(ChannelAttributes.TAKEN_OVER).get();
+            final boolean takeOver = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver();
             final SettableFuture<Void> disconnectFuture = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
             if (disconnectFuture == null) {
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
@@ -650,7 +650,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // We have to check if the old client is currently taken over
             // Otherwise we could takeover the same client twice
             final int nextRetry;
-            if (takeOver == null || !takeOver) {
+            if (!takeOver) {
                 disconnectPreviousClient(msg, oldClient, disconnectFuture);
                 nextRetry = retry;
             } else {
@@ -684,7 +684,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
-        oldClient.attr(ChannelAttributes.TAKEN_OVER).set(true);
+        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(true);
 
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
