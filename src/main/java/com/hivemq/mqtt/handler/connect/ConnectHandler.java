@@ -209,7 +209,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        ctx.pipeline().channel().attr(ChannelAttributes.AUTH_AUTHENTICATED).set(false);
+        ctx.pipeline().channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthAuthenticated(false);
         connectAuthenticated(ctx, connect, clientSettings);
         cleanChannelAttributesAfterAuth(ctx);
     }
@@ -218,7 +218,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                                                final @NotNull CONNECT connect,
                                                final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        ctx.pipeline().channel().attr(ChannelAttributes.AUTH_AUTHENTICATED).set(true);
+        ctx.pipeline().channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthAuthenticated(true);
         connectAuthenticated(ctx, connect, clientSettings);
         cleanChannelAttributesAfterAuth(ctx);
     }
