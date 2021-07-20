@@ -184,7 +184,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addPublishFlowHandler(ctx, connect);
 
-        ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthOngoing(true);
         ctx.channel().attr(ChannelAttributes.AUTH_CONNECT).set(connect);
         pluginAuthenticatorService.authenticateConnect(ctx, connect, createClientSettings(connect));
     }
@@ -230,7 +230,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             } catch (final NoSuchElementException ignored) {
             }
         }
-        ctx.channel().attr(ChannelAttributes.AUTH_ONGOING).set(null);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthOngoing(false);
         ctx.channel().attr(ChannelAttributes.AUTH_CONNECT).set(null);
     }
 

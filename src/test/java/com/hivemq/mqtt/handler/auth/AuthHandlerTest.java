@@ -125,7 +125,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_auth_reauth() {
 
-        channel.attr(ChannelAttributes.AUTH_ONGOING).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthOngoing(true);
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 

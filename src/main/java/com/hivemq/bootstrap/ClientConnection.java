@@ -60,6 +60,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean authOngoing;
     private boolean reAuthOngoing;
     private boolean authAuthenticated;
     private boolean authenticatedOrAuthenticationBypassed;
@@ -256,6 +257,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isAuthOngoing() {
+        return authOngoing;
+    }
+
+    public void setAuthOngoing(final boolean authOngoing) {
+        this.authOngoing = authOngoing;
     }
 
     public boolean isReAuthOngoing() {
