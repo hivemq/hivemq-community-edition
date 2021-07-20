@@ -183,7 +183,7 @@ public class IncomingPublishHandlerTest {
     @Test(timeout = 5000)
     public void test_read_publish_skip_incoming_publishes() {
 
-        channel.attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 

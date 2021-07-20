@@ -66,7 +66,6 @@ public class ChannelAttributes {
     public static final AttributeKey<SettableFuture<Void>> DISCONNECT_FUTURE = AttributeKey.valueOf("MQTT.DisconnectFuture");
 
 
-
     /**
      * This contains the SNI hostname sent by the client if TLS SNI is used
      */
@@ -151,10 +150,4 @@ public class ChannelAttributes {
     public static final AttributeKey<ModifiableDefaultPermissions> AUTH_PERMISSIONS = AttributeKey.valueOf("Auth.User.Permissions");
 
     public static final AttributeKey<CONNECT> CONNECT_MESSAGE = AttributeKey.valueOf("Connect.Message");
-
-    /**
-     * True if this client is not allowed to publish any more messages, if <null> he is allowed to do so.
-     * The value is never set to false.
-     */
-    public static final AttributeKey<Boolean> INCOMING_PUBLISHES_SKIP_REST = AttributeKey.valueOf("Incoming.Publishes.Skip.Rest");
 }

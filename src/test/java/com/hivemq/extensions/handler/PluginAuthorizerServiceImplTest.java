@@ -185,7 +185,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         assertNull(channel.readOutbound());
@@ -356,7 +356,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
 
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 

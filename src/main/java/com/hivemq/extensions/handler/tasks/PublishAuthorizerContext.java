@@ -61,7 +61,7 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
 
         if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
                 || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
-            ctx.channel().attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
         }
 
 

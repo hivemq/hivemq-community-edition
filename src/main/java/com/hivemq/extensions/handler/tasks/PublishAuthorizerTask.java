@@ -71,7 +71,7 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
         }
 
         output.authorizerPresent();
-        if (channelHandlerContext.channel().attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).get() != null) {
+        if (channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest()) {
             //client already disconnected by authorizer, no more processing of any messages allowed.
             output.forceFailedAuthorization();
         } else {
