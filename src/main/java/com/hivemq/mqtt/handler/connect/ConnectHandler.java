@@ -589,10 +589,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         //send server keep alive max when connect keep alive is zero and zero is not allowed or keep alive > server keep alive maximum
         if ((msg.getKeepAlive() == 0 && !allowZeroKeepAlive) || (msg.getKeepAlive() > serverKeepAliveMaximum)) {
             builder.withServerKeepAlive(serverKeepAliveMaximum);
-            channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(serverKeepAliveMaximum);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(serverKeepAliveMaximum);
         } else {
             builder.withServerKeepAlive(KEEP_ALIVE_NOT_SET);
-            channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(msg.getKeepAlive());
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(msg.getKeepAlive());
         }
 
         //init Topic Alias Mapping if maximum is greater than zero and aliases are available

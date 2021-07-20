@@ -202,7 +202,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
             password = null;
         }
 
-        channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(keepAlive);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(keepAlive);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(isCleanSessionFlag);
 
         return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)

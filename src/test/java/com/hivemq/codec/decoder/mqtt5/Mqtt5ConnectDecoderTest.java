@@ -171,7 +171,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("test2", willUserProperties.get(2).getName());
         assertEquals("value", willUserProperties.get(2).getValue());
 
-        assertNull(channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get());
+        assertNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive());
         assertEquals("username", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUsername());
         assertEquals("pass", new String(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword(), StandardCharsets.UTF_8));
 
