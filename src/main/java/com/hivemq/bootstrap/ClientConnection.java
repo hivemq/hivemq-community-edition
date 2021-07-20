@@ -22,6 +22,8 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author Daniel Krüger
  */
@@ -31,6 +33,7 @@ public class ClientConnection {
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable CONNECT connectMessage;
+    private @Nullable AtomicInteger inFlightMessages;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
     private @Nullable String[] topicAliasMapping;
@@ -71,6 +74,17 @@ public class ClientConnection {
 
     public void setConnectMessage(final @Nullable CONNECT connectMessage) {
         this.connectMessage = connectMessage;
+    }
+
+    /**
+     * The amount of messages that have been polled but not yet delivered.
+     */
+    public @Nullable AtomicInteger getInFlightMessages() {
+        return inFlightMessages;
+    }
+
+    public void setInFlightMessages(final @Nullable AtomicInteger inFlightMessages) {
+        this.inFlightMessages = inFlightMessages;
     }
 
     public @Nullable Integer getClientReceiveMaximum() {

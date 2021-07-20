@@ -18,6 +18,7 @@ package com.hivemq.persistence.clientqueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
@@ -137,8 +138,9 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).set(true);
-        channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).set(new AtomicInteger(0));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(channelPersistence.get("client")).thenReturn(channel);
@@ -152,8 +154,9 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_channel_inactive() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).set(true);
-        channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).set(new AtomicInteger(0));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         channel.close();
 
@@ -168,7 +171,8 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_not_sent() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).set(new AtomicInteger(0));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(channelPersistence.get("client")).thenReturn(channel);
@@ -182,8 +186,9 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_sending() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).set(true);
-        channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).set(new AtomicInteger(10));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(10));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(channelPersistence.get("client")).thenReturn(channel);

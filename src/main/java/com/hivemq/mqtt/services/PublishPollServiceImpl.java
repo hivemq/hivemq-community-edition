@@ -276,10 +276,10 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private AtomicInteger inFlightMessageCount(final @NotNull Channel channel) {
-        AtomicInteger qos0InFlightMessages = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).get();
+        AtomicInteger qos0InFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
         if (qos0InFlightMessages == null) {
             qos0InFlightMessages = new AtomicInteger(0);
-            channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).set(qos0InFlightMessages);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(qos0InFlightMessages);
         }
         return qos0InFlightMessages;
     }
@@ -467,7 +467,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 FutureUtils.addExceptionLogger(future);
             }
 
-            final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).get();
+            final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
             if (inFlightMessages != null && inFlightMessages.decrementAndGet() > 0) {
                 return;
             }
@@ -478,7 +478,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         public void onFailure(final Throwable t) {
             Exceptions.rethrowError("Pubrel delivery failed", t);
             messageIDPool.returnId(message.getPacketIdentifier());
-            final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).get();
+            final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
             if (inFlightMessages != null) {
                 inFlightMessages.decrementAndGet();
             }

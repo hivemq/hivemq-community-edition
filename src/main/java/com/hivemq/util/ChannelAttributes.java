@@ -119,11 +119,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Long> CLIENT_SESSION_EXPIRY_INTERVAL = AttributeKey.valueOf("ClientSession.ExpiryInterval");
 
     /**
-     * The amount of messages that have been polled but not yet delivered
-     */
-    public static final AttributeKey<AtomicInteger> IN_FLIGHT_MESSAGES = AttributeKey.valueOf("Client.InFlightMessages");
-
-    /**
      * Representation of information regarding the connection of a single client
      */
     public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("Client.Connection");
