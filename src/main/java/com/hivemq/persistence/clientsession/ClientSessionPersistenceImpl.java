@@ -244,7 +244,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             return Futures.immediateFuture(false);
         }
 
-        channel.attr(ChannelAttributes.PREVENT_LWT).set(preventLwtMessage);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(preventLwtMessage);
         if (session.getSessionExpiryInterval() != SESSION_EXPIRY_NOT_SET) {
             channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(session.getSessionExpiryInterval());
         }

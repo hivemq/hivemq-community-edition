@@ -66,6 +66,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean preventLwt;
     private boolean inFlightMessagesSent;
 
     private @Nullable SslClientCertificate authCertificate;
@@ -297,6 +298,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isPreventLwt() {
+        return preventLwt;
+    }
+
+    public void setPreventLwt(final boolean preventLwt) {
+        this.preventLwt = preventLwt;
     }
 
     /**

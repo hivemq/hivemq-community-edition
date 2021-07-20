@@ -116,7 +116,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         handleInactive(channel, ctx);
         final String[] topicAliasMapping = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
         final boolean gracefulDisconnect = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
-        final boolean preventLwt = channel.attr(ChannelAttributes.PREVENT_LWT).get() != null ? channel.attr(ChannelAttributes.PREVENT_LWT).get() : false;
+        final boolean preventLwt = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt();
         final boolean takenOver = channel.attr(ChannelAttributes.TAKEN_OVER).get() != null ? channel.attr(ChannelAttributes.TAKEN_OVER).get() : false;
         final boolean authenticated = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed();
         final boolean logged = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isDisconnectEventLogged();
@@ -184,7 +184,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             final long sessionExpiryInterval) {
 
         messageIDPools.remove(clientId);
-        final boolean preventWill = channel.attr(ChannelAttributes.PREVENT_LWT).get() != null ? channel.attr(ChannelAttributes.PREVENT_LWT).get() : false;
+        final boolean preventWill = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt();
         final boolean sendWill = !preventWill && (channel.attr(ChannelAttributes.SEND_WILL).get() != null ? channel.attr(ChannelAttributes.SEND_WILL).get() : true);
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {

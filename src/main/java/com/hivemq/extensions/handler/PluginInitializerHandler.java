@@ -123,7 +123,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
-            ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false);
             ctx.writeAndFlush(msg, promise);
             return;
         }
@@ -202,13 +202,13 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         final MqttWillPublish willPublish = connect.getWillPublish();
         final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         if (DefaultPermissionsEvaluator.checkWillPublish(permissions, willPublish)) {
-            ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null); //clear prevent flag, Will is authorized
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false); //clear prevent flag, Will is authorized
             ctx.writeAndFlush(msg, promise);
             return;
         }
 
         //Will is not authorized
-        ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(true);
         //We have already added the will to the session, so we need to remove it again
         final ListenableFuture<Void> removeWillFuture =
                 clientSessionPersistence.removeWill(connect.getClientIdentifier());
