@@ -44,7 +44,7 @@ public class AuthConnectInput extends ClientBasedInputImpl
     public AuthConnectInput(final @NotNull CONNECT connect, final @NotNull Channel channel) {
         super(connect.getClientIdentifier(), channel);
         this.connect = connect;
-        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp(),
                 System.currentTimeMillis());
     }
 
