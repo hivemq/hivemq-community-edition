@@ -295,7 +295,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     private boolean checkClientId(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
 
-        final Boolean assigned = ctx.channel().attr(ChannelAttributes.CLIENT_ID_ASSIGNED).get();
+        final Boolean assigned = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned();
 
         if (assigned != null && assigned) {
             return true;
@@ -581,7 +581,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         //when client identifier assigned, send it in CONNACK
-        final Boolean clientIdAssigned = channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).get();
+        final Boolean clientIdAssigned = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned();
         if (clientIdAssigned != null && clientIdAssigned) {
             builder.withAssignedClientIdentifier(msg.getClientIdentifier());
         }

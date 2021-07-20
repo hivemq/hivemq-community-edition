@@ -136,7 +136,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
         if (clientId.isEmpty() && allowAssignedClientId) {
             clientId = clientIds.generateNext();
-            channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(true);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(true);
         } else if (clientId.isEmpty()) {
             mqttConnacker.connackError(channel,
                     "The client id of the client (IP: {}) is empty. This is not allowed.",
@@ -145,7 +145,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     ReasonStrings.CONNACK_CLIENT_IDENTIFIER_EMPTY);
             return null;
         } else {
-            channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(false);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(false);
         }
 
         channel.attr(ChannelAttributes.CLIENT_ID).set(clientId);

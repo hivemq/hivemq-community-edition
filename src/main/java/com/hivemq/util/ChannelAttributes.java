@@ -133,6 +133,4 @@ public class ChannelAttributes {
      *******************/
 
     public static final AttributeKey<String[]> TOPIC_ALIAS_MAPPING = AttributeKey.valueOf("TopicAlias.Mapping");
-
-    public static final AttributeKey<Boolean> CLIENT_ID_ASSIGNED = AttributeKey.valueOf("Client.Identifier.Assigned");
 }

@@ -148,7 +148,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                 }
 
                 clientId = clientIds.generateNext();
-                channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(true);
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(true);
             } else {
                 clientId = Strings.getPrefixedString(buf, utf8StringLength);
             }

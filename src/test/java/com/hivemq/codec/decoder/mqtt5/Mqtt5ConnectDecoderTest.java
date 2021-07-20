@@ -1486,7 +1486,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertEquals(44, connect.getClientIdentifier().length());
 
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).get());
+        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned());
 
     }
 
@@ -1555,7 +1555,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertEquals("huhu", connect.getClientIdentifier());
 
-        assertFalse(channel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).get());
+        assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned());
 
     }
 
