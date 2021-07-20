@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
 
 public class ChannelUtilsTest {
 
-
     @Test
     public void test_channel_ip() throws Exception {
         final Channel channel = mock(Channel.class);
@@ -68,6 +67,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_only_client_id() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
@@ -82,6 +82,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_cert() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
         channel.attr(ChannelAttributes.AUTH_CERTIFICATE).set(new SslClientCertificateImpl(new Certificate[]{}));
 
@@ -97,6 +98,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_username() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
         channel.attr(ChannelAttributes.AUTH_USERNAME).set("user");
 
@@ -112,9 +114,10 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_username_and_password() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
         channel.attr(ChannelAttributes.AUTH_USERNAME).set("user");
-        channel.attr(ChannelAttributes.AUTH_PASSWORD).set("pass".getBytes(UTF_8));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword("pass".getBytes(UTF_8));
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
 

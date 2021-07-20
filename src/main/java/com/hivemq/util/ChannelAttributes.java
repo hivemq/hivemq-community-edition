@@ -59,7 +59,6 @@ public class ChannelAttributes {
     public static final AttributeKey<String> AUTH_CIPHER_SUITE = AttributeKey.valueOf("Auth.Cipher.Suite");
     public static final AttributeKey<String> AUTH_PROTOCOL = AttributeKey.valueOf("Auth.Protocol");
     public static final AttributeKey<String> AUTH_USERNAME = AttributeKey.valueOf("Auth.Username");
-    public static final AttributeKey<byte[]> AUTH_PASSWORD = AttributeKey.valueOf("Auth.Password");
 
     /**
      * Representation of information regarding the connection of a single client.

@@ -219,7 +219,7 @@ public class ConnectInboundInterceptorHandler {
                 ctx.channel().attr(ChannelAttributes.CLEAN_START).set(connect.isCleanStart());
                 ctx.channel().attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(connect.getKeepAlive());
                 ctx.channel().attr(ChannelAttributes.AUTH_USERNAME).set(connect.getUsername());
-                ctx.channel().attr(ChannelAttributes.AUTH_PASSWORD).set(connect.getPassword());
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(connect.getPassword());
 
                 ctx.fireChannelRead(connect);
             }

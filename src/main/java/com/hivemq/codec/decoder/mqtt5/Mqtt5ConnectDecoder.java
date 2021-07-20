@@ -225,7 +225,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                         ReasonStrings.CONNACK_MALFORMED_PACKET_PASSWORD);
                 return false;
             }
-            channel.attr(ChannelAttributes.AUTH_PASSWORD).set(password);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(password);
             connectBuilder.withPassword(password);
         }
         return true;
