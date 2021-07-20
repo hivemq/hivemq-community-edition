@@ -286,10 +286,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     @NotNull
     private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart,
-            @NotNull final String clientId,
-            final long sessionExpiryInterval,
-            @Nullable final MqttWillPublish willPublish,
-            @Nullable final Long queueSizeMaximum) {
+                                                         @NotNull final String clientId,
+                                                         final long sessionExpiryInterval,
+                                                         @Nullable final MqttWillPublish willPublish,
+                                                         @Nullable final Long queueSizeMaximum) {
         return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish, queueSizeMaximum);
     }
 
@@ -344,7 +344,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             }
 
             final int maxTopicLength = configurationService.restrictionsConfiguration().maxTopicLength();
-            if(msg.getWillPublish().getTopic().length() > maxTopicLength) {
+            if (msg.getWillPublish().getTopic().length() > maxTopicLength) {
                 mqttConnacker.connackError(ctx.channel(),
                         "A client (IP: {}) sent a CONNECT with a Will Topic exceeding the max length. This is not allowed.",
                         "Sent CONNECT with Will topic that exceeds maximum topic length",
@@ -515,8 +515,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             existent = clientSessionPersistence.isExistent(msg.getClientIdentifier());
         }
         final ListenableFuture<Void> future = updatePersistenceData(msg.isCleanStart(),
-                    msg.getClientIdentifier(), sessionExpiryInterval, msg.getWillPublish(),
-                    queueSizeMaximum);
+                msg.getClientIdentifier(), sessionExpiryInterval, msg.getWillPublish(),
+                queueSizeMaximum);
 
         Futures.addCallback(future, new UpdatePersistenceCallback(ctx, this, msg, existent), ctx.executor());
     }
@@ -606,9 +606,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(sessionExpiryInterval);
 
         //set userproperties from auth to connack
-        final Mqtt5UserProperties userPropertiesFromAuth =
-                channel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).getAndSet(null);
+        final Mqtt5UserProperties userPropertiesFromAuth = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUserProperties();
         if (userPropertiesFromAuth != null) {
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUserProperties(null);
             builder.withUserProperties(userPropertiesFromAuth);
         }
 
@@ -706,7 +706,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         final int keepAlive;
         if (ProtocolVersion.MQTTv5.equals(msg.getProtocolVersion()) &&
                 ((msg.getKeepAlive() == 0 && !allowZeroKeepAlive) || (msg.getKeepAlive() > serverKeepAliveMaximum))) {
-            if(log.isTraceEnabled()) {
+            if (log.isTraceEnabled()) {
                 log.trace("Client {} used keepAlive {} which is invalid, using server maximum of {}", msg.getClientIdentifier(), msg.getKeepAlive(), serverKeepAliveMaximum);
             }
             keepAlive = serverKeepAliveMaximum;
@@ -718,14 +718,14 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             // The MQTT spec defines a 1.5 grace period
             final Double keepAliveValue = keepAlive * getGracePeriod();
-            if(log.isTraceEnabled()) {
+            if (log.isTraceEnabled()) {
                 log.trace("Client {} specified a keepAlive value of {}s. Using keepAlive of {}s. The maximum timeout before disconnecting is {}s",
                         msg.getClientIdentifier(), msg.getKeepAlive(), keepAlive, keepAliveValue);
             }
             ctx.pipeline().addFirst(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, new IdleStateHandler(keepAliveValue.intValue(), 0, 0, TimeUnit.SECONDS));
             ctx.pipeline().addAfter(MQTT_KEEPALIVE_IDLE_NOTIFIER_HANDLER, MQTT_KEEPALIVE_IDLE_HANDLER, new KeepAliveIdleHandler(mqttServerDisconnector));
         } else {
-            if(log.isTraceEnabled()) {
+            if (log.isTraceEnabled()) {
                 log.trace("Client {} specified keepAlive of 0. Disabling PING mechanism", msg.getClientIdentifier());
             }
         }
@@ -742,9 +742,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         private final boolean sessionPresent;
 
         public UpdatePersistenceCallback(final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ConnectHandler connectHandler,
-                final @NotNull CONNECT connect,
-                final boolean sessionPresent) {
+                                         final @NotNull ConnectHandler connectHandler,
+                                         final @NotNull CONNECT connect,
+                                         final boolean sessionPresent) {
             this.ctx = ctx;
             this.connectHandler = connectHandler;
             this.connect = connect;
