@@ -16,15 +16,13 @@
 package com.hivemq.util;
 
 import com.google.common.base.Optional;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.security.auth.ClientToken;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -40,8 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Christoph Schäbel
  */
 public class ChannelUtils {
-
-    private final static Logger log = LoggerFactory.getLogger(ChannelUtils.class);
 
     private ChannelUtils() {
         //This is a utility class, don't instantiate it!
@@ -129,8 +125,7 @@ public class ChannelUtils {
                 listener,
                 disconnectTimestampOptional);
 
-        final Boolean authenticated = channel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).get();
-        clientToken.setAuthenticated(authenticated != null ? authenticated : false);
+        clientToken.setAuthenticated(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed());
 
         return clientToken;
     }

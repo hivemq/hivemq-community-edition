@@ -222,7 +222,7 @@ public class DisconnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
 
         embeddedChannel.disconnect().get();
 
@@ -236,7 +236,7 @@ public class DisconnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
 
         when(clientSessionPersistence.clientDisconnected(
                 anyString(),
@@ -256,7 +256,7 @@ public class DisconnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(false);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
         embeddedChannel.disconnect().get();
@@ -272,7 +272,7 @@ public class DisconnectHandlerTest {
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(null);
         embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
-        embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
         embeddedChannel.disconnect().get();
