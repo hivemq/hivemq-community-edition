@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -163,7 +164,8 @@ public class SendRetainedMessagesListenerTest {
         ignoredTopics.add(anothertopic);
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(
                 new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
@@ -195,7 +197,8 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -275,7 +278,8 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -309,7 +313,8 @@ public class SendRetainedMessagesListenerTest {
                 subResult(new Topic("topic2", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -348,6 +353,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 
@@ -372,6 +378,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.EXACTLY_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
         embeddedChannel.runPendingTasks();
@@ -384,6 +391,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_exception_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
         final SendRetainedMessageResultListener sendRetainedMessageResultListener =
                 createSendRetainedMessageSingleListener(channel);
@@ -408,6 +416,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_throwable_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         createSendRetainedMessageSingleListener(channel).onFailure(new Throwable("test"));
 
         // tests if the test finish successfully. No need for assertion.
@@ -417,6 +426,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_error_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         createSendRetainedMessageSingleListener(channel).onFailure(new Error());
     }
 
@@ -461,7 +471,8 @@ public class SendRetainedMessagesListenerTest {
                 subResult(new Topic("topic2", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         listener.operationComplete(embeddedChannel.newSucceededFuture());
 

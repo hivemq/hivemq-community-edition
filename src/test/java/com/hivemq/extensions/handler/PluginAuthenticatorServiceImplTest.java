@@ -127,7 +127,7 @@ public class PluginAuthenticatorServiceImplTest {
         securityConfig = new SecurityConfigurationServiceImpl();
         embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(100);
 
 

@@ -30,7 +30,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.util.Attribute;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -47,9 +46,6 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
     @Mock
     private Channel channel;
-
-    @Mock
-    private Attribute attribute;
 
     @Mock
     private FullConfigurationService fullConfigurationService;
@@ -75,7 +71,6 @@ public class Mqtt31ConnectDecoderValidationsTest {
                 new HivemqId());
 
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
     }
 
     @Test

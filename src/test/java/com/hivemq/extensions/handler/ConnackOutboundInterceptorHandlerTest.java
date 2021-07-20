@@ -120,7 +120,7 @@ public class ConnackOutboundInterceptorHandlerTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
 
         when(plugin.getId()).thenReturn("plugin");
@@ -141,7 +141,7 @@ public class ConnackOutboundInterceptorHandlerTest {
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         final CONNACK initial = testConnack();
         channel.writeOutbound(initial);

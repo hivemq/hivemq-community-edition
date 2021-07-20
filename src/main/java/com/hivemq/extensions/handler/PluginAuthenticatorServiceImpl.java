@@ -209,7 +209,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             return;
         }
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         final AuthenticatorProviderInput authenticatorProviderInput =
                 new AuthenticatorProviderInputImpl(serverInformation, ctx.channel(), clientId);

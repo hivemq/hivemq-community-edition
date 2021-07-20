@@ -71,7 +71,7 @@ public class ChannelUtils {
      * Fetches the clientId from the channel attributes of the passed channel
      */
     public static String getClientId(final @NotNull Channel channel) {
-        return channel.attr(ChannelAttributes.CLIENT_ID).get();
+        return channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
     }
 
     public static ClientToken tokenFromChannel(@NotNull final Channel channel, @NotNull final Long disconnectTimestamp) {

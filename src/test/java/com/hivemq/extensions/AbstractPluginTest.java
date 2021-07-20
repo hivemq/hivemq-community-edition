@@ -20,7 +20,6 @@ import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
-import com.hivemq.extensions.client.parameter.ServerInformationImpl;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 

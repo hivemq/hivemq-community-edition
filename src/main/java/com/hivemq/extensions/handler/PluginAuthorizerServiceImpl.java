@@ -109,7 +109,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         }
 
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         if (clientId == null) {
             //we must process the msg in every case !
@@ -148,7 +148,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     public void authorizeWillPublish(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null || !ctx.channel().isActive()) {
             //no more processing needed, client is already disconnected
             return;
@@ -212,7 +212,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     public void authorizeSubscriptions(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null || !ctx.channel().isActive()) {
             //no more processing needed
             return;

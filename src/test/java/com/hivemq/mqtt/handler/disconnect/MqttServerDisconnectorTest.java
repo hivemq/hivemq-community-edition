@@ -200,7 +200,7 @@ public class MqttServerDisconnectorTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);

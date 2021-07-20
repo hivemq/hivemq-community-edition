@@ -17,7 +17,6 @@ package com.hivemq.extensions.auth.parameter;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
-import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import org.junit.Before;
 import org.junit.Test;
 

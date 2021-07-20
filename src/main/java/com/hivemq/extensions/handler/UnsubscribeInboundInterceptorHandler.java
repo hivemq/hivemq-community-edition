@@ -85,7 +85,7 @@ public class UnsubscribeInboundInterceptorHandler {
             final @NotNull UNSUBSCRIBE unsubscribe) {
 
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null) {
             return;
         }

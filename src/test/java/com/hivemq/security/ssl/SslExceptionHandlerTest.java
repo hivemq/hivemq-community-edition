@@ -15,6 +15,7 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -23,12 +24,11 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.NotSslRecordException;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
@@ -51,12 +51,6 @@ public class SslExceptionHandlerTest {
     Throwable throwable;
 
     @Mock
-    Attribute<String> clientIdAttribute;
-
-    @Mock
-    Attribute attribute;
-
-    @Mock
     EventLog eventLog;
 
     SslExceptionHandler sslExceptionHandler;
@@ -65,10 +59,12 @@ public class SslExceptionHandlerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
-        when(channel.attr(any(AttributeKey.class))).thenReturn(attribute);
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(clientIdAttribute);
+
+        final ClientConnection clientConnection = new ClientConnection(null);
+        clientConnection.setClientId("client");
+
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
         when(channel.isActive()).thenReturn(true);
-        when(clientIdAttribute.get()).thenReturn("client");
 
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
 

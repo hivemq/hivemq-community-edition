@@ -78,7 +78,7 @@ public class PubackInterceptorHandler {
 
     public void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null) {
             return;
         }
@@ -128,7 +128,7 @@ public class PubackInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null) {
             return;
         }

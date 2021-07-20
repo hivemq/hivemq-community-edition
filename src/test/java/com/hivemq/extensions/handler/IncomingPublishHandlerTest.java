@@ -126,7 +126,9 @@ public class IncomingPublishHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
+        clientConnection = new ClientConnection(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
 
         @NotNull PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
 
@@ -150,8 +152,6 @@ public class IncomingPublishHandlerTest {
                 mock(DropOutgoingPublishesHandler.class));
         channel.pipeline().addFirst(publishFlowHandler);
         channel.pipeline().context(PublishFlowHandler.class);
-        clientConnection = new ClientConnection(null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @After
@@ -172,7 +172,7 @@ public class IncomingPublishHandlerTest {
     @Test(timeout = 5000)
     public void test_read_publish_client_id_not_set() {
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 

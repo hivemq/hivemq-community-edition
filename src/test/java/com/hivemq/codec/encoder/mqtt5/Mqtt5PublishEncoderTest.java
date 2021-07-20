@@ -733,7 +733,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         Mqtt5PayloadFormatIndicator.UNSPECIFIED, null, null, correlationData, userProperties,
                         -1, false, true, null);
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set("clientid");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientid");
         channel.writeOutbound(publish);
         final ByteBuf buf = channel.readOutbound();
         assertEquals(0, buf.readableBytes());

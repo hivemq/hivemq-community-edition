@@ -36,7 +36,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.*;
 
 /**
- * @author  Christoph Schäbel
+ * @author Christoph Schäbel
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class TestGetSubscribersWithFilterFromTopicTreeImpl {
@@ -85,7 +85,6 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("anothertopic", getMatchAllFilter());
         assertEquals(true, subscribers.isEmpty());
     }
-
 
 
     @Test

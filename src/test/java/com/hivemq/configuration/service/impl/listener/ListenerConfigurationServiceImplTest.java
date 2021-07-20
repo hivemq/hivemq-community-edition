@@ -104,19 +104,22 @@ public class ListenerConfigurationServiceImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_add_invalid_listener_type_subclass_of_tcplistener() {
 
-        listenerConfigurationService.addListener(new TcpListener(1883, "localhost") {});
+        listenerConfigurationService.addListener(new TcpListener(1883, "localhost") {
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_add_invalid_listener_type_subclass_of_tlstcplistener() {
 
-        listenerConfigurationService.addListener(new TlsTcpListener(1883, "localhost", createDefaultTLS()) {});
+        listenerConfigurationService.addListener(new TlsTcpListener(1883, "localhost", createDefaultTLS()) {
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_add_invalid_listener_type_subclass_of_websocketlistener() {
 
-        final WebsocketListener subclass = new WebsocketListener(123, null, null, false, null, null) {};
+        final WebsocketListener subclass = new WebsocketListener(123, null, null, false, null, null) {
+        };
 
         listenerConfigurationService.addListener(subclass);
     }

@@ -48,7 +48,7 @@ public class DisconnectedReasonCodeTest {
     @Test
     public void test_all_connack_codes_exist() {
         for (final ConnackReasonCode value : ConnackReasonCode.values()) {
-            if(value.equals(ConnackReasonCode.SUCCESS)){
+            if (value.equals(ConnackReasonCode.SUCCESS)) {
                 continue;
             }
             assertNotNull(DisconnectedReasonCode.valueOf(value.name()));
@@ -58,7 +58,7 @@ public class DisconnectedReasonCodeTest {
     @Test
     public void test_all_internal_connack_codes_exist() {
         for (final Mqtt5ConnAckReasonCode value : Mqtt5ConnAckReasonCode.values()) {
-            if(value.equals(Mqtt5ConnAckReasonCode.SUCCESS)){
+            if (value.equals(Mqtt5ConnAckReasonCode.SUCCESS)) {
                 continue;
             }
             assertNotNull(DisconnectedReasonCode.valueOf(value.name()));

@@ -80,8 +80,8 @@ public class AbstractVariableHeaderLengthEncoderTest {
         final ByteBuf remainingLength = encoder.getRemainingLength(123456);
 
         assertEquals(3, remainingLength.readableBytes());
-        assertEquals((byte)0xC0, remainingLength.readByte());
-        assertEquals((byte)0xC4, remainingLength.readByte());
+        assertEquals((byte) 0xC0, remainingLength.readByte());
+        assertEquals((byte) 0xC4, remainingLength.readByte());
         assertEquals(7, remainingLength.readByte());
     }
 
@@ -91,9 +91,9 @@ public class AbstractVariableHeaderLengthEncoderTest {
         final ByteBuf remainingLength = encoder.getRemainingLength(2345678);
 
         assertEquals(4, remainingLength.readableBytes());
-        assertEquals((byte)0xCE, remainingLength.readByte());
-        assertEquals((byte)0x95, remainingLength.readByte());
-        assertEquals((byte)0x8F, remainingLength.readByte());
+        assertEquals((byte) 0xCE, remainingLength.readByte());
+        assertEquals((byte) 0x95, remainingLength.readByte());
+        assertEquals((byte) 0x8F, remainingLength.readByte());
         assertEquals(1, remainingLength.readByte());
     }
 

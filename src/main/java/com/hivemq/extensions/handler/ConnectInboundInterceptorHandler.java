@@ -101,7 +101,7 @@ public class ConnectInboundInterceptorHandler {
 
     public void handleInboundConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         if (clientId == null) {
             return;
         }
@@ -214,7 +214,7 @@ public class ConnectInboundInterceptorHandler {
                         reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
-                ctx.channel().attr(ChannelAttributes.CLIENT_ID).set(connect.getClientIdentifier());
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(connect.getClientIdentifier());
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(connect.isCleanStart());
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(connect.getKeepAlive());

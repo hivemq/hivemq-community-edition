@@ -112,8 +112,8 @@ public class PluginAuthorizerServiceImplTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final Map<String, HiveMQExtension> pluginMap = new HashMap<>();
@@ -150,7 +150,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
         assertNull(channel.readOutbound());
@@ -161,7 +161,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         assertNull(channel.readOutbound());
@@ -172,7 +172,7 @@ public class PluginAuthorizerServiceImplTest {
 
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 

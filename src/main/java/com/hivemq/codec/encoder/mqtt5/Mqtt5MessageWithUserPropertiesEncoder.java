@@ -73,7 +73,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> extends 
 
         if (message.getOmittedProperties() > 0) {
 
-            final String clientIdFromChannel = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+            final String clientIdFromChannel = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
             final String clientId = clientIdFromChannel != null ? clientIdFromChannel : "UNKNOWN";
 
             final long maximumPacketSize = calculateMaxMessageSize(ctx.channel());

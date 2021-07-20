@@ -73,7 +73,7 @@ public class InterceptorHandlerTest {
     private @NotNull ChannelHandlerContext channelHandlerContext;
     @Mock
     private @NotNull ChannelPromise channelPromise;
-    
+
     private @NotNull InterceptorHandler interceptorHandler;
 
     @Before
@@ -207,7 +207,7 @@ public class InterceptorHandlerTest {
         interceptorHandler.write(channelHandlerContext, mock(DISCONNECT.class), channelPromise);
         verify(disconnectInterceptorHandler, times(1)).handleOutboundDisconnect(any(), any(), any());
     }
-    
+
     @Test
     public void test_write_without_responsible_interceptor() {
         interceptorHandler.write(channelHandlerContext, mock(AUTH.class), channelPromise);

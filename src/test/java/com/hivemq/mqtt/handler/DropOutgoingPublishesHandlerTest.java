@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler;
 
 import com.codahale.metrics.Counter;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
@@ -30,11 +31,11 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.util.Attribute;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 
 import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
 import static org.junit.Assert.*;
@@ -64,17 +65,15 @@ public class DropOutgoingPublishesHandlerTest {
     @Mock
     PublishPayloadPersistence publishPayloadPersistence;
 
-    @Mock
-    Attribute attribute;
-
     private DropOutgoingPublishesHandler handler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
-        when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
-        when(attribute.get()).thenReturn("clientId");
+        final ClientConnection clientConnection = new ClientConnection(null);
+        clientConnection.setClientId("clientId");
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
         InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE.set(0);
         handler = new DropOutgoingPublishesHandler(publishPayloadPersistence, messageDroppedService);
     }

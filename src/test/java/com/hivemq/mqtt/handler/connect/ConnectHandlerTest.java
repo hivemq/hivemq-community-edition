@@ -1452,7 +1452,7 @@ public class ConnectHandlerTest {
                 .withSessionExpiryInterval(SESSION_EXPIRY_MAX)
                 .build();
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(20000L);
 
         handler.afterTakeover(ctx, connect);
@@ -1473,7 +1473,7 @@ public class ConnectHandlerTest {
                 .withSessionExpiryInterval(SESSION_EXPIRY_MAX)
                 .build();
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(20000L);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(123L);
 
@@ -1494,7 +1494,7 @@ public class ConnectHandlerTest {
                 .withCleanStart(false)
                 .build();
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(true);
         when(clientSessionPersistence.clientConnected(
                 anyString(),
@@ -1581,7 +1581,7 @@ public class ConnectHandlerTest {
     private void buildPipeline() {
         embeddedChannel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_DECODER, TestMqttDecoder.create());
         embeddedChannel.pipeline().addLast(ChannelHandlerNames.GLOBAL_THROTTLING_HANDLER, new DummyHandler());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("clientId");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientId");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         createHandler();

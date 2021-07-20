@@ -60,10 +60,10 @@ public class MessageExpiryHandlerTest {
         MockitoAnnotations.initMocks(this);
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("ClientId");
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("ClientId");
         channel.pipeline().addLast(messageExpiryHandler);
         when(ctx.channel()).thenReturn(channel);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(MessageExpiryHandler.log);

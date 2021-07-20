@@ -70,7 +70,7 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
             channel.eventLoop().schedule(() -> {
                 if (log.isTraceEnabled()) {
                     log.trace("Retrying retained message for client '{}' on topic '{}'.",
-                            channel.attr(ChannelAttributes.CLIENT_ID).get(), subscription.getTopic());
+                            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(), subscription.getTopic());
                 }
                 final ListenableFuture<Void> sentFuture =
                         retainedMessagesSender.writeRetainedMessages(channel, subscription);
@@ -79,7 +79,7 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
 
         } else {
             Exceptions.rethrowError("Unable to send retained message on topic " + subscription.getTopic() +
-                    " to client " + channel.attr(ChannelAttributes.CLIENT_ID).get() + ".", throwable);
+                    " to client " + channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId() + ".", throwable);
         }
     }
 }

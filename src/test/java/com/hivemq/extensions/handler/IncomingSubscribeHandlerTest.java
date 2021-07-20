@@ -108,9 +108,7 @@ public class IncomingSubscribeHandlerTest {
 
     private FullConfigurationService configurationService;
 
-
     private EmbeddedChannel channel;
-    private ChannelHandlerContext channelHandlerContext;
 
     private AtomicReference<Message> messageAtomicReference;
     private ClientConnection clientConnection;
@@ -146,11 +144,10 @@ public class IncomingSubscribeHandlerTest {
 
     private void createChannel() {
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         channel.pipeline().addFirst(subscribeHandler);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channelHandlerContext = channel.pipeline().context(SubscribeHandler.class);
     }
 
     @Test(timeout = 5000, expected = ClosedChannelException.class)
@@ -165,7 +162,7 @@ public class IncomingSubscribeHandlerTest {
     @Test(timeout = 5000)
     public void test_read_subscribe_client_id_not_set() {
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Subscribe());
 

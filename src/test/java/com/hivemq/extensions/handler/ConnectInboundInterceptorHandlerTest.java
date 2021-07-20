@@ -106,7 +106,9 @@ public class ConnectInboundInterceptorHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         when(plugin.getId()).thenReturn("plugin");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -123,14 +125,12 @@ public class ConnectInboundInterceptorHandlerTest {
                 handler.handleInboundConnect(ctx, ((CONNECT) msg));
             }
         });
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
 
-        channel.attr(ChannelAttributes.CLIENT_ID).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeInbound(testConnect());
 

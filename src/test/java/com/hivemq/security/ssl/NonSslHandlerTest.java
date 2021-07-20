@@ -15,10 +15,12 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -33,9 +35,7 @@ import static org.junit.Assert.*;
  */
 public class NonSslHandlerTest {
 
-
     private EmbeddedChannel channel;
-
 
     private MqttServerDisconnector disconnector;
 
@@ -52,7 +52,6 @@ public class NonSslHandlerTest {
             11, 4, 1, 5, 1, 6, 1, 4, 2, 3, 3, 3, 1, 3, 2, 2, 3, 2, 1, 2, 2, 0, 17, 0, 9, 0, 7, 2, 0, 4, 0, 0, 0, 0,
             0, 23, 0, 0, 0, 43, 0, 7, 6, 3, 3, 3, 2, 3, 1
     };
-
 
     private static final byte[] VALID_SSL_CONNECT_PACKET = {
             16, 3, 3, 1, 42, 1, 0, 'M', 'Q', 'T', 'T', 54, -41, -98, 66, -38, 61, 6, -46, 107, -62, 115, 33, 110, 94, -82,
@@ -72,6 +71,7 @@ public class NonSslHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         disconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }

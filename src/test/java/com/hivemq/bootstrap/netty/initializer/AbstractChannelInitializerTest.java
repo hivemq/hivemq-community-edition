@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -26,13 +27,13 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.exception.SslException;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import util.TestChannelAttribute;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -82,8 +84,8 @@ public class AbstractChannelInitializerTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
+        when(socketChannel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
         when(socketChannel.pipeline()).thenReturn(pipeline);
-        when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(socketChannel.isActive()).thenReturn(true);
 
         when(channelDependencies.getGlobalTrafficShapingHandler())

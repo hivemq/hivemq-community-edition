@@ -133,7 +133,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             return;
         }
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         if (clientContext == null) {
             final ModifiableDefaultPermissions defaultPermissions =

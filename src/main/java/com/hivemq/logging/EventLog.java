@@ -103,7 +103,7 @@ public class EventLog {
      * @param channel of the client connection
      */
     public void clientConnected(@NotNull final Channel channel) {
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         final Boolean cleanStart = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isCleanStart();
         final Long sessionExpiry = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
@@ -120,7 +120,7 @@ public class EventLog {
      */
     public void clientDisconnected(@NotNull final Channel channel, @Nullable final String reasonString) {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectEventLogged(true);
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         final boolean graceful = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isGracefulDisconnect();
 
@@ -145,7 +145,7 @@ public class EventLog {
      */
     public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectEventLogged(true);
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         log.trace("Client {} was disconnected.", clientId);
         logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
@@ -158,7 +158,7 @@ public class EventLog {
      * @param reasonCode of the AUTH packet.
      */
     public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         if (received) {
             logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());

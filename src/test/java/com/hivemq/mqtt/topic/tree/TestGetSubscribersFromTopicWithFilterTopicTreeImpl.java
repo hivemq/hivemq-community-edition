@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author  Christoph Schäbel
+ * @author Christoph Schäbel
  */
 public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
@@ -207,7 +207,6 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
         final Set<String> subscribers = topicTree.getSubscribersForTopic("topic", getMatchAllFilter(), false);
         assertEquals(0, subscribers.size());
     }
-
 
 
     @Test

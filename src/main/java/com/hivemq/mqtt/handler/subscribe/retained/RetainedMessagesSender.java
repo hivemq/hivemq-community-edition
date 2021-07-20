@@ -103,7 +103,7 @@ public class RetainedMessagesSender {
             return Futures.immediateFuture(null);
         }
 
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
+        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final ImmutableList.Builder<ListenableFuture<RetainedMessage>> retainedMessageFutures = ImmutableList.builder();
         for (final Topic topic : subscribedTopics) {
             retainedMessageFutures.add(retainedMessagePersistence.get(topic.getTopic()));

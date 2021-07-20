@@ -105,7 +105,7 @@ public class TlsTcpChannelInitializerTest {
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
 
 
-        final MqttServerDisconnector mqttServerDisconnector =new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
 
         tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, sslFactory);

@@ -233,7 +233,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_create_plugin_folder_if_not_exists() throws Exception{
+    public void test_create_plugin_folder_if_not_exists() throws Exception {
 
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
@@ -242,7 +242,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_create_data_folder_if_not_exists() throws Exception{
+    public void test_create_data_folder_if_not_exists() throws Exception {
 
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
@@ -251,7 +251,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_create_log_folder_if_not_exists() throws Exception{
+    public void test_create_log_folder_if_not_exists() throws Exception {
 
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
