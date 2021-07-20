@@ -33,6 +33,7 @@ public class ClientConnection {
     private @Nullable CONNECT connectMessage;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
+    private @Nullable String[] topicAliasMapping;
     private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
@@ -86,6 +87,14 @@ public class ClientConnection {
 
     public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
+    }
+
+    public @Nullable String[] getTopicAliasMapping() {
+        return topicAliasMapping;
+    }
+
+    public void setTopicAliasMapping(final @Nullable String[] topicAliasMapping) {
+        this.topicAliasMapping = topicAliasMapping;
     }
 
     public boolean isClientIdAssigned() {

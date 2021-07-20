@@ -113,7 +113,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final Channel channel = ctx.channel();
         handleInactive(channel, ctx);
-        final String[] topicAliasMapping = channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
+        final String[] topicAliasMapping = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
         final boolean gracefulDisconnect = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
         final boolean preventLwt = channel.attr(ChannelAttributes.PREVENT_LWT).get() != null ? channel.attr(ChannelAttributes.PREVENT_LWT).get() : false;
         final boolean takenOver = channel.attr(ChannelAttributes.TAKEN_OVER).get() != null ? channel.attr(ChannelAttributes.TAKEN_OVER).get() : false;

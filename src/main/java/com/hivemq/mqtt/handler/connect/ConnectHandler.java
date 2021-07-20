@@ -597,7 +597,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         //init Topic Alias Mapping if maximum is greater than zero and aliases are available
         if (topicAliasMaximum > 0 && topicAliasLimiter.aliasesAvailable()) {
-            channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[topicAliasMaximum]);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[topicAliasMaximum]);
             builder.withTopicAliasMaximum(topicAliasMaximum);
             topicAliasLimiter.initUsage(topicAliasMaximum);
         }

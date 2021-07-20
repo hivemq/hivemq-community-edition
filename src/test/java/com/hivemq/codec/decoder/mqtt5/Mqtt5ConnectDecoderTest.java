@@ -215,7 +215,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(DEFAULT_RESPONSE_INFORMATION_REQUESTED, connect.isResponseInformationRequested());
         assertEquals(DEFAULT_PROBLEM_INFORMATION_REQUESTED, connect.isProblemInformationRequested());
 
-        assertNull(channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get());
+        assertNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping());
     }
 
     @Test
