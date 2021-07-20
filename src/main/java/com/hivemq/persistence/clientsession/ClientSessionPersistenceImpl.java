@@ -246,7 +246,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         channel.attr(ChannelAttributes.PREVENT_LWT).set(preventLwtMessage);
         if (session.getSessionExpiryInterval() != SESSION_EXPIRY_NOT_SET) {
-            channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(session.getSessionExpiryInterval());
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(session.getSessionExpiryInterval());
         }
 
         final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);

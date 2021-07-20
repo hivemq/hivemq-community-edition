@@ -351,7 +351,7 @@ public class PublishFlowHandlerTest {
 
     @Test
     public void test_delete_everything_after_client_disconnects_on_clean_session() {
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
 
         embeddedChannel.finish();
 
@@ -360,7 +360,7 @@ public class PublishFlowHandlerTest {
 
     @Test
     public void test_dont_delete_anything_after_client_disconnects_on_persistent_session() {
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(500L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(500L);
 
         embeddedChannel.finish();
 

@@ -343,7 +343,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return false;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(sessionExpiryInterval);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(sessionExpiryInterval);
         connectBuilder.withAuthMethod(authMethod)
                 .withAuthData(authData)
                 .withSessionExpiryInterval(sessionExpiryInterval)

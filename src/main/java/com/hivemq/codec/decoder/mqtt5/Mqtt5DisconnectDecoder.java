@@ -111,7 +111,7 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                         return null;
                     }
                     final Long sessionExpiryIntervalFromChannel =
-                            channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+                            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
                     if ((sessionExpiryInterval != 0) && (sessionExpiryIntervalFromChannel == 0)) {
                         disconnector.disconnect(
                                 channel,

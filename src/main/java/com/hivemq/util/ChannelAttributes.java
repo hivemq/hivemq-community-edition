@@ -32,7 +32,6 @@ import io.netty.util.AttributeKey;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Dominik Obermaier
@@ -112,11 +111,6 @@ public class ChannelAttributes {
      * Attribute for storing connection attributes. It is added only when connection attributes are set.
      */
     public static final AttributeKey<ConnectionAttributes> CONNECTION_ATTRIBUTES = AttributeKey.valueOf("ConnectionAttributes");
-
-    /**
-     * Attribute for storing the client session expiry interval.
-     */
-    public static final AttributeKey<Long> CLIENT_SESSION_EXPIRY_INTERVAL = AttributeKey.valueOf("ClientSession.ExpiryInterval");
 
     /**
      * Representation of information regarding the connection of a single client

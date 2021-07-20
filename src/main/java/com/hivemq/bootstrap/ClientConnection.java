@@ -36,6 +36,7 @@ public class ClientConnection {
     private @Nullable AtomicInteger inFlightMessages;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
+    private @Nullable Long clientSessionExpiryInterval;
     private @Nullable String[] topicAliasMapping;
     private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
@@ -101,6 +102,17 @@ public class ClientConnection {
 
     public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
+    }
+
+    /**
+     * Attribute for storing the client session expiry interval.
+     */
+    public @Nullable Long getClientSessionExpiryInterval() {
+        return clientSessionExpiryInterval;
+    }
+
+    public void setClientSessionExpiryInterval(final @Nullable Long clientSessionExpiryInterval) {
+        this.clientSessionExpiryInterval = clientSessionExpiryInterval;
     }
 
     public @Nullable String[] getTopicAliasMapping() {

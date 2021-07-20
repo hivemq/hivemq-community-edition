@@ -167,7 +167,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         orderedTopicService.handleInactive();
 
-        final Long sessionExpiryInterval = ctx.channel().attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long sessionExpiryInterval = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         //remove incoming message flow for not persisted client
         if (sessionExpiryInterval != null && sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {

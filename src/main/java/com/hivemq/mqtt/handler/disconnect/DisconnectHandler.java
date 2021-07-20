@@ -89,7 +89,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
         if (msg.getSessionExpiryInterval() != CONNECT.SESSION_EXPIRY_NOT_SET) {
-            ctx.channel().attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(msg.getSessionExpiryInterval());
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
         }
 
         if (log.isTraceEnabled()) {
@@ -158,7 +158,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             return;
         }
 
-        final Long sessionExpiryInterval = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long sessionExpiryInterval = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         if (clientId == null || sessionExpiryInterval == null) {
             if (disconnectFuture != null) {
