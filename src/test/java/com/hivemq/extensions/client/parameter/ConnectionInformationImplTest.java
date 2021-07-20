@@ -39,7 +39,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.hivemq.util.ChannelAttributes.*;
+import static com.hivemq.util.ChannelAttributes.AUTH_CERTIFICATE;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
@@ -228,7 +229,7 @@ public class ConnectionInformationImplTest {
     public void test_full_client_tls_information() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnection.setAuthCipherSuite("cipher");
-        channel.attr(AUTH_SNI_HOSTNAME).set("sni-hostname");
+        clientConnection.setAuthSniHostname("sni-hostname");
         clientConnection.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);

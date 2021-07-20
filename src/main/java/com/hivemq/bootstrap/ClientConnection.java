@@ -62,6 +62,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable String authSniHostname;
     private @Nullable String authCipherSuite;
     private @Nullable String authProtocol;
     private @Nullable String authUsername;
@@ -267,6 +268,17 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    /**
+     * This contains the SNI hostname sent by the client if TLS SNI is used.
+     */
+    public @Nullable String getAuthSniHostname() {
+        return authSniHostname;
+    }
+
+    public void setAuthSniHostname(final @Nullable String authSniHostname) {
+        this.authSniHostname = authSniHostname;
     }
 
     public @Nullable String getAuthCipherSuite() {
