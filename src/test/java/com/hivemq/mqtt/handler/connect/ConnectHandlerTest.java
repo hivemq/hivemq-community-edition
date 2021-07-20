@@ -1105,7 +1105,7 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_auth_in_progress_message_handler_is_removed() {
         createHandler();
-        embeddedChannel.attr(ChannelAttributes.AUTH_METHOD).set("someMethod");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("someMethod");
         embeddedChannel.pipeline().addAfter(ChannelHandlerNames.MQTT_MESSAGE_DECODER,
                 ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER,
                 channelDependencies.getAuthInProgressMessageHandler());
@@ -1427,7 +1427,7 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_set_client_settings() {
         createHandler();
-        embeddedChannel.attr(ChannelAttributes.AUTH_METHOD).set("someMethod");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("someMethod");
         embeddedChannel.pipeline().addAfter(ChannelHandlerNames.MQTT_MESSAGE_DECODER,
                 ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER,
                 channelDependencies.getAuthInProgressMessageHandler());

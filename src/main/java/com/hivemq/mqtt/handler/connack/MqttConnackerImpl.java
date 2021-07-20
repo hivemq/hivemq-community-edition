@@ -176,7 +176,7 @@ public class MqttConnackerImpl implements MqttConnacker {
                     .withUserProperties(userProperties);
 
             // set auth method if present
-            final String authMethod = channel.attr(ChannelAttributes.AUTH_METHOD).get();
+            final String authMethod = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthMethod();
             if (authMethod != null) {
                 connackBuilder.withAuthMethod(authMethod);
 

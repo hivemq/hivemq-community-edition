@@ -62,7 +62,6 @@ public class ChannelAttributes {
     public static final AttributeKey<String> AUTH_USERNAME = AttributeKey.valueOf("Auth.Username");
     public static final AttributeKey<byte[]> AUTH_PASSWORD = AttributeKey.valueOf("Auth.Password");
     public static final AttributeKey<CONNECT> AUTH_CONNECT = AttributeKey.valueOf("Auth.Connect");
-    public static final AttributeKey<String> AUTH_METHOD = AttributeKey.valueOf("Auth.AuthenticationMethod");
 
     /**
      * Representation of information regarding the connection of a single client.
