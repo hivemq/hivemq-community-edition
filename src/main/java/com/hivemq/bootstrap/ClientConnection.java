@@ -30,6 +30,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.security.auth.SslClientCertificate;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
@@ -62,6 +63,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable SslClientCertificate authCertificate;
     private @Nullable String authSniHostname;
     private @Nullable String authCipherSuite;
     private @Nullable String authProtocol;
@@ -268,6 +270,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable SslClientCertificate getAuthCertificate() {
+        return authCertificate;
+    }
+
+    public void setAuthCertificate(final @Nullable SslClientCertificate authCertificate) {
+        this.authCertificate = authCertificate;
     }
 
     /**

@@ -33,7 +33,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Set;
 
-import static com.hivemq.util.ChannelAttributes.AUTH_CERTIFICATE;
 import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -62,7 +61,7 @@ public class ExtensionInformationUtilTest {
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+        clientConnection.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
@@ -84,7 +83,7 @@ public class ExtensionInformationUtilTest {
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+        clientConnection.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
@@ -121,7 +120,7 @@ public class ExtensionInformationUtilTest {
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+        clientConnection.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
@@ -169,7 +168,7 @@ public class ExtensionInformationUtilTest {
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        channel.attr(AUTH_CERTIFICATE).set(clientCertificate);
+        clientConnection.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();

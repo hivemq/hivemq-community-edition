@@ -17,7 +17,6 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.util.AttributeKey;
 
 /**
@@ -49,8 +48,6 @@ public class ChannelAttributes {
      * This attribute is added during connection. The future is set, when the client disconnect handling is complete.
      */
     public static final AttributeKey<SettableFuture<Void>> DISCONNECT_FUTURE = AttributeKey.valueOf("MQTT.DisconnectFuture");
-
-    public static final AttributeKey<SslClientCertificate> AUTH_CERTIFICATE = AttributeKey.valueOf("Auth.Certificate");
 
     /**
      * Representation of information regarding the connection of a single client.

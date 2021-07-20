@@ -84,7 +84,7 @@ public class ChannelUtilsTest {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_ID).set("theId");
-        channel.attr(ChannelAttributes.AUTH_CERTIFICATE).set(new SslClientCertificateImpl(new Certificate[]{}));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthCertificate(new SslClientCertificateImpl(new Certificate[]{}));
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
 

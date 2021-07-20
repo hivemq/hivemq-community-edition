@@ -15,6 +15,7 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -68,6 +69,7 @@ public class SslClientCertificateHandlerTest {
         when(sslEngine.getSession()).thenReturn(sslSession);
 
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
@@ -86,7 +88,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenReturn(new Certificate[0]);
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        assertNotNull(channel.attr(ChannelAttributes.AUTH_CERTIFICATE));
+        assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate());
 
     }
 
