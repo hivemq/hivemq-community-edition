@@ -58,6 +58,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean extensionDisconnectEventSent;
     private @Nullable ClientContextImpl extensionClientContext;
     private @Nullable ClientEventListeners extensionClientEventListeners;
     private @Nullable ClientAuthenticators extensionClientAuthenticators;
@@ -239,6 +240,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isExtensionDisconnectEventSent() {
+        return extensionDisconnectEventSent;
+    }
+
+    public void setExtensionDisconnectEventSent(final boolean extensionDisconnectEventSent) {
+        this.extensionDisconnectEventSent = extensionDisconnectEventSent;
     }
 
     public @Nullable ClientContextImpl getExtensionClientContext() {

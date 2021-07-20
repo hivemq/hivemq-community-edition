@@ -199,8 +199,12 @@ public class MqttConnackerImpl implements MqttConnacker {
                             final @Nullable String reasonString,
                             final @NotNull Mqtt5UserProperties userProperties,
                             final boolean isAuthentication) {
-        if ((channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null) &&
-                (channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null)) {
+
+        if (channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null &&
+                !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
+
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
             channel.pipeline().fireUserEventTriggered(isAuthentication ?

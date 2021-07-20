@@ -102,7 +102,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         } else {
             ctx.channel().attr(ChannelAttributes.SEND_WILL).set(false);
         }
-        if (ctx.channel().attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
+        if (!ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
             ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(), msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
         }
         ctx.channel().close();
@@ -131,7 +132,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         //increase metrics
         metricsHolder.getClosedConnectionsCounter().inc();
         if (!gracefulDisconnect) {
-            if (channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null) {
+            if (!ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
                 ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(null, null, null, false));
             }
         }

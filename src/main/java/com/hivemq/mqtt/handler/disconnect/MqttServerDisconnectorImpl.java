@@ -88,8 +88,11 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
                             final @NotNull Mqtt5UserProperties userProperties,
                             final boolean isAuthentication) {
 
-        if ((channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null) &&
-                (channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).getAndSet(true) == null)) {
+        if (channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null &&
+                !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
+
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
             channel.pipeline().fireUserEventTriggered(isAuthentication ?
@@ -121,7 +124,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean forceClose) {
 
-        if(forceClose){
+        if (forceClose) {
             channel.close();
             return;
         }
@@ -132,7 +135,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             reasonCode = null;
             reasonString = null;
         } else {
-            if(version == ProtocolVersion.MQTTv5) {
+            if (version == ProtocolVersion.MQTTv5) {
                 Preconditions.checkNotNull(reasonCode, "Reason code must never be null for Mqtt 5");
             }
             if (!withReasonString) {
