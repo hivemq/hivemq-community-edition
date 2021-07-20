@@ -437,7 +437,7 @@ public class MqttConnackerTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthData(ByteBuffer.wrap("decent_guy".getBytes()));
-        channel.attr(ChannelAttributes.AUTH_METHOD).set("face_check");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("face_check");
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, "dont like him");
@@ -479,7 +479,7 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_ID).set("luke_skywalker");
-        channel.attr(ChannelAttributes.AUTH_METHOD).set("face_check");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("face_check");
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, "dont like him");

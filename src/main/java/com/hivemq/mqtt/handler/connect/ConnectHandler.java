@@ -613,7 +613,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         // set auth method if present
-        final String authMethod = channel.attr(ChannelAttributes.AUTH_METHOD).get();
+        final String authMethod = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthMethod();
         if (authMethod != null) {
             builder.withAuthMethod(authMethod);
 

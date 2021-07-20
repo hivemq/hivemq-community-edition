@@ -126,7 +126,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final String authMethod = connect.getAuthMethod();
         if (authMethod != null) {
-            ctx.channel().attr(ChannelAttributes.AUTH_METHOD).set(authMethod);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(authMethod);
         }
 
         final ModifiableDefaultPermissions defaultPermissions = new ModifiableDefaultPermissionsImpl();
@@ -185,7 +185,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             final boolean reAuth) {
 
         final String authMethod = auth.getAuthMethod();
-        if (!authMethod.equals(ctx.channel().attr(ChannelAttributes.AUTH_METHOD).get())) {
+        if (!authMethod.equals(ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthMethod())) {
             badAuthMethodDisconnect(ctx, auth, reAuth);
             return;
         }

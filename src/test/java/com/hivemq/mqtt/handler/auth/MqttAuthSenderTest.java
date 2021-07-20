@@ -72,7 +72,7 @@ public class MqttAuthSenderTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
-        embeddedChannel.attr(ChannelAttributes.AUTH_METHOD).set("METHOD");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("METHOD");
         final ChannelFuture future = mqttAuthSender.sendAuth(embeddedChannel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
 
         assertNotNull(future);
