@@ -127,10 +127,4 @@ public class ChannelAttributes {
      * Representation of information regarding the connection of a single client
      */
     public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("Client.Connection");
-
-    /* *****************
-     *      MQTT 5     *
-     *******************/
-
-    public static final AttributeKey<String[]> TOPIC_ALIAS_MAPPING = AttributeKey.valueOf("TopicAlias.Mapping");
 }

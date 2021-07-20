@@ -52,7 +52,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void test_decode_allProperties() {
 
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
 
         final byte[] encoded = {
                 // fixed header
@@ -175,8 +175,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(47);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {
@@ -205,8 +205,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {
@@ -1155,7 +1155,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(1024 * 1024 * 200);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
 
         final byte[] encodedWithTopicName = {
                 // fixed header
@@ -1197,7 +1197,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void test_decode_to_may_topic_aliases_returnsNull() {
 
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
 
         final byte[] encodedWithWrongTopicAlias = {
                 // fixed header
@@ -1262,7 +1262,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void test_decode_topicAliasTooLarge_returnsNull() {
 
-        channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(new String[3]);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
 
         final byte[] encoded = {
                 // fixed header

@@ -431,7 +431,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final String[] mapping = embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
+        final String[] mapping = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
 
         assertEquals(5, mapping.length);
     }
@@ -453,7 +453,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final String[] mapping = embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
+        final String[] mapping = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
         assertNull(mapping);
 
     }

@@ -80,6 +80,7 @@ public class DisconnectHandlerTest {
 
         final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, messageIDPools, clientSessionPersistence, channelPersistence);
         embeddedChannel = new EmbeddedChannel(disconnectHandler);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
     }
 
     @Test
@@ -139,7 +140,7 @@ public class DisconnectHandlerTest {
     public void test_graceful_disconnect_remove_mapping() throws Exception {
 
         final String[] topics = new String[]{"topic1", "topic2", "topic3"};
-        embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(topics);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(topics);
 
         embeddedChannel.writeInbound(new DISCONNECT());
 
@@ -150,7 +151,7 @@ public class DisconnectHandlerTest {
     public void test_ungraceful_disconnect_remove_mapping() throws Exception {
 
         final String[] topics = new String[]{"topic1", "topic2", "topic3"};
-        embeddedChannel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).set(topics);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(topics);
 
         final ChannelFuture future = embeddedChannel.close();
         future.await();

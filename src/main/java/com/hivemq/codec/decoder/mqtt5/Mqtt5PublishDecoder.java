@@ -263,7 +263,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         boolean isNewTopicAlias = false;
         if (topicAlias != DEFAULT_NO_TOPIC_ALIAS) {
 
-            final String[] topicAliasMapping = channel.attr(ChannelAttributes.TOPIC_ALIAS_MAPPING).get();
+            final String[] topicAliasMapping = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
             if (topicAliasMapping == null || topicAlias > topicAliasMapping.length) {
                 disconnector.disconnect(channel,
                         "A client (IP: {}) sent a PUBLISH with a too large topic alias. This is not allowed. Disconnecting client.",
