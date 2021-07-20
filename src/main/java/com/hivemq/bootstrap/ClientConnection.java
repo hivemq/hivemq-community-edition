@@ -33,6 +33,7 @@ public class ClientConnection {
     private @Nullable CONNECT connectMessage;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
+    private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
@@ -85,6 +86,14 @@ public class ClientConnection {
 
     public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
+    }
+
+    public boolean isClientIdAssigned() {
+        return clientIdAssigned;
+    }
+
+    public void setClientIdAssigned(final boolean clientIdAssigned) {
+        this.clientIdAssigned = clientIdAssigned;
     }
 
     public boolean isDisconnectEventLogged() {

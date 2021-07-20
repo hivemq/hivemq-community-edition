@@ -504,7 +504,7 @@ public class ConnectHandlerTest {
 
         createHandler();
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(true);
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("assigned")
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -541,7 +541,7 @@ public class ConnectHandlerTest {
 
         createHandler();
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID_ASSIGNED).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(false);
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("ownId")
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
