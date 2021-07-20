@@ -15,9 +15,8 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
-import com.hivemq.configuration.service.entity.Tls;
-import com.hivemq.logging.EventLog;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslHandler;
@@ -42,12 +41,6 @@ public class SslParameterHandlerTest {
     private EmbeddedChannel channel;
 
     @Mock
-    private EventLog eventLog;
-
-    @Mock
-    private Tls tls;
-
-    @Mock
     private SslHandler sslHandler;
 
     @Mock
@@ -61,6 +54,7 @@ public class SslParameterHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
@@ -78,7 +72,7 @@ public class SslParameterHandlerTest {
         when(sslSession.getCipherSuite()).thenReturn("CipherSuite");
         when(sslSession.getProtocol()).thenReturn("Protocol");
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-        assertEquals("Protocol", channel.attr(ChannelAttributes.AUTH_PROTOCOL).get());
+        assertEquals("Protocol", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol());
         assertEquals("CipherSuite", channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).get());
         assertNull(channel.pipeline().get(SslParameterHandler.class));
     }

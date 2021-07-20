@@ -116,7 +116,7 @@ public class ExtensionInformationUtil {
 
         try {
             final String cipher = channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).get();
-            final String protocol = channel.attr(ChannelAttributes.AUTH_PROTOCOL).get();
+            final String protocol = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol();
             final String sniHostname = channel.attr(ChannelAttributes.AUTH_SNI_HOSTNAME).get();
 
             final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
