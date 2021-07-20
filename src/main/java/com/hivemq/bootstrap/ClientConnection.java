@@ -29,6 +29,7 @@ import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +61,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable Mqtt5UserProperties authUserProperties;
     private boolean authOngoing;
     private boolean reAuthOngoing;
     private boolean authAuthenticated;
@@ -257,6 +259,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable Mqtt5UserProperties getAuthUserProperties() {
+        return authUserProperties;
+    }
+
+    public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
+        this.authUserProperties = authUserProperties;
     }
 
     public boolean isAuthOngoing() {

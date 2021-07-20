@@ -578,8 +578,7 @@ public class ConnectHandlerTest {
 
         createHandler();
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_USER_PROPERTIES)
-                .set(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value")));
+        clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value")));
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("ownId")
                 .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("connect", "value")))
@@ -610,7 +609,7 @@ public class ConnectHandlerTest {
         assertEquals("name", userProps.get().asList().get(0).getName());
         assertEquals("value", userProps.get().asList().get(0).getValue());
 
-        assertNull(embeddedChannel.attr(ChannelAttributes.AUTH_USER_PROPERTIES).get());
+        assertNull(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUserProperties());
     }
 
     @Test
