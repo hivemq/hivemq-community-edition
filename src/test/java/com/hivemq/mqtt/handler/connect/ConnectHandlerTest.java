@@ -640,8 +640,6 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-
 
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
@@ -649,6 +647,7 @@ public class ConnectHandlerTest {
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -683,13 +682,13 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -728,12 +727,12 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -778,12 +777,12 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
         oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         oldChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -1596,7 +1595,7 @@ public class ConnectHandlerTest {
 
         ctx = embeddedChannel.pipeline().context(ConnectHandler.class);
 
-        embeddedChannel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
     }
 
     private static class TestDisconnectEventHandler extends SimpleChannelInboundHandler<CONNECT> {

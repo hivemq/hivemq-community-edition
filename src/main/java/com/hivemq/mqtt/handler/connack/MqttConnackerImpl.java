@@ -200,8 +200,8 @@ public class MqttConnackerImpl implements MqttConnacker {
                             final @NotNull Mqtt5UserProperties userProperties,
                             final boolean isAuthentication) {
 
-        if (channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).get() != null &&
-                !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+        if (channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionConnectEventSent()
+                && !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
 
             channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
 
