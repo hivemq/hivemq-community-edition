@@ -41,14 +41,15 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -109,8 +110,7 @@ public class ConnackOutboundInterceptorHandler {
 
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        final boolean requestResponseInformation =
-                Objects.requireNonNullElse(channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).get(), false);
+        final boolean requestResponseInformation = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isRequestResponseInformation();
 
         final ConnackOutboundProviderInputImpl providerInput =
                 new ConnackOutboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);

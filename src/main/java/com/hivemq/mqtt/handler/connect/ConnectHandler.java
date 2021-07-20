@@ -179,7 +179,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             ctx.channel().attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(connect.getMaximumPacketSize());
         }
 
-        ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(connect.isResponseInformationRequested());
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(connect.isProblemInformationRequested());
 
         addPublishFlowHandler(ctx, connect);

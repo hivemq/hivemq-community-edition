@@ -141,6 +141,4 @@ public class ChannelAttributes {
     public static final AttributeKey<Long> QUEUE_SIZE_MAXIMUM = AttributeKey.valueOf("Client.QueueSize.Maximum");
 
     public static final AttributeKey<Boolean> DISCONNECT_EVENT_LOGGED = AttributeKey.valueOf("Disconnect.Event.Logged");
-
-    public static final AttributeKey<Boolean> REQUEST_RESPONSE_INFORMATION = AttributeKey.valueOf("Request.Response.Information");
 }

@@ -121,7 +121,7 @@ public class ConnackOutboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        channel.attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
 
         when(plugin.getId()).thenReturn("plugin");
 
