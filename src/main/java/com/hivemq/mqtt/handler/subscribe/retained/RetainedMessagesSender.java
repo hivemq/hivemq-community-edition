@@ -230,7 +230,7 @@ public class RetainedMessagesSender {
                 resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
                 return;
             }
-            final Long queueLimit = channel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).get();
+            final Long queueLimit = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getQueueSizeMaximum();
             futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true,
                     Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));

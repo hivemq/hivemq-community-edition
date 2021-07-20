@@ -147,8 +147,8 @@ public class ConnectHandlerTest {
 
         embeddedChannel = new EmbeddedChannel(new DummyHandler());
         clientConnection = new ClientConnection(null);
-        embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(null);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(null);
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
@@ -1477,7 +1477,7 @@ public class ConnectHandlerTest {
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(20000L);
-        embeddedChannel.attr(ChannelAttributes.QUEUE_SIZE_MAXIMUM).set(123L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(123L);
 
         handler.afterTakeover(ctx, connect);
 
