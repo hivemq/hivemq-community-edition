@@ -17,8 +17,6 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
-import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
@@ -91,7 +89,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> EXTENSION_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
     public static final AttributeKey<ClientAuthenticators> EXTENSION_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
     public static final AttributeKey<ClientAuthorizers> EXTENSION_CLIENT_AUTHORIZERS = AttributeKey.valueOf("Extension.Client.Authorizers");
-    public static final AttributeKey<ClientInformation> EXTENSION_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
 
     /**
      * Representation of information regarding the connection of a single client
