@@ -17,13 +17,11 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
-import com.hivemq.extensions.client.parameter.ConnectionAttributes;
 import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -101,16 +99,6 @@ public class ChannelAttributes {
      * The time at which the clients CONNECT message was received by the broker.
      */
     public static final AttributeKey<Long> CONNECT_RECEIVED_TIMESTAMP = AttributeKey.valueOf("Connect.Received.Timestamp");
-
-    /**
-     * This key contains the actual listener a client connected to
-     */
-    public static final AttributeKey<Listener> LISTENER = AttributeKey.valueOf("Listener");
-
-    /**
-     * Attribute for storing connection attributes. It is added only when connection attributes are set.
-     */
-    public static final AttributeKey<ConnectionAttributes> CONNECTION_ATTRIBUTES = AttributeKey.valueOf("ConnectionAttributes");
 
     /**
      * Representation of information regarding the connection of a single client

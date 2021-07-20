@@ -88,7 +88,7 @@ public class ExtensionInformationUtil {
     public static @Nullable Listener getListenerFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final com.hivemq.configuration.service.entity.Listener hiveMQListener = channel.attr(ChannelAttributes.LISTENER).get();
+        final com.hivemq.configuration.service.entity.Listener hiveMQListener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();
         if (hiveMQListener == null) {
             return null;
         }
