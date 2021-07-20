@@ -79,7 +79,7 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_fails_no_protocol() {
-        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        clientConnection.setAuthCipherSuite("cipher");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -101,7 +101,7 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_no_cert() {
-        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
 
         final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
@@ -115,7 +115,7 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_with_cert() {
 
-        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
@@ -145,7 +145,7 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_with_sni() {
 
-        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
         channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
 
@@ -162,7 +162,7 @@ public class ExtensionInformationUtilTest {
     @Test
     public void test_get_tls_with_everything() {
 
-        channel.attr(AUTH_CIPHER_SUITE).set("cipher");
+        clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
         channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
 

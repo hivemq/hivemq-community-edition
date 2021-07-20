@@ -46,7 +46,7 @@ public class SslParameterHandler extends ChannelInboundHandlerAdapter {
         final Channel channel = ctx.channel();
         final SslHandler sslHandler = (SslHandler) channel.pipeline().get(ChannelHandlerNames.SSL_HANDLER);
         final SSLSession session = sslHandler.engine().getSession();
-        channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).set(session.getCipherSuite());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthCipherSuite(session.getCipherSuite());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthProtocol(session.getProtocol());
 
         channel.pipeline().remove(this);

@@ -73,7 +73,7 @@ public class SslParameterHandlerTest {
         when(sslSession.getProtocol()).thenReturn("Protocol");
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
         assertEquals("Protocol", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol());
-        assertEquals("CipherSuite", channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).get());
+        assertEquals("CipherSuite", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCipherSuite());
         assertNull(channel.pipeline().get(SslParameterHandler.class));
     }
 }
