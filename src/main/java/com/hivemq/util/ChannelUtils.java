@@ -117,7 +117,7 @@ public class ChannelUtils {
         final byte[] password = channel.attr(ChannelAttributes.AUTH_PASSWORD).get();
         final SslClientCertificate sslCert = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
 
-        final Listener listener = channel.attr(ChannelAttributes.LISTENER).get();
+        final Listener listener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();
         final Optional<Long> disconnectTimestampOptional = Optional.fromNullable(disconnectTimestamp);
 
         final ClientToken clientToken = new ClientToken(clientId,

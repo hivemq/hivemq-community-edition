@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
@@ -33,6 +34,7 @@ public class ClientConnection {
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable ModifiableDefaultPermissions authPermissions;
+    private @Nullable Listener connectedListener;
     private @Nullable CONNECT connectMessage;
     private @Nullable AtomicInteger inFlightMessages;
     private @Nullable Integer clientReceiveMaximum;
@@ -71,6 +73,17 @@ public class ClientConnection {
 
     public void setAuthPermissions(final @NotNull ModifiableDefaultPermissions authPermissions) {
         this.authPermissions = authPermissions;
+    }
+
+    /**
+     * This key contains the actual listener a client connected to.
+     */
+    public @Nullable Listener getConnectedListener() {
+        return connectedListener;
+    }
+
+    public void setConnectedListener(final @Nullable Listener connectedListener) {
+        this.connectedListener = connectedListener;
     }
 
     public @Nullable CONNECT getConnectMessage() {

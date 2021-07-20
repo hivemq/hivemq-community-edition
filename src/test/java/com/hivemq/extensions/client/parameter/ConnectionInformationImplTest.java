@@ -117,7 +117,7 @@ public class ConnectionInformationImplTest {
     @Test
     public void test_tcp_listener() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(LISTENER).set(new TcpListener(1337, "127.0.0.1"));
+        clientConnection.setConnectedListener(new TcpListener(1337, "127.0.0.1"));
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 
@@ -136,7 +136,7 @@ public class ConnectionInformationImplTest {
     @Test
     public void test_tls_tcp_listener() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(LISTENER).set(new TlsTcpListener(1337, "127.0.0.1", createDefaultTls().build()));
+        clientConnection.setConnectedListener(new TlsTcpListener(1337, "127.0.0.1", createDefaultTls().build()));
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 
@@ -156,7 +156,7 @@ public class ConnectionInformationImplTest {
     public void test_websocket_listener() {
 
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(LISTENER).set(new WebsocketListener.Builder().port(1337).bindAddress("127.0.0.1").build());
+        clientConnection.setConnectedListener(new WebsocketListener.Builder().port(1337).bindAddress("127.0.0.1").build());
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 
@@ -175,7 +175,7 @@ public class ConnectionInformationImplTest {
     @Test
     public void test_tls_websocket_listener() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(LISTENER).set(new TlsWebsocketListener.Builder().port(1337).bindAddress("127.0.0.1").tls(createDefaultTls().build()).build());
+        clientConnection.setConnectedListener(new TlsWebsocketListener.Builder().port(1337).bindAddress("127.0.0.1").tls(createDefaultTls().build()).build());
 
         final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(channel);
 

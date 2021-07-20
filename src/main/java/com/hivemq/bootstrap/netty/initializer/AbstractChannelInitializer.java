@@ -72,7 +72,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         final ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
         ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        ch.attr(ChannelAttributes.LISTENER).set(listener);
+        ch.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectedListener(listener);
 
         ch.pipeline().addLast(ALL_CHANNELS_GROUP_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
         if (throttlingEnabled) {
