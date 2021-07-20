@@ -40,6 +40,7 @@ public class ClientConnection {
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
     private @Nullable Long clientSessionExpiryInterval;
+    private @Nullable Long connectReceivedTimestamp;
     private @Nullable String[] topicAliasMapping;
     private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
@@ -130,6 +131,17 @@ public class ClientConnection {
 
     public void setClientSessionExpiryInterval(final @Nullable Long clientSessionExpiryInterval) {
         this.clientSessionExpiryInterval = clientSessionExpiryInterval;
+    }
+
+    /**
+     * The time at which the clients CONNECT message was received by the broker.
+     */
+    public @Nullable Long getConnectReceivedTimestamp() {
+        return connectReceivedTimestamp;
+    }
+
+    public void setConnectReceivedTimestamp(final @Nullable Long connectReceivedTimestamp) {
+        this.connectReceivedTimestamp = connectReceivedTimestamp;
     }
 
     public @Nullable String[] getTopicAliasMapping() {

@@ -94,12 +94,6 @@ public class ChannelAttributes {
     public static final AttributeKey<ClientInformation> EXTENSION_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
     public static final AttributeKey<ConnectionInformation> EXTENSION_CONNECTION_INFORMATION = AttributeKey.valueOf("Extension.Connection.Information");
 
-
-    /**
-     * The time at which the clients CONNECT message was received by the broker.
-     */
-    public static final AttributeKey<Long> CONNECT_RECEIVED_TIMESTAMP = AttributeKey.valueOf("Connect.Received.Timestamp");
-
     /**
      * Representation of information regarding the connection of a single client
      */

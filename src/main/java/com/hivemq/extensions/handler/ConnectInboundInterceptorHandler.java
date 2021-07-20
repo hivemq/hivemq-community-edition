@@ -120,7 +120,7 @@ public class ConnectInboundInterceptorHandler {
                 new ConnectInboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
 
         final long timestamp =
-                Objects.requireNonNullElse(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get(),
+                Objects.requireNonNullElse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp(),
                         System.currentTimeMillis());
         final ConnectPacketImpl packet = new ConnectPacketImpl(connect, timestamp);
         final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInfo, connectionInfo, packet);

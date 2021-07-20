@@ -114,7 +114,7 @@ public class MqttConnectDecoder {
         }
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(protocolVersion);
-        channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).set(System.currentTimeMillis());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectReceivedTimestamp(System.currentTimeMillis());
 
         if (protocolVersion == ProtocolVersion.MQTTv5) {
             return mqtt5ConnectDecoder.decode(channel, buf, fixedHeader);

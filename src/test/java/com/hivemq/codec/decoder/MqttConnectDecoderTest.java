@@ -29,8 +29,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.assertNotNull;
@@ -41,17 +39,14 @@ public class MqttConnectDecoderTest {
 
     private static final byte fixedHeader = 0b0001_0000;
 
-    @Mock
     private @NotNull MqttConnacker mqttConnacker;
-
     private @NotNull Channel channel;
     private @NotNull MqttConnectDecoder decoder;
     private @NotNull ClientConnection clientConnection;
 
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mqttConnacker = mock(MqttConnacker.class);
         final HivemqId hiveMQId = new HivemqId();
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(null);
@@ -86,7 +81,7 @@ public class MqttConnectDecoderTest {
         }
 
         assertSame(ProtocolVersion.MQTTv5, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
+        assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp());
     }
 
     @Test
@@ -94,7 +89,7 @@ public class MqttConnectDecoderTest {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 4});
         decoder.decode(channel, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1_1, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
+        assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp());
     }
 
     @Test
@@ -102,7 +97,7 @@ public class MqttConnectDecoderTest {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 6, 'M', 'Q', 'T', 'T', 3, 1});
         decoder.decode(channel, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ChannelAttributes.CONNECT_RECEIVED_TIMESTAMP).get());
+        assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp());
     }
 
     @Test
