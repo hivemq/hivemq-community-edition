@@ -286,10 +286,10 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     @NotNull
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
-        ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_EVENT_LISTENERS).get();
+        ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientEventListeners();
         if (eventListeners == null) {
             eventListeners = new ClientEventListeners(hiveMQExtensions);
-            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_EVENT_LISTENERS).set(eventListeners);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientEventListeners(eventListeners);
         }
         return eventListeners;
     }

@@ -24,6 +24,7 @@ import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.parameter.ConnectionAttributes;
+import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -56,6 +57,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable ClientEventListeners extensionClientEventListeners;
     private @Nullable ClientAuthenticators extensionClientAuthenticators;
     private @Nullable ClientAuthorizers extensionClientAuthorizers;
     private @Nullable ClientInformation extensionClientInformation;
@@ -235,6 +237,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable ClientEventListeners getExtensionClientEventListeners() {
+        return extensionClientEventListeners;
+    }
+
+    public void setExtensionClientEventListeners(final @Nullable ClientEventListeners extensionClientEventListeners) {
+        this.extensionClientEventListeners = extensionClientEventListeners;
     }
 
     public @Nullable ClientAuthorizers getExtensionClientAuthorizers() {
