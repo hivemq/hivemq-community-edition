@@ -381,7 +381,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        embeddedChannel.attr(ChannelAttributes.AUTH_CONNECT).set(connect);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(connect);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
@@ -396,7 +396,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createMulti());
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        embeddedChannel.attr(ChannelAttributes.AUTH_CONNECT).set(connect);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(connect);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);

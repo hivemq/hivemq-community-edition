@@ -62,6 +62,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable CONNECT authConnect;
     private @Nullable String authMethod;
     private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
@@ -262,6 +263,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable CONNECT getAuthConnect() {
+        return authConnect;
+    }
+
+    public void setAuthConnect(final @Nullable CONNECT authConnect) {
+        this.authConnect = authConnect;
     }
 
     public @Nullable String getAuthMethod() {
