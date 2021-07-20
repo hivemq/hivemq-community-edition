@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -59,6 +60,7 @@ public class ClientConnection {
     private boolean incomingPublishesDefaultFailedSkipRest;
     private boolean requestResponseInformation;
     private @Nullable Boolean requestProblemInformation;
+    private @Nullable SettableFuture<Void> disconnectFuture;
 
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
@@ -248,6 +250,17 @@ public class ClientConnection {
 
     public void setRequestProblemInformation(final @Nullable Boolean requestProblemInformation) {
         this.requestProblemInformation = requestProblemInformation;
+    }
+
+    /**
+     * This attribute is added during connection. The future is set, when the client disconnect handling is complete.
+     */
+    public @Nullable SettableFuture<Void> getDisconnectFuture() {
+        return disconnectFuture;
+    }
+
+    public void setDisconnectFuture(final @Nullable SettableFuture<Void> disconnectFuture) {
+        this.disconnectFuture = disconnectFuture;
     }
 
     /**
