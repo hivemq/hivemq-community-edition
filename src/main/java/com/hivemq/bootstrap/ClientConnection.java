@@ -44,6 +44,7 @@ public class ClientConnection {
 
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
+    private boolean cleanStart;
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable Listener connectedListener;
     private @Nullable CONNECT connectMessage;
@@ -111,6 +112,14 @@ public class ClientConnection {
 
     public void setProtocolVersion(final @Nullable ProtocolVersion protocolVersion) {
         this.protocolVersion = protocolVersion;
+    }
+
+    public boolean isCleanStart() {
+        return cleanStart;
+    }
+
+    public void setCleanStart(final boolean cleanStart) {
+        this.cleanStart = cleanStart;
     }
 
     public @Nullable ModifiableDefaultPermissions getAuthPermissions() {

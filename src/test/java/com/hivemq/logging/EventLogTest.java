@@ -60,7 +60,7 @@ public class EventLogTest {
     private Channel channel;
 
     @Mock
-    private Attribute attributeClientId, attributeCleanStart;
+    private Attribute attributeClientId;
     private ClientConnection clientConnection;
 
     @Before
@@ -70,6 +70,7 @@ public class EventLogTest {
         clientConnection = new ClientConnection(null);
         clientConnection.setDisconnectEventLogged(true);
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
+        clientConnection.setCleanStart(cleanStart);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
@@ -77,9 +78,6 @@ public class EventLogTest {
 
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attributeClientId);
         when(attributeClientId.get()).thenReturn(clientId);
-
-        when(channel.attr(ChannelAttributes.CLEAN_START)).thenReturn(attributeCleanStart);
-        when(attributeCleanStart.get()).thenReturn(cleanStart);
 
         logMessageBuffer = new StringBuffer();
     }

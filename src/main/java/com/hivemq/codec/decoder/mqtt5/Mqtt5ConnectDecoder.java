@@ -168,7 +168,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
-        channel.attr(ChannelAttributes.CLEAN_START).set(cleanStart);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(cleanStart);
 
         return connectBuilder
                 .withClientIdentifier(clientId)

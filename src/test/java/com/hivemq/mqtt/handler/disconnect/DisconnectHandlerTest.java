@@ -254,7 +254,7 @@ public class DisconnectHandlerTest {
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(false);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(false);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
@@ -270,7 +270,7 @@ public class DisconnectHandlerTest {
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(null);
-        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(false);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);

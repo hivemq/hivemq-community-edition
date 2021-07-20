@@ -15,6 +15,7 @@
  */
 package com.hivemq.codec.decoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -34,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -42,7 +44,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class Mqtt31ConnectDecoderValidationsTest {
-
 
     @Mock
     private Channel channel;
@@ -73,9 +74,9 @@ public class Mqtt31ConnectDecoderValidationsTest {
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
 
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
         when(channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE)).thenReturn(attribute);
-        when(channel.attr(ChannelAttributes.CLEAN_START)).thenReturn(attribute);
     }
 
     @Test
