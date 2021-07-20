@@ -55,7 +55,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.InitFutureUtilsExecutorRule;
-import util.TestChannelAttribute;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -185,7 +184,7 @@ public class PublishPollServiceImplTest {
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
         when(channel.isActive()).thenReturn(true);
         clientConnection.setInFlightMessages(new AtomicInteger(0));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
 
 
         publishPollService.pollNewMessages("client");
@@ -201,7 +200,7 @@ public class PublishPollServiceImplTest {
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
         when(channel.isActive()).thenReturn(false);
         clientConnection.setInFlightMessages(new AtomicInteger(0));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
 
         publishPollService.pollNewMessages("client");
         final ArgumentCaptor<List<PublishWithFuture>> argumentCaptor = ArgumentCaptor.forClass(List.class);
@@ -247,15 +246,12 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_inflight_messages_empty() throws NoMessageIdAvailableException {
-        final Attribute attribute = mock(Attribute.class);
-        when(attribute.get()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(attribute);
+        clientConnection.setInFlightMessagesSent(true);
 
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
         publishPollService.pollInflightMessages("client", channel);
 
         verify(messageIDPool, never()).takeIfAvailable(anyInt());
-        verify(attribute).set(true);
     }
 
     @Test
@@ -275,7 +271,7 @@ public class PublishPollServiceImplTest {
         when(channel.isActive()).thenReturn(true);
         final AtomicInteger inFlightCount = new AtomicInteger(0);
         clientConnection.setInFlightMessages(inFlightCount);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
 
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
 
@@ -306,7 +302,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
         clientConnection.setInFlightMessages(new AtomicInteger(1));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
 
         publishPollService.pollSharedPublishes("group/topic");
 
@@ -326,7 +322,7 @@ public class PublishPollServiceImplTest {
 
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
         clientConnection.setInFlightMessages(new AtomicInteger(1));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
 
         publishPollService.pollSharedPublishes("group/topic");
 
@@ -339,7 +335,7 @@ public class PublishPollServiceImplTest {
 
         when(channel.isActive()).thenReturn(true);
         clientConnection.setInFlightMessages(new AtomicInteger(0));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
+        clientConnection.setInFlightMessagesSent(true);
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish(QoS.AT_LEAST_ONCE);

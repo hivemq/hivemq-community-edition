@@ -104,7 +104,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         checkNotNull(client, "Client must not be null");
         checkNotNull(channel, "Channel must not be null");
         // Null equal false, true will never be set
-        final boolean inflightMessagesSent = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).get() != null;
+        final boolean inflightMessagesSent = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isInFlightMessagesSent();
         if (inflightMessagesSent) {
             pollNewMessages(client, channel);
             final boolean noSharedSubscriptions = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getNoSharedSubscription();
@@ -215,7 +215,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             @Override
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
                 if (messages.isEmpty()) {
-                    channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).set(true);
+                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
                     channel.eventLoop().submit(() -> pollMessages(client, channel)); // No more inflight messages
                     return;
                 }
