@@ -98,9 +98,9 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         eventLog.clientDisconnected(ctx.channel(), logClientReasonString ? msg.getReasonString() : null);
 
         if (msg.getReasonCode() != NORMAL_DISCONNECTION) {
-            ctx.channel().attr(ChannelAttributes.SEND_WILL).set(true);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setSendWill(true);
         } else {
-            ctx.channel().attr(ChannelAttributes.SEND_WILL).set(false);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setSendWill(false);
         }
         if (!ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
             ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
@@ -122,7 +122,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final boolean logged = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isDisconnectEventLogged();
 
         if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
-            channel.attr(ChannelAttributes.SEND_WILL).set(true);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setSendWill(true);
         }
 
         if (!logged) {
@@ -175,8 +175,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         persistDisconnectState(channel, clientId, persistent, sessionExpiryInterval);
     }
 
-    ;
-
     private void persistDisconnectState(
             final Channel channel,
             final @NotNull String clientId,
@@ -185,7 +183,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         messageIDPools.remove(clientId);
         final boolean preventWill = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt();
-        final boolean sendWill = !preventWill && (channel.attr(ChannelAttributes.SEND_WILL).get() != null ? channel.attr(ChannelAttributes.SEND_WILL).get() : true);
+        final boolean sendWill = !preventWill && channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isSendWill();
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
                     @Override
