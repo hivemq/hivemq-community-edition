@@ -168,7 +168,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         final byte[] password;
         if (isPasswordFlag) {
             password = Bytes.getPrefixedBytes(buf);
-            channel.attr(ChannelAttributes.AUTH_PASSWORD).set(password);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(password);
         } else {
             password = null;
         }

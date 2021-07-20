@@ -45,7 +45,6 @@ import static org.junit.Assert.*;
  */
 public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
-
     @Override
     @Before
     public void setUp() {
@@ -174,7 +173,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertNull(channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get());
         assertEquals("username", channel.attr(ChannelAttributes.AUTH_USERNAME).get());
-        assertEquals("pass", new String(channel.attr(ChannelAttributes.AUTH_PASSWORD).get(), StandardCharsets.UTF_8));
+        assertEquals("pass", new String(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword(), StandardCharsets.UTF_8));
 
     }
 

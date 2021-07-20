@@ -110,7 +110,7 @@ public class ChannelUtils {
 
         //These things can all be null!
         final String username = channel.attr(ChannelAttributes.AUTH_USERNAME).get();
-        final byte[] password = channel.attr(ChannelAttributes.AUTH_PASSWORD).get();
+        final byte[] password = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword();
         final SslClientCertificate sslCert = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
 
         final Listener listener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();

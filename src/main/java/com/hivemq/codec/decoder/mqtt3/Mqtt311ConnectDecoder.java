@@ -197,7 +197,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                         ReasonStrings.CONNACK_MALFORMED_PACKET_PASSWORD);
                 return null;
             }
-            channel.attr(ChannelAttributes.AUTH_PASSWORD).set(password);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(password);
         } else {
             password = null;
         }
