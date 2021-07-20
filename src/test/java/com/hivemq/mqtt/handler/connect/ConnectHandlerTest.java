@@ -1495,7 +1495,7 @@ public class ConnectHandlerTest {
                 .build();
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(true);
         when(clientSessionPersistence.clientConnected(
                 anyString(),
                 anyBoolean(),

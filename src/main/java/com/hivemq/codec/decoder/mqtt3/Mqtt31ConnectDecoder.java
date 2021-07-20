@@ -174,7 +174,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         }
 
         channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(keepAlive);
-        channel.attr(ChannelAttributes.CLEAN_START).set(isCleanSessionFlag);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(isCleanSessionFlag);
 
         return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
                 .withClientIdentifier(clientId)
