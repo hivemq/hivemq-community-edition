@@ -111,7 +111,7 @@ public class ChannelUtils {
         //These things can all be null!
         final String username = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUsername();
         final byte[] password = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword();
-        final SslClientCertificate sslCert = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
+        final SslClientCertificate sslCert = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate();
 
         final Listener listener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();
         final Optional<Long> disconnectTimestampOptional = Optional.fromNullable(disconnectTimestamp);

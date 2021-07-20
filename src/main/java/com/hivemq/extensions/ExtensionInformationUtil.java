@@ -119,7 +119,7 @@ public class ExtensionInformationUtil {
             final String protocol = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol();
             final String sniHostname = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthSniHostname();
 
-            final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.AUTH_CERTIFICATE).get();
+            final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate();
 
             if(cipher == null || protocol == null){
                 return null;
