@@ -434,7 +434,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         //if authorizers are present and no permissions are available and the default behaviour has not been changed
@@ -458,7 +458,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     private boolean isWillNotAuthorized(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
         if (msg.getWillPublish() != null) {
-            final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+            final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
             if (!DefaultPermissionsEvaluator.checkWillPublish(permissions, msg.getWillPublish())) {
 
                 //will is not authorized, disconnect client

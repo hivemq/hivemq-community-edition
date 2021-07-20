@@ -154,7 +154,7 @@ public class IncomingSubscribeService {
 
         final StringBuilder reasonStringBuilder = new StringBuilder();
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         for (int i = 0; i < msg.getTopics().size(); i++) {

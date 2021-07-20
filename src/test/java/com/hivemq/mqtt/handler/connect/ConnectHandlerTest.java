@@ -112,37 +112,25 @@ public class ConnectHandlerTest {
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;
-
     @Mock
     private ChannelPersistence channelPersistence;
-
     @Mock
     private EventLog eventLog;
-
     @Mock
     private ChannelDependencies channelDependencies;
-
     @Mock
     private Authorizers authorizers;
     @Mock
     private PluginAuthorizerService pluginAuthorizerService;
     @Mock
     private PluginAuthenticatorServiceImpl internalAuthServiceImpl;
-    @Mock
-    private MessageIDPools messageIDPools;
-    @Mock
-    private ChannelFuture channelFuture;
-    @Mock
-    private ChannelPipeline pipeline;
 
     private FullConfigurationService configurationService;
     private MqttConnacker mqttConnacker;
     private ChannelHandlerContext ctx;
     private ConnectHandler handler;
     private ModifiableDefaultPermissions defaultPermissions;
-
     private MqttServerDisconnectorImpl serverDisconnector;
-
     private @NotNull ClientConnection clientConnection;
 
     @Before
@@ -1052,7 +1040,7 @@ public class ConnectHandlerTest {
         assertEquals(Mqtt3ConnAckReturnCode.ACCEPTED, connack.getReturnCode());
         assertTrue(embeddedChannel.isActive());
 
-        assertNotNull(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get());
+        assertNotNull(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions());
     }
 
     @Test
@@ -1109,7 +1097,7 @@ public class ConnectHandlerTest {
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(embeddedChannel.isActive());
 
-        assertNotNull(embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).get());
+        assertNotNull(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions());
     }
 
     /* ******
@@ -1319,7 +1307,7 @@ public class ConnectHandlerTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "topic").type(TopicPermission.PermissionType.ALLOW).build());
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1346,7 +1334,7 @@ public class ConnectHandlerTest {
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.ALLOW);
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         final PublishAuthorizerResult result = new PublishAuthorizerResult(null, null, true);
         embeddedChannel.pipeline().fireUserEventTriggered(new AuthorizeWillResultEvent(connect, result));
@@ -1582,7 +1570,7 @@ public class ConnectHandlerTest {
                 new DummyHandler());
 
         doAnswer(invocation -> {
-            ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(defaultPermissions);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(defaultPermissions);
             handler.connectSuccessfulUnauthenticated(
                     invocation.getArgument(0),
                     invocation.getArgument(1),

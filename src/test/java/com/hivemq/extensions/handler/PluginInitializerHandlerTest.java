@@ -199,7 +199,7 @@ public class PluginInitializerHandlerTest {
 
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
 
-        channelHandlerContext.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(new ModifiableDefaultPermissionsImpl());
+        channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(new ModifiableDefaultPermissionsImpl());
 
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
 
@@ -242,7 +242,7 @@ public class PluginInitializerHandlerTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
 
@@ -272,7 +272,7 @@ public class PluginInitializerHandlerTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
 

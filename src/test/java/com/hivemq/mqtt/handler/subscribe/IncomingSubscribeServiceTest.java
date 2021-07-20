@@ -388,7 +388,7 @@ public class IncomingSubscribeServiceTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -410,7 +410,7 @@ public class IncomingSubscribeServiceTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -434,7 +434,7 @@ public class IncomingSubscribeServiceTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -460,7 +460,7 @@ public class IncomingSubscribeServiceTest {
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -493,7 +493,7 @@ public class IncomingSubscribeServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test4").type(TopicPermission.PermissionType.ALLOW).build());
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -538,7 +538,7 @@ public class IncomingSubscribeServiceTest {
 
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
-        channel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(null);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe,
                 new Mqtt5SubAckReasonCode[]{Mqtt5SubAckReasonCode.GRANTED_QOS_1, null, null},

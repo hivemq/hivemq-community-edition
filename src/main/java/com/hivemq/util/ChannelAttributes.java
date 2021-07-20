@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
-import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.client.ClientAuthenticators;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
@@ -146,8 +145,4 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> REQUEST_RESPONSE_INFORMATION = AttributeKey.valueOf("Request.Response.Information");
 
     public static final AttributeKey<Boolean> REQUEST_PROBLEM_INFORMATION = AttributeKey.valueOf("Request.Problem.Information");
-
-    public static final AttributeKey<ModifiableDefaultPermissions> AUTH_PERMISSIONS = AttributeKey.valueOf("Auth.User.Permissions");
-
-    public static final AttributeKey<CONNECT> CONNECT_MESSAGE = AttributeKey.valueOf("Connect.Message");
 }
