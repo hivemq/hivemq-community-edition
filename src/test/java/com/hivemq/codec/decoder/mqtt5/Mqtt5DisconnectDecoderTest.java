@@ -55,7 +55,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(100L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(100L);
     }
 
     @Test
@@ -343,7 +343,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_session_expiry_zero_overwrite() {
 
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         final byte[] encoded = new byte[]{
 
@@ -376,11 +376,9 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxSessionExpiryInterval(80);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-
-        //from connect
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(50L);
-
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        //from connect
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(50L);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = new byte[]{

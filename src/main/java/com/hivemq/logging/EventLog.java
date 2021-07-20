@@ -106,7 +106,7 @@ public class EventLog {
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         final Boolean cleanStart = channel.attr(ChannelAttributes.CLEAN_START).get();
-        final Long sessionExpiry = channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long sessionExpiry = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.", valueOrUnknown(clientId), valueOrUnknown(ip), valueOrUnknown(cleanStart), valueOrUnknown(sessionExpiry));
     }

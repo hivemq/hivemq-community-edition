@@ -87,11 +87,11 @@ public class DisconnectHandlerTest {
     public void test_disconnection_on_disconnect_message() {
         assertTrue(embeddedChannel.isOpen());
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(1000L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(1000L);
 
         embeddedChannel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
 
-        assertEquals(2000, embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get().longValue());
+        assertEquals(2000, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval().longValue());
 
         //verify that the client was disconnected
         assertFalse(embeddedChannel.isOpen());
@@ -220,7 +220,7 @@ public class DisconnectHandlerTest {
 
         //make the client connected
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
         embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
 
@@ -234,7 +234,7 @@ public class DisconnectHandlerTest {
 
         //make the client connected
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
         embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
 
@@ -255,7 +255,7 @@ public class DisconnectHandlerTest {
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
         embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(false);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 
@@ -271,7 +271,7 @@ public class DisconnectHandlerTest {
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(null);
         embeddedChannel.attr(ChannelAttributes.CLEAN_START).set(false);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
         embeddedChannel.attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
         embeddedChannel.attr(ChannelAttributes.DISCONNECT_FUTURE).set(disconnectFuture);
 

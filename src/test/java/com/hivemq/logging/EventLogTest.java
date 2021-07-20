@@ -60,7 +60,7 @@ public class EventLogTest {
     private Channel channel;
 
     @Mock
-    private Attribute attributeClientId, attributeCleanStart, attributeSessionExpiry, attributeDisconnect;
+    private Attribute attributeClientId, attributeCleanStart, attributeDisconnect;
 
     @Before
     public void setUp() throws Exception {
@@ -68,6 +68,7 @@ public class EventLogTest {
 
         final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setDisconnectEventLogged(true);
+        clientConnection.setClientSessionExpiryInterval(sessionExpiry);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
@@ -78,9 +79,6 @@ public class EventLogTest {
 
         when(channel.attr(ChannelAttributes.CLEAN_START)).thenReturn(attributeCleanStart);
         when(attributeCleanStart.get()).thenReturn(cleanStart);
-
-        when(channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL)).thenReturn(attributeSessionExpiry);
-        when(attributeSessionExpiry.get()).thenReturn(sessionExpiry);
 
         logMessageBuffer = new StringBuffer();
     }

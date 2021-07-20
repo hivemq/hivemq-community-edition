@@ -201,7 +201,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         assertNotNull(expiry);
         assertEquals(0, expiry.longValue());
@@ -408,7 +408,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long expiry = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         assertNotNull(expiry);
         assertEquals(Mqtt5CONNECT.SESSION_EXPIRY_MAX, expiry.longValue());
@@ -490,7 +490,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Long expiryFromChannel = embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).get();
+        final Long expiryFromChannel = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
 
         assertNotNull(expiryFromChannel);
         assertEquals(10000L, expiryFromChannel.longValue());
@@ -1455,7 +1455,7 @@ public class ConnectHandlerTest {
                 .build();
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(20000L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(20000L);
 
         handler.afterTakeover(ctx, connect);
 
@@ -1476,7 +1476,7 @@ public class ConnectHandlerTest {
                 .build();
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(20000L);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(20000L);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(123L);
 
         handler.afterTakeover(ctx, connect);

@@ -549,7 +549,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             connackSent = mqttConnacker.connackSuccess(ctx, connack);
 
         } else {
-            ctx.channel().attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(msg.getSessionExpiryInterval());
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
             if (sessionPresent) {
                 connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
             } else {
@@ -603,7 +603,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         //Set session expiry interval to channel for DISCONNECT
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(sessionExpiryInterval);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(sessionExpiryInterval);
 
         //set userproperties from auth to connack
         final Mqtt5UserProperties userPropertiesFromAuth =

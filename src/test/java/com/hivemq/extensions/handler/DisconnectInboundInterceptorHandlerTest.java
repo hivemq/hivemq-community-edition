@@ -93,7 +93,6 @@ public class DisconnectInboundInterceptorHandlerTest {
     private @NotNull EmbeddedChannel channel;
     public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
     private @NotNull DisconnectInterceptorHandler handler;
-    private @NotNull PluginOutputAsyncerImpl asyncer;
 
     @Before
     public void setup() {
@@ -154,7 +153,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         final DISCONNECT disconnect = testDisconnect();
         channel.writeInbound(disconnect);
@@ -181,7 +180,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         channel.writeInbound(testDisconnect());
         channel.runPendingTasks();
@@ -207,7 +206,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         channel.writeInbound(testDisconnect());
         channel.runPendingTasks();
@@ -232,7 +231,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         channel.writeInbound(testDisconnect());
         channel.runPendingTasks();
@@ -258,7 +257,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         channel.writeInbound(testDisconnect());
         channel.runPendingTasks();
@@ -279,7 +278,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL).set(0L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(0L);
 
         channel.writeInbound(testDisconnect());
         channel.runPendingTasks();
