@@ -119,7 +119,7 @@ public class IncomingPublishServiceTest {
 
     @Test
     public void test_publishes_skipped() {
-        embeddedChannel.attr(ChannelAttributes.INCOMING_PUBLISHES_SKIP_REST).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
         incomingPublishService.processPublish(ctx, TestMessageUtil.createMqtt5Publish(), null);
 
         verify(mqttServerDisconnector, never()).disconnect(
