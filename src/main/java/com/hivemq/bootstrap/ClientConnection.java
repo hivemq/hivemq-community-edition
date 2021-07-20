@@ -31,6 +31,7 @@ public class ClientConnection {
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable CONNECT connectMessage;
+    private @Nullable Integer clientReceiveMaximum;
     private @Nullable Long queueSizeMaximum;
     private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
@@ -68,6 +69,14 @@ public class ClientConnection {
 
     public void setConnectMessage(final @Nullable CONNECT connectMessage) {
         this.connectMessage = connectMessage;
+    }
+
+    public @Nullable Integer getClientReceiveMaximum() {
+        return clientReceiveMaximum;
+    }
+
+    public void setClientReceiveMaximum(final @Nullable Integer clientReceiveMaximum) {
+        this.clientReceiveMaximum = clientReceiveMaximum;
     }
 
     public @Nullable Long getQueueSizeMaximum() {

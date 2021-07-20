@@ -127,6 +127,7 @@ public class PublishPollServiceImplTest {
     private @NotNull PublishPollService publishPollService;
 
     private @NotNull SingleWriterService singleWriterService;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
@@ -134,10 +135,14 @@ public class PublishPollServiceImplTest {
         when(messageIDPools.forClient(anyString())).thenReturn(messageIDPool);
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
-        when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(null));
+
+        clientConnection = new ClientConnection(publishFlushHandler);
+
+        final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(clientConnectionAttribute.get()).thenReturn(clientConnection);
+
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
-        final ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
@@ -173,7 +178,8 @@ public class PublishPollServiceImplTest {
     public void test_new_messages_inflight_batch_size() throws NoMessageIdAvailableException {
 
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 1;
-        when(channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM)).thenReturn(new TestChannelAttribute<>(10));
+
+        clientConnection.setClientReceiveMaximum(10);
 
         when(messageIDPool.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));

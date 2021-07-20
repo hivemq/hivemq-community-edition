@@ -123,12 +123,12 @@ public class PluginAuthenticatorServiceImplTest {
 
         MockitoAnnotations.initMocks(this);
         clientConnection = new ClientConnection(null);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         securityConfig = new SecurityConfigurationServiceImpl();
         embeddedChannel = new EmbeddedChannel();
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(100);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(100);
 
 
         embeddedChannel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, Mockito.mock(MQTTMessageDecoder.class));

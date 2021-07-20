@@ -1442,7 +1442,7 @@ public class ConnectHandlerTest {
         handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
 
         assertTrue(embeddedChannel.attr(ChannelAttributes.AUTH_AUTHENTICATED).get());
-        assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get().intValue());
+        assertEquals(123, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum().intValue());
         assertEquals(123, connect.getReceiveMaximum());
     }
 

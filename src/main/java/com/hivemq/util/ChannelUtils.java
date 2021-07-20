@@ -100,7 +100,7 @@ public class ChannelUtils {
     }
 
     public static int maxInflightWindow(@NotNull final Channel channel) {
-        final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
+        final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum();
         final int max = InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE;
         if (clientReceiveMaximum == null) {
             return max;

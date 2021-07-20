@@ -191,7 +191,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
             //Attention, this set is immutable, so we need a fresh mutable collection
             final Queue<String> topics = new ConcurrentLinkedQueue<>(retainedMessageTopics);
 
-            final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
+            final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum();
 
             int concurrentMessages = clientReceiveMaximum == null ? CONCURRENT_MESSAGES :
                     Math.min(clientReceiveMaximum, CONCURRENT_MESSAGES);

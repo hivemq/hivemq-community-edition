@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -303,9 +304,10 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
-        final Integer receiveMax = channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).get();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final Integer receiveMax = clientConnection.getClientReceiveMaximum();
         Preconditions.checkNotNull(receiveMax, "Receive maximum must not be null here");
-        final Long queueSizeMaximum = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getQueueSizeMaximum();
+        final Long queueSizeMaximum = clientConnection.getQueueSizeMaximum();
         return new ModifiableClientSettingsImpl(receiveMax, queueSizeMaximum);
     }
 
