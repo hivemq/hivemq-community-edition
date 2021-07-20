@@ -290,7 +290,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_user_properties_request_problem_information_false() {
 
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(false);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header

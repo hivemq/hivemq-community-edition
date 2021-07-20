@@ -143,6 +143,4 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> DISCONNECT_EVENT_LOGGED = AttributeKey.valueOf("Disconnect.Event.Logged");
 
     public static final AttributeKey<Boolean> REQUEST_RESPONSE_INFORMATION = AttributeKey.valueOf("Request.Response.Information");
-
-    public static final AttributeKey<Boolean> REQUEST_PROBLEM_INFORMATION = AttributeKey.valueOf("Request.Problem.Information");
 }

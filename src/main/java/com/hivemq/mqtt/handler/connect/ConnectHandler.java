@@ -180,7 +180,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         ctx.channel().attr(ChannelAttributes.REQUEST_RESPONSE_INFORMATION).set(connect.isResponseInformationRequested());
-        ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(connect.isProblemInformationRequested());
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(connect.isProblemInformationRequested());
 
         addPublishFlowHandler(ctx, connect);
 
