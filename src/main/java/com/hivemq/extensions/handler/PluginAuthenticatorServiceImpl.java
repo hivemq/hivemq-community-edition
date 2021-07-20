@@ -237,7 +237,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                 }
             }
         } else {
-            final CONNECT connect = ctx.channel().attr(ChannelAttributes.AUTH_CONNECT).get();
+            final CONNECT connect = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthConnect();
 
             final ConnectAuthOutput output = new ConnectAuthOutput(
                     asyncer, validateUTF8, defaultPermissions, clientSettings, timeout, true);
