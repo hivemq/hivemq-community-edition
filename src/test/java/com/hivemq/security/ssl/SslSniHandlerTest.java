@@ -15,6 +15,7 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -39,12 +40,11 @@ public class SslSniHandlerTest {
 
         final SslSniHandler sslSniHandler = new SslSniHandler(sslHandler, sslContext);
         final Channel channel = new EmbeddedChannel(sslSniHandler);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
 
         sslSniHandler.replaceHandler(channel.pipeline().firstContext(), "abc.com", sslContext);
 
-        assertEquals("abc.com", channel.attr(ChannelAttributes.AUTH_SNI_HOSTNAME).get());
+        assertEquals("abc.com", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthSniHostname());
         assertSame(sslHandler, channel.pipeline().get(SslHandler.class));
     }
-
-
 }

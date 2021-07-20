@@ -33,7 +33,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Set;
 
-import static com.hivemq.util.ChannelAttributes.*;
+import static com.hivemq.util.ChannelAttributes.AUTH_CERTIFICATE;
+import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
@@ -138,8 +139,8 @@ public class ExtensionInformationUtilTest {
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
         assertTrue(clientTlsInformation.getHostname().isEmpty());
         assertTrue(clientTlsInformation.getClientCertificate().isPresent());
-        assertNotNull(((TlsInformation)clientTlsInformation).getCertificate());
-        assertNotNull(((TlsInformation)clientTlsInformation).getCertificateChain());
+        assertNotNull(((TlsInformation) clientTlsInformation).getCertificate());
+        assertNotNull(((TlsInformation) clientTlsInformation).getCertificateChain());
     }
 
     @Test
@@ -147,7 +148,7 @@ public class ExtensionInformationUtilTest {
 
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
-        channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
+        clientConnection.setAuthSniHostname("test.hostname.domain");
 
         final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
@@ -164,7 +165,7 @@ public class ExtensionInformationUtilTest {
 
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
-        channel.attr(AUTH_SNI_HOSTNAME).set("test.hostname.domain");
+        clientConnection.setAuthSniHostname("test.hostname.domain");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
@@ -187,8 +188,8 @@ public class ExtensionInformationUtilTest {
         assertTrue(clientTlsInformation.getHostname().isPresent());
         assertEquals("test.hostname.domain", clientTlsInformation.getHostname().get());
         assertTrue(clientTlsInformation.getClientCertificate().isPresent());
-        assertNotNull(((TlsInformation)clientTlsInformation).getCertificate());
-        assertNotNull(((TlsInformation)clientTlsInformation).getCertificateChain());
+        assertNotNull(((TlsInformation) clientTlsInformation).getCertificate());
+        assertNotNull(((TlsInformation) clientTlsInformation).getCertificateChain());
     }
 
 
