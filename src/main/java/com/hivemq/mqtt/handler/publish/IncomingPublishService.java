@@ -128,7 +128,7 @@ public class IncomingPublishService {
 
         if (authorizerResult != null && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
-            if (ctx.channel().attr(ChannelAttributes.INCOMING_PUBLISHES_DEFAULT_FAILED_SKIP_REST).get() != null) {
+            if (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesDefaultFailedSkipRest()) {
                 //reason string and reason code null, because client disconnected previously
                 finishUnauthorizedPublish(ctx, publish, null, null);
             } else if (authorizerResult.getAckReasonCode() == AckReasonCode.SUCCESS) {
@@ -162,7 +162,7 @@ public class IncomingPublishService {
     private void finishUnauthorizedPublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish,
                                            @Nullable final AckReasonCode reasonCode, @Nullable final String reasonString) {
 
-        ctx.channel().attr(ChannelAttributes.INCOMING_PUBLISHES_DEFAULT_FAILED_SKIP_REST).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesDefaultFailedSkipRest(true);
 
         if (!ctx.channel().isActive()) {
             //no more processing needed.

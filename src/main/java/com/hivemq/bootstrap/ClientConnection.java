@@ -27,7 +27,7 @@ public class ClientConnection {
 
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
-
+    private boolean incomingPublishesDefaultFailedSkipRest;
 
     public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
         this.publishFlushHandler = publishFlushHandler;
@@ -45,4 +45,13 @@ public class ClientConnection {
         this.protocolVersion = protocolVersion;
     }
 
+    /**
+     * True if this client is not allowed to publish any more messages by default, if false he is allowed to do so.
+     */
+    public boolean isIncomingPublishesDefaultFailedSkipRest() {
+        return incomingPublishesDefaultFailedSkipRest;
+    }
+    public void setIncomingPublishesDefaultFailedSkipRest(final boolean incomingPublishesDefaultFailedSkipRest) {
+        this.incomingPublishesDefaultFailedSkipRest = incomingPublishesDefaultFailedSkipRest;
+    }
 }

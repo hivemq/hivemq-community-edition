@@ -157,10 +157,4 @@ public class ChannelAttributes {
      * The value is never set to false.
      */
     public static final AttributeKey<Boolean> INCOMING_PUBLISHES_SKIP_REST = AttributeKey.valueOf("Incoming.Publishes.Skip.Rest");
-
-    /**
-     * True if this client is not allowed to publish any more messages by default, if <null> he is allowed to do so.
-     * The value is never set to false.
-     */
-    public static final AttributeKey<Boolean> INCOMING_PUBLISHES_DEFAULT_FAILED_SKIP_REST = AttributeKey.valueOf("Incoming.Publishes.Default.Failed.Skip.Rest");
 }
