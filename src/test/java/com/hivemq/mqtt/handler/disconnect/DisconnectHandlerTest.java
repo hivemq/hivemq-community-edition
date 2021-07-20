@@ -125,7 +125,7 @@ public class DisconnectHandlerTest {
     public void test_graceful_flag_set_on_message() {
 
         embeddedChannel.writeInbound(new DISCONNECT());
-        assertNotNull(embeddedChannel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get());
+        assertNotNull(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isGracefulDisconnect());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class DisconnectHandlerTest {
     public void test_no_graceful_flag_set_on_close() throws Exception {
         final ChannelFuture future = embeddedChannel.close();
         future.await();
-        assertNull(embeddedChannel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get());
+        assertFalse(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isGracefulDisconnect());
     }
 
     @Test

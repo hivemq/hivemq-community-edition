@@ -66,6 +66,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean gracefulDisconnect;
     private boolean sendWill = true;
     private boolean takenOver;
     private boolean preventLwt;
@@ -300,6 +301,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isGracefulDisconnect() {
+        return gracefulDisconnect;
+    }
+
+    public void setGracefulDisconnect(final boolean gracefulDisconnect) {
+        this.gracefulDisconnect = gracefulDisconnect;
     }
 
     public boolean isSendWill() {

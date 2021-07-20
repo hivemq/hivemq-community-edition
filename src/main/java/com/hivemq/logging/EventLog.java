@@ -15,9 +15,9 @@
  */
 package com.hivemq.logging;
 
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
@@ -122,7 +122,7 @@ public class EventLog {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectEventLogged(true);
         final String clientId = channel.attr(ChannelAttributes.CLIENT_ID).get();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
-        final boolean graceful = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
+        final boolean graceful = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isGracefulDisconnect();
 
         if (graceful) {
             log.trace("Client {} disconnected gracefully.", clientId);
