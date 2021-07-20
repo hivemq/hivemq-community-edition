@@ -30,6 +30,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,6 +59,8 @@ public class ClientConnection {
 
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
+
+    private @Nullable ScheduledFuture<?> authFuture;
 
     private boolean extensionConnectEventSent;
     private boolean extensionDisconnectEventSent;
@@ -250,6 +253,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable ScheduledFuture<?> getAuthFuture() {
+        return authFuture;
+    }
+
+    public void setAuthFuture(final @Nullable ScheduledFuture<?> authFuture) {
+        this.authFuture = authFuture;
     }
 
     public boolean isExtensionConnectEventSent() {

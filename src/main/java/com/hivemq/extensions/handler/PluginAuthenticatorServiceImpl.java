@@ -190,10 +190,10 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             return;
         }
 
-        final ScheduledFuture<?> authFuture = ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).get();
+        final ScheduledFuture<?> authFuture = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthFuture();
         if (authFuture != null) {
             authFuture.cancel(true);
-            ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(null);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthFuture(null);
         }
 
         int enhancedAuthenticatorCount = 0;

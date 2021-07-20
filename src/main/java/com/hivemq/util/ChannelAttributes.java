@@ -23,7 +23,6 @@ import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.util.AttributeKey;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author Dominik Obermaier
@@ -75,7 +74,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<Boolean> AUTH_AUTHENTICATED = AttributeKey.valueOf("Auth.Authenticated");
     public static final AttributeKey<Boolean> AUTHENTICATED_OR_AUTHENTICATION_BYPASSED = AttributeKey.valueOf("AuthenticatedOrAuthenticationBypassed");
-    public static final AttributeKey<ScheduledFuture<?>> AUTH_FUTURE = AttributeKey.valueOf("Auth.Future");
 
     /**
      * Representation of information regarding the connection of a single client
