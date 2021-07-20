@@ -38,12 +38,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> IN_FLIGHT_MESSAGES_SENT = AttributeKey.valueOf("MQTT.inflight-messages.sent");
 
     /**
-     * True if it is guarantied that this client has no shared subscriptions, if null it is unclear.
-     * The value is never set to false.
-     */
-    public static final AttributeKey<Boolean> NO_SHARED_SUBSCRIPTION = AttributeKey.valueOf("MQTT.no-shared-subscriptions");
-
-    /**
      * Representation of information regarding the connection of a single client.
      */
     public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("Client.Connection");

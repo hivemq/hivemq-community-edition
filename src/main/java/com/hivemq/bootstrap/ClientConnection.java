@@ -54,6 +54,7 @@ public class ClientConnection {
     private @Nullable Long connectReceivedTimestamp;
     private @Nullable Long maxPacketSizeSend;
     private @Nullable String[] topicAliasMapping;
+    private boolean noSharedSubscription;
     private boolean clientIdAssigned;
     private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
@@ -196,6 +197,17 @@ public class ClientConnection {
 
     public void setTopicAliasMapping(final @Nullable String[] topicAliasMapping) {
         this.topicAliasMapping = topicAliasMapping;
+    }
+
+    /**
+     * True if it is guarantied that this client has no shared subscriptions, if false it is unclear.
+     */
+    public boolean getNoSharedSubscription() {
+        return noSharedSubscription;
+    }
+
+    public void setNoSharedSubscription(final boolean noSharedSubscription) {
+        this.noSharedSubscription = noSharedSubscription;
     }
 
     public boolean isClientIdAssigned() {

@@ -107,14 +107,14 @@ public class PublishPollServiceImpl implements PublishPollService {
         final boolean inflightMessagesSent = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).get() != null;
         if (inflightMessagesSent) {
             pollNewMessages(client, channel);
-            final Boolean noSharedSubscriptions = channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).get();
-            if (noSharedSubscriptions != null && noSharedSubscriptions) {
+            final boolean noSharedSubscriptions = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getNoSharedSubscription();
+            if (noSharedSubscriptions) {
                 return;
             }
             try {
                 final ImmutableSet<Topic> topics = sharedSubscriptionService.getSharedSubscriptions(client);
                 if (topics.isEmpty()) {
-                    channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).setIfAbsent(true);
+                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setNoSharedSubscription(true);
                     return;
                 }
                 for (final Topic topic : topics) {
