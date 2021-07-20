@@ -62,6 +62,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable String authCipherSuite;
     private @Nullable String authProtocol;
     private @Nullable String authUsername;
     private byte @Nullable [] authPassword;
@@ -266,6 +267,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable String getAuthCipherSuite() {
+        return authCipherSuite;
+    }
+
+    public void setAuthCipherSuite(final @Nullable String authCipherSuite) {
+        this.authCipherSuite = authCipherSuite;
     }
 
     public @Nullable String getAuthProtocol() {

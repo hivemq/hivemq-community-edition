@@ -115,7 +115,7 @@ public class ExtensionInformationUtil {
         Preconditions.checkNotNull(channel, "channel must never be null");
 
         try {
-            final String cipher = channel.attr(ChannelAttributes.AUTH_CIPHER_SUITE).get();
+            final String cipher = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCipherSuite();
             final String protocol = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol();
             final String sniHostname = channel.attr(ChannelAttributes.AUTH_SNI_HOSTNAME).get();
 
