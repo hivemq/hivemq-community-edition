@@ -173,7 +173,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         ctx.channel().attr(ChannelAttributes.TAKEN_OVER).set(false);
         ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
-        ctx.channel().attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(connect.getReceiveMaximum());
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
         if (connect.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
             ctx.channel().attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(connect.getMaximumPacketSize());
@@ -398,7 +398,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                                      final @NotNull CONNECT msg,
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
-        channel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(clientSettings.getClientReceiveMaximum());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(clientSettings.getClientReceiveMaximum());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
     }
 

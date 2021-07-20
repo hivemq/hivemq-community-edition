@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
@@ -91,6 +92,7 @@ public class PublishFlowHandlerTest {
         embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set(CLIENT_ID);
     }
 
@@ -573,7 +575,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages_multiple_pubacks() throws Exception {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(3);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(3);
 
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -758,7 +760,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_max_inflight_window() throws Exception {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_RECEIVE_MAXIMUM).set(50);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(50);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 3;
 
 
