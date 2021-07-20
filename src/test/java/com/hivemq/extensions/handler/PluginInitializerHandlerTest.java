@@ -126,10 +126,10 @@ public class PluginInitializerHandlerTest {
 
 
         embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
         final ClientConnection clientConnection = new ClientConnection(null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("test_client");
 
 
         when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
@@ -237,7 +237,7 @@ public class PluginInitializerHandlerTest {
                 .withWillPublish(willPublish)
                 .build();
 
-        embeddedChannel.attr(ChannelAttributes.CONNECT_MESSAGE).set(connect);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(connect);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
@@ -267,7 +267,7 @@ public class PluginInitializerHandlerTest {
                 .withWillPublish(willPublish)
                 .build();
 
-        embeddedChannel.attr(ChannelAttributes.CONNECT_MESSAGE).set(connect);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(connect);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());

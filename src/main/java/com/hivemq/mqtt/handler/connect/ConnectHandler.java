@@ -542,7 +542,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         final ChannelFuture connackSent;
 
-        ctx.channel().attr(ChannelAttributes.CONNECT_MESSAGE).set(msg);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(msg);
 
         if (ProtocolVersion.MQTTv5 == msg.getProtocolVersion()) {
             final CONNACK connack = buildMqtt5Connack(ctx.channel(), msg, sessionPresent);
