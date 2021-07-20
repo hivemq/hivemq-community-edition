@@ -18,6 +18,7 @@ package com.hivemq.bootstrap;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extensions.client.parameter.ConnectionAttributes;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
@@ -51,6 +52,8 @@ public class ClientConnection {
 
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
+
+    private @Nullable ConnectionInformation extensionConnectionInformation;
 
     public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
         this.publishFlushHandler = publishFlushHandler;
@@ -226,5 +229,13 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable ConnectionInformation getExtensionConnectionInformation() {
+        return extensionConnectionInformation;
+    }
+
+    public void setExtensionConnectionInformation(final @Nullable ConnectionInformation extensionConnectionInformation) {
+        this.extensionConnectionInformation = extensionConnectionInformation;
     }
 }

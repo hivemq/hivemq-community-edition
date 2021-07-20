@@ -55,10 +55,10 @@ public class ExtensionInformationUtil {
     }
 
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
-        ConnectionInformation connectionInformation = channel.attr(ChannelAttributes.EXTENSION_CONNECTION_INFORMATION).get();
+        ConnectionInformation connectionInformation = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionConnectionInformation();
         if (connectionInformation == null) {
             connectionInformation = new ConnectionInformationImpl(channel);
-            channel.attr(ChannelAttributes.EXTENSION_CONNECTION_INFORMATION).set(connectionInformation);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectionInformation(connectionInformation);
         }
         return connectionInformation;
     }
