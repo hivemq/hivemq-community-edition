@@ -33,11 +33,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> PREVENT_LWT = AttributeKey.valueOf("MQTT.PreventLWT");
 
     /**
-     * This reveres to the in-flight messages in the client queue, not the ones in the ordered topic queue
-     */
-    public static final AttributeKey<Boolean> IN_FLIGHT_MESSAGES_SENT = AttributeKey.valueOf("MQTT.inflight-messages.sent");
-
-    /**
      * Representation of information regarding the connection of a single client.
      */
     public static final AttributeKey<ClientConnection> CLIENT_CONNECTION = AttributeKey.valueOf("Client.Connection");

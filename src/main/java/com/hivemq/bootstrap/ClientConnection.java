@@ -66,6 +66,8 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean inFlightMessagesSent;
+
     private @Nullable SslClientCertificate authCertificate;
     private @Nullable String authSniHostname;
     private @Nullable String authCipherSuite;
@@ -295,6 +297,17 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    /**
+     * This reveres to the in-flight messages in the client queue, not the ones in the ordered topic queue.
+     */
+    public boolean isInFlightMessagesSent() {
+        return inFlightMessagesSent;
+    }
+
+    public void setInFlightMessagesSent(final boolean inFlightMessagesSent) {
+        this.inFlightMessagesSent = inFlightMessagesSent;
     }
 
     public @Nullable SslClientCertificate getAuthCertificate() {

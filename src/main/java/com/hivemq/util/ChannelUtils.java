@@ -84,7 +84,7 @@ public class ChannelUtils {
     }
 
     public static boolean messagesInFlight(@NotNull final Channel channel) {
-        final boolean inFlightMessagesSent = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT).get() != null;
+        final boolean inFlightMessagesSent = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isInFlightMessagesSent();
         if (!inFlightMessagesSent) {
             return true;
         }
