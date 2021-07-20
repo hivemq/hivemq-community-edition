@@ -24,7 +24,6 @@ import io.netty.util.AttributeKey;
 public class ChannelAttributes {
 
     public static final AttributeKey<String> CLIENT_ID = AttributeKey.valueOf("MQTT.ClientId");
-    public static final AttributeKey<Boolean> CONNACK_SENT = AttributeKey.valueOf("MQTT.ConnackSent");
 
     /**
      * Representation of information regarding the connection of a single client.
