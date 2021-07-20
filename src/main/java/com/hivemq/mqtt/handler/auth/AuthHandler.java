@@ -74,8 +74,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
 
         final Channel channel = ctx.channel();
         final boolean reAuthOngoing = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isReAuthOngoing();
-        final Boolean auth = channel.attr(ChannelAttributes.AUTH_ONGOING).get();
-        final boolean authOngoing = auth != null && auth;
+        final boolean authOngoing = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthOngoing();
 
         authSender.logAuth(channel, msg.getReasonCode(), true);
 

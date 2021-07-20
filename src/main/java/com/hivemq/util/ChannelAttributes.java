@@ -69,7 +69,6 @@ public class ChannelAttributes {
 
     public static final AttributeKey<ByteBuffer> AUTH_DATA = AttributeKey.valueOf("Auth.Data");
     public static final AttributeKey<Mqtt5UserProperties> AUTH_USER_PROPERTIES = AttributeKey.valueOf("Auth.User.Properties");
-    public static final AttributeKey<Boolean> AUTH_ONGOING = AttributeKey.valueOf("Auth.Ongoing");
 
     /**
      * Representation of information regarding the connection of a single client.
