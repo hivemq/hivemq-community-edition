@@ -16,9 +16,9 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -103,7 +103,8 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> extends 
         int omittedProperties = 0;
         int propertyLength = calculatePropertyLength(message);
 
-        if (!securityConfigurationService.allowRequestProblemInformation() || !Objects.requireNonNullElse(ctx.channel().attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).get(), Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
+        if (!securityConfigurationService.allowRequestProblemInformation()
+                || !Objects.requireNonNullElse(ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getRequestProblemInformation(), Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
 
             //Must omit user properties and reason string for any other packet than PUBLISH, CONNACK, DISCONNECT
             //if no problem information requested.

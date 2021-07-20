@@ -244,7 +244,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_reason_string_request_problem_information_false() {
 
-        channel.attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(false);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -295,7 +295,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_user_props_request_problem_information_false() {
 
-        channel.attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(false);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header

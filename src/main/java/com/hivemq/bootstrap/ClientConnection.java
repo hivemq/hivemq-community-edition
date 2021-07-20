@@ -33,6 +33,7 @@ public class ClientConnection {
     private @Nullable CONNECT connectMessage;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
+    private @Nullable Boolean requestProblemInformation;
 
     public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
         this.publishFlushHandler = publishFlushHandler;
@@ -86,5 +87,13 @@ public class ClientConnection {
 
     public void setIncomingPublishesDefaultFailedSkipRest(final boolean incomingPublishesDefaultFailedSkipRest) {
         this.incomingPublishesDefaultFailedSkipRest = incomingPublishesDefaultFailedSkipRest;
+    }
+
+    public @Nullable Boolean getRequestProblemInformation() {
+        return requestProblemInformation;
+    }
+
+    public void setRequestProblemInformation(final @Nullable Boolean requestProblemInformation) {
+        this.requestProblemInformation = requestProblemInformation;
     }
 }

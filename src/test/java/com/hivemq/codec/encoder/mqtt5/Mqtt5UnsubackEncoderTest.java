@@ -91,7 +91,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_properties_request_problem_information_false() {
 
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(false);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
         final byte[] expected = {
                 // fixed header
                 //   type, flags
@@ -140,7 +140,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ChannelAttributes.REQUEST_PROBLEM_INFORMATION).set(false);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
