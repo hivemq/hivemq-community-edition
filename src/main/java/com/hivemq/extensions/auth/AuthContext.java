@@ -140,7 +140,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             if (future.isSuccess()) {
                 final ScheduledFuture<?> timeoutFuture =
                         ctx.executor().schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
-                ctx.channel().attr(ChannelAttributes.AUTH_FUTURE).set(timeoutFuture);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthFuture(timeoutFuture);
             } else if (future.channel().isActive()) {
                 onSendException(future.cause());
             }
