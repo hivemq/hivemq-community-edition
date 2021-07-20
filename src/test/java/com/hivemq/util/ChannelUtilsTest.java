@@ -16,18 +16,13 @@
 package com.hivemq.util;
 
 import com.google.common.base.Optional;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.security.auth.ClientToken;
 import com.hivemq.security.ssl.SslClientCertificateImpl;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.local.LocalAddress;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 import util.TestChannelAttribute;
 
@@ -40,20 +35,12 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("deprecation")
 public class ChannelUtilsTest {
 
-    @Mock
-    Channel channel;
-
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void test_channel_ip() throws Exception {
+        final Channel channel = mock(Channel.class);
         when(channel.remoteAddress()).thenReturn(new InetSocketAddress(0));
 
         final Optional<String> channelIP = ChannelUtils.getChannelIP(channel);
@@ -64,6 +51,7 @@ public class ChannelUtilsTest {
 
     @Test
     public void test_no_socket_address_available() throws Exception {
+        final Channel channel = mock(Channel.class);
         when(channel.remoteAddress()).thenReturn(null);
 
         assertEquals(false, ChannelUtils.getChannelIP(channel).isPresent());
@@ -71,6 +59,7 @@ public class ChannelUtilsTest {
 
     @Test
     public void test_no_inet_socket_address_available() throws Exception {
+        final Channel channel = mock(Channel.class);
         when(channel.remoteAddress()).thenReturn(new LocalAddress("myId"));
 
         assertEquals(false, ChannelUtils.getChannelIP(channel).isPresent());
@@ -138,67 +127,18 @@ public class ChannelUtilsTest {
 
     @Test
     public void test_messages_in_flight() {
-        final Channel channel = mock(Channel.class);
-        final ChannelPipeline pipeline = mock(ChannelPipeline.class);
-        when(channel.pipeline()).thenReturn(pipeline);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(null));
+        final ClientConnection clientConnection = new ClientConnection(null);
+
+        final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
         assertFalse(ChannelUtils.messagesInFlight(channel));
 
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(1)));
+        clientConnection.setInFlightMessages(new AtomicInteger(1));
         assertTrue(ChannelUtils.messagesInFlight(channel));
 
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
         assertFalse(ChannelUtils.messagesInFlight(channel));
     }
-
-    private class TestAttribute<T> implements Attribute<T> {
-
-        private final T object;
-
-        private TestAttribute(final T object) {
-            this.object = object;
-        }
-
-        @Override
-        public AttributeKey<T> key() {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public T get() {
-            return object;
-        }
-
-        @Override
-        public void set(final T value) {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public T getAndSet(final T value) {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public T setIfAbsent(final T value) {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public T getAndRemove() {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public boolean compareAndSet(final T oldValue, final T newValue) {
-            throw new RuntimeException("Not implemented");
-        }
-
-        @Override
-        public void remove() {
-            throw new RuntimeException("Not implemented");
-        }
-    }
-
 }

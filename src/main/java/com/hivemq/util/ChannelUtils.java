@@ -92,7 +92,7 @@ public class ChannelUtils {
         if (!inFlightMessagesSent) {
             return true;
         }
-        final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES).get();
+        final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
         if (inFlightMessages == null) {
             return false;
         }

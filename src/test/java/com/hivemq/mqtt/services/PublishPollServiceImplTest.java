@@ -165,7 +165,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1), createPublish(1))));
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
 
         publishPollService.pollNewMessages("client");
 
@@ -184,7 +184,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
 
@@ -200,7 +200,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"), eq(false), any(ImmutableIntArray.class), anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
         when(channel.isActive()).thenReturn(false);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         publishPollService.pollNewMessages("client");
@@ -220,7 +220,7 @@ public class PublishPollServiceImplTest {
 
         when(channel.isActive()).thenReturn(true);
         when(channel.newPromise()).thenReturn(mock(ChannelPromise.class));
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
 
         publishPollService.pollInflightMessages("client", channel);
 
@@ -236,7 +236,7 @@ public class PublishPollServiceImplTest {
                 .thenReturn(Futures.immediateFuture(ImmutableList.of(createPublish(1))));
 
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
 
         publishPollService.pollInflightMessages("client", channel);
 
@@ -274,7 +274,7 @@ public class PublishPollServiceImplTest {
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
         final AtomicInteger inFlightCount = new AtomicInteger(0);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(inFlightCount));
+        clientConnection.setInFlightMessages(inFlightCount);
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
@@ -305,7 +305,7 @@ public class PublishPollServiceImplTest {
 
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(1)));
+        clientConnection.setInFlightMessages(new AtomicInteger(1));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         publishPollService.pollSharedPublishes("group/topic");
@@ -325,7 +325,7 @@ public class PublishPollServiceImplTest {
         when(channel.isActive()).thenReturn(true);
 
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(1)));
+        clientConnection.setInFlightMessages(new AtomicInteger(1));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
 
         publishPollService.pollSharedPublishes("group/topic");
@@ -338,7 +338,7 @@ public class PublishPollServiceImplTest {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
 
         when(channel.isActive()).thenReturn(true);
-        when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES)).thenReturn(new TestChannelAttribute<>(new AtomicInteger(0)));
+        clientConnection.setInFlightMessages(new AtomicInteger(0));
         when(channel.attr(ChannelAttributes.IN_FLIGHT_MESSAGES_SENT)).thenReturn(new TestChannelAttribute<>(true));
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
 
