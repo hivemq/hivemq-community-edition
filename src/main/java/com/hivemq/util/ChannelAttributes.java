@@ -21,8 +21,6 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.util.AttributeKey;
 
-import java.nio.ByteBuffer;
-
 /**
  * @author Dominik Obermaier
  */
@@ -65,8 +63,6 @@ public class ChannelAttributes {
     public static final AttributeKey<byte[]> AUTH_PASSWORD = AttributeKey.valueOf("Auth.Password");
     public static final AttributeKey<CONNECT> AUTH_CONNECT = AttributeKey.valueOf("Auth.Connect");
     public static final AttributeKey<String> AUTH_METHOD = AttributeKey.valueOf("Auth.AuthenticationMethod");
-
-    public static final AttributeKey<ByteBuffer> AUTH_DATA = AttributeKey.valueOf("Auth.Data");
 
     /**
      * Representation of information regarding the connection of a single client.

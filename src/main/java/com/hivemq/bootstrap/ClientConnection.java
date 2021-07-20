@@ -31,6 +31,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,6 +62,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
     private boolean authOngoing;
     private boolean reAuthOngoing;
@@ -259,6 +261,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public @Nullable ByteBuffer getAuthData() {
+        return authData;
+    }
+
+    public void setAuthData(final @Nullable ByteBuffer authData) {
+        this.authData = authData;
     }
 
     public @Nullable Mqtt5UserProperties getAuthUserProperties() {

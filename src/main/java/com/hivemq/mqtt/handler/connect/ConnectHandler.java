@@ -618,8 +618,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             builder.withAuthMethod(authMethod);
 
             // set auth data
-            final ByteBuffer authData = channel.attr(ChannelAttributes.AUTH_DATA).getAndSet(null);
+            final ByteBuffer authData = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthData();
             if (authData != null) {
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthData(null);
                 builder.withAuthData(Bytes.fromReadOnlyBuffer(authData));
             }
         }
