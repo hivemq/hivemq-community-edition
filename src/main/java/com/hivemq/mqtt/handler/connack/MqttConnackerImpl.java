@@ -181,8 +181,9 @@ public class MqttConnackerImpl implements MqttConnacker {
                 connackBuilder.withAuthMethod(authMethod);
 
                 // set auth data
-                final ByteBuffer authData = channel.attr(ChannelAttributes.AUTH_DATA).getAndSet(null);
+                final ByteBuffer authData = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthData();
                 if (authData != null) {
+                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthData(null);
                     connackBuilder.withAuthData(Bytes.fromReadOnlyBuffer(authData));
                 }
             }
