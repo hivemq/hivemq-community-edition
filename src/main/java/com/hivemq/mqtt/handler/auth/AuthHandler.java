@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.auth;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -73,8 +74,9 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg) {
 
         final Channel channel = ctx.channel();
-        final boolean reAuthOngoing = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isReAuthOngoing();
-        final boolean authOngoing = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthOngoing();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final boolean reAuthOngoing = clientConnection.isReAuthOngoing();
+        final boolean authOngoing = clientConnection.isAuthOngoing();
 
         authSender.logAuth(channel, msg.getReasonCode(), true);
 

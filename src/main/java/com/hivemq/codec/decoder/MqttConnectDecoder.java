@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
@@ -113,8 +114,9 @@ public class MqttConnectDecoder {
                 return null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(protocolVersion);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectReceivedTimestamp(System.currentTimeMillis());
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setProtocolVersion(protocolVersion);
+        clientConnection.setConnectReceivedTimestamp(System.currentTimeMillis());
 
         if (protocolVersion == ProtocolVersion.MQTTv5) {
             return mqtt5ConnectDecoder.decode(channel, buf, fixedHeader);

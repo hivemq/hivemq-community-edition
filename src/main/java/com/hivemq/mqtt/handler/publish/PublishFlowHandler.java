@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
@@ -119,7 +120,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     @Override
     public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
 
-        if(!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)){
+        if (!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)) {
             super.write(ctx, msg, promise);
             return;
         }
@@ -137,9 +138,9 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             return;
         }
 
-        if(DROP_MESSAGES_QOS_0){
+        if (DROP_MESSAGES_QOS_0) {
             final boolean messageDropped = dropOutgoingPublishesHandler.checkChannelNotWritable(ctx, msg, promise);
-            if(messageDropped){
+            if (messageDropped) {
                 return;
             }
         }
@@ -167,11 +168,12 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         orderedTopicService.handleInactive();
 
-        final Long sessionExpiryInterval = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientSessionExpiryInterval();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final Long sessionExpiryInterval = clientConnection.getClientSessionExpiryInterval();
 
         //remove incoming message flow for not persisted client
         if (sessionExpiryInterval != null && sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {
-            final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+            final String clientId = clientConnection.getClientId();
             if (clientId != null) {   //Just to be save. The client id should never be null, if the persistent session is not null.
                 persistence.delete(clientId);
             }

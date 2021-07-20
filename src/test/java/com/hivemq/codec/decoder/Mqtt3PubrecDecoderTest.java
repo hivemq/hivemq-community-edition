@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
 
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 
 public class Mqtt3PubrecDecoderTest {
@@ -44,8 +43,8 @@ public class Mqtt3PubrecDecoderTest {
     @Test
     public void test_pubrec_received() {
 
-        embeddedChannel.attr(CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0101_0000);

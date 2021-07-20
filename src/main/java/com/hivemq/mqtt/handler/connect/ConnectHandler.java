@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -171,21 +172,22 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(false);
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(SettableFuture.create());
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(connect.getReceiveMaximum());
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setTakenOver(false);
+        clientConnection.setDisconnectFuture(SettableFuture.create());
+        clientConnection.setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
         if (connect.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(connect.getMaximumPacketSize());
+            clientConnection.setMaxPacketSizeSend(connect.getMaximumPacketSize());
         }
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(connect.isResponseInformationRequested());
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(connect.isProblemInformationRequested());
+        clientConnection.setRequestResponseInformation(connect.isResponseInformationRequested());
+        clientConnection.setRequestProblemInformation(connect.isProblemInformationRequested());
 
         addPublishFlowHandler(ctx, connect);
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthOngoing(true);
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(connect);
+        clientConnection.setAuthOngoing(true);
+        clientConnection.setAuthConnect(connect);
         pluginAuthenticatorService.authenticateConnect(ctx, connect, createClientSettings(connect));
     }
 
@@ -230,8 +232,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             } catch (final NoSuchElementException ignored) {
             }
         }
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthOngoing(false);
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(null);
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setAuthOngoing(false);
+        clientConnection.setAuthConnect(null);
     }
 
     @Override
@@ -373,8 +376,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx,
                                       final @NotNull CONNECT msg,
                                       final @Nullable ModifiableClientSettingsImpl clientSettings) {
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(true); //do not send will until it is authorized
+
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setAuthenticatedOrAuthenticationBypassed(true);
+        clientConnection.setPreventLwt(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {
             applyClientSettings(clientSettings, msg, ctx.channel());
@@ -398,8 +403,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                                      final @NotNull CONNECT msg,
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(clientSettings.getClientReceiveMaximum());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
+
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setClientReceiveMaximum(clientSettings.getClientReceiveMaximum());
+        clientConnection.setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
     }
 
     private void continueAfterWillAuthorization(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
@@ -540,16 +547,18 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     private void sendConnackSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
 
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         final ChannelFuture connackSent;
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(msg);
+        clientConnection.setConnectMessage(msg);
 
         if (ProtocolVersion.MQTTv5 == msg.getProtocolVersion()) {
             final CONNACK connack = buildMqtt5Connack(ctx.channel(), msg, sessionPresent);
             connackSent = mqttConnacker.connackSuccess(ctx, connack);
 
         } else {
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
+            clientConnection.setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
             if (sessionPresent) {
                 connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_SESS_PRESENT);
             } else {
@@ -558,7 +567,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         //send out queued messages (from inflight and client-session queue) for client after connack is sent
-        connackSent.addListener(new PollInflightMessageListener(publishPollService, ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId()));
+        connackSent.addListener(new PollInflightMessageListener(publishPollService, clientConnection.getClientId()));
     }
 
     private @NotNull CONNACK buildMqtt5Connack(final @NotNull Channel channel, final @NotNull CONNECT msg, final boolean sessionPresent) {
@@ -580,47 +589,49 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             builder.withSessionExpiryInterval(sessionExpiryInterval);
         }
 
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         //when client identifier assigned, send it in CONNACK
-        final Boolean clientIdAssigned = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned();
-        if (clientIdAssigned != null && clientIdAssigned) {
+        final boolean clientIdAssigned = clientConnection.isClientIdAssigned();
+        if (clientIdAssigned) {
             builder.withAssignedClientIdentifier(msg.getClientIdentifier());
         }
 
         //send server keep alive max when connect keep alive is zero and zero is not allowed or keep alive > server keep alive maximum
         if ((msg.getKeepAlive() == 0 && !allowZeroKeepAlive) || (msg.getKeepAlive() > serverKeepAliveMaximum)) {
             builder.withServerKeepAlive(serverKeepAliveMaximum);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(serverKeepAliveMaximum);
+            clientConnection.setConnectKeepAlive(serverKeepAliveMaximum);
         } else {
             builder.withServerKeepAlive(KEEP_ALIVE_NOT_SET);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(msg.getKeepAlive());
+            clientConnection.setConnectKeepAlive(msg.getKeepAlive());
         }
 
         //init Topic Alias Mapping if maximum is greater than zero and aliases are available
         if (topicAliasMaximum > 0 && topicAliasLimiter.aliasesAvailable()) {
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[topicAliasMaximum]);
+            clientConnection.setTopicAliasMapping(new String[topicAliasMaximum]);
             builder.withTopicAliasMaximum(topicAliasMaximum);
             topicAliasLimiter.initUsage(topicAliasMaximum);
         }
 
         //Set session expiry interval to channel for DISCONNECT
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(sessionExpiryInterval);
+        clientConnection.setClientSessionExpiryInterval(sessionExpiryInterval);
 
         //set userproperties from auth to connack
-        final Mqtt5UserProperties userPropertiesFromAuth = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUserProperties();
+        final Mqtt5UserProperties userPropertiesFromAuth = clientConnection.getAuthUserProperties();
         if (userPropertiesFromAuth != null) {
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUserProperties(null);
+            clientConnection.setAuthUserProperties(null);
             builder.withUserProperties(userPropertiesFromAuth);
         }
 
         // set auth method if present
-        final String authMethod = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthMethod();
+        final String authMethod = clientConnection.getAuthMethod();
         if (authMethod != null) {
             builder.withAuthMethod(authMethod);
 
             // set auth data
-            final ByteBuffer authData = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthData();
+            final ByteBuffer authData = clientConnection.getAuthData();
             if (authData != null) {
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthData(null);
+                clientConnection.setAuthData(null);
                 builder.withAuthData(Bytes.fromReadOnlyBuffer(authData));
             }
         }
@@ -642,8 +653,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 channelPersistence.persist(msg.getClientIdentifier(), ctx.channel());
                 return Futures.immediateFuture(null);
             }
-            final boolean takeOver = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver();
-            final SettableFuture<Void> disconnectFuture = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
+            final ClientConnection clientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+            final boolean takeOver = clientConnection.isTakenOver();
+            final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
             if (disconnectFuture == null) {
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
             }

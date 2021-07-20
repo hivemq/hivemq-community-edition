@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.handler;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
@@ -38,7 +39,9 @@ import com.hivemq.extensions.packets.pubrel.PubrelPacketImpl;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,15 +78,15 @@ public class PubrelInterceptorHandler {
     }
 
 
-
     public void handleInboundPubrel(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREL pubrel) {
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
+        final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.fireChannelRead(pubrel);
             return;
@@ -128,12 +131,13 @@ public class PubrelInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
+        final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(pubrel, promise);
             return;

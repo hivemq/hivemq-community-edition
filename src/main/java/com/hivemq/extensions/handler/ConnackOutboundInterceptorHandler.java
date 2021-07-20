@@ -16,6 +16,7 @@
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -95,7 +96,8 @@ public class ConnackOutboundInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             ctx.write(connack, promise);
             return;
@@ -110,7 +112,7 @@ public class ConnackOutboundInterceptorHandler {
 
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        final boolean requestResponseInformation = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isRequestResponseInformation();
+        final boolean requestResponseInformation = clientConnection.isRequestResponseInformation();
 
         final ConnackOutboundProviderInputImpl providerInput =
                 new ConnackOutboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);

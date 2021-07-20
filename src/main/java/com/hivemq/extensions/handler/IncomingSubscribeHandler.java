@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.handler;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -90,12 +91,13 @@ public class IncomingSubscribeHandler {
      */
     public void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE subscribe) {
         final Channel channel = ctx.channel();
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
+        final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             authorizerService.authorizeSubscriptions(ctx, subscribe);
             return;

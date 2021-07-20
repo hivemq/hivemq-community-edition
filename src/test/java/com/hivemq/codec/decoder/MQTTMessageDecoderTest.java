@@ -18,6 +18,7 @@ package com.hivemq.codec.decoder;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -26,7 +27,6 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
 
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 
 public class MQTTMessageDecoderTest {
@@ -41,7 +41,7 @@ public class MQTTMessageDecoderTest {
         clientConnection = new ClientConnection(null);
         //setting version to fake "connected" state
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        embeddedChannel.attr(CLIENT_CONNECTION).set(clientConnection);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     /* ***********************
@@ -64,7 +64,7 @@ public class MQTTMessageDecoderTest {
     @Test
     public void test_reserved_fifteen_received() {
 
-        embeddedChannel.attr(CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1111_0000);
         buf.writeByte(0b0000_000);

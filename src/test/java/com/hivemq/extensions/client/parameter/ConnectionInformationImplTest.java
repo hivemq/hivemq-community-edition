@@ -26,6 +26,7 @@ import com.hivemq.extension.sdk.api.client.parameter.TlsInformation;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +40,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +57,7 @@ public class ConnectionInformationImplTest {
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(null);
-        channel.attr(CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @Test(expected = NullPointerException.class)

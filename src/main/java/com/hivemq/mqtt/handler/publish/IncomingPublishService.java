@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.publish;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -77,7 +78,8 @@ public class IncomingPublishService {
                                @NotNull final PUBLISH publish,
                                @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ProtocolVersion protocolVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         final int maxQos = mqttConfigurationService.maximumQos().getQosNumber();
         final int qos = publish.getQoS().getQosNumber();
@@ -107,7 +109,7 @@ public class IncomingPublishService {
         }
 
         if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
-            final Long maxPublishSize = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getMaxPacketSizeSend();
+            final Long maxPublishSize = clientConnection.getMaxPacketSizeSend();
             if (!isMessageSizeAllowed(maxPublishSize, publish)) {
                 final String clientId = ChannelUtils.getClientId(ctx.channel());
                 final String logMessage = "Client '" + clientId + "' (IP: {}) sent a PUBLISH with " + publish.getPayload().length + " bytes payload its max allowed size is " + maxPublishSize + " bytes. Disconnecting client.";
@@ -126,9 +128,11 @@ public class IncomingPublishService {
 
     private void authorizePublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @Nullable final PublishAuthorizerResult authorizerResult) {
 
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         if (authorizerResult != null && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
-            if (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesDefaultFailedSkipRest()) {
+            if (clientConnection.isIncomingPublishesDefaultFailedSkipRest()) {
                 //reason string and reason code null, because client disconnected previously
                 finishUnauthorizedPublish(ctx, publish, null, null);
             } else if (authorizerResult.getAckReasonCode() == AckReasonCode.SUCCESS) {
@@ -139,7 +143,7 @@ public class IncomingPublishService {
             return;
         }
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+        final ModifiableDefaultPermissions permissions = clientConnection.getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         //if authorizers are present and no permissions are available and the default behaviour has not been changed
@@ -162,7 +166,9 @@ public class IncomingPublishService {
     private void finishUnauthorizedPublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish,
                                            @Nullable final AckReasonCode reasonCode, @Nullable final String reasonString) {
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesDefaultFailedSkipRest(true);
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
+        clientConnection.setIncomingPublishesDefaultFailedSkipRest(true);
 
         if (!ctx.channel().isActive()) {
             //no more processing needed.
@@ -173,7 +179,7 @@ public class IncomingPublishService {
                 + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain() + "'";
 
         //MQTT 3.x.x -> disconnect (without publish answer packet)
-        if (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion() != ProtocolVersion.MQTTv5) {
+        if (clientConnection.getProtocolVersion() != ProtocolVersion.MQTTv5) {
 
             final String clientId = ChannelUtils.getClientId(ctx.channel());
             mqttServerDisconnector.disconnect(ctx.channel(),

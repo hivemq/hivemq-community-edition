@@ -16,6 +16,7 @@
 package com.hivemq.extensions;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
@@ -46,21 +47,19 @@ public class ExtensionInformationUtil {
     private static final Logger log = LoggerFactory.getLogger(ExtensionInformationUtil.class);
 
     public static @NotNull ClientInformation getAndSetClientInformation(@NotNull final Channel channel, @NotNull final String clientId) {
-        ClientInformation clientInformation = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientInformation();
-        if (clientInformation == null) {
-            clientInformation = new ClientInformationImpl(clientId);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientInformation(clientInformation);
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        if (clientConnection.getExtensionClientInformation() == null) {
+            clientConnection.setExtensionClientInformation(new ClientInformationImpl(clientId));
         }
-        return clientInformation;
+        return clientConnection.getExtensionClientInformation();
     }
 
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
-        ConnectionInformation connectionInformation = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionConnectionInformation();
-        if (connectionInformation == null) {
-            connectionInformation = new ConnectionInformationImpl(channel);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectionInformation(connectionInformation);
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        if (clientConnection.getExtensionConnectionInformation() == null) {
+            clientConnection.setExtensionConnectionInformation(new ConnectionInformationImpl(channel));
         }
-        return connectionInformation;
+        return clientConnection.getExtensionConnectionInformation();
     }
 
     public static @NotNull MqttVersion mqttVersionFromChannel(final @NotNull Channel channel) {
@@ -70,7 +69,6 @@ public class ExtensionInformationUtil {
         Preconditions.checkNotNull(protocolVersion, "protocol version must never be null");
 
         return mqttVersionFromProtocolVersion(protocolVersion);
-
     }
 
     public static @NotNull MqttVersion mqttVersionFromProtocolVersion(final @NotNull ProtocolVersion protocolVersion) {
@@ -114,14 +112,15 @@ public class ExtensionInformationUtil {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
 
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         try {
-            final String cipher = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCipherSuite();
-            final String protocol = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthProtocol();
-            final String sniHostname = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthSniHostname();
+            final String cipher = clientConnection.getAuthCipherSuite();
+            final String protocol = clientConnection.getAuthProtocol();
+            final String sniHostname = clientConnection.getAuthSniHostname();
 
-            final SslClientCertificate sslClientCertificate = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate();
+            final SslClientCertificate sslClientCertificate = clientConnection.getAuthCertificate();
 
-            if(cipher == null || protocol == null){
+            if (cipher == null || protocol == null) {
                 return null;
             }
 

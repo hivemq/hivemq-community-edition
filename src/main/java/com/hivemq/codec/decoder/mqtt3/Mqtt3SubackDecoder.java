@@ -26,13 +26,12 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Lukas Brandl
@@ -48,7 +47,7 @@ public class Mqtt3SubackDecoder extends AbstractMqttDecoder<SUBACK> {
 
     @Override
     public SUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
+        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(channel, MessageType.SUBACK);
                 buf.clear();

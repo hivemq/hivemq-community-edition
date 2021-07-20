@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -174,15 +175,17 @@ public class MqttConnackerImpl implements MqttConnacker {
                     .withReasonString(reasonString)
                     .withUserProperties(userProperties);
 
+            final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
             // set auth method if present
-            final String authMethod = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthMethod();
+            final String authMethod = clientConnection.getAuthMethod();
             if (authMethod != null) {
                 connackBuilder.withAuthMethod(authMethod);
 
                 // set auth data
-                final ByteBuffer authData = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthData();
+                final ByteBuffer authData = clientConnection.getAuthData();
                 if (authData != null) {
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthData(null);
+                    clientConnection.setAuthData(null);
                     connackBuilder.withAuthData(Bytes.fromReadOnlyBuffer(authData));
                 }
             }
@@ -200,10 +203,12 @@ public class MqttConnackerImpl implements MqttConnacker {
                             final @NotNull Mqtt5UserProperties userProperties,
                             final boolean isAuthentication) {
 
-        if (channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionConnectEventSent()
-                && !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
+        if (clientConnection.isExtensionConnectEventSent()
+                && !clientConnection.isExtensionDisconnectEventSent()) {
+
+            clientConnection.setExtensionDisconnectEventSent(true);
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();

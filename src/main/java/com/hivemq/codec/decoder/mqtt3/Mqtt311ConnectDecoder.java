@@ -15,6 +15,7 @@
  */
 package com.hivemq.codec.decoder.mqtt3;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.configuration.HivemqId;
@@ -116,6 +117,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final String clientId;
 
         if (validateUTF8 && utf8StringLength > 0) {
@@ -148,13 +150,13 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                 }
 
                 clientId = clientIds.generateNext();
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(true);
+                clientConnection.setClientIdAssigned(true);
             } else {
                 clientId = Strings.getPrefixedString(buf, utf8StringLength);
             }
         }
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(clientId);
+        clientConnection.setClientId(clientId);
 
         final MqttWillPublish willPublish;
 
@@ -180,7 +182,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                         ReasonStrings.CONNACK_MALFORMED_PACKET_USERNAME);
                 return null;
             }
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername(userName);
+            clientConnection.setAuthUsername(userName);
         } else {
             userName = null;
         }
@@ -197,13 +199,13 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                         ReasonStrings.CONNACK_MALFORMED_PACKET_PASSWORD);
                 return null;
             }
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(password);
+            clientConnection.setAuthPassword(password);
         } else {
             password = null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(keepAlive);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(isCleanSessionFlag);
+        clientConnection.setConnectKeepAlive(keepAlive);
+        clientConnection.setCleanStart(isCleanSessionFlag);
 
         return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier(clientId)
