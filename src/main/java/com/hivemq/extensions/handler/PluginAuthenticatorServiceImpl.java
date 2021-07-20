@@ -129,7 +129,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         }
 
         final ModifiableDefaultPermissions defaultPermissions = new ModifiableDefaultPermissionsImpl();
-        ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(defaultPermissions);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(defaultPermissions);
 
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap =
                 authenticators.getAuthenticatorProviderMap();
@@ -215,7 +215,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final AuthInput input = new AuthInput(clientId, ctx.channel(), auth, reAuth);
 
-        final ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+        final ModifiableDefaultPermissions defaultPermissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         final ModifiableClientSettingsImpl clientSettings = getSettingsFromChannel(ctx.channel());
 
         final ClientAuthenticators clientAuthenticators = getClientAuthenticators(ctx);

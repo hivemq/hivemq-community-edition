@@ -137,7 +137,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
         if (clientContext == null) {
             final ModifiableDefaultPermissions defaultPermissions =
-                    ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+                    ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
             assert defaultPermissions != null;
             clientContext = new ClientContextImpl(hiveMQExtensions, defaultPermissions);
         }
@@ -200,7 +200,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         }
 
         final MqttWillPublish willPublish = connect.getWillPublish();
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         if (DefaultPermissionsEvaluator.checkWillPublish(permissions, willPublish)) {
             ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(null); //clear prevent flag, Will is authorized
             ctx.writeAndFlush(msg, promise);
@@ -285,9 +285,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
                 if (counter.incrementAndGet() == initializerSize) {
                     //update the clients context when all initializers are initialized.
                     channelHandlerContext.channel().attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
-                    channelHandlerContext.channel()
-                            .attr(ChannelAttributes.AUTH_PERMISSIONS)
-                            .set(clientContext.getDefaultPermissions());
+                    channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(clientContext.getDefaultPermissions());
                     initializeFuture.set(null);
                 }
             } catch (final Exception e) {

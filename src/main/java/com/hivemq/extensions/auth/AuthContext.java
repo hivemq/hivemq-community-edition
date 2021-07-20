@@ -148,7 +148,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     void succeedAuthentication(final @NotNull T output) {
-        ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).set(output.getDefaultPermissions());
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(output.getDefaultPermissions());
     }
 
     abstract void failAuthentication(@NotNull T output);

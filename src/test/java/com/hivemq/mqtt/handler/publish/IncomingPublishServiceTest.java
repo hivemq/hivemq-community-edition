@@ -69,20 +69,15 @@ public class IncomingPublishServiceTest {
 
     @Mock
     private InternalPublishService publishService;
-
-    private MqttConfigurationService mqttConfigurationService;
-
-    private RestrictionsConfigurationService restrictionsConfigurationService;
-
-    private EmbeddedChannel embeddedChannel;
-    private ChannelHandlerContext ctx;
-
-    private IncomingPublishService incomingPublishService;
-
     @Mock
     private MqttServerDisconnectorImpl mqttServerDisconnector;
 
-    final ClientConnection clientConnection = new ClientConnection(null);
+    private MqttConfigurationService mqttConfigurationService;
+    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private EmbeddedChannel embeddedChannel;
+    private ChannelHandlerContext ctx;
+    private IncomingPublishService incomingPublishService;
+    private final ClientConnection clientConnection = new ClientConnection(null);
 
     @Before
     public void setUp() throws Exception {
@@ -98,7 +93,7 @@ public class IncomingPublishServiceTest {
         setupHandlerAndChannel();
 
         ctx = embeddedChannel.pipeline().context(CheckUserEventTriggeredOnSuper.class);
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(new ModifiableDefaultPermissionsImpl());
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(new ModifiableDefaultPermissionsImpl());
     }
 
     private void setupHandlerAndChannel() {
@@ -208,7 +203,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -390,7 +385,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -410,7 +405,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -443,7 +438,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -463,7 +458,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -482,7 +477,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -502,7 +497,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -527,7 +522,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -547,7 +542,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(permissions);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 

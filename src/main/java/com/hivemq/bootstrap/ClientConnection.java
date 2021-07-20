@@ -17,6 +17,7 @@ package com.hivemq.bootstrap;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -28,6 +29,7 @@ public class ClientConnection {
 
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
+    private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable CONNECT connectMessage;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
@@ -46,6 +48,14 @@ public class ClientConnection {
 
     public void setProtocolVersion(final @Nullable ProtocolVersion protocolVersion) {
         this.protocolVersion = protocolVersion;
+    }
+
+    public @Nullable ModifiableDefaultPermissions getAuthPermissions() {
+        return authPermissions;
+    }
+
+    public void setAuthPermissions(final @NotNull ModifiableDefaultPermissions authPermissions) {
+        this.authPermissions = authPermissions;
     }
 
     public @Nullable CONNECT getConnectMessage() {

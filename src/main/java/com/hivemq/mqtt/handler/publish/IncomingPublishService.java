@@ -139,7 +139,7 @@ public class IncomingPublishService {
             return;
         }
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.AUTH_PERMISSIONS).get();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         //if authorizers are present and no permissions are available and the default behaviour has not been changed
