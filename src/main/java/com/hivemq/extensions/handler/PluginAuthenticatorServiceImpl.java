@@ -312,10 +312,10 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {
-        ClientAuthenticators clientAuthenticators = ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHENTICATORS).get();
+        ClientAuthenticators clientAuthenticators = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthenticators();
         if (clientAuthenticators == null) {
             clientAuthenticators = new ClientAuthenticatorsImpl(priorityComparator);
-            ctx.channel().attr(ChannelAttributes.EXTENSION_CLIENT_AUTHENTICATORS).set(clientAuthenticators);
+            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientAuthenticators(clientAuthenticators);
         }
         return clientAuthenticators;
     }

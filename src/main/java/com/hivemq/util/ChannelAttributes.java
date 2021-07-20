@@ -17,8 +17,6 @@ package com.hivemq.util;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.extensions.client.ClientAuthenticators;
-import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -87,7 +85,6 @@ public class ChannelAttributes {
     public static final AttributeKey<ClientEventListeners> EXTENSION_CLIENT_EVENT_LISTENERS = AttributeKey.valueOf("Extension.Client.Event.Listeners");
     public static final AttributeKey<Boolean> EXTENSION_CONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Connect.Event.Sent");
     public static final AttributeKey<Boolean> EXTENSION_DISCONNECT_EVENT_SENT = AttributeKey.valueOf("Extension.Disconnect.Event.Sent");
-    public static final AttributeKey<ClientAuthenticators> EXTENSION_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
 
     /**
      * Representation of information regarding the connection of a single client
