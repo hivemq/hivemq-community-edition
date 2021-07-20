@@ -150,7 +150,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
 
         final Boolean authenticated = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed();
-        final SettableFuture<Void> disconnectFuture = ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+        final SettableFuture<Void> disconnectFuture = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
 
         //only change the session information if user is authenticated
         if (authenticated == null || !authenticated) {
@@ -194,7 +194,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
                             channelPersistence.remove(clientId);
                         }
 
-                        final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+                        final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
                         if (disconnectFuture != null) {
                             disconnectFuture.set(null);
                         }

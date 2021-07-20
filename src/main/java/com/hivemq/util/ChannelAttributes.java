@@ -15,7 +15,6 @@
  */
 package com.hivemq.util;
 
-import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import io.netty.util.AttributeKey;
 
@@ -43,11 +42,6 @@ public class ChannelAttributes {
      * The value is never set to false.
      */
     public static final AttributeKey<Boolean> NO_SHARED_SUBSCRIPTION = AttributeKey.valueOf("MQTT.no-shared-subscriptions");
-
-    /**
-     * This attribute is added during connection. The future is set, when the client disconnect handling is complete.
-     */
-    public static final AttributeKey<SettableFuture<Void>> DISCONNECT_FUTURE = AttributeKey.valueOf("MQTT.DisconnectFuture");
 
     /**
      * Representation of information regarding the connection of a single client.

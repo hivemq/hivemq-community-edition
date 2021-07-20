@@ -172,7 +172,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         ctx.channel().attr(ChannelAttributes.TAKEN_OVER).set(false);
-        ctx.channel().attr(ChannelAttributes.DISCONNECT_FUTURE).set(SettableFuture.create());
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(SettableFuture.create());
         ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
         if (connect.getMaximumPacketSize() <= DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
@@ -643,7 +643,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 return Futures.immediateFuture(null);
             }
             final Boolean takeOver = oldClient.attr(ChannelAttributes.TAKEN_OVER).get();
-            final SettableFuture<Void> disconnectFuture = oldClient.attr(ChannelAttributes.DISCONNECT_FUTURE).get();
+            final SettableFuture<Void> disconnectFuture = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
             if (disconnectFuture == null) {
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
             }
