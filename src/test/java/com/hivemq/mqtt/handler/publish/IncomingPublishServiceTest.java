@@ -29,7 +29,6 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -68,17 +67,12 @@ public class IncomingPublishServiceTest {
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector();
 
-    private static final long CURRENT_MILLIS_FIXED = 1430756192355L;
-
     @Mock
     private InternalPublishService publishService;
 
     private MqttConfigurationService mqttConfigurationService;
 
     private RestrictionsConfigurationService restrictionsConfigurationService;
-
-    @Mock
-    private EventLog eventLog;
 
     private EmbeddedChannel embeddedChannel;
     private ChannelHandlerContext ctx;
@@ -105,8 +99,6 @@ public class IncomingPublishServiceTest {
 
         ctx = embeddedChannel.pipeline().context(CheckUserEventTriggeredOnSuper.class);
         embeddedChannel.attr(ChannelAttributes.AUTH_PERMISSIONS).set(new ModifiableDefaultPermissionsImpl());
-
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     private void setupHandlerAndChannel() {
@@ -119,6 +111,7 @@ public class IncomingPublishServiceTest {
         final CheckUserEventTriggeredOnSuper triggeredUserEvents = new CheckUserEventTriggeredOnSuper();
 
         embeddedChannel = new EmbeddedChannel(triggeredUserEvents);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("clientid");
         embeddedChannel.attr(ChannelAttributes.MAX_PACKET_SIZE_SEND).set(1000L);
@@ -777,7 +770,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_default_not_authorized() {
 
-        embeddedChannel.attr(ChannelAttributes.INCOMING_PUBLISHES_DEFAULT_FAILED_SKIP_REST).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesDefaultFailedSkipRest(true);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish();
         incomingPublishService.processPublish(
