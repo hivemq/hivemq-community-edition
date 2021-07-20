@@ -16,6 +16,7 @@
 package com.hivemq.logging;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
@@ -30,6 +31,7 @@ import util.LogbackCapturingAppender;
 import java.net.InetSocketAddress;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -58,12 +60,19 @@ public class EventLogTest {
     private Channel channel;
 
     @Mock
-    private Attribute attributeClientId, attributeCleanStart, attributeSessionExpiry, attributeDisconnect, attributeDisconnectEventLogged;
+    private Attribute attributeClientId, attributeCleanStart, attributeSessionExpiry, attributeDisconnect;
 
     @Before
     public void setUp() throws Exception {
-
         MockitoAnnotations.initMocks(this);
+
+        final ClientConnection clientConnection = new ClientConnection(null);
+        clientConnection.setDisconnectEventLogged(true);
+
+        final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(clientConnectionAttribute.get()).thenReturn(clientConnection);
+
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attributeClientId);
         when(attributeClientId.get()).thenReturn(clientId);
 
@@ -72,8 +81,6 @@ public class EventLogTest {
 
         when(channel.attr(ChannelAttributes.CLIENT_SESSION_EXPIRY_INTERVAL)).thenReturn(attributeSessionExpiry);
         when(attributeSessionExpiry.get()).thenReturn(sessionExpiry);
-
-        when(channel.attr(ChannelAttributes.DISCONNECT_EVENT_LOGGED)).thenReturn(attributeDisconnectEventLogged);
 
         logMessageBuffer = new StringBuffer();
     }

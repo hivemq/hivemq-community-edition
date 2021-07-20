@@ -31,6 +31,7 @@ public class ClientConnection {
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable CONNECT connectMessage;
+    private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
     private boolean requestResponseInformation;
@@ -66,6 +67,14 @@ public class ClientConnection {
 
     public void setConnectMessage(final @Nullable CONNECT connectMessage) {
         this.connectMessage = connectMessage;
+    }
+
+    public boolean isDisconnectEventLogged() {
+        return disconnectEventLogged;
+    }
+
+    public void setDisconnectEventLogged(final boolean disconnectEventLogged) {
+        this.disconnectEventLogged = disconnectEventLogged;
     }
 
     /**
