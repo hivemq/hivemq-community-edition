@@ -29,7 +29,6 @@ public class ChannelAttributes {
     public static final AttributeKey<Boolean> GRACEFUL_DISCONNECT = AttributeKey.valueOf("MQTT.GracefulDisconnect");
     public static final AttributeKey<Boolean> SEND_WILL = AttributeKey.valueOf("MQTT.SendWill");
     public static final AttributeKey<Boolean> CONNACK_SENT = AttributeKey.valueOf("MQTT.ConnackSent");
-    public static final AttributeKey<Boolean> TAKEN_OVER = AttributeKey.valueOf("MQTT.TakenOver");
 
     /**
      * Representation of information regarding the connection of a single client.

@@ -66,6 +66,7 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
+    private boolean takenOver;
     private boolean preventLwt;
     private boolean inFlightMessagesSent;
 
@@ -298,6 +299,14 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
+    }
+
+    public boolean isTakenOver() {
+        return takenOver;
+    }
+
+    public void setTakenOver(final boolean takenOver) {
+        this.takenOver = takenOver;
     }
 
     public boolean isPreventLwt() {

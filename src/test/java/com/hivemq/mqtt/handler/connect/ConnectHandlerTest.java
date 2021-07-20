@@ -663,7 +663,7 @@ public class ConnectHandlerTest {
 
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -704,7 +704,7 @@ public class ConnectHandlerTest {
 
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -726,12 +726,12 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -747,14 +747,14 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(false);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(false);
         disconnectFuture.set(null);
 
         embeddedChannel.runPendingTasks();
 
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -776,12 +776,12 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         final ClientConnection clientConnection = new ClientConnection(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(true);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -797,14 +797,14 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(embeddedChannel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.TAKEN_OVER).set(false);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(false);
         disconnectFuture.set(null);
 
         embeddedChannel.runPendingTasks();
 
         assertTrue(embeddedChannel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertTrue(oldChannel.attr(ChannelAttributes.TAKEN_OVER).get());
+        assertTrue(oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();

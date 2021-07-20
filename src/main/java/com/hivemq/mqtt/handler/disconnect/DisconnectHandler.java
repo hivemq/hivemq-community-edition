@@ -117,7 +117,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final String[] topicAliasMapping = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
         final boolean gracefulDisconnect = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
         final boolean preventLwt = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt();
-        final boolean takenOver = channel.attr(ChannelAttributes.TAKEN_OVER).get() != null ? channel.attr(ChannelAttributes.TAKEN_OVER).get() : false;
+        final boolean takenOver = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver();
         final boolean authenticated = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed();
         final boolean logged = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isDisconnectEventLogged();
 
@@ -190,7 +190,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
                     @Override
                     public void onSuccess(@Nullable final Void result) {
-                        if (!channel.attr(ChannelAttributes.TAKEN_OVER).get()) {
+                        if (!channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver()) {
                             channelPersistence.remove(clientId);
                         }
 
