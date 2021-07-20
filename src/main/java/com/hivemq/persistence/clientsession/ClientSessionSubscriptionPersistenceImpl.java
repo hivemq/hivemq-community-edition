@@ -354,7 +354,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 publishPollService.pollSharedPublishesForClient(clientId, sharedSubId, topic.getQoS().getQosNumber(), topic.isRetainAsPublished(), topic.getSubscriptionIdentifier(), channel);
                 sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                 sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubId);
-                channel.attr(ChannelAttributes.NO_SHARED_SUBSCRIPTION).set(false);
+                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setNoSharedSubscription(false);
                 log.trace("Invalidated cache and polled for shared subscription '{}' and client '{}'", sharedSubId, clientId);
             }
         }
