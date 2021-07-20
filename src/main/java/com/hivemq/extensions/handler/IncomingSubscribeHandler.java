@@ -95,7 +95,7 @@ public class IncomingSubscribeHandler {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
         if (clientContext == null) {
             authorizerService.authorizeSubscriptions(ctx, subscribe);
             return;

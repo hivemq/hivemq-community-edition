@@ -187,7 +187,7 @@ public class IncomingSubscribeHandlerTest {
 
         final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Subscribe());
 
@@ -204,7 +204,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
@@ -231,7 +231,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin);
@@ -257,7 +257,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -296,7 +296,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -335,7 +335,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);
@@ -372,7 +372,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch subackLatch = new CountDownLatch(1);

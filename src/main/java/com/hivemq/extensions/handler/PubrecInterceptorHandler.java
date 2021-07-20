@@ -82,7 +82,7 @@ public class PubrecInterceptorHandler {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
         if (clientContext == null) {
             ctx.fireChannelRead(pubrec);
             return;
@@ -132,7 +132,7 @@ public class PubrecInterceptorHandler {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(pubrec, promise);
             return;

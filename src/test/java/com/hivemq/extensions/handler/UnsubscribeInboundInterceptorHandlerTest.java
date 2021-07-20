@@ -95,7 +95,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_ID).set("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -137,7 +137,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
                 getIsolatedInboundInterceptor("SimpleUnsubscribeTestInterceptor");
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -162,7 +162,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
                 getIsolatedInboundInterceptor("ModifyUnsubscribeTestInterceptor");
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
-        channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(extension);

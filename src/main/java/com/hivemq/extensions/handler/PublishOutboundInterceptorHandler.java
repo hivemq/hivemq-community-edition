@@ -90,7 +90,7 @@ public class PublishOutboundInterceptorHandler {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(publish, promise);
             return;

@@ -82,7 +82,7 @@ public class UnsubackOutboundInterceptorHandler {
             return;
         }
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).get();
+        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(unsuback, promise);
             return;

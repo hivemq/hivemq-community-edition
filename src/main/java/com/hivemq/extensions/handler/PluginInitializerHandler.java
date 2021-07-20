@@ -284,7 +284,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             try {
                 if (counter.incrementAndGet() == initializerSize) {
                     //update the clients context when all initializers are initialized.
-                    channelHandlerContext.channel().attr(ChannelAttributes.EXTENSION_CLIENT_CONTEXT).set(clientContext);
+                    channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
                     channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(clientContext.getDefaultPermissions());
                     initializeFuture.set(null);
                 }
