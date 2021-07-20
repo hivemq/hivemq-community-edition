@@ -300,7 +300,7 @@ public class MqttConnackerTest {
             }
         });
         channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
@@ -327,7 +327,7 @@ public class MqttConnackerTest {
             }
         });
         channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
@@ -354,7 +354,7 @@ public class MqttConnackerTest {
             }
         });
         channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -381,7 +381,7 @@ public class MqttConnackerTest {
             }
         });
         channel.attr(ChannelAttributes.EXTENSION_CONNECT_EVENT_SENT).set(true);
-        channel.attr(ChannelAttributes.EXTENSION_DISCONNECT_EVENT_SENT).set(null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         final ClientConnection clientConnection = new ClientConnection(null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
