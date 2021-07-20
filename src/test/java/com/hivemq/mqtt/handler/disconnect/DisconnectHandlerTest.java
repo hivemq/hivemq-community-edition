@@ -216,7 +216,7 @@ public class DisconnectHandlerTest {
                 anyLong())).thenReturn(Futures.immediateFuture(null));
         embeddedChannel.attr(ChannelAttributes.TAKEN_OVER).set(true);
         embeddedChannel.attr(ChannelAttributes.SEND_WILL).set(true);
-        embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).set(false);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false);
 
         //make the client connected
         embeddedChannel.attr(ChannelAttributes.CLIENT_ID).set("client");

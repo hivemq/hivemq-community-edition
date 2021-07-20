@@ -65,6 +65,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -175,7 +176,7 @@ public class PluginInitializerHandlerTest {
         verify(initializers, times(1)).getClientInitializerMap();
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
-        assertNull(embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).get());
+        assertFalse(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
     }
 
     @Test(timeout = 10000)
@@ -250,7 +251,7 @@ public class PluginInitializerHandlerTest {
                 eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED), anyString(), eq(Mqtt5UserProperties.NO_USER_PROPERTIES), eq(true));
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
-        assertEquals(true, embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).get());
+        assertEquals(true, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
     }
 
     @Test(timeout = 10000)
@@ -282,7 +283,7 @@ public class PluginInitializerHandlerTest {
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
-        assertNull(embeddedChannel.attr(ChannelAttributes.PREVENT_LWT).get());
+        assertFalse(embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
     }
 
     private Map<String, ClientInitializer> createClientInitializerMap() throws Exception {
