@@ -92,7 +92,6 @@ public class ChannelAttributes {
     public static final AttributeKey<ClientAuthenticators> EXTENSION_CLIENT_AUTHENTICATORS = AttributeKey.valueOf("Extension.Client.Authenticators");
     public static final AttributeKey<ClientAuthorizers> EXTENSION_CLIENT_AUTHORIZERS = AttributeKey.valueOf("Extension.Client.Authorizers");
     public static final AttributeKey<ClientInformation> EXTENSION_CLIENT_INFORMATION = AttributeKey.valueOf("Extension.Client.Information");
-    public static final AttributeKey<ConnectionInformation> EXTENSION_CONNECTION_INFORMATION = AttributeKey.valueOf("Extension.Connection.Information");
 
     /**
      * Representation of information regarding the connection of a single client
