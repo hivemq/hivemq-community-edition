@@ -23,11 +23,10 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Florian Limpöck
@@ -46,7 +45,7 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
     @Override
     public PINGREQ decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
 
-        final ProtocolVersion protocolVersion = channel.attr(CLIENT_CONNECTION).get().getProtocolVersion();
+        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
 
         //Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (ProtocolVersion.MQTTv5 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {

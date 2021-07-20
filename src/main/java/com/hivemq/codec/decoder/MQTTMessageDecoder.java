@@ -15,6 +15,7 @@
  */
 package com.hivemq.codec.decoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -115,7 +116,8 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final int fixedHeaderSize = getFixedHeaderSize(remainingLength);
 
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
         //this is the message size HiveMQ allows for incoming messages
         if (remainingLength + fixedHeaderSize > mqttConfig.maxPacketSize()) {
 
@@ -133,8 +135,8 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             if (protocolVersion == ProtocolVersion.MQTTv5) {
                 final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE, null, Mqtt5UserProperties.NO_USER_PROPERTIES,
                         null, SESSION_EXPIRY_NOT_SET);
-                if (!ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
-                    ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
+                if (!clientConnection.isExtensionDisconnectEventSent()) {
+                    clientConnection.setExtensionDisconnectEventSent(true);
                     ctx.channel().pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
                 }
                 ctx.channel().writeAndFlush(disconnect)

@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -104,17 +105,18 @@ public class PublishPollServiceImpl implements PublishPollService {
         checkNotNull(client, "Client must not be null");
         checkNotNull(channel, "Channel must not be null");
         // Null equal false, true will never be set
-        final boolean inflightMessagesSent = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isInFlightMessagesSent();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final boolean inflightMessagesSent = clientConnection.isInFlightMessagesSent();
         if (inflightMessagesSent) {
             pollNewMessages(client, channel);
-            final boolean noSharedSubscriptions = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getNoSharedSubscription();
+            final boolean noSharedSubscriptions = clientConnection.getNoSharedSubscription();
             if (noSharedSubscriptions) {
                 return;
             }
             try {
                 final ImmutableSet<Topic> topics = sharedSubscriptionService.getSharedSubscriptions(client);
                 if (topics.isEmpty()) {
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setNoSharedSubscription(true);
+                    clientConnection.setNoSharedSubscription(true);
                     return;
                 }
                 for (final Topic topic : topics) {
@@ -214,8 +216,11 @@ public class PublishPollServiceImpl implements PublishPollService {
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
+
+                final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
                 if (messages.isEmpty()) {
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
+                    clientConnection.setInFlightMessagesSent(true);
                     channel.eventLoop().submit(() -> pollMessages(client, channel)); // No more inflight messages
                     return;
                 }
@@ -265,7 +270,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         Futures.addCallback(settableFuture, new PubrelResendCallback(client, message, messageIDPool, channel), MoreExecutors.directExecutor());
                     }
                 }
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getPublishFlushHandler().sendPublishes(publishesToSend);
+                clientConnection.getPublishFlushHandler().sendPublishes(publishesToSend);
             }
 
             @Override
@@ -276,12 +281,11 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private AtomicInteger inFlightMessageCount(final @NotNull Channel channel) {
-        AtomicInteger qos0InFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
-        if (qos0InFlightMessages == null) {
-            qos0InFlightMessages = new AtomicInteger(0);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(qos0InFlightMessages);
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        if (clientConnection.getInFlightMessages() == null) {
+            clientConnection.setInFlightMessages(new AtomicInteger(0));
         }
-        return qos0InFlightMessages;
+        return clientConnection.getInFlightMessages();
     }
 
     /**

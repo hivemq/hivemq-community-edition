@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -120,10 +121,11 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @NotNull ChannelPromise promise) {
 
         final Map<String, ClientInitializer> pluginInitializerMap = initializers.getClientInitializerMap();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false);
+            clientConnection.setPreventLwt(false);
             ctx.writeAndFlush(msg, promise);
             return;
         }
@@ -133,11 +135,11 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             return;
         }
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = clientConnection.getClientId();
 
         if (clientContext == null) {
             final ModifiableDefaultPermissions defaultPermissions =
-                    ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+                    clientConnection.getAuthPermissions();
             assert defaultPermissions != null;
             clientContext = new ClientContextImpl(hiveMQExtensions, defaultPermissions);
         }
@@ -155,7 +157,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
             final ClientInitializer initializer = initializerEntry.getValue();
             final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
-            if(extension == null || extension.getExtensionClassloader() == null) {
+            if (extension == null || extension.getExtensionClassloader() == null) {
                 taskContext.finishInitializer();
                 continue;
             }
@@ -175,14 +177,14 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(null);
+                clientConnection.setConnectMessage(null);
             }
 
             @Override
             public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError(t);
                 log.error("Calling initializer failed", t);
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(null);
+                clientConnection.setConnectMessage(null);
                 ctx.writeAndFlush(msg, promise);
             }
         }, ctx.executor());
@@ -193,22 +195,24 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @Nullable CONNACK msg,
             final @NotNull ChannelPromise promise) {
 
-        final CONNECT connect = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectMessage();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
+        final CONNECT connect = clientConnection.getConnectMessage();
         if (connect == null || connect.getWillPublish() == null) {
             ctx.writeAndFlush(msg, promise);
             return;
         }
 
         final MqttWillPublish willPublish = connect.getWillPublish();
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+        final ModifiableDefaultPermissions permissions = clientConnection.getAuthPermissions();
         if (DefaultPermissionsEvaluator.checkWillPublish(permissions, willPublish)) {
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false); //clear prevent flag, Will is authorized
+            clientConnection.setPreventLwt(false); //clear prevent flag, Will is authorized
             ctx.writeAndFlush(msg, promise);
             return;
         }
 
         //Will is not authorized
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(true);
+        clientConnection.setPreventLwt(true);
         //We have already added the will to the session, so we need to remove it again
         final ListenableFuture<Void> removeWillFuture =
                 clientSessionPersistence.removeWill(connect.getClientIdentifier());
@@ -280,12 +284,13 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             finishInitializer();
         }
 
-        public void finishInitializer(){
+        public void finishInitializer() {
             try {
                 if (counter.incrementAndGet() == initializerSize) {
+                    final ClientConnection clientConnection = channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
                     //update the clients context when all initializers are initialized.
-                    channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
-                    channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(clientContext.getDefaultPermissions());
+                    clientConnection.setExtensionClientContext(clientContext);
+                    clientConnection.setAuthPermissions(clientContext.getDefaultPermissions());
                     initializeFuture.set(null);
                 }
             } catch (final Exception e) {

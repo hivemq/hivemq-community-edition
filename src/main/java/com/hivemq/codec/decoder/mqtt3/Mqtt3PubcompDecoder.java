@@ -25,10 +25,9 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Dominik Obermaier
@@ -38,7 +37,7 @@ public class Mqtt3PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
     @Inject
     public Mqtt3PubcompDecoder(final @NotNull MqttServerDisconnector disconnector,
-            final @NotNull FullConfigurationService fullConfigurationService) {
+                               final @NotNull FullConfigurationService fullConfigurationService) {
         super(disconnector, fullConfigurationService);
     }
 
@@ -46,7 +45,7 @@ public class Mqtt3PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
     @Override
     public PUBCOMP decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
+        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(channel, MessageType.PUBCOMP);
                 buf.clear();

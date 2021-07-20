@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -26,6 +27,7 @@ import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
@@ -33,8 +35,6 @@ import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.hivemq.util.ChannelAttributes.CLIENT_CONNECTION;
 
 /**
  * @author Dominik Obermaier
@@ -52,14 +52,16 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
     @Override
     public UNSUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
+        if (ProtocolVersion.MQTTv3_1_1 == clientConnection.getProtocolVersion()) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
                 disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
-        } else if (ProtocolVersion.MQTTv3_1 == channel.attr(CLIENT_CONNECTION).get().getProtocolVersion()) {
+        } else if (ProtocolVersion.MQTTv3_1 == clientConnection.getProtocolVersion()) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
                 disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);

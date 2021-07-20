@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -134,9 +135,11 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         if (clientId.isEmpty() && allowAssignedClientId) {
             clientId = clientIds.generateNext();
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(true);
+            clientConnection.setClientIdAssigned(true);
         } else if (clientId.isEmpty()) {
             mqttConnacker.connackError(channel,
                     "The client id of the client (IP: {}) is empty. This is not allowed.",
@@ -145,10 +148,10 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     ReasonStrings.CONNACK_CLIENT_IDENTIFIER_EMPTY);
             return null;
         } else {
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientIdAssigned(false);
+            clientConnection.setClientIdAssigned(false);
         }
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(clientId);
+        clientConnection.setClientId(clientId);
 
         final MqttWillPublish mqttWillPublish;
         if (will) {
@@ -168,7 +171,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(cleanStart);
+        clientConnection.setCleanStart(cleanStart);
 
         return connectBuilder
                 .withClientIdentifier(clientId)

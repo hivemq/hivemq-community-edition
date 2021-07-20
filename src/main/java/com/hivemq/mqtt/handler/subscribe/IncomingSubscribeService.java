@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -125,7 +126,7 @@ public class IncomingSubscribeService {
         this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
-    public void processSubscribe(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg, final boolean authorizersPresent){
+    public void processSubscribe(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg, final boolean authorizersPresent) {
         processSubscribe(ctx, msg, new Mqtt5SubAckReasonCode[msg.getTopics().size()], new String[msg.getTopics().size()], authorizersPresent);
     }
 
@@ -216,7 +217,7 @@ public class IncomingSubscribeService {
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
                         ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return false;
-            } else if(topicString.length() > maxTopicLength) {
+            } else if (topicString.length() > maxTopicLength) {
                 final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" + topic.getTopic() + "'";
                 mqttServerDisconnector.disconnect(
                         ctx.channel(),
@@ -229,16 +230,18 @@ public class IncomingSubscribeService {
         }
         return true;
     }
+
     private void persistSubscriptionForClient(final @NotNull ChannelHandlerContext ctx,
                                               final @NotNull ClientData clientData,
                                               final @NotNull SUBSCRIBE msg,
                                               final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
                                               final @Nullable String reasonString) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final String clientId = clientConnection.getClientId();
         downgradeSharedSubscriptions(msg);
 
-        final ProtocolVersion mqttVersion = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ProtocolVersion mqttVersion = clientConnection.getProtocolVersion();
         final Mqtt5SubAckReasonCode[] answerCodes = providedCodes != null ? providedCodes : new Mqtt5SubAckReasonCode[msg.getTopics().size()];
 
         final ImmutableList.Builder<ListenableFuture<SubscriptionResult>> singleAddFutures = ImmutableList.builder();

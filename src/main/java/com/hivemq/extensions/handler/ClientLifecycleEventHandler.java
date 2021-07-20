@@ -17,6 +17,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
@@ -286,12 +287,11 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     @NotNull
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
-        ClientEventListeners eventListeners = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientEventListeners();
-        if (eventListeners == null) {
-            eventListeners = new ClientEventListeners(hiveMQExtensions);
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientEventListeners(eventListeners);
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        if (clientConnection.getExtensionClientEventListeners() == null) {
+            clientConnection.setExtensionClientEventListeners(new ClientEventListeners(hiveMQExtensions));
         }
-        return eventListeners;
+        return clientConnection.getExtensionClientEventListeners();
     }
 
     private static class ProviderInTaskContext extends PluginInTaskContext {

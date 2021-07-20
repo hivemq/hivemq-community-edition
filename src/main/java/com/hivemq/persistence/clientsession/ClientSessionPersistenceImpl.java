@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -243,10 +244,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
             return Futures.immediateFuture(false);
         }
-
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(preventLwtMessage);
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        clientConnection.setPreventLwt(preventLwtMessage);
         if (session.getSessionExpiryInterval() != SESSION_EXPIRY_NOT_SET) {
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(session.getSessionExpiryInterval());
+            clientConnection.setClientSessionExpiryInterval(session.getSessionExpiryInterval());
         }
 
         final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);

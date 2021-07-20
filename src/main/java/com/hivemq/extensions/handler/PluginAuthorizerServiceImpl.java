@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -263,15 +264,12 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
                 .run(allTopicsProcessedTask, MoreExecutors.directExecutor());
     }
 
-    @NotNull
-    private ClientAuthorizers getClientAuthorizers(final @NotNull ChannelHandlerContext ctx) {
-        ClientAuthorizers clientAuthorizers = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
-        if (clientAuthorizers == null) {
-
-            clientAuthorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientAuthorizers(clientAuthorizers);
+    private @NotNull ClientAuthorizers getClientAuthorizers(final @NotNull ChannelHandlerContext ctx) {
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        if (clientConnection.getExtensionClientAuthorizers() == null) {
+            clientConnection.setExtensionClientAuthorizers(new ClientAuthorizersImpl(extensionPriorityComparator));
         }
-        return clientAuthorizers;
+        return clientConnection.getExtensionClientAuthorizers();
     }
 
     private void disconnectWithReasonCode(final @NotNull ChannelHandlerContext ctx, @NotNull final String logReason, final @NotNull String reasonString) {

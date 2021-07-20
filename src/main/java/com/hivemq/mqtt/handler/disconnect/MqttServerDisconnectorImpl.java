@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.disconnect;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -88,10 +89,12 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
                             final @NotNull Mqtt5UserProperties userProperties,
                             final boolean isAuthentication) {
 
-        if (channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionConnectEventSent()
-                && !channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isExtensionDisconnectEventSent()) {
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(true);
+        if (clientConnection.isExtensionConnectEventSent()
+                && !clientConnection.isExtensionDisconnectEventSent()) {
+
+            clientConnection.setExtensionDisconnectEventSent(true);
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();

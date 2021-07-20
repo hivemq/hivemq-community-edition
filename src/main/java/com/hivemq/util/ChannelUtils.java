@@ -16,6 +16,7 @@
 package com.hivemq.util;
 
 import com.google.common.base.Optional;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -84,11 +85,12 @@ public class ChannelUtils {
     }
 
     public static boolean messagesInFlight(@NotNull final Channel channel) {
-        final boolean inFlightMessagesSent = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isInFlightMessagesSent();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final boolean inFlightMessagesSent = clientConnection.isInFlightMessagesSent();
         if (!inFlightMessagesSent) {
             return true;
         }
-        final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
+        final AtomicInteger inFlightMessages = clientConnection.getInFlightMessages();
         if (inFlightMessages == null) {
             return false;
         }
@@ -106,14 +108,15 @@ public class ChannelUtils {
 
     private static ClientToken getClientToken(@NotNull final Channel channel, @Nullable final Long disconnectTimestamp) {
         checkNotNull(channel, "channel must not be null");
+
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         final String clientId = getClientId(channel);
-
         //These things can all be null!
-        final String username = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUsername();
-        final byte[] password = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword();
-        final SslClientCertificate sslCert = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate();
-
-        final Listener listener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();
+        final String username = clientConnection.getAuthUsername();
+        final byte[] password = clientConnection.getAuthPassword();
+        final SslClientCertificate sslCert = clientConnection.getAuthCertificate();
+        final Listener listener = clientConnection.getConnectedListener();
         final Optional<Long> disconnectTimestampOptional = Optional.fromNullable(disconnectTimestamp);
 
         final ClientToken clientToken = new ClientToken(clientId,
@@ -125,7 +128,7 @@ public class ChannelUtils {
                 listener,
                 disconnectTimestampOptional);
 
-        clientToken.setAuthenticated(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed());
+        clientToken.setAuthenticated(clientConnection.isAuthenticatedOrAuthenticationBypassed());
 
         return clientToken;
     }
