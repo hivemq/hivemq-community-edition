@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.handler.auth;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -62,6 +63,7 @@ public class AuthHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
         authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
 
         channel.pipeline().addLast(authHandler);
@@ -89,7 +91,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_success() {
 
-        channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
@@ -105,7 +107,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_reauth() {
 
-        channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
@@ -149,7 +151,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_continue() {
 
-        channel.attr(ChannelAttributes.RE_AUTH_ONGOING).set(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), any(), eq(true));
 
@@ -160,7 +162,7 @@ public class AuthHandlerTest {
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
         verify(pluginAuthenticatorService).authenticateReAuth(any(), any());
-        assertTrue(channel.attr(ChannelAttributes.RE_AUTH_ONGOING).get());
+        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isReAuthOngoing());
 
     }
 }
