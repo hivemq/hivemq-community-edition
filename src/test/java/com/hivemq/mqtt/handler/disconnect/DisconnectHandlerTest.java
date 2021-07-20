@@ -103,7 +103,7 @@ public class DisconnectHandlerTest {
 
         embeddedChannel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
 
-        assertEquals(true, embeddedChannel.attr(ChannelAttributes.SEND_WILL).get());
+        assertEquals(true, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isSendWill());
 
         //verify that the client was disconnected
         assertFalse(embeddedChannel.isOpen());
@@ -115,7 +115,7 @@ public class DisconnectHandlerTest {
 
         embeddedChannel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
 
-        assertEquals(false, embeddedChannel.attr(ChannelAttributes.SEND_WILL).get());
+        assertEquals(false, embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isSendWill());
 
         //verify that the client was disconnected
         assertFalse(embeddedChannel.isOpen());
@@ -215,7 +215,7 @@ public class DisconnectHandlerTest {
                 anyBoolean(),
                 anyLong())).thenReturn(Futures.immediateFuture(null));
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(true);
-        embeddedChannel.attr(ChannelAttributes.SEND_WILL).set(true);
+        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setSendWill(true);
         embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setPreventLwt(false);
 
         //make the client connected
