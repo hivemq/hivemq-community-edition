@@ -60,13 +60,14 @@ public class EventLogTest {
     private Channel channel;
 
     @Mock
-    private Attribute attributeClientId, attributeCleanStart, attributeDisconnect;
+    private Attribute attributeClientId, attributeCleanStart;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        final ClientConnection clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(null);
         clientConnection.setDisconnectEventLogged(true);
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
 
@@ -155,8 +156,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_gracefully() {
 
-        when(channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT)).thenReturn(attributeDisconnect);
-        when(attributeDisconnect.get()).thenReturn(true);
+        clientConnection.setGracefulDisconnect(true);
 
         eventLog.clientDisconnected(channel, null);
 
@@ -169,8 +169,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_ungracefully() {
 
-        when(channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT)).thenReturn(attributeDisconnect);
-        when(attributeDisconnect.get()).thenReturn(null);
+        clientConnection.setGracefulDisconnect(false);
 
         eventLog.clientDisconnected(channel, null);
 

@@ -84,7 +84,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final DISCONNECT msg) throws Exception {
 
-        ctx.channel().attr(ChannelAttributes.GRACEFUL_DISCONNECT).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setGracefulDisconnect(true);
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_ID).get();
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
@@ -115,7 +115,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final Channel channel = ctx.channel();
         handleInactive(channel, ctx);
         final String[] topicAliasMapping = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping();
-        final boolean gracefulDisconnect = channel.attr(ChannelAttributes.GRACEFUL_DISCONNECT).get() != null;
+        final boolean gracefulDisconnect = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isGracefulDisconnect();
         final boolean preventLwt = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt();
         final boolean takenOver = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isTakenOver();
         final boolean authenticated = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthenticatedOrAuthenticationBypassed();
