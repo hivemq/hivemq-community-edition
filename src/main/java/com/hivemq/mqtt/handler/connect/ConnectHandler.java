@@ -373,7 +373,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx,
                                       final @NotNull CONNECT msg,
                                       final @Nullable ModifiableClientSettingsImpl clientSettings) {
-        ctx.channel().attr(ChannelAttributes.AUTHENTICATED_OR_AUTHENTICATION_BYPASSED).set(true);
+        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthenticatedOrAuthenticationBypassed(true);
         ctx.channel().attr(ChannelAttributes.PREVENT_LWT).set(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {
