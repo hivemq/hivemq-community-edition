@@ -160,7 +160,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 buf.clear();
                 return null;
             }
-            channel.attr(ChannelAttributes.AUTH_USERNAME).set(userName);
+            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername(userName);
         } else {
             userName = null;
         }
