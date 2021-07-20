@@ -18,6 +18,7 @@ package com.hivemq.bootstrap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
+import com.hivemq.extensions.client.parameter.ConnectionAttributes;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -44,6 +45,9 @@ public class ClientConnection {
     private boolean incomingPublishesDefaultFailedSkipRest;
     private boolean requestResponseInformation;
     private @Nullable Boolean requestProblemInformation;
+
+    private final Object connectionAttributesMutex = new Object();
+    private @Nullable ConnectionAttributes connectionAttributes;
 
     public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
         this.publishFlushHandler = publishFlushHandler;
@@ -175,5 +179,27 @@ public class ClientConnection {
 
     public void setRequestProblemInformation(final @Nullable Boolean requestProblemInformation) {
         this.requestProblemInformation = requestProblemInformation;
+    }
+
+    /**
+     * Attribute for storing connection attributes. It is added only when connection attributes are set.
+     */
+    public @Nullable ConnectionAttributes getConnectionAttributes() {
+        return connectionAttributes;
+    }
+
+    public void setConnectionAttributes(final @Nullable ConnectionAttributes connectionAttributes) {
+        this.connectionAttributes = connectionAttributes;
+    }
+
+    public @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(
+            final @NotNull ConnectionAttributes connectionAttributes) {
+
+        synchronized (connectionAttributesMutex) {
+            if (this.connectionAttributes == null) {
+                this.connectionAttributes = connectionAttributes;
+            }
+            return this.connectionAttributes;
+        }
     }
 }

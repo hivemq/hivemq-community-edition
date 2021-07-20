@@ -16,15 +16,14 @@
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.services.exception.LimitExceededException;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
-import io.netty.util.Attribute;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
@@ -33,8 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,27 +41,20 @@ import static org.mockito.Mockito.when;
 public class ConnectionAttributesTest {
 
     private ConnectionAttributes connectionAttributes;
-
-    @Mock
     private Channel channel;
-
-    @Mock
-    private Attribute<ConnectionAttributes> connectionAttributesAttribute;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() {
         connectionAttributes = new ConnectionAttributes(1000);
-    }
-
-    private void setUpWithMocks() {
-        MockitoAnnotations.initMocks(this);
-        when(channel.attr(ChannelAttributes.CONNECTION_ATTRIBUTES)).thenReturn(connectionAttributesAttribute);
+        channel = mock(Channel.class);
+        clientConnection = new ClientConnection(null);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
     @Test
     public void test_getInstanceIfPresent_present() {
-        setUpWithMocks();
-        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+        clientConnection.setConnectionAttributes(connectionAttributes);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
 
@@ -72,8 +63,7 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getInstanceIfPresent_not_present() {
-        setUpWithMocks();
-        when(connectionAttributesAttribute.get()).thenReturn(null);
+        clientConnection.setConnectionAttributes(null);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
 
@@ -82,8 +72,7 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getInstance_present() {
-        setUpWithMocks();
-        when(connectionAttributesAttribute.get()).thenReturn(connectionAttributes);
+        clientConnection.setConnectionAttributes(connectionAttributes);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstance(channel);
 
@@ -92,14 +81,11 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getInstance_not_present() {
-        setUpWithMocks();
-        when(connectionAttributesAttribute.get()).thenReturn(null);
-        when(connectionAttributesAttribute.setIfAbsent(any(ConnectionAttributes.class))).thenReturn(connectionAttributes);
+        clientConnection.setConnectionAttributes(null);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstance(channel);
 
-        verify(connectionAttributesAttribute).setIfAbsent(any(ConnectionAttributes.class));
-        assertEquals(connectionAttributes, returnConnectionAttributes);
+        assertNotNull(returnConnectionAttributes);
     }
 
     @Test
