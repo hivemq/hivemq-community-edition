@@ -50,6 +50,7 @@ public class ClientConnection {
     private @Nullable CONNECT connectMessage;
     private @Nullable AtomicInteger inFlightMessages;
     private @Nullable Integer clientReceiveMaximum;
+    private @Nullable Integer connectKeepAlive;
     private @Nullable Long queueSizeMaximum;
     private @Nullable Long clientSessionExpiryInterval;
     private @Nullable Long connectReceivedTimestamp;
@@ -166,6 +167,14 @@ public class ClientConnection {
 
     public void setClientReceiveMaximum(final @Nullable Integer clientReceiveMaximum) {
         this.clientReceiveMaximum = clientReceiveMaximum;
+    }
+
+    public @Nullable Integer getConnectKeepAlive() {
+        return connectKeepAlive;
+    }
+
+    public void setConnectKeepAlive(final @Nullable Integer connectKeepAlive) {
+        this.connectKeepAlive = connectKeepAlive;
     }
 
     public @Nullable Long getQueueSizeMaximum() {

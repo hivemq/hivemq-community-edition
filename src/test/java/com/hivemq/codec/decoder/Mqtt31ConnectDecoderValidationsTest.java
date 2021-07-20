@@ -76,7 +76,6 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
         when(channel.attr(ChannelAttributes.CLIENT_ID)).thenReturn(attribute);
-        when(channel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE)).thenReturn(attribute);
     }
 
     @Test

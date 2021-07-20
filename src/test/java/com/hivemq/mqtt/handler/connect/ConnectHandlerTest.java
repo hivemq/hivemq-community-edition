@@ -219,7 +219,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
 
         boolean containsHandler = false;
         for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
@@ -252,7 +252,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
 
         boolean containsHandler = false;
         for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
@@ -303,7 +303,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
 
         boolean containsHandler = false;
         for (final Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {
@@ -355,7 +355,7 @@ public class ConnectHandlerTest {
         embeddedChannel.writeInbound(connect1);
         assertTrue(embeddedChannel.isOpen());
 
-        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CONNECT_KEEP_ALIVE).get();
+        final Integer keepAlive = embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
 
         boolean containsHandler = false;
         for (Map.Entry<String, ChannelHandler> handler : embeddedChannel.pipeline()) {

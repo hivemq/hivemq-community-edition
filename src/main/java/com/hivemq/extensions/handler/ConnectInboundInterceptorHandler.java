@@ -217,7 +217,7 @@ public class ConnectInboundInterceptorHandler {
                 ctx.channel().attr(ChannelAttributes.CLIENT_ID).set(connect.getClientIdentifier());
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setCleanStart(connect.isCleanStart());
-                ctx.channel().attr(ChannelAttributes.CONNECT_KEEP_ALIVE).set(connect.getKeepAlive());
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectKeepAlive(connect.getKeepAlive());
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername(connect.getUsername());
                 ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword(connect.getPassword());
 
