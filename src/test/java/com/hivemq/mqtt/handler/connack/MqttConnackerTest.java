@@ -515,6 +515,5 @@ public class MqttConnackerTest {
         final CONNACK connack = channel.readOutbound();
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(channel.isActive());
-        assertTrue(channel.attr(ChannelAttributes.CONNACK_SENT).get());
     }
 }

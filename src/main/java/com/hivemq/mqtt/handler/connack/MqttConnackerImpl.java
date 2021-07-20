@@ -76,7 +76,6 @@ public class MqttConnackerImpl implements MqttConnacker {
         //for preventing success, when a connack will be prevented by an extension
         channelFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
-                future.channel().attr(ChannelAttributes.CONNACK_SENT).set(true);
                 eventLog.clientConnected(future.channel());
             }
         });
