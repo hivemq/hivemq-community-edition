@@ -20,7 +20,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
-import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.ConfigurationBootstrap;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -175,13 +174,11 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
         try {
             final long startTime = System.currentTimeMillis();
-            final ShutdownHooks shutdownHooks = hiveMQServer.getInjector().getInstance(ShutdownHooks.class);
 
             try {
-                shutdownHooks.runShutdownHooks();
+                hiveMQServer.stop();
             } catch (final Exception ex) {
                 if (desiredState == State.CLOSED) {
-                    // during close we try to shut down as much as possible
                     log.error("Exception during running shutdown hook.");
                 } else {
                     throw ex;

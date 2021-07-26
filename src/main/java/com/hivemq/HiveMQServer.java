@@ -227,12 +227,29 @@ public class HiveMQServer {
 
         final long startTime = System.nanoTime();
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            stop();
+        }, "shutdown-executor," + hivemqId.get()));
+
         bootstrap();
         startInstance(null);
 
         log.info("Started HiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
 
         afterStart();
+    }
+
+    public void stop() {
+        if (injector == null) {
+            return;
+        }
+        final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
+        // Already shutdown.
+        if (shutdownHooks.isShuttingDown()) {
+            return;
+        }
+
+        shutdownHooks.runShutdownHooks();
     }
 
     public @Nullable Injector getInjector() {
