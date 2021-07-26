@@ -16,6 +16,7 @@
 package com.hivemq.lifecycle;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,26 +32,21 @@ public class LifecycleHiveMQShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleHiveMQShutdownHook.class);
 
-    private final LifecycleRegistry lifecycleRegistry;
+    private final @NotNull LifecycleRegistry lifecycleRegistry;
 
     @Inject
-    LifecycleHiveMQShutdownHook(final LifecycleRegistry lifecycleRegistry) {
+    LifecycleHiveMQShutdownHook(final @NotNull LifecycleRegistry lifecycleRegistry) {
         this.lifecycleRegistry = lifecycleRegistry;
     }
 
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "Lifecycle Shutdown";
     }
 
     @Override
-    public Priority priority() {
+    public @NotNull Priority priority() {
         return Priority.HIGH;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 
     @Override

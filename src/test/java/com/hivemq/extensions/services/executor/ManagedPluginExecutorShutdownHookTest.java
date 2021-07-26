@@ -51,7 +51,6 @@ public class ManagedPluginExecutorShutdownHookTest {
 
         assertEquals("ManagedExtensionExecutorService shutdown", pluginExecutorShutdownHook.name());
         assertEquals(HiveMQShutdownHook.Priority.DOES_NOT_MATTER, pluginExecutorShutdownHook.priority());
-        assertEquals(false, pluginExecutorShutdownHook.isAsynchronous());
 
         pluginExecutorShutdownHook.run();
 

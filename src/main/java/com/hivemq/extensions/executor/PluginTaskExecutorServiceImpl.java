@@ -111,23 +111,13 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
 
         private final @NotNull PluginTaskExecutor[] taskExecutors;
 
-        public PluginTaskExecutorServiceShutdownHook(final @NotNull PluginTaskExecutor[] taskExecutors) {
+        PluginTaskExecutorServiceShutdownHook(final @NotNull PluginTaskExecutor[] taskExecutors) {
             this.taskExecutors = taskExecutors;
         }
 
         @Override
         public @NotNull String name() {
             return "Plugin Task Executor Service Shutdown Hook";
-        }
-
-        @Override
-        public @NotNull Priority priority() {
-            return Priority.DOES_NOT_MATTER;
-        }
-
-        @Override
-        public boolean isAsynchronous() {
-            return false;
         }
 
         @Override

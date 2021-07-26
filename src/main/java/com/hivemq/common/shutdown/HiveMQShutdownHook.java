@@ -36,30 +36,12 @@ public interface HiveMQShutdownHook extends Runnable {
     @NotNull String name();
 
     /**
-     * The {@link HiveMQShutdownHook.Priority} of the shutdown hook. This is only relevant if the execution of this
-     * shutdown hook is
-     * <b>not</b> asynchronous. See {@link HiveMQShutdownHook#isAsynchronous()}
+     * The {@link HiveMQShutdownHook.Priority} of the shutdown hook.
      *
      * @return the {@link HiveMQShutdownHook.Priority} of the shutdown hook.
      */
     default @NotNull Priority priority() {
         return Priority.DOES_NOT_MATTER;
-    }
-
-    /**
-     * If the Shutdown hook should be executed asynchronous. This is only
-     * recommended if this shutdown hook does not have any side effects and
-     * does not rely on any internal state of HiveMQ.
-     * <p>
-     * In case you are not sure, it's safe to set this to <code>false</code>
-     * <p>
-     * <b>Important:</b> If your shutdown hook is going to take a long time, consider making
-     * it asynchronous since it will block the whole shutdown
-     *
-     * @return <code>true</code> if the shutdown hook should be executed asynchronous, <code>false</code> otherwise.
-     */
-    default boolean isAsynchronous() {
-        return false;
     }
 
     enum Priority {

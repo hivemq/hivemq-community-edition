@@ -115,28 +115,20 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
 
         private static final Logger log = LoggerFactory.getLogger(ExtensionSystemShutdownHook.class);
 
-        @NotNull
-        private final ExtensionBootstrap extensionBootstrap;
+        private final @NotNull ExtensionBootstrap extensionBootstrap;
 
-        private ExtensionSystemShutdownHook(@NotNull final ExtensionBootstrap extensionBootstrap) {
+        private ExtensionSystemShutdownHook(final @NotNull ExtensionBootstrap extensionBootstrap) {
             this.extensionBootstrap = extensionBootstrap;
         }
 
-        @NotNull
         @Override
-        public String name() {
+        public @NotNull String name() {
             return "Extension System Shutdown Hook";
         }
 
-        @NotNull
         @Override
-        public Priority priority() {
+        public @NotNull Priority priority() {
             return Priority.VERY_LOW;
-        }
-
-        @Override
-        public boolean isAsynchronous() {
-            return false;
         }
 
         @Override

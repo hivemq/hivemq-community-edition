@@ -18,9 +18,9 @@ package com.hivemq.extensions.executor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extensions.executor.task.AsyncOutputImpl;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
@@ -85,27 +85,17 @@ public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
 
 
     static class PluginOutputAsyncerShutdownHook implements HiveMQShutdownHook {
-        @NotNull
-        private final ScheduledExecutorService scheduledExecutor;
+
+        private final @NotNull ScheduledExecutorService scheduledExecutor;
 
         @VisibleForTesting
-        PluginOutputAsyncerShutdownHook(@NotNull final ScheduledExecutorService scheduledExecutor) {
+        PluginOutputAsyncerShutdownHook(final @NotNull ScheduledExecutorService scheduledExecutor) {
             this.scheduledExecutor = scheduledExecutor;
         }
 
         @Override
         public @NotNull String name() {
             return "Extension Timeout Executor Shutdown Hook";
-        }
-
-        @Override
-        public @NotNull Priority priority() {
-            return Priority.DOES_NOT_MATTER;
-        }
-
-        @Override
-        public boolean isAsynchronous() {
-            return false;
         }
 
         @Override

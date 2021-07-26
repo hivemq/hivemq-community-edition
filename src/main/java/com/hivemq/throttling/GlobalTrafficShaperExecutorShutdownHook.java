@@ -15,8 +15,8 @@
  */
 package com.hivemq.throttling;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -28,29 +28,20 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class GlobalTrafficShaperExecutorShutdownHook implements HiveMQShutdownHook {
 
+    private final @NotNull ScheduledExecutorService executor;
 
-    private final ScheduledExecutorService executor;
-
-    public GlobalTrafficShaperExecutorShutdownHook(final ScheduledExecutorService executor) {
-
+    public GlobalTrafficShaperExecutorShutdownHook(final @NotNull ScheduledExecutorService executor) {
         this.executor = executor;
     }
 
-    @NotNull
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "Global Traffic Shaper Executor Shutdown Hook";
     }
 
-    @NotNull
     @Override
-    public Priority priority() {
+    public @NotNull Priority priority() {
         return Priority.HIGH;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 
     @Override
