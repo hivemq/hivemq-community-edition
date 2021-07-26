@@ -30,32 +30,24 @@ public class ManagedPluginExecutorShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(ManagedPluginExecutorShutdownHook.class);
 
-    @NotNull
-    private final GlobalManagedExtensionExecutorService scheduledExecutorService;
+    private final @NotNull GlobalManagedExtensionExecutorService scheduledExecutorService;
     private final int timeout;
 
     public ManagedPluginExecutorShutdownHook(
-            @NotNull final GlobalManagedExtensionExecutorService scheduledExecutorService, final int timeout) {
+            final @NotNull GlobalManagedExtensionExecutorService scheduledExecutorService, final int timeout) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.timeout = timeout;
     }
 
-    @NotNull
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "ManagedExtensionExecutorService shutdown";
     }
 
-    @NotNull
     @Override
-    public HiveMQShutdownHook.Priority priority() {
+    public @NotNull Priority priority() {
         //must be lower than extension shut down hook which is VERY_LOW
         return Priority.DOES_NOT_MATTER;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 
     @Override
@@ -75,5 +67,4 @@ public class ManagedPluginExecutorShutdownHook implements HiveMQShutdownHook {
             log.warn("Not able to wait for managed extension executor service shutdown. Enforcing shutdown.", ex);
         }
     }
-
 }

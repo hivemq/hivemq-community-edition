@@ -15,9 +15,9 @@
  */
 package com.hivemq.metrics;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.jmx.JmxReporterBootstrap;
 
 import javax.annotation.PostConstruct;
@@ -30,11 +30,12 @@ import javax.inject.Singleton;
 @Singleton
 public class MetricsShutdownHook implements HiveMQShutdownHook {
 
-    private final ShutdownHooks shutdownHooks;
-    private final JmxReporterBootstrap jmxReporterBootstrap;
+    private final @NotNull ShutdownHooks shutdownHooks;
+    private final @NotNull JmxReporterBootstrap jmxReporterBootstrap;
 
     @Inject
-    public MetricsShutdownHook(final ShutdownHooks shutdownHooks, final JmxReporterBootstrap jmxReporterBootstrap) {
+    public MetricsShutdownHook(
+            final @NotNull ShutdownHooks shutdownHooks, final @NotNull JmxReporterBootstrap jmxReporterBootstrap) {
         this.shutdownHooks = shutdownHooks;
         this.jmxReporterBootstrap = jmxReporterBootstrap;
     }
@@ -49,20 +50,8 @@ public class MetricsShutdownHook implements HiveMQShutdownHook {
         jmxReporterBootstrap.stop();
     }
 
-    @NotNull
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "Metrics Shutdown";
-    }
-
-    @NotNull
-    @Override
-    public Priority priority() {
-        return Priority.DOES_NOT_MATTER;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 }

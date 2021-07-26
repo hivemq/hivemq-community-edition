@@ -20,8 +20,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
@@ -81,21 +81,9 @@ public class PersistenceShutdownHook implements HiveMQShutdownHook {
         this.payloadPersistence = payloadPersistence;
     }
 
-    @NotNull
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "Persistence Shutdown";
-    }
-
-    @NotNull
-    @Override
-    public Priority priority() {
-        return Priority.DOES_NOT_MATTER;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 
     @Override

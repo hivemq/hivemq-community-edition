@@ -20,7 +20,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
-import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.ConfigurationBootstrap;
 import com.hivemq.configuration.info.SystemInformationImpl;
@@ -178,37 +177,17 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
             final long startTime = System.currentTimeMillis();
             final ShutdownHooks shutdownHooks = hiveMQServer.getInjector().getInstance(ShutdownHooks.class);
 
-            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getSynchronousHooks().values()) {
-                try {
-                    // We call run, as we want to execute the hooks now, in this thread
-                    //noinspection CallToThreadRun
-                    hiveMQShutdownHook.run();
-                } catch (final Exception ex) {
-                    if (desiredState == State.CLOSED) {
-                        // during close we try to shut down as much as possible
-                        log.error("Exception during shutdown hook \"{}\".", hiveMQShutdownHook.name());
-                    } else {
-                        throw ex;
-                    }
+            try {
+                shutdownHooks.runShutdownHooks();
+            } catch (final Exception ex) {
+                if (desiredState == State.CLOSED) {
+                    // during close we try to shut down as much as possible
+                    log.error("Exception during running shutdown hook.");
+                } else {
+                    throw ex;
                 }
             }
 
-            for (final HiveMQShutdownHook hiveMQShutdownHook : shutdownHooks.getAsyncShutdownHooks().keySet()) {
-                try {
-                    // We call run, as we want to execute the hooks now, in this thread
-                    //noinspection CallToThreadRun
-                    hiveMQShutdownHook.run();
-                } catch (final Exception ex) {
-                    if (desiredState == State.CLOSED) {
-                        // during close we try to shut down as much as possible
-                        log.error("Exception during shutdown hook \"{}\".", hiveMQShutdownHook.name());
-                    } else {
-                        throw ex;
-                    }
-                }
-            }
-
-            shutdownHooks.clearRuntime();
             hiveMQServer = null;
             failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was stopped"), startFutures);
             succeedFutureList(stopFutures);

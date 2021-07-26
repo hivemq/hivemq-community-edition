@@ -54,7 +54,7 @@ public class ExtensionStartStopExecutorProvider implements Provider<ExecutorServ
 
     private static class ExtensionStartStopExecutorShutdownHook implements HiveMQShutdownHook {
 
-        private final ExecutorService executorService;
+        private final @NotNull ExecutorService executorService;
 
         private ExtensionStartStopExecutorShutdownHook(final @NotNull ExecutorService executorService) {
             this.executorService = executorService;
@@ -68,11 +68,6 @@ public class ExtensionStartStopExecutorProvider implements Provider<ExecutorServ
         @Override
         public @NotNull Priority priority() {
             return Priority.DOES_NOT_MATTER;
-        }
-
-        @Override
-        public boolean isAsynchronous() {
-            return false;
         }
 
         @Override

@@ -45,18 +45,13 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
     }
 
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "Netty Shutdown";
     }
 
     @Override
-    public Priority priority() {
+    public @NotNull Priority priority() {
         return Priority.MEDIUM;
-    }
-
-    @Override
-    public boolean isAsynchronous() {
-        return false;
     }
 
     @Override

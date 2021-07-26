@@ -50,11 +50,6 @@ public class SecurityExecutorProvider implements Provider<ScheduledExecutorServi
             }
 
             @Override
-            public boolean isAsynchronous() {
-                return false;
-            }
-
-            @Override
             public void run() {
                 sslContextStoreService.shutdownNow();
             }

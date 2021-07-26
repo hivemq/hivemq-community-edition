@@ -52,7 +52,7 @@ public class GlobalTrafficShapingProviderTest {
 
     @After
     public void tearDown() throws Exception {
-        for (final HiveMQShutdownHook hook : shutdownHooks.getSynchronousHooks().values()) {
+        for (final HiveMQShutdownHook hook : shutdownHooks.getShutdownHooks().values()) {
             hook.run();
         }
         closeableMock.close();
@@ -66,7 +66,7 @@ public class GlobalTrafficShapingProviderTest {
 
         globalTrafficShapingProvider.get();
 
-        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getSynchronousHooks()
+        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getShutdownHooks()
                 .values()
                 .stream()
                 .filter(x -> x instanceof GlobalTrafficShaperExecutorShutdownHook)

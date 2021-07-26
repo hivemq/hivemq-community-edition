@@ -43,7 +43,6 @@ public class PersistenceStartup implements HiveMQShutdownHook {
 
     private final @NotNull ExecutorService persistenceStartExecutor;
     private final @NotNull ExecutorService environmentCreateExecutor;
-
     private final @NotNull List<FilePersistence> filePersistenceList;
 
     private final long start;
@@ -83,14 +82,6 @@ public class PersistenceStartup implements HiveMQShutdownHook {
 
     public @NotNull String name() {
         return "PersistenceStartupShutdownHook";
-    }
-
-    public @NotNull Priority priority() {
-        return Priority.DOES_NOT_MATTER;
-    }
-
-    public boolean isAsynchronous() {
-        return false;
     }
 
     public void run() {

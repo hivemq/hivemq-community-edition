@@ -50,11 +50,6 @@ public class AsyncIteratorFactory {
             }
 
             @Override
-            public boolean isAsynchronous() {
-                return false;
-            }
-
-            @Override
             public void run() {
                 executorService.shutdown();
             }
