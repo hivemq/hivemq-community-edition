@@ -19,13 +19,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Ordering;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MarkerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.concurrent.Executors;
@@ -48,12 +46,8 @@ public class ShutdownHooks {
 
     private static final Logger log = LoggerFactory.getLogger(ShutdownHooks.class);
 
-    private static final String SHUTDOWN_HOOK_THREAD_NAME = "shutdown-executor";
-
     private final @NotNull AtomicBoolean shuttingDown;
     private final @NotNull Multimap</* Priority */Integer, HiveMQShutdownHook> synchronousHooks;
-
-    private @Nullable Thread hivemqShutdownThread;
 
     @Inject
     public ShutdownHooks() {
@@ -65,19 +59,8 @@ public class ShutdownHooks {
                 .build();
     }
 
-    @PostConstruct
-    public void postConstruct() {
-        log.trace("Registering shutdown hook");
-        createShutdownThread();
-        Runtime.getRuntime().addShutdownHook(hivemqShutdownThread);
-    }
-
     public boolean isShuttingDown() {
         return shuttingDown.get();
-    }
-
-    private void createShutdownThread() {
-        hivemqShutdownThread = new Thread(this::runShutdownHooks, SHUTDOWN_HOOK_THREAD_NAME);
     }
 
     /**
@@ -100,7 +83,7 @@ public class ShutdownHooks {
      *
      * @param hiveMQShutdownHook the {@link HiveMQShutdownHook} to add
      */
-    public synchronized void remove(@NotNull final HiveMQShutdownHook hiveMQShutdownHook) {
+    public synchronized void remove(final @NotNull HiveMQShutdownHook hiveMQShutdownHook) {
         if (shuttingDown.get()) {
             return;
         }
