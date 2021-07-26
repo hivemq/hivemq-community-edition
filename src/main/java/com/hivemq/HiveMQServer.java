@@ -229,7 +229,7 @@ public class HiveMQServer {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             stop();
-        }, "shutdown-executor," + hivemqId.get()));
+        }, "shutdown-thread," + hivemqId.get()));
 
         bootstrap();
         startInstance(null);
