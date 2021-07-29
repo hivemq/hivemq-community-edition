@@ -104,7 +104,6 @@ public class ShutdownHooks {
     public void runShutdownHooks() {
         shuttingDown.set(true);
         log.info("Shutting down HiveMQ. Please wait, this could take a while...");
-        log.trace("Running shutdown hook");
         final ScheduledExecutorService executorService =
                 Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create("shutdown-log-executor"));
         executorService.scheduleAtFixedRate(
