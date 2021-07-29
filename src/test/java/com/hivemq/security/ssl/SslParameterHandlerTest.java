@@ -54,7 +54,7 @@ public class SslParameterHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }

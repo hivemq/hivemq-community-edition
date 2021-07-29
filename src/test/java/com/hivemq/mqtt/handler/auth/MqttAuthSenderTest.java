@@ -62,21 +62,21 @@ public class MqttAuthSenderTest {
 
     @Test(expected = NullPointerException.class)
     public void test_send_auth_method_null() {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
-        mqttAuthSender.sendAuth(embeddedChannel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
+        mqttAuthSender.sendAuth(channel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
     }
 
     @Test
     public void test_send_auth_success() {
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("METHOD");
-        final ChannelFuture future = mqttAuthSender.sendAuth(embeddedChannel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("METHOD");
+        final ChannelFuture future = mqttAuthSender.sendAuth(channel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
 
         assertNotNull(future);
-        verify(eventLog).clientAuthentication(embeddedChannel, Mqtt5AuthReasonCode.SUCCESS, false);
+        verify(eventLog).clientAuthentication(channel, Mqtt5AuthReasonCode.SUCCESS, false);
 
     }
 }

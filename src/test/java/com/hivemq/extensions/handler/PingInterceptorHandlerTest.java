@@ -92,7 +92,7 @@ public class PingInterceptorHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
         when(plugin.getId()).thenReturn("plugin");

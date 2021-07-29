@@ -82,7 +82,7 @@ public class PublishStatusFutureCallbackTest {
         queueId = "queueId";
         publish = TestMessageUtil.createMqtt5Publish();
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         client = "client";
 
         when(publishPollService.removeMessageFromSharedQueue(anyString(), anyString())).thenReturn(Futures.immediateFuture(null));

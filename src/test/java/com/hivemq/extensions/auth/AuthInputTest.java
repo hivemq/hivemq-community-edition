@@ -50,14 +50,14 @@ public class AuthInputTest {
     @Before
     public void setUp() {
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);
 
-        authInput = new AuthInput("client", embeddedChannel, auth, false);
+        authInput = new AuthInput("client", channel, auth, false);
     }
 
     @Test(timeout = 5000)

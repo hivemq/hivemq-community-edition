@@ -126,7 +126,7 @@ public class IncomingPublishHandlerTest {
         executor1.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
 

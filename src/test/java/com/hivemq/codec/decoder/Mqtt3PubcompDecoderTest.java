@@ -32,15 +32,15 @@ import static org.junit.Assert.*;
 
 public class Mqtt3PubcompDecoderTest {
 
-    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(null);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @Test
@@ -50,13 +50,13 @@ public class Mqtt3PubcompDecoderTest {
         buf.writeByte(0b0111_0000);
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final PUBCOMP pubcomp = embeddedChannel.readInbound();
+        final PUBCOMP pubcomp = channel.readInbound();
 
         assertEquals(55555, pubcomp.getPacketIdentifier());
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
@@ -66,11 +66,11 @@ public class Mqtt3PubcompDecoderTest {
         buf.writeByte(0b0111_0010);
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -83,13 +83,13 @@ public class Mqtt3PubcompDecoderTest {
         buf.writeByte(0b0111_0010);
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final PUBCOMP pubcomp = embeddedChannel.readInbound();
+        final PUBCOMP pubcomp = channel.readInbound();
 
         assertEquals(55555, pubcomp.getPacketIdentifier());
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
 }

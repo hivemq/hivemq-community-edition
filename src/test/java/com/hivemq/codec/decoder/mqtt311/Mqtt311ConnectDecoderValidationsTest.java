@@ -59,7 +59,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(channel, null)));
 
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

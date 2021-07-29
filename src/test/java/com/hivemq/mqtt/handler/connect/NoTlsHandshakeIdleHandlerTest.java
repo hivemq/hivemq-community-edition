@@ -45,7 +45,7 @@ public class NoTlsHandshakeIdleHandlerTest {
     MqttServerDisconnector mqttServerDisconnector;
 
     private NoTlsHandshakeIdleHandler handler;
-    private EmbeddedChannel embeddedChannel;
+    private EmbeddedChannel channel;
     private AtomicBoolean userEventTriggered;
 
     @Before
@@ -61,14 +61,14 @@ public class NoTlsHandshakeIdleHandlerTest {
             }
         };
 
-        embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.pipeline().addLast(handler);
-        embeddedChannel.pipeline().addLast(eventAdapter);
+        channel = new EmbeddedChannel();
+        channel.pipeline().addLast(handler);
+        channel.pipeline().addLast(eventAdapter);
     }
 
     @Test
     public void test_nothing_happens_for_non_idle_state_event() throws Exception {
-        handler.userEventTriggered(embeddedChannel.pipeline().context(handler), "SomeEvent");
+        handler.userEventTriggered(channel.pipeline().context(handler), "SomeEvent");
 
         verify(mqttServerDisconnector, never()).logAndClose(any(Channel.class), any(), any());
         assertTrue(userEventTriggered.get());
@@ -77,7 +77,7 @@ public class NoTlsHandshakeIdleHandlerTest {
     @Test
     public void test_nothing_happens_for_idle_state_writer_event() throws Exception {
 
-        handler.userEventTriggered(embeddedChannel.pipeline().context(handler), FIRST_WRITER_IDLE_STATE_EVENT);
+        handler.userEventTriggered(channel.pipeline().context(handler), FIRST_WRITER_IDLE_STATE_EVENT);
 
         verify(mqttServerDisconnector, never()).logAndClose(any(Channel.class), any(), any());
         assertTrue(userEventTriggered.get());
@@ -86,7 +86,7 @@ public class NoTlsHandshakeIdleHandlerTest {
     @Test
     public void test_idle_state_reader_event() throws Exception {
 
-        handler.userEventTriggered(embeddedChannel.pipeline().context(handler), FIRST_READER_IDLE_STATE_EVENT);
+        handler.userEventTriggered(channel.pipeline().context(handler), FIRST_READER_IDLE_STATE_EVENT);
 
         verify(mqttServerDisconnector, times(1)).logAndClose(any(Channel.class), any(), any());
         assertFalse(userEventTriggered.get());

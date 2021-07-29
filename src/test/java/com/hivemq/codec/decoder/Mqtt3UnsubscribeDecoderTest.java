@@ -32,15 +32,15 @@ import static org.junit.Assert.*;
 
 public class Mqtt3UnsubscribeDecoderTest {
 
-    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel channel;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 
     @Test
@@ -61,9 +61,9 @@ public class Mqtt3UnsubscribeDecoderTest {
         buf.writeBytes(new byte[]{0, 3, 0x63, 0x2F, 0x64});
 
 
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final UNSUBSCRIBE subscribe = embeddedChannel.readInbound();
+        final UNSUBSCRIBE subscribe = channel.readInbound();
 
         assertNotNull(subscribe);
 
@@ -74,7 +74,7 @@ public class Mqtt3UnsubscribeDecoderTest {
 
         assertEquals("c/d", subscribe.getTopics().get(1));
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
@@ -88,15 +88,15 @@ public class Mqtt3UnsubscribeDecoderTest {
         //MessageID
         buf.writeShort(55555);
 
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final UNSUBSCRIBE unsubscribe = embeddedChannel.readInbound();
+        final UNSUBSCRIBE unsubscribe = channel.readInbound();
 
         assertNull(unsubscribe);
 
 
         //Client got disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -114,22 +114,22 @@ public class Mqtt3UnsubscribeDecoderTest {
         buf.writeBytes(new byte[]{0, 0});
 
 
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
-        final UNSUBSCRIBE unsubscribe = embeddedChannel.readInbound();
+        final UNSUBSCRIBE unsubscribe = channel.readInbound();
 
         assertNull(unsubscribe);
 
         //Client got disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_unsubscribe_invalid_header_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1010_0100);
         //Remaining length
@@ -144,18 +144,18 @@ public class Mqtt3UnsubscribeDecoderTest {
         // "c/d"
         buf.writeBytes(new byte[]{0, 3, 0x63, 0x2F, 0x64});
 
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_unsubscribe_invalid_header_mqtt_31() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1010_0100);
@@ -171,11 +171,11 @@ public class Mqtt3UnsubscribeDecoderTest {
         // "c/d"
         buf.writeBytes(new byte[]{0, 3, 0x63, 0x2F, 0x64});
 
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
 }

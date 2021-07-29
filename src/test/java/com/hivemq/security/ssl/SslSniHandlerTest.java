@@ -40,7 +40,7 @@ public class SslSniHandlerTest {
 
         final SslSniHandler sslSniHandler = new SslSniHandler(sslHandler, sslContext);
         final Channel channel = new EmbeddedChannel(sslSniHandler);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
 
         sslSniHandler.replaceHandler(channel.pipeline().firstContext(), "abc.com", sslContext);
 

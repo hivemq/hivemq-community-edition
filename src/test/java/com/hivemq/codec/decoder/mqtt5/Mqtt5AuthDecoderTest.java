@@ -39,7 +39,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
     @Before
     public void before() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
@@ -1056,7 +1056,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
         assertNull(auth);
 
         createChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 

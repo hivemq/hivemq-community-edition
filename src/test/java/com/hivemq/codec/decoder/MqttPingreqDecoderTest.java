@@ -36,98 +36,98 @@ import static org.junit.Assert.assertTrue;
  */
 public class MqttPingreqDecoderTest {
 
-    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel channel;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
     }
 
     @Test
     public void test_ping_request_received_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0000);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final Object pingreq = embeddedChannel.readInbound();
+        final Object pingreq = channel.readInbound();
 
         assertTrue(pingreq instanceof PINGREQ);
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
     public void test_ping_request_received_mqtt_5() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0000);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final Object pingreq = embeddedChannel.readInbound();
+        final Object pingreq = channel.readInbound();
 
         assertTrue(pingreq instanceof PINGREQ);
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
     public void test_ping_request_invalid_header_mqtt_311() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0001);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_ping_request_invalid_header_mqtt_5() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0001);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_ping_request_invalid_header_ignored_mqtt_31() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1100_0001);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final Object pingreq = embeddedChannel.readInbound();
+        final Object pingreq = channel.readInbound();
 
         assertTrue(pingreq instanceof PINGREQ);
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
 }

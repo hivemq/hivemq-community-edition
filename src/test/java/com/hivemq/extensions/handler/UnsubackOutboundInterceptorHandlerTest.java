@@ -93,7 +93,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");

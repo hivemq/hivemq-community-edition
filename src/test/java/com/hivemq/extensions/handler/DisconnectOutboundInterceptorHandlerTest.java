@@ -99,7 +99,7 @@ public class DisconnectOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);

@@ -46,7 +46,7 @@ public class PingRequestHandlerTest {
     public void test_pingreq() throws Exception {
 
         final EmbeddedChannel channel = new EmbeddedChannel(new PingRequestHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
 
         channel.writeInbound(new PINGREQ());
 

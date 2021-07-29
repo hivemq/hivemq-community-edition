@@ -31,17 +31,17 @@ import static org.junit.Assert.*;
 
 public class MQTTMessageDecoderTest {
 
-    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(null);
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
         //setting version to fake "connected" state
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     /* ***********************
@@ -54,25 +54,25 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0000_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_reserved_fifteen_received() {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1111_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -82,11 +82,11 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0010_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -96,11 +96,11 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1001_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -110,11 +110,11 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1011_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -124,11 +124,11 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1101_0000);
         buf.writeByte(0b0000_000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertNull(embeddedChannel.readInbound());
+        assertNull(channel.readInbound());
 
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
@@ -160,16 +160,16 @@ public class MQTTMessageDecoderTest {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeBytes(connect);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        assertTrue(embeddedChannel.isOpen());
+        assertTrue(channel.isOpen());
 
         final ByteBuf buf2 = Unpooled.buffer();
         buf2.writeBytes(connect);
-        embeddedChannel.writeInbound(buf2);
+        channel.writeInbound(buf2);
 
         //verify that the client was disconnected
-        assertFalse(embeddedChannel.isOpen());
+        assertFalse(channel.isOpen());
 
     }
 }

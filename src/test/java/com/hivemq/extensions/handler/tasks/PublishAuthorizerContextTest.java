@@ -59,7 +59,7 @@ public class PublishAuthorizerContextTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         when(ctx.channel()).thenReturn(channel);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();

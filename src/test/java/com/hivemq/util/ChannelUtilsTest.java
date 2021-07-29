@@ -66,7 +66,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_only_client_id() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
 
         final ClientToken clientToken = ChannelUtils.tokenFromChannel(channel);
@@ -81,7 +81,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_cert() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthCertificate(new SslClientCertificateImpl(new Certificate[]{}));
 
@@ -97,7 +97,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_username() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
 
@@ -113,7 +113,7 @@ public class ChannelUtilsTest {
     @Test
     public void test_token_from_channel_client_id_and_username_and_password() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("theId");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthUsername("user");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPassword("pass".getBytes(UTF_8));
@@ -129,9 +129,9 @@ public class ChannelUtilsTest {
 
     @Test
     public void test_messages_in_flight() {
-        final ClientConnection clientConnection = new ClientConnection(null);
 
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         clientConnection.setInFlightMessagesSent(true);

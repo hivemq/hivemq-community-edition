@@ -138,7 +138,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
@@ -154,7 +154,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_channel_inactive() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
@@ -171,7 +171,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_not_sent() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
@@ -186,7 +186,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_sending() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(10));
 

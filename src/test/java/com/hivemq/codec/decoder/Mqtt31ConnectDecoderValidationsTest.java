@@ -70,7 +70,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
 
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(channel, null)));
     }
 
     @Test

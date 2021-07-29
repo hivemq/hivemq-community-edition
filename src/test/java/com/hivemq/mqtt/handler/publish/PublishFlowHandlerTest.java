@@ -80,7 +80,7 @@ public class PublishFlowHandlerTest {
 
     private OrderedTopicService orderedTopicService;
 
-    private EmbeddedChannel embeddedChannel;
+    private EmbeddedChannel channel;
 
     @Before
     public void setUp() throws Exception {
@@ -89,11 +89,11 @@ public class PublishFlowHandlerTest {
         when(pool.takeNextId()).thenReturn(100);
         when(messageIDPools.forClientOrNull(anyString())).thenReturn(pool);
         orderedTopicService = new OrderedTopicService();
-        embeddedChannel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
+        channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
     }
 
     @After
@@ -105,7 +105,7 @@ public class PublishFlowHandlerTest {
     public void test_return_qos_1_message_id() throws Exception {
 
         final PUBACK puback = new PUBACK(pool.takeNextId());
-        embeddedChannel.writeInbound(puback);
+        channel.writeInbound(puback);
 
         verify(pool).returnId(eq(100));
 
@@ -115,7 +115,7 @@ public class PublishFlowHandlerTest {
     public void test_return_qos_2_message_id() throws Exception {
 
         final PUBCOMP pubcomp = new PUBCOMP(pool.takeNextId());
-        embeddedChannel.writeInbound(pubcomp);
+        channel.writeInbound(pubcomp);
 
         verify(pool).returnId(eq(100));
     }
@@ -124,7 +124,7 @@ public class PublishFlowHandlerTest {
     public void test_dont_return_message_id() throws Exception {
 
         final PUBREL pubrel = new PUBREL(pool.takeNextId());
-        embeddedChannel.writeInbound(pubrel);
+        channel.writeInbound(pubrel);
 
         verify(pool, never()).returnId(anyInt());
     }
@@ -133,7 +133,7 @@ public class PublishFlowHandlerTest {
     public void test_dont_return_invalid_message_id() {
 
         final PUBACK puback = new PUBACK(-1);
-        embeddedChannel.writeInbound(puback);
+        channel.writeInbound(puback);
 
         verify(pool, never()).returnId(anyInt());
     }
@@ -143,18 +143,18 @@ public class PublishFlowHandlerTest {
 
 
         final PUBLISH publish = createPublish(QoS.AT_MOST_ONCE);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
     public void test_qos_1_messages_not_acknowledged() {
 
         final PUBLISH publish = createPublish(QoS.AT_LEAST_ONCE);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
 
@@ -174,16 +174,16 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
         //ack to remove from map
         final PUBREL pubrel = new PUBREL(messageid);
-        embeddedChannel.writeInbound(pubrel);
+        channel.writeInbound(pubrel);
 
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
         //pubcomp is here
-        assertEquals(1, embeddedChannel.outboundMessages().size());
+        assertEquals(1, channel.outboundMessages().size());
     }
 
     @Test
@@ -202,10 +202,10 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
@@ -223,10 +223,10 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
         verify(incomingMessageFlowPersistence, times(2)).addOrReplace(CLIENT_ID, publish.getPacketIdentifier(), publish);
     }
 
@@ -234,9 +234,9 @@ public class PublishFlowHandlerTest {
     public void test_qos_2_messages_not_acknowledged() {
 
         final PUBLISH publish = createPublish(QoS.EXACTLY_ONCE);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
@@ -255,16 +255,16 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
         //ack to remove from map
         final PUBREL pubrel = new PUBREL(messageid);
-        embeddedChannel.writeInbound(pubrel);
+        channel.writeInbound(pubrel);
 
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
 
         //pubcomp is here
-        assertEquals(1, embeddedChannel.outboundMessages().size());
+        assertEquals(1, channel.outboundMessages().size());
     }
 
     @Test
@@ -283,10 +283,10 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
@@ -304,10 +304,10 @@ public class PublishFlowHandlerTest {
 
         when(incomingMessageFlowPersistence.get(CLIENT_ID, messageid)).thenReturn(null, publish);
 
-        embeddedChannel.writeInbound(publish);
-        embeddedChannel.writeInbound(publish);
+        channel.writeInbound(publish);
+        channel.writeInbound(publish);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
         verify(incomingMessageFlowPersistence, times(2)).addOrReplace(CLIENT_ID, publish.getPacketIdentifier(), publish);
     }
 
@@ -315,11 +315,11 @@ public class PublishFlowHandlerTest {
     public void test_acknowledge_qos_2_messages_with_pubcomp() {
 
         final PUBREL pubrel = new PUBREL(123);
-        embeddedChannel.writeInbound(pubrel);
+        channel.writeInbound(pubrel);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBCOMP pubComp = embeddedChannel.readOutbound();
+        final PUBCOMP pubComp = channel.readOutbound();
 
         assertNotNull(pubComp);
         assertEquals(pubrel.getPacketIdentifier(), pubComp.getPacketIdentifier());
@@ -334,11 +334,11 @@ public class PublishFlowHandlerTest {
     public void test_acknowledge_qos_1_message() {
 
         final PUBACK puback = new PUBACK(123);
-        embeddedChannel.writeOutbound(puback);
+        channel.writeOutbound(puback);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBACK pubackOut = embeddedChannel.readOutbound();
+        final PUBACK pubackOut = channel.readOutbound();
 
         assertNotNull(pubackOut);
         assertEquals(puback.getPacketIdentifier(), pubackOut.getPacketIdentifier());
@@ -351,18 +351,18 @@ public class PublishFlowHandlerTest {
 
     @Test
     public void test_delete_everything_after_client_disconnects_on_clean_session() {
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
 
-        embeddedChannel.finish();
+        channel.finish();
 
         verify(incomingMessageFlowPersistence).delete(CLIENT_ID);
     }
 
     @Test
     public void test_dont_delete_anything_after_client_disconnects_on_persistent_session() {
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(500L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(500L);
 
-        embeddedChannel.finish();
+        channel.finish();
 
         verify(incomingMessageFlowPersistence, never()).delete(CLIENT_ID);
     }
@@ -371,9 +371,9 @@ public class PublishFlowHandlerTest {
     public void test_puback_received() {
 
         final PUBACK puback = new PUBACK(123);
-        embeddedChannel.writeInbound(puback);
+        channel.writeInbound(puback);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
@@ -382,11 +382,11 @@ public class PublishFlowHandlerTest {
         when(publishPollService.putPubrelInQueue(anyString(), anyInt())).thenReturn(Futures.immediateFuture(null));
 
         final PUBREC pubrec = new PUBREC(123);
-        embeddedChannel.writeInbound(pubrec);
+        channel.writeInbound(pubrec);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBREL pubrel = embeddedChannel.readOutbound();
+        final PUBREL pubrel = channel.readOutbound();
 
         assertNotNull(pubrel);
 
@@ -398,20 +398,20 @@ public class PublishFlowHandlerTest {
     public void test_pubcomp_received() {
 
         final PUBCOMP pubcomp = new PUBCOMP(123);
-        embeddedChannel.writeInbound(pubcomp);
+        channel.writeInbound(pubcomp);
 
-        assertEquals(true, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(true, channel.outboundMessages().isEmpty());
     }
 
     @Test
     public void test_publish_sending() {
 
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
-        embeddedChannel.writeOutbound(publish);
+        channel.writeOutbound(publish);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBLISH publishOut = embeddedChannel.readOutbound();
+        final PUBLISH publishOut = channel.readOutbound();
 
         assertNotNull(publishOut);
 
@@ -425,11 +425,11 @@ public class PublishFlowHandlerTest {
 
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_MOST_ONCE).withPayload(new byte[100]).build();
 
-        embeddedChannel.writeOutbound(publish);
+        channel.writeOutbound(publish);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBLISH publishOut = embeddedChannel.readOutbound();
+        final PUBLISH publishOut = channel.readOutbound();
 
         assertNotNull(publishOut);
 
@@ -444,11 +444,11 @@ public class PublishFlowHandlerTest {
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
 
-        embeddedChannel.writeOutbound(publishWithFuture);
+        channel.writeOutbound(publishWithFuture);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBLISH publishOut = embeddedChannel.readOutbound();
+        final PUBLISH publishOut = channel.readOutbound();
 
         assertNotNull(publishOut);
 
@@ -460,11 +460,11 @@ public class PublishFlowHandlerTest {
     public void test_pubrel_sending() {
 
         final PUBREL pubrel = new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        embeddedChannel.writeOutbound(pubrel);
+        channel.writeOutbound(pubrel);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final PUBREL pubrelOut = embeddedChannel.readOutbound();
+        final PUBREL pubrelOut = channel.readOutbound();
 
         assertNotNull(pubrelOut);
 
@@ -476,11 +476,11 @@ public class PublishFlowHandlerTest {
     public void test_any_sending() {
 
         final MessageWithID messageWithID = new PUBACK(1);
-        embeddedChannel.writeOutbound(messageWithID);
+        channel.writeOutbound(messageWithID);
 
-        assertEquals(false, embeddedChannel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
 
-        final MessageWithID messageOut = embeddedChannel.readOutbound();
+        final MessageWithID messageOut = channel.readOutbound();
 
         assertNotNull(messageOut);
 
@@ -495,16 +495,16 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(2));
 
         promise1.await();
         promise2.await();
@@ -523,16 +523,16 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
 
-        embeddedChannel.pipeline().fireUserEventTriggered(new PublishDroppedEvent(publish));
-        embeddedChannel.pipeline().fireUserEventTriggered(new PublishDroppedEvent(publish2));
+        channel.pipeline().fireUserEventTriggered(new PublishDroppedEvent(publish));
+        channel.pipeline().fireUserEventTriggered(new PublishDroppedEvent(publish2));
 
         promise1.await();
         promise2.await();
@@ -548,21 +548,21 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
 
         assertEquals(0, orderedTopicService.queue.size());
         assertEquals(3, orderedTopicService.unacknowledgedMessages().size());
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(2));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(3));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
 
         promise1.await();
         promise2.await();
@@ -575,7 +575,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages_multiple_pubacks() throws Exception {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(3);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(3);
 
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -584,34 +584,34 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish5 = createPublish("topic", 5, QoS.AT_LEAST_ONCE);
         final PUBLISH publish6 = createPublish("topic", 6, QoS.AT_LEAST_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
-        final ChannelPromise promise4 = embeddedChannel.newPromise();
-        final ChannelPromise promise5 = embeddedChannel.newPromise();
-        final ChannelPromise promise6 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
+        final ChannelPromise promise4 = channel.newPromise();
+        final ChannelPromise promise5 = channel.newPromise();
+        final ChannelPromise promise6 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
-        embeddedChannel.writeAndFlush(publish4, promise4);
-        embeddedChannel.writeAndFlush(publish5, promise5);
-        embeddedChannel.writeAndFlush(publish6, promise6);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish4, promise4);
+        channel.writeAndFlush(publish5, promise5);
+        channel.writeAndFlush(publish6, promise6);
 
         assertEquals(3, orderedTopicService.queue.size());
         assertEquals(3, orderedTopicService.unacknowledgedMessages().size());
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(2));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(3));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(4));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(4));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(5));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(5));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(6));
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(6));
+        channel.pipeline().fireChannelRead(new PUBACK(4));
+        channel.pipeline().fireChannelRead(new PUBACK(4));
+        channel.pipeline().fireChannelRead(new PUBACK(5));
+        channel.pipeline().fireChannelRead(new PUBACK(5));
+        channel.pipeline().fireChannelRead(new PUBACK(6));
+        channel.pipeline().fireChannelRead(new PUBACK(6));
 
         promise1.await();
         promise2.await();
@@ -633,28 +633,28 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish3 = createPublish("topic", 3, QoS.AT_LEAST_ONCE);
         final PUBLISH publish4 = createPublish("topic", 4, QoS.AT_LEAST_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
-        final ChannelPromise promise4 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
+        final ChannelPromise promise4 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish1, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
-        embeddedChannel.writeAndFlush(publish4, promise4);
+        channel.writeAndFlush(publish1, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish4, promise4);
 
         promise1.await();
 
         assertEquals(3, orderedTopicService.queue.size());
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
 
         promise2.await();
         assertEquals(2, orderedTopicService.queue.size());
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(2));
+        channel.pipeline().fireChannelRead(new PUBACK(2));
         promise3.await();
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(3));
+        channel.pipeline().fireChannelRead(new PUBACK(3));
         promise4.await();
 
 
@@ -670,16 +670,16 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.EXACTLY_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBCOMP(1));
-        embeddedChannel.pipeline().fireChannelRead(new PUBCOMP(2));
+        channel.pipeline().fireChannelRead(new PUBCOMP(1));
+        channel.pipeline().fireChannelRead(new PUBCOMP(2));
 
         promise1.await();
         promise2.await();
@@ -698,17 +698,17 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish2 = createPublish("topic", 2, QoS.EXACTLY_ONCE);
         final PUBLISH publish3 = createPublish("topic", 3, QoS.EXACTLY_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
+        channel.pipeline().fireChannelRead(new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
                 null, Mqtt5UserProperties.NO_USER_PROPERTIES));
-        embeddedChannel.pipeline().fireChannelRead(new PUBREC(2, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
+        channel.pipeline().fireChannelRead(new PUBREC(2, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR,
                 null, Mqtt5UserProperties.NO_USER_PROPERTIES));
 
         promise1.await();
@@ -727,11 +727,11 @@ public class PublishFlowHandlerTest {
         final SettableFuture<PublishStatus> future = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(internalPublish, future, true);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publishWithFuture, promise1);
+        channel.writeAndFlush(publishWithFuture, promise1);
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBACK(1));
+        channel.pipeline().fireChannelRead(new PUBACK(1));
 
         promise1.await();
 
@@ -746,11 +746,11 @@ public class PublishFlowHandlerTest {
         final SettableFuture<PublishStatus> future = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(internalPublish, future, true);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publishWithFuture, promise1);
+        channel.writeAndFlush(publishWithFuture, promise1);
 
-        embeddedChannel.pipeline().fireChannelRead(new PUBCOMP(1));
+        channel.pipeline().fireChannelRead(new PUBCOMP(1));
 
         promise1.await();
 
@@ -760,7 +760,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_max_inflight_window() throws Exception {
 
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(50);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(50);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 3;
 
 
@@ -769,15 +769,15 @@ public class PublishFlowHandlerTest {
         final PUBLISH publish3 = createPublish("topic", 3, QoS.EXACTLY_ONCE);
         final PUBLISH publish4 = createPublish("topic", 4, QoS.EXACTLY_ONCE);
 
-        final ChannelPromise promise1 = embeddedChannel.newPromise();
-        final ChannelPromise promise2 = embeddedChannel.newPromise();
-        final ChannelPromise promise3 = embeddedChannel.newPromise();
-        final ChannelPromise promise4 = embeddedChannel.newPromise();
+        final ChannelPromise promise1 = channel.newPromise();
+        final ChannelPromise promise2 = channel.newPromise();
+        final ChannelPromise promise3 = channel.newPromise();
+        final ChannelPromise promise4 = channel.newPromise();
 
-        embeddedChannel.writeAndFlush(publish, promise1);
-        embeddedChannel.writeAndFlush(publish2, promise2);
-        embeddedChannel.writeAndFlush(publish3, promise3);
-        embeddedChannel.writeAndFlush(publish4, promise4);
+        channel.writeAndFlush(publish, promise1);
+        channel.writeAndFlush(publish2, promise2);
+        channel.writeAndFlush(publish3, promise3);
+        channel.writeAndFlush(publish4, promise4);
 
         assertEquals(1, orderedTopicService.queue.size());
         assertEquals(3, orderedTopicService.unacknowledgedMessages().size());
