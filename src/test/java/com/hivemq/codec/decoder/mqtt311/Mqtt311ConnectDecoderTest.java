@@ -71,7 +71,7 @@ public class Mqtt311ConnectDecoderTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(channel, null)));
 
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);

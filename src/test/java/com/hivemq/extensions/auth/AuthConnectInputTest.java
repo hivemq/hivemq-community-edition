@@ -41,11 +41,11 @@ public class AuthConnectInputTest {
     @Before
     public void setUp() {
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectReceivedTimestamp(12345L);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectReceivedTimestamp(12345L);
 
         connect = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("client")
@@ -54,7 +54,7 @@ public class AuthConnectInputTest {
                 .withAuthMethod("method")
                 .withAuthData(new byte[]{'a', 'b', 'c'})
                 .build();
-        taskInput = new AuthConnectInput(connect, embeddedChannel);
+        taskInput = new AuthConnectInput(connect, channel);
     }
 
     @Test(timeout = 5000)

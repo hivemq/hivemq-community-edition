@@ -567,7 +567,7 @@ public class Mqtt5PubrecDecoderTest extends AbstractMqtt5DecoderTest {
         assertTrue(channel.isOpen());
 
         createChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
     }

@@ -45,7 +45,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Before
     public void before() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
@@ -175,7 +175,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(47);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
@@ -205,7 +205,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTopicAliasMapping(new String[3]);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
@@ -381,7 +381,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setRetainedMessagesEnabled(false);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
 
         final byte[] encoded = {
                 // fixed header
@@ -444,7 +444,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxMessageExpiryInterval(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {
@@ -614,7 +614,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfigurationService.securityConfiguration().setPayloadFormatValidation(true);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfigurationService));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {

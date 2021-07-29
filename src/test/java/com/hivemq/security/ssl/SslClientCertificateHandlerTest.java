@@ -69,7 +69,7 @@ public class SslClientCertificateHandlerTest {
         when(sslEngine.getSession()).thenReturn(sslSession);
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }

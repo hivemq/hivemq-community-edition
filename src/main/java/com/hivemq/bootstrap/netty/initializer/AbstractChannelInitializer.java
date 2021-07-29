@@ -48,7 +48,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
-
     private final @NotNull ChannelDependencies channelDependencies;
     private final @NotNull Listener listener;
 
@@ -69,7 +68,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
         final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
-        final ClientConnection clientConnection = new ClientConnection(publishFlushHandler);
+        final ClientConnection clientConnection = new ClientConnection(ch, publishFlushHandler);
         ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         clientConnection.setConnectedListener(listener);

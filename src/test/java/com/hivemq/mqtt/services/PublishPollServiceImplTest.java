@@ -135,7 +135,7 @@ public class PublishPollServiceImplTest {
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
 
-        clientConnection = new ClientConnection(publishFlushHandler);
+        clientConnection = new ClientConnection(channel, publishFlushHandler);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);

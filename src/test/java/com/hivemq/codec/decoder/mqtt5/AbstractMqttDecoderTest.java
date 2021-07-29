@@ -29,7 +29,7 @@ import util.TestMqttDecoder;
 public class AbstractMqttDecoderTest {
 
     protected @NotNull EmbeddedChannel channel;
-    protected @NotNull ClientConnection clientConnection = new ClientConnection(null);
+    protected @NotNull ClientConnection clientConnection = new ClientConnection(channel, null);
     protected @NotNull LogbackCapturingAppender logCapture;
 
     @Before

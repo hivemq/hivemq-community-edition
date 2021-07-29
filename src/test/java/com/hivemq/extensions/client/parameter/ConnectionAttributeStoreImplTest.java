@@ -52,7 +52,7 @@ public class ConnectionAttributeStoreImplTest {
     @Before
     public void setUp() {
 
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
 
         channel = mock(Channel.class);
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);

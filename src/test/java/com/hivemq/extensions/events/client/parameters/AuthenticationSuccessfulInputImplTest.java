@@ -37,7 +37,7 @@ public class AuthenticationSuccessfulInputImplTest {
     @Test
     public void test_construction_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationSuccessfulInputImpl successfulInput = new AuthenticationSuccessfulInputImpl("client", channel);

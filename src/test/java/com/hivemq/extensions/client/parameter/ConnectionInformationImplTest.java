@@ -56,7 +56,7 @@ public class ConnectionInformationImplTest {
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 

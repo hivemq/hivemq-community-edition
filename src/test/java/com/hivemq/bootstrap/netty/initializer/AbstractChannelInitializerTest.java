@@ -84,7 +84,7 @@ public class AbstractChannelInitializerTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        when(socketChannel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(null)));
+        when(socketChannel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(socketChannel, null)));
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.isActive()).thenReturn(true);
 
@@ -169,11 +169,11 @@ public class AbstractChannelInitializerTest {
 
     @Test
     public void test_embedded_channel_closed_after_sslException_in_initializer() throws Exception {
-        final EmbeddedChannel embeddedChannel =
+        final EmbeddedChannel channel =
                 new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
 
         final CountDownLatch latch = new CountDownLatch(1);
-        embeddedChannel.closeFuture().addListener(new ChannelFutureListener() {
+        channel.closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(final ChannelFuture future) throws Exception {
                 latch.countDown();

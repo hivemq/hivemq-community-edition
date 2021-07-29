@@ -71,7 +71,7 @@ public class NonSslHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         disconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }

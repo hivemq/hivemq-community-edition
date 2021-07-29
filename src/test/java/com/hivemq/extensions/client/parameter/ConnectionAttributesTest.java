@@ -48,7 +48,7 @@ public class ConnectionAttributesTest {
     public void setUp() {
         connectionAttributes = new ConnectionAttributes(1000);
         channel = mock(Channel.class);
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 

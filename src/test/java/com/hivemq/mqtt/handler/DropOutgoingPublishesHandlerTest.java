@@ -71,7 +71,7 @@ public class DropOutgoingPublishesHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setClientId("clientId");
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
         InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE.set(0);

@@ -39,7 +39,7 @@ public class AuthenticationFailedInputImplTest {
     @Test
     public void test_construction_null_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", null, null, null);
@@ -54,7 +54,7 @@ public class AuthenticationFailedInputImplTest {
     @Test
     public void test_construction_with_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input =
@@ -74,7 +74,7 @@ public class AuthenticationFailedInputImplTest {
     @Test(expected = NullPointerException.class)
     public void test_construction_client_id_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(null);
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         new AuthenticationFailedInputImpl(channel, null, null, null, null);

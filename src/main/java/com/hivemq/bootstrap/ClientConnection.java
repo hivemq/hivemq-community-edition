@@ -32,6 +32,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
+import io.netty.channel.Channel;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ClientConnection {
 
+    private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable String clientId;
@@ -100,8 +102,13 @@ public class ClientConnection {
     private @Nullable ClientInformation extensionClientInformation;
     private @Nullable ConnectionInformation extensionConnectionInformation;
 
-    public ClientConnection(final @NotNull PublishFlushHandler publishFlushHandler) {
+    public ClientConnection(final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler) {
+        this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
+    }
+
+    public @NotNull Channel getChannel() {
+        return channel;
     }
 
     public @NotNull PublishFlushHandler getPublishFlushHandler() {

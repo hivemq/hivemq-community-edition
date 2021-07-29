@@ -53,7 +53,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
         when(channel.eventLoop()).thenReturn(new DefaultEventLoop(Executors.newSingleThreadExecutor()));
     }

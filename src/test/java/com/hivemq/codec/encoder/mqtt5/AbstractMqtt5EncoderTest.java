@@ -45,7 +45,7 @@ public class AbstractMqtt5EncoderTest {
     protected void setUp(final @NotNull ChannelHandler encoder) throws Exception {
 
         channel = new EmbeddedChannel(encoder);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(true);

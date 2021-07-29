@@ -48,7 +48,7 @@ public class SubscriptionAuthorizerInputImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }

@@ -65,7 +65,7 @@ public class EventLogTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         clientConnection.setDisconnectEventLogged(true);
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
         clientConnection.setCleanStart(cleanStart);

@@ -104,7 +104,7 @@ public class IncomingSubscribeServiceTest {
     private IncomingSubscribeService incomingSubscribeService;
     private HivemqId hivemqId;
 
-    private final @NotNull ClientConnection clientConnection = new ClientConnection(null);
+    private final @NotNull ClientConnection clientConnection = new ClientConnection(channel, null);
 
     @Before
     public void setUp() throws Exception {

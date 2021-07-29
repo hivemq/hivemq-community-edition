@@ -103,11 +103,11 @@ public class ClientLifecycleEventHandlerTest {
         executor1 = new PluginTaskExecutor(new AtomicLong());
         executor1.postConstruct();
 
-        final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        when(channelHandlerContext.channel()).thenReturn(embeddedChannel);
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        when(channelHandlerContext.channel()).thenReturn(channel);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
         pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));

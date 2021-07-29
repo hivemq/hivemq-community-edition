@@ -32,15 +32,15 @@ import static org.junit.Assert.*;
 
 public class Mqtt3DisconnectDecoderTest {
 
-    private @NotNull EmbeddedChannel embeddedChannel;
+    private @NotNull EmbeddedChannel channel;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        embeddedChannel = new EmbeddedChannel(TestMqttDecoder.create());
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 
     @Test
@@ -48,13 +48,13 @@ public class Mqtt3DisconnectDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1110_0000);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final DISCONNECT disconnect = embeddedChannel.readInbound();
+        final DISCONNECT disconnect = channel.readInbound();
 
         assertNotNull(disconnect);
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
@@ -62,29 +62,29 @@ public class Mqtt3DisconnectDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1110_0010);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
 
         //The client needs to get disconnected
-        assertFalse(embeddedChannel.isActive());
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_disconnect_invalid_header_mqtt_31() {
 
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
-        embeddedChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1110_0010);
         buf.writeByte(0b0000_0000);
-        embeddedChannel.writeInbound(buf);
+        channel.writeInbound(buf);
 
-        final DISCONNECT disconnect = embeddedChannel.readInbound();
+        final DISCONNECT disconnect = channel.readInbound();
 
         assertNotNull(disconnect);
 
-        assertTrue(embeddedChannel.isActive());
+        assertTrue(channel.isActive());
     }
 
 }

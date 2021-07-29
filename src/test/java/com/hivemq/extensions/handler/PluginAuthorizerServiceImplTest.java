@@ -106,7 +106,7 @@ public class PluginAuthorizerServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
 
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();

@@ -96,7 +96,7 @@ public class PublishOutboundInterceptorHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();

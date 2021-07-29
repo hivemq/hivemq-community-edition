@@ -49,7 +49,7 @@ public class ExtensionInformationUtilTest {
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(null);
+        clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }

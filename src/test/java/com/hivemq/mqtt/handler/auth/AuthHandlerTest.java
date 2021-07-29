@@ -63,7 +63,7 @@ public class AuthHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
 
         channel.pipeline().addLast(authHandler);
