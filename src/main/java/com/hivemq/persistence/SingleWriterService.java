@@ -42,7 +42,7 @@ public interface SingleWriterService {
     void stop();
 
     interface Task<R> {
-        @NotNull R doTask(int bucketIndex, @NotNull ImmutableList<Integer> queueBuckets, int queueIndex);
+        @NotNull R doTask(int bucketIndex);
     }
 
     interface SuccessCallback<R> {

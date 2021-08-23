@@ -80,7 +80,7 @@ public class InMemoryProducerQueuesTest {
         for (int j = 0; j < 4; j++) {
             final Thread thread = new Thread(() -> {
                 for (int i = 0; i < 10_000; i++) {
-                    producerQueues.submit("same", (bucketIndex, queueBuckets, queueIndex) -> {
+                    producerQueues.submit("same", (bucketIndex) -> {
                         runnable.run();
                         return null;
                     });

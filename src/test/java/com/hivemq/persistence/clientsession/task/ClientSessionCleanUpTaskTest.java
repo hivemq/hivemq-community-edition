@@ -50,7 +50,7 @@ public class ClientSessionCleanUpTaskTest {
     @Test
     public void test_clean_up_clean_task() throws Exception {
         Mockito.when(localPersistence.cleanUp(0)).thenReturn(ImmutableSet.of("client"));
-        task.doTask(0, ImmutableList.of(0), 0);
+        task.doTask(0);
         verify(clientSessionPersistence, times(1)).cleanClientData("client");
     }
 }

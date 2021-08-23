@@ -29,16 +29,16 @@ public abstract class AbstractPersistence {
     private static final Logger log = LoggerFactory.getLogger(AbstractPersistence.class);
 
     @NotNull
-    protected ListenableFuture<Void> closeDB(final @NotNull LocalPersistence localPersistence, final @NotNull ProducerQueues singleWriter) {
-        return singleWriter.shutdown((bucketIndex, queueBuckets, queueIndex) -> {
-            for (final Integer bucket : queueBuckets) {
-                try {
-                    localPersistence.closeDB(bucket);
-                } catch (final Throwable t) {
-                    log.warn("Persistence not closed properly: " + t.getMessage());
-                    log.debug("Original exception:", t);
-                    Exceptions.rethrowError(t);
-                }
+    protected ListenableFuture<Void> closeDB(
+            final @NotNull LocalPersistence localPersistence,
+            final @NotNull ProducerQueues singleWriter) {
+        return singleWriter.shutdown((bucketIndex) -> {
+            try {
+                localPersistence.closeDB(bucketIndex);
+            } catch (final Throwable t) {
+                log.warn("Persistence not closed properly: " + t.getMessage());
+                log.debug("Original exception:", t);
+                Exceptions.rethrowError(t);
             }
             return null;
         });

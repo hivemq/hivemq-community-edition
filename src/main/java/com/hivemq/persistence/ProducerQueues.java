@@ -37,9 +37,9 @@ public interface ProducerQueues {
                                              @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
                                              @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback);
 
-    @NotNull <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull SingleWriterServiceImpl.Task<R> task);
+    @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(final @NotNull SingleWriterService.Task<R> task);
 
-    @NotNull <R> ListenableFuture<List<R>> submitToAllQueuesAsList(final @NotNull SingleWriterServiceImpl.Task<R> task);
+    @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsSequential(final @NotNull SingleWriterService.Task<R> task);
 
     int getBucket(@NotNull final String key);
 

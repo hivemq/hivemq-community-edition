@@ -131,7 +131,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             if (sharedSubscription == null) {
                 //not a shared subscription
                 subscriberExisted = topicTree.addTopic(client, topic, SubscriptionFlags.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
-                persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+                persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                     localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
                     return null;
                 });
@@ -153,7 +153,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
 
                 final Subscription subscription = new Subscription(sharedTopic, SubscriptionFlags.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
 
-                persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+                persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                     localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
                     invalidateSharedSubscriptionCacheAndPoll(client, ImmutableSet.of(subscription));
                     return null;
@@ -221,7 +221,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 topicTree.removeSubscriber(client, sharedSubscription.getTopicFilter(), sharedSubscription.getShareName());
             }
 
-            final ListenableFuture<Void> persistFuture = singleWriter.submit(client, (bucketIndex, queueBuckets, queueIndex) -> {
+            final ListenableFuture<Void> persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                 localPersistence.remove(client, topic, timestamp, bucketIndex);
                 return null;
             });
@@ -265,7 +265,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     @NotNull
     @Override
     public ListenableFuture<Void> removeAllLocally(@NotNull final String clientId) {
-        return singleWriter.submit(clientId, (bucketIndex, queueBuckets, queueIndex) -> {
+        return singleWriter.submit(clientId, (bucketIndex) -> {
             localPersistence.removeAll(clientId, System.currentTimeMillis(), bucketIndex);
             return null;
         });
@@ -317,7 +317,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             subscriptionResultBuilder.add(new SubscriptionResult(subscription.getTopic(), subscriberExisted, subscription.getSharedGroup()));
         }
 
-        final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex, queueBuckets, queueIndex) -> {
+        final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex) -> {
             localPersistence.addSubscriptions(clientId, topics, timestamp, bucketIndex);
             return null;
         });
@@ -366,7 +366,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) -> singleWriter.submit(bucket,
                         // actual single writer call
-                        (bucketIndex, ignored1, ignored2) ->
+                        (bucketIndex) ->
                                 localPersistence.getAllSubscribersChunk(
                                         bucketIndex,
                                         lastKey,
@@ -395,7 +395,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             topicTree.removeSubscriber(clientId, topicFilter.getTopic(), topicFilter.getSharedName());
         }
 
-        final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex, queueBuckets, queueIndex) -> {
+        final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex) -> {
             localPersistence.removeSubscriptions(clientId, topics, timestamp, bucketIndex);
             return null;
         });
@@ -436,7 +436,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     @NotNull
     @Override
     public ListenableFuture<Void> cleanUp(final int bucketIndex) {
-        return singleWriter.submit(bucketIndex, (bucketIndex1, queueBuckets, queueIndex) -> {
+        return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             localPersistence.cleanUp(bucketIndex1);
             return null;
         });

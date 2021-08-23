@@ -81,7 +81,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                         "Topic contains wildcard characters. Call getWithWildcards method instead.");
             }
 
-            return singleWriter.submit(topic, (bucketIndex, queueBuckets, queueIndex) -> {
+            return singleWriter.submit(topic, (bucketIndex) -> {
                 final RetainedMessage retainedMessage = localPersistence.get(topic, bucketIndex);
                 if (retainedMessage == null) {
                     return null;
@@ -106,7 +106,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         try {
             checkNotNull(topic, "Topic must not be null");
 
-            return singleWriter.submit(topic, (bucketIndex, queueBuckets, queueIndex) -> {
+            return singleWriter.submit(topic, (bucketIndex) -> {
                 localPersistence.remove(topic, bucketIndex);
                 return null;
             });
@@ -124,7 +124,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
 
             payloadPersistence.add(retainedMessage.getMessage(), 1, retainedMessage.getPublishId());
 
-            return singleWriter.submit(topic, (bucketIndex, queueBuckets, queueIndex) -> {
+            return singleWriter.submit(topic, (bucketIndex) -> {
                 localPersistence.put(retainedMessage, topic, bucketIndex);
                 return null;
             });
@@ -144,16 +144,11 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                         "Topic does not contain wildcard characters. Call get method instead.");
             }
 
-            final ListenableFuture<List<Set<String>>> futures =
-                    singleWriter.submitToAllQueuesAsList((bucketIndex, queueBuckets, queueIndex) -> {
-                        final Set<String> topics = new HashSet<>();
-                        for (final Integer bucket : queueBuckets) {
-                            topics.addAll(localPersistence.getAllTopics(subscription, bucket));
-                        }
-                        return topics;
-                    });
-            return FutureUtils.combineSetResults(futures);
-
+            final List<ListenableFuture<Set<String>>> futures =
+                    singleWriter.submitToAllBucketsParallel((bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(
+                            subscription,
+                            bucketIndex)));
+            return FutureUtils.combineSetResults(Futures.allAsList(futures));
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
@@ -162,7 +157,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @NotNull
     @Override
     public ListenableFuture<Void> cleanUp(final int bucketIndex) {
-        return singleWriter.submit(bucketIndex, (bucketIndex1, queueBuckets, queueIndex) -> {
+        return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             localPersistence.cleanUp(bucketIndex1);
             return null;
         });
@@ -178,23 +173,22 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @Override
     public ListenableFuture<Void> clear() {
         final List<ListenableFuture<Void>> futureList =
-                singleWriter.submitToAllQueues((bucketIndex, queueBuckets, queueIndex) -> {
-                    for (final Integer bucket : queueBuckets) {
-                        localPersistence.clear(bucket);
-                    }
+                singleWriter.submitToAllBucketsParallel((bucketIndex) -> {
+                    localPersistence.clear(bucketIndex);
                     return null;
                 });
         return FutureUtils.voidFutureFromList(ImmutableList.copyOf(futureList));
     }
 
     @Override
-    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(@NotNull ChunkCursor cursor) {
+    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
+            @NotNull ChunkCursor cursor) {
         return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) ->
                         // actual single writer call
-                        singleWriter.submit(bucket, (bucketIndex, ignored1, ignored2) ->
-                                localPersistence.getAllRetainedMessagesChunk(
+                        singleWriter.submit(bucket,
+                                (bucketIndex) -> localPersistence.getAllRetainedMessagesChunk(
                                         bucketIndex,
                                         lastKey,
                                         maxResults)));

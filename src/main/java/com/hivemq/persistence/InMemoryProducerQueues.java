@@ -53,8 +53,6 @@ public class InMemoryProducerQueues implements ProducerQueues {
 
     private final int bucketsPerQueue;
 
-    private final @NotNull ImmutableList<ImmutableList<Integer>> queueBucketIndexes;
-
     private final @NotNull AtomicBoolean shutdown = new AtomicBoolean(false);
 
     private @Nullable ListenableFuture<Void> closeFuture;
@@ -74,7 +72,6 @@ public class InMemoryProducerQueues implements ProducerQueues {
         bucketsPerQueue = persistenceBucketCount / amountOfQueues;
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
 
-        final ImmutableList.Builder<ImmutableList<Integer>> bucketIndexListBuilder = ImmutableList.builder();
         final ImmutableList.Builder<AtomicLong> counterBuilder = ImmutableList.builder();
 
         queues = new MpscUnboundedArrayQueue[amountOfQueues];
@@ -84,13 +81,9 @@ public class InMemoryProducerQueues implements ProducerQueues {
             wips[i] = new AtomicInteger();
         }
 
-
         for (int i = 0; i < amountOfQueues; i++) {
             counterBuilder.add(new AtomicLong(0));
-            bucketIndexListBuilder.add(createBucketIndexes(i, bucketsPerQueue));
         }
-        final @NotNull ImmutableList<AtomicLong> queueTaskCounter = counterBuilder.build();
-        queueBucketIndexes = bucketIndexListBuilder.build();
     }
 
     @VisibleForTesting
@@ -104,13 +97,13 @@ public class InMemoryProducerQueues implements ProducerQueues {
 
     public <R> @NotNull ListenableFuture<R> submit(final @NotNull String key, final @NotNull Task<R> task) {
         //noinspection ConstantConditions (future is never null if the callbacks are null)
-        return submit(getBucket(key), task, null, null);
+        return submitInternal(getBucket(key), task, null, null, false);
     }
 
     public <R> @NotNull ListenableFuture<R> submit(final int bucketIndex,
                                           @NotNull final Task<R> task) {
         //noinspection ConstantConditions (futuer is never null if the callbacks are null)
-        return submit(bucketIndex, task, null, null);
+        return submitInternal(bucketIndex, task, null, null, false);
     }
 
 
@@ -119,11 +112,11 @@ public class InMemoryProducerQueues implements ProducerQueues {
                                                     @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                                     @Nullable final SingleWriterService.FailedCallback failedCallback) {
 
-        return submit(bucketIndex, task, successCallback, failedCallback, false);
+        return submitInternal(bucketIndex, task, successCallback, failedCallback, false);
     }
 
 
-    private <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
+    private <R> @Nullable ListenableFuture<R> submitInternal(final int bucketIndex,
                                                      final @NotNull Task<R> task,
                                                      @Nullable final SingleWriterService.SuccessCallback<R> successCallback,
                                                      @Nullable final SingleWriterService.FailedCallback failedCallback,
@@ -143,7 +136,7 @@ public class InMemoryProducerQueues implements ProducerQueues {
         final AtomicInteger wip = wips[queueIndex];
         queue.offer(() -> {
             try {
-                final R result = task.doTask(bucketIndex, queueBucketIndexes.get(queueIndex), queueIndex);
+                final R result = task.doTask(bucketIndex);
                 if (resultFuture != null) {
                     resultFuture.set(result);
                 } else {
@@ -184,29 +177,56 @@ public class InMemoryProducerQueues implements ProducerQueues {
         return resultFuture;
     }
 
-
-    @NotNull
-    public <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task) {
-        return submitToAllQueues(task, false);
-    }
-
-    @NotNull
-    public <R> ListenableFuture<List<R>> submitToAllQueuesAsList(final @NotNull Task<R> task) {
-        return Futures.allAsList(submitToAllQueues(task, false));
-    }
-
-    @NotNull
-    private <R> List<ListenableFuture<R>> submitToAllQueues(final @NotNull Task<R> task, final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() && System.currentTimeMillis() - shutdownStartTime > shutdownGracePeriod) {
-            return Collections.singletonList(SettableFuture.create()); // Future will never return since we are shutting down.
+    /**
+     * submits the task for all buckets either parallel or sequential
+     *
+     * @param task     the task to submit
+     * @param <R>      the returned object
+     * @param parallel true for parallel, false for sequential
+     * @return a list of listenableFutures of type R
+     */
+    public @NotNull <R> List<ListenableFuture<R>> submitToAllBuckets(final @NotNull Task<R> task, final boolean parallel) {
+        if (parallel) {
+            return submitToAllBucketsParallel(task, false);
+        } else {
+            return submitToAllBucketsSequential(task);
         }
+    }
+
+    /**
+     * submits the task for all buckets at once
+     *
+     * @param task the task to submit
+     * @param <R>  the returned object
+     * @return a list of listenableFutures of type R
+     */
+    public @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(final @NotNull Task<R> task) {
+        return submitToAllBucketsParallel(task, false);
+    }
+
+    private @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(final @NotNull Task<R> task, final boolean ignoreShutdown) {
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
-        final List<ListenableFuture<R>> futures = new ArrayList<>();
-        for (int i = 0; i < amountOfQueues; i++) {
-            final ListenableFuture<R> future = submit(i * bucketsPerQueue, task, null, null, ignoreShutdown);
-            futures.add(future);
+        for (int bucket = 0; bucket < persistenceBucketCount; bucket++) {
+            //noinspection ConstantConditions (futuer is never null if the callbacks are null)
+            builder.add(submitInternal(bucket, task, null, null, ignoreShutdown));
         }
-        return futures;
+        return builder.build();
+    }
+
+    public @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsSequential(final @NotNull Task<R> task) {
+
+        final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
+
+        ListenableFuture<R> previousFuture = Futures.immediateFuture(null);
+        for (int bucket = 0; bucket < persistenceBucketCount; bucket++) {
+            final int finalBucket = bucket;
+            final SettableFuture<R> future = SettableFuture.create();
+            previousFuture.addListener(() -> future.setFuture(submit(finalBucket, task)),
+                    MoreExecutors.directExecutor());
+            previousFuture = future;
+            builder.add(future);
+        }
+        return builder.build();
     }
 
 
@@ -235,9 +255,9 @@ public class InMemoryProducerQueues implements ProducerQueues {
         closeFuture = executorService.schedule(() -> {
             // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
             if (finalTask != null) {
-                Futures.allAsList(submitToAllQueues(finalTask, true)).get();
+                Futures.allAsList(submitToAllBucketsParallel(finalTask, true)).get();
             } else {
-                Futures.allAsList(submitToAllQueues((Task<Void>) (bucketIndex, queueBuckets, queueIndex) -> null, true)).get();
+                Futures.allAsList(submitToAllBucketsParallel((Task<Void>) (bucketIndex) -> null, true)).get();
             }
             return null;
         }, shutdownGracePeriod + 50, TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
