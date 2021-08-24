@@ -27,6 +27,7 @@ import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.util.Validators;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -50,6 +51,7 @@ public class HiveMQNettyBootstrap {
     private final @NotNull ShutdownHooks shutdownHooks;
     private final @NotNull ListenerConfigurationService listenerConfigurationService;
     private final @NotNull ChannelInitializerFactory channelInitializerFactory;
+    private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull NettyConfiguration nettyConfiguration;
 
     @Inject
@@ -57,11 +59,13 @@ public class HiveMQNettyBootstrap {
             final @NotNull ShutdownHooks shutdownHooks,
             final @NotNull ListenerConfigurationService listenerConfigurationService,
             final @NotNull ChannelInitializerFactory channelInitializerFactory,
+            final @NotNull ChannelPersistence channelPersistence,
             final @NotNull NettyConfiguration nettyConfiguration) {
 
         this.shutdownHooks = shutdownHooks;
         this.listenerConfigurationService = listenerConfigurationService;
         this.channelInitializerFactory = channelInitializerFactory;
+        this.channelPersistence = channelPersistence;
         this.nettyConfiguration = nettyConfiguration;
     }
 
@@ -69,9 +73,13 @@ public class HiveMQNettyBootstrap {
 
         //Adding shutdown hook for graceful shutdown
         final int shutdownTimeout = InternalConfigurations.EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT;
-        shutdownHooks.add(new NettyShutdownHook(nettyConfiguration.getChildEventLoopGroup(),
+        final int channelsShutdownTimeout = InternalConfigurations.CHANNEL_PERSISTENCE_SHUTDOWN_TIMEOUT;
+        shutdownHooks.add(new NettyShutdownHook(
+                nettyConfiguration.getChildEventLoopGroup(),
                 nettyConfiguration.getParentEventLoopGroup(),
-                shutdownTimeout));
+                shutdownTimeout,
+                channelsShutdownTimeout,
+                channelPersistence));
 
         final List<BindInformation> futures = new ArrayList<>();
 
@@ -100,6 +108,7 @@ public class HiveMQNettyBootstrap {
             final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
             log.info("Starting TCP listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
+            channelPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
         }
         return futures.build();
@@ -114,6 +123,7 @@ public class HiveMQNettyBootstrap {
             final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
             log.info("Starting TLS TCP listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
+            channelPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
         }
         return futures.build();
@@ -128,6 +138,7 @@ public class HiveMQNettyBootstrap {
             final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
             log.info("Starting Websocket listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
+            channelPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
         }
         return futures.build();
@@ -143,6 +154,7 @@ public class HiveMQNettyBootstrap {
             final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
             log.info("Starting Websocket TLS listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
+            channelPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
         }
         return futures.build();

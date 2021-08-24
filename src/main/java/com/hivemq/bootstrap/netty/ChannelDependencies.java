@@ -19,6 +19,7 @@ import com.hivemq.codec.decoder.MqttConnectDecoder;
 import com.hivemq.codec.decoder.MqttDecoders;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -83,6 +84,7 @@ public class ChannelDependencies {
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull InterceptorHandler interceptorHandler;
     private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
+    private final @NotNull ShutdownHooks shutdownHooks;
 
 
     @Inject
@@ -114,7 +116,8 @@ public class ChannelDependencies {
             final @NotNull Provider<MessageExpiryHandler> publishMessageExpiryHandlerProvider,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull InterceptorHandler interceptorHandler,
-            final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
+            final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter,
+            final @NotNull ShutdownHooks shutdownHooks) {
 
         this.noConnectIdleHandler = noConnectIdleHandler;
         this.connectHandlerProvider = connectHandlerProvider;
@@ -130,6 +133,7 @@ public class ChannelDependencies {
         this.pingRequestHandler = pingRequestHandler;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqttConnectDecoder = mqttConnectDecoder;
+        this.shutdownHooks = shutdownHooks;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory, globalMQTTMessageCounter);
         this.eventLog = eventLog;
         this.sslParameterHandler = sslParameterHandler;
@@ -289,5 +293,10 @@ public class ChannelDependencies {
     @NotNull
     public PublishFlushHandler createPublishFlushHandler() {
         return new PublishFlushHandler(metricsHolder);
+    }
+
+    @NotNull
+    public ShutdownHooks getShutdownHooks() {
+        return shutdownHooks;
     }
 }
