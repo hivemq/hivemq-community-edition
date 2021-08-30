@@ -149,7 +149,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
                     closeFuture.set(null);
                 });
             }
-//            return FutureUtils.voidFutureFromList(futureBuilder.build());
+
             final ListenableFuture<List<Void>> future = Futures.allAsList(futureBuilder.build());
             final SettableFuture<Void> resultFuture = SettableFuture.create();
             Futures.addCallback(future, new FutureCallback<>() {
