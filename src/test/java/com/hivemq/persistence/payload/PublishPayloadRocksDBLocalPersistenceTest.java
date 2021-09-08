@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.persistence.payload;
 
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,40 +27,34 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.LogbackCapturingAppender;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class PublishPayloadRocksDBLocalPersistenceTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    LocalPersistenceFileUtil localPersistenceFileUtil;
-
+    private LocalPersistenceFileUtil localPersistenceFileUtil;
     private PersistenceStartup persistenceStartup;
     private PublishPayloadRocksDBLocalPersistence persistence;
     private LogbackCapturingAppender capturingAppender;
 
-
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
+        localPersistenceFileUtil = mock(LocalPersistenceFileUtil.class);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(8);
-        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
+        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
+                temporaryFolder.newFolder());
         InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.set(1024);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.set(16);
         persistenceStartup = new PersistenceStartup();
@@ -76,7 +73,7 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
     }
 
     @Test
-    public void test_add_get_payload() throws Exception {
+    public void test_add_get_payload() {
 
         final byte[] payload1 = "payload".getBytes();
         final byte[] payload2 = "payload".getBytes();
@@ -87,13 +84,12 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);
 
-        assertEquals(true, Arrays.equals(result1, payload1));
-        assertEquals(true, Arrays.equals(result2, payload2));
+        assertArrayEquals(result1, payload1);
+        assertArrayEquals(result2, payload2);
     }
 
-
     @Test
-    public void test_add_remove_get_payload() throws Exception {
+    public void test_add_remove_get_payload() {
 
         final byte[] payload1 = "payload".getBytes();
         final byte[] payload2 = "payload".getBytes();
@@ -106,12 +102,12 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);
 
-        assertEquals(true, Arrays.equals(result1, payload1));
+        assertArrayEquals(result1, payload1);
         assertNull(result2);
     }
 
     @Test
-    public void test_add_get_big_payload() throws Exception {
+    public void test_add_get_big_payload() {
 
         final byte[] payload1 = "payload".getBytes();
         final byte[] payload2 = RandomStringUtils.random(10 * 1024 * 1024 + 100, true, true).getBytes();
@@ -122,12 +118,12 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);
 
-        assertEquals(true, Arrays.equals(result1, payload1));
-        assertEquals(true, Arrays.equals(result2, payload2));
+        assertArrayEquals(result1, payload1);
+        assertArrayEquals(result2, payload2);
     }
 
     @Test
-    public void test_add_remove_get_big_payload() throws Exception {
+    public void test_add_remove_get_big_payload() {
 
         final byte[] payload1 = "payload".getBytes();
         final byte[] payload2 = RandomStringUtils.random(10 * 1024 * 1024 + 100, true, true).getBytes();
@@ -140,12 +136,12 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         final byte[] result1 = persistence.get(0L);
         final byte[] result2 = persistence.get(1L);
 
-        assertEquals(true, Arrays.equals(result1, payload1));
+        assertArrayEquals(result1, payload1);
         assertNull(result2);
     }
 
     @Test
-    public void test_get_all_ids() throws Exception {
+    public void test_get_all_ids() {
 
         final byte[] payload1 = "payload".getBytes();
 
@@ -157,9 +153,21 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
 
         final List<Long> allIds = persistence.getAllIds();
         assertEquals(2, allIds.size());
-        assertEquals(false, allIds.contains(1L));
+        assertFalse(allIds.contains(1L));
     }
 
+    @Test
+    public void init() {
+        final int highestPayloadId = 123456789;
+        persistence.put(highestPayloadId, new byte[]{1, 2, 3});
+        persistence.stop();
+        final PublishPayloadRocksDBLocalPersistence newPersistence =
+                new PublishPayloadRocksDBLocalPersistence(localPersistenceFileUtil, persistenceStartup);
+        newPersistence.start();
+        System.err.println(PUBLISH.PUBLISH_COUNTER.get());
+        assertTrue(PUBLISH.PUBLISH_COUNTER.get() > highestPayloadId);
+        newPersistence.stop();
+    }
 
     @Test(timeout = 10_000)
     public void put_bigPayloads_memtableFlushed() {
@@ -181,7 +189,9 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         for (final long memTableSize : persistence.getRocksdbToMemTableSize()) {
             assertEquals(0L, memTableSize);
         }
-        assertTrue(capturingAppender.getLastCapturedLog().getMessage().contains("Hard flushing memTable due to exceeding memTable limit"));
+        assertTrue(capturingAppender.getLastCapturedLog()
+                .getMessage()
+                .contains("Hard flushing memTable due to exceeding memTable limit"));
     }
 
     @Test
@@ -214,6 +224,4 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         }
         assertNull(capturingAppender.getLastCapturedLog());
     }
-
-
 }
