@@ -100,9 +100,9 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = Objects.requireNonNullElse(
+        configFolder = Objects.requireNonNullElseGet(
                 configFolder,
-                setUpHiveMQFolder(
+                () -> setUpHiveMQFolder(
                         SystemProperties.CONFIG_FOLDER,
                         EnvironmentVariables.CONFIG_FOLDER,
                         "conf",
@@ -114,9 +114,9 @@ public class SystemInformationImpl implements SystemInformation {
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
 
-        dataFolder = Objects.requireNonNullElse(
+        dataFolder = Objects.requireNonNullElseGet(
                 dataFolder,
-                setUpHiveMQFolder(
+                () -> setUpHiveMQFolder(
                         SystemProperties.DATA_FOLDER,
                         EnvironmentVariables.DATA_FOLDER,
                         "data",
@@ -124,9 +124,9 @@ public class SystemInformationImpl implements SystemInformation {
                 )
         );
 
-        pluginFolder = Objects.requireNonNullElse(
+        pluginFolder = Objects.requireNonNullElseGet(
                 pluginFolder,
-                setUpHiveMQFolder(
+                () -> setUpHiveMQFolder(
                         SystemProperties.EXTENSIONS_FOLDER,
                         EnvironmentVariables.EXTENSION_FOLDER,
                         "extensions",
