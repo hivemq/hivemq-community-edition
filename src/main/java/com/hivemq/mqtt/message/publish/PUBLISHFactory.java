@@ -49,7 +49,8 @@ public class PUBLISHFactory {
         private @Nullable String topic;
         private boolean duplicateDelivery;
         private boolean retain;
-        private @Nullable QoS qoS;
+        private @NotNull QoS qoS;
+        private @NotNull QoS onwardQos;
         private long messageExpiryInterval = MESSAGE_EXPIRY_INTERVAL_NOT_SET;
         private @Nullable String hivemqId;
         private @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
@@ -68,6 +69,7 @@ public class PUBLISHFactory {
             this.hivemqId = publish.getHivemqId();
             this.topic = publish.getTopic();
             this.qoS = publish.getQoS();
+            this.onwardQos = publish.getOnwardQoS();
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
@@ -92,7 +94,7 @@ public class PUBLISHFactory {
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, retain, messageExpiryInterval,
+            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain, messageExpiryInterval,
                     payloadFormatIndicator, contentType, responseTopic, correlationData,
                     userProperties, packetIdentifier, duplicateDelivery, isNewTopicAlias, subscriptionIdentifiers,
                     persistence, timestamp, publishId);
@@ -129,8 +131,14 @@ public class PUBLISHFactory {
         }
 
         @NotNull
-        public Mqtt5Builder withQoS(final @Nullable QoS qoS) {
+        public Mqtt5Builder withQoS(final @NotNull QoS qoS) {
             this.qoS = qoS;
+            return this;
+        }
+
+        @NotNull
+        public Mqtt5Builder withOnwardQos(final @NotNull QoS onwardQos) {
+            this.onwardQos = onwardQos;
             return this;
         }
 
@@ -213,7 +221,8 @@ public class PUBLISHFactory {
         private @Nullable String topic;
         private @Nullable PublishPayloadPersistence persistence;
 
-        private @Nullable QoS qoS;
+        private @NotNull QoS qoS;
+        private @NotNull QoS onwardQos;
         private @Nullable byte[] payload;
         private boolean retain;
 
@@ -231,6 +240,7 @@ public class PUBLISHFactory {
             this.hivemqId = publish.getHivemqId();
             this.topic = publish.getTopic();
             this.qoS = publish.getQoS();
+            this.onwardQos = publish.getOnwardQoS();
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
@@ -248,7 +258,7 @@ public class PUBLISHFactory {
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, retain,
+            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain,
                     messageExpiryInterval, persistence, packetIdentifier, duplicateDelivery, publishId, timestamp);
         }
 
@@ -277,8 +287,14 @@ public class PUBLISHFactory {
         }
 
         @NotNull
-        public Mqtt3Builder withQoS(final @Nullable QoS qoS) {
+        public Mqtt3Builder withQoS(final @NotNull QoS qoS) {
             this.qoS = qoS;
+            return this;
+        }
+
+        @NotNull
+        public Mqtt3Builder withOnwardQos(final @NotNull QoS onwardQos) {
+            this.onwardQos = onwardQos;
             return this;
         }
 
@@ -330,6 +346,7 @@ public class PUBLISHFactory {
                 .withHivemqId(origin.getHivemqId())
                 .withTopic(packet.getTopic())
                 .withQoS(QoS.from(packet.getQos()))
+                .withOnwardQos(QoS.from(packet.getOnwardQos()))
                 .withPayload(Bytes.getBytesFromReadOnlyBuffer(packet.getPayload()))
                 .withRetain(packet.getRetain())
                 .withMessageExpiryInterval(packet.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))

@@ -167,6 +167,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPayload(new byte[100])
                 .withDuplicateDelivery(true)
                 .withPacketIdentifier(messageid)
@@ -195,6 +196,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPayload(new byte[100])
                 .withDuplicateDelivery(true)
                 .withPacketIdentifier(messageid)
@@ -217,6 +219,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPayload(new byte[100])
                 .withPacketIdentifier(messageid)
                 .build();
@@ -248,6 +251,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
                 .withPayload(new byte[100])
                 .withDuplicateDelivery(true)
                 .withPacketIdentifier(messageid)
@@ -276,6 +280,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
                 .withPayload(new byte[100])
                 .withDuplicateDelivery(true)
                 .withPacketIdentifier(messageid)
@@ -298,6 +303,7 @@ public class PublishFlowHandlerTest {
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
                 .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
                 .withPayload(new byte[100])
                 .withPacketIdentifier(messageid)
                 .build();
@@ -406,7 +412,7 @@ public class PublishFlowHandlerTest {
     @Test
     public void test_publish_sending() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
         channel.writeOutbound(publish);
 
         assertEquals(false, channel.outboundMessages().isEmpty());
@@ -423,7 +429,7 @@ public class PublishFlowHandlerTest {
     @Test
     public void test_publish_sending_qos_0() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_MOST_ONCE).withPayload(new byte[100]).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE).withPayload(new byte[100]).build();
 
         channel.writeOutbound(publish);
 
@@ -439,7 +445,7 @@ public class PublishFlowHandlerTest {
     @Test
     public void test_publish_with_future_not_shared_sending() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();
 
         final SettableFuture<PublishStatus> publishStatusSettableFuture = SettableFuture.create();
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishStatusSettableFuture, false);
@@ -794,6 +800,7 @@ public class PublishFlowHandlerTest {
                 .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
                 .withTopic(topic)
                 .withQoS(qoS)
+                .withOnwardQos(qoS)
                 .withPacketIdentifier(messageId)
                 .withPayload("payload".getBytes())
                 .withDuplicateDelivery(dup)

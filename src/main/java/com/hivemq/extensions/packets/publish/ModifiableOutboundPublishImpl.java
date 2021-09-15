@@ -46,6 +46,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
 
     private @NotNull String topic;
     private final @NotNull Qos qos;
+    private final @NotNull Qos onwardQos;
     private final int packetId;
     private final boolean dupFlag;
     private @Nullable ByteBuffer payload;
@@ -68,6 +69,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
 
         topic = packet.topic;
         qos = packet.qos;
+        onwardQos = packet.onwardQos;
         packetId = packet.packetId;
         dupFlag = packet.dupFlag;
         payload = packet.payload;
@@ -267,7 +269,7 @@ public class ModifiableOutboundPublishImpl implements ModifiableOutboundPublish 
     }
 
     public @NotNull PublishPacketImpl copy() {
-        return new PublishPacketImpl(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
+        return new PublishPacketImpl(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
                 userProperties.copy(), timestamp);
     }

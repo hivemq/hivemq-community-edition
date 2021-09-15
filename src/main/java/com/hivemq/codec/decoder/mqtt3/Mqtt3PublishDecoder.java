@@ -105,6 +105,7 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
                 .withHivemqId(hivemqId.get())
                 .withMessageExpiryInterval(maxMessageExpiryInterval)
                 .withQoS(QoS.valueOf(qos))
+                .withOnwardQos(QoS.valueOf(qos))
                 .withTopic(topicName)
                 .withDuplicateDelivery(dup)
                 .withPacketIdentifier(packetIdentifier)

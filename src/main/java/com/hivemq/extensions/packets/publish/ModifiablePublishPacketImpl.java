@@ -47,6 +47,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @NotNull String topic;
     @NotNull Qos qos;
+    @NotNull Qos onwardQos;
     final int packetId;
     final boolean dupFlag;
     @Nullable ByteBuffer payload;
@@ -69,6 +70,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
         this.topic = packet.topic;
         this.qos = packet.qos;
+        this.onwardQos = this.qos;
         this.packetId = packet.packetId;
         this.dupFlag = packet.dupFlag;
         this.payload = packet.payload;
@@ -123,12 +125,14 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     @Override
     public void setQos(final @NotNull Qos qos) {
         PluginBuilderUtil.checkQos(qos, configurationService.mqttConfiguration().maximumQos().getQosNumber());
-        if (qos.getQosNumber() == this.qos.getQosNumber()) {
+        if (qos.getQosNumber() == this.onwardQos.getQosNumber()) {
             return;
         }
-        this.qos = qos;
+        this.onwardQos = qos;
         modified = true;
     }
+
+    public @NotNull Qos getOnwardQos() { return onwardQos; }
 
     @Override
     public int getPacketId() {
@@ -271,7 +275,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     public @NotNull PublishPacketImpl copy() {
-        return new PublishPacketImpl(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
+        return new PublishPacketImpl(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
                 userProperties.copy(), timestamp);
     }
@@ -292,6 +296,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         return that.canEqual(this) &&
                 topic.equals(that.topic) &&
                 (qos == that.qos) &&
+                (onwardQos == that.onwardQos) &&
                 (packetId == that.packetId) &&
                 (dupFlag == that.dupFlag) &&
                 Objects.equals(payload, that.payload) &&
@@ -312,7 +317,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
+        return Objects.hash(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
                 userProperties, timestamp);
     }

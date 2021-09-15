@@ -40,6 +40,7 @@ public class PublishPacketImpl implements PublishPacket {
 
     final @NotNull String topic;
     final @NotNull Qos qos;
+    final @NotNull Qos onwardQos;
     final int packetId;
     final boolean dupFlag;
     final @Nullable ByteBuffer payload;
@@ -56,6 +57,7 @@ public class PublishPacketImpl implements PublishPacket {
     public PublishPacketImpl(
             final @NotNull String topic,
             final @NotNull Qos qos,
+            final @NotNull Qos onwardQos,
             final int packetId,
             final boolean dupFlag,
             final @Nullable ByteBuffer payload,
@@ -71,6 +73,7 @@ public class PublishPacketImpl implements PublishPacket {
 
         this.topic = topic;
         this.qos = qos;
+        this.onwardQos = onwardQos;
         this.packetId = packetId;
         this.dupFlag = dupFlag;
         this.payload = payload;
@@ -89,6 +92,7 @@ public class PublishPacketImpl implements PublishPacket {
         this(
                 publish.getTopic(),
                 publish.getQoS().toQos(),
+                publish.getOnwardQoS().toQos(),
                 publish.getPacketIdentifier(),
                 publish.isDuplicateDelivery(),
                 (publish.getPayload() == null) ? null : ByteBuffer.wrap(publish.getPayload()),
@@ -114,6 +118,8 @@ public class PublishPacketImpl implements PublishPacket {
     public @NotNull Qos getQos() {
         return qos;
     }
+
+    public @NotNull Qos getOnwardQos() { return onwardQos; }
 
     @Override
     public int getPacketId() {
@@ -191,6 +197,7 @@ public class PublishPacketImpl implements PublishPacket {
         return that.canEqual(this) &&
                 topic.equals(that.topic) &&
                 (qos == that.qos) &&
+                (onwardQos == that.onwardQos) &&
                 (packetId == that.packetId) &&
                 (dupFlag == that.dupFlag) &&
                 Objects.equals(payload, that.payload) &&
@@ -211,7 +218,7 @@ public class PublishPacketImpl implements PublishPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(topic, qos, packetId, dupFlag, payload, retain, messageExpiryInterval,
+        return Objects.hash(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
                 payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
                 userProperties, timestamp);
     }

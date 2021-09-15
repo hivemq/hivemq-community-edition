@@ -72,6 +72,7 @@ public class PUBLISHTest {
                 .withHivemqId("hivemqId")
                 .withUserProperties(Mqtt5UserProperties.of())
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .build();
 
     }
@@ -81,6 +82,7 @@ public class PUBLISHTest {
 
         new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withTopic("topic")
                 .withUserProperties(Mqtt5UserProperties.of())
                 .build();
@@ -92,6 +94,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload(new byte[0])
                 .withTopic("topic")
@@ -100,6 +103,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload(new byte[0])
                 .withTopic("topic")
@@ -115,6 +119,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
@@ -124,6 +129,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
@@ -140,6 +146,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
                 .withPublishId(1L)
@@ -177,6 +184,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
                 .withTopic("topic") // 10+38 = 48 bytes
@@ -191,6 +199,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPublishId(1L)
                 .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
@@ -206,6 +215,7 @@ public class PUBLISHTest {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload(new byte[1024 * 1024 * 5]) // 5MB + 12 bytes
                 .withCorrelationData(new byte[1024 * 1024 * 5])  // 5MB + 12 bytes

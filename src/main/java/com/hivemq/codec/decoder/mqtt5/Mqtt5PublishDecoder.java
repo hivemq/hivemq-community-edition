@@ -121,6 +121,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         return publishBuilder
                 .withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(qos))
+                .withOnwardQos(QoS.valueOf(qos))
                 .withRetain(retain)
                 .withPacketIdentifier(packetIdentifier)
                 .withDuplicateDelivery(dup)

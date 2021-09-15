@@ -191,6 +191,7 @@ public class RetainedMessagesSender {
                         .withRetain(true)
                         .withDuplicateDelivery(false)
                         .withQoS(qos)
+                        .withOnwardQos(qos)
                         .withUserProperties(retainedMessage.getUserProperties())
                         .withResponseTopic(retainedMessage.getResponseTopic())
                         .withContentType(retainedMessage.getContentType())

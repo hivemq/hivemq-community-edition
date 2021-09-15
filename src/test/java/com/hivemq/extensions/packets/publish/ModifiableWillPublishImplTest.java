@@ -154,7 +154,7 @@ public class ModifiableWillPublishImplTest {
 
         final WillPublishPacketImpl expectedPacket = new WillPublishPacketImpl(
                 "modifiedTopic",
-                Qos.EXACTLY_ONCE,
+                Qos.AT_LEAST_ONCE,
                 ByteBuffer.wrap("modifiedPayload".getBytes()),
                 true,
                 30,

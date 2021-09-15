@@ -351,6 +351,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                                 .withPacketIdentifier(packetId)
                                 .withQoS(minQos)
+                                .withOnwardQos(minQos)
                                 .withRetain(publish.isRetain() && retainAsPublished)
                                 .withSubscriptionIdentifiers(subscriptionIdentifiers)
                                 .build();

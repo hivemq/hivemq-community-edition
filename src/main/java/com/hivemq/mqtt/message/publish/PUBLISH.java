@@ -57,6 +57,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     private final @NotNull String topic;
     private final boolean retain;
     private final @NotNull QoS qoS;
+    private final @NotNull QoS onwardQos;
 
     private long messageExpiryInterval;
 
@@ -76,21 +77,22 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     //MQTT 5
     PUBLISH(
-            @NotNull final String hivemqId,
-            @NotNull final String topic,
-            @Nullable final byte[] payload,
-            @NotNull final QoS qos,
+            final @NotNull String hivemqId,
+            final @NotNull String topic,
+            final @Nullable byte[] payload,
+            final @NotNull QoS qos,
+            final @NotNull QoS onwardQos,
             final boolean isRetain,
             final long messageExpiryInterval,
-            @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
-            @Nullable final String contentType,
-            @Nullable final String responseTopic,
-            @Nullable final byte[] correlationData,
-            @NotNull final Mqtt5UserProperties userProperties,
+            final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+            final @Nullable String contentType,
+            final @Nullable String responseTopic,
+            final @Nullable byte[] correlationData,
+            final @NotNull Mqtt5UserProperties userProperties,
             final int packetIdentifier,
             final boolean isDup,
             final boolean isNewTopicAlias,
-            @Nullable final ImmutableIntArray subscriptionIdentifiers,
+            final @Nullable ImmutableIntArray subscriptionIdentifiers,
             final @Nullable PublishPayloadPersistence persistence,
             final long timestamp,
             final long publishId) {
@@ -104,6 +106,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.topic = topic;
         this.payload = payload;
         this.qoS = qos;
+        this.onwardQos = onwardQos;
         this.retain = isRetain;
         this.duplicateDelivery = isDup;
         this.isNewTopicAlias = isNewTopicAlias;
@@ -135,13 +138,14 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     //MQTT 3
     PUBLISH(
-            @NotNull final String hivemqId,
-            @NotNull final String topic,
-            @Nullable final byte[] payload,
-            @NotNull final QoS qos,
+            final @NotNull String hivemqId,
+            final @NotNull String topic,
+            final @Nullable byte[] payload,
+            final @NotNull QoS qos,
+            final @NotNull QoS onwardQos,
             final boolean isRetain,
             final long messageExpiryInterval,
-            @Nullable final PublishPayloadPersistence publishPayloadPersistence,
+            final @Nullable PublishPayloadPersistence publishPayloadPersistence,
             final int packetIdentifier,
             final boolean isDup,
             final long publishId,
@@ -157,6 +161,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.topic = topic;
         this.payload = payload;
         this.qoS = qos;
+        this.onwardQos = onwardQos;
         this.retain = isRetain;
         this.messageExpiryInterval = messageExpiryInterval;
         this.persistence = publishPayloadPersistence;
@@ -187,13 +192,14 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     }
 
     public PUBLISH(
-            @NotNull final PUBLISH publish,
-            @Nullable final PublishPayloadPersistence persistence) {
+            final @NotNull PUBLISH publish,
+            final @Nullable PublishPayloadPersistence persistence) {
 
         this(publish.getHivemqId(),
                 publish.getTopic(),
                 publish.getPayload(),
                 publish.getQoS(),
+                publish.getOnwardQoS(),
                 publish.isRetain(),
                 publish.getMessageExpiryInterval(),
                 publish.getPayloadFormatIndicator(),
@@ -294,6 +300,9 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     public QoS getQoS() {
         return qoS;
     }
+
+    @NotNull
+    public QoS getOnwardQoS() { return onwardQos; }
 
     @Override
     public long getMessageExpiryInterval() {
