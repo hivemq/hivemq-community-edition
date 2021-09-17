@@ -132,7 +132,9 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         modified = true;
     }
 
-    public @NotNull Qos getOnwardQos() { return onwardQos; }
+    public @NotNull Qos getOnwardQos() {
+        return onwardQos;
+    }
 
     @Override
     public int getPacketId() {

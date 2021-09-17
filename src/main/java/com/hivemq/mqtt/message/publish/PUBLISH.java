@@ -216,15 +216,13 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
                 publish.getPublishId());
     }
 
-    @NotNull
     @Override
-    public String getHivemqId() {
+    public @NotNull String getHivemqId() {
         return hivemqId;
     }
 
-    @NotNull
     @Override
-    public String getUniqueId() {
+    public @NotNull String getUniqueId() {
         return uniqueId;
     }
 
@@ -233,21 +231,18 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return publishId;
     }
 
-    @Nullable
     @Override
-    public Mqtt5PayloadFormatIndicator getPayloadFormatIndicator() {
+    public @Nullable Mqtt5PayloadFormatIndicator getPayloadFormatIndicator() {
         return payloadFormatIndicator;
     }
 
-    @Nullable
     @Override
-    public String getContentType() {
+    public @Nullable String getContentType() {
         return contentType;
     }
 
-    @Nullable
     @Override
-    public String getResponseTopic() {
+    public @Nullable String getResponseTopic() {
         return responseTopic;
     }
 
@@ -275,9 +270,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return persistence.get(publishId);
     }
 
-    @NotNull
     @Override
-    public String getTopic() {
+    public @NotNull String getTopic() {
         return topic;
     }
 
@@ -295,14 +289,14 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return retain;
     }
 
-    @NotNull
     @Override
-    public QoS getQoS() {
+    public @NotNull QoS getQoS() {
         return qoS;
     }
 
-    @NotNull
-    public QoS getOnwardQoS() { return onwardQos; }
+    public @NotNull QoS getOnwardQoS() {
+        return onwardQos;
+    }
 
     @Override
     public long getMessageExpiryInterval() {
@@ -313,9 +307,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         this.messageExpiryInterval = messageExpiryInterval;
     }
 
-    @Nullable
     @Override
-    public ImmutableIntArray getSubscriptionIdentifiers() {
+    public @Nullable ImmutableIntArray getSubscriptionIdentifiers() {
         return subscriptionIdentifiers;
     }
 
@@ -324,8 +317,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return timestamp;
     }
 
-    @Nullable
-    public PublishPayloadPersistence getPersistence() {
+    public @Nullable PublishPayloadPersistence getPersistence() {
         return persistence;
     }
 
@@ -379,9 +371,8 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return result;
     }
 
-    @NotNull
     @Override
-    public MessageType getType() {
+    public @NotNull MessageType getType() {
         return MessageType.PUBLISH;
     }
 

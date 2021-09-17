@@ -119,7 +119,9 @@ public class PublishPacketImpl implements PublishPacket {
         return qos;
     }
 
-    public @NotNull Qos getOnwardQos() { return onwardQos; }
+    public @NotNull Qos getOnwardQos() {
+        return onwardQos;
+    }
 
     @Override
     public int getPacketId() {
