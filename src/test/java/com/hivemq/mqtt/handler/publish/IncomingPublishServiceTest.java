@@ -720,6 +720,7 @@ public class IncomingPublishServiceTest {
                 "topic",
                 new byte[0],
                 QoS.EXACTLY_ONCE,
+                QoS.EXACTLY_ONCE,
                 false,
                 MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT,
                 Mqtt5PayloadFormatIndicator.UTF_8,

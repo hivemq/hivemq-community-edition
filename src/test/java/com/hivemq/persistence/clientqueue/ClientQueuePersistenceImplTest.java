@@ -301,6 +301,7 @@ public class ClientQueuePersistenceImplTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic(topic)

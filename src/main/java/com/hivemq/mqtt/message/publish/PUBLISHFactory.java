@@ -49,7 +49,8 @@ public class PUBLISHFactory {
         private @Nullable String topic;
         private boolean duplicateDelivery;
         private boolean retain;
-        private @Nullable QoS qoS;
+        private @NotNull QoS qoS;
+        private @NotNull QoS onwardQos;
         private long messageExpiryInterval = MESSAGE_EXPIRY_INTERVAL_NOT_SET;
         private @Nullable String hivemqId;
         private @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
@@ -63,11 +64,11 @@ public class PUBLISHFactory {
         private int packetIdentifier;
         private long publishId = PUBLISH.NO_PUBLISH_ID_SET;
 
-        @NotNull
-        public Mqtt5Builder fromPublish(final @NotNull PUBLISH publish) {
+        public @NotNull Mqtt5Builder fromPublish(final @NotNull PUBLISH publish) {
             this.hivemqId = publish.getHivemqId();
             this.topic = publish.getTopic();
             this.qoS = publish.getQoS();
+            this.onwardQos = publish.getOnwardQoS();
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
@@ -85,123 +86,109 @@ public class PUBLISHFactory {
             return this;
         }
 
-        @NotNull
-        public PUBLISH build() {
+        public @NotNull PUBLISH build() {
 
             Preconditions.checkNotNull(hivemqId, "HivemqId may never be null");
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, retain, messageExpiryInterval,
+            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain, messageExpiryInterval,
                     payloadFormatIndicator, contentType, responseTopic, correlationData,
                     userProperties, packetIdentifier, duplicateDelivery, isNewTopicAlias, subscriptionIdentifiers,
                     persistence, timestamp, publishId);
         }
 
-        @NotNull
-        public Mqtt5Builder withTimestamp(final long timestamp) {
+        public @NotNull Mqtt5Builder withTimestamp(final long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withPayload(final @Nullable byte[] payload) {
+        public @NotNull Mqtt5Builder withPayload(final @Nullable byte[] payload) {
             this.payload = payload;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withTopic(final @Nullable String topic) {
+        public @NotNull Mqtt5Builder withTopic(final @Nullable String topic) {
             this.topic = topic;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withDuplicateDelivery(final boolean duplicateDelivery) {
+        public @NotNull Mqtt5Builder withDuplicateDelivery(final boolean duplicateDelivery) {
             this.duplicateDelivery = duplicateDelivery;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withRetain(final boolean retain) {
+        public @NotNull Mqtt5Builder withRetain(final boolean retain) {
             this.retain = retain;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withQoS(final @Nullable QoS qoS) {
+        public @NotNull Mqtt5Builder withQoS(final @NotNull QoS qoS) {
             this.qoS = qoS;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withMessageExpiryInterval(final long messageExpiryInterval) {
+        public @NotNull Mqtt5Builder withOnwardQos(final @NotNull QoS onwardQos) {
+            this.onwardQos = onwardQos;
+            return this;
+        }
+
+        public @NotNull Mqtt5Builder withMessageExpiryInterval(final long messageExpiryInterval) {
             this.messageExpiryInterval = messageExpiryInterval;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withHivemqId(final @Nullable String hivemqId) {
+        public @NotNull Mqtt5Builder withHivemqId(final @Nullable String hivemqId) {
             this.hivemqId = hivemqId;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withPayloadFormatIndicator(final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
+        public @NotNull Mqtt5Builder withPayloadFormatIndicator(final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
             this.payloadFormatIndicator = payloadFormatIndicator;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withContentType(final @Nullable String contentType) {
+        public @NotNull Mqtt5Builder withContentType(final @Nullable String contentType) {
             this.contentType = contentType;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withResponseTopic(final @Nullable String responseTopic) {
+        public @NotNull Mqtt5Builder withResponseTopic(final @Nullable String responseTopic) {
             this.responseTopic = responseTopic;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withCorrelationData(final @Nullable byte[] correlationData) {
+        public @NotNull Mqtt5Builder withCorrelationData(final @Nullable byte[] correlationData) {
             this.correlationData = correlationData;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withNewTopicAlias(final boolean newTopicAlias) {
+        public @NotNull Mqtt5Builder withNewTopicAlias(final boolean newTopicAlias) {
             isNewTopicAlias = newTopicAlias;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withSubscriptionIdentifiers(final @Nullable ImmutableIntArray subscriptionIdentifiers) {
+        public @NotNull Mqtt5Builder withSubscriptionIdentifiers(final @Nullable ImmutableIntArray subscriptionIdentifiers) {
             this.subscriptionIdentifiers = subscriptionIdentifiers;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withPersistence(final @Nullable PublishPayloadPersistence persistence) {
+        public @NotNull Mqtt5Builder withPersistence(final @Nullable PublishPayloadPersistence persistence) {
             this.persistence = persistence;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withUserProperties(final @NotNull Mqtt5UserProperties userProperties) {
+        public @NotNull Mqtt5Builder withUserProperties(final @NotNull Mqtt5UserProperties userProperties) {
             this.userProperties = userProperties;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withPacketIdentifier(final int packetIdentifier) {
+        public @NotNull Mqtt5Builder withPacketIdentifier(final int packetIdentifier) {
             this.packetIdentifier = packetIdentifier;
             return this;
         }
 
-        @NotNull
-        public Mqtt5Builder withPublishId(final long publishId) {
+        public @NotNull Mqtt5Builder withPublishId(final long publishId) {
             this.publishId = publishId;
             return this;
         }
@@ -213,7 +200,8 @@ public class PUBLISHFactory {
         private @Nullable String topic;
         private @Nullable PublishPayloadPersistence persistence;
 
-        private @Nullable QoS qoS;
+        private @NotNull QoS qoS;
+        private @NotNull QoS onwardQos;
         private @Nullable byte[] payload;
         private boolean retain;
 
@@ -226,11 +214,11 @@ public class PUBLISHFactory {
 
         private long timestamp = -1;
 
-        @NotNull
-        public Mqtt3Builder fromPublish(final @NotNull PUBLISH publish) {
+        public @NotNull Mqtt3Builder fromPublish(final @NotNull PUBLISH publish) {
             this.hivemqId = publish.getHivemqId();
             this.topic = publish.getTopic();
             this.qoS = publish.getQoS();
+            this.onwardQos = publish.getOnwardQoS();
             this.payload = publish.getPayload();
             this.retain = publish.isRetain();
             this.messageExpiryInterval = publish.getMessageExpiryInterval();
@@ -241,79 +229,72 @@ public class PUBLISHFactory {
             return this;
         }
 
-        @NotNull
-        public PUBLISH build() {
+        public @NotNull PUBLISH build() {
 
             Preconditions.checkNotNull(hivemqId, "HivemqId may never be null");
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, retain,
+            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain,
                     messageExpiryInterval, persistence, packetIdentifier, duplicateDelivery, publishId, timestamp);
         }
 
-        @NotNull
-        public Mqtt3Builder withTimestamp(final long timestamp) {
+        public @NotNull Mqtt3Builder withTimestamp(final long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withHivemqId(final @Nullable String hivemqId) {
+        public @NotNull Mqtt3Builder withHivemqId(final @Nullable String hivemqId) {
             this.hivemqId = hivemqId;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withTopic(final @Nullable String topic) {
+        public @NotNull Mqtt3Builder withTopic(final @Nullable String topic) {
             this.topic = topic;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withPersistence(final @Nullable PublishPayloadPersistence persistence) {
+        public @NotNull Mqtt3Builder withPersistence(final @Nullable PublishPayloadPersistence persistence) {
             this.persistence = persistence;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withQoS(final @Nullable QoS qoS) {
+        public @NotNull Mqtt3Builder withQoS(final @NotNull QoS qoS) {
             this.qoS = qoS;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withPayload(final @Nullable byte[] payload) {
+        public @NotNull Mqtt3Builder withOnwardQos(final @NotNull QoS onwardQos) {
+            this.onwardQos = onwardQos;
+            return this;
+        }
+
+        public @NotNull Mqtt3Builder withPayload(final @Nullable byte[] payload) {
             this.payload = payload;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withRetain(final boolean retain) {
+        public @NotNull Mqtt3Builder withRetain(final boolean retain) {
             this.retain = retain;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withMessageExpiryInterval(final long messageExpiryInterval) {
+        public @NotNull Mqtt3Builder withMessageExpiryInterval(final long messageExpiryInterval) {
             this.messageExpiryInterval = messageExpiryInterval;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withDuplicateDelivery(final boolean duplicateDelivery) {
+        public @NotNull Mqtt3Builder withDuplicateDelivery(final boolean duplicateDelivery) {
             this.duplicateDelivery = duplicateDelivery;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withPacketIdentifier(final int packetIdentifier) {
+        public @NotNull Mqtt3Builder withPacketIdentifier(final int packetIdentifier) {
             this.packetIdentifier = packetIdentifier;
             return this;
         }
 
-        @NotNull
-        public Mqtt3Builder withPublishId(final long publishId) {
+        public @NotNull Mqtt3Builder withPublishId(final long publishId) {
             this.publishId = publishId;
             return this;
         }
@@ -330,6 +311,7 @@ public class PUBLISHFactory {
                 .withHivemqId(origin.getHivemqId())
                 .withTopic(packet.getTopic())
                 .withQoS(QoS.from(packet.getQos()))
+                .withOnwardQos(QoS.from(packet.getOnwardQos()))
                 .withPayload(Bytes.getBytesFromReadOnlyBuffer(packet.getPayload()))
                 .withRetain(packet.getRetain())
                 .withMessageExpiryInterval(packet.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))

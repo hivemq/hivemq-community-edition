@@ -342,6 +342,7 @@ public class ClientQueuePersistenceSerializer {
         cursor += Short.BYTES;
 
         builder.withQoS(QoS.valueOf(serialized[cursor] & QOS_BITS));
+        builder.withOnwardQos(QoS.valueOf(serialized[cursor] & QOS_BITS));
         builder.withDuplicateDelivery((serialized[cursor] & DUPLICATE_DELIVERY_BIT) == DUPLICATE_DELIVERY_BIT);
         builder.withRetain((serialized[cursor] & RETAINED_BIT) == RETAINED_BIT);
         cursor += 1;

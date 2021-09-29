@@ -58,6 +58,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt3Publish() {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withPayload("payload".getBytes())
                 .withPacketIdentifier(1)
@@ -68,6 +69,7 @@ public class TestMessageUtil {
     public static PUBLISH createMqtt3Publish(
             final String hivemqId, final String topic, final QoS qoS, final byte[] payload, final boolean retain) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
+                .withOnwardQos(qoS)
                 .withTopic(topic)
                 .withPayload(payload)
                 .withRetain(retain)
@@ -78,6 +80,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt3Publish(final String topic, final byte[] payload, final QoS qoS) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
+                .withOnwardQos(qoS)
                 .withTopic(topic)
                 .withPayload(payload)
                 .withHivemqId("hivemqId")
@@ -87,6 +90,7 @@ public class TestMessageUtil {
     public static PUBLISH createMqtt3Publish(
             final String hivemqId, final long publishId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withTopic("topic")
                 .withHivemqId(hivemqId)
                 .withPublishId(publishId)
@@ -97,6 +101,7 @@ public class TestMessageUtil {
     public static PUBLISH createMqtt3Publish(
             final long publishId, final PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withPublishId(publishId)
                 .withPersistence(publishPayloadPersistence)
@@ -124,6 +129,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt3Publish(final String hivemqId, final long publishid) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withPacketIdentifier(1)
                 .withPublishId(publishid)
@@ -134,6 +140,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt3Publish(final long timestamp) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withTimestamp(timestamp)
                 .withHivemqId("hivemqId")
@@ -143,6 +150,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt3Publish(final QoS qoS) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
+                .withOnwardQos(qoS)
                 .withTopic("topic")
                 .withPayload("payload".getBytes())
                 .withHivemqId("hivemqId")
@@ -158,6 +166,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt5Publish(final String topic, final QoS qos) {
         return new PUBLISHFactory.Mqtt5Builder().withQoS(qos)
+                .withOnwardQos(qos)
                 .withTopic(topic)
                 .withPayload("payload".getBytes())
                 .withPacketIdentifier(1)
@@ -168,6 +177,7 @@ public class TestMessageUtil {
     public static PUBLISHFactory.Mqtt5Builder getDefaultPublishBuilder(
             final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
         return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withPayload("payload".getBytes())
                 .withPacketIdentifier(1)
@@ -178,6 +188,7 @@ public class TestMessageUtil {
 
     public static PUBLISH createMqtt5Publish(final int packetId) {
         return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withTopic("topic")
                 .withPayload("payload".getBytes())
                 .withPacketIdentifier(packetId)
@@ -190,21 +201,22 @@ public class TestMessageUtil {
     }
 
     public static PUBLISH createMqtt5Publish(
-            @NotNull final String hivemqId,
-            @NotNull final String topic,
-            @NotNull final byte[] payload,
-            @NotNull final QoS qos,
+            final @NotNull String hivemqId,
+            final @NotNull String topic,
+            final @NotNull byte[] payload,
+            final @NotNull QoS qos,
+            final @NotNull QoS onwardQos,
             final boolean isRetain,
             final long messageExpiryInterval,
-            @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
-            @Nullable final String contentType,
-            @Nullable final String responseTopic,
-            @Nullable final byte[] correlationData,
-            @NotNull final Mqtt5UserProperties userProperties,
+            final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+            final @Nullable String contentType,
+            final @Nullable String responseTopic,
+            final @Nullable byte[] correlationData,
+            final @NotNull Mqtt5UserProperties userProperties,
             final int packetIdentifier,
             final boolean isDup,
             final boolean isNewTopicAlias,
-            @Nullable final ImmutableList<Integer> subscriptionIdentifiers) {
+            final @Nullable ImmutableList<Integer> subscriptionIdentifiers) {
 
         final ImmutableIntArray subscriptionIdentifierArray;
         if (subscriptionIdentifiers == null) {
@@ -217,6 +229,7 @@ public class TestMessageUtil {
                 .withTopic(topic)
                 .withPayload(payload)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withRetain(isRetain)
                 .withMessageExpiryInterval(messageExpiryInterval)
                 .withPayloadFormatIndicator(payloadFormatIndicator)
@@ -236,6 +249,7 @@ public class TestMessageUtil {
         return createMqtt5Publish("hivemqId",
                 "topic",
                 "payload".getBytes(),
+                QoS.EXACTLY_ONCE,
                 QoS.EXACTLY_ONCE,
                 true,
                 360,

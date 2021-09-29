@@ -194,7 +194,7 @@ public class PublishDistributorImpl implements PublishDistributor {
                 .withRetain(publish.isRetain() && retainAsPublished)
                 .withSubscriptionIdentifiers(identifiers);
 
-        final int qos = Math.min(publish.getQoS().getQosNumber(), subscriptionQos);
+        final int qos = Math.min(publish.getOnwardQoS().getQosNumber(), subscriptionQos);
         builder.withQoS(QoS.valueOf(qos));
 
         if (qos == 0) {
