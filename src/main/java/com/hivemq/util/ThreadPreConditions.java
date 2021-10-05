@@ -28,6 +28,13 @@ public class ThreadPreConditions {
 
     private static boolean enabled = false;
 
+    static {
+        final String enableThreadPreconditionString = System.getProperty("TEST_ENABLE_THREAD_PRECONDITION");
+        if (enableThreadPreconditionString != null) {
+            enabled = Boolean.parseBoolean(enableThreadPreconditionString);
+        }
+    }
+
     public static boolean enabled() {
         return enabled;
     }
