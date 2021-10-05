@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import util.InitFutureUtilsExecutorRule;
 
@@ -128,7 +127,7 @@ public class DisconnectHandlerTest {
     public void test_graceful_flag_set_on_message() {
 
         channel.writeInbound(new DISCONNECT());
-        assertEquals(ClientState.DISCONNECTED_GRACEFULLY, clientConnection.getClientState());
+        assertEquals(ClientState.DISCONNECTED_BY_CLIENT, clientConnection.getClientState());
     }
 
     @Test
@@ -142,7 +141,7 @@ public class DisconnectHandlerTest {
     @Test
     public void test_graceful_disconnect_remove_mapping() throws Exception {
 
-        final String[] topics = new String[]{"topic1", "topic2", "topic3"};
+        final String[] topics = {"topic1", "topic2", "topic3"};
         clientConnection.setTopicAliasMapping(topics);
 
         channel.writeInbound(new DISCONNECT());
@@ -153,7 +152,7 @@ public class DisconnectHandlerTest {
     @Test
     public void test_ungraceful_disconnect_remove_mapping() throws Exception {
 
-        final String[] topics = new String[]{"topic1", "topic2", "topic3"};
+        final String[] topics = {"topic1", "topic2", "topic3"};
         clientConnection.setTopicAliasMapping(topics);
 
         final ChannelFuture future = channel.close();
@@ -175,7 +174,7 @@ public class DisconnectHandlerTest {
     public void test_no_graceful_flag_set_on_close() throws Exception {
         final ChannelFuture future = channel.close();
         future.await();
-        assertEquals(ClientState.DISCONNECTED_UNGRACEFULLY, clientConnection.getClientState());
+        assertEquals(ClientState.DISCONNECTED_UNSPECIFIED, clientConnection.getClientState());
     }
 
     @Test
@@ -206,8 +205,8 @@ public class DisconnectHandlerTest {
 
         channel.writeInbound(disconnect);
 
-        verify(eventLog, times(1)).clientDisconnected(channel, disconnectReason);
-        verify(eventLog, Mockito.never()).clientDisconnected(channel, null);
+        verify(eventLog, times(1)).clientDisconnectedGracefully(clientConnection, disconnectReason);
+        verify(eventLog, never()).clientDisconnectedUngracefully(clientConnection);
     }
 
 
@@ -217,7 +216,7 @@ public class DisconnectHandlerTest {
         when(clientSessionPersistence.clientDisconnected(anyString(),
                 anyBoolean(),
                 anyLong())).thenReturn(Futures.immediateFuture(null));
-        clientConnection.proposeClientState(ClientState.TAKEN_OVER);
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
         clientConnection.setSendWill(true);
         clientConnection.setPreventLwt(false);
 
@@ -228,7 +227,7 @@ public class DisconnectHandlerTest {
 
         channel.disconnect().get();
 
-        verify(clientSessionPersistence, Mockito.times(1)).clientDisconnected(eq("client"), eq(true), anyLong());
+        verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), eq(true), anyLong());
     }
 
     @Test

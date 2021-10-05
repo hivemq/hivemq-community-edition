@@ -424,7 +424,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             @Override
             public void onFailure(@NotNull final Throwable t) {
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
                 ctx.close();
                 Exceptions.rethrowError("Exception on disconnecting client with same client identifier", t);
             }
@@ -664,7 +663,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // Otherwise we could takeover the same client twice
             final int nextRetry;
             if (oldClientConnection.getClientState() != ClientState.DISCONNECTING
-                    && oldClientConnection.getClientState() != ClientState.TAKEN_OVER) {
+                    && !oldClientConnection.getClientState().disconnected()) {
 
                 oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
 

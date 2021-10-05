@@ -16,21 +16,21 @@ public enum ClientState {
     AUTHENTICATED,
 
     DISCONNECTING,
+    CONNECT_FAILED,
     DISCONNECTED_UNSPECIFIED,
-    DISCONNECTED_GRACEFULLY,
-    DISCONNECTED_UNGRACEFULLY,
-    TAKEN_OVER;
+    DISCONNECTED_BY_CLIENT,
+    DISCONNECTED_BY_SERVER,
+    DISCONNECTED_TAKEN_OVER;
 
-    private static final @NotNull EnumSet<ClientState> IMMUTABLE_STATUS =
-            EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
+    private static final @NotNull EnumSet<ClientState> DISCONNECTED = EnumSet.of(DISCONNECTED_UNSPECIFIED,
+            DISCONNECTED_BY_CLIENT, DISCONNECTED_BY_SERVER, DISCONNECTED_TAKEN_OVER, CONNECT_FAILED);
+
+    private static final @NotNull EnumSet<ClientState> IMMUTABLE = DISCONNECTED;
 
     private static final @NotNull EnumSet<ClientState> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
 
-    private static final @NotNull EnumSet<ClientState> DISCONNECTED =
-            EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
-
-    public boolean immutableStatus() {
-        return IMMUTABLE_STATUS.contains(this);
+    public boolean immutable() {
+        return IMMUTABLE.contains(this);
     }
 
     public boolean unauthenticated() {

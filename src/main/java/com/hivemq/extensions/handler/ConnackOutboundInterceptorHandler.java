@@ -200,10 +200,11 @@ public class ConnackOutboundInterceptorHandler {
         public void run() {
             if (outputHolder.get().isPrevent()) {
                 final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-                clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
+                clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
                 eventLog.clientWasDisconnected(
                         ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
+                clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
                 ctx.channel().close();
             } else {
                 ctx.writeAndFlush(CONNACK.from(inputHolder.get().getConnackPacket()), promise);

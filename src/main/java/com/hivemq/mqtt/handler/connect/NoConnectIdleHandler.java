@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
@@ -68,16 +69,15 @@ public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) {
 
-        if (evt instanceof IdleStateEvent) {
+        if (evt instanceof IdleStateEvent && ((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
+            final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+            clientConnection.proposeClientState(ClientState.DISCONNECTING);
+            if (log.isDebugEnabled()) {
 
-            if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
-                if (log.isDebugEnabled()) {
-
-                    log.debug("Client with IP {} disconnected. The client was idle for too long without sending a MQTT CONNECT packet",
-                            ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
-                }
+                log.debug("Client with IP {} disconnected. The client was idle for too long without sending a MQTT CONNECT packet",
+                        ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
                 eventLog.clientWasDisconnected(ctx.channel(), "No CONNECT sent in time");
+                clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
                 ctx.close();
                 return;
             }
