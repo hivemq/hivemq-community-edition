@@ -16,7 +16,7 @@
 package com.hivemq.mqtt.handler.disconnect;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
@@ -69,7 +69,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -114,7 +114,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -143,7 +143,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -174,7 +174,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -199,7 +199,7 @@ public class MqttServerDisconnectorTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
@@ -220,7 +220,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -246,7 +246,7 @@ public class MqttServerDisconnectorTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -266,7 +266,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
@@ -286,7 +286,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
 
         final CountDownLatch eventLatch = new CountDownLatch(1);

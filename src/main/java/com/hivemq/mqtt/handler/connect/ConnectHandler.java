@@ -18,7 +18,7 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -186,7 +186,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addPublishFlowHandler(ctx, connect);
 
-        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATING);
         clientConnection.setAuthConnect(connect);
         pluginAuthenticatorService.authenticateConnect(ctx, clientConnection, connect, createClientSettings(connect));
     }
@@ -424,7 +424,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             @Override
             public void onFailure(@NotNull final Throwable t) {
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
                 ctx.close();
                 Exceptions.rethrowError("Exception on disconnecting client with same client identifier", t);
             }
@@ -663,7 +663,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // We have to check if the old client is currently taken over
             // Otherwise we could takeover the same client twice
             final int nextRetry;
-            if (oldClientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
+            if (oldClientConnection.getClientState() != ClientState.TAKEN_OVER) {
                 if (oldClient.eventLoop().inEventLoop()) {
                     disconnectPreviousClient(msg, oldClient, disconnectFuture);
                 } else {

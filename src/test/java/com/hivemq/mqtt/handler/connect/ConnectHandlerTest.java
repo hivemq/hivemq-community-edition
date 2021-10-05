@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -642,7 +642,7 @@ public class ConnectHandlerTest {
 
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
@@ -663,7 +663,7 @@ public class ConnectHandlerTest {
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertEquals(ClientStatus.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -682,14 +682,14 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
-        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -706,7 +706,7 @@ public class ConnectHandlerTest {
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertEquals(ClientStatus.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -733,7 +733,7 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnection.setDisconnectFuture(disconnectFuture);
-        clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
+        clientConnection.proposeClientState(ClientState.TAKEN_OVER);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -751,14 +751,14 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.AUTHENTICATED);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStateUnsafe(ClientState.AUTHENTICATED);
         disconnectFuture.set(null);
 
         channel.runPendingTasks();
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertEquals(ClientStatus.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -784,7 +784,7 @@ public class ConnectHandlerTest {
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         clientConnection.setDisconnectFuture(disconnectFuture);
-        clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
+        clientConnection.proposeClientState(ClientState.TAKEN_OVER);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -800,14 +800,14 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.AUTHENTICATED);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStateUnsafe(ClientState.AUTHENTICATED);
         disconnectFuture.set(null);
 
         channel.runPendingTasks();
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
-        assertEquals(ClientStatus.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.TAKEN_OVER, oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
 
         assertTrue(disconnectEventLatch.await(5, TimeUnit.SECONDS));
         disconnectMessageWaiter.await();
@@ -1120,7 +1120,7 @@ public class ConnectHandlerTest {
         channel.runPendingTasks();
 
         assertNull(channel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
-        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
     }
 
     @Test(timeout = 5000)
@@ -1160,7 +1160,7 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(channel.isActive());
-        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
     }
 
     @Test(timeout = 5000)
@@ -1446,7 +1446,7 @@ public class ConnectHandlerTest {
 
         channel.runPendingTasks();
 
-        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
+        assertEquals(ClientState.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientState());
         assertEquals(123, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum().intValue());
         assertEquals(123, connect.getReceiveMaximum());
     }
@@ -1601,7 +1601,7 @@ public class ConnectHandlerTest {
                 QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_MOST_ONCE)));
 
         ctx = channel.pipeline().context(ConnectHandler.class);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
     }
 
     private static class TestDisconnectEventHandler extends SimpleChannelInboundHandler<CONNECT> {

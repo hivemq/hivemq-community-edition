@@ -19,7 +19,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -128,7 +128,7 @@ public class DisconnectHandlerTest {
     public void test_graceful_flag_set_on_message() {
 
         channel.writeInbound(new DISCONNECT());
-        assertEquals(ClientStatus.DISCONNECTED_GRACEFULLY, clientConnection.getClientStatus());
+        assertEquals(ClientState.DISCONNECTED_GRACEFULLY, clientConnection.getClientState());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class DisconnectHandlerTest {
     public void test_no_graceful_flag_set_on_close() throws Exception {
         final ChannelFuture future = channel.close();
         future.await();
-        assertEquals(ClientStatus.DISCONNECTED_UNGRACEFULLY, clientConnection.getClientStatus());
+        assertEquals(ClientState.DISCONNECTED_UNGRACEFULLY, clientConnection.getClientState());
     }
 
     @Test
@@ -217,7 +217,7 @@ public class DisconnectHandlerTest {
         when(clientSessionPersistence.clientDisconnected(anyString(),
                 anyBoolean(),
                 anyLong())).thenReturn(Futures.immediateFuture(null));
-        clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
+        clientConnection.proposeClientState(ClientState.TAKEN_OVER);
         clientConnection.setSendWill(true);
         clientConnection.setPreventLwt(false);
 
@@ -238,7 +238,7 @@ public class DisconnectHandlerTest {
         clientConnection.setClientId("client");
         clientConnection.setClientSessionExpiryInterval(0L);
         clientConnection.setDisconnectFuture(SettableFuture.create());
-        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
 
         when(clientSessionPersistence.clientDisconnected(
                 anyString(),
@@ -273,7 +273,7 @@ public class DisconnectHandlerTest {
         clientConnection.setClientId(null);
         clientConnection.setCleanStart(false);
         clientConnection.setClientSessionExpiryInterval(0L);
-        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setDisconnectFuture(disconnectFuture);
 
         channel.disconnect().get();

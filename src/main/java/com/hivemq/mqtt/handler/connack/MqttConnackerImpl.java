@@ -17,7 +17,7 @@ package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -80,7 +80,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         //for preventing success, when a connack will be prevented by an extension
         channelFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
                 eventLog.clientConnected(future.channel());
             }
         });
@@ -114,7 +114,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         // Avoid calling disconnect multiple times.
-        if (clientConnection.getClientStatus().disconnected()) {
+        if (clientConnection.getClientState().disconnected()) {
             return;
         }
 
@@ -122,7 +122,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         logConnack(channel, logMessage, eventLogMessage);
         if (protocolVersion == null) {
-            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
             channel.close();
         } else if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
             connackError3(clientConnection, connackWithReasonCode, reasonCode, reasonString, isAuthentication);
@@ -156,10 +156,10 @@ public class MqttConnackerImpl implements MqttConnacker {
         final Mqtt3ConnAckReturnCode returnCode = transformReasonCode(reasonCode);
 
         if (returnCode != null && withReasonCode) {
-            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
         } else {
-            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
             //Do not send connack to not let the client know its an mqtt server
             clientConnection.getChannel().close();
         }
@@ -205,10 +205,10 @@ public class MqttConnackerImpl implements MqttConnacker {
                 }
             }
 
-            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(connackBuilder.build()).addListener(ChannelFutureListener.CLOSE);
         } else {
-            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
             //Do not send connack to not let the client know its an mqtt server
             clientConnection.getChannel().close();
         }
@@ -221,7 +221,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if (clientConnection.getClientStatus() != ClientStatus.CONNECTING) {
+        if (clientConnection.getClientState() != ClientState.CONNECTING) {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
