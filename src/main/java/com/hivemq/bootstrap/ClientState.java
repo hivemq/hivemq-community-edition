@@ -7,7 +7,7 @@ import java.util.EnumSet;
 /**
  * @author Abdullah Imal
  */
-public enum ClientStatus {
+public enum ClientState {
 
     CONNECTING,
 
@@ -20,12 +20,12 @@ public enum ClientStatus {
     DISCONNECTED_UNGRACEFULLY,
     TAKEN_OVER;
 
-    private static final @NotNull EnumSet<ClientStatus> IMMUTABLE_STATUS =
+    private static final @NotNull EnumSet<ClientState> IMMUTABLE_STATUS =
             EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
 
-    private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
+    private static final @NotNull EnumSet<ClientState> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
 
-    private static final @NotNull EnumSet<ClientStatus> DISCONNECTED =
+    private static final @NotNull EnumSet<ClientState> DISCONNECTED =
             EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
 
     public boolean immutableStatus() {

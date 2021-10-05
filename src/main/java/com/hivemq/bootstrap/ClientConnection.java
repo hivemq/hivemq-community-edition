@@ -46,7 +46,7 @@ public class ClientConnection {
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
-    private volatile @NotNull ClientStatus clientStatus = ClientStatus.CONNECTING;
+    private volatile @NotNull ClientState clientState = ClientState.CONNECTING;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable String clientId;
     private boolean cleanStart;
@@ -108,21 +108,21 @@ public class ClientConnection {
         return publishFlushHandler;
     }
 
-    public @NotNull ClientStatus getClientStatus() {
-        return clientStatus;
+    public @NotNull ClientState getClientState() {
+        return clientState;
     }
 
-    public void proposeClientStatus(final @NotNull ClientStatus clientStatus) {
-        if (!this.clientStatus.immutableStatus()) {
-            this.clientStatus = clientStatus;
+    public void proposeClientState(final @NotNull ClientState clientState) {
+        if (!this.clientState.immutableStatus()) {
+            this.clientState = clientState;
         }
     }
 
     // ONLY VISIBLE FOR TESTING !!!
     // DO NOT USE IN PROD !!!
     @VisibleForTesting()
-    public void setClientStatusUnsafe(final @NotNull ClientStatus clientStatus) {
-        this.clientStatus = clientStatus;
+    public void setClientStateUnsafe(final @NotNull ClientState clientState) {
+        this.clientState = clientState;
     }
 
     public @Nullable ProtocolVersion getProtocolVersion() {

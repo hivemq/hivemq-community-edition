@@ -17,7 +17,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.codec.decoder.MQTTMessageDecoder;
@@ -235,7 +235,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
         clientConnection.setAuthMethod("auth method");
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
@@ -258,7 +258,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
         clientConnection.setAuthMethod("auth method");
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
@@ -280,7 +280,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
@@ -300,7 +300,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
         clientConnection.setAuthMethod(auth.getAuthMethod());
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
@@ -314,7 +314,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createMulti());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
         clientConnection.setAuthMethod(auth.getAuthMethod());
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
 
         pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 

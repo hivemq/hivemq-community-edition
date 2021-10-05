@@ -16,7 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -71,7 +71,7 @@ public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
 
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
                 if (log.isDebugEnabled()) {
 
                     log.debug("Client with IP {} disconnected. The client was idle for too long without sending a MQTT CONNECT packet",

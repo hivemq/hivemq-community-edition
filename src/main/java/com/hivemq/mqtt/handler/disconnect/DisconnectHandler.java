@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -89,7 +89,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_GRACEFULLY);
 
         final String clientId = clientConnection.getClientId();
 
@@ -118,19 +118,19 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNSPECIFIED);
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
 
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event.
-        final boolean initialLog = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_UNSPECIFIED;
+        final boolean initialLog = clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED;
 
         handleInactive(channel, ctx);
 
         final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
-        final boolean gracefulDisconnect = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_GRACEFULLY;
+        final boolean gracefulDisconnect = clientConnection.getClientState() == ClientState.DISCONNECTED_GRACEFULLY;
         final boolean preventLwt = clientConnection.isPreventLwt();
-        final boolean takenOver = clientConnection.getClientStatus() == ClientStatus.TAKEN_OVER;
-        final boolean authenticated = clientConnection.getClientStatus() == ClientStatus.AUTHENTICATED;
+        final boolean takenOver = clientConnection.getClientState() == ClientState.TAKEN_OVER;
+        final boolean authenticated = clientConnection.getClientState() == ClientState.AUTHENTICATED;
 
         if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
             clientConnection.setSendWill(true);
@@ -163,7 +163,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
         //only change the session information if user is authenticated
-        if (clientConnection.getClientStatus().unauthenticated()) {
+        if (clientConnection.getClientState().unauthenticated()) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
@@ -201,7 +201,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
-                if (clientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
+                if (clientConnection.getClientState() != ClientState.TAKEN_OVER) {
                     channelPersistence.remove(clientId);
                 }
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();

@@ -19,7 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -181,7 +181,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             final @NotNull ClientConnection clientConnection,
             final @NotNull AUTH auth) {
 
-        final boolean reAuth = clientConnection.getClientStatus() == ClientStatus.RE_AUTHENTICATING;
+        final boolean reAuth = clientConnection.getClientState() == ClientState.RE_AUTHENTICATING;
 
         final String authMethod = auth.getAuthMethod();
         if (!authMethod.equals(clientConnection.getAuthMethod())) {

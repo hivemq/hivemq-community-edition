@@ -17,7 +17,7 @@ package com.hivemq.mqtt.handler.auth;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientStatus;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -98,7 +98,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             final @NotNull ClientConnection clientConnection) {
 
         final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
-        if (clientConnection.getClientStatus() == ClientStatus.RE_AUTHENTICATING) {
+        if (clientConnection.getClientState() == ClientState.RE_AUTHENTICATING) {
             disconnector.disconnect(
                     ctx.channel(),
                     SUCCESS_AUTH_RECEIVED_FROM_CLIENT,
@@ -132,10 +132,10 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             final @NotNull AUTH msg,
             final @NotNull ClientConnection clientConnection) {
 
-        final ClientStatus clientStatus = clientConnection.getClientStatus();
-        if (clientStatus == ClientStatus.AUTHENTICATING || clientStatus == ClientStatus.RE_AUTHENTICATING) {
+        final ClientState clientState = clientConnection.getClientState();
+        if (clientState == ClientState.AUTHENTICATING || clientState == ClientState.RE_AUTHENTICATING) {
             final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
-            if (clientStatus == ClientStatus.RE_AUTHENTICATING) {
+            if (clientState == ClientState.RE_AUTHENTICATING) {
                 disconnector.disconnect(
                         ctx.channel(),
                         REAUTHENTICATE_DURING_RE_AUTH,
@@ -158,7 +158,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             return;
         }
 
-        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
         authService.authenticateAuth(ctx, clientConnection, msg);
     }
 }
