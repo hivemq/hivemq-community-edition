@@ -175,7 +175,7 @@ public class DisconnectHandlerTest {
     public void test_no_graceful_flag_set_on_close() throws Exception {
         final ChannelFuture future = channel.close();
         future.await();
-        assertEquals(ClientStatus.DISCONNECTED_UNSPECIFIED, clientConnection.getClientStatus());
+        assertEquals(ClientStatus.DISCONNECTED_UNGRACEFULLY, clientConnection.getClientStatus());
     }
 
     @Test

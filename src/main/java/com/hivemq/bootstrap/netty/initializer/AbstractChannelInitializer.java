@@ -50,13 +50,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
     private final @NotNull ChannelDependencies channelDependencies;
     private final @NotNull Listener listener;
-
     private final boolean throttlingEnabled;
     private final boolean legacyNettyShutdown;
 
     public AbstractChannelInitializer(
-            final @NotNull ChannelDependencies channelDependencies,
-            final @NotNull Listener listener) {
+            final @NotNull ChannelDependencies channelDependencies, final @NotNull Listener listener) {
         this.channelDependencies = channelDependencies;
         this.listener = listener;
         final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
