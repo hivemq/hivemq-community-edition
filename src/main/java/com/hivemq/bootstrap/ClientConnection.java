@@ -73,7 +73,6 @@ public class ClientConnection {
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
-    private boolean gracefulDisconnect;
     private boolean sendWill = true;
     private boolean preventLwt;
     private boolean inFlightMessagesSent;
@@ -117,7 +116,7 @@ public class ClientConnection {
     }
 
     public void setClientStatus(final @NotNull ClientStatus clientStatus) {
-        if (this.clientStatus != ClientStatus.TAKEN_OVER) {
+        if (!this.clientStatus.immutableStatus()) {
             this.clientStatus = clientStatus;
         }
     }
@@ -349,14 +348,6 @@ public class ClientConnection {
             }
             return this.connectionAttributes;
         }
-    }
-
-    public boolean isGracefulDisconnect() {
-        return gracefulDisconnect;
-    }
-
-    public void setGracefulDisconnect(final boolean gracefulDisconnect) {
-        this.gracefulDisconnect = gracefulDisconnect;
     }
 
     public boolean isSendWill() {

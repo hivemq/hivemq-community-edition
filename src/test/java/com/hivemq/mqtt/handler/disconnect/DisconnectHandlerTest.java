@@ -128,7 +128,7 @@ public class DisconnectHandlerTest {
     public void test_graceful_flag_set_on_message() {
 
         channel.writeInbound(new DISCONNECT());
-        assertTrue(clientConnection.isGracefulDisconnect());
+        assertEquals(ClientStatus.DISCONNECTED_GRACEFULLY, clientConnection.getClientStatus());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class DisconnectHandlerTest {
     public void test_no_graceful_flag_set_on_close() throws Exception {
         final ChannelFuture future = channel.close();
         future.await();
-        assertFalse(clientConnection.isGracefulDisconnect());
+        assertEquals(ClientStatus.DISCONNECTED_UNGRACEFULLY, clientConnection.getClientStatus());
     }
 
     @Test
