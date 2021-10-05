@@ -214,7 +214,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        clientConnection.setClientStatus(ClientStatus.UNAUTHENTICATED);
+        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
         connectAuthenticated(ctx, clientConnection, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnection);
     }

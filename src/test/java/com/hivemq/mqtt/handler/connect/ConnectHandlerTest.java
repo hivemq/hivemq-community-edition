@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.HivemqId;
@@ -1115,7 +1116,7 @@ public class ConnectHandlerTest {
         handler.connectSuccessfulAuthenticated(ctx, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get(), connect, null);
 
         assertNull(channel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
+        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
     }
 
     @Test(timeout = 5000)
@@ -1155,7 +1156,7 @@ public class ConnectHandlerTest {
         assertNotNull(connack);
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
         assertTrue(channel.isActive());
-        assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
+        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
     }
 
     @Test(timeout = 5000)
@@ -1439,7 +1440,7 @@ public class ConnectHandlerTest {
         clientSettings.setOverloadProtectionThrottlingLevel(NONE);
         handler.connectSuccessfulAuthenticated(ctx, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get(), connect, clientSettings);
 
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
+        assertEquals(ClientStatus.AUTHENTICATED, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientStatus());
         assertEquals(123, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum().intValue());
         assertEquals(123, connect.getReceiveMaximum());
     }
