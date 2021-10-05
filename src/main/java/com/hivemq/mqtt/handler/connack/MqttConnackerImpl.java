@@ -32,6 +32,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -72,6 +73,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkNotNull(ctx, "ChannelHandlerContext must never be null");
         Preconditions.checkNotNull(connack, "CONNACK must never be null");
         Preconditions.checkArgument(connack.getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS, "Error is no success");
+        ThreadPreConditions.inNettyChildEventloop();
 
         final ChannelFuture channelFuture = ctx.writeAndFlush(connack);
 
@@ -107,6 +109,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
+        ThreadPreConditions.inNettyChildEventloop();
 
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
