@@ -1,18 +1,34 @@
 package com.hivemq.bootstrap;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
+import java.util.EnumSet;
+
 /**
  * @author Abdullah Imal
  */
 public enum ClientStatus {
 
-    TCP_OPEN,
     CONNECTING,
-    CONNECTED,
+
     AUTHENTICATING,
     RE_AUTHENTICATING,
     AUTHENTICATED,
-    UNAUTHENTICATED,
+
     DISCONNECTED_GRACEFULLY,
     DISCONNECTED_UNGRACEFULLY,
-    TAKEN_OVER
+    TAKEN_OVER;
+
+    private static final @NotNull EnumSet<ClientStatus> LEGACY_UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
+
+    private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED =
+            EnumSet.of(CONNECTING, AUTHENTICATING, RE_AUTHENTICATING);
+
+    public boolean legacyUnauthenticated() {
+        return LEGACY_UNAUTHENTICATED.contains(this);
+    }
+
+    public boolean unauthenticated() {
+        return UNAUTHENTICATED.contains(this);
+    }
 }
