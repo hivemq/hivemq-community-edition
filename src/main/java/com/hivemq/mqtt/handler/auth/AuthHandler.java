@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.auth;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -75,27 +76,29 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
 
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        final boolean reAuthOngoing = clientConnection.isReAuthOngoing();
-        final boolean authOngoing = clientConnection.isAuthOngoing();
 
         authSender.logAuth(channel, msg.getReasonCode(), true);
 
         switch (msg.getReasonCode()) {
             case SUCCESS:
-                onReceivedSuccess(ctx, msg, reAuthOngoing);
+                onReceivedSuccess(ctx, msg, clientConnection);
                 break;
             case CONTINUE_AUTHENTICATION:
-                onReceivedContinue(ctx, msg, reAuthOngoing);
+                onReceivedContinue(ctx, msg, clientConnection);
                 break;
             case REAUTHENTICATE:
-                onReceivedReAuthenticate(ctx, msg, authOngoing, reAuthOngoing);
+                onReceivedReAuthenticate(ctx, msg, clientConnection);
                 break;
         }
     }
 
-    private void onReceivedSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean reAuthOngoing) {
+    private void onReceivedSuccess(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull AUTH msg,
+            final @NotNull ClientConnection clientConnection) {
+
         final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
-        if (reAuthOngoing) {
+        if (clientConnection.getClientStatus() == ClientStatus.RE_AUTHENTICATING) {
             disconnector.disconnect(
                     ctx.channel(),
                     SUCCESS_AUTH_RECEIVED_FROM_CLIENT,
@@ -117,14 +120,22 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
         }
     }
 
-    private void onReceivedContinue(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean reAuthOngoing) {
-        authService.authenticateAuth(ctx, msg, reAuthOngoing);
+    private void onReceivedContinue(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull AUTH msg,
+            final @NotNull ClientConnection clientConnection) {
+        authService.authenticateAuth(ctx, clientConnection, msg);
     }
 
-    private void onReceivedReAuthenticate(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH msg, final boolean authOngoing, final boolean reAuthOngoing) {
-        if (reAuthOngoing || authOngoing) {
+    private void onReceivedReAuthenticate(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull AUTH msg,
+            final @NotNull ClientConnection clientConnection) {
+
+        final ClientStatus clientStatus = clientConnection.getClientStatus();
+        if (clientStatus == ClientStatus.CONNECTING || clientStatus == ClientStatus.RE_AUTHENTICATING) {
             final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
-            if (reAuthOngoing) {
+            if (clientStatus == ClientStatus.RE_AUTHENTICATING) {
                 disconnector.disconnect(
                         ctx.channel(),
                         REAUTHENTICATE_DURING_RE_AUTH,
@@ -147,7 +158,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             return;
         }
 
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setReAuthOngoing(true);
-        authService.authenticateReAuth(ctx, msg);
+        clientConnection.setReAuthOngoing(true);
+        authService.authenticateAuth(ctx, clientConnection, msg);
     }
 }

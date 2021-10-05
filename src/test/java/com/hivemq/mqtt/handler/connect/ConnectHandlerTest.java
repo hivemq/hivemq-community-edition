@@ -1112,7 +1112,7 @@ public class ConnectHandlerTest {
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
 
-        handler.connectSuccessfulAuthenticated(ctx, connect, null);
+        handler.connectSuccessfulAuthenticated(ctx, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get(), connect, null);
 
         assertNull(channel.pipeline().get(ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER));
         assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
@@ -1126,7 +1126,7 @@ public class ConnectHandlerTest {
                 new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
         channel.writeInbound(connect);
 
-        verify(internalAuthServiceImpl, times(1)).authenticateConnect(any(), any(), any());
+        verify(internalAuthServiceImpl, times(1)).authenticateConnect(any(), any(), any(), any());
     }
 
     @Test(timeout = 5000)
@@ -1437,7 +1437,7 @@ public class ConnectHandlerTest {
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
         clientSettings.setClientReceiveMaximum(123);
         clientSettings.setOverloadProtectionThrottlingLevel(NONE);
-        handler.connectSuccessfulAuthenticated(ctx, connect, clientSettings);
+        handler.connectSuccessfulAuthenticated(ctx, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get(), connect, clientSettings);
 
         assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isAuthAuthenticated());
         assertEquals(123, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum().intValue());
@@ -1572,9 +1572,10 @@ public class ConnectHandlerTest {
             handler.connectSuccessfulUnauthenticated(
                     invocation.getArgument(0),
                     invocation.getArgument(1),
-                    invocation.getArgument(2));
+                    invocation.getArgument(2),
+                    invocation.getArgument(3));
             return null;
-        }).when(internalAuthServiceImpl).authenticateConnect(any(), any(), any());
+        }).when(internalAuthServiceImpl).authenticateConnect(any(), any(), any(), any());
 
     }
 

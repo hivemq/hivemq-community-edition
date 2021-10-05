@@ -45,6 +45,7 @@ public class ClientConnection {
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
+    private @NotNull ClientStatus clientStatus = ClientStatus.TCP_OPEN;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable String clientId;
     private boolean cleanStart;
@@ -87,7 +88,6 @@ public class ClientConnection {
     private @Nullable String authMethod;
     private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
-    private boolean authOngoing;
     private boolean reAuthOngoing;
     private boolean authAuthenticated;
     private boolean authenticatedOrAuthenticationBypassed;
@@ -113,6 +113,14 @@ public class ClientConnection {
 
     public @NotNull PublishFlushHandler getPublishFlushHandler() {
         return publishFlushHandler;
+    }
+
+    public @NotNull ClientStatus getClientStatus() {
+        return clientStatus;
+    }
+
+    public void setClientStatus(final @NotNull ClientStatus clientStatus) {
+        this.clientStatus = clientStatus;
     }
 
     public @Nullable ProtocolVersion getProtocolVersion() {
@@ -461,14 +469,6 @@ public class ClientConnection {
 
     public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
         this.authUserProperties = authUserProperties;
-    }
-
-    public boolean isAuthOngoing() {
-        return authOngoing;
-    }
-
-    public void setAuthOngoing(final boolean authOngoing) {
-        this.authOngoing = authOngoing;
     }
 
     public boolean isReAuthOngoing() {
