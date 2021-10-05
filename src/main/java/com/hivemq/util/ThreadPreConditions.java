@@ -16,8 +16,6 @@
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Lukas Brandl
@@ -25,8 +23,8 @@ import org.slf4j.LoggerFactory;
 public class ThreadPreConditions {
 
     public static final String SINGLE_WRITER_THREAD_PREFIX = "single-writer";
-
-    private static final Logger log = LoggerFactory.getLogger(ThreadPreConditions.class);
+    public static final String NETTY_NATIVE_CHILD_EVENTLOOP = "hivemq-native-eventloop-child";
+    public static final String NETTY_CHILD_EVENTLOOP = "hivemq-eventloop-child";
 
     private static boolean enabled = false;
 
@@ -46,13 +44,26 @@ public class ThreadPreConditions {
         if (!enabled) {
             return;
         }
-        if (!Thread.currentThread().getName().startsWith(prefix)) {
-            log.error("Thread name doesn't start with {}", prefix);
-            throw new ThreadPreConditionException();
+        final String name = Thread.currentThread().getName();
+        if (!name.startsWith(prefix)) {
+            throw new ThreadPreConditionException("Thread name doesn't start with '" + prefix + "' as expected. Thread name: '" + name + "'.");
+        }
+    }
+
+    public static void inNettyChildEventloop() {
+        if (!enabled) {
+            return;
+        }
+        final String name = Thread.currentThread().getName();
+        if (!name.startsWith(NETTY_NATIVE_CHILD_EVENTLOOP) && !name.startsWith(NETTY_CHILD_EVENTLOOP)) {
+            throw new ThreadPreConditionException("Thread name doesn't start with '" + NETTY_NATIVE_CHILD_EVENTLOOP + "' as expected. Thread name: '" + name + "'.");
         }
     }
 
     public static class ThreadPreConditionException extends RuntimeException {
 
+        public ThreadPreConditionException(final @NotNull String message) {
+            super(message);
+        }
     }
 }

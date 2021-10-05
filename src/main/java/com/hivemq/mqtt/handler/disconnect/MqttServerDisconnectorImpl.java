@@ -30,6 +30,7 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
@@ -72,6 +73,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final boolean forceClose) {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
+        ThreadPreConditions.inNettyChildEventloop();
 
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         // Avoid calling disconnect multiple times.
