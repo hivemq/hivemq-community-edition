@@ -63,7 +63,6 @@ public class ClientConnection {
     private @Nullable String[] topicAliasMapping;
     private boolean noSharedSubscription;
     private boolean clientIdAssigned;
-    private boolean disconnectEventLogged;
     private boolean incomingPublishesSkipRest;
     private boolean incomingPublishesDefaultFailedSkipRest;
     private boolean requestResponseInformation;
@@ -269,14 +268,6 @@ public class ClientConnection {
 
     public void setClientIdAssigned(final boolean clientIdAssigned) {
         this.clientIdAssigned = clientIdAssigned;
-    }
-
-    public boolean isDisconnectEventLogged() {
-        return disconnectEventLogged;
-    }
-
-    public void setDisconnectEventLogged(final boolean disconnectEventLogged) {
-        this.disconnectEventLogged = disconnectEventLogged;
     }
 
     /**

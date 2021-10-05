@@ -124,7 +124,6 @@ public class EventLog {
      */
     public void clientDisconnected(@NotNull final Channel channel, @Nullable final String reasonString) {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.setDisconnectEventLogged(true);
         final String clientId = clientConnection.getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         final boolean graceful = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_GRACEFULLY;
@@ -150,7 +149,6 @@ public class EventLog {
      */
     public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.setDisconnectEventLogged(true);
         final String clientId = clientConnection.getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
         log.trace("Client {} was disconnected.", clientId);
