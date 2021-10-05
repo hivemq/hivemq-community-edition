@@ -115,7 +115,7 @@ public class ClientConnection {
         return clientStatus;
     }
 
-    public void setClientStatus(final @NotNull ClientStatus clientStatus) {
+    public void proposeClientStatus(final @NotNull ClientStatus clientStatus) {
         if (!this.clientStatus.immutableStatus()) {
             this.clientStatus = clientStatus;
         }

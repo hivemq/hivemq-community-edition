@@ -186,7 +186,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addPublishFlowHandler(ctx, connect);
 
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATING);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATING);
         clientConnection.setAuthConnect(connect);
         pluginAuthenticatorService.authenticateConnect(ctx, clientConnection, connect, createClientSettings(connect));
     }
@@ -380,7 +380,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull CONNECT msg,
             final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
         clientConnection.setPreventLwt(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {
@@ -697,7 +697,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
-        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatus(ClientStatus.TAKEN_OVER);
+        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.TAKEN_OVER);
 
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
