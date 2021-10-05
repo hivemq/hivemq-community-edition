@@ -180,6 +180,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         final byte[] encoded1 = {
                 // fixed header
                 // type, reserved
@@ -199,6 +204,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded1);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         final byte[] encoded2 = {
                 // fixed header
                 // type, reserved
@@ -217,6 +227,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         };
 
         decodeNullExpected(encoded2);
+
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         final byte[] encoded3 = {
                 // fixed header
@@ -851,7 +866,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
         };
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(protocolVersion);
 
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
