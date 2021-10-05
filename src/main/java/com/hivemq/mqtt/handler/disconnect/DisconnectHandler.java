@@ -29,14 +29,13 @@ import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.MessageIDPools;
-import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -85,7 +84,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     }
 
     @Override
-    protected void channelRead0(final ChannelHandlerContext ctx, final DISCONNECT msg) throws Exception {
+    protected void channelRead0(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT msg) throws Exception {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
@@ -94,7 +94,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final String clientId = clientConnection.getClientId();
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
-        if (msg.getSessionExpiryInterval() != CONNECT.SESSION_EXPIRY_NOT_SET) {
+        if (msg.getSessionExpiryInterval() != Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) {
             clientConnection.setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
         }
 
@@ -114,17 +114,16 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     }
 
     @Override
-    public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(final @NotNull ChannelHandlerContext ctx) throws Exception {
 
-        final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
         clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
 
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event.
         final boolean initialLog = clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED;
 
-        handleInactive(channel, ctx);
+        handleInactive(clientConnection);
 
         final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
         final boolean gracefulDisconnect = clientConnection.getClientState() == ClientState.DISCONNECTED_GRACEFULLY;
@@ -137,7 +136,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         }
 
         if (initialLog) {
-            eventLog.clientDisconnected(channel, null);
+            eventLog.clientDisconnected(ctx.channel(), null);
         }
 
         //increase metrics
@@ -155,11 +154,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         super.channelInactive(ctx);
     }
 
-    private void handleInactive(final @NotNull Channel channel, final @NotNull ChannelHandlerContext ctx) {
+    private void handleInactive(final @NotNull ClientConnection clientConnection) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-
-        final String clientId = clientConnection.getClientId();
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
         //only change the session information if user is authenticated
@@ -172,7 +168,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final Long sessionExpiryInterval = clientConnection.getClientSessionExpiryInterval();
 
-        if (clientId == null || sessionExpiryInterval == null) {
+        if (clientConnection.getClientId() == null || sessionExpiryInterval == null) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
@@ -182,25 +178,22 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final boolean persistent = sessionExpiryInterval > 0;
 
-        persistDisconnectState(channel, clientId, persistent, sessionExpiryInterval);
+        persistDisconnectState(clientConnection, persistent, sessionExpiryInterval);
     }
 
     private void persistDisconnectState(
-            final Channel channel,
-            final @NotNull String clientId,
-            final boolean persistent,
-            final long sessionExpiryInterval) {
+            final ClientConnection clientConnection, final boolean persistent, final long sessionExpiryInterval) {
+
+        final String clientId = clientConnection.getClientId();
 
         messageIDPools.remove(clientId);
-
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         final boolean preventWill = clientConnection.isPreventLwt();
         final boolean sendWill = !preventWill && clientConnection.isSendWill();
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final @Nullable Void result) {
                 if (clientConnection.getClientState() != ClientState.TAKEN_OVER) {
                     channelPersistence.remove(clientId);
                 }
@@ -211,7 +204,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable throwable) {
+            public void onFailure(final @NotNull Throwable throwable) {
                 Exceptions.rethrowError("Unable to update client session data for disconnecting client " + clientId +
                         " with clean session set to " + !persistent + ".", throwable);
             }
