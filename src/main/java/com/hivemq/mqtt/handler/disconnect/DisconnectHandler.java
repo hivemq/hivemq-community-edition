@@ -120,6 +120,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
 
+        final boolean initialLog = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_UNGRACEFULLY;
+
         handleInactive(channel, ctx);
 
         final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
@@ -127,13 +129,12 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final boolean preventLwt = clientConnection.isPreventLwt();
         final boolean takenOver = clientConnection.getClientStatus() == ClientStatus.TAKEN_OVER;
         final boolean authenticated = clientConnection.getClientStatus() == ClientStatus.AUTHENTICATED;
-        final boolean logged = clientConnection.isDisconnectEventLogged();
 
         if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
             clientConnection.setSendWill(true);
         }
 
-        if (!logged) {
+        if (initialLog) {
             eventLog.clientDisconnected(channel, null);
         }
 
