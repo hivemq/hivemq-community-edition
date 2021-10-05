@@ -133,7 +133,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             final @NotNull ClientConnection clientConnection) {
 
         final ClientStatus clientStatus = clientConnection.getClientStatus();
-        if (clientStatus == ClientStatus.CONNECTING || clientStatus == ClientStatus.RE_AUTHENTICATING) {
+        if (clientStatus == ClientStatus.AUTHENTICATING || clientStatus == ClientStatus.RE_AUTHENTICATING) {
             final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_REASON_CODE, msg.getType().name());
             if (clientStatus == ClientStatus.RE_AUTHENTICATING) {
                 disconnector.disconnect(
@@ -158,7 +158,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             return;
         }
 
-        clientConnection.setReAuthOngoing(true);
+        clientConnection.setClientStatus(ClientStatus.RE_AUTHENTICATING);
         authService.authenticateAuth(ctx, clientConnection, msg);
     }
 }
