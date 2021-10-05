@@ -66,7 +66,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
         clientConnection.setAuthData(output.getAuthenticationData());
         clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()));
-        connectHandler.connectSuccessfulAuthenticated(ctx, connect, output.getClientSettings());
+        connectHandler.connectSuccessfulAuthenticated(ctx, clientConnection, connect, output.getClientSettings());
     }
 
     @Override
@@ -84,7 +84,8 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     void undecidedAuthentication(final @NotNull ConnectAuthOutput output) {
         if (initial) {
-            connectHandler.connectSuccessfulUnauthenticated(ctx, connect, output.getClientSettings());
+            final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+            connectHandler.connectSuccessfulUnauthenticated(ctx, clientConnection, connect, output.getClientSettings());
         } else {
             connacker.connackError(
                     ctx.channel(),

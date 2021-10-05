@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -121,10 +122,9 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @Override
     public void authenticateConnect(
             final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ClientConnection clientConnection,
             final @NotNull CONNECT connect,
             final @NotNull ModifiableClientSettingsImpl clientSettings) {
-
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         final String authMethod = connect.getAuthMethod();
         if (authMethod != null) {
@@ -137,7 +137,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap =
                 authenticators.getAuthenticatorProviderMap();
         if (authenticatorProviderMap.isEmpty()) {
-            connectHandler.connectSuccessfulUnauthenticated(ctx, connect, clientSettings);
+            connectHandler.connectSuccessfulUnauthenticated(ctx, clientConnection, connect, clientSettings);
             return;
         }
 
@@ -176,17 +176,12 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     @Override
-    public void authenticateReAuth(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth) {
-        authenticateAuth(ctx, auth, true);
-    }
-
-    @Override
     public void authenticateAuth(
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull AUTH auth,
-            final boolean reAuth) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull AUTH auth) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final boolean reAuth = clientConnection.getClientStatus() == ClientStatus.RE_AUTHENTICATING;
 
         final String authMethod = auth.getAuthMethod();
         if (!authMethod.equals(clientConnection.getAuthMethod())) {

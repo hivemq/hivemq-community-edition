@@ -126,9 +126,11 @@ public class PluginAuthenticatorServiceImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         securityConfig = new SecurityConfigurationServiceImpl();
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(100);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnection.setClientId("client");
+        clientConnection.setClientReceiveMaximum(100);
 
 
         channel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, Mockito.mock(MQTTMessageDecoder.class));
@@ -165,9 +167,9 @@ public class PluginAuthenticatorServiceImplTest {
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
-        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
     }
 
     @Test
@@ -178,9 +180,9 @@ public class PluginAuthenticatorServiceImplTest {
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
-        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
     }
 
@@ -192,7 +194,7 @@ public class PluginAuthenticatorServiceImplTest {
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
         verify(pluginTaskExecutorService).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
 
@@ -206,7 +208,7 @@ public class PluginAuthenticatorServiceImplTest {
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
         verify(pluginTaskExecutorService).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
 
@@ -220,7 +222,7 @@ public class PluginAuthenticatorServiceImplTest {
         final CONNECT fullMqtt5Connect = TestMessageUtil.createFullMqtt5Connect();
         final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, fullMqtt5Connect, clientSettings);
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
         verify(pluginTaskExecutorService, times(2)).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
 
@@ -231,10 +233,10 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("auth method");
+        clientConnection.setAuthMethod("auth method");
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttServerDisconnector).disconnect(
                 channel,
@@ -253,10 +255,10 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("auth method");
+        clientConnection.setAuthMethod("auth method");
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttServerDisconnector).disconnect(
                 channel,
@@ -276,7 +278,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttServerDisconnector).disconnect(
                 channel, DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT, "Different auth method",
@@ -293,9 +295,9 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
+        clientConnection.setAuthMethod(auth.getAuthMethod());
 
-        pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(pluginTaskExecutorService).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
 
@@ -306,9 +308,9 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createMulti());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
+        clientConnection.setAuthMethod(auth.getAuthMethod());
 
-        pluginAuthenticatorService.authenticateReAuth(channelHandlerContext, auth);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         //Only Enhanced should be called.
         verify(pluginTaskExecutorService, times(1)).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
@@ -320,10 +322,10 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("auth method");
+        clientConnection.setAuthMethod("auth method");
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttConnacker).connackError(
                 channel,
@@ -340,10 +342,10 @@ public class PluginAuthenticatorServiceImplTest {
 
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(Map.of());
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod("auth method");
+        clientConnection.setAuthMethod("auth method");
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttConnacker).connackError(
                 channel,
@@ -362,7 +364,7 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
 
-        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(mqttConnacker).connackError(
                 eq(channel),
@@ -381,10 +383,10 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createEnhanced());
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(connect);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
+        clientConnection.setAuthConnect(connect);
+        clientConnection.setAuthMethod(auth.getAuthMethod());
 
-        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         verify(pluginTaskExecutorService).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));
 
@@ -396,10 +398,10 @@ public class PluginAuthenticatorServiceImplTest {
         when(authenticators.getAuthenticatorProviderMap()).thenReturn(createMulti());
         final CONNECT connect = TestMessageUtil.createFullMqtt5Connect();
         final AUTH auth = TestMessageUtil.createFullMqtt5Auth();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthConnect(connect);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthMethod(auth.getAuthMethod());
+        clientConnection.setAuthConnect(connect);
+        clientConnection.setAuthMethod(auth.getAuthMethod());
 
-        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, auth, false);
+        pluginAuthenticatorService.authenticateAuth(channelHandlerContext, clientConnection, auth);
 
         //Only Enhanced should be called.
         verify(pluginTaskExecutorService, times(1)).handlePluginInOutTaskExecution(any(PluginInOutTaskContext.class), any(Supplier.class), any(Supplier.class), any(PluginInOutTask.class));

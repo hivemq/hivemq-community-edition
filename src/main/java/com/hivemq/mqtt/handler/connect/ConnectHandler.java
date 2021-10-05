@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.connect;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -186,22 +187,24 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         addPublishFlowHandler(ctx, connect);
 
-        clientConnection.setAuthOngoing(true);
+        clientConnection.setClientStatus(ClientStatus.AUTHENTICATING);
         clientConnection.setAuthConnect(connect);
-        pluginAuthenticatorService.authenticateConnect(ctx, connect, createClientSettings(connect));
+        pluginAuthenticatorService.authenticateConnect(ctx, clientConnection, connect, createClientSettings(connect));
     }
 
     private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
         return new ModifiableClientSettingsImpl(connect.getReceiveMaximum(), null);
     }
 
-    public void connectSuccessfulUnauthenticated(final @NotNull ChannelHandlerContext ctx,
-                                                 final @NotNull CONNECT connect,
-                                                 final @Nullable ModifiableClientSettingsImpl clientSettings) {
+    public void connectSuccessfulUnauthenticated(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull CONNECT connect,
+            final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
         if (AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
             mqttConnacker.connackError(
-                    ctx.channel(),
+                    clientConnection.getChannel(),
                     PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                     ReasonStrings.AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
@@ -211,29 +214,30 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        ctx.pipeline().channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthAuthenticated(false);
-        connectAuthenticated(ctx, connect, clientSettings);
-        cleanChannelAttributesAfterAuth(ctx);
+        clientConnection.setClientStatus(ClientStatus.UNAUTHENTICATED);
+        connectAuthenticated(ctx, clientConnection, connect, clientSettings);
+        cleanChannelAttributesAfterAuth(clientConnection);
     }
 
-    public void connectSuccessfulAuthenticated(final @NotNull ChannelHandlerContext ctx,
-                                               final @NotNull CONNECT connect,
-                                               final @Nullable ModifiableClientSettingsImpl clientSettings) {
+    public void connectSuccessfulAuthenticated(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull CONNECT connect,
+            final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        ctx.pipeline().channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthAuthenticated(true);
-        connectAuthenticated(ctx, connect, clientSettings);
-        cleanChannelAttributesAfterAuth(ctx);
+        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
+        connectAuthenticated(ctx, clientConnection, connect, clientSettings);
+        cleanChannelAttributesAfterAuth(clientConnection);
     }
 
-    private void cleanChannelAttributesAfterAuth(final @NotNull ChannelHandlerContext ctx) {
-        if (ctx.pipeline().context(AUTH_IN_PROGRESS_MESSAGE_HANDLER) != null) {
+    private void cleanChannelAttributesAfterAuth(final @NotNull ClientConnection clientConnection) {
+        final ChannelPipeline pipeline = clientConnection.getChannel().pipeline();
+        if (pipeline.context(AUTH_IN_PROGRESS_MESSAGE_HANDLER) != null) {
             try {
-                ctx.pipeline().remove(AUTH_IN_PROGRESS_MESSAGE_HANDLER);
+                pipeline.remove(AUTH_IN_PROGRESS_MESSAGE_HANDLER);
             } catch (final NoSuchElementException ignored) {
             }
         }
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.setAuthOngoing(false);
         clientConnection.setAuthConnect(null);
     }
 
@@ -373,11 +377,12 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         return true;
     }
 
-    private void connectAuthenticated(final @NotNull ChannelHandlerContext ctx,
-                                      final @NotNull CONNECT msg,
-                                      final @Nullable ModifiableClientSettingsImpl clientSettings) {
+    private void connectAuthenticated(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull CONNECT msg,
+            final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
         clientConnection.setAuthenticatedOrAuthenticationBypassed(true);
         clientConnection.setPreventLwt(true); //do not send will until it is authorized
 
