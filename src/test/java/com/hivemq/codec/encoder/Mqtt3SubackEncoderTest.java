@@ -17,7 +17,6 @@ package com.hivemq.codec.encoder;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.Mqtt3SubackEncoder;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -52,7 +51,7 @@ public class Mqtt3SubackEncoderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         clientConnection = new ClientConnection(channel, null);
-        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog());
         mqtt3SubackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
         channel = new EmbeddedChannel(mqtt3SubackEncoder);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);

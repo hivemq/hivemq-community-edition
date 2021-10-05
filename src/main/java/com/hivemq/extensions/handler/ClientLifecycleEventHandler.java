@@ -280,7 +280,6 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         for (final Map.Entry<String, ClientLifecycleEventListenerProvider> eventListenerEntry : pluginEventListenerProviderMap.entrySet()) {
             final EventTask<ConnectionStartInputImpl> connectEventTask = new EventTask<>(eventListenerEntry.getValue(), providerInput, eventListenerEntry.getKey(), eventListeners);
             pluginTaskExecutorService.handlePluginInTaskExecution(taskContext, connectionStartInput, connectEventTask);
-            ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         }
 
     }

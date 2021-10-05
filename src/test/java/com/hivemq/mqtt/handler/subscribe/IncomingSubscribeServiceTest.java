@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -102,7 +101,6 @@ public class IncomingSubscribeServiceTest {
 
     private EmbeddedChannel channel;
     private IncomingSubscribeService incomingSubscribeService;
-    private HivemqId hivemqId;
 
     private final @NotNull ClientConnection clientConnection = new ClientConnection(channel, null);
 
@@ -110,8 +108,7 @@ public class IncomingSubscribeServiceTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        hivemqId = new HivemqId();
-        incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog, hivemqId));
+        incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog));
 
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);

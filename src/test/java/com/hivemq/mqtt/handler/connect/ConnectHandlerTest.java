@@ -23,7 +23,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -154,7 +153,7 @@ public class ConnectHandlerTest {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
         mqttConnacker = new MqttConnackerImpl(eventLog);
-        serverDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        serverDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         when(channelPersistence.get(anyString())).thenReturn(null);
 
@@ -643,8 +642,8 @@ public class ConnectHandlerTest {
 
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        clientConnection.setExtensionConnectEventSent(true);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
@@ -683,14 +682,14 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setExtensionConnectEventSent(true);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         disconnectFuture.set(null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
@@ -733,7 +732,6 @@ public class ConnectHandlerTest {
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setExtensionConnectEventSent(true);
         clientConnection.setDisconnectFuture(disconnectFuture);
         clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
 
@@ -785,7 +783,6 @@ public class ConnectHandlerTest {
         final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        clientConnection.setExtensionConnectEventSent(true);
         clientConnection.setDisconnectFuture(disconnectFuture);
         clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
 
@@ -1604,8 +1601,7 @@ public class ConnectHandlerTest {
                 QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_MOST_ONCE)));
 
         ctx = channel.pipeline().context(ConnectHandler.class);
-
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
     }
 
     private static class TestDisconnectEventHandler extends SimpleChannelInboundHandler<CONNECT> {

@@ -54,7 +54,7 @@ public class TestMqttDecoder {
 
         final EventLog eventLog = new EventLog();
         final HivemqId hiveMQId = new HivemqId();
-        final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog, hiveMQId);
+        final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog);
         final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
         final MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 

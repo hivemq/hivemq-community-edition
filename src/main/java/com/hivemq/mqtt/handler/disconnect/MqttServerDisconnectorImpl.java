@@ -18,7 +18,6 @@ package com.hivemq.mqtt.handler.disconnect;
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientStatus;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -53,12 +52,9 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
     private final boolean disconnectWithReasonCode;
     private final boolean disconnectWithReasonString;
     private final @NotNull EventLog eventLog;
-    private final @NotNull HivemqId hivemqId;
 
     @Inject
-    public MqttServerDisconnectorImpl(final @NotNull EventLog eventLog,
-                                      final @NotNull HivemqId hivemqId) {
-        this.hivemqId = hivemqId;
+    public MqttServerDisconnectorImpl(final @NotNull EventLog eventLog) {
         this.disconnectWithReasonCode = InternalConfigurations.DISCONNECT_WITH_REASON_CODE.get();
         this.disconnectWithReasonString = InternalConfigurations.DISCONNECT_WITH_REASON_STRING.get();
         this.eventLog = eventLog;
@@ -78,57 +74,55 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         Preconditions.checkNotNull(channel, "Channel must never be null");
 
         if (channel.isActive()) {
-            log(channel, logMessage, eventLogMessage);
-            fireEvents(channel, reasonCode, reasonString, userProperties, isAuthentication);
-            closeConnection(channel, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
+            final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
+            log(clientConnection, logMessage, eventLogMessage);
+            fireEvents(clientConnection, reasonCode, reasonString, userProperties, isAuthentication);
+            closeConnection(clientConnection, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
         }
     }
 
-    private void fireEvents(final @NotNull Channel channel,
-                            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
-                            final @Nullable String reasonString,
-                            final @NotNull Mqtt5UserProperties userProperties,
-                            final boolean isAuthentication) {
+    private void fireEvents(
+            final @NotNull ClientConnection clientConnection,
+            final @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final boolean isAuthentication) {
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-
-        if (clientConnection.isExtensionConnectEventSent()
-                && !clientConnection.isExtensionDisconnectEventSent()) {
+        if (clientConnection.getClientStatus().wasAuthenticated() && !clientConnection.isExtensionDisconnectEventSent()) {
 
             clientConnection.setExtensionDisconnectEventSent(true);
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
-            channel.pipeline().fireUserEventTriggered(isAuthentication ?
+            clientConnection.getChannel().pipeline().fireUserEventTriggered(isAuthentication ?
                     new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
                     new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
         }
     }
 
     private void log(
-            final @NotNull Channel channel,
+            final @NotNull ClientConnection clientConnection,
             final @Nullable String logMessage,
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(channel).or("UNKNOWN"));
+            log.debug(logMessage, getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {
-            eventLog.clientWasDisconnected(channel, eventLogMessage);
+            eventLog.clientWasDisconnected(clientConnection.getChannel(), eventLogMessage);
         }
     }
 
     private void closeConnection(
-            final @NotNull Channel channel,
+            final @NotNull ClientConnection clientConnection,
             final boolean withReasonCode,
             final boolean withReasonString,
             @Nullable Mqtt5DisconnectReasonCode reasonCode,
             @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean forceClose) {
-
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         if (forceClose) {
             clientConnection.getChannel().close();

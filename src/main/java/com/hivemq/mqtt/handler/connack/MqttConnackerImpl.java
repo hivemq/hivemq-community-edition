@@ -209,8 +209,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if (clientConnection.isExtensionConnectEventSent()
-                && !clientConnection.isExtensionDisconnectEventSent()) {
+        if (clientConnection.getClientStatus().wasAuthenticated() && !clientConnection.isExtensionDisconnectEventSent()) {
 
             clientConnection.setExtensionDisconnectEventSent(true);
 
