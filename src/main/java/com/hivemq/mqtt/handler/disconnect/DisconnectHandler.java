@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -121,7 +122,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
         final boolean gracefulDisconnect = clientConnection.isGracefulDisconnect();
         final boolean preventLwt = clientConnection.isPreventLwt();
-        final boolean takenOver = clientConnection.isTakenOver();
+        final boolean takenOver = clientConnection.getClientStatus() == ClientStatus.TAKEN_OVER;
         final boolean authenticated = clientConnection.isAuthenticatedOrAuthenticationBypassed();
         final boolean logged = clientConnection.isDisconnectEventLogged();
 
@@ -196,7 +197,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
-                if (!clientConnection.isTakenOver()) {
+                if (clientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
                     channelPersistence.remove(clientId);
                 }
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();

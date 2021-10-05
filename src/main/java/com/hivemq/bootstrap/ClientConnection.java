@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -45,7 +46,7 @@ public class ClientConnection {
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
-    private @NotNull ClientStatus clientStatus = ClientStatus.TCP_OPEN;
+    private volatile @NotNull ClientStatus clientStatus = ClientStatus.TCP_OPEN;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable String clientId;
     private boolean cleanStart;
@@ -74,7 +75,6 @@ public class ClientConnection {
 
     private boolean gracefulDisconnect;
     private boolean sendWill = true;
-    private boolean takenOver;
     private boolean preventLwt;
     private boolean inFlightMessagesSent;
 
@@ -118,6 +118,15 @@ public class ClientConnection {
     }
 
     public void setClientStatus(final @NotNull ClientStatus clientStatus) {
+        if (this.clientStatus != ClientStatus.TAKEN_OVER) {
+            this.clientStatus = clientStatus;
+        }
+    }
+
+    // ONLY VISIBLE FOR TESTING !!!
+    // DO NOT USE IN PROD !!!
+    @VisibleForTesting()
+    public void setClientStatusUnsafe(final @NotNull ClientStatus clientStatus) {
         this.clientStatus = clientStatus;
     }
 
@@ -357,14 +366,6 @@ public class ClientConnection {
 
     public void setSendWill(final boolean sendWill) {
         this.sendWill = sendWill;
-    }
-
-    public boolean isTakenOver() {
-        return takenOver;
-    }
-
-    public void setTakenOver(final boolean takenOver) {
-        this.takenOver = takenOver;
     }
 
     public boolean isPreventLwt() {
