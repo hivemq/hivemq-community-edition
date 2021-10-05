@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.mqtt.handler.auth.AuthHandler.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
@@ -94,7 +95,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_success() {
 
-        clientConnection.setReAuthOngoing(true);
+        clientConnection.setClientStatus(ClientStatus.RE_AUTHENTICATING);
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
@@ -110,7 +111,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_reauth() {
 
-        clientConnection.setReAuthOngoing(true);
+        clientConnection.setClientStatus(ClientStatus.RE_AUTHENTICATING);
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
 
@@ -154,7 +155,7 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_continue() {
 
-        clientConnection.setReAuthOngoing(true);
+        clientConnection.setClientStatus(ClientStatus.RE_AUTHENTICATING);
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), eq(clientConnection), any());
 
@@ -165,7 +166,7 @@ public class AuthHandlerTest {
 
         channel.writeInbound(new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), eq(clientConnection), any());
-        assertTrue(clientConnection.isReAuthOngoing());
+        assertEquals(ClientStatus.RE_AUTHENTICATING, clientConnection.getClientStatus());
 
     }
 }

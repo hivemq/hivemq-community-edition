@@ -88,7 +88,6 @@ public class ClientConnection {
     private @Nullable String authMethod;
     private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
-    private boolean reAuthOngoing;
     private boolean authenticatedOrAuthenticationBypassed;
     private @Nullable ScheduledFuture<?> authFuture;
 
@@ -468,14 +467,6 @@ public class ClientConnection {
 
     public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
         this.authUserProperties = authUserProperties;
-    }
-
-    public boolean isReAuthOngoing() {
-        return reAuthOngoing;
-    }
-
-    public void setReAuthOngoing(final boolean reAuthOngoing) {
-        this.reAuthOngoing = reAuthOngoing;
     }
 
     public boolean isAuthenticatedOrAuthenticationBypassed() {
