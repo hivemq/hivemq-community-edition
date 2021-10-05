@@ -213,7 +213,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
         connectAuthenticated(ctx, clientConnection, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnection);
     }
@@ -224,7 +223,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull CONNECT connect,
             final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
         connectAuthenticated(ctx, clientConnection, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnection);
     }
@@ -382,7 +380,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull CONNECT msg,
             final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
-        clientConnection.setAuthenticatedOrAuthenticationBypassed(true);
+        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
         clientConnection.setPreventLwt(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {

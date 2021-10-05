@@ -46,7 +46,7 @@ public class ClientConnection {
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
-    private volatile @NotNull ClientStatus clientStatus = ClientStatus.TCP_OPEN;
+    private volatile @NotNull ClientStatus clientStatus = ClientStatus.CONNECTING;
     private @Nullable ProtocolVersion protocolVersion;
     private @Nullable String clientId;
     private boolean cleanStart;
@@ -88,7 +88,6 @@ public class ClientConnection {
     private @Nullable String authMethod;
     private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
-    private boolean authenticatedOrAuthenticationBypassed;
     private @Nullable ScheduledFuture<?> authFuture;
 
     private boolean extensionConnectEventSent;
@@ -468,14 +467,6 @@ public class ClientConnection {
 
     public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
         this.authUserProperties = authUserProperties;
-    }
-
-    public boolean isAuthenticatedOrAuthenticationBypassed() {
-        return authenticatedOrAuthenticationBypassed;
-    }
-
-    public void setAuthenticatedOrAuthenticationBypassed(final boolean authenticatedOrAuthenticationBypassed) {
-        this.authenticatedOrAuthenticationBypassed = authenticatedOrAuthenticationBypassed;
     }
 
     public @Nullable ScheduledFuture<?> getAuthFuture() {

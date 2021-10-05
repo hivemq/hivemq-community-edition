@@ -748,7 +748,7 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.CONNECTED);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.AUTHENTICATED);
         disconnectFuture.set(null);
 
         channel.runPendingTasks();
@@ -798,7 +798,7 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.CONNECTED);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatusUnsafe(ClientStatus.AUTHENTICATED);
         disconnectFuture.set(null);
 
         channel.runPendingTasks();

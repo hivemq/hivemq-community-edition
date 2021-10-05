@@ -17,6 +17,7 @@ package com.hivemq.util;
 
 import com.google.common.base.Optional;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -128,7 +129,7 @@ public class ChannelUtils {
                 listener,
                 disconnectTimestampOptional);
 
-        clientToken.setAuthenticated(clientConnection.isAuthenticatedOrAuthenticationBypassed());
+        clientToken.setAuthenticated(clientConnection.getClientStatus() == ClientStatus.AUTHENTICATED);
 
         return clientToken;
     }
