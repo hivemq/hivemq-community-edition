@@ -29,7 +29,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.Before;
 import org.junit.Test;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
@@ -42,12 +41,6 @@ import static org.junit.Assert.*;
  * @author Florian Limpöck
  */
 public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
-
-    @Before
-    public void before() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-    }
 
     @Test
     public void test_decode_allProperties() {
@@ -1074,12 +1067,22 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         encoded[20] = '#';
         decodeNullExpected(encoded);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         encoded[20] = 'b';
         publish = decode(encoded);
         assertEquals("rtopic/b", publish.getResponseTopic());
 
         encoded[20] = '+';
         decodeNullExpected(encoded);
+
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         encoded[20] = 'c';
         publish = decode(encoded);
@@ -1305,12 +1308,22 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         encoded[10] = '#';
         decodeNullExpected(encoded);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         encoded[10] = 'b';
         decode = decode(encoded);
         assertEquals("topic/b", decode.getTopic());
 
         encoded[10] = '+';
         decodeNullExpected(encoded);
+
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         encoded[10] = 'c';
         decode = decode(encoded);

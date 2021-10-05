@@ -24,7 +24,9 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
+import util.TestMqttDecoder;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +35,6 @@ import static org.junit.Assert.*;
  * @since 4.0
  */
 public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
-
 
     private final @NotNull Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.SUCCESS;
 
@@ -56,6 +57,11 @@ public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded0001);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         final byte[] encoded0010 = {
                 // fixed header
                 //   type, flags
@@ -73,6 +79,11 @@ public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
 
         decodeNullExpected(encoded0010);
 
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         final byte[] encoded0100 = {
                 // fixed header
                 //   type, flags
@@ -89,6 +100,11 @@ public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
         };
 
         decodeNullExpected(encoded0100);
+
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         final byte[] encoded1000 = {
                 // fixed header
@@ -567,10 +583,9 @@ public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertTrue(channel.isOpen());
 
-        createChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-
+        channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
-
 }
