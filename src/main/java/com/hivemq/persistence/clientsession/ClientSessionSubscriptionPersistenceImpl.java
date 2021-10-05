@@ -163,7 +163,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             //set future result when local persistence future and topic tree future return;
             return Futures.whenAllComplete(persistFuture)
                     .call(() -> new SubscriptionResult(topic, subscriberExisted, sharedSubscription == null ? null : sharedSubscription.getShareName()),
-                    MoreExecutors.directExecutor());
+                            MoreExecutors.directExecutor());
 
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
@@ -406,11 +406,13 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     private void disconnectSharedSubscriberWithEmptyTopic(final @NotNull String clientId) {
         final Channel channel = channelPersistence.get(clientId);
         if (channel != null) {
-            mqttServerDisconnector.disconnect(channel,
-                    "A client (IP: {}) sent a shared subscription with an empty topic. Disconnecting client.",
-                    "Sent shared subscription with empty topic",
-                    Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
-                    ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY);
+            channel.eventLoop().execute(() -> {
+                mqttServerDisconnector.disconnect(channel,
+                        "A client (IP: {}) sent a shared subscription with an empty topic. Disconnecting client.",
+                        "Sent shared subscription with empty topic",
+                        Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
+                        ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY);
+            });
         } else {
             //at least log if that happens
             log.debug("Client {} sent a shared subscription with empty topic.", clientId);

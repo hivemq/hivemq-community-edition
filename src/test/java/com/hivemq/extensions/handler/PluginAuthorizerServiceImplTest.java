@@ -462,6 +462,7 @@ public class PluginAuthorizerServiceImplTest {
 
         while (channel.isActive()) {
             Thread.sleep(25);
+            channel.runPendingTasks();
         }
     }
 
@@ -488,6 +489,7 @@ public class PluginAuthorizerServiceImplTest {
 
         while (channel.isActive()) {
             Thread.sleep(25);
+            channel.runPendingTasks();
         }
     }
 

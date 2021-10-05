@@ -34,8 +34,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 import util.TestMessageUtil;
 
@@ -51,22 +49,19 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("NullabilityAnnotations")
 public class PublishAuthorizationProcessedTaskTest {
 
-    @Mock
-    MqttServerDisconnectorImpl mqtt5ServerDisconnector;
-
-    @Mock
-    IncomingPublishService incomingPublishService;
-
+    private MqttServerDisconnectorImpl mqtt5ServerDisconnector;
+    private IncomingPublishService incomingPublishService;
     private PublishAuthorizationProcessedTask task;
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
-
     private PublishAuthorizerOutputImpl output;
     private PluginOutputAsyncerImpl asyncer;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        mqtt5ServerDisconnector = mock(MqttServerDisconnectorImpl.class);
+        incomingPublishService = mock(IncomingPublishService.class);
+
         channel = new EmbeddedChannel(new DummyHandler());
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
@@ -85,6 +80,8 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
+        channel.runPendingTasks();
+
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
                 eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
@@ -94,6 +91,8 @@ public class PublishAuthorizationProcessedTaskTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         output.disconnectClient(DisconnectReasonCode.QUOTA_EXCEEDED);
         task.onSuccess(output);
+
+        channel.runPendingTasks();
 
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
                 eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), eq(null));
@@ -105,6 +104,8 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient(DisconnectReasonCode.QUOTA_EXCEEDED, "test-string");
         task.onSuccess(output);
 
+        channel.runPendingTasks();
+
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
                 eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), eq("test-string"));
     }
@@ -115,6 +116,8 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient();
         task.onSuccess(output);
 
+        channel.runPendingTasks();
+
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
 
@@ -123,6 +126,8 @@ public class PublishAuthorizationProcessedTaskTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         output.disconnectClient();
         task.onSuccess(output);
+
+        channel.runPendingTasks();
 
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
@@ -285,6 +290,9 @@ public class PublishAuthorizationProcessedTaskTest {
     public void test_failure() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         task.onFailure(new RuntimeException("test"));
+
+        channel.runPendingTasks();
+
         verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
                 eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
     }
