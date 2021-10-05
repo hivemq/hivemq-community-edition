@@ -663,7 +663,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // Otherwise we could takeover the same client twice
             final int nextRetry;
             if (clientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
-                disconnectPreviousClient(msg, oldClient, disconnectFuture);
+                disconnectPreviousClient(msg, oldClientConnection, oldClient, disconnectFuture);
                 nextRetry = retry;
             } else {
                 // The client is currently taken over
@@ -693,10 +693,11 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
     private void disconnectPreviousClient(
             final @NotNull CONNECT msg,
+            final @NotNull ClientConnection clientConnection,
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
-        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.TAKEN_OVER);
+        clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
 
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
