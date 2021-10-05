@@ -109,6 +109,12 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
 
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
+        // Avoid calling disconnect multiple times.
+        if (clientConnection.getClientStatus().disconnected()) {
+            return;
+        }
+
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         logConnack(channel, logMessage, eventLogMessage);
@@ -209,9 +215,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if (clientConnection.getClientStatus().wasAuthenticated() && !clientConnection.isExtensionDisconnectEventSent()) {
-
-            clientConnection.setExtensionDisconnectEventSent(true);
+        if (clientConnection.getClientStatus() != ClientStatus.CONNECTING) {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();

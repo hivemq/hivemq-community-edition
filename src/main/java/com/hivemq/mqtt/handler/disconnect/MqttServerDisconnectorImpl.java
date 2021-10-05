@@ -73,12 +73,18 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
 
-        if (channel.isActive()) {
-            final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        // Avoid calling disconnect multiple times.
+        if (clientConnection.getClientStatus().disconnected() ) {
+            return;
+        }
 
+        if (channel.isActive()) {
             log(clientConnection, logMessage, eventLogMessage);
             fireEvents(clientConnection, reasonCode, reasonString, userProperties, isAuthentication);
             closeConnection(clientConnection, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
+        } else {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
         }
     }
 
@@ -89,9 +95,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if (clientConnection.getClientStatus().wasAuthenticated() && !clientConnection.isExtensionDisconnectEventSent()) {
-
-            clientConnection.setExtensionDisconnectEventSent(true);
+        if (clientConnection.getClientStatus() != ClientStatus.CONNECTING) {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
@@ -123,6 +127,10 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean forceClose) {
+
+        if (reasonCode == Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER) {
+            clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
+        }
 
         if (forceClose) {
             clientConnection.getChannel().close();

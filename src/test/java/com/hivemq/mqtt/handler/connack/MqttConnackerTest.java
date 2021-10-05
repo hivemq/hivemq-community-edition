@@ -17,6 +17,7 @@
 package com.hivemq.mqtt.handler.connack;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
 import com.hivemq.extensions.events.OnServerDisconnectEvent;
@@ -298,7 +299,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge");
@@ -324,7 +324,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge", Mqtt5UserProperties.NO_USER_PROPERTIES, true);
@@ -349,7 +348,6 @@ public class MqttConnackerTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
         assertTrue(channel.isActive());
 
@@ -376,7 +374,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
         mqttConnacker.connackError(channel, "log", "eventlog", Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID, "packettoolarge", Mqtt5UserProperties.NO_USER_PROPERTIES, true);
