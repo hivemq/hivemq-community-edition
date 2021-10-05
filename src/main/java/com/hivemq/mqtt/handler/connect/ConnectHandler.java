@@ -424,6 +424,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             @Override
             public void onFailure(@NotNull final Throwable t) {
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
                 ctx.close();
                 Exceptions.rethrowError("Exception on disconnecting client with same client identifier", t);
             }

@@ -118,11 +118,11 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNSPECIFIED);
 
-        // Graceful disconnect status are set before disconnecting the client.
+        // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event.
-        final boolean initialLog = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_UNGRACEFULLY;
+        final boolean initialLog = clientConnection.getClientStatus() == ClientStatus.DISCONNECTED_UNSPECIFIED;
 
         handleInactive(channel, ctx);
 

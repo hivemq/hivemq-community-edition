@@ -17,6 +17,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -198,6 +199,9 @@ public class ConnackOutboundInterceptorHandler {
         @Override
         public void run() {
             if (outputHolder.get().isPrevent()) {
+                final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+                clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+
                 eventLog.clientWasDisconnected(
                         ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
                 ctx.channel().close();

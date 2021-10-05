@@ -119,6 +119,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         logConnack(channel, logMessage, eventLogMessage);
         if (protocolVersion == null) {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
             channel.close();
         } else if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
             connackError3(clientConnection, connackWithReasonCode, reasonCode, reasonString, isAuthentication);
@@ -155,6 +156,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
         } else {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
             //Do not send connack to not let the client know its an mqtt server
             clientConnection.getChannel().close();
         }
@@ -203,6 +205,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(connackBuilder.build()).addListener(ChannelFutureListener.CLOSE);
         } else {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
             //Do not send connack to not let the client know its an mqtt server
             clientConnection.getChannel().close();
         }
