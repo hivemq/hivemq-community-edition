@@ -174,7 +174,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.setTakenOver(false);
         clientConnection.setDisconnectFuture(SettableFuture.create());
         clientConnection.setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
@@ -659,7 +658,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 return Futures.immediateFuture(null);
             }
             final ClientConnection clientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-            final boolean takeOver = clientConnection.isTakenOver();
             final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
             if (disconnectFuture == null) {
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
@@ -667,7 +665,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // We have to check if the old client is currently taken over
             // Otherwise we could takeover the same client twice
             final int nextRetry;
-            if (!takeOver) {
+            if (clientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
                 disconnectPreviousClient(msg, oldClient, disconnectFuture);
                 nextRetry = retry;
             } else {
@@ -701,7 +699,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
-        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().setTakenOver(true);
+        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatus(ClientStatus.TAKEN_OVER);
 
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
