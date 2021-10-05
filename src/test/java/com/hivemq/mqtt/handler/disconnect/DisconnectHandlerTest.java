@@ -217,7 +217,7 @@ public class DisconnectHandlerTest {
         when(clientSessionPersistence.clientDisconnected(anyString(),
                 anyBoolean(),
                 anyLong())).thenReturn(Futures.immediateFuture(null));
-        clientConnection.setClientStatus(ClientStatus.TAKEN_OVER);
+        clientConnection.proposeClientStatus(ClientStatus.TAKEN_OVER);
         clientConnection.setSendWill(true);
         clientConnection.setPreventLwt(false);
 
@@ -238,7 +238,7 @@ public class DisconnectHandlerTest {
         clientConnection.setClientId("client");
         clientConnection.setClientSessionExpiryInterval(0L);
         clientConnection.setDisconnectFuture(SettableFuture.create());
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
 
         when(clientSessionPersistence.clientDisconnected(
                 anyString(),
@@ -273,7 +273,7 @@ public class DisconnectHandlerTest {
         clientConnection.setClientId(null);
         clientConnection.setCleanStart(false);
         clientConnection.setClientSessionExpiryInterval(0L);
-        clientConnection.setClientStatus(ClientStatus.AUTHENTICATED);
+        clientConnection.proposeClientStatus(ClientStatus.AUTHENTICATED);
         clientConnection.setDisconnectFuture(disconnectFuture);
 
         channel.disconnect().get();

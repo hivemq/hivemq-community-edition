@@ -158,7 +158,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<AUTH> {
             return;
         }
 
-        clientConnection.setClientStatus(ClientStatus.RE_AUTHENTICATING);
+        clientConnection.proposeClientStatus(ClientStatus.RE_AUTHENTICATING);
         authService.authenticateAuth(ctx, clientConnection, msg);
     }
 }

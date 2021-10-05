@@ -151,7 +151,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_gracefully() {
 
-        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
 
         eventLog.clientDisconnected(channel, null);
 
@@ -164,7 +164,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_ungracefully() {
 
-        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
 
         eventLog.clientDisconnected(channel, null);
 

@@ -88,7 +88,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
         final String clientId = clientConnection.getClientId();
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
@@ -118,7 +118,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
+        clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
 
         handleInactive(channel, ctx);
 

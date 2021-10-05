@@ -61,7 +61,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
     void succeedAuthentication(final @NotNull ReAuthOutput output) {
         super.succeedAuthentication(output);
         final Channel channel = ctx.channel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStatus(ClientStatus.AUTHENTICATED);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
         applyClientSettings(output.getClientSettings(), channel);
 
         final ChannelFuture authFuture = authSender.sendAuth(
