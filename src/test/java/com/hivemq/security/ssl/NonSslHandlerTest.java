@@ -16,7 +16,6 @@
 package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -72,7 +71,7 @@ public class NonSslHandlerTest {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
-        disconnector = new MqttServerDisconnectorImpl(new EventLog(), new HivemqId());
+        disconnector = new MqttServerDisconnectorImpl(new EventLog());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }
 

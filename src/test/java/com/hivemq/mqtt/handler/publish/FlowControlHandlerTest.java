@@ -16,7 +16,6 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -63,7 +62,7 @@ public class FlowControlHandlerTest {
         mqttConfigurationService = new MqttConfigurationServiceImpl();
         mqttConfigurationService.setServerReceiveMaximum(10);
 
-        final MqttServerDisconnector serverDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        final MqttServerDisconnector serverDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         flowControlHandler = new FlowControlHandler(mqttConfigurationService, serverDisconnector);
 

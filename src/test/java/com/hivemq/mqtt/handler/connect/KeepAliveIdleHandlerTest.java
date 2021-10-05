@@ -16,7 +16,6 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.util.ChannelAttributes;
@@ -26,33 +25,32 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class KeepAliveIdleHandlerTest {
 
-
     @Test
     public void test_disconnect_when_idle() throws Exception {
-        final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog(), new HivemqId()));
+        final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog()));
         final EmbeddedChannel channel = new EmbeddedChannel(keepAliveIdleHandler, new AnotherIdleHandler(false));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
 
         channel.pipeline().fireUserEventTriggered(IdleStateEvent.FIRST_READER_IDLE_STATE_EVENT);
 
-        //We got disconnected
-        assertEquals(false, channel.isActive());
-
+        // We got disconnected. As expected.
+        assertFalse(channel.isActive());
         channel.checkException();
     }
 
     @Test
     public void test_dont_disconnect_on_wrong_idles() throws Exception {
-        final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog(), new HivemqId()));
+        final KeepAliveIdleHandler keepAliveIdleHandler = new KeepAliveIdleHandler(new MqttServerDisconnectorImpl(new EventLog()));
         final EmbeddedChannel channel = new EmbeddedChannel(keepAliveIdleHandler, new AnotherIdleHandler(true));
         channel.pipeline().fireUserEventTriggered(IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT);
         channel.pipeline().fireUserEventTriggered(IdleStateEvent.FIRST_ALL_IDLE_STATE_EVENT);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
         channel.checkException();
     }
 
@@ -66,7 +64,7 @@ public class KeepAliveIdleHandlerTest {
 
         @Override
         public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
-            assertEquals(shouldGetTriggered, true);
+            assertTrue(shouldGetTriggered);
         }
     }
 }

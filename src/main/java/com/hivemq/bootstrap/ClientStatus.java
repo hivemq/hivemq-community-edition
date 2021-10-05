@@ -27,6 +27,9 @@ public enum ClientStatus {
 
     private static final @NotNull EnumSet<ClientStatus> LEGACY_UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
 
+    private static final @NotNull EnumSet<ClientStatus> WAS_AUTHENTICATED =
+            EnumSet.of(AUTHENTICATED, RE_AUTHENTICATING, TAKEN_OVER);
+
     public boolean immutableStatus() {
         return IMMUTABLE_STATUS.contains(this);
     }
@@ -37,5 +40,9 @@ public enum ClientStatus {
 
     public boolean legacyUnauthenticated() {
         return LEGACY_UNAUTHENTICATED.contains(this);
+    }
+
+    public boolean wasAuthenticated() {
+        return WAS_AUTHENTICATED.contains(this);
     }
 }

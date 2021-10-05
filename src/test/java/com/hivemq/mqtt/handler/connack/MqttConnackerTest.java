@@ -298,7 +298,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
@@ -325,7 +324,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 
@@ -351,7 +349,6 @@ public class MqttConnackerTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
         assertTrue(channel.isActive());
@@ -379,7 +376,6 @@ public class MqttConnackerTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("luke_skywalker");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionConnectEventSent(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionDisconnectEventSent(false);
         assertTrue(channel.isActive());
 

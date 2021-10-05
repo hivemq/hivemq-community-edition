@@ -259,6 +259,7 @@ public class AbstractChannelInitializerTest {
 
         @Override
         protected void initChannel(@NotNull final Channel ch) throws Exception {
+            ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(ch, null));
             addSpecialHandlers(ch);
         }
 

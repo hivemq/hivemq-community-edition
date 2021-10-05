@@ -88,7 +88,6 @@ public class ClientConnection {
     private @Nullable Mqtt5UserProperties authUserProperties;
     private @Nullable ScheduledFuture<?> authFuture;
 
-    private boolean extensionConnectEventSent;
     private boolean extensionDisconnectEventSent;
     private @Nullable ClientContextImpl extensionClientContext;
     private @Nullable ClientEventListeners extensionClientEventListeners;
@@ -457,14 +456,6 @@ public class ClientConnection {
 
     public void setAuthFuture(final @Nullable ScheduledFuture<?> authFuture) {
         this.authFuture = authFuture;
-    }
-
-    public boolean isExtensionConnectEventSent() {
-        return extensionConnectEventSent;
-    }
-
-    public void setExtensionConnectEventSent(final boolean extensionConnectEventSent) {
-        this.extensionConnectEventSent = extensionConnectEventSent;
     }
 
     public boolean isExtensionDisconnectEventSent() {

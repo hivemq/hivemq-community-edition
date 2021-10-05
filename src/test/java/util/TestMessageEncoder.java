@@ -20,7 +20,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
 import com.hivemq.codec.encoder.MQTTMessageEncoder;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
@@ -51,7 +50,7 @@ public class TestMessageEncoder extends MQTTMessageEncoder {
                 new EncoderFactory(
                         messageDroppedService,
                         securityConfigurationService,
-                        new MqttServerDisconnectorImpl(new EventLog(), new HivemqId())),
+                        new MqttServerDisconnectorImpl(new EventLog())),
                 new GlobalMQTTMessageCounter(new MetricsHolder(new MetricRegistry())));
         pingreqEncoder = new PingreqEncoder();
     }

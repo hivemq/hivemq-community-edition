@@ -17,7 +17,6 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.FakeChannelPipeline;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
@@ -105,7 +104,7 @@ public class TlsTcpChannelInitializerTest {
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
 
 
-        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
 
         tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, sslFactory);
