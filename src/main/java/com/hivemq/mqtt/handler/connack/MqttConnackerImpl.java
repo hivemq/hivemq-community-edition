@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.connack;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -77,6 +78,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         //for preventing success, when a connack will be prevented by an extension
         channelFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
+                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientStatus(ClientStatus.AUTHENTICATED);
                 eventLog.clientConnected(future.channel());
             }
         });
@@ -105,14 +107,17 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         Preconditions.checkNotNull(channel, "Channel must never be null");
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
+
         logConnack(channel, logMessage, eventLogMessage);
         if (protocolVersion == null) {
             channel.close();
         } else if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
-            connackError3(channel, connackWithReasonCode, reasonCode, reasonString, isAuthentication);
+            connackError3(clientConnection, connackWithReasonCode, reasonCode, reasonString, isAuthentication);
         } else {
-            connackError5(channel, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties, isAuthentication);
+            connackError5(clientConnection, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties, isAuthentication);
         }
     }
 
@@ -131,25 +136,26 @@ public class MqttConnackerImpl implements MqttConnacker {
     }
 
     private void connackError3(
-            final @NotNull Channel channel,
+            final @NotNull ClientConnection clientConnection,
             final boolean withReasonCode,
             final @Nullable Mqtt5ConnAckReasonCode reasonCode,
             final @Nullable String reasonString,
             final boolean isAuthentication) {
 
-        fireEvents(channel, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, isAuthentication);
+        fireEvents(clientConnection, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, isAuthentication);
         final Mqtt3ConnAckReturnCode returnCode = transformReasonCode(reasonCode);
 
         if (returnCode != null && withReasonCode) {
-            channel.writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+            clientConnection.getChannel().writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
-            channel.close();
+            clientConnection.getChannel().close();
         }
     }
 
     private void connackError5(
-            final @NotNull Channel channel,
+            final @NotNull ClientConnection clientConnection,
             final boolean withReasonCode,
             final boolean withReasonString,
             @Nullable Mqtt5ConnAckReasonCode reasonCode,
@@ -157,7 +163,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        fireEvents(channel, reasonCode, reasonString, userProperties, isAuthentication);
+        fireEvents(clientConnection, reasonCode, reasonString, userProperties, isAuthentication);
 
         if (!withReasonCode) {
             reasonCode = null;
@@ -175,8 +181,6 @@ public class MqttConnackerImpl implements MqttConnacker {
                     .withReasonString(reasonString)
                     .withUserProperties(userProperties);
 
-            final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-
             // set auth method if present
             final String authMethod = clientConnection.getAuthMethod();
             if (authMethod != null) {
@@ -190,20 +194,20 @@ public class MqttConnackerImpl implements MqttConnacker {
                 }
             }
 
-            channel.writeAndFlush(connackBuilder.build()).addListener(ChannelFutureListener.CLOSE);
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+            clientConnection.getChannel().writeAndFlush(connackBuilder.build()).addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
-            channel.close();
+            clientConnection.getChannel().close();
         }
     }
 
-    private void fireEvents(final @NotNull Channel channel,
-                            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
-                            final @Nullable String reasonString,
-                            final @NotNull Mqtt5UserProperties userProperties,
-                            final boolean isAuthentication) {
-
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+    private void fireEvents(
+            final @NotNull ClientConnection clientConnection,
+            final @Nullable Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final boolean isAuthentication) {
 
         if (clientConnection.isExtensionConnectEventSent()
                 && !clientConnection.isExtensionDisconnectEventSent()) {
@@ -212,7 +216,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
-            channel.pipeline().fireUserEventTriggered(isAuthentication ?
+            clientConnection.getChannel().pipeline().fireUserEventTriggered(isAuthentication ?
                     new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
                     new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
         }

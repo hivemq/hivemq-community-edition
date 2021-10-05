@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.disconnect;
 
 import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -127,12 +128,14 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean forceClose) {
 
+        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         if (forceClose) {
-            channel.close();
+            clientConnection.getChannel().close();
             return;
         }
 
-        final ProtocolVersion version = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ProtocolVersion version = clientConnection.getProtocolVersion();
 
         if (!withReasonCode) {
             reasonCode = null;
@@ -148,10 +151,11 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
         if (reasonCode != null && version == ProtocolVersion.MQTTv5) {
             final DISCONNECT disconnect = new DISCONNECT(reasonCode, reasonString, userProperties, null, SESSION_EXPIRY_NOT_SET);
-            channel.writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+            clientConnection.getChannel().writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
         } else {
             // close channel without sending DISCONNECT (Mqtt 3)
-            channel.close();
+            clientConnection.getChannel().close();
         }
     }
 }
