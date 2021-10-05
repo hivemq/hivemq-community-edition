@@ -258,6 +258,7 @@ public class DisconnectHandlerTest {
         clientConnection.setCleanStart(false);
         clientConnection.setClientSessionExpiryInterval(0L);
         clientConnection.setDisconnectFuture(disconnectFuture);
+        clientConnection.proposeClientState(ClientState.CONNECT_FAILED);
 
         channel.disconnect().get();
 

@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -168,6 +169,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(47);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
+        clientConnection = new ClientConnection(channel, null);
         clientConnection.setTopicAliasMapping(new String[3]);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
@@ -191,15 +193,17 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     }
 
     @Test
-    public void test_decode_topic_alias_overide() {
+    public void test_decode_topic_alias_override() {
 
 
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         clientConnection.setTopicAliasMapping(new String[3]);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {
@@ -1161,7 +1165,10 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     public void decode_noTopicAliasFound_returnsNull() {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(1024 * 1024 * 200);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setTopicAliasMapping(new String[3]);
 
         final byte[] encodedWithTopicName = {
