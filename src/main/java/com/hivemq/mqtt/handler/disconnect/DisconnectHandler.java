@@ -120,7 +120,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-        final boolean authenticated = clientConnection.getClientState() != ClientState.CONNECT_FAILED;
+        final boolean authenticated = !clientConnection.getClientState().unauthenticated();
 
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event when we can set this state.

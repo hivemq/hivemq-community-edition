@@ -27,7 +27,12 @@ public enum ClientState {
 
     private static final @NotNull EnumSet<ClientState> IMMUTABLE = DISCONNECTED;
 
-    private static final @NotNull EnumSet<ClientState> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
+    private static final @NotNull EnumSet<ClientState> UNAUTHENTICATED =
+            EnumSet.of(CONNECTING, AUTHENTICATING, CONNECT_FAILED);
+
+    public boolean disconnected() {
+        return DISCONNECTED.contains(this);
+    }
 
     public boolean immutable() {
         return IMMUTABLE.contains(this);
@@ -35,9 +40,5 @@ public enum ClientState {
 
     public boolean unauthenticated() {
         return UNAUTHENTICATED.contains(this);
-    }
-
-    public boolean disconnected() {
-        return DISCONNECTED.contains(this);
     }
 }
