@@ -133,6 +133,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         }
 
         if (forceClose) {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
             clientConnection.getChannel().close();
             return;
         }
@@ -156,6 +157,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
         } else {
+            clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
             // close channel without sending DISCONNECT (Mqtt 3)
             clientConnection.getChannel().close();
         }

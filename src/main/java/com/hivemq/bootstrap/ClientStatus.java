@@ -15,12 +15,13 @@ public enum ClientStatus {
     RE_AUTHENTICATING,
     AUTHENTICATED,
 
+    DISCONNECTED_UNSPECIFIED,
     DISCONNECTED_GRACEFULLY,
     DISCONNECTED_UNGRACEFULLY,
     TAKEN_OVER;
 
     private static final @NotNull EnumSet<ClientStatus> IMMUTABLE_STATUS =
-            EnumSet.of(DISCONNECTED_GRACEFULLY, TAKEN_OVER);
+            EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
 
     private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
 
