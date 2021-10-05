@@ -103,11 +103,13 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
         final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "'. Disconnecting client from extension.";
         final String eventLogMessage = "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "', extension requested disconnect";
 
-        mqttServerDisconnector.disconnect(ctx.channel(),
-                logMessage,
-                eventLogMessage,
-                output != null ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
-                output != null ? output.getReasonString() : null);
+        ctx.channel().eventLoop().execute(() -> {
+            mqttServerDisconnector.disconnect(ctx.channel(),
+                    logMessage,
+                    eventLogMessage,
+                    output != null ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                    output != null ? output.getReasonString() : null);
+        });
     }
 
     private String getReasonString(@NotNull final PUBLISH publish) {

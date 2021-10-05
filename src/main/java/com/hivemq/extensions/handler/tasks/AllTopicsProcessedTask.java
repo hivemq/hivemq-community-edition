@@ -119,10 +119,12 @@ public class AllTopicsProcessedTask implements Runnable {
         final String logMessage = "A client (IP: {}) sent a SUBSCRIBE with an unauthorized subscription for topic '" + msg.getTopics().get(topicIndex).getTopic() + "'. This is not allowed. Disconnecting client.";
         final String eventLogMessage = "Sent a SUBSCRIBE with an unauthorized subscription for topic '" + msg.getTopics().get(topicIndex).getTopic() + "'";
 
-        mqttServerDisconnector.disconnect(ctx.channel(),
-                logMessage,
-                eventLogMessage,
-                Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()),
-                output.getReasonString());
+        ctx.channel().eventLoop().execute(() -> {
+            mqttServerDisconnector.disconnect(ctx.channel(),
+                    logMessage,
+                    eventLogMessage,
+                    Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()),
+                    output.getReasonString());
+        });
     }
 }
