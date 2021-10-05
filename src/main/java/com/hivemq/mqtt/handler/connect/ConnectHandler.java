@@ -654,15 +654,15 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 channelPersistence.persist(msg.getClientIdentifier(), ctx.channel());
                 return Futures.immediateFuture(null);
             }
-            final ClientConnection clientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-            final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
+            final ClientConnection oldClientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+            final SettableFuture<Void> disconnectFuture = oldClientConnection.getDisconnectFuture();
             if (disconnectFuture == null) {
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
             }
             // We have to check if the old client is currently taken over
             // Otherwise we could takeover the same client twice
             final int nextRetry;
-            if (clientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
+            if (oldClientConnection.getClientStatus() != ClientStatus.TAKEN_OVER) {
                 disconnectPreviousClient(msg, oldClientConnection, oldClient, disconnectFuture);
                 nextRetry = retry;
             } else {
