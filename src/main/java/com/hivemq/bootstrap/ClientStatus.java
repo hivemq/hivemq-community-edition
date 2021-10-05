@@ -22,13 +22,10 @@ public enum ClientStatus {
     private static final @NotNull EnumSet<ClientStatus> IMMUTABLE_STATUS =
             EnumSet.of(DISCONNECTED_GRACEFULLY, TAKEN_OVER);
 
-    private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED =
-            EnumSet.of(CONNECTING, AUTHENTICATING, RE_AUTHENTICATING);
+    private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
 
-    private static final @NotNull EnumSet<ClientStatus> LEGACY_UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
-
-    private static final @NotNull EnumSet<ClientStatus> WAS_AUTHENTICATED =
-            EnumSet.of(AUTHENTICATED, RE_AUTHENTICATING, TAKEN_OVER);
+    private static final @NotNull EnumSet<ClientStatus> DISCONNECTED =
+            EnumSet.of(DISCONNECTED_GRACEFULLY, DISCONNECTED_UNGRACEFULLY, TAKEN_OVER);
 
     public boolean immutableStatus() {
         return IMMUTABLE_STATUS.contains(this);
@@ -38,11 +35,7 @@ public enum ClientStatus {
         return UNAUTHENTICATED.contains(this);
     }
 
-    public boolean legacyUnauthenticated() {
-        return LEGACY_UNAUTHENTICATED.contains(this);
-    }
-
-    public boolean wasAuthenticated() {
-        return WAS_AUTHENTICATED.contains(this);
+    public boolean disconnected() {
+        return DISCONNECTED.contains(this);
     }
 }

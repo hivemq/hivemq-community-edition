@@ -103,6 +103,7 @@ public class Mqtt5PubcompDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         final byte[] encoded1000 = {

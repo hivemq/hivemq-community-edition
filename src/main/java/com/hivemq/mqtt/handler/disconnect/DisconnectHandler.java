@@ -57,6 +57,7 @@ import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.NORMAL_DI
 public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
     private static final Logger log = LoggerFactory.getLogger(DisconnectHandler.class);
+
     private final @NotNull EventLog eventLog;
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
@@ -89,6 +90,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
         clientConnection.proposeClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
+
         final String clientId = clientConnection.getClientId();
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
@@ -106,10 +108,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         } else {
             clientConnection.setSendWill(false);
         }
-        if (!clientConnection.isExtensionDisconnectEventSent()) {
-            clientConnection.setExtensionDisconnectEventSent(true);
-            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(), msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
-        }
+        ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
+                msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
         ctx.channel().close();
     }
 
@@ -143,8 +143,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         //increase metrics
         metricsHolder.getClosedConnectionsCounter().inc();
         if (!gracefulDisconnect) {
-            if (!clientConnection.isExtensionDisconnectEventSent()) {
-                clientConnection.setExtensionDisconnectEventSent(true);
+            if (initialLog) {
                 ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(null, null, null, false));
             }
         }
@@ -164,7 +163,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
         //only change the session information if user is authenticated
-        if (clientConnection.getClientStatus().legacyUnauthenticated()) {
+        if (clientConnection.getClientStatus().unauthenticated()) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
