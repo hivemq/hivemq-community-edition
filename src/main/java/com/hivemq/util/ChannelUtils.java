@@ -129,7 +129,10 @@ public class ChannelUtils {
                 listener,
                 disconnectTimestampOptional);
 
-        clientToken.setAuthenticated(clientConnection.getClientState() == ClientState.AUTHENTICATED);
+        final ClientState clientState = clientConnection.getClientState();
+        final boolean authenticated = clientState == ClientState.AUTHENTICATED || clientState == ClientState.RE_AUTHENTICATING;
+
+        clientToken.setAuthenticated(authenticated);
 
         return clientToken;
     }
