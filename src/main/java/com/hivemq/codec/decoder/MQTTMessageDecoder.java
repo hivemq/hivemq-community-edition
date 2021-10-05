@@ -19,27 +19,23 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
 
 import static com.hivemq.mqtt.message.MessageType.CONNECT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Dominik Obermaier
@@ -132,19 +128,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                     false,
                     forceClose);
             buf.clear();
-            if (protocolVersion == ProtocolVersion.MQTTv5) {
-                final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE, null, Mqtt5UserProperties.NO_USER_PROPERTIES,
-                        null, SESSION_EXPIRY_NOT_SET);
-                if (!clientConnection.isExtensionDisconnectEventSent()) {
-                    clientConnection.setExtensionDisconnectEventSent(true);
-                    ctx.channel().pipeline().fireUserEventTriggered(new OnServerDisconnectEvent(disconnect));
-                }
-                ctx.channel().writeAndFlush(disconnect)
-                        .addListener(ChannelFutureListener.CLOSE);
-            } else {
-                ctx.close();
-            }
-
             return;
         }
 
