@@ -17,6 +17,7 @@ package com.hivemq.logging;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientStatus;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
@@ -150,7 +151,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_gracefully() {
 
-        clientConnection.setGracefulDisconnect(true);
+        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_GRACEFULLY);
 
         eventLog.clientDisconnected(channel, null);
 
@@ -163,7 +164,7 @@ public class EventLogTest {
     @Test
     public void clientDisconnected_ungracefully() {
 
-        clientConnection.setGracefulDisconnect(false);
+        clientConnection.setClientStatus(ClientStatus.DISCONNECTED_UNGRACEFULLY);
 
         eventLog.clientDisconnected(channel, null);
 

@@ -19,16 +19,23 @@ public enum ClientStatus {
     DISCONNECTED_UNGRACEFULLY,
     TAKEN_OVER;
 
-    private static final @NotNull EnumSet<ClientStatus> LEGACY_UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
+    private static final @NotNull EnumSet<ClientStatus> IMMUTABLE_STATUS =
+            EnumSet.of(DISCONNECTED_GRACEFULLY, TAKEN_OVER);
 
     private static final @NotNull EnumSet<ClientStatus> UNAUTHENTICATED =
             EnumSet.of(CONNECTING, AUTHENTICATING, RE_AUTHENTICATING);
 
-    public boolean legacyUnauthenticated() {
-        return LEGACY_UNAUTHENTICATED.contains(this);
+    private static final @NotNull EnumSet<ClientStatus> LEGACY_UNAUTHENTICATED = EnumSet.of(CONNECTING, AUTHENTICATING);
+
+    public boolean immutableStatus() {
+        return IMMUTABLE_STATUS.contains(this);
     }
 
     public boolean unauthenticated() {
         return UNAUTHENTICATED.contains(this);
+    }
+
+    public boolean legacyUnauthenticated() {
+        return LEGACY_UNAUTHENTICATED.contains(this);
     }
 }
