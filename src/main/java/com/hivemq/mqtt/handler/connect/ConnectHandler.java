@@ -663,7 +663,11 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             // We have to check if the old client is currently taken over
             // Otherwise we could takeover the same client twice
             final int nextRetry;
-            if (oldClientConnection.getClientState() != ClientState.TAKEN_OVER) {
+            if (oldClientConnection.getClientState() != ClientState.DISCONNECTING
+                    && oldClientConnection.getClientState() != ClientState.TAKEN_OVER) {
+
+                oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
+
                 if (oldClient.eventLoop().inEventLoop()) {
                     disconnectPreviousClient(msg, oldClient, disconnectFuture);
                 } else {
