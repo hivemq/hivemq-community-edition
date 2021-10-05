@@ -105,12 +105,12 @@ public class PluginAuthorizerServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection(channel, null);
 
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);

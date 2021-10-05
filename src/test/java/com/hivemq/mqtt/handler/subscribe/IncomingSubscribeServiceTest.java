@@ -102,7 +102,7 @@ public class IncomingSubscribeServiceTest {
     private EmbeddedChannel channel;
     private IncomingSubscribeService incomingSubscribeService;
 
-    private final @NotNull ClientConnection clientConnection = new ClientConnection(channel, null);
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
@@ -111,6 +111,7 @@ public class IncomingSubscribeServiceTest {
         incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog));
 
         channel = new EmbeddedChannel();
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
 

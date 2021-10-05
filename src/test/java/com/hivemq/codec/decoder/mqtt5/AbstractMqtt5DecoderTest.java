@@ -39,6 +39,8 @@ abstract class AbstractMqtt5DecoderTest extends AbstractMqttDecoderTest {
 
         final Message message = channel.readInbound();
         assertNull(message);
+
+        channel.runPendingTasks();
         assertFalse(channel.isOpen());
         assertFalse(channel.isActive());
 

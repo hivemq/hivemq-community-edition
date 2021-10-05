@@ -50,10 +50,10 @@ public class Mqtt3SubackEncoderTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientConnection = new ClientConnection(channel, null);
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog());
         mqtt3SubackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
         channel = new EmbeddedChannel(mqtt3SubackEncoder);
+        clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
