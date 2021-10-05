@@ -76,28 +76,27 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         ThreadPreConditions.inNettyChildEventloop();
 
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        // Avoid calling disconnect multiple times.
-        if (clientConnection.getClientState().disconnected() ) {
-            return;
-        }
+        final ClientState oldClientState = clientConnection.getClientState();
+        clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
         if (channel.isActive()) {
             log(clientConnection, logMessage, eventLogMessage);
-            fireEvents(clientConnection, reasonCode, reasonString, userProperties, isAuthentication);
+            fireEvents(clientConnection, oldClientState, reasonCode, reasonString, userProperties, isAuthentication);
             closeConnection(clientConnection, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
         } else {
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
         }
     }
 
     private void fireEvents(
             final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientState oldClientState,
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean isAuthentication) {
 
-        if (clientConnection.getClientState() != ClientState.CONNECTING) {
+        if (oldClientState != ClientState.CONNECTING) {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
@@ -121,7 +120,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         }
     }
 
-    private void closeConnection(
+    private static void closeConnection(
             final @NotNull ClientConnection clientConnection,
             final boolean withReasonCode,
             final boolean withReasonString,
@@ -131,35 +130,33 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final boolean forceClose) {
 
         if (reasonCode == Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER) {
-            clientConnection.proposeClientState(ClientState.TAKEN_OVER);
+            clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
         }
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
 
         if (forceClose) {
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
             clientConnection.getChannel().close();
             return;
         }
 
         final ProtocolVersion version = clientConnection.getProtocolVersion();
 
-        if (!withReasonCode) {
-            reasonCode = null;
-            reasonString = null;
-        } else {
+        if (withReasonCode) {
             if (version == ProtocolVersion.MQTTv5) {
                 Preconditions.checkNotNull(reasonCode, "Reason code must never be null for Mqtt 5");
             }
             if (!withReasonString) {
                 reasonString = null;
             }
+        } else {
+            reasonCode = null;
+            reasonString = null;
         }
 
         if (reasonCode != null && version == ProtocolVersion.MQTTv5) {
             final DISCONNECT disconnect = new DISCONNECT(reasonCode, reasonString, userProperties, null, SESSION_EXPIRY_NOT_SET);
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_GRACEFULLY);
             clientConnection.getChannel().writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
         } else {
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_UNGRACEFULLY);
             // close channel without sending DISCONNECT (Mqtt 3)
             clientConnection.getChannel().close();
         }

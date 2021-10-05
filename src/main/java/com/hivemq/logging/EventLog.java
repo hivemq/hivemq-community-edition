@@ -16,7 +16,6 @@
 package com.hivemq.logging;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -118,26 +117,34 @@ public class EventLog {
      * Log that the connection to a client was closed, regardless if the connection was closed by the client or the
      * server.
      *
-     * @param channel      of the client connection
-     * @param reasonString reason specified by the client for the DISCONNECT
+     * @param clientConnection of the client.
+     * @param reason           reason specified by the client for the DISCONNECT
      */
-    public void clientDisconnected(@NotNull final Channel channel, @Nullable final String reasonString) {
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        final String clientId = clientConnection.getClientId();
-        final String ip = ChannelUtils.getChannelIP(channel).orNull();
-        final boolean graceful = clientConnection.getClientState() == ClientState.DISCONNECTED_GRACEFULLY;
+    public void clientDisconnectedGracefully(
+            final @NotNull ClientConnection clientConnection, final @Nullable String reason) {
 
-        if (graceful) {
-            log.trace("Client {} disconnected gracefully.", clientId);
-            if (reasonString != null) {
-                logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reasonString);
-            } else {
-                logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
-            }
+        final String clientId = clientConnection.getClientId();
+        final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orNull();
+
+        log.trace("Client {} disconnected gracefully.", clientId);
+        if (reason != null) {
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
         } else {
-            log.trace("Client {} disconnected ungracefully.", clientId);
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
         }
+    }
+
+    /**
+     * Log that the connection to a client was closed ungracefully.
+     *
+     * @param clientConnection Connection of the client.
+     */
+    public void clientDisconnectedUngracefully(final @NotNull ClientConnection clientConnection) {
+        final String clientId = clientConnection.getClientId();
+        final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orNull();
+
+        log.trace("Client {} disconnected ungracefully.", clientId);
+        logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
     }
 
     /**

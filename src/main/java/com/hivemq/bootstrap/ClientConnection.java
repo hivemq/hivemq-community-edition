@@ -113,7 +113,7 @@ public class ClientConnection {
     }
 
     public void proposeClientState(final @NotNull ClientState clientState) {
-        if (!this.clientState.immutableStatus()) {
+        if (!this.clientState.immutable()) {
             this.clientState = clientState;
         }
     }

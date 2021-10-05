@@ -98,7 +98,8 @@ public class MqttConnackerTest {
         mqttConnacker.connackError(channel, null, null, null, null);
 
         assertFalse(channel.isActive());
-        verify(eventLog, never()).clientDisconnected(any(), any());
+        verify(eventLog, never()).clientDisconnectedGracefully(any(), any());
+        verify(eventLog, never()).clientDisconnectedUngracefully(any());
     }
 
     @Test(timeout = 20000)
@@ -112,7 +113,8 @@ public class MqttConnackerTest {
         mqttConnacker.connackError(channel, null, null, null, null);
 
         assertFalse(channel.isActive());
-        verify(eventLog, never()).clientDisconnected(any(), any());
+        verify(eventLog, never()).clientDisconnectedGracefully(any(), any());
+        verify(eventLog, never()).clientDisconnectedUngracefully(any());
     }
 
     @Test(timeout = 20000)

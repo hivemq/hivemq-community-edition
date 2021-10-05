@@ -89,7 +89,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-        clientConnection.proposeClientState(ClientState.DISCONNECTED_GRACEFULLY);
+        clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
         final String clientId = clientConnection.getClientId();
 
@@ -101,7 +101,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         if (log.isTraceEnabled()) {
             log.trace("The client [{}] sent a disconnect message.", clientId);
         }
-        eventLog.clientDisconnected(ctx.channel(), logClientReasonString ? msg.getReasonString() : null);
+        eventLog.clientDisconnectedGracefully(clientConnection, logClientReasonString ? msg.getReasonString() : null);
 
         if (msg.getReasonCode() != NORMAL_DISCONNECTION) {
             clientConnection.setSendWill(true);
@@ -110,6 +110,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         }
         ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
                 msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
+
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_CLIENT);
         ctx.channel().close();
     }
 
@@ -117,26 +119,27 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     public void channelInactive(final @NotNull ChannelHandlerContext ctx) throws Exception {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-        clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
+
+        final boolean authenticated = clientConnection.getClientState() != ClientState.CONNECT_FAILED;
 
         // Any disconnect status other than unspecified is already handled.
-        // We can be sure that we are logging the initial log and event.
+        // We can be sure that we are logging the initial log and event when we can set this state.
+        clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
         final boolean initialLog = clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED;
 
         handleInactive(clientConnection);
 
         final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
-        final boolean gracefulDisconnect = clientConnection.getClientState() == ClientState.DISCONNECTED_GRACEFULLY;
+        final boolean gracefulDisconnect = clientConnection.getClientState() == ClientState.DISCONNECTED_BY_CLIENT;
+        final boolean takenOver = clientConnection.getClientState() == ClientState.DISCONNECTED_TAKEN_OVER;
         final boolean preventLwt = clientConnection.isPreventLwt();
-        final boolean takenOver = clientConnection.getClientState() == ClientState.TAKEN_OVER;
-        final boolean authenticated = clientConnection.getClientState() == ClientState.AUTHENTICATED;
 
         if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
             clientConnection.setSendWill(true);
         }
 
         if (initialLog) {
-            eventLog.clientDisconnected(ctx.channel(), null);
+            eventLog.clientDisconnectedUngracefully(clientConnection);
         }
 
         //increase metrics
@@ -194,7 +197,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
-                if (clientConnection.getClientState() != ClientState.TAKEN_OVER) {
+                if (clientConnection.getClientState() != ClientState.DISCONNECTED_TAKEN_OVER) {
                     channelPersistence.remove(clientId);
                 }
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
