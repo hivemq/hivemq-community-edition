@@ -128,7 +128,7 @@ public class MqttConnackerImpl implements MqttConnacker {
 
         if ((protocolVersion == ProtocolVersion.MQTTv3_1) || (protocolVersion == ProtocolVersion.MQTTv3_1_1)) {
             connackError3(clientConnection, connackWithReasonCode, reasonCode);
-        } else {
+        } else { // MQTT 5
             connackError5(clientConnection, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties);
         }
     }

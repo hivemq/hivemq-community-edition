@@ -130,9 +130,11 @@ public class ChannelUtils {
                 disconnectTimestampOptional);
 
         final ClientState clientState = clientConnection.getClientState();
-        final boolean authenticated = clientState == ClientState.AUTHENTICATED || clientState == ClientState.RE_AUTHENTICATING;
+        // Clients are seen as authenticated in both states.
+        final boolean authenticatedOrAuthenticating =
+                (clientState == ClientState.AUTHENTICATED) || (clientState == ClientState.RE_AUTHENTICATING);
 
-        clientToken.setAuthenticated(authenticated);
+        clientToken.setAuthenticated(authenticatedOrAuthenticating);
 
         return clientToken;
     }

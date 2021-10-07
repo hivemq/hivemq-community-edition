@@ -117,8 +117,8 @@ public class EventLog {
      * Log that the connection to a client was closed, regardless if the connection was closed by the client or the
      * server.
      *
-     * @param clientConnection of the client.
-     * @param reason           reason specified by the client for the DISCONNECT
+     * @param clientConnection the connection to the client.
+     * @param reason           reason specified by the client for the DISCONNECT.
      */
     public void clientDisconnectedGracefully(
             final @NotNull ClientConnection clientConnection, final @Nullable String reason) {
@@ -137,7 +137,7 @@ public class EventLog {
     /**
      * Log that the connection to a client was closed ungracefully.
      *
-     * @param clientConnection Connection of the client.
+     * @param clientConnection the connection to the client.
      */
     public void clientDisconnectedUngracefully(final @NotNull ClientConnection clientConnection) {
         final String clientId = clientConnection.getClientId();
