@@ -38,8 +38,8 @@ public interface MqttConnacker {
      * <p>
      * returns the connack sent future.
      *
-     * @param ctx     the channel handler context of the connecting MQTT client
-     * @param connack the CONNACK message to send. (Must be SUCCESS reason code)
+     * @param ctx     the channel handler context of the connecting MQTT client.
+     * @param connack the CONNACK message to send. Must be SUCCESS reason code.
      * @return the connack sent future that completes when the CONNACK is sent
      */
     @NotNull

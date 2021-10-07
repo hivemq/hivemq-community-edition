@@ -288,7 +288,6 @@ public class MqttServerDisconnectorTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
-
         final CountDownLatch eventLatch = new CountDownLatch(1);
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));

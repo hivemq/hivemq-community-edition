@@ -188,11 +188,11 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         clientConnection.proposeClientState(ClientState.AUTHENTICATING);
         clientConnection.setAuthConnect(connect);
-        pluginAuthenticatorService.authenticateConnect(ctx, clientConnection, connect, createClientSettings(connect));
-    }
-
-    private ModifiableClientSettingsImpl createClientSettings(@NotNull final CONNECT connect) {
-        return new ModifiableClientSettingsImpl(connect.getReceiveMaximum(), null);
+        pluginAuthenticatorService.authenticateConnect(
+                ctx,
+                clientConnection,
+                connect,
+                new ModifiableClientSettingsImpl(connect.getReceiveMaximum(), null));
     }
 
     public void connectSuccessfulUnauthenticated(
@@ -227,7 +227,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         cleanChannelAttributesAfterAuth(clientConnection);
     }
 
-    private void cleanChannelAttributesAfterAuth(final @NotNull ClientConnection clientConnection) {
+    private static void cleanChannelAttributesAfterAuth(final @NotNull ClientConnection clientConnection) {
         final ChannelPipeline pipeline = clientConnection.getChannel().pipeline();
         if (pipeline.context(AUTH_IN_PROGRESS_MESSAGE_HANDLER) != null) {
             try {
@@ -270,7 +270,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 .pipeline()
                 .addBefore(MESSAGE_EXPIRY_HANDLER, MQTT_PUBLISH_FLOW_HANDLER,
                         publishFlowHandlerProvider.get());
-        if (ProtocolVersion.MQTTv5 == connect.getProtocolVersion()) {
+
+        if (connect.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             ctx.channel()
                     .pipeline()
                     .addBefore(MQTT_MESSAGE_BARRIER, MQTT_5_FLOW_CONTROL_HANDLER,
@@ -289,11 +290,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     }
 
     @NotNull
-    private ListenableFuture<Void> updatePersistenceData(final boolean cleanStart,
-                                                         @NotNull final String clientId,
-                                                         final long sessionExpiryInterval,
-                                                         @Nullable final MqttWillPublish willPublish,
-                                                         @Nullable final Long queueSizeMaximum) {
+    private ListenableFuture<Void> updatePersistenceData(
+            final boolean cleanStart,
+            final @NotNull String clientId,
+            final long sessionExpiryInterval,
+            final @Nullable MqttWillPublish willPublish,
+            final @Nullable Long queueSizeMaximum) {
+
         return clientSessionPersistence.clientConnected(clientId, cleanStart, sessionExpiryInterval, willPublish, queueSizeMaximum);
     }
 
@@ -383,7 +386,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         clientConnection.setPreventLwt(true); //do not send will until it is authorized
 
         if (clientSettings != null && clientSettings.isModified()) {
-            applyClientSettings(clientSettings, msg, ctx.channel());
+            applyClientSettings(clientSettings, msg, clientConnection.getChannel());
         }
 
         if (msg.getWillPublish() != null) {
@@ -554,10 +557,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         clientConnection.setConnectMessage(msg);
 
-        if (ProtocolVersion.MQTTv5 == msg.getProtocolVersion()) {
+        if (msg.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             final CONNACK connack = buildMqtt5Connack(ctx.channel(), msg, sessionPresent);
             connackSent = mqttConnacker.connackSuccess(ctx, connack);
-
         } else {
             clientConnection.setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
             if (sessionPresent) {
@@ -640,8 +642,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         return builder.build();
     }
 
-    @NotNull
-    private ListenableFuture<Void> disconnectClientWithSameClientId(
+    private @NotNull ListenableFuture<Void> disconnectClientWithSameClientId(
             final @NotNull CONNECT msg, final @NotNull ChannelHandlerContext ctx, final int retry) {
 
         final Lock lock = stripedLock.get(msg.getClientIdentifier());
@@ -660,7 +661,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
             }
             // We have to check if the old client is currently taken over
-            // Otherwise we could takeover the same client twice
+            // Otherwise we could take over the same client twice
             final int nextRetry;
             if (oldClientConnection.getClientState() != ClientState.DISCONNECTING
                     && !oldClientConnection.getClientState().disconnected()) {
@@ -754,16 +755,17 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         return InternalConfigurations.MQTT_CONNECTION_KEEP_ALIVE_FACTOR;
     }
 
-    private static class UpdatePersistenceCallback implements FutureCallback<Void> {
+    private static final class UpdatePersistenceCallback implements FutureCallback<Void> {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ConnectHandler connectHandler;
         private final @NotNull CONNECT connect;
         private final boolean sessionPresent;
 
-        public UpdatePersistenceCallback(final @NotNull ChannelHandlerContext ctx,
-                                         final @NotNull ConnectHandler connectHandler,
-                                         final @NotNull CONNECT connect,
-                                         final boolean sessionPresent) {
+        private UpdatePersistenceCallback(
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ConnectHandler connectHandler,
+                final @NotNull CONNECT connect,
+                final boolean sessionPresent) {
             this.ctx = ctx;
             this.connectHandler = connectHandler;
             this.connect = connect;
@@ -771,14 +773,14 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
 
         @Override
-        public void onSuccess(@Nullable final Void aVoid) {
+        public void onSuccess(final @Nullable Void aVoid) {
             if (ctx.channel().isActive() && !ctx.executor().isShutdown()) {
                 connectHandler.afterPersistSession(ctx, connect, sessionPresent);
             }
         }
 
         @Override
-        public void onFailure(@NotNull final Throwable throwable) {
+        public void onFailure(final @NotNull Throwable throwable) {
             Exceptions.rethrowError("Unable to handle client connection for id " + connect.getClientIdentifier() + ".", throwable);
             ctx.channel().disconnect();
         }
