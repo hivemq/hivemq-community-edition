@@ -114,8 +114,8 @@ public class EventLog {
     }
 
     /**
-     * Log that the connection to a client was closed, regardless if the connection was closed by the client or the
-     * server.
+     * Log that the connection to a client was closed gracefully, regardless if the connection was closed by the client
+     * or the server.
      *
      * @param clientConnection the connection to the client.
      * @param reason           reason specified by the client for the DISCONNECT.
@@ -135,7 +135,8 @@ public class EventLog {
     }
 
     /**
-     * Log that the connection to a client was closed ungracefully.
+     * Log that the connection to a client was closed ungracefully, regardless if the connection was closed by the
+     * client or the server.
      *
      * @param clientConnection the connection to the client.
      */
