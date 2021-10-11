@@ -247,6 +247,10 @@ public class InternalConfigurations {
 
     public static final int CLEANUP_JOB_PARALLELISM = 1;
 
+    // set to true to close all client connections at netty-event-loop shutdown
+    public static final boolean NETTY_SHUTDOWN_LEGACY = false;
+    public static final int NETTY_SHUTDOWN_PARTITION_SIZE = 100;
+
     public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
 
     public static final double CONNECT_THROTTLING_INFLIGHT_TO_QUEUE_RATIO = 2.0;
@@ -254,7 +258,8 @@ public class InternalConfigurations {
     public static final double CONNECT_THROTTLING_TIMEOUT_FACTOR = 2.0;
 
 
-    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT = 360;
+    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT = 60;
+    public static final int CHANNEL_PERSISTENCE_SHUTDOWN_TIMEOUT = 180;
 
     public static final boolean DROP_MESSAGES_QOS_0 = true;
 

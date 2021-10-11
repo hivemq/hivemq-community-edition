@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.persistence.payload;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +25,7 @@ import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.migration.meta.PersistenceType;
+import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -42,7 +44,8 @@ import static com.hivemq.persistence.payload.PublishPayloadRocksDBSerializer.ser
  * @author Florian Limpöck
  */
 @LazySingleton
-public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersistence implements PublishPayloadLocalPersistence {
+public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersistence
+        implements PublishPayloadLocalPersistence {
 
     @VisibleForTesting
     static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
@@ -52,24 +55,24 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     private final long memtableSize;
     private final boolean forceFlush;
 
-
-    private long maxId = 0;
-
     @NotNull
     private long[] rocksdbToMemTableSize;
 
     @Inject
-    public PublishPayloadRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-                                                 final @NotNull PersistenceStartup persistenceStartup) {
-        super(localPersistenceFileUtil,
+    public PublishPayloadRocksDBLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PersistenceStartup persistenceStartup) {
+        super(
+                localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
-        this.memtableSize = PhysicalMemoryUtil.physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get()
-                / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        this.memtableSize = PhysicalMemoryUtil.physicalMemory() /
+                InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH.get();
     }
@@ -91,9 +94,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     @Override
     protected @NotNull Options getOptions() {
-        return new Options()
-                .setCreateIfMissing(true)
-                .setStatistics(new Statistics());
+        return new Options().setCreateIfMissing(true).setStatistics(new Statistics());
     }
 
     @PostConstruct
@@ -104,20 +105,20 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @Override
     public void init() {
         try {
-            long max = 0;
+            long maxId = 0;
             for (final RocksDB bucket : buckets) {
-                try(final RocksIterator rocksIterator = bucket.newIterator()) {
+                try (final RocksIterator rocksIterator = bucket.newIterator()) {
                     rocksIterator.seekToFirst();
                     while (rocksIterator.isValid()) {
                         final long key = deserializeKey(rocksIterator.key());
-                        if (key > max) {
-                            max = key;
+                        if (key > maxId) {
+                            maxId = key;
                         }
                         rocksIterator.next();
                     }
                 }
             }
-            maxId = max;
+            PUBLISH.PUBLISH_COUNTER.set(maxId + 1);
 
         } catch (final Exception e) {
             log.error("An error occurred while preparing the Publish Payload persistence.");
@@ -142,7 +143,8 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         }
     }
 
-    private void flushOnMemtableOverflow(final @NotNull RocksDB bucket, final int bucketIndex, final int payloadSize) throws RocksDBException {
+    private void flushOnMemtableOverflow(final @NotNull RocksDB bucket, final int bucketIndex, final int payloadSize)
+            throws RocksDBException {
         final long updatedSize = payloadSize + rocksdbToMemTableSize[bucketIndex];
         if (updatedSize >= memtableSize) {
             bucket.flush(FLUSH_OPTIONS);
@@ -173,7 +175,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
         final ImmutableList.Builder<Long> builder = ImmutableList.builder();
         for (final RocksDB bucket : buckets) {
-            try(final RocksIterator rocksIterator = bucket.newIterator()) {
+            try (final RocksIterator rocksIterator = bucket.newIterator()) {
                 rocksIterator.seekToFirst();
                 while (rocksIterator.isValid()) {
                     final byte[] key = rocksIterator.key();
@@ -199,11 +201,10 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         }
     }
 
-
     @Override
     public void iterate(final @NotNull Callback callback) {
         for (final RocksDB bucket : buckets) {
-            try(final RocksIterator rocksIterator = bucket.newIterator()) {
+            try (final RocksIterator rocksIterator = bucket.newIterator()) {
                 rocksIterator.seekToFirst();
                 while (rocksIterator.isValid()) {
                     final long payloadId = deserializeKey(rocksIterator.key());
@@ -214,15 +215,9 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         }
     }
 
-
     @VisibleForTesting
     long[] getRocksdbToMemTableSize() {
         return rocksdbToMemTableSize;
-    }
-
-    @Override
-    public long getMaxId() {
-        return maxId;
     }
 
     public long getMemtableSize() {

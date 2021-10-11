@@ -114,6 +114,7 @@ public class ClientQueuePersistenceSerializerTest {
     public void test_serialize_minimal_publish() {
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withPacketIdentifier(10)
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
@@ -148,6 +149,7 @@ public class ClientQueuePersistenceSerializerTest {
 
         final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10)
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
@@ -198,6 +200,7 @@ public class ClientQueuePersistenceSerializerTest {
 
         final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10)
                 .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")

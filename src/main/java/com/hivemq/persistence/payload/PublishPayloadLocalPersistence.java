@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.annotations.ReadOnly;
 
 /**
  * @author Lukas Brandl
@@ -38,7 +39,7 @@ public interface PublishPayloadLocalPersistence {
      * @param id      The payload id.
      * @param payload The payload to put.
      */
-    void put(long id, @NotNull byte[] payload);
+    void put(long id, byte @NotNull [] payload);
 
     /**
      * Get a payload for a specific id.
@@ -46,8 +47,7 @@ public interface PublishPayloadLocalPersistence {
      * @param id The payload id.
      * @return the payload for the id.
      */
-    @Nullable
-    byte[] get(long id);
+    byte @Nullable [] get(long id);
 
     /**
      * Remove a payload for a specific id.
@@ -57,16 +57,10 @@ public interface PublishPayloadLocalPersistence {
     void remove(long id);
 
     /**
-     * @return the highest identifier for which payloads are currently stored in the persistence.
-     */
-    long getMaxId();
-
-    /**
      * @return all payload ids as a readonly list.
      */
     @ReadOnly
-    @NotNull
-    ImmutableList<Long> getAllIds();
+    @NotNull ImmutableList<Long> getAllIds();
 
     /**
      * close the persistence with all buckets.
@@ -75,12 +69,14 @@ public interface PublishPayloadLocalPersistence {
 
     /**
      * iterate over all entries.
+     *
      * @param callback the callback called at every iteration.
      */
     void iterate(final @NotNull Callback callback);
 
     @FunctionalInterface
     interface Callback {
-        void call(long id, @Nullable byte[] payload);
+
+        void call(long id, byte @Nullable [] payload);
     }
 }

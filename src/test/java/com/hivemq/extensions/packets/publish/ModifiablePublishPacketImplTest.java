@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.collect.ImmutableList;
@@ -50,8 +51,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setTopic() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -78,8 +79,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setTopic_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -106,8 +107,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setTopic_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -129,8 +130,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopic_invalid() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -152,8 +153,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopic_tooLong() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -176,8 +177,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopic_utf8MustNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -199,8 +200,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopic_utf8ShouldNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -222,8 +223,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setTopic_utf8ShouldNot_allowed() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -251,8 +252,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setQos() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -274,13 +275,13 @@ public class ModifiablePublishPacketImplTest {
         modifiablePacket.setQos(Qos.EXACTLY_ONCE);
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(Qos.EXACTLY_ONCE, modifiablePacket.getQos());
+        assertEquals(Qos.EXACTLY_ONCE, modifiablePacket.getOnwardQos());
     }
 
     @Test
     public void setQos_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -302,13 +303,13 @@ public class ModifiablePublishPacketImplTest {
         modifiablePacket.setQos(Qos.AT_LEAST_ONCE);
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(Qos.AT_LEAST_ONCE, modifiablePacket.getQos());
+        assertEquals(Qos.AT_LEAST_ONCE, modifiablePacket.getOnwardQos());
     }
 
     @Test(expected = NullPointerException.class)
     public void setQos_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -330,8 +331,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setQos_exceedsMax() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -354,8 +355,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setPayload() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -382,8 +383,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setPayload_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -410,8 +411,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setPayload_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -433,8 +434,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setRetain() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -461,8 +462,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setRetain_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -489,8 +490,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setRetain_notAvailable() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -513,8 +514,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setMessageExpiryInterval() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -541,8 +542,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setMessageExpiryInterval_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -569,8 +570,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setMessageExpiryInterval_exceedsMax() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -593,8 +594,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setPayloadFormatIndicator() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -621,8 +622,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setPayloadFormatIndicator_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -649,8 +650,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setPayloadFormatIndicator_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -677,8 +678,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setContentType() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -705,8 +706,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setContentType_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -733,8 +734,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setContentType_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -761,8 +762,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setContentType_utf8MustNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -784,8 +785,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setContentType_utf8ShouldNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -807,8 +808,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setContentType_utf8ShouldNot_allowed() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -836,8 +837,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setResponseTopic() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -864,8 +865,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setResponseTopic_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -892,8 +893,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setResponseTopic_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -920,8 +921,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setResponseTopic_utf8MustNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -943,8 +944,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setResponseTopic_utf8ShouldNot() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -966,8 +967,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setResponseTopic_utf8ShouldNot_allowed() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -995,8 +996,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setCorrelationData() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1023,8 +1024,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setCorrelationData_same() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1051,8 +1052,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void setCorrelationData_null() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1079,8 +1080,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void modifyUserProperties() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1107,8 +1108,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1132,8 +1133,8 @@ public class ModifiablePublishPacketImplTest {
 
     @Test
     public void copy_changes() {
-        final PublishPacketImpl packet = new PublishPacketImpl(
-                "topic",
+        final PublishPacketImpl packet = new PublishPacketImpl("topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1162,8 +1163,8 @@ public class ModifiablePublishPacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final PublishPacketImpl copy = modifiablePacket.copy();
 
-        final PublishPacketImpl expectedPacket = new PublishPacketImpl(
-                "modifiedTopic",
+        final PublishPacketImpl expectedPacket = new PublishPacketImpl("modifiedTopic",
+                Qos.AT_LEAST_ONCE,
                 Qos.EXACTLY_ONCE,
                 1,
                 false,
