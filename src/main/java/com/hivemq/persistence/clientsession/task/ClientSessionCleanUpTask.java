@@ -39,7 +39,7 @@ public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> 
     }
 
     @Override
-    public @Nullable Void doTask(final int bucketIndex, @NotNull final ImmutableList<Integer> queueBuckets, final int queueIndex) {
+    public @Nullable Void doTask(final int bucketIndex) {
 
         final Set<String> expiredSessions = localPersistence.cleanUp(bucketIndex);
         for (final String expiredSession : expiredSessions) {

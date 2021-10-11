@@ -94,7 +94,7 @@ public class InMemorySingleWriter implements SingleWriterService {
     }
 
     public @NotNull Executor callbackExecutor(final @NotNull String key) {
-        return command -> callbackProducerQueue.submit(key, (bucketIndex, queueBuckets, queueIndex) -> {
+        return command -> callbackProducerQueue.submit(key, (bucketIndex) -> {
                     command.run();
                     return null; // this is fine, because Executors dont return anything. The return value will not be used.
                 }
