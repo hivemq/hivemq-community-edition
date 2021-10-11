@@ -17,6 +17,7 @@ package com.hivemq.bootstrap.netty.initializer;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -70,6 +71,9 @@ public class AbstractChannelInitializerTest {
     FullConfigurationService configurationService;
 
     @Mock
+    ShutdownHooks shutdownHooks;
+
+    @Mock
     MqttConfigurationService mqttConfigurationService;
 
     @Mock
@@ -92,6 +96,7 @@ public class AbstractChannelInitializerTest {
                 .thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 1000L));
 
         when(channelDependencies.getConfigurationService()).thenReturn(configurationService);
+        when(channelDependencies.getShutdownHooks()).thenReturn(shutdownHooks);
         when(configurationService.mqttConfiguration()).thenReturn(mqttConfigurationService);
 
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);

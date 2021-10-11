@@ -23,6 +23,7 @@ import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.persistence.ChannelPersistence;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -58,14 +59,18 @@ public class HiveMQNettyBootstrapTest {
     private ChannelInitializerFactoryImpl channelInitializerFactoryImpl;
 
     @Mock
+    private ChannelPersistence channelPersistence;
+
+    @Mock
     private AbstractChannelInitializer abstractChannelInitializer;
+
 
     private final int randomPort = RandomPortGenerator.get();
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks, listenerConfigurationService, channelInitializerFactoryImpl,
+        hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks, listenerConfigurationService, channelInitializerFactoryImpl, channelPersistence,
                 new NettyConfiguration(NioServerSocketChannel.class, NioSocketChannel.class, new NioEventLoopGroup(1), new NioEventLoopGroup(1)));
 
         when(channelInitializerFactoryImpl.getChannelInitializer(any(Listener.class))).thenReturn(abstractChannelInitializer);

@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
@@ -66,5 +67,13 @@ public interface ChannelPersistence {
      */
     @NotNull
     Set<Map.Entry<String, Channel>> entries();
+
+    void addServerChannel(@NotNull String listenerName, @NotNull Channel channel);
+
+    @NotNull Set<Map.Entry<String, Channel>> getServerChannels();
+
+    @NotNull ListenableFuture<Void> shutDown();
+
+    void interruptShutdown();
 
 }
