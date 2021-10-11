@@ -120,7 +120,7 @@ public class PendingWillMessages {
     }
 
     private PUBLISH publishFromWill(final ClientSessionWill sessionWill) {
-        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic()).withQoS(sessionWill.getQos()).withPayload(sessionWill.getPayload())
+        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic()).withQoS(sessionWill.getQos()).withOnwardQos(sessionWill.getQos()).withPayload(sessionWill.getPayload())
                 .withRetain(sessionWill.isRetain()).withHivemqId(sessionWill.getHivemqId()).withUserProperties(sessionWill.getUserProperties())
                 .withResponseTopic(sessionWill.getResponseTopic()).withCorrelationData(sessionWill.getCorrelationData())
                 .withContentType(sessionWill.getContentType()).withPayloadFormatIndicator(sessionWill.getPayloadFormatIndicator())

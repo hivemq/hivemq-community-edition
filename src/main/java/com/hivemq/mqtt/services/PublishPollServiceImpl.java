@@ -24,6 +24,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageIDPools;
@@ -335,12 +336,12 @@ public class PublishPollServiceImpl implements PublishPollService {
                     PUBLISH publish = publishes.get(i);
                     try {
                         inFlightMessages.incrementAndGet();
-                        if (publish.getQoS().getQosNumber() > 0 && qos == 0) {
+                        if (publish.getOnwardQoS().getQosNumber() > 0 && qos == 0) {
                             // In case the messages gets downgraded to qos 0, it can be removed.
                             removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
                         }
                         // We can't sent the qos when the message is queue, because we don't know the which client is will be sent
-                        final QoS minQos = QoS.valueOf(Math.min(qos, publish.getQoS().getQosNumber()));
+                        final QoS minQos = QoS.valueOf(Math.min(qos, publish.getOnwardQoS().getQosNumber()));
                         // There can only be one subscription ID for this message, because there are no overlapping shared subscriptions
                         final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
                                 ImmutableIntArray.of(subscriptionIdentifier) : ImmutableIntArray.of();
@@ -351,6 +352,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                                 .withPacketIdentifier(packetId)
                                 .withQoS(minQos)
+                                .withOnwardQos(minQos)
                                 .withRetain(publish.isRetain() && retainAsPublished)
                                 .withSubscriptionIdentifiers(subscriptionIdentifiers)
                                 .build();

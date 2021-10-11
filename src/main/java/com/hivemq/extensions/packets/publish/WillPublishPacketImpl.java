@@ -55,6 +55,7 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
         super(
                 topic,
                 qos,
+                qos,
                 0,
                 false,
                 payload,

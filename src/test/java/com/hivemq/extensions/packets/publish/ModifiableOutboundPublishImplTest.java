@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.packets.publish;
 
 import com.google.common.collect.ImmutableList;
@@ -51,6 +52,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -78,6 +80,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setTopic_same() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -107,6 +110,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -130,6 +134,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -152,6 +157,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setTopic_tooLong() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -177,6 +183,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -200,6 +207,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -222,6 +230,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setTopic_utf8ShouldNot_allowed() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -252,6 +261,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -279,6 +289,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setPayload_same() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -308,6 +319,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -330,6 +342,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setRetain() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -359,6 +372,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -386,6 +400,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setMessageExpiryInterval() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -415,6 +430,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -443,6 +459,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -466,6 +483,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setPayloadFormatIndicator() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -495,6 +513,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -522,6 +541,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setPayloadFormatIndicator_null() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -551,6 +571,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -578,6 +599,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setContentType_same() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -607,6 +629,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -635,6 +658,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -658,6 +682,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -680,6 +705,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setContentType_utf8ShouldNot_allowed() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -710,6 +736,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -739,6 +766,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -766,6 +794,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setResponseTopic_null() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -795,6 +824,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -818,6 +848,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -840,6 +871,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setResponseTopic_utf8ShouldNot_allowed() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -870,6 +902,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -897,6 +930,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setCorrelationData_same() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -926,6 +960,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -953,6 +988,7 @@ public class ModifiableOutboundPublishImplTest {
     public void setSubscriptionIdentifiers() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -982,6 +1018,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -1010,6 +1047,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -1033,6 +1071,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -1055,6 +1094,7 @@ public class ModifiableOutboundPublishImplTest {
     public void modifyUserProperties() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1084,6 +1124,7 @@ public class ModifiableOutboundPublishImplTest {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
                 Qos.AT_LEAST_ONCE,
+                Qos.AT_LEAST_ONCE,
                 1,
                 false,
                 ByteBuffer.wrap("payload".getBytes()),
@@ -1108,6 +1149,7 @@ public class ModifiableOutboundPublishImplTest {
     public void copy_changes() {
         final PublishPacketImpl packet = new PublishPacketImpl(
                 "topic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,
@@ -1138,6 +1180,7 @@ public class ModifiableOutboundPublishImplTest {
 
         final PublishPacketImpl expectedPacket = new PublishPacketImpl(
                 "modifiedTopic",
+                Qos.AT_LEAST_ONCE,
                 Qos.AT_LEAST_ONCE,
                 1,
                 false,

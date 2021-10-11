@@ -156,6 +156,7 @@ public class PublishServiceImpl implements PublishService {
         return new PUBLISHFactory.Mqtt5Builder()
                 .withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(publish.getQos().getQosNumber()))
+                .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber()))
                 .withRetain(publish.getRetain())
                 .withTopic(publish.getTopic())
                 .withPayload(payload)

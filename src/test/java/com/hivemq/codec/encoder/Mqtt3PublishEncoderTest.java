@@ -48,6 +48,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
+        builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
 
@@ -72,6 +73,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topié");
         builder.withQoS(QoS.AT_MOST_ONCE);
+        builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
 
@@ -96,6 +98,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
+        builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withDuplicateDelivery(true);
@@ -121,6 +124,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
+        builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
@@ -146,6 +150,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
+        builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
@@ -172,6 +177,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
+        builder.withOnwardQos(QoS.AT_LEAST_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -197,6 +203,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
+        builder.withOnwardQos(QoS.AT_LEAST_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -223,6 +230,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
+        builder.withOnwardQos(QoS.AT_LEAST_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -249,6 +257,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
+        builder.withOnwardQos(QoS.AT_LEAST_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -276,6 +285,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
+        builder.withOnwardQos(QoS.EXACTLY_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -301,6 +311,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
+        builder.withOnwardQos(QoS.EXACTLY_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -327,6 +338,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
+        builder.withOnwardQos(QoS.EXACTLY_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
@@ -353,6 +365,7 @@ public class Mqtt3PublishEncoderTest {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
+        builder.withOnwardQos(QoS.EXACTLY_ONCE);
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");

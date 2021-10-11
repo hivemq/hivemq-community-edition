@@ -1191,6 +1191,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final long expiryInterval, final long timestamp) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic("topic")
@@ -1204,6 +1205,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic(topic)
@@ -1215,6 +1217,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic, final int publishId) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPublishId(1L)
                 .withPayload("message".getBytes())
                 .withTopic(topic)
@@ -1241,6 +1244,7 @@ public class ClientQueueXodusLocalPersistenceTest {
             final int packetId, final QoS qos, final String topic, final int publishId, final int queueLimit) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPayload(RandomStringUtils.randomAlphanumeric(queueLimit).getBytes())
                 .withCorrelationData(RandomStringUtils.randomAlphanumeric(65000).getBytes())
                 .withResponseTopic(RandomStringUtils.randomAlphanumeric(65000))

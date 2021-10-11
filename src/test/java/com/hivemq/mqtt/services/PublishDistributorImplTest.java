@@ -181,6 +181,7 @@ public class PublishDistributorImplTest {
     private PUBLISH createPublish(final @NotNull QoS qos) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(0)
                 .withQoS(qos)
+                .withOnwardQos(qos)
                 .withPayload("message".getBytes())
                 .withTopic("topic")
                 .withHivemqId("hivemqId")

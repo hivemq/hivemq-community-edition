@@ -241,8 +241,7 @@ tasks.javadoc {
 
     doLast {
         javaexec {
-            main = "-jar"
-            args("$projectDir/gradle/tools/javadoc-cleaner-1.0.jar")
+            classpath(projectDir.resolve("gradle/tools/javadoc-cleaner-1.0.jar"))
         }
     }
 
@@ -415,9 +414,8 @@ val updateThirdPartyLicenses by tasks.registering {
     dependsOn(tasks.downloadLicenses)
     doLast {
         javaexec {
-            main = "-jar"
+            classpath(projectDir.resolve("gradle/tools/license-third-party-tool-2.0.jar"))
             args(
-                "$projectDir/gradle/tools/license-third-party-tool-2.0.jar",
                 "$buildDir/reports/license/dependency-license.xml",
                 "$projectDir/src/distribution/third-party-licenses/licenses",
                 "$projectDir/src/distribution/third-party-licenses/licenses.html"
@@ -463,4 +461,9 @@ githubRelease {
     tagName(project.version.toString())
     releaseAssets(hivemqZip)
     allowUploadToExisting(true)
+}
+
+val javaComponent = components["java"] as AdhocComponentWithVariants
+javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) {
+    skip()
 }

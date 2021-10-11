@@ -89,7 +89,7 @@ public class AuthInProgressMessageHandlerTest {
 
     @Test(timeout = 5000)
     public void test_handler_disallows_publish() {
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withPayload("payload".getBytes()).withHivemqId("hivemqId").build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withPayload("payload".getBytes()).withHivemqId("hivemqId").build();
 
         channel.writeInbound(publish);
         final CONNACK connack = channel.readOutbound();
