@@ -23,7 +23,6 @@ import com.hivemq.bootstrap.ClientState;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -60,9 +59,6 @@ public class DisconnectHandlerTest {
     private TopicAliasLimiter topicAliasLimiter;
 
     @Mock
-    private MessageIDPools messageIDPools;
-
-    @Mock
     private ClientSessionPersistence clientSessionPersistence;
 
     @Mock
@@ -79,7 +75,7 @@ public class DisconnectHandlerTest {
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
 
-        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, messageIDPools, clientSessionPersistence, channelPersistence);
+        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, clientSessionPersistence, channelPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);

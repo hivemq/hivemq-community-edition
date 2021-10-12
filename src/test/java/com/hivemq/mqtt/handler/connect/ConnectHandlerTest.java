@@ -53,7 +53,6 @@ import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.FlowControlHandler;
 import com.hivemq.mqtt.handler.publish.OrderedTopicService;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -1539,7 +1538,6 @@ public class ConnectHandlerTest {
                 () -> new PublishFlowHandler(Mockito.mock(PublishPollService.class),
                         mock(IncomingMessageFlowPersistence.class),
                         mock(OrderedTopicService.class),
-                        mock(MessageIDPools.class),
                         mock(IncomingPublishHandler.class),
                         mock(DropOutgoingPublishesHandler.class));
 

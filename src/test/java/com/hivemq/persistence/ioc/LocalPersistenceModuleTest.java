@@ -29,7 +29,6 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.ioc.MQTTServiceModule;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.PersistenceStartup;
@@ -77,9 +76,6 @@ public class LocalPersistenceModuleTest {
 
     @Mock
     private ListeningScheduledExecutorService listeningScheduledExecutorService;
-
-    @Mock
-    private MessageIDPools messageIDProducers;
 
     @Mock
     private MetricsHolder metricsHolder;
@@ -220,7 +216,6 @@ public class LocalPersistenceModuleTest {
                                 .toInstance(listeningScheduledExecutorService);
                         bind(ListeningScheduledExecutorService.class).annotatedWith(PayloadPersistence.class)
                                 .toInstance(listeningScheduledExecutorService);
-                        bind(MessageIDPools.class).toInstance(messageIDProducers);
                         bind(MetricsHolder.class).toInstance(metricsHolder);
                         bind(MetricRegistry.class).toInstance(new MetricRegistry());
                         bind(SingleWriterService.class).toInstance(singleWriterServiceImpl);

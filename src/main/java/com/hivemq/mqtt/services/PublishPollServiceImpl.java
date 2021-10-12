@@ -27,7 +27,6 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -73,7 +72,6 @@ public class PublishPollServiceImpl implements PublishPollService {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishPollService.class);
 
-    private final @NotNull MessageIDPools messageIDPools;
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
@@ -82,14 +80,12 @@ public class PublishPollServiceImpl implements PublishPollService {
     private final @NotNull SingleWriterService singleWriterService;
 
     @Inject
-    public PublishPollServiceImpl(final @NotNull MessageIDPools messageIDPools,
-                                  final @NotNull ClientQueuePersistence clientQueuePersistence,
+    public PublishPollServiceImpl(final @NotNull ClientQueuePersistence clientQueuePersistence,
                                   final @NotNull ChannelPersistence channelPersistence,
                                   final @NotNull PublishPayloadPersistence payloadPersistence,
                                   final @NotNull MessageDroppedService messageDroppedService,
                                   final @NotNull SharedSubscriptionService sharedSubscriptionService,
                                   final @NotNull SingleWriterService singleWriterService) {
-        this.messageIDPools = messageIDPools;
         this.clientQueuePersistence = clientQueuePersistence;
         this.channelPersistence = channelPersistence;
         this.payloadPersistence = payloadPersistence;
@@ -151,7 +147,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      */
     @Override
     public void pollNewMessages(final @NotNull String client, final @NotNull Channel channel) {
-        final MessageIDPool messageIDPool = messageIDPools.forClient(client);
+        final MessageIDPool messageIDPool = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMessageIDPool();
         final ImmutableIntArray messageIds;
         try {
             messageIds = createMessageIds(messageIDPool, pollMessageLimit(channel));
@@ -231,7 +227,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
                     inFlightMessageCount.incrementAndGet();
-                    final MessageIDPool messageIDPool = messageIDPools.forClient(client);
+                    final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
                     try {
                         final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
                         if (message.getPacketIdentifier() != packetId) {
@@ -329,7 +325,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 if (publishes.isEmpty()) {
                     return;
                 }
-                final MessageIDPool messageIDPool = messageIDPools.forClient(client);
+                final MessageIDPool messageIDPool = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMessageIDPool();
                 final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
                 for (int i = 0, publishesSize = publishes.size(); i < publishesSize; i++) {

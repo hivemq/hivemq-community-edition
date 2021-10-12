@@ -24,7 +24,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.handler.publish.PublishWriteFailedListener;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -69,7 +68,6 @@ public class RetainedMessagesSender {
     private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence;
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
-    private final @NotNull MessageIDPools messageIDPools;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
 
     @Inject
@@ -78,14 +76,12 @@ public class RetainedMessagesSender {
             final @NotNull PublishPayloadPersistence publishPayloadPersistence,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
-            final @NotNull MessageIDPools messageIDPools,
             final @NotNull MqttConfigurationService mqttConfigurationService) {
 
         this.hiveMQId = hiveMQId;
         this.publishPayloadPersistence = publishPayloadPersistence;
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.clientQueuePersistence = clientQueuePersistence;
-        this.messageIDPools = messageIDPools;
         this.mqttConfigurationService = mqttConfigurationService;
     }
 
@@ -114,7 +110,7 @@ public class RetainedMessagesSender {
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         Futures.addCallback(retainedMessagesFuture, new SendRetainedMessageCallback(subscribedTopics, hiveMQId,
-                publishPayloadPersistence, messageIDPools, clientId, resultFuture, channel, clientQueuePersistence,
+                publishPayloadPersistence, clientId, resultFuture, channel, clientQueuePersistence,
                 mqttConfigurationService), channel.eventLoop());
 
         return resultFuture;
@@ -126,7 +122,6 @@ public class RetainedMessagesSender {
         private final @NotNull Topic[] subscribedTopics;
         private final @NotNull HivemqId hivemqId;
         private final @NotNull PublishPayloadPersistence payloadPersistence;
-        private final @NotNull MessageIDPools messageIDPools;
         private final @NotNull String clientId;
         private final @NotNull SettableFuture<Void> resultFuture;
         private final @NotNull Channel channel;
@@ -137,7 +132,6 @@ public class RetainedMessagesSender {
                 final @NotNull Topic[] subscribedTopics,
                 final @NotNull HivemqId hivemqId,
                 final @NotNull PublishPayloadPersistence payloadPersistence,
-                final @NotNull MessageIDPools messageIDPools,
                 final @NotNull String clientId,
                 final @NotNull SettableFuture<Void> resultFuture,
                 final @NotNull Channel channel,
@@ -147,7 +141,6 @@ public class RetainedMessagesSender {
             this.subscribedTopics = subscribedTopics;
             this.hivemqId = hivemqId;
             this.payloadPersistence = payloadPersistence;
-            this.messageIDPools = messageIDPools;
             this.clientId = clientId;
             this.resultFuture = resultFuture;
             this.channel = channel;
@@ -253,10 +246,8 @@ public class RetainedMessagesSender {
 
                     payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                     if (qos0Publish.getPacketIdentifier() != 0) {
-                        final MessageIDPool messageIDPool = messageIDPools.forClientOrNull(clientId);
-                        if (messageIDPool != null) {
-                            messageIDPool.returnId(qos0Publish.getPacketIdentifier());
-                        }
+                        final MessageIDPool messageIDPool = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMessageIDPool();
+                        messageIDPool.returnId(qos0Publish.getPacketIdentifier());
                     }
                 }
 

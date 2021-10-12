@@ -25,7 +25,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
@@ -81,10 +80,6 @@ public class PublishPollServiceImplTest {
 
     @Mock
     @NotNull
-    MessageIDPools messageIDPools;
-
-    @Mock
-    @NotNull
     MessageIDPool messageIDPool;
 
     @Mock
@@ -131,11 +126,11 @@ public class PublishPollServiceImplTest {
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
-        when(messageIDPools.forClient(anyString())).thenReturn(messageIDPool);
         when(channelPersistence.get(anyString())).thenReturn(channel);
         when(channel.pipeline()).thenReturn(pipeline);
 
         clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection.setMessageIDPool(messageIDPool);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
@@ -148,7 +143,7 @@ public class PublishPollServiceImplTest {
 
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
-        publishPollService = new PublishPollServiceImpl(messageIDPools, clientQueuePersistence, channelPersistence,
+        publishPollService = new PublishPollServiceImpl(clientQueuePersistence, channelPersistence,
                 publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, singleWriterService);
     }
 
