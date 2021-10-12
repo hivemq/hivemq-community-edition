@@ -21,7 +21,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
@@ -70,9 +69,6 @@ public class PublishFlowHandlerTest {
     private PublishPollService publishPollService;
 
     @Mock
-    private MessageIDPools messageIDPools;
-
-    @Mock
     private MessageIDPool pool;
 
     @Mock
@@ -87,12 +83,13 @@ public class PublishFlowHandlerTest {
         MockitoAnnotations.initMocks(this);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 5;
         when(pool.takeNextId()).thenReturn(100);
-        when(messageIDPools.forClientOrNull(anyString())).thenReturn(pool);
         orderedTopicService = new OrderedTopicService();
         channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
-                incomingMessageFlowPersistence, orderedTopicService, messageIDPools, incomingPublishHandler,
+                incomingMessageFlowPersistence, orderedTopicService, incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        clientConnection.setMessageIDPool(pool);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
     }
 

@@ -28,7 +28,6 @@ import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.persistence.ChannelPersistence;
@@ -60,7 +59,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     private final @NotNull EventLog eventLog;
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
-    private final @NotNull MessageIDPools messageIDPools;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
 
@@ -71,13 +69,11 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             final @NotNull EventLog eventLog,
             final @NotNull MetricsHolder metricsHolder,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
-            final @NotNull MessageIDPools messageIDPools,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ChannelPersistence channelPersistence) {
         this.eventLog = eventLog;
         this.metricsHolder = metricsHolder;
         this.topicAliasLimiter = topicAliasLimiter;
-        this.messageIDPools = messageIDPools;
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
         this.logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
@@ -188,9 +184,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             final ClientConnection clientConnection, final boolean persistent, final long sessionExpiryInterval) {
 
         final String clientId = clientConnection.getClientId();
-
-        messageIDPools.remove(clientId);
-
         final boolean preventWill = clientConnection.isPreventLwt();
         final boolean sendWill = !preventWill && clientConnection.isSendWill();
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);

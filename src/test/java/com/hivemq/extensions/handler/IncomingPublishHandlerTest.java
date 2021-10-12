@@ -41,7 +41,6 @@ import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.OrderedTopicService;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.Message;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -147,7 +146,6 @@ public class IncomingPublishHandlerTest {
                 mock(PublishPollService.class),
                 mock(IncomingMessageFlowPersistence.class),
                 mock(OrderedTopicService.class),
-                mock(MessageIDPools.class),
                 incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class));
         channel.pipeline().addFirst(publishFlowHandler);

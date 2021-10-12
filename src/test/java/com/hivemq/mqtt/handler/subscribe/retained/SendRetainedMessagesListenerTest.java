@@ -21,10 +21,8 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.MqttConfigurationService;
-import com.hivemq.mqtt.message.MessageIDPools;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
-import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.RetainedMessage;
@@ -500,12 +498,9 @@ public class SendRetainedMessagesListenerTest {
     private SendRetainedMessagesListener createListener(
             final List<SubscriptionResult> subscriptions, final Set<Topic> ignoredTopics) {
 
-        final MessageIDPools messageIDPools = mock(MessageIDPools.class);
-        when(messageIDPools.forClient(anyString())).thenReturn(new SequentialMessageIDPoolImpl());
-
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mqttConfigurationService);
+                mqttConfigurationService);
 
         return new SendRetainedMessagesListener(
                 subscriptions, ignoredTopics, retainedMessagePersistence, retainedMessagesSender);
@@ -514,12 +509,9 @@ public class SendRetainedMessagesListenerTest {
     private SendRetainedMessageResultListener createSendRetainedMessageSingleListener(final EmbeddedChannel channel) {
         final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE);
 
-        final MessageIDPools messageIDPools = mock(MessageIDPools.class);
-        when(messageIDPools.forClient(anyString())).thenReturn(new SequentialMessageIDPoolImpl());
-
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 mock(PublishPayloadPersistence.class), retainedMessagePersistence, queuePersistence,
-                messageIDPools, mqttConfigurationService);
+                mqttConfigurationService);
 
         return new SendRetainedMessageResultListener(channel, topic, retainedMessagesSender);
 

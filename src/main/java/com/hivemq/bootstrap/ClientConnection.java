@@ -32,6 +32,8 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
 
@@ -68,6 +70,7 @@ public class ClientConnection {
     private boolean requestResponseInformation;
     private @Nullable Boolean requestProblemInformation;
     private @Nullable SettableFuture<Void> disconnectFuture;
+    private @NotNull MessageIDPool messageIDPool;
 
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
@@ -98,6 +101,7 @@ public class ClientConnection {
     public ClientConnection(final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler) {
         this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
+        this.messageIDPool = new SequentialMessageIDPoolImpl();
     }
 
     public @NotNull Channel getChannel() {
@@ -209,6 +213,15 @@ public class ClientConnection {
 
     public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
+    }
+
+    @VisibleForTesting
+    public void setMessageIDPool(final @NotNull MessageIDPool messageIDPool) {
+        this.messageIDPool = messageIDPool;
+    }
+
+    public @NotNull MessageIDPool getMessageIDPool() {
+        return messageIDPool;
     }
 
     /**
