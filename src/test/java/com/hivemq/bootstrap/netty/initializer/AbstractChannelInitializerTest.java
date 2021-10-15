@@ -18,7 +18,6 @@ package com.hivemq.bootstrap.netty.initializer;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
@@ -40,7 +39,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import util.TestChannelAttribute;
 
@@ -104,7 +102,7 @@ public class AbstractChannelInitializerTest {
         when(restrictionsConfigurationService.noConnectIdleTimeout()).thenReturn(500L);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
 
-        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
 
@@ -125,7 +123,7 @@ public class AbstractChannelInitializerTest {
     public void test_init_channel_with_throttling() throws Exception {
 
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(1000L);
-        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog, new HivemqId());
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
         abstractChannelInitializer = new TestAbstractChannelInitializer(channelDependencies);
 
@@ -155,17 +153,13 @@ public class AbstractChannelInitializerTest {
 
         final IdleStateHandler[] idleStateHandler = new IdleStateHandler[1];
 
-        when(pipeline.addAfter(anyString(), anyString(), any(ChannelHandler.class))).thenAnswer(
-                new Answer<ChannelPipeline>() {
-                    @Override
-                    public ChannelPipeline answer(final InvocationOnMock invocation) throws Throwable {
+        when(pipeline.addAfter(anyString(), anyString(), any(ChannelHandler.class))).thenAnswer((Answer<ChannelPipeline>) invocation -> {
 
-                        if (invocation.getArguments()[1].equals(NEW_CONNECTION_IDLE_HANDLER)) {
-                            idleStateHandler[0] = (IdleStateHandler) (invocation.getArguments()[2]);
-                        }
-                        return pipeline;
-                    }
-                });
+            if (invocation.getArguments()[1].equals(NEW_CONNECTION_IDLE_HANDLER)) {
+                idleStateHandler[0] = (IdleStateHandler) (invocation.getArguments()[2]);
+            }
+            return pipeline;
+        });
 
         abstractChannelInitializer.initChannel(socketChannel);
 
@@ -178,12 +172,7 @@ public class AbstractChannelInitializerTest {
                 new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies));
 
         final CountDownLatch latch = new CountDownLatch(1);
-        channel.closeFuture().addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(final ChannelFuture future) throws Exception {
-                latch.countDown();
-            }
-        });
+        channel.closeFuture().addListener((ChannelFutureListener) future -> latch.countDown());
 
         assertTrue(latch.await(3, TimeUnit.SECONDS));
         verify(eventLog).clientWasDisconnected(any(Channel.class), anyString());
