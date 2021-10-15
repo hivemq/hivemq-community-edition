@@ -705,6 +705,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull Channel oldClient,
             final @NotNull SettableFuture<Void> disconnectFuture) {
 
+        oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
                 msg.getClientIdentifier());

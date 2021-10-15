@@ -129,9 +129,6 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean forceClose) {
 
-        if (reasonCode == Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER) {
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
-        }
         clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
 
         if (forceClose) {
