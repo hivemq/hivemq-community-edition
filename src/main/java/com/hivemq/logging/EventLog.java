@@ -126,7 +126,9 @@ public class EventLog {
         final String clientId = clientConnection.getClientId();
         final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orNull();
 
-        log.trace("Client {} disconnected gracefully.", clientId);
+        if (log.isTraceEnabled()) {
+            log.trace("Client {} disconnected gracefully.", clientId);
+        }
         if (reason != null) {
             logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
         } else {
@@ -144,7 +146,9 @@ public class EventLog {
         final String clientId = clientConnection.getClientId();
         final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orNull();
 
-        log.trace("Client {} disconnected ungracefully.", clientId);
+        if (log.isTraceEnabled()) {
+            log.trace("Client {} disconnected ungracefully.", clientId);
+        }
         logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
     }
 
@@ -158,7 +162,9 @@ public class EventLog {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final String clientId = clientConnection.getClientId();
         final String ip = ChannelUtils.getChannelIP(channel).orNull();
-        log.trace("Client {} was disconnected.", clientId);
+        if (log.isTraceEnabled()) {
+            log.trace("Client {} was disconnected.", clientId);
+        }
         logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
     }
 
