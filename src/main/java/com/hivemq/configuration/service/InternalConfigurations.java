@@ -189,8 +189,6 @@ public class InternalConfigurations {
 
     public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
 
-    public static final AtomicInteger MESSAGE_ID_PRODUCER_LOCK_SIZE = new AtomicInteger(8);
-
     /**
      * The amount of clean up job tasks that are processed at the same time, in each schedule interval
      */
