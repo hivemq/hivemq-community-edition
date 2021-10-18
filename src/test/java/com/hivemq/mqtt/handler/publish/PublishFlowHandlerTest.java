@@ -87,8 +87,8 @@ public class PublishFlowHandlerTest {
         channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 incomingMessageFlowPersistence, orderedTopicService, incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        clientConnection.setMessageIDPool(pool);
+        final ClientConnection clientConnection = spy(new ClientConnection(channel, null));
+        when(clientConnection.getMessageIDPool()).thenReturn(pool);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
     }

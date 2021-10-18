@@ -15,7 +15,6 @@
  */
 package com.hivemq.bootstrap;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -70,7 +69,7 @@ public class ClientConnection {
     private boolean requestResponseInformation;
     private @Nullable Boolean requestProblemInformation;
     private @Nullable SettableFuture<Void> disconnectFuture;
-    private @NotNull MessageIDPool messageIDPool;
+    private final @NotNull MessageIDPool messageIDPool;
 
     private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
@@ -213,11 +212,6 @@ public class ClientConnection {
 
     public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
-    }
-
-    @VisibleForTesting
-    public void setMessageIDPool(final @NotNull MessageIDPool messageIDPool) {
-        this.messageIDPool = messageIDPool;
     }
 
     public @NotNull MessageIDPool getMessageIDPool() {
