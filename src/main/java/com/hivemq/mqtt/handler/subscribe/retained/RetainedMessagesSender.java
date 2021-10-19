@@ -214,7 +214,7 @@ public class RetainedMessagesSender {
             }
             if (log.isTraceEnabled()) {
                 for (final Topic topic : subscribedTopics) {
-                    log.trace("Sending retained message with topic [{}] for client [{}]", topic.getQoS(), clientId);
+                    log.trace("Sending retained message with topic [{}] for client [{}]", topic.getTopic(), clientId);
                 }
             }
             final ImmutableList.Builder<PUBLISH> builder = ImmutableList.builder();
