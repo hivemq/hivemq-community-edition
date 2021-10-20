@@ -22,7 +22,4 @@ package com.hivemq.mqtt.message.pool.exception;
  */
 public class NoMessageIdAvailableException extends Exception {
 
-    public NoMessageIdAvailableException() {
-        super();
-    }
 }

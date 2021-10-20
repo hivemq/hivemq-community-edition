@@ -17,6 +17,7 @@ package com.hivemq.mqtt.message.pool;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import org.junit.Test;
 
@@ -30,7 +31,6 @@ import static org.junit.Assert.assertTrue;
  * @author Dominik Obermaier
  */
 public class SequentialMessageIDPoolImplTest {
-
 
     @Test
     public void test_message_id_pool_produces_sequential() throws Exception {
@@ -47,9 +47,7 @@ public class SequentialMessageIDPoolImplTest {
 
         assertTrue(areConsecutiveMessageIds(Lists.partition(integers, 65535).get(0)));
         assertTrue(areConsecutiveMessageIds(Lists.partition(integers, 65535).get(1)));
-
     }
-
 
     @Test
     public void test_prepopulation() throws Exception {
@@ -150,7 +148,7 @@ public class SequentialMessageIDPoolImplTest {
         messageIDPool.takeIfAvailable(70_000);
     }
 
-    private boolean areConsecutiveMessageIds(final List<Integer> integerList) {
+    private static boolean areConsecutiveMessageIds(final @NotNull List<Integer> integerList) {
 
         int last = 0;
         for (int i = 0; i < 65535; i++) {
