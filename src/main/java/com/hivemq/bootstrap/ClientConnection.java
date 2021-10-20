@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;

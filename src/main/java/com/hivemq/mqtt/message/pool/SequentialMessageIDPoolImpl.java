@@ -59,32 +59,6 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
     @ThreadSafe
     @Override
     public synchronized int takeNextId() throws NoMessageIdAvailableException {
-        return takeNextIdNonSynchronized();
-    }
-
-    @ThreadSafe
-    @Override
-    public synchronized int takeIfAvailable(final int id) throws NoMessageIdAvailableException {
-
-        checkArgument(id > MIN_MESSAGE_ID);
-        checkArgument(id <= MAX_MESSAGE_ID);
-
-        if (usedMessageIds.contains(id)) {
-            return takeNextIdNonSynchronized();
-        }
-
-        usedMessageIds.add(id);
-
-        if (id > circularTicker) {
-            circularTicker = id;
-        }
-
-        return id;
-    }
-
-    // To prevent deadlock
-    private int takeNextIdNonSynchronized() throws NoMessageIdAvailableException {
-
         if (usedMessageIds.size() >= MAX_MESSAGE_ID) {
             throw NO_MESSAGE_ID_AVAILABLE_EXCEPTION;
         }
@@ -100,6 +74,26 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         usedMessageIds.add(circularTicker);
 
         return circularTicker;
+    }
+
+    @ThreadSafe
+    @Override
+    public synchronized int takeIfAvailable(final int id) throws NoMessageIdAvailableException {
+
+        checkArgument(id > MIN_MESSAGE_ID);
+        checkArgument(id <= MAX_MESSAGE_ID);
+
+        if (usedMessageIds.contains(id)) {
+            return takeNextId();
+        }
+
+        usedMessageIds.add(id);
+
+        if (id > circularTicker) {
+            circularTicker = id;
+        }
+
+        return id;
     }
 
     /**
