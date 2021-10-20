@@ -42,19 +42,6 @@ public class PublishWriteFailedListenerTest {
     }
 
     @Test
-    public void test_success_different_futures() throws Exception {
-        final SettableFuture<PublishStatus> inStatusFuture = SettableFuture.create();
-        inStatusFuture.set(PublishStatus.DELIVERED);
-        when(channelFuture.isSuccess()).thenReturn(true);
-        final SettableFuture<PublishStatus> outStatusFuture = SettableFuture.create();
-
-        final PublishWriteFailedListener promiseListener = new PublishWriteFailedListener(inStatusFuture, outStatusFuture);
-        promiseListener.operationComplete(channelFuture);
-
-        assertEquals(PublishStatus.DELIVERED, outStatusFuture.get());
-    }
-
-    @Test
     public void test_failed() throws Exception {
         final SettableFuture<PublishStatus> statusFuture = SettableFuture.create();
         when(channelFuture.cause()).thenReturn(new EncoderException());
@@ -63,18 +50,6 @@ public class PublishWriteFailedListenerTest {
         promiseListener.operationComplete(channelFuture);
 
         assertEquals(PublishStatus.FAILED, statusFuture.get());
-    }
-
-    @Test
-    public void test_failed_different_futures() throws Exception {
-        final SettableFuture<PublishStatus> inStatusFuture = SettableFuture.create();
-        when(channelFuture.cause()).thenReturn(new EncoderException());
-        final SettableFuture<PublishStatus> outStatusFuture = SettableFuture.create();
-
-        final PublishWriteFailedListener promiseListener = new PublishWriteFailedListener(inStatusFuture, outStatusFuture);
-        promiseListener.operationComplete(channelFuture);
-
-        assertEquals(PublishStatus.FAILED, outStatusFuture.get());
     }
 
     @Test
@@ -88,19 +63,5 @@ public class PublishWriteFailedListenerTest {
         promiseListener.operationComplete(channelFuture);
 
         assertEquals(PublishStatus.NOT_CONNECTED, statusFuture.get());
-    }
-
-    @Test
-    public void test_channel_closed_different_futures() throws Exception {
-        final SettableFuture<Void> storedInPersistenceFuture = SettableFuture.create();
-        final SettableFuture<PublishStatus> inStatusFuture = SettableFuture.create();
-        storedInPersistenceFuture.set(null);
-        when(channelFuture.cause()).thenReturn(new ClosedChannelException());
-        final SettableFuture<PublishStatus> outStatusFuture = SettableFuture.create();
-
-        final PublishWriteFailedListener promiseListener = new PublishWriteFailedListener(inStatusFuture, outStatusFuture);
-        promiseListener.operationComplete(channelFuture);
-
-        assertEquals(PublishStatus.NOT_CONNECTED, outStatusFuture.get());
     }
 }

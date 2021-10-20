@@ -31,25 +31,10 @@ public class PublishWriteFailedListener implements GenericFutureListener<Future<
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishWriteFailedListener.class);
 
-    private final @NotNull SettableFuture<PublishStatus> inStatusFuture;
-    private final @NotNull SettableFuture<PublishStatus> outStatusFuture;
-    private final boolean sameFuture;
+    private final @NotNull SettableFuture<PublishStatus> statusFuture;
 
-    public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> inStatusFuture) {
-        this(inStatusFuture, inStatusFuture, true);
-    }
-
-    public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> inStatusFuture,
-                                      final @NotNull SettableFuture<PublishStatus> outStatusFuture) {
-        this(inStatusFuture, outStatusFuture, false);
-    }
-
-    public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> inStatusFuture,
-                                      final @NotNull SettableFuture<PublishStatus> outStatusFuture,
-                                      final boolean sameFuture) {
-        this.inStatusFuture = inStatusFuture;
-        this.outStatusFuture = outStatusFuture; // Since SettableFuture can only be set once, we need a new future to account for failure cases in operationComplete
-        this.sameFuture = sameFuture; // To avoid waiting indefinitely on inStatusFuture
+    public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> statusFuture) {
+        this.statusFuture = statusFuture;
     }
 
     @Override
@@ -58,24 +43,19 @@ public class PublishWriteFailedListener implements GenericFutureListener<Future<
             final Throwable cause = future.cause();
             if (Exceptions.isConnectionClosedException(cause)) {
                 log.trace("Failed to write publish. Client not connected anymore");
-                outStatusFuture.set(PublishStatus.NOT_CONNECTED);
-                return;
+                statusFuture.set(PublishStatus.NOT_CONNECTED);
+
             } else if (cause instanceof EncoderException) {
                 Exceptions.rethrowError("Failed to write publish. Encoding Failure.", cause);
                 final Throwable rootCause = cause.getCause();
                 if (cause != rootCause) {
                     Exceptions.rethrowError("Failed to write publish. Encoding Failure, root cause:", rootCause);
                 }
-                outStatusFuture.set(PublishStatus.FAILED);
-                return;
+                statusFuture.set(PublishStatus.FAILED);
             } else {
                 Exceptions.rethrowError("Failed to write publish.", cause);
-                outStatusFuture.set(PublishStatus.FAILED);
-                return;
+                statusFuture.set(PublishStatus.FAILED);
             }
-        } else if(!sameFuture && inStatusFuture.isDone()) {
-            // see RetainedMessagesSender for QoS0 publishes
-            outStatusFuture.set(inStatusFuture.get());
         }
     }
 }

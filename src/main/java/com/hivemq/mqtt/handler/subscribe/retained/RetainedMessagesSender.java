@@ -239,9 +239,9 @@ public class RetainedMessagesSender {
 
         private ListenableFuture<Void> sendQos0PublishDirectly(final @NotNull PUBLISH qos0Publish) {
             final SettableFuture<Void> resultFuture = SettableFuture.create();
-            final SettableFuture<PublishStatus> publishWriteFailedFuture = SettableFuture.create();
+            final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
 
-            Futures.addCallback(publishWriteFailedFuture, new FutureCallback<>() {
+            Futures.addCallback(publishFuture, new FutureCallback<>() {
                 @Override
                 public void onSuccess(final @Nullable PublishStatus status) {
 
@@ -271,9 +271,8 @@ public class RetainedMessagesSender {
                 }
             }, MoreExecutors.directExecutor());
 
-            final SettableFuture<PublishStatus> publishWriteAndFlushFuture = SettableFuture.create();
-            final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishWriteAndFlushFuture, false, payloadPersistence);
-            channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishWriteAndFlushFuture, publishWriteFailedFuture));
+            final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
+            channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
 
             return resultFuture;
         }
