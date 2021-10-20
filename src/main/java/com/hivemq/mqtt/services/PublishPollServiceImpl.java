@@ -255,7 +255,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                             final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishFuture, false, payloadPersistence);
                             publishesToSend.add(publishWithFuture);
                         } catch (final PayloadPersistenceException e) {
-                            // We don't prevent other messages form being published in case on reference is missing
+                            // We don't prevent other messages from being published in case of a missing reference
                             log.error("Payload reference error for publish on topic: " + publish.getTopic(), e);
                             if (publish.getQoS().getQosNumber() > 0) {
                                 removeMessageFromQueue(client, publish.getPacketIdentifier());

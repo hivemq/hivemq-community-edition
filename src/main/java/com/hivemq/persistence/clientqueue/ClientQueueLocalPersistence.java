@@ -94,7 +94,7 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
             int bucketIndex);
 
     /**
-     * Returns a batch of PUBLISHes that already have a packet identifier The size of the batch is limited by 2
+     * Returns a batch of PUBLISHes that already have a packet identifier. The size of the batch is limited by 2
      * factors:
      * <li>
      * <ul>The count of PUBLISHes will be less then or equal to the size of the given packet id list</ul>

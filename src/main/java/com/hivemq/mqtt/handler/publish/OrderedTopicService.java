@@ -157,7 +157,7 @@ public class OrderedTopicService {
         }
 
         // In case the client is disconnected, we return all the publish status futures
-        // This is particularly important for shared subscriptions, because the publish wont be resent otherwise
+        // This is particularly important for shared subscriptions, because the publish will not be resent otherwise
         for (final Map.Entry<Integer, SettableFuture<PublishStatus>> entry : messageIdToFutureMap.entrySet()) {
             final SettableFuture<PublishStatus> publishStatusFuture = entry.getValue();
             publishStatusFuture.set(PublishStatus.NOT_CONNECTED);

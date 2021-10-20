@@ -38,7 +38,7 @@ public enum PublishStatus {
     FAILED(3),
 
     /**
-     * the message is not jet delivered
+     * the message is not yet delivered
      */
     IN_PROGRESS(4),
 
