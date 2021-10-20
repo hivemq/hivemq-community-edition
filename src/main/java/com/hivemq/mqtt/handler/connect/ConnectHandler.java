@@ -674,7 +674,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                     && !oldClientConnection.getClientState().disconnected()) {
 
                 oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
-                disconnectPreviousClient(msg, oldClient, disconnectFuture);
+                disconnectPreviousClient(msg, oldClientConnection);
                 nextRetry = retry;
             } else {
                 // The client is currently taken over
@@ -702,31 +702,20 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private void disconnectPreviousClient(
-            final @NotNull CONNECT msg,
-            final @NotNull Channel oldClient,
-            final @NotNull SettableFuture<Void> disconnectFuture) {
+    private void disconnectPreviousClient(final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection) {
 
         log.debug(
                 "Disconnecting already connected client with id {} because another client connects with that id",
                 msg.getClientIdentifier());
 
-        if (oldClient.eventLoop().inEventLoop()) {
-            mqttServerDisconnector.disconnect(oldClient,
-                    null, //already logged
-                    ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                    Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                    ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
-        } else {
-            oldClient.eventLoop().execute(() ->
-                    mqttServerDisconnector.disconnect(oldClient,
-                            null, //already logged
-                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                            Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
-        }
+        clientConnection.getChannel().eventLoop().execute(() ->
+                mqttServerDisconnector.disconnect(clientConnection.getChannel(),
+                        null, //already logged
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                        Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
 
-        disconnectFuture.addListener(() -> {
+        clientConnection.getDisconnectFuture().addListener(() -> {
             channelPersistence.remove(msg.getClientIdentifier());
             Checkpoints.checkpoint("ClientTakeOverDisconnected");
         }, MoreExecutors.directExecutor());
