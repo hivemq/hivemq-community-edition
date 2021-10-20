@@ -25,7 +25,7 @@ import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
  * the concrete implementation can decide how message ids are generated. The only guarantee
  * the message ID pool provides is that each taken message id will not be reused until it is returned.
  * <p>
- * <b>Each taken message id must be returned explicitly to the pool<b/>
+ * <b>Each taken message id must be returned explicitly to the pool</b>
  * <p>
  * All message ID pool implementations are Thread safe
  *
