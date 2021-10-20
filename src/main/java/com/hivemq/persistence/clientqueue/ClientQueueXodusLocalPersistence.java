@@ -895,6 +895,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             increaseQos0MessagesMemory(publish.getEstimatedSizeInMemory() * -1);
             increaseClientQos0MessagesMemory(key, publish.getEstimatedSizeInMemory() * -1);
         }
+        qos0MessageBuckets.get(bucketIndex).remove(key);
     }
 
     /**
