@@ -667,12 +667,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                     && !oldClientConnection.getClientState().disconnected()) {
 
                 oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
-
-                if (oldClient.eventLoop().inEventLoop()) {
-                    disconnectPreviousClient(msg, oldClient, disconnectFuture);
-                } else {
-                    oldClient.eventLoop().execute(() -> disconnectPreviousClient(msg, oldClient, disconnectFuture));
-                }
+                disconnectPreviousClient(msg, oldClient, disconnectFuture);
                 nextRetry = retry;
             } else {
                 // The client is currently taken over
@@ -709,11 +704,20 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 "Disconnecting already connected client with id {} because another client connects with that id",
                 msg.getClientIdentifier());
 
-        mqttServerDisconnector.disconnect(oldClient,
-                null, //already logged
-                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
+        if (oldClient.eventLoop().inEventLoop()) {
+            mqttServerDisconnector.disconnect(oldClient,
+                    null, //already logged
+                    ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                    Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                    ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
+        } else {
+            oldClient.eventLoop().execute(() ->
+                    mqttServerDisconnector.disconnect(oldClient,
+                            null, //already logged
+                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                            Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
+        }
 
         disconnectFuture.addListener(() -> {
             channelPersistence.remove(msg.getClientIdentifier());
