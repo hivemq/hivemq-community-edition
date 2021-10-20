@@ -659,6 +659,8 @@ public class ConnectHandlerTest {
                 .build();
 
         channel.writeInbound(connect1);
+        channel.runPendingTasks();
+        oldChannel.runPendingTasks();
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
@@ -702,6 +704,8 @@ public class ConnectHandlerTest {
                 .build();
 
         channel.writeInbound(connect1);
+        oldChannel.runPendingTasks();
+        channel.runPendingTasks();
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
@@ -750,10 +754,12 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStateUnsafe(ClientState.AUTHENTICATED);
         disconnectFuture.set(null);
+        clientConnection.setClientStateUnsafe(ClientState.AUTHENTICATED);
 
-        channel.runPendingTasks();
+        channel.runPendingTasks(); // retry take over
+        oldChannel.runPendingTasks(); // disconnect client
+        channel.runPendingTasks(); // retry take over
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
@@ -799,10 +805,12 @@ public class ConnectHandlerTest {
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientStateUnsafe(ClientState.AUTHENTICATED);
         disconnectFuture.set(null);
+        clientConnection.setClientStateUnsafe(ClientState.AUTHENTICATED);
 
-        channel.runPendingTasks();
+        channel.runPendingTasks(); // retry take over
+        oldChannel.runPendingTasks(); // disconnect client
+        channel.runPendingTasks(); // retry take over
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
