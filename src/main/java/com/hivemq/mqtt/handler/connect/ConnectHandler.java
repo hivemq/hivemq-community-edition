@@ -396,10 +396,10 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 if (isWillNotAuthorized(ctx, msg)) {
                     return;
                 }
-                continueAfterWillAuthorization(ctx, msg);
+                continueAfterWillAuthorization(ctx, clientConnection, msg);
             }
         } else {
-            continueAfterWillAuthorization(ctx, msg);
+            continueAfterWillAuthorization(ctx, clientConnection, msg);
         }
     }
 
@@ -413,39 +413,47 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         clientConnection.setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
     }
 
-    private void continueAfterWillAuthorization(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
+    private void continueAfterWillAuthorization(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull CONNECT msg) {
 
-        ctx.pipeline().fireUserEventTriggered(new OnAuthSuccessEvent());
+        clientConnection.getChannel().pipeline().fireUserEventTriggered(new OnAuthSuccessEvent());
 
-        final ListenableFuture<Void> disconnectFuture = disconnectClientWithSameClientId(msg, ctx, 0);
+        final ListenableFuture<Void> disconnectFuture = disconnectClientWithSameClientId(msg, clientConnection, 0);
 
         Futures.addCallback(disconnectFuture, new FutureCallback<>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(final @Nullable Void result) {
                 afterTakeover(ctx, msg);
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable t) {
-                ctx.close();
-                Exceptions.rethrowError("Exception on disconnecting client with same client identifier", t);
+            public void onFailure(final @NotNull Throwable throwable) {
+                // Set here the ClientState.DISCONNECTED_TAKEN_OVER as we will else remove the client id from the
+                // ChannelPersistences (see DisconnectHandler).
+                clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
+                clientConnection.getChannel().close();
+                Exceptions.rethrowError("Exception on disconnecting client with same client identifier", throwable);
             }
-        }, ctx.executor());
+        }, clientConnection.getChannel().eventLoop());
     }
 
     private void afterPublishAuthorizer(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg, @NotNull final PublishAuthorizerResult authorizerResult) {
 
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         if (authorizerResult.isAuthorizerPresent() && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
             if (authorizerResult.getAckReasonCode() == AckReasonCode.SUCCESS) {
-                continueAfterWillAuthorization(ctx, msg);
+                continueAfterWillAuthorization(ctx, clientConnection, msg);
             } else {
                 connackWillNotAuthorized(ctx, msg, authorizerResult.getDisconnectReasonCode(), authorizerResult.getAckReasonCode(), authorizerResult.getReasonString());
             }
             return;
         }
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+        final ModifiableDefaultPermissions permissions = clientConnection.getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         //if authorizers are present and no permissions are available and the default behaviour has not been changed
@@ -464,7 +472,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
-        continueAfterWillAuthorization(ctx, msg);
+        continueAfterWillAuthorization(ctx, clientConnection, msg);
     }
 
     private boolean isWillNotAuthorized(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
@@ -643,16 +651,15 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     }
 
     private @NotNull ListenableFuture<Void> disconnectClientWithSameClientId(
-            final @NotNull CONNECT msg, final @NotNull ChannelHandlerContext ctx, final int retry) {
+            final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection, final int retry) {
 
         final Lock lock = stripedLock.get(msg.getClientIdentifier());
         lock.lock();
-
         try {
             final Channel oldClient = channelPersistence.get(msg.getClientIdentifier());
 
             if (oldClient == null) {
-                channelPersistence.persist(msg.getClientIdentifier(), ctx.channel());
+                channelPersistence.persist(msg.getClientIdentifier(), clientConnection.getChannel());
                 return Futures.immediateFuture(null);
             }
             final ClientConnection oldClientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
@@ -680,14 +687,14 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             Futures.addCallback(disconnectFuture, new FutureCallback<>() {
                 @Override
                 public void onSuccess(final Void result) {
-                    resultFuture.setFuture(disconnectClientWithSameClientId(msg, ctx, nextRetry));
+                    resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, nextRetry));
                 }
 
                 @Override
                 public void onFailure(final @NotNull Throwable t) {
                     resultFuture.setException(t);
                 }
-            }, ctx.executor());
+            }, clientConnection.getChannel().eventLoop());
             return resultFuture;
 
         } finally {
