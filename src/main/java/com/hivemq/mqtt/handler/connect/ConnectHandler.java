@@ -708,17 +708,17 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 "Disconnecting already connected client with id {} because another client connects with that id",
                 msg.getClientIdentifier());
 
+        clientConnection.getDisconnectFuture().addListener(() -> {
+            channelPersistence.remove(msg.getClientIdentifier());
+            Checkpoints.checkpoint("ClientTakeOverDisconnected");
+        }, MoreExecutors.directExecutor());
+
         clientConnection.getChannel().eventLoop().execute(() ->
                 mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                         null, //already logged
                         ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
                         Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
                         ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
-
-        clientConnection.getDisconnectFuture().addListener(() -> {
-            channelPersistence.remove(msg.getClientIdentifier());
-            Checkpoints.checkpoint("ClientTakeOverDisconnected");
-        }, MoreExecutors.directExecutor());
     }
 
     private void addKeepAliveHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
