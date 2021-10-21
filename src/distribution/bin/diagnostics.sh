@@ -107,5 +107,5 @@ if hash java 2>/dev/null; then
     fi
 
 else
-  echoerr "ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptopenjdk.net/?variant=openjdk11 and try again."
+  echoerr "ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/?variant=openjdk11 and try again."
 fi
