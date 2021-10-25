@@ -99,11 +99,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         }
         eventLog.clientDisconnectedGracefully(clientConnection, logClientReasonString ? msg.getReasonString() : null);
 
-        if (msg.getReasonCode() != NORMAL_DISCONNECTION) {
-            clientConnection.setSendWill(true);
-        } else {
-            clientConnection.setSendWill(false);
-        }
+        clientConnection.setSendWill(msg.getReasonCode() != NORMAL_DISCONNECTION);
+
         ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
                 msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
 
@@ -121,31 +118,39 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event when we can set this state.
         clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
-        final boolean initialLog = clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED;
 
-        handleInactive(clientConnection);
+        final ClientState clientState = clientConnection.getClientState();
+        final boolean initialDisconnectEvent = clientState == ClientState.DISCONNECTED_UNSPECIFIED;
 
-        final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
-        final boolean gracefulDisconnect = clientConnection.getClientState() == ClientState.DISCONNECTED_BY_CLIENT;
-        final boolean takenOver = clientConnection.getClientState() == ClientState.DISCONNECTED_TAKEN_OVER;
-        final boolean preventLwt = clientConnection.isPreventLwt();
-
-        if (!gracefulDisconnect && !preventLwt && !takenOver && authenticated) {
-            clientConnection.setSendWill(true);
+        //only change the session information if user is authenticated
+        if (authenticated) {
+            persistDisconnectState(clientConnection);
+        } else {
+            final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
+            if (disconnectFuture != null) {
+                disconnectFuture.set(null);
+            }
         }
 
-        if (initialLog) {
-            eventLog.clientDisconnectedUngracefully(clientConnection);
+        final boolean ungracefulDisconnect =
+                (clientState == ClientState.DISCONNECTED_BY_SERVER)
+                        || (clientState == ClientState.DISCONNECTED_UNSPECIFIED);
+
+        if (clientConnection.isPreventLwt()) {
+            clientConnection.setSendWill(false);
+        } else if (ungracefulDisconnect && authenticated) {
+            clientConnection.setSendWill(true);
         }
 
         //increase metrics
         metricsHolder.getClosedConnectionsCounter().inc();
-        if (!gracefulDisconnect) {
-            if (initialLog) {
-                ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(null, null, null, false));
-            }
+
+        if (initialDisconnectEvent) {
+            eventLog.clientDisconnectedUngracefully(clientConnection);
+            ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(null, null, null, false));
         }
 
+        final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
         if (topicAliasMapping != null) {
             topicAliasLimiter.finishUsage(topicAliasMapping);
         }
@@ -153,17 +158,9 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         super.channelInactive(ctx);
     }
 
-    private void handleInactive(final @NotNull ClientConnection clientConnection) {
+    private void persistDisconnectState(final @NotNull ClientConnection clientConnection) {
 
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
-
-        //only change the session information if user is authenticated
-        if (clientConnection.getClientState().unauthenticated()) {
-            if (disconnectFuture != null) {
-                disconnectFuture.set(null);
-            }
-            return;
-        }
 
         final Long sessionExpiryInterval = clientConnection.getClientSessionExpiryInterval();
 
@@ -176,12 +173,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         }
 
         final boolean persistent = sessionExpiryInterval > 0;
-
-        persistDisconnectState(clientConnection, persistent, sessionExpiryInterval);
-    }
-
-    private void persistDisconnectState(
-            final ClientConnection clientConnection, final boolean persistent, final long sessionExpiryInterval) {
 
         final String clientId = clientConnection.getClientId();
         final boolean preventWill = clientConnection.isPreventLwt();
