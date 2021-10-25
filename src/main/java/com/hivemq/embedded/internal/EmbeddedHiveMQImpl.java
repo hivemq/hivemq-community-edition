@@ -88,6 +88,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     public void close() throws ExecutionException, InterruptedException {
         synchronized (this) {
             if (shutDownFuture == null) {
+                log.info("Closing EmbeddedHiveMQ.");
                 this.desiredState = State.CLOSED;
                 stateChangeExecutor.submit(this::stateChange);
                 shutDownFuture = stateChangeExecutor.submit(stateChangeExecutor::shutdown);
@@ -118,9 +119,9 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
         // Try to perform a stop regardless
         if (localDesiredState == State.CLOSED) {
-            log.info("Closing EmbeddedHiveMQ.");
-            performStop(localDesiredState, localStartFutures, localStopFutures);
-
+            if ((currentState != State.STOPPED) && (currentState != State.CLOSED)) {
+                performStop(localDesiredState, localStartFutures, localStopFutures);
+            }
         } else if (currentState == State.FAILED) {
             if (failedException != null) {
                 failFutureLists(failedException, localStartFutures, localStopFutures);
@@ -179,7 +180,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 hiveMQServer.stop();
             } catch (final Exception ex) {
                 if (desiredState == State.CLOSED) {
-                    log.error("Exception during running shutdown hook.");
+                    log.error("Exception during running shutdown hook.", ex);
                 } else {
                     throw ex;
                 }
