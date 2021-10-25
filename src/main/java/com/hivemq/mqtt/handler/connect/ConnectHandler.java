@@ -430,9 +430,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             @Override
             public void onFailure(final @NotNull Throwable throwable) {
-                // Set here the ClientState.DISCONNECTED_TAKEN_OVER as we will else remove the client id from the
+                // Set here the ClientState.DISCONNECTED_TAKE_OVER_FAILED as we will else remove the client id from the
                 // ChannelPersistences (see DisconnectHandler).
-                clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
+                clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKE_OVER_FAILED);
                 clientConnection.getChannel().close();
                 Exceptions.rethrowError("Exception on disconnecting client with same client identifier", throwable);
             }

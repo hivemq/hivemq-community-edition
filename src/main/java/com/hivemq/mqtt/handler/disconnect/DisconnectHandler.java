@@ -76,7 +76,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         this.topicAliasLimiter = topicAliasLimiter;
         this.clientSessionPersistence = clientSessionPersistence;
         this.channelPersistence = channelPersistence;
-        this.logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
+        logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
     }
 
     @Override
@@ -172,17 +172,15 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             return;
         }
 
-        final boolean persistent = sessionExpiryInterval > 0;
-
-        final String clientId = clientConnection.getClientId();
-        final boolean preventWill = clientConnection.isPreventLwt();
-        final boolean sendWill = !preventWill && clientConnection.isSendWill();
-        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(clientId, sendWill, sessionExpiryInterval);
+        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(
+                clientConnection.getClientId(),
+                clientConnection.isSendWill(),
+                sessionExpiryInterval);
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
                 if (clientConnection.getClientState() != ClientState.DISCONNECTED_TAKEN_OVER) {
-                    channelPersistence.remove(clientId);
+                    channelPersistence.remove(clientConnection.getClientId());
                 }
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
                 if (disconnectFuture != null) {
@@ -192,8 +190,9 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
             @Override
             public void onFailure(final @NotNull Throwable throwable) {
-                Exceptions.rethrowError("Unable to update client session data for disconnecting client " + clientId +
-                        " with clean session set to " + !persistent + ".", throwable);
+                final boolean persistent = sessionExpiryInterval > 0;
+                Exceptions.rethrowError("Unable to update client session data for disconnecting client " +
+                        clientConnection.getClientId() + " with clean session set to " + !persistent + ".", throwable);
             }
         });
     }
