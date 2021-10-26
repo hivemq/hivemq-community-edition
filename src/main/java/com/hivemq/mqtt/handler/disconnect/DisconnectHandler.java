@@ -179,9 +179,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
-                if (clientConnection.getClientState() != ClientState.DISCONNECTED_TAKEN_OVER) {
-                    channelPersistence.remove(clientConnection.getClientId());
-                }
+                channelPersistence.remove(clientConnection);
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
                 if (disconnectFuture != null) {
                     disconnectFuture.set(null);

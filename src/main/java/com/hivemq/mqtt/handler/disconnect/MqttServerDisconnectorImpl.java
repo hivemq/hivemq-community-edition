@@ -30,6 +30,7 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -78,6 +79,8 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final ClientState oldClientState = clientConnection.getClientState();
         clientConnection.proposeClientState(ClientState.DISCONNECTING);
+
+        Checkpoints.checkpoint("on-client-disconnect");
 
         if (channel.isActive()) {
             log(clientConnection, logMessage, eventLogMessage);

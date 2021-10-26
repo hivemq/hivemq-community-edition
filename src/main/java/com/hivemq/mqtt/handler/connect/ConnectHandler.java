@@ -674,7 +674,14 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                     && !oldClientConnection.getClientState().disconnected()) {
 
                 oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
-                disconnectPreviousClient(msg, oldClientConnection);
+
+                oldClientConnection.getChannel().eventLoop().execute(() ->
+                        mqttServerDisconnector.disconnect(oldClientConnection.getChannel(),
+                                "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
+                                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
+
                 nextRetry = retry;
             } else {
                 // The client is currently taken over
@@ -700,21 +707,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         } finally {
             lock.unlock();
         }
-    }
-
-    private void disconnectPreviousClient(final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection) {
-
-        clientConnection.getDisconnectFuture().addListener(() -> {
-            channelPersistence.remove(msg.getClientIdentifier());
-            Checkpoints.checkpoint("ClientTakeOverDisconnected");
-        }, MoreExecutors.directExecutor());
-
-        clientConnection.getChannel().eventLoop().execute(() ->
-                mqttServerDisconnector.disconnect(clientConnection.getChannel(),
-                        "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
-                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                        Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
     }
 
     private void addKeepAliveHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
