@@ -430,8 +430,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
             @Override
             public void onFailure(final @NotNull Throwable throwable) {
-                // Set here the ClientState.DISCONNECTED_TAKE_OVER_FAILED as we will else remove the client id from the
-                // ChannelPersistences (see DisconnectHandler).
                 clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKE_OVER_FAILED);
                 clientConnection.getChannel().close();
                 Exceptions.rethrowError("Exception on disconnecting client with same client identifier", throwable);
@@ -739,7 +737,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         }
     }
 
-    private double getGracePeriod() {
+    private static double getGracePeriod() {
         return InternalConfigurations.MQTT_CONNECTION_KEEP_ALIVE_FACTOR;
     }
 
@@ -773,5 +771,4 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             ctx.channel().disconnect();
         }
     }
-
 }
