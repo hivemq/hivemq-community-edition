@@ -73,6 +73,7 @@ import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -639,17 +640,19 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
 
-        final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(oldClientConnection);
+        oldClientConnection.proposeClientState(ClientState.AUTHENTICATED);
+        oldClientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-        disconnectFuture.set(null);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
+        oldClientConnection.setDisconnectFuture(disconnectFuture);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
-        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
+        Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
+            oldChannelRef.set(null);
+            disconnectFuture.set(null);
+        });
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
@@ -682,19 +685,21 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
-        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
+        oldClientConnection.proposeClientState(ClientState.AUTHENTICATED);
+        oldClientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(oldClientConnection);
 
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-        disconnectFuture.set(null);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setDisconnectFuture(disconnectFuture);
+        oldClientConnection.setDisconnectFuture(disconnectFuture);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
-        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
+        Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
+            oldChannelRef.set(null);
+            disconnectFuture.set(null);
+        });
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
@@ -732,32 +737,38 @@ public class ConnectHandlerTest {
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
 
-        final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setDisconnectFuture(disconnectFuture);
-        clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
+        final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(oldClientConnection);
+        oldClientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        oldClientConnection.setDisconnectFuture(disconnectFuture);
+        oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
-        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
+        Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
+            oldChannelRef.set(null);
+            disconnectFuture.set(null);
+        });
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("sameClientId").build();
 
-        channel.writeInbound(connect1);
+        channel.writeInbound(connect1); // queue retry
 
         oldChannel.runPendingTasks();
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        disconnectFuture.set(null);
-        clientConnection.setClientStateUnsafe(ClientState.AUTHENTICATED);
+        oldClientConnection.getChannel().eventLoop().execute(() ->
+                serverDisconnector.disconnect(oldClientConnection.getChannel(),
+                        "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                        Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
 
-        channel.runPendingTasks(); // retry take over
         oldChannel.runPendingTasks(); // disconnect client
         channel.runPendingTasks(); // retry take over
 
@@ -785,30 +796,36 @@ public class ConnectHandlerTest {
 
         final EmbeddedChannel oldChannel =
                 new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
-        final ClientConnection clientConnection = new ClientConnection(oldChannel, null);
-        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        clientConnection.setDisconnectFuture(disconnectFuture);
-        clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKEN_OVER);
+        final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
+        oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(oldClientConnection);
+        oldClientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        oldClientConnection.setDisconnectFuture(disconnectFuture);
+        oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
 
         final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
         when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
-        when(channelPersistence.remove(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.getAndSet(null));
+        Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
+            oldChannelRef.set(null);
+            disconnectFuture.set(null);
+        });
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
         final CONNECT connect1 = new CONNECT.Mqtt5Builder().withClientIdentifier("sameClientId").build();
 
-        channel.writeInbound(connect1);
+        channel.writeInbound(connect1); // queue retry
 
         assertTrue(oldChannel.isOpen());
         assertTrue(channel.isOpen());
 
-        disconnectFuture.set(null);
-        clientConnection.setClientStateUnsafe(ClientState.AUTHENTICATED);
+        oldClientConnection.getChannel().eventLoop().execute(() ->
+                serverDisconnector.disconnect(oldClientConnection.getChannel(),
+                        "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                        Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
 
-        channel.runPendingTasks(); // retry take over
         oldChannel.runPendingTasks(); // disconnect client
         channel.runPendingTasks(); // retry take over
 

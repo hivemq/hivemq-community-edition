@@ -15,11 +15,11 @@
  */
 package com.hivemq.persistence;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.*;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -46,50 +46,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Singleton
 public class ChannelPersistenceImpl implements ChannelPersistence {
 
-    private static final Logger log = LoggerFactory.getLogger(ChannelPersistence.class);
+    private static final Logger log = LoggerFactory.getLogger(ChannelPersistenceImpl.class);
 
-    private final @NotNull Map<String, Channel> channelMap;
+    private final @NotNull Map<String, ClientConnection> clientConnectionMap;
     private final @NotNull Map<String, Channel> serverChannelMap;
-    private final boolean shutdownLegacy;
     private final @NotNull AtomicBoolean interrupted;
+    private final boolean shutdownLegacy;
     private final int shutdownPartitionSize;
 
     @Inject
     public ChannelPersistenceImpl() {
-        this.shutdownLegacy = InternalConfigurations.NETTY_SHUTDOWN_LEGACY;
-        this.shutdownPartitionSize = InternalConfigurations.NETTY_SHUTDOWN_PARTITION_SIZE;
-        this.interrupted = new AtomicBoolean(false);
-        this.channelMap = new ConcurrentHashMap<>();
-        this.serverChannelMap = new ConcurrentHashMap<>();
+        shutdownLegacy = InternalConfigurations.NETTY_SHUTDOWN_LEGACY;
+        shutdownPartitionSize = InternalConfigurations.NETTY_SHUTDOWN_PARTITION_SIZE;
+        interrupted = new AtomicBoolean(false);
+        clientConnectionMap = new ConcurrentHashMap<>();
+        serverChannelMap = new ConcurrentHashMap<>();
     }
 
-
-        @Nullable
     @Override
-    public Channel get(final @NotNull String clientId) {
-        return channelMap.get(clientId);
+    public @Nullable Channel get(final @NotNull String clientId) {
+        final ClientConnection clientConnection = clientConnectionMap.get(clientId);
+        return clientConnection == null ? null : clientConnection.getChannel();
     }
 
     @Override
     public void persist(final @NotNull String clientId, final @NotNull Channel value) {
-        channelMap.put(clientId, value);
+        clientConnectionMap.put(clientId, value.attr(ChannelAttributes.CLIENT_CONNECTION).get());
     }
 
-    @Nullable
     @Override
-    public Channel remove(final @NotNull String clientId) {
-        return channelMap.remove(clientId);
+    public void remove(final @NotNull ClientConnection clientConnection) {
+        clientConnectionMap.remove(clientConnection.getClientId(), clientConnection);
     }
 
     @Override
     public long size() {
-        return channelMap.size();
+        return clientConnectionMap.size();
     }
 
     @NotNull
     @Override
-    public Set<Map.Entry<String, Channel>> entries() {
-        return channelMap.entrySet();
+    public Set<Map.Entry<String, ClientConnection>> entries() {
+        return clientConnectionMap.entrySet();
     }
 
 
@@ -126,7 +124,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
             public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError(t);
                 log.warn("Shutdown of listeners failed");
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Original Exception: ", t);
                 }
                 shutDownClients(allClientsClosedFuture);
@@ -136,8 +134,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
         return allClientsClosedFuture;
     }
 
-    @NotNull
-    private ListenableFuture<Void> shutDownListeners() {
+    private @NotNull ListenableFuture<Void> shutDownListeners() {
         try {
             final Map<String, Channel> allServerChannels = ImmutableMap.copyOf(serverChannelMap);
             final ImmutableList.Builder<ListenableFuture<Void>> futureBuilder = ImmutableList.builder();
@@ -170,26 +167,30 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     }
 
     private void shutDownClients(final @NotNull SettableFuture<Void> allClientsClosedFuture) {
-        final List<Channel> allChannels = new ArrayList<>(channelMap.values());
-        if (allChannels.isEmpty()) {
+        final List<ClientConnection> allConnections = new ArrayList<>(clientConnectionMap.values());
+        if (allConnections.isEmpty()) {
             allClientsClosedFuture.set(null);
             return;
         }
-        final List<List<Channel>> channelPartitions = Lists.partition(allChannels, shutdownPartitionSize);
-        shutDownPartition(channelPartitions, 0, allClientsClosedFuture);
+        final List<List<ClientConnection>> connectionPartitions = Lists.partition(allConnections, shutdownPartitionSize);
+        shutDownPartition(connectionPartitions, 0, allClientsClosedFuture);
     }
 
-    private void shutDownPartition(final @NotNull List<List<Channel>> channelPartitions, final int index, final @NotNull SettableFuture<Void> closeFuture) {
-        if (interrupted.get() || index >= channelPartitions.size()) {
+    private void shutDownPartition(
+            final @NotNull List<List<ClientConnection>> connectionPartitions,
+            final int index,
+            final @NotNull SettableFuture<Void> closeFuture) {
+
+        if (interrupted.get() || index >= connectionPartitions.size()) {
             closeFuture.set(null);
             return;
         }
-        final List<Channel> partition = channelPartitions.get(index);
+        final List<ClientConnection> partition = connectionPartitions.get(index);
         final List<ListenableFuture<Void>> closeFutures = new ArrayList<>(partition.size());
-        for (final Channel channel : partition) {
-            final SettableFuture<Void> disconnectFuture = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getDisconnectFuture();
-            final ChannelFuture channelFuture = channel.close();
-            if(disconnectFuture != null){
+        for (final ClientConnection clientConnection : partition) {
+            final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
+            final ChannelFuture channelFuture = clientConnection.getChannel().close();
+            if (disconnectFuture != null) {
                 closeFutures.add(disconnectFuture);
             } else {
                 final SettableFuture<Void> channelCloseFuture = SettableFuture.create();
@@ -199,7 +200,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
         }
 
         Futures.whenAllComplete(closeFutures).run(() -> {
-            shutDownPartition(channelPartitions, index + 1, closeFuture);
+            shutDownPartition(connectionPartitions, index + 1, closeFuture);
         }, MoreExecutors.directExecutor());
     }
 }

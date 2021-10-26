@@ -243,7 +243,7 @@ public class DisconnectHandlerTest {
         channel.disconnect().get();
 
         verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-        verify(channelPersistence, never()).remove("client");
+        verify(channelPersistence, never()).remove(clientConnection);
     }
 
     @Test
