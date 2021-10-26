@@ -132,16 +132,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             }
         }
 
-        final boolean ungracefulDisconnect =
-                (clientState == ClientState.DISCONNECTED_BY_SERVER)
-                        || (clientState == ClientState.DISCONNECTED_UNSPECIFIED);
-
-        if (clientConnection.isPreventLwt()) {
-            clientConnection.setSendWill(false);
-        } else if (ungracefulDisconnect && authenticated) {
-            clientConnection.setSendWill(true);
-        }
-
         //increase metrics
         metricsHolder.getClosedConnectionsCounter().inc();
 
@@ -170,6 +160,18 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             }
             // No CONNECT message was received yet, we don't have to clean up
             return;
+        }
+
+        if (clientConnection.isPreventLwt()) {
+            clientConnection.setSendWill(false);
+        } else {
+            final ClientState clientState = clientConnection.getClientState();
+            final boolean ungracefulDisconnect =
+                    (clientState == ClientState.DISCONNECTED_BY_SERVER)
+                            || (clientState == ClientState.DISCONNECTED_UNSPECIFIED);
+            if (ungracefulDisconnect) {
+                clientConnection.setSendWill(true);
+            }
         }
 
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(
