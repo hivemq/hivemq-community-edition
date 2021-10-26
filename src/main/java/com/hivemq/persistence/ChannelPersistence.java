@@ -31,7 +31,7 @@ import java.util.Set;
 public interface ChannelPersistence {
 
     /**
-     * Receive a {@link Channel} from the channel persistence, for a specific client id.
+     * Receive a {@link Channel} from the persistence, for a specific client id.
      *
      * @param clientId The client identifier.
      * @return The Channel of the client or {@code null} if not found.
@@ -39,12 +39,12 @@ public interface ChannelPersistence {
     @Nullable Channel get(@NotNull String clientId);
 
     /**
-     * Store a {@link Channel} in the channel persistence, for a specific client id.
+     * Store a {@link ClientConnection} in the persistence, for a specific client id.
      *
-     * @param clientId The client identifier.
-     * @param value    The Channel of the client.
+     * @param clientId         The client identifier.
+     * @param clientConnection The ClientConnection of the client.
      */
-    void persist(@NotNull String clientId, @NotNull Channel value);
+    void persist(@NotNull String clientId, @NotNull ClientConnection clientConnection);
 
     /**
      * Remove a {@link ClientConnection} from the persistence, for a specific client id.
@@ -54,7 +54,7 @@ public interface ChannelPersistence {
     void remove(@NotNull ClientConnection clientConnection);
 
     /**
-     * @return the amount of stored channels.
+     * @return the amount of stored connections.
      */
     long size();
 
