@@ -23,7 +23,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -70,8 +69,8 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     }
 
     @Override
-    public void persist(final @NotNull String clientId, final @NotNull Channel value) {
-        clientConnectionMap.put(clientId, value.attr(ChannelAttributes.CLIENT_CONNECTION).get());
+    public void persist(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
+        clientConnectionMap.put(clientId, clientConnection);
     }
 
     @Override

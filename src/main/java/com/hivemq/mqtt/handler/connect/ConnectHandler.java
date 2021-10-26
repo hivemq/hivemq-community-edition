@@ -659,7 +659,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final Channel oldClient = channelPersistence.get(msg.getClientIdentifier());
 
             if (oldClient == null) {
-                channelPersistence.persist(msg.getClientIdentifier(), clientConnection.getChannel());
+                channelPersistence.persist(msg.getClientIdentifier(), clientConnection);
                 return Futures.immediateFuture(null);
             }
             final ClientConnection oldClientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();

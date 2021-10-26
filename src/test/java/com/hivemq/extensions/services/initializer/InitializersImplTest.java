@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.services.initializer;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.ClientContext;
 import com.hivemq.extension.sdk.api.client.parameter.InitializerInput;
@@ -33,12 +34,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
@@ -58,35 +55,26 @@ public class InitializersImplTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private InitializersImpl initializers;
-
-    @Mock
     private HiveMQExtensions hiveMQExtensions;
-
-    private ChannelPersistence channelPersistence;
-
-    @Mock
-    private IsolatedExtensionClassloader classloader1;
-
-    @Mock
     private HiveMQExtension plugin1;
-
-    @Mock
     private HiveMQExtension plugin2;
+    private ChannelPersistence channelPersistence;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        hiveMQExtensions = mock(HiveMQExtensions.class);
+        plugin1 = mock(HiveMQExtension.class);
+        plugin2 = mock(HiveMQExtension.class);
         channelPersistence = new ChannelPersistenceImpl();
         initializers = new InitializersImpl(hiveMQExtensions);
 
         when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
         when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
-
     }
 
     @Test
-    public void test_add_success() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void test_add_success() throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
@@ -95,7 +83,7 @@ public class InitializersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
 
@@ -104,21 +92,21 @@ public class InitializersImplTest {
         when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
         when(plugin1.getId()).thenReturn("plugin1");
 
-        final Channel channelMock = Mockito.mock(Channel.class);
-        final ChannelPipeline pipelineMock = Mockito.mock(ChannelPipeline.class);
+        final Channel channelMock = mock(Channel.class);
+        final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
+        final ClientConnection clientConnection = new ClientConnection(channelMock, null);
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        channelPersistence.persist("client", channelMock);
+        channelPersistence.persist("client", clientConnection);
 
         initializers.addClientInitializer(clientInitializer);
 
         assertEquals(clientInitializer, initializers.getClientInitializerMap().get("plugin1"));
-
     }
 
     @Test
-    public void test_add_two_different_priorities() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void test_add_two_different_priorities() throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne")
@@ -128,7 +116,7 @@ public class InitializersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
 
@@ -138,7 +126,7 @@ public class InitializersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
 
@@ -167,11 +155,10 @@ public class InitializersImplTest {
 
         assertEquals(clientInitializerTwo, iterator.next().getValue());
         assertEquals(clientInitializer, iterator.next().getValue());
-
     }
 
     @Test
-    public void test_add_two_equal_priorities() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void test_add_two_equal_priorities() throws Exception {
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
                 .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne")
@@ -181,7 +168,7 @@ public class InitializersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
 
@@ -191,7 +178,7 @@ public class InitializersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
 
@@ -219,14 +206,12 @@ public class InitializersImplTest {
         //the first one added is the first one shown
         assertEquals(clientInitializer, iterator.next().getValue());
         assertEquals(clientInitializerTwo, iterator.next().getValue());
-
     }
-
 
     public static class TestClientInitializerOne implements ClientInitializer {
 
         @Override
-        public void initialize(@NotNull final InitializerInput input, @NotNull final ClientContext pipeline) {
+        public void initialize(final @NotNull InitializerInput input, final @NotNull ClientContext pipeline) {
 
         }
     }
@@ -234,15 +219,8 @@ public class InitializersImplTest {
     public static class TestClientInitializerTwo implements ClientInitializer {
 
         @Override
-        public void initialize(@NotNull final InitializerInput input, @NotNull final ClientContext pipeline) {
+        public void initialize(final @NotNull InitializerInput input, final @NotNull ClientContext pipeline) {
 
         }
-    }
-
-    @NotNull
-    private HiveMQExtension getHiveMQPlugin(final int priority) {
-        final HiveMQExtension plugin = mock(HiveMQExtension.class);
-        when(plugin.getPriority()).thenReturn(priority);
-        return plugin;
     }
 }
