@@ -36,8 +36,7 @@ public interface ClientSessionPersistence {
 
     boolean isExistent(@NotNull final String client);
 
-    @NotNull
-    ListenableFuture<Void> clientDisconnected(final @NotNull String client, final boolean sendWil, long sessionExpiry);
+    @NotNull ListenableFuture<Void> clientDisconnected(@NotNull String client, boolean sendWill, long sessionExpiry);
 
     /**
      * Mark the client session as connected
