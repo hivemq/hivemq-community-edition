@@ -39,12 +39,21 @@ public interface ChannelPersistence {
     @Nullable Channel get(@NotNull String clientId);
 
     /**
-     * Store a {@link ClientConnection} in the persistence, for a specific client id.
+     * Receive a {@link ClientConnection} from the persistence, for a specific client id.
      *
-     * @param clientId         The client identifier.
-     * @param clientConnection The ClientConnection of the client.
+     * @param clientId The client identifier.
+     * @return The ClientConnection of the client or {@code null} if not found.
      */
-    void persist(@NotNull String clientId, @NotNull ClientConnection clientConnection);
+    @Nullable ClientConnection getClientConnection(@NotNull String clientId);
+
+    /**
+     * Try to put a ClientConnection for the client id. Return the old ClientConnection when there is already one.
+     *
+     * @param clientId         The client id of which the ClientConnection should be persisted.
+     * @param clientConnection The ClientConnection to persist.
+     * @return The currently persisted ClientConnection.
+     */
+    @Nullable ClientConnection tryPersist(@NotNull String clientId, @NotNull ClientConnection clientConnection);
 
     /**
      * Remove a {@link ClientConnection} from the persistence, for a specific client id.

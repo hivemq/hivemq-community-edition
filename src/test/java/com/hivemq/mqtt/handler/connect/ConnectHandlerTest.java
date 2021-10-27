@@ -90,6 +90,7 @@ import util.*;
 
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -145,7 +146,7 @@ public class ConnectHandlerTest {
                 any(),
                 isNull())).thenReturn(Futures.immediateFuture(null));
 
-        channel = new EmbeddedChannel(new DummyHandler());
+        channel = new EmbeddedChannel(new MyChannelId(), new DummyHandler());
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setQueueSizeMaximum(null);
@@ -155,7 +156,7 @@ public class ConnectHandlerTest {
         mqttConnacker = new MqttConnackerImpl(eventLog);
         serverDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
-        when(channelPersistence.get(anyString())).thenReturn(null);
+        when(channelPersistence.tryPersist(anyString(), any())).thenReturn(null);
 
         when(channelDependencies.getAuthInProgressMessageHandler()).thenReturn(new AuthInProgressMessageHandler(
                 mqttConnacker));
@@ -630,7 +631,8 @@ public class ConnectHandlerTest {
         assertFalse(channel.pipeline().names().contains(ChannelHandlerNames.MQTT_CONNECT_HANDLER));
     }
 
-    @Test(timeout = 5_000)
+//    @Test(timeout = 5_000)
+    @Test
     public void test_client_takeover_mqtt3() throws Exception {
 
         final CountDownLatch disconnectEventLatch = new CountDownLatch(1);
@@ -638,7 +640,7 @@ public class ConnectHandlerTest {
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, false);
 
         final EmbeddedChannel oldChannel =
-                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+                new EmbeddedChannel(new MyChannelId(), testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
 
         final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
         oldChannel.attr(ChannelAttributes.CLIENT_CONNECTION).set(oldClientConnection);
@@ -647,10 +649,10 @@ public class ConnectHandlerTest {
         final SettableFuture<Void> disconnectFuture = SettableFuture.create();
         oldClientConnection.setDisconnectFuture(disconnectFuture);
 
-        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
-        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        final AtomicReference<ClientConnection> oldClientConnectionRef = new AtomicReference<>(oldClientConnection);
+        when(channelPersistence.tryPersist(eq("sameClientId"), any())).thenAnswer(invocation -> oldClientConnectionRef.get());
         Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
-            oldChannelRef.set(null);
+            oldClientConnectionRef.set(null);
             disconnectFuture.set(null);
         });
 
@@ -662,8 +664,8 @@ public class ConnectHandlerTest {
                 .build();
 
         channel.writeInbound(connect1);
-        channel.runPendingTasks();
-        oldChannel.runPendingTasks();
+        oldChannel.runPendingTasks(); // disconnect client
+        channel.runPendingTasks(); // retry take over
 
         assertTrue(channel.isOpen());
         assertFalse(oldChannel.isOpen());
@@ -684,7 +686,7 @@ public class ConnectHandlerTest {
         final TestDisconnectHandler testDisconnectHandler = new TestDisconnectHandler(disconnectMessageWaiter, true);
 
         final EmbeddedChannel oldChannel =
-                new EmbeddedChannel(testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
+                new EmbeddedChannel(new MyChannelId(), testDisconnectHandler, new TestDisconnectEventHandler(disconnectEventLatch));
         final ClientConnection oldClientConnection = new ClientConnection(oldChannel, null);
         oldClientConnection.proposeClientState(ClientState.AUTHENTICATED);
         oldClientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -694,10 +696,10 @@ public class ConnectHandlerTest {
         oldClientConnection.setDisconnectFuture(disconnectFuture);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().proposeClientState(ClientState.AUTHENTICATED);
 
-        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
-        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        final AtomicReference<ClientConnection> oldClientConnectionRef = new AtomicReference<>(oldClientConnection);
+        when(channelPersistence.tryPersist(eq("sameClientId"), any())).thenAnswer(invocation -> oldClientConnectionRef.get());
         Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
-            oldChannelRef.set(null);
+            oldClientConnectionRef.set(null);
             disconnectFuture.set(null);
         });
 
@@ -743,10 +745,10 @@ public class ConnectHandlerTest {
         oldClientConnection.setDisconnectFuture(disconnectFuture);
         oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
 
-        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
-        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        final AtomicReference<ClientConnection> oldClientConnectionRef = new AtomicReference<>(oldClientConnection);
+        when(channelPersistence.tryPersist(eq("sameClientId"), any())).thenAnswer(invocation -> oldClientConnectionRef.get());
         Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
-            oldChannelRef.set(null);
+            oldClientConnectionRef.set(null);
             disconnectFuture.set(null);
         });
 
@@ -802,10 +804,10 @@ public class ConnectHandlerTest {
         oldClientConnection.setDisconnectFuture(disconnectFuture);
         oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
 
-        final AtomicReference<Channel> oldChannelRef = new AtomicReference<>(oldChannel);
-        when(channelPersistence.get(eq("sameClientId"))).thenAnswer(invocation -> oldChannelRef.get());
+        final AtomicReference<ClientConnection> oldClientConnectionRef = new AtomicReference<>(oldClientConnection);
+        when(channelPersistence.tryPersist(eq("sameClientId"), any())).thenAnswer(invocation -> oldClientConnectionRef.get());
         Checkpoints.callbackOnCheckpoint("on-client-disconnect", () -> {
-            oldChannelRef.set(null);
+            oldClientConnectionRef.set(null);
             disconnectFuture.set(null);
         });
 
@@ -1692,4 +1694,38 @@ public class ConnectHandlerTest {
         }
     }
 
+    private static class MyChannelId implements ChannelId {
+
+        private final String uuid = UUID.randomUUID().toString();
+
+        @Override
+        public String asShortText() {
+            return uuid;
+        }
+
+        @Override
+        public String asLongText() {
+            return uuid;
+        }
+
+        @Override
+        public int compareTo(@NotNull ChannelId o) {
+            return 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return uuid.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (!(o instanceof MyChannelId)) return false;
+
+            final MyChannelId that = (MyChannelId) o;
+
+            return uuid.equals(that.uuid);
+        }
+    }
 }

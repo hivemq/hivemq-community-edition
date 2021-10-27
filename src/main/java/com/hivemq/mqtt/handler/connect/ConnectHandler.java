@@ -16,7 +16,10 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -66,7 +69,6 @@ import javax.inject.Singleton;
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
@@ -105,10 +107,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private int topicAliasMaximum;
     private int serverKeepAliveMaximum;
     private boolean allowZeroKeepAlive;
-
     private long maxMessageExpiryInterval;
-
-    private final Striped<Lock> stripedLock = Striped.lock(Runtime.getRuntime().availableProcessors() * 16);
 
     @Inject
     public ConnectHandler(
@@ -651,60 +650,52 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private @NotNull ListenableFuture<Void> disconnectClientWithSameClientId(
             final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection, final int retry) {
 
-        final Lock lock = stripedLock.get(msg.getClientIdentifier());
-        lock.lock();
-        try {
-            final Channel oldClient = channelPersistence.get(msg.getClientIdentifier());
-
-            if (oldClient == null) {
-                channelPersistence.persist(msg.getClientIdentifier(), clientConnection);
-                return Futures.immediateFuture(null);
-            }
-            final ClientConnection oldClientConnection = oldClient.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-            final SettableFuture<Void> disconnectFuture = oldClientConnection.getDisconnectFuture();
-            if (disconnectFuture == null) {
-                return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
-            }
-            // We have to check if the old client is currently taken over
-            // Otherwise we could take over the same client twice
-            final int nextRetry;
-            if (oldClientConnection.getClientState() != ClientState.DISCONNECTING
-                    && !oldClientConnection.getClientState().disconnected()) {
-
-                oldClientConnection.proposeClientState(ClientState.DISCONNECTING);
-
-                oldClientConnection.getChannel().eventLoop().execute(() ->
-                        mqttServerDisconnector.disconnect(oldClientConnection.getChannel(),
-                                "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
-                                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                                ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
-
-                nextRetry = retry;
-            } else {
-                // The client is currently taken over
-                if (retry >= MAX_TAKEOVER_RETRIES) {
-                    return Futures.immediateFailedFuture(new RuntimeException("maximum takeover retries exceeded"));
-                }
-                nextRetry = retry + 1;
-            }
-            final SettableFuture<Void> resultFuture = SettableFuture.create();
-            Futures.addCallback(disconnectFuture, new FutureCallback<>() {
-                @Override
-                public void onSuccess(final Void result) {
-                    resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, nextRetry));
-                }
-
-                @Override
-                public void onFailure(final @NotNull Throwable t) {
-                    resultFuture.setException(t);
-                }
-            }, clientConnection.getChannel().eventLoop());
-            return resultFuture;
-
-        } finally {
-            lock.unlock();
+        final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
+        // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
+        if (persistedClientConnection == null
+                || persistedClientConnection.getChannel().id().equals(clientConnection.getChannel().id())) {
+            return Futures.immediateFuture(null);
         }
+        final SettableFuture<Void> disconnectFuture = persistedClientConnection.getDisconnectFuture();
+        if (disconnectFuture == null) {
+            return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
+        }
+        // We have to check if the old client is currently taken over
+        // Otherwise we could take over the same client twice
+        final int nextRetry;
+        if (persistedClientConnection.getClientState() != ClientState.DISCONNECTING
+                && !persistedClientConnection.getClientState().disconnected()) {
+
+            persistedClientConnection.proposeClientState(ClientState.DISCONNECTING);
+
+            persistedClientConnection.getChannel().eventLoop().execute(() ->
+                    mqttServerDisconnector.disconnect(persistedClientConnection.getChannel(),
+                            "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
+                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                            Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
+
+            nextRetry = retry;
+        } else {
+            // The client is currently taken over
+            if (retry >= MAX_TAKEOVER_RETRIES) {
+                return Futures.immediateFailedFuture(new RuntimeException("maximum takeover retries exceeded"));
+            }
+            nextRetry = retry + 1;
+        }
+        final SettableFuture<Void> resultFuture = SettableFuture.create();
+        Futures.addCallback(disconnectFuture, new FutureCallback<>() {
+            @Override
+            public void onSuccess(final Void result) {
+                resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, nextRetry));
+            }
+
+            @Override
+            public void onFailure(final @NotNull Throwable t) {
+                resultFuture.setException(t);
+            }
+        }, clientConnection.getChannel().eventLoop());
+        return resultFuture;
     }
 
     private void addKeepAliveHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
