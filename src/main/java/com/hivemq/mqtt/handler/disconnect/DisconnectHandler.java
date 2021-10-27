@@ -164,14 +164,11 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         if (clientConnection.isPreventLwt()) {
             clientConnection.setSendWill(false);
-        } else {
-            final ClientState clientState = clientConnection.getClientState();
-            final boolean ungracefulDisconnect =
-                    (clientState == ClientState.DISCONNECTED_BY_SERVER)
-                            || (clientState == ClientState.DISCONNECTED_UNSPECIFIED);
-            if (ungracefulDisconnect) {
-                clientConnection.setSendWill(true);
-            }
+
+            // ungraceful disconnect
+        } else if ((clientConnection.getClientState() == ClientState.DISCONNECTED_BY_SERVER)
+                || (clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED)) {
+            clientConnection.setSendWill(true);
         }
 
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(

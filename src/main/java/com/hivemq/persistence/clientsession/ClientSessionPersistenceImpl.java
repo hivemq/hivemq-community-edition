@@ -130,9 +130,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return builder.build();
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> clientDisconnected(@NotNull final String client, final boolean sendWill, final long sessionExpiry) {
+    public @NotNull ListenableFuture<Void> clientDisconnected(final @NotNull String client, final boolean sendWill, final long sessionExpiry) {
         checkNotNull(client, "Client id must not be null");
         final long timestamp = System.currentTimeMillis();
         final SettableFuture<Void> resultFuture = SettableFuture.create();
