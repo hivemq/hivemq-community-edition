@@ -62,7 +62,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     public int add(final long payloadId, final int referenceCount) {
         final LongIntHashMap map = buckets[calcBucket(payloadId)];
         final int currentCount = map.get(payloadId);
-        map.put(currentCount, referenceCount);
+        map.put(payloadId, currentCount + referenceCount);
         return currentCount + referenceCount;
     }
 

@@ -234,4 +234,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
     }
 
+    public PayloadReferenceCounterRegistry getPayloadReferenceCounterRegistry() {
+        return payloadReferenceCounterRegistry;
+    }
 }
