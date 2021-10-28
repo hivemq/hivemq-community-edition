@@ -150,6 +150,9 @@ dependencies {
     implementation("net.openhft:zero-allocation-hashing:${property("zero-allocation-hashing.version")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
+
+    /* primitive data structures */
+    implementation("org.eclipse.collections:eclipse-collections:10.4.0")
 }
 
 

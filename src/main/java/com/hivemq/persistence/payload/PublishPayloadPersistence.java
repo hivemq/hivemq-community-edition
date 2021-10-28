@@ -20,9 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * @author Lukas Brandl
  */
@@ -89,7 +86,7 @@ public interface PublishPayloadPersistence {
     /**
      * @return all reference counts for all publish payloads in a readonly map.
      */
-    @NotNull
     @VisibleForTesting
-    ImmutableMap<Long, AtomicLong> getReferenceCountersAsMap();
+    @NotNull
+    ImmutableMap<Long, Integer> getReferenceCountersAsMap();
 }

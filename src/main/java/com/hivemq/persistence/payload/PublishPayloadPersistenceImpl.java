@@ -19,8 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableScheduledFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.*;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -33,11 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -59,10 +55,13 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     private final @NotNull BucketLock bucketLock;
 
     @NotNull Cache<Long, byte[]> payloadCache;
-    final ConcurrentHashMap<Long, AtomicLong> referenceCounter = new ConcurrentHashMap<>();
     final Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
+    private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
+
 
     private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
+    private final int bucketLockCount;
+
 
     @Inject
     PublishPayloadPersistenceImpl(final @NotNull PublishPayloadLocalPersistence localPersistence,
@@ -76,9 +75,10 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                 .maximumSize(InternalConfigurations.PAYLOAD_CACHE_SIZE.get())
                 .concurrencyLevel(InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL.get())
                 .build();
-
-        removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.get();
-        bucketLock = new BucketLock(InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get());
+        removeSchedule =  InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.get();
+        bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        bucketLock = new BucketLock(bucketLockCount);
+        payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
 
     // The payload persistence has to be initialized after the other persistence bootstraps are finished.
@@ -94,26 +94,28 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             if (!scheduledExecutorService.isShutdown()) {
                 removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(
                         new RemoveEntryTask(payloadCache, localPersistence, bucketLock, removablePayloads, removeDelay,
-                                referenceCounter, taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
+                                payloadReferenceCounterRegistry, taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
             }
         }
     }
 
+
     /**
      * {@inheritDoc}
+     * @return
      */
     @Override
-    public boolean add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
+    public boolean add(@NotNull final byte[] payload, final long referenceCount, final @NotNull long payloadId) {
         checkNotNull(payload, "Payload must not be null");
-        accessBucket(payloadId, () -> {
-            final AtomicLong counter = referenceCounter.get(payloadId);
+        bucketLock.accessBucketByPaloadId(payloadId, () -> {
+            final Integer counter = payloadReferenceCounterRegistry.get(payloadId);
             if (payloadCache.getIfPresent(payloadId) != null && counter != null) {
-                counter.addAndGet(referenceCount);
+                payloadReferenceCounterRegistry.add(payloadId, (int) referenceCount);
             } else {
                 if (counter == null) {
-                    referenceCounter.put(payloadId, new AtomicLong(referenceCount));
+                    payloadReferenceCounterRegistry.put(payloadId, (int) referenceCount);
                 } else {
-                    counter.addAndGet(referenceCount);
+                    payloadReferenceCounterRegistry.add(payloadId, (int) referenceCount);
                 }
                 payloadCache.put(payloadId, payload);
                 localPersistence.put(payloadId, payload);
@@ -173,13 +175,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore locking is not an issue here.
-        accessBucket(payloadId, () -> {
-            final AtomicLong referenceCount = referenceCounter.get(payloadId);
-            if (referenceCount == null) {
-                referenceCounter.put(payloadId, new AtomicLong(1));
-            } else {
-                referenceCount.incrementAndGet();
-            }
+        bucketLock.accessBucketByPaloadId(payloadId, () -> {
+                payloadReferenceCounterRegistry.increment(payloadId);
         });
     }
 
@@ -188,67 +185,53 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      */
     @Override
     public void decrementReferenceCounter(final long id) {
-        final AtomicLong counter = referenceCounter.get(id);
-        if (counter == null || counter.get() <= 0) {
-            log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
-            if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
-                if (log.isWarnEnabled()) {
-                    for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
-                        log.warn(Thread.currentThread().getStackTrace()[i].toString());
+        bucketLock.accessBucketByPaloadId(id, () -> {
+            final Integer counter = payloadReferenceCounterRegistry.get(id);
+            if (counter == null || counter <= 0) {
+                log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
+                if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
+                    if (log.isWarnEnabled()) {
+                        for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
+                            log.warn(Thread.currentThread().getStackTrace()[i].toString());
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
+                            log.debug(Thread.currentThread().getStackTrace()[i].toString());
+                        }
                     }
                 }
-            } else {
-                if (log.isDebugEnabled()) {
-                    for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
-                        log.debug(Thread.currentThread().getStackTrace()[i].toString());
-                    }
-                }
+                return;
             }
-            return;
-        }
 
-        final long referenceCount = counter.decrementAndGet();
+            final long referenceCount = payloadReferenceCounterRegistry.decrement(id);
 
-        if (referenceCount == 0) {
-            removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
-            //Note: We'll remove the AtomicLong from the reference counter in the cleanup
-        }
-
+            if (referenceCount == 0) {
+                removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
+                //Note: We'll remove the reference counter entry  in the cleanup
+            }
+        });
     }
+
+
 
 
     @Override
     public void closeDB() {
         if (removeTaskFuture != null) {
-            removeTaskFuture.cancel(true);
         }
         localPersistence.closeDB();
     }
 
-    @NotNull
     @Override
     @VisibleForTesting
-    public ImmutableMap<Long, AtomicLong> getReferenceCountersAsMap() {
-        return ImmutableMap.copyOf(referenceCounter);
-    }
-
-    private void accessBucket(final long payloadId, final @NotNull BucketAccessCallback callback) {
-        checkNotNull(payloadId);
-        final Lock lock = bucketLock.get(Long.toString(payloadId));
-        lock.lock();
-        try {
-            callback.call();
-        } finally {
-            lock.unlock();
-        }
+    public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
+        return ImmutableMap.copyOf(payloadReferenceCounterRegistry.getAll());
     }
 
     public static long createId() {
         return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
     }
 
-    @FunctionalInterface
-    private interface BucketAccessCallback {
-        void call();
-    }
 }
