@@ -22,20 +22,23 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
 
     private final int numberBuckets;
     private final @NotNull BucketLock bucketLock;
-    public final LongIntHashMap @NotNull [] buckets;
+    private final @NotNull LongIntHashMap @NotNull [] buckets;
 
     PayloadReferenceCounterRegistryImpl(final @NotNull BucketLock bucketLock) {
         this.numberBuckets = bucketLock.getBucketCount();
         this.bucketLock = bucketLock;
         this.buckets = new LongIntHashMap[numberBuckets];
+        for (int i = 0; i < numberBuckets; i++) {
+            this.buckets[i] = new LongIntHashMap();
+        }
     }
 
     @NotThreadSafe
     public @Nullable Integer get(final long payloadId) {
         final LongIntHashMap map = buckets[calcBucket(payloadId)];
-        if(map.containsKey(payloadId)){
+        if (map.containsKey(payloadId)) {
             return map.get(payloadId);
-        }else{
+        } else {
             return null;
         }
     }
