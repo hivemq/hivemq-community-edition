@@ -80,7 +80,18 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
 
     @NotThreadSafe
     public int decrement(final long payloadId) {
-        return add(payloadId, -1);
+        final int bucketIndex = calcBucket(payloadId);
+        final LongIntHashMap map = buckets[bucketIndex];
+
+        final int i = map.get(payloadId);
+        if (i == 0) {
+            // return a negative value, but dont set it in the registry
+            return -1;
+        } else {
+            map.put(payloadId, i - 1);
+            return i - 1;
+        }
+
     }
 
     /**
