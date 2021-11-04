@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.payload;
 
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
@@ -49,49 +50,44 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     }
 
     @NotThreadSafe
-    public @Nullable Integer get(final long payloadId) {
-        final LongIntHashMap map = buckets[calcBucket(payloadId)];
-        if (map.containsKey(payloadId)) {
-            return map.get(payloadId);
-        } else {
-            return null;
-        }
+    public @Nullable int get(final long payloadId) {
+        final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
+        return map.get(payloadId);
     }
 
-    @NotThreadSafe
-    public int add(final long payloadId, final int referenceCount) {
-        final LongIntHashMap map = buckets[calcBucket(payloadId)];
+    @Override
+    public int getAndIncrementBy(@NotNull long payloadId, int delta) {
+        final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
         final int currentCount = map.get(payloadId);
-        map.put(payloadId, currentCount + referenceCount);
-        return currentCount + referenceCount;
+        map.put(payloadId, currentCount + delta);
+        return currentCount;
     }
 
     @NotThreadSafe
-    public int put(final long payloadId, final int referenceCount) {
-        final LongIntHashMap map = buckets[calcBucket(payloadId)];
-        map.put(payloadId, referenceCount);
-        return referenceCount;
+    public int incrementAndGet(final long payloadId) {
+        final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
+        final int currentCount = map.get(payloadId);
+        map.put(payloadId, currentCount + 1);
+        return currentCount + 1;
     }
 
     @NotThreadSafe
-    public int increment(final long payloadId) {
-        return add(payloadId, 1);
-    }
-
-    @NotThreadSafe
-    public int decrement(final long payloadId) {
-        final int bucketIndex = calcBucket(payloadId);
+    public int decrementAndGet(final long payloadId) {
+        final int bucketIndex = bucketIndexForPayloadId(payloadId);
         final LongIntHashMap map = buckets[bucketIndex];
 
-        final int i = map.get(payloadId);
-        if (i == 0) {
+        final int currentValue = map.get(payloadId);
+        if (currentValue == 0) {
             // return a negative value, but dont set it in the registry
             return -1;
-        } else {
-            map.put(payloadId, i - 1);
-            return i - 1;
         }
-
+        final int newValue = currentValue - 1;
+        if (newValue == 0) {
+            map.remove(payloadId);
+        } else {
+            map.put(payloadId, newValue);
+        }
+        return newValue;
     }
 
     /**
@@ -101,16 +97,16 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
      */
     @ThreadSafe
     public synchronized @NotNull Map<Long, Integer> getAll() {
-        final ConcurrentHashMap<Long, Integer> completeMap = new ConcurrentHashMap<>();
+        final ImmutableMap.Builder<Long, Integer> builder = ImmutableMap.builder();
         for (int i = 0; i < numberBuckets; i++) {
             final int finalI = i;
             bucketLock.accessBucket(finalI, () -> {
                 for (LongIntPair longIntPair : buckets[finalI].keyValuesView()) {
-                    completeMap.put(longIntPair.getOne(), longIntPair.getTwo());
+                    builder.put(longIntPair.getOne(), longIntPair.getTwo());
                 }
             });
         }
-        return completeMap;
+        return builder.build();
     }
 
     @ThreadSafe
@@ -125,18 +121,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
         return sum.get();
     }
 
-
-    @NotThreadSafe
-    public void remove(final long payloadId) {
-        final LongIntHashMap map = buckets[calcBucket(payloadId)];
-        if (map == null) {
-            return;
-        }
-        map.remove(payloadId);
-    }
-
-
-    private int calcBucket(final @NotNull long pubCounter) {
-        return BucketUtils.getBucket(Long.toString(pubCounter), numberBuckets);
+    private int bucketIndexForPayloadId(final long payloadId) {
+        return BucketUtils.getBucket(Long.toString(payloadId), numberBuckets);
     }
 }

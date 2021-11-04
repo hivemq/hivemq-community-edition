@@ -74,7 +74,6 @@ public class RemoveEntryTask implements Runnable {
                         if(referenceCount!=null && referenceCount == 0){
                             payloadCache.invalidate(payloadId);
                             localPersistence.remove(payloadId);
-                            payloadReferenceCounterRegistry.remove(payloadId);
                         }
                     });
                 } else {

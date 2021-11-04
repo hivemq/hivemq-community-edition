@@ -30,7 +30,6 @@ import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
@@ -100,29 +99,17 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     }
 
 
-    /**
-     * {@inheritDoc}
-     * @return
-     */
-    @Override
-    public boolean add(@NotNull final byte[] payload, final long referenceCount, final @NotNull long payloadId) {
+    public boolean add(final byte @NotNull [] payload, final long referenceCount, final @NotNull long payloadId) {
         checkNotNull(payload, "Payload must not be null");
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
-            final Integer counter = payloadReferenceCounterRegistry.get(payloadId);
-            if (payloadCache.getIfPresent(payloadId) != null && counter != null) {
-                payloadReferenceCounterRegistry.add(payloadId, (int) referenceCount);
-            } else {
-                if (counter == null) {
-                    payloadReferenceCounterRegistry.put(payloadId, (int) referenceCount);
-                } else {
-                    payloadReferenceCounterRegistry.add(payloadId, (int) referenceCount);
-                }
-                payloadCache.put(payloadId, payload);
+            if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == 0) {
                 localPersistence.put(payloadId, payload);
             }
+            payloadCache.put(payloadId, payload);
         });
         return true;
     }
+
 
     /**
      * {@inheritDoc}
@@ -176,7 +163,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore locking is not an issue here.
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
-                payloadReferenceCounterRegistry.increment(payloadId);
+                payloadReferenceCounterRegistry.incrementAndGet(payloadId);
         });
     }
 
@@ -205,7 +192,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                 return;
             }
 
-            final long referenceCount = payloadReferenceCounterRegistry.decrement(id);
+            final long referenceCount = payloadReferenceCounterRegistry.decrementAndGet(id);
 
             if (referenceCount == 0) {
                 removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));

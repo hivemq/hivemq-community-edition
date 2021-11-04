@@ -155,7 +155,8 @@ public class PublishPayloadPersistenceImplTest {
 
     @Test
     public void decrement_reference_count() throws Exception {
-        persistence.getPayloadReferenceCounterRegistry().put(0L,2);
+        persistence.getPayloadReferenceCounterRegistry().incrementAndGet(0L);
+        persistence.getPayloadReferenceCounterRegistry().incrementAndGet(0L);
         persistence.decrementReferenceCounter(0L);
         assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
         assertEquals(0, persistence.removablePayloads.size());
@@ -163,17 +164,16 @@ public class PublishPayloadPersistenceImplTest {
 
     @Test
     public void decrement_reference_count_to_zero() throws Exception {
-        persistence.getPayloadReferenceCounterRegistry().put(0L, 1);
+        persistence.getPayloadReferenceCounterRegistry().incrementAndGet(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(0L, (long)persistence.getReferenceCountersAsMap().get(0L));
         assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_already_zero() throws Exception {
-        persistence.getPayloadReferenceCounterRegistry().put(0L, 0);
+        persistence.getPayloadReferenceCounterRegistry().incrementAndGet(0L);
+        persistence.getPayloadReferenceCounterRegistry().decrementAndGet(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(0L, (long)persistence.getReferenceCountersAsMap().get(0L));
         assertEquals(0, persistence.removablePayloads.size());
     }
 
