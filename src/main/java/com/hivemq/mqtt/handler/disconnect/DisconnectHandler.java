@@ -113,8 +113,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
 
-        final boolean authenticated = !clientConnection.getClientState().unauthenticated();
-
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event when we can set this state.
         clientConnection.proposeClientState(ClientState.DISCONNECTED_UNSPECIFIED);
@@ -123,14 +121,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final boolean initialDisconnectEvent = clientState == ClientState.DISCONNECTED_UNSPECIFIED;
 
         //only change the session information if user is authenticated
-        if (authenticated) {
-            persistDisconnectState(clientConnection);
-        } else {
-            final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
-            if (disconnectFuture != null) {
-                disconnectFuture.set(null);
-            }
-        }
+        persistDisconnectState(clientConnection);
 
         //increase metrics
         metricsHolder.getClosedConnectionsCounter().inc();
@@ -152,9 +143,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
-        final Long sessionExpiryInterval = clientConnection.getClientSessionExpiryInterval();
-
-        if (clientConnection.getClientId() == null || sessionExpiryInterval == null) {
+        if (clientConnection.getClientId() == null
+                || clientConnection != channelPersistence.getClientConnection(clientConnection.getClientId())) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
@@ -174,7 +164,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(
                 clientConnection.getClientId(),
                 clientConnection.isSendWill(),
-                sessionExpiryInterval);
+                clientConnection.getClientSessionExpiryInterval());
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
@@ -187,7 +177,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
             @Override
             public void onFailure(final @NotNull Throwable throwable) {
-                final boolean persistent = sessionExpiryInterval > 0;
+                final boolean persistent = clientConnection.getClientSessionExpiryInterval() > 0;
                 Exceptions.rethrowError("Unable to update client session data for disconnecting client " +
                         clientConnection.getClientId() + " with clean session set to " + !persistent + ".", throwable);
             }
