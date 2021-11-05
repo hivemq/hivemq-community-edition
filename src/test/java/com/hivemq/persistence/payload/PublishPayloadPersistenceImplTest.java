@@ -174,7 +174,7 @@ public class PublishPayloadPersistenceImplTest {
         persistence.getPayloadReferenceCounterRegistry().incrementAndGet(0L);
         persistence.getPayloadReferenceCounterRegistry().decrementAndGet(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(0, persistence.removablePayloads.size());
+        assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test

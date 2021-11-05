@@ -66,14 +66,14 @@ public class RemoveEntryTask implements Runnable {
                 if (System.currentTimeMillis() - removablePayload.getTimestamp() > removeDelay) {
                     final long payloadId = removablePayload.getId();
                     bucketLock.accessBucketByPaloadId(removablePayload.getId(), ()->{
-                        final Integer referenceCount = payloadReferenceCounterRegistry.get(payloadId);
-
+                        final int referenceCount = payloadReferenceCounterRegistry.get(payloadId);
                         //The reference count can be null, if it was marked as removable twice.
                         //Which is possible if a payload marked as removable and we receive the same payload again and mark it as removable again,
                         //before the cleanup is able to remove the payload.
-                        if(referenceCount!=null && referenceCount == 0){
+                        if(referenceCount == 0){
                             payloadCache.invalidate(payloadId);
                             localPersistence.remove(payloadId);
+                            payloadReferenceCounterRegistry.remove(payloadId);
                         }
                     });
                 } else {
