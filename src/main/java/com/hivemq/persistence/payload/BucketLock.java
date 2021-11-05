@@ -29,11 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class BucketLock {
 
     private final Lock @NotNull [] locks;
-    private final int bucketCount;
 
     public BucketLock(final int bucketCount) {
         locks = new Lock[bucketCount];
-        this.bucketCount = bucketCount;
         for (int i = 0; i < bucketCount; i++) {
             locks[i] = new ReentrantLock();
         }
@@ -41,7 +39,7 @@ public class BucketLock {
 
 
     public int getBucketCount() {
-        return bucketCount;
+        return locks.length;
     }
 
 
