@@ -101,7 +101,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     }
 
 
-    public boolean add(final byte @NotNull [] payload, final long referenceCount, final @NotNull long payloadId) {
+    public boolean add(final byte @NotNull [] payload, final long referenceCount, final long payloadId) {
         checkNotNull(payload, "Payload must not be null");
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
             if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == UNKNOWN_PAYLOAD) {
