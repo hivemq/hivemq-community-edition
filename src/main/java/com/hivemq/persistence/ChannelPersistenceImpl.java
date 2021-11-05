@@ -64,13 +64,18 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
 
     @Override
     public @Nullable Channel get(final @NotNull String clientId) {
-        final ClientConnection clientConnection = clientConnectionMap.get(clientId);
+        final ClientConnection clientConnection = getClientConnection(clientId);
         return clientConnection == null ? null : clientConnection.getChannel();
     }
 
     @Override
-    public void persist(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
-        clientConnectionMap.put(clientId, clientConnection);
+    public @Nullable ClientConnection getClientConnection(final @NotNull String clientId) {
+        return clientConnectionMap.get(clientId);
+    }
+
+    @Override
+    public @Nullable ClientConnection tryPersist(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
+        return clientConnectionMap.computeIfAbsent(clientId, id -> clientConnection);
     }
 
     @Override

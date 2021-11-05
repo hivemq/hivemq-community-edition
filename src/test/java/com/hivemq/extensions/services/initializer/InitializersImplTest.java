@@ -98,7 +98,7 @@ public class InitializersImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        channelPersistence.persist("client", clientConnection);
+        channelPersistence.tryPersist("client", clientConnection);
 
         initializers.addClientInitializer(clientInitializer);
 
