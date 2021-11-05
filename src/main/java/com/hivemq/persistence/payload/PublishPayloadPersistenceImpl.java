@@ -19,7 +19,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.ListenableScheduledFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -61,7 +62,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
 
     private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
-    private final int bucketLockCount;
 
 
     @Inject
@@ -76,8 +76,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                 .maximumSize(InternalConfigurations.PAYLOAD_CACHE_SIZE.get())
                 .concurrencyLevel(InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL.get())
                 .build();
-        removeSchedule =  InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.get();
-        bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.get();
+        int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         bucketLock = new BucketLock(bucketLockCount);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
@@ -165,7 +165,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore locking is not an issue here.
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
-                payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1);
+            payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1);
         });
     }
 
@@ -191,7 +191,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                         }
                     }
                 }
-            }else if (result == 0){
+            } else if (result == 0) {
                 //Note: We'll remove the reference counter entry  in the cleanup
                 removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
             }
@@ -201,6 +201,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     @Override
     public void closeDB() {
         if (removeTaskFuture != null) {
+            removeTaskFuture.cancel(true);
         }
         localPersistence.closeDB();
     }
