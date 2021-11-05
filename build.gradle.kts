@@ -152,7 +152,7 @@ dependencies {
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
 
     /* primitive data structures */
-    implementation("org.eclipse.collections:eclipse-collections:10.4.0")
+    implementation("org.eclipse.collections:eclipse-collections:${property("ecliplse.collections.version")}")
 }
 
 
