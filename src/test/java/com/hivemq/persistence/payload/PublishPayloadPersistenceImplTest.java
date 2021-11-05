@@ -27,7 +27,6 @@ import util.LogbackCapturingAppender;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyLong;
@@ -108,7 +107,7 @@ public class PublishPayloadPersistenceImplTest {
         final byte[] result = persistence.get(123);
 
         verify(localPersistence, never()).get(anyLong());
-        assertEquals(true, Arrays.equals(payload, result));
+        assertTrue(Arrays.equals(payload, result));
     }
 
     @Test
@@ -126,7 +125,7 @@ public class PublishPayloadPersistenceImplTest {
         final byte[] result = persistence.get(123);
 
         verify(localPersistence, times(1)).get(anyLong());
-        assertEquals(true, Arrays.equals(payload, result));
+        assertTrue(Arrays.equals(payload, result));
     }
 
     @Test(expected = PayloadPersistenceException.class)
