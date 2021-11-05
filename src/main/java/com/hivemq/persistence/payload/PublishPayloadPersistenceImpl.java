@@ -35,6 +35,8 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.REF_COUNT_ALREADY_ZERO;
+import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.UNKNOWN_PAYLOAD;
 
 /**
  * @author Lukas Brandl
@@ -102,7 +104,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public boolean add(final byte @NotNull [] payload, final long referenceCount, final @NotNull long payloadId) {
         checkNotNull(payload, "Payload must not be null");
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
-            if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == 0) {
+            if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == UNKNOWN_PAYLOAD) {
                 localPersistence.put(payloadId, payload);
             }
             payloadCache.put(payloadId, payload);
@@ -163,7 +165,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore locking is not an issue here.
         bucketLock.accessBucketByPaloadId(payloadId, () -> {
-                payloadReferenceCounterRegistry.incrementAndGet(payloadId);
+                payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1);
         });
     }
 
@@ -173,8 +175,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     @Override
     public void decrementReferenceCounter(final long id) {
         bucketLock.accessBucketByPaloadId(id, () -> {
-            final Integer counter = payloadReferenceCounterRegistry.get(id);
-            if (counter == null || counter <= 0) {
+            final int result = payloadReferenceCounterRegistry.decrementAndGet(id);
+            if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
                 log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
                 if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
                     if (log.isWarnEnabled()) {
@@ -189,20 +191,12 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                         }
                     }
                 }
-                return;
-            }
-
-            final long referenceCount = payloadReferenceCounterRegistry.decrementAndGet(id);
-
-            if (referenceCount == 0) {
-                removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
+            }else if (result == 0){
                 //Note: We'll remove the reference counter entry  in the cleanup
+                removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
             }
         });
     }
-
-
-
 
     @Override
     public void closeDB() {
@@ -219,9 +213,5 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     public static long createId() {
         return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
-    }
-
-    public PayloadReferenceCounterRegistry getPayloadReferenceCounterRegistry() {
-        return payloadReferenceCounterRegistry;
     }
 }

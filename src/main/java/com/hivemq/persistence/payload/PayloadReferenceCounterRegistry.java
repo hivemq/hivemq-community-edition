@@ -15,65 +15,79 @@
  */
 package com.hivemq.persistence.payload;
 
+import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-import java.util.Map;
 
 /**
- * @author Daniel Krüger
- * <p>
  * This class stores the counter for payload references in in-memory data structures.
  * To avoid object overheads, the references are stored in a map that supports primitive data types.
+ *
+ * @author Daniel Krüger
  */
 public interface PayloadReferenceCounterRegistry {
+
+    /**
+     * This return value represents a state where no entry is found for the given key. This makes difference to the return of 0.
+     * The later indicates that we have a payload and its reference count is 0, so it could be removed.
+     * The UNKNOWN_PAYLOAD constant represents, that we have no information on the reference count and that the payload
+     * is assumed to be not present in the persistence.
+     */
+    int UNKNOWN_PAYLOAD = -1;
+
+    /**
+     * This constant serves as the return value of the {@link #decrementAndGet} in case a decrement gets called on a reference counter
+     * that is already 0
+     */
+    int REF_COUNT_ALREADY_ZERO = -2;
 
     /**
      * Getter for the reference count that is associated to the given payloadId
      *
      * @param payloadId the key for the payload reference counter
-     * @return null: there was no entry for the given payloadId, otherwise the associated reference counter
+     * @return {@link #UNKNOWN_PAYLOAD}: there was no entry for the given payloadId
+     * otherwise the associated reference counter
      */
-    int get(final @NotNull long payloadId);
-
-    /**
-     * Increments the reference count by one
-     *
-     * @param payloadId the payloadId for which the count is incremented
-     * @return the new value that is associated to the payloadId
-     */
-    int incrementAndGet(final @NotNull long payloadId);
-
-    /**
-     * Gets the current count of the reference
-     *
-     * @param payloadId the payloadId for which the count is incremented
-     * @param delta     the value by which the reference count is incremented
-     * @return the existing value that is associated or 0 if none was associated
-     */
-    int getAndIncrementBy(final @NotNull long payloadId, final int delta);
+    int get(@NotNull long payloadId);
 
     /**
      * Decrements the reference count by one
      *
      * @param payloadId the payloadId for which the count is decremented
-     * @return the new value that is associated to the payloadId
+     * @return {@link #UNKNOWN_PAYLOAD}: there was no entry for the given payloadId,
+     * {@link #REF_COUNT_ALREADY_ZERO}: the counter, that should get decremented, was already zero
+     * otherwise: the decremented reference count
      */
-    int decrementAndGet(final @NotNull long payloadId);
+    int decrementAndGet(@NotNull long payloadId);
+
+    /**
+     * Gets the current count of the reference and increases it afterwards by the given amount
+     *
+     * @param payloadId the payloadId for which the count is incremented
+     * @param delta     the value by which the reference count is incremented
+     * @return {@link #UNKNOWN_PAYLOAD}: there was no entry for the given payloadId
+     * otherwise: the existing value that is associated before the increment
+     */
+    int getAndIncrementBy(@NotNull long payloadId, int delta);
+
+    /**
+     * Removes the entry for the given payloadId from the registry
+     *
+     * @param payloadId the payloadId for which the entry is removed
+     */
+    void remove(@NotNull long payloadId);
 
     /**
      * Returns all reference counter entries for all buckets and nodes
      *
      * @return all reference counter entries for all buckets and nodes
      */
-    @NotNull Map<Long, Integer> getAll();
+    @NotNull ImmutableMap<Long, Integer> getAll();
 
     /**
-     * Returns the amount of entries for all buckets and node
+     * Returns the amount of entries for all buckets and nodes
      *
-     * @return the amount of entries for all buckets and node
+     * @return the amount of entries for all buckets and nodes
      */
     int size();
-
-
 }

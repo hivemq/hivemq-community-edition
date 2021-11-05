@@ -52,51 +52,48 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     @NotThreadSafe
     public @Nullable int get(final long payloadId) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
-        return map.get(payloadId);
+        return map.getIfAbsent(payloadId, UNKNOWN_PAYLOAD);
     }
 
     @Override
     public int getAndIncrementBy(@NotNull long payloadId, int delta) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
-        final int currentCount = map.get(payloadId);
-        map.put(payloadId, currentCount + delta);
-        return currentCount;
+        final int previousValue = map.getIfAbsent(payloadId, UNKNOWN_PAYLOAD);
+        if (previousValue == UNKNOWN_PAYLOAD) {
+            map.put(payloadId, delta);
+        } else {
+            map.put(payloadId, previousValue + delta);
+        }
+        return previousValue;
     }
 
-    @NotThreadSafe
-    public int incrementAndGet(final long payloadId) {
-        final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
-        final int currentCount = map.get(payloadId);
-        map.put(payloadId, currentCount + 1);
-        return currentCount + 1;
-    }
-
-    @NotThreadSafe
+    @Override
     public int decrementAndGet(final long payloadId) {
         final int bucketIndex = bucketIndexForPayloadId(payloadId);
         final LongIntHashMap map = buckets[bucketIndex];
-
-        final int currentValue = map.get(payloadId);
+        final int currentValue = map.getIfAbsent(payloadId, UNKNOWN_PAYLOAD);
+        if (currentValue == UNKNOWN_PAYLOAD) {
+            return UNKNOWN_PAYLOAD;
+        }
         if (currentValue == 0) {
-            // return a negative value, but dont set it in the registry
-            return -1;
+            return REF_COUNT_ALREADY_ZERO;
         }
         final int newValue = currentValue - 1;
-        if (newValue == 0) {
-            map.remove(payloadId);
-        } else {
-            map.put(payloadId, newValue);
-        }
+        map.put(payloadId, newValue);
         return newValue;
     }
 
-    /**
-     * This method is thread safe
-     *
-     * @return a map that contains all entries
-     */
+    @Override
+    public void remove(@NotNull long payloadId) {
+        final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
+        if (map == null) {
+            return;
+        }
+        map.remove(payloadId);
+    }
+
     @ThreadSafe
-    public synchronized @NotNull Map<Long, Integer> getAll() {
+    public @NotNull ImmutableMap<Long, Integer> getAll() {
         final ImmutableMap.Builder<Long, Integer> builder = ImmutableMap.builder();
         for (int i = 0; i < numberBuckets; i++) {
             final int finalI = i;
