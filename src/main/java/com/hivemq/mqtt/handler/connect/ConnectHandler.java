@@ -209,6 +209,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return;
         }
 
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         connectAuthenticated(ctx, clientConnection, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnection);
     }
@@ -219,6 +220,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull CONNECT connect,
             final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         connectAuthenticated(ctx, clientConnection, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnection);
     }
@@ -428,7 +430,9 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             public void onFailure(final @NotNull Throwable throwable) {
                 clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKE_OVER_FAILED);
                 clientConnection.getChannel().close();
-                Exceptions.rethrowError("Exception on disconnecting client with same client identifier", throwable);
+                log.warn("Exception on disconnecting client with same client identifier '{}'. Cause: {}",
+                        clientConnection.getClientId(),
+                        throwable.getMessage());
             }
         }, clientConnection.getChannel().eventLoop());
     }
@@ -649,8 +653,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
         // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
-        if (persistedClientConnection == null
-                || persistedClientConnection.getChannel().id().equals(clientConnection.getChannel().id())) {
+        if (persistedClientConnection.getChannel().id().equals(clientConnection.getChannel().id())) {
             return Futures.immediateFuture(null);
         }
         final SettableFuture<Void> disconnectFuture = persistedClientConnection.getDisconnectFuture();

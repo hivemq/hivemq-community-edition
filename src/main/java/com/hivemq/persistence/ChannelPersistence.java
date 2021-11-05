@@ -53,7 +53,7 @@ public interface ChannelPersistence {
      * @param clientConnection The ClientConnection to persist.
      * @return The currently persisted ClientConnection.
      */
-    @Nullable ClientConnection tryPersist(@NotNull String clientId, @NotNull ClientConnection clientConnection);
+    @NotNull ClientConnection tryPersist(@NotNull String clientId, @NotNull ClientConnection clientConnection);
 
     /**
      * Remove a {@link ClientConnection} from the persistence, for a specific client id.
