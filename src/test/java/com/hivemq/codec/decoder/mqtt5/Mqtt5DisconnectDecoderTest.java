@@ -34,8 +34,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
-import util.TestMessageEncoder;
 import util.TestMqttDecoder;
+import util.encoder.TestMessageEncoder;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
