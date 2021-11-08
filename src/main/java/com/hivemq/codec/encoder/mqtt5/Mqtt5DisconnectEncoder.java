@@ -15,10 +15,9 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithOmissibleReasonCodeEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -36,11 +35,13 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SERVER_REFERENCE;
  * @author Florian Limpöck
  */
 @Singleton
-public class Mqtt5DisconnectEncoder extends Mqtt5MessageWithOmissibleReasonCodeEncoder<DISCONNECT, Mqtt5DisconnectReasonCode> implements MqttEncoder<DISCONNECT> {
+public class Mqtt5DisconnectEncoder extends Mqtt5MessageWithOmissibleReasonCodeEncoder<DISCONNECT, Mqtt5DisconnectReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.DISCONNECT.ordinal() << 4;
 
-    public Mqtt5DisconnectEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5DisconnectEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
@@ -55,13 +56,12 @@ public class Mqtt5DisconnectEncoder extends Mqtt5MessageWithOmissibleReasonCodeE
     }
 
     @Override
-    int additionalPropertyLength(@NotNull final DISCONNECT message) {
+    int additionalPropertyLength(final @NotNull DISCONNECT message) {
         return nullablePropertyEncodedLength(message.getServerReference());
     }
 
-
     @Override
-    void encodeAdditionalProperties(@NotNull final DISCONNECT message, @NotNull final ByteBuf out) {
+    void encodeAdditionalProperties(final @NotNull DISCONNECT message, final @NotNull ByteBuf out) {
         encodeNullableProperty(SERVER_REFERENCE, message.getServerReference(), out);
     }
 }

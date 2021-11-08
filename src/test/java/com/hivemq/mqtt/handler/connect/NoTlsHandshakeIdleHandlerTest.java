@@ -16,15 +16,15 @@
 
 package com.hivemq.mqtt.handler.connect;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,17 +41,14 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class NoTlsHandshakeIdleHandlerTest {
 
-    @Mock
-    MqttServerDisconnector mqttServerDisconnector;
-
+    private MqttServerDisconnector mqttServerDisconnector;
     private NoTlsHandshakeIdleHandler handler;
     private EmbeddedChannel channel;
     private AtomicBoolean userEventTriggered;
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
+        mqttServerDisconnector = mock(MqttServerDisconnector.class);
         handler = new NoTlsHandshakeIdleHandler(mqttServerDisconnector);
         userEventTriggered = new AtomicBoolean(false);
         final ChannelInboundHandlerAdapter eventAdapter = new ChannelInboundHandlerAdapter() {
@@ -60,8 +57,8 @@ public class NoTlsHandshakeIdleHandlerTest {
                 userEventTriggered.set(true);
             }
         };
-
         channel = new EmbeddedChannel();
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
         channel.pipeline().addLast(handler);
         channel.pipeline().addLast(eventAdapter);
     }

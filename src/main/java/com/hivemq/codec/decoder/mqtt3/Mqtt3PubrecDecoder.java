@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -25,9 +26,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 /**
  * @author Dominik Obermaier
@@ -36,25 +35,26 @@ import io.netty.channel.Channel;
 public class Mqtt3PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
     @Inject
-    public Mqtt3PubrecDecoder(final @NotNull MqttServerDisconnector disconnector,
-                              final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt3PubrecDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
-    @Nullable
     @Override
-    public PUBREC decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
+    public @Nullable PUBREC decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                disconnectByInvalidFixedHeader(channel, MessageType.PUBREC);
+                disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBREC);
                 buf.clear();
                 return null;
             }
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByNoMessageId(channel, MessageType.PUBREC);
+            disconnectByNoMessageId(clientConnection, MessageType.PUBREC);
             buf.clear();
             return null;
         }

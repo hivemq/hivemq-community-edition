@@ -15,22 +15,25 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.mqtt.message.publish.Mqtt3PUBLISH;
 import com.hivemq.util.Strings;
 import com.hivemq.util.Utf8Utils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqtt3PUBLISH> implements MqttEncoder<Mqtt3PUBLISH> {
+public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqtt3PUBLISH> {
+
     private static final byte PUBLISH_FIXED_HEADER = 0b0011_0000;
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull Mqtt3PUBLISH msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull Mqtt3PUBLISH msg,
+            final @NotNull ByteBuf out) {
 
         byte header = PUBLISH_FIXED_HEADER;
         final int qos = msg.getQoS().getQosNumber();
@@ -63,5 +66,4 @@ public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqt
         }
         return length;
     }
-
 }

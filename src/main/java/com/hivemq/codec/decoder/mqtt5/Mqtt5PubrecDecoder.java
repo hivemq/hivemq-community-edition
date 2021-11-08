@@ -15,20 +15,21 @@
  */
 package com.hivemq.codec.decoder.mqtt5;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.mqtt.message.pubrec.Mqtt5PUBREC;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 import javax.inject.Inject;
 
@@ -42,38 +43,40 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 @LazySingleton
 public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
-    @VisibleForTesting
     @Inject
-    public Mqtt5PubrecDecoder(final MqttServerDisconnector disconnector, final FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt5PubrecDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
     @Override
-    public PUBREC decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
+    public @Nullable PUBREC decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(channel, MessageType.PUBREC);
+            disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBREC);
             return null;
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByRemainingLengthToShort(channel, MessageType.PUBREC);
+            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBREC);
             return null;
         }
 
-        final int packetIdentifier = decodePacketIdentifier(channel, buf, MessageType.PUBREC);
+        final int packetIdentifier = decodePacketIdentifier(clientConnection, buf, MessageType.PUBREC);
         if (packetIdentifier == 0) {
             return null;
         }
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBREC(packetIdentifier, PUBREC.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBREC(packetIdentifier, Mqtt5PUBREC.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
-            disconnectByInvalidReasonCode(channel, MessageType.PUBREC);
+            disconnectByInvalidReasonCode(clientConnection, MessageType.PUBREC);
             return null;
         }
 
@@ -81,7 +84,7 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
             return new PUBREC(packetIdentifier, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
-        final int propertiesLength = decodePropertiesLengthNoPayload(buf, channel, MessageType.PUBREC);
+        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.PUBREC);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
@@ -94,32 +97,30 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
             switch (propertyIdentifier) {
                 case REASON_STRING:
-                    reasonString = decodeReasonString(channel, buf, reasonString, MessageType.PUBREC);
+                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.PUBREC);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(channel, buf, userPropertiesBuilder, MessageType.PUBREC);
+                    userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBREC);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(channel, propertyIdentifier, MessageType.PUBREC);
+                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.PUBREC);
                     return null;
             }
         }
 
-
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if(invalidUserPropertiesLength(channel, MessageType.PUBREC, userProperties)){
+        if (invalidUserPropertiesLength(clientConnection, MessageType.PUBREC, userProperties)) {
             return null;
         }
 
         return new PUBREC(packetIdentifier, reasonCode, reasonString, userProperties);
     }
-
 }

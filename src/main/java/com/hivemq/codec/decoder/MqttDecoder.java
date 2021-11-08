@@ -15,11 +15,11 @@
  */
 package com.hivemq.codec.decoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,13 @@ public abstract class MqttDecoder<T extends Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);
 
-    public abstract @Nullable T decode(final @NotNull  Channel channel, final @NotNull  ByteBuf buf, final byte header);
+    public abstract @Nullable T decode(@NotNull ClientConnection clientConnection, @NotNull ByteBuf buf, byte header);
 
     /**
      * Checks if the last 4 bits are actually zeroed out
      *
      * @param header the header byte
-     * @return <code>true</code> if the last four header bytes are actually zeroed out, false otherwise.
+     * @return {@code true} if the last four header bytes are actually zeroed out, false otherwise.
      */
     protected boolean validateHeader(final byte header) {
 
@@ -51,23 +51,27 @@ public abstract class MqttDecoder<T extends Message> {
      * Checks if the topic is not empty and doesn't contain null characters.
      *
      * @param topic the topic string
-     * @return <code>true</code> if the topic is valid.
+     * @return {@code true} if the topic is valid.
      */
-    protected boolean isInvalidTopic(final @NotNull Channel channel, final @Nullable String topic) {
+    protected static boolean isInvalidTopic(
+            final @NotNull ClientConnection clientConnection, final @Nullable String topic) {
+
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
+                log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
+                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
             }
             return true;
         }
 
         if (topic.contains("\u0000")) {
             if (log.isDebugEnabled()) {
-                log.debug("A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). This is not allowed. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
+                log.debug("A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). " +
+                                "This is not allowed. Disconnecting client.",
+                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
             }
             return true;
         }
         return false;
     }
-
 }

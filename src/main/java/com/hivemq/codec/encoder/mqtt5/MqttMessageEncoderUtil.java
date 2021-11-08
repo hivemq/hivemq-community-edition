@@ -15,18 +15,12 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import io.netty.buffer.ByteBuf;
-
-import java.nio.ByteBuffer;
-
 /**
  * Util for encoders of MQTT messages for different versions.
  *
  * @author Silvio Giebl
  */
-public class MqttMessageEncoderUtil {
+public final class MqttMessageEncoderUtil {
 
     private MqttMessageEncoderUtil() {
     }
@@ -50,37 +44,4 @@ public class MqttMessageEncoderUtil {
     public static int encodedLengthWithHeader(final int encodedLength) {
         return MqttVariableByteInteger.encodedLength(encodedLength) + encodedLength;
     }
-
-    public static int nullableEncodedLength(@Nullable final String string) {
-        return (string == null) ? 0 : MqttBinaryData.encodedLength(string);
-    }
-
-    public static int nullableEncodedLength(@Nullable final ByteBuffer byteBuffer) {
-        return (byteBuffer == null) ? 0 : MqttBinaryData.encodedLength(byteBuffer);
-    }
-
-    public static int encodedOrEmptyLength(@Nullable final ByteBuffer byteBuffer) {
-        return (byteBuffer == null) ? MqttBinaryData.EMPTY_LENGTH : MqttBinaryData.encodedLength(byteBuffer);
-    }
-
-    public static void encodeNullable(@Nullable final String string, @NotNull final ByteBuf out) {
-        if (string != null) {
-            MqttBinaryData.encode(string, out);
-        }
-    }
-
-    public static void encodeNullable(@Nullable final ByteBuffer byteBuffer, @NotNull final ByteBuf out) {
-        if (byteBuffer != null) {
-            MqttBinaryData.encode(byteBuffer, out);
-        }
-    }
-
-    public static void encodeOrEmpty(@Nullable final ByteBuffer byteBuffer, @NotNull final ByteBuf out) {
-        if (byteBuffer != null) {
-            MqttBinaryData.encode(byteBuffer, out);
-        } else {
-            MqttBinaryData.encodeEmpty(out);
-        }
-    }
-
 }

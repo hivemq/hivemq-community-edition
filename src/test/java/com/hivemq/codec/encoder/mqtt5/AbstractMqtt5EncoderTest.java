@@ -25,13 +25,13 @@ import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
+import util.encoder.TestMessageEncoder;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Florian Limpöck
@@ -41,11 +41,14 @@ public class AbstractMqtt5EncoderTest {
 
     static final int MAX_PACKET_SIZE = 130;
     protected @NotNull EmbeddedChannel channel;
+    protected @NotNull ClientConnection clientConnection;
+    protected @NotNull TestMessageEncoder testMessageEncoder;
 
-    protected void setUp(final @NotNull ChannelHandler encoder) throws Exception {
-
-        channel = new EmbeddedChannel(encoder);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+    protected void setUp() throws Exception {
+        testMessageEncoder = new TestMessageEncoder();
+        channel = new EmbeddedChannel(testMessageEncoder);
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(true);
@@ -54,13 +57,9 @@ public class AbstractMqtt5EncoderTest {
 
     }
 
-    void encodeTestBufferSize(final byte @NotNull [] expected, final @NotNull MessageWithID message, final int bufferSize) {
+    void encodeTestBufferSize(final byte @NotNull [] expected, final @NotNull MessageWithID message) {
         channel.writeOutbound(message);
         final ByteBuf buf = channel.readOutbound();
-
-        assertTrue("buffer size is shorter than the expected length", bufferSize >= expected.length);
-
-        assertEquals(expected.length, bufferSize);
 
         try {
             assertEquals(expected.length, buf.readableBytes());
@@ -68,6 +67,7 @@ public class AbstractMqtt5EncoderTest {
                 assertEquals("ByteBuf differed at index " + i, expected[i], buf.readByte());
             }
         } finally {
+            assertFalse(buf.isReadable());
             buf.release();
         }
     }
@@ -80,7 +80,7 @@ public class AbstractMqtt5EncoderTest {
             + 2 // value length
             + 8; // bytes to encode "property"
 
-    final private @NotNull MqttUserProperty userProperty = new MqttUserProperty(user, property);
+    private final @NotNull MqttUserProperty userProperty = new MqttUserProperty(user, property);
 
     @NotNull Mqtt5UserProperties getUserProperties(final int totalCount) {
         final ImmutableList.Builder<MqttUserProperty> builder = new ImmutableList.Builder<>();
@@ -90,13 +90,13 @@ public class AbstractMqtt5EncoderTest {
         return Mqtt5UserProperties.of(builder.build());
     }
 
-    @NotNull String getPaddedUtf8String(final int length) {
+    static @NotNull String getPaddedUtf8String(final int length) {
         final char[] reasonString = new char[length];
         Arrays.fill(reasonString, 'r');
         return new String(reasonString);
     }
 
-    private int getMaxPropertyLength(final int maxPacketSize) {
+    private static int getMaxPropertyLength(final int maxPacketSize) {
         return maxPacketSize - 1  // type, reserved
                 - 3  // remaining length
                 - 1  // session present
@@ -105,8 +105,8 @@ public class AbstractMqtt5EncoderTest {
     }
 
     class MaximumPacketBuilder {
-        int maxUserPropertyCount;
 
+        int maxUserPropertyCount;
         int remainingPropertyBytes;
 
         @NotNull MaximumPacketBuilder build(final int maxPacketSize) {
@@ -128,7 +128,5 @@ public class AbstractMqtt5EncoderTest {
         int getMaxUserPropertiesCount() {
             return maxUserPropertyCount;
         }
-
     }
-
 }

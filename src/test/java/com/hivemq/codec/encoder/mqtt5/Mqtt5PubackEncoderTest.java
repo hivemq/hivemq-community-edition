@@ -16,8 +16,6 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.configuration.service.SecurityConfigurationService;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -25,10 +23,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.when;
 
 /**
  * @author Waldemar Ruck
@@ -38,22 +32,10 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
     private final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.SUCCESS;
 
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
-    private Mqtt5PubackEncoder encoder;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-
-        encoder = new Mqtt5PubackEncoder(messageDroppedService, securityConfigurationService);
-        super.setUp(encoder);
+        super.setUp();
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
     }
 
     @Test
@@ -85,7 +67,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
         final PUBACK pubAck =
                 new PUBACK((127 * 256) + 1, reasonCode, "reason", userProperties);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -111,14 +93,14 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, reasonCode, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
     public void encode_reason_string_request_problem_information_false() {
 
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(false);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(false);
 
         // MQTT v5.0 Spec §3.4.2.2
         final byte[] expected = {
@@ -132,13 +114,13 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0, 1
         };
         final PUBACK pubAck = new PUBACK(1, reasonCode, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
     public void encode_user_property_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
@@ -156,13 +138,13 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
         final Mqtt5UserProperties userProperties =
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
         final PUBACK pubAck = new PUBACK(1, reasonCode, null, userProperties);
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
     public void encode_reason_string_and_user_property_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
@@ -182,7 +164,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
         final Mqtt5UserProperties userProperties =
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
         final PUBACK pubAck = new PUBACK(1, Mqtt5PubAckReasonCode.NOT_AUTHORIZED, "reason", userProperties);
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -211,7 +193,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, reasonCode, null, userProperties);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -230,7 +212,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
         final PUBACK pubAck =
                 new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -259,7 +241,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, "", userProperties);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -282,7 +264,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, notAuthorizedCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -316,7 +298,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, reasonCode, "reason", userProperties);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -336,7 +318,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
         final PUBACK pubAck =
                 new PUBACK(1, reasonCode, null, getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
 
     @Test
@@ -357,7 +339,6 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBACK pubAck = new PUBACK(1, reasonCode, null, userProperties);
 
-        encodeTestBufferSize(expected, pubAck, encoder.bufferSize(channel.pipeline().context(encoder), pubAck));
+        encodeTestBufferSize(expected, pubAck);
     }
-
 }

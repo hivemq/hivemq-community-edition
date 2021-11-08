@@ -15,25 +15,28 @@
  */
 package util.encoder;
 
-import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.util.Strings;
 import com.hivemq.util.Utf8Utils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
 
 /**
  * @author Lukas Brandl
  */
-public class Mqtt3UnsubscribeEncoder extends AbstractVariableHeaderLengthEncoder<UNSUBSCRIBE> implements MqttEncoder<UNSUBSCRIBE> {
+public class Mqtt3UnsubscribeEncoder extends AbstractVariableHeaderLengthEncoder<UNSUBSCRIBE> {
+
     private static final byte UNSUBSCRIBE_FIXED_HEADER = (byte) 0b1010_0010;
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull UNSUBSCRIBE msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull UNSUBSCRIBE msg,
+            final @NotNull ByteBuf out) {
 
         out.writeByte(UNSUBSCRIBE_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);
@@ -54,5 +57,4 @@ public class Mqtt3UnsubscribeEncoder extends AbstractVariableHeaderLengthEncoder
         }
         return length;
     }
-
 }

@@ -18,9 +18,7 @@ package com.hivemq.codec.encoder.mqtt5;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
-import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -29,8 +27,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestMessageUtil;
 
 import java.nio.ByteBuffer;
@@ -42,7 +38,6 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CORRELATION_DATA;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.PAYLOAD_FORMAT_INDICATOR;
 import static com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties.NO_USER_PROPERTIES;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
@@ -51,25 +46,11 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
 
     private HivemqId hiveMQId;
 
-    private Mqtt5PublishEncoder encoder;
-
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         hiveMQId = new HivemqId();
-
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-
-        encoder = new Mqtt5PublishEncoder(messageDroppedService, securityConfigurationService);
-        super.setUp(encoder);
+        super.setUp();
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
     }
 
     @Test
@@ -126,8 +107,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 userProperties,
                 -1, false, true, ImmutableList.copyOf(identifiers));
 
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
-
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -155,7 +135,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         Mqtt5PayloadFormatIndicator.UNSPECIFIED, null, null, null, NO_USER_PROPERTIES,
                         -1, false, true, null);
 
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -181,7 +161,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         null, null, null, null, NO_USER_PROPERTIES,
                         -1, false, true, null);
 
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -206,7 +186,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         -1, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -233,7 +213,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         15, true, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -260,7 +240,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -287,7 +267,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         17, true, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -314,7 +294,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UTF_8, null, null,
                         null, NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -344,7 +324,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         15, false, true, null);
 
 
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -373,7 +353,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UTF_8,
                         "myContentType", null, null, NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -402,7 +382,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UTF_8, null,
                         "responseTopic", null, NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
 
@@ -427,13 +407,13 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0x09, 0, 5, 1, 2, 3, 4, 5
         };
 
-        final byte[] correlationData = new byte[]{1, 2, 3, 4, 5};
+        final byte[] correlationData = {1, 2, 3, 4, 5};
         final PUBLISH publish =
                 TestMessageUtil.createMqtt5Publish(hiveMQId.get(), "topic", new byte[0], QoS.AT_LEAST_ONCE, QoS.AT_LEAST_ONCE, false,
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UTF_8, null, null,
                         correlationData, NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -458,7 +438,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, null, null, null, null,
                         NO_USER_PROPERTIES,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -482,7 +462,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, null, null, null, null,
                 NO_USER_PROPERTIES,
                 2, true, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -515,7 +495,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UTF_8, null, null,
                         null, userProperties,
                         15, false, true, null);
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -553,7 +533,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         15, false, true, null);
 
         // Do not omit reason string because it is a PUBLISH packet!
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -580,7 +560,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, null, null, null, null,
                         NO_USER_PROPERTIES,
                         15, false, true, ImmutableList.copyOf(Collections.singleton(3)));
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -614,7 +594,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, null, null, null, null,
                         NO_USER_PROPERTIES,
                         15, false, true, ImmutableList.copyOf(identifiers));
-        encodeTestBufferSize(expected, publish, encoder.bufferSize(channel.pipeline().context(encoder), publish));
+        encodeTestBufferSize(expected, publish);
     }
 
     @Test
@@ -672,21 +652,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         7, false, true, null);
-        encodeTestBufferSize(expectedQos0, publishQos0, encoder.bufferSize(channel.pipeline().context(encoder), publishQos0));
+        encodeTestBufferSize(expectedQos0, publishQos0);
 
         final PUBLISH publishQos1 =
                 TestMessageUtil.createMqtt5Publish(hiveMQId.get(), "topic", new byte[0], QoS.AT_LEAST_ONCE, QoS.AT_LEAST_ONCE, false,
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         7, false, true, null);
-        encodeTestBufferSize(expectedQos1, publishQos1, encoder.bufferSize(channel.pipeline().context(encoder), publishQos1));
+        encodeTestBufferSize(expectedQos1, publishQos1);
 
         final PUBLISH publishQos2 =
                 TestMessageUtil.createMqtt5Publish(hiveMQId.get(), "topic", new byte[0], QoS.EXACTLY_ONCE, QoS.EXACTLY_ONCE, false,
                         MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT, Mqtt5PayloadFormatIndicator.UNSPECIFIED, null,
                         null, null, NO_USER_PROPERTIES,
                         7, false, true, null);
-        encodeTestBufferSize(expectedQos2, publishQos2, encoder.bufferSize(channel.pipeline().context(encoder), publishQos2));
+        encodeTestBufferSize(expectedQos2, publishQos2);
     }
 
     @Test

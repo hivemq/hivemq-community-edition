@@ -1,5 +1,6 @@
 package util.encoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.EncoderFactory;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -12,7 +13,6 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Abdullah Imal
@@ -42,7 +42,8 @@ public class TestEncoderFactory extends EncoderFactory {
     }
 
     @Override
-    protected @Nullable MqttEncoder getEncoder(final @NotNull Message msg, final @NotNull ChannelHandlerContext ctx) {
+    protected @Nullable MqttEncoder getEncoder(
+            final @NotNull Message msg, final @NotNull ClientConnection clientConnection) {
 
         if (msg instanceof CONNECT) {
             return connectEncoder;
@@ -56,6 +57,6 @@ public class TestEncoderFactory extends EncoderFactory {
         if (msg instanceof PINGREQ) {
             return pingreqEncoder;
         }
-        return super.getEncoder(msg, ctx);
+        return super.getEncoder(msg, clientConnection);
     }
 }

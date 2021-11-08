@@ -15,11 +15,12 @@
  */
 package com.hivemq.codec.encoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -117,17 +118,17 @@ public class AbstractVariableHeaderLengthEncoderTest {
         }
 
         @Override
-        protected void encode(final ChannelHandlerContext ctx, final PUBLISH msg, final ByteBuf out) throws Exception {
-            //noop
+        public void encode(@NotNull ClientConnection clientConnection, @NotNull PUBLISH msg, @NotNull ByteBuf out) {
+
         }
 
         @Override
-        public int bufferSize(final ChannelHandlerContext ctx, final PUBLISH msg) {
+        public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBLISH msg) {
             return 256;
         }
 
         @Override
-        protected int remainingLength(final PUBLISH msg) {
+        protected int remainingLength(final @NotNull PUBLISH msg) {
             return 0;
         }
     }

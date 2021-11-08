@@ -16,6 +16,7 @@
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.*;
 import com.hivemq.codec.encoder.mqtt5.*;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -36,10 +37,7 @@ import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,15 +69,16 @@ public class EncoderFactory {
     /**
      * Finds the {@link MqttEncoder} encoder and encodes the {@link Message} message.
      *
-     * @param ctx the {@link ChannelHandlerContext} which this {@link MessageToByteEncoder} belongs to
-     * @param msg the {@link Message} to encode
-     * @param out the {@link ByteBuf} into which the encoded message will be written
+     * @param clientConnection the {@link ClientConnection} of the client
+     * @param msg              the {@link Message} to encode
+     * @param out              the {@link ByteBuf} into which the encoded message will be written
      */
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final @NotNull ByteBuf out) {
 
-        final MqttEncoder encoder = getEncoder(msg, ctx);
+        final MqttEncoder encoder = getEncoder(msg, clientConnection);
         if (encoder != null) {
-            encoder.encode(ctx, msg, out);
+            encoder.encode(clientConnection, msg, out);
         } else {
             log.error("No encoder found for msg: {} ", msg.getType());
         }
@@ -88,36 +87,37 @@ public class EncoderFactory {
     /**
      * This method finds the Mqtt encoder depending on the message and the protocol version.
      *
-     * @param msg the {@link Message} is used to identify the encoder
-     * @param ctx the {@link ChannelHandlerContext} of the mqtt client
+     * @param msg              the {@link Message} is used to identify the encoder
+     * @param clientConnection the {@link ClientConnection} of the mqtt client
      * @return {@link MqttEncoder} encoder depends on the message and protocol
      */
-    protected @Nullable MqttEncoder getEncoder(final @NotNull Message msg, final @NotNull ChannelHandlerContext ctx) {
+    protected @Nullable MqttEncoder getEncoder(
+            final @NotNull Message msg, final @NotNull ClientConnection clientConnection) {
 
-        final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
-        if (version == ProtocolVersion.MQTTv5) {
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             return mqtt5Instance.getEncoder(msg);
         } else {
             return mqtt3Instance.getEncoder(msg);
         }
     }
 
-    @NotNull ByteBuf allocateBuffer(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final boolean preferDirect) {
+    protected @NotNull ByteBuf allocateBuffer(
+            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final boolean preferDirect) {
 
-        final MqttEncoder encoder = getEncoder(msg, ctx);
+        final MqttEncoder encoder = getEncoder(msg, clientConnection);
         if (encoder != null) {
-            final int bufferSize = encoder.bufferSize(ctx, msg);
+            final int bufferSize = encoder.bufferSize(clientConnection, msg);
             if (preferDirect) {
-                return ctx.alloc().ioBuffer(bufferSize);
+                return clientConnection.getChannel().alloc().ioBuffer(bufferSize);
             } else {
-                return ctx.alloc().heapBuffer(bufferSize);
+                return clientConnection.getChannel().alloc().heapBuffer(bufferSize);
             }
         }
 
         if (preferDirect) {
-            return ctx.alloc().ioBuffer();
+            return clientConnection.getChannel().alloc().ioBuffer();
         } else {
-            return ctx.alloc().heapBuffer();
+            return clientConnection.getChannel().alloc().heapBuffer();
         }
     }
 

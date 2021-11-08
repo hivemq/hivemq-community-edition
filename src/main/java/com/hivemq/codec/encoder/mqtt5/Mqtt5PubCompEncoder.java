@@ -15,9 +15,8 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
@@ -30,11 +29,13 @@ import javax.inject.Singleton;
  * @since 4.0
  */
 @Singleton
-public class Mqtt5PubCompEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBCOMP, Mqtt5PubCompReasonCode> implements MqttEncoder<PUBCOMP> {
+public class Mqtt5PubCompEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBCOMP, Mqtt5PubCompReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.PUBCOMP.ordinal() << 4;
 
-    public Mqtt5PubCompEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5PubCompEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
@@ -43,10 +44,8 @@ public class Mqtt5PubCompEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         return FIXED_HEADER;
     }
 
-    @NotNull
     @Override
-    Mqtt5PubCompReasonCode getDefaultReasonCode() {
+    @NotNull Mqtt5PubCompReasonCode getDefaultReasonCode() {
         return Mqtt5PubCompReasonCode.SUCCESS;
     }
-
 }

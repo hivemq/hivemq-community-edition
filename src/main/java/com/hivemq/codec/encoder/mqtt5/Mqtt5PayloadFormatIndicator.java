@@ -60,10 +60,9 @@ public enum Mqtt5PayloadFormatIndicator {
      *
      * @param code the byte code.
      * @return the Payload Format Indicator belonging to the byte code or null if the byte code is not a valid Payload
-     *         Format Indicator.
+     * Format Indicator.
      */
-    @Nullable
-    public static Mqtt5PayloadFormatIndicator fromCode(final int code) {
+    public static @Nullable Mqtt5PayloadFormatIndicator fromCode(final int code) {
         final Mqtt5PayloadFormatIndicator[] values = values();
         if (code < 0 || code >= values.length) {
             return null;

@@ -60,14 +60,14 @@ public class MqttConnectDecoderTest {
     @Test
     public void test_no_protocol_version() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{1});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         verify(mqttConnacker).connackError(eq(channel), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
     @Test
     public void test_invalid_protocol_version_not_enough_readable_bytes() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 1, 2, 3, 4});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         verify(mqttConnacker).connackError(eq(channel), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
@@ -75,7 +75,7 @@ public class MqttConnectDecoderTest {
     public void test_valid_mqtt5_version() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 5});
         try {
-            decoder.decode(channel, buf, fixedHeader);
+            decoder.decode(clientConnection, buf, fixedHeader);
         } catch (final Exception e) {
             //ignore because mqtt5ConnectDecoder not tested here
         }
@@ -87,7 +87,7 @@ public class MqttConnectDecoderTest {
     @Test
     public void test_valid_mqtt3_1_1_version() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 4});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1_1, clientConnection.getProtocolVersion());
         assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp());
     }
@@ -95,7 +95,7 @@ public class MqttConnectDecoderTest {
     @Test
     public void test_valid_mqtt3_1_version() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 6, 'M', 'Q', 'T', 'T', 3, 1});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1, clientConnection.getProtocolVersion());
         assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp());
     }
@@ -103,21 +103,21 @@ public class MqttConnectDecoderTest {
     @Test
     public void test_invalid_protocol_version_mqtt_5() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 5});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         verify(mqttConnacker).connackError(eq(channel), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
     @Test
     public void test_invalid_protocol_version_7() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 7});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         verify(mqttConnacker).connackError(eq(channel), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 
     @Test
     public void test_invalid_protocol_version_length() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 5, 'M', 'Q', 'T', 'T', 7});
-        decoder.decode(channel, buf, fixedHeader);
+        decoder.decode(clientConnection, buf, fixedHeader);
         verify(mqttConnacker).connackError(eq(channel), anyString(), anyString(), eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION), anyString());
     }
 }

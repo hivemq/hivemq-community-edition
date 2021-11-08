@@ -15,33 +15,35 @@
  */
 package com.hivemq.codec.encoder;
 
-import com.hivemq.codec.encoder.mqtt3.Mqtt3PublishEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
+import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.encoder.TestMessageEncoder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class Mqtt3PublishEncoderTest {
 
     private EmbeddedChannel channel;
-    private final Mqtt3PublishEncoder mqtt3PublishEncoder = new Mqtt3PublishEncoder();
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-
-        channel = new EmbeddedChannel(mqtt3PublishEncoder);
+        channel = new EmbeddedChannel(new TestMessageEncoder());
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
-
 
     @Test
     public void test_qos_0_message() throws Exception {
@@ -57,7 +59,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0000, buf.readByte());
         assertEquals(14, buf.readByte());
@@ -65,7 +66,7 @@ public class Mqtt3PublishEncoderTest {
         //There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -82,7 +83,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0000, buf.readByte());
         assertEquals(15, buf.readByte());
@@ -90,7 +90,7 @@ public class Mqtt3PublishEncoderTest {
         //There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -108,7 +108,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1000, buf.readByte());
         assertEquals(14, buf.readByte());
@@ -116,7 +115,7 @@ public class Mqtt3PublishEncoderTest {
         //There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -134,7 +133,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0001, buf.readByte());
         assertEquals(14, buf.readByte());
@@ -142,7 +140,7 @@ public class Mqtt3PublishEncoderTest {
         //There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -161,7 +159,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1001, buf.readByte());
         assertEquals(14, buf.readByte());
@@ -169,7 +166,7 @@ public class Mqtt3PublishEncoderTest {
         //There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -187,7 +184,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0010, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -195,7 +191,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -214,7 +210,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1010, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -222,7 +217,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -241,7 +236,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0011, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -249,7 +243,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -269,7 +263,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1011, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -277,7 +270,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -295,7 +288,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0100, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -303,7 +295,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -322,7 +314,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1100, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -330,7 +321,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -349,7 +340,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_0101, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -357,7 +347,7 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -377,7 +367,6 @@ public class Mqtt3PublishEncoderTest {
         channel.writeOutbound(publish);
 
         final ByteBuf buf = channel.readOutbound();
-        assertEquals(mqtt3PublishEncoder.bufferSize(channel.pipeline().context(mqtt3PublishEncoder), publish), buf.readableBytes());
 
         assertEquals((byte) 0b0011_1101, buf.readByte());
         assertEquals(16, buf.readByte());
@@ -385,7 +374,6 @@ public class Mqtt3PublishEncoderTest {
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
-
 }
