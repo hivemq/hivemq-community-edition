@@ -24,6 +24,7 @@ import com.hivemq.codec.decoder.mqtt3.*;
 import com.hivemq.codec.decoder.mqtt5.*;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -50,7 +51,7 @@ public class TestMqttDecoder {
         return create(fullConfig);
     }
 
-    public static MQTTMessageDecoder create(final FullConfigurationService fullConfigurationService) {
+    public static MQTTMessageDecoder create(final @NotNull FullConfigurationService fullConfigurationService) {
 
         final EventLog eventLog = new EventLog();
         final HivemqId hiveMQId = new HivemqId();
@@ -66,7 +67,7 @@ public class TestMqttDecoder {
         return new MQTTMessageDecoder(
                 mqttConnectDecoder,
                 fullConfigurationService.mqttConfiguration(),
-                new MqttDecoders(new Mqtt3ConnackDecoder(eventLog),
+                new MqttDecoders(
                         new Mqtt3PublishDecoder(hiveMQId, disconnector, fullConfigurationService),
                         new Mqtt3PubackDecoder(disconnector, fullConfigurationService),
                         new Mqtt3PubrecDecoder(disconnector, fullConfigurationService),
@@ -75,8 +76,6 @@ public class TestMqttDecoder {
                         new Mqtt3DisconnectDecoder(disconnector, fullConfigurationService),
                         new Mqtt3SubscribeDecoder(disconnector, fullConfigurationService),
                         new Mqtt3UnsubscribeDecoder(disconnector, fullConfigurationService),
-                        new Mqtt3SubackDecoder(disconnector, fullConfigurationService),
-                        new Mqtt3UnsubackDecoder(disconnector, fullConfigurationService),
                         new MqttPingreqDecoder(disconnector),
                         new Mqtt5PublishDecoder(disconnector, hiveMQId, fullConfigurationService, new TopicAliasLimiterImpl()),
                         new Mqtt5DisconnectDecoder(disconnector, fullConfigurationService),
@@ -90,5 +89,4 @@ public class TestMqttDecoder {
                 , disconnector,
                 new GlobalMQTTMessageCounter(metricsHolder));
     }
-
 }

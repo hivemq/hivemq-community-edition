@@ -37,7 +37,6 @@ public class MqttDecoders {
 
     @Inject
     public MqttDecoders(
-            final @NotNull Mqtt3ConnackDecoder mqtt3ConnackDecoder,
             final @NotNull Mqtt3PublishDecoder mqtt3PublishDecoder,
             final @NotNull Mqtt3PubackDecoder mqtt3PubackDecoder,
             final @NotNull Mqtt3PubrecDecoder mqtt3PubrecDecoder,
@@ -46,8 +45,6 @@ public class MqttDecoders {
             final @NotNull Mqtt3DisconnectDecoder mqtt3DisconnectDecoder,
             final @NotNull Mqtt3SubscribeDecoder mqtt3SubscribeDecoder,
             final @NotNull Mqtt3UnsubscribeDecoder mqtt3UnsubscribeDecoder,
-            final @NotNull Mqtt3SubackDecoder mqtt3SubackDecoder,
-            final @NotNull Mqtt3UnsubackDecoder mqtt3UnsubackDecoder,
             final @NotNull MqttPingreqDecoder mqttPingreqDecoder,
             final @NotNull Mqtt5PublishDecoder mqtt5PublishDecoder,
             final @NotNull Mqtt5DisconnectDecoder mqtt5DisconnectDecoder,
