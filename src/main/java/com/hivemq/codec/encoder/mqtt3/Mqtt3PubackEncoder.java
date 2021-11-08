@@ -15,23 +15,26 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3PubackEncoder extends FixedSizeMessageEncoder<PUBACK> implements MqttEncoder<PUBACK> {
+public class Mqtt3PubackEncoder implements MqttEncoder<PUBACK> {
 
+    public static final int ENCODED_PUBACK_SIZE = 4;
     private static final byte PUBACK_FIXED_HEADER = 0b0100_0000;
     private static final byte PUBACK_REMAINING_LENGTH = 0b0000_0010;
-    public static final int ENCODED_PUBACK_SIZE = 4;
 
     @Override
-    public void encode(final ChannelHandlerContext ctx, final PUBACK msg, final ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull PUBACK msg,
+            final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
@@ -45,7 +48,7 @@ public class Mqtt3PubackEncoder extends FixedSizeMessageEncoder<PUBACK> implemen
     }
 
     @Override
-    public int bufferSize(final ChannelHandlerContext ctx, final PUBACK msg) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBACK msg) {
         return ENCODED_PUBACK_SIZE;
     }
 }

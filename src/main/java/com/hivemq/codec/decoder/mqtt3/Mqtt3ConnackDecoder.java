@@ -16,16 +16,16 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.MqttDecoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,29 +48,38 @@ public class Mqtt3ConnackDecoder extends MqttDecoder<CONNACK> {
     }
 
     @Override
-    public CONNACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
-        final boolean isMqtt311 = ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+    public @Nullable CONNACK decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+
+        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
+
         final byte connectAcknowledgeFlags = buf.readByte();
-        if (isMqtt311) {
+
+        if (protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                log.debug("A client (IP: {}) sent a Connack with an invalid fixed header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                eventLog.clientWasDisconnected(channel, "Invalid CONNACK fixed header");
-                channel.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("A client (IP: {}) sent a Connack with an invalid fixed header. Disconnecting client.",
+                            getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                }
+                eventLog.clientWasDisconnected(clientConnection.getChannel(), "Invalid CONNACK fixed header");
+                clientConnection.getChannel().close();
                 buf.clear();
                 return null;
             }
             if (connectAcknowledgeFlags != 0 && connectAcknowledgeFlags != 1) {
-                log.debug("A client (IP: {}) sent a Connack with an invalid variable header. Disconnecting client.", getChannelIP(channel).or("UNKNOWN"));
-                eventLog.clientWasDisconnected(channel, "Invalid CONNACK variable header");
-                channel.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("A client (IP: {}) sent a Connack with an invalid variable header. Disconnecting client.",
+                            getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                }
+                eventLog.clientWasDisconnected(clientConnection.getChannel(), "Invalid CONNACK variable header");
+                clientConnection.getChannel().close();
                 buf.clear();
                 return null;
             }
         }
 
-
         boolean sessionPresent = false;
-        if (isMqtt311) {
+        if (protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             sessionPresent = (connectAcknowledgeFlags & SESSION_PRESENT_BITMASK) == 0b0000_0001;
         }
         final byte returnCode = buf.readByte();

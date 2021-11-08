@@ -27,11 +27,9 @@ import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,35 +41,34 @@ import java.util.List;
 public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @Inject
-    public Mqtt3UnsubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
-                                   final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt3UnsubscribeDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
-    @Nullable
     @Override
-    public UNSUBSCRIBE decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
+    public @Nullable UNSUBSCRIBE decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-
-        if (ProtocolVersion.MQTTv3_1_1 == clientConnection.getProtocolVersion()) {
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
-                disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
+                disconnectByInvalidFixedHeader(clientConnection, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
-        } else if (ProtocolVersion.MQTTv3_1 == clientConnection.getProtocolVersion()) {
+        } else if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
-                disconnectByInvalidFixedHeader(channel, MessageType.UNSUBSCRIBE);
+                disconnectByInvalidFixedHeader(clientConnection, MessageType.UNSUBSCRIBE);
                 buf.clear();
                 return null;
             }
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByNoMessageId(channel, MessageType.UNSUBSCRIBE);
+            disconnectByNoMessageId(clientConnection, MessageType.UNSUBSCRIBE);
             buf.clear();
             return null;
         }
@@ -80,8 +77,8 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
-            if (isInvalidTopic(channel, topic)) {
-                disconnector.disconnect(channel,
+            if (isInvalidTopic(clientConnection, topic)) {
+                disconnector.disconnect(clientConnection.getChannel(),
                         "A client (IP: {}) sent an UNSUBSCRIBE with an empty topic. This is not allowed. Disconnecting client.",
                         "Sent UNSUBSCRIBE with an empty topic",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -93,7 +90,7 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         }
 
         if (topics.isEmpty()) {
-            disconnector.disconnect(channel,
+            disconnector.disconnect(clientConnection.getChannel(),
                     "A client (IP: {}) sent an UNSUBSCRIBE without topic filters. This is not allowed. Disconnecting client.",
                     "Sent UNSUBSCRIBE without topic filters",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -101,7 +98,6 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
             buf.clear();
             return null;
         }
-
         return new UNSUBSCRIBE(topics, messageId);
     }
 }

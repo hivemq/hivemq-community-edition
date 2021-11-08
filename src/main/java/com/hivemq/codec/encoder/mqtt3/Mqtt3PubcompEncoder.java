@@ -15,23 +15,26 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3PubcompEncoder extends FixedSizeMessageEncoder<PUBCOMP> implements MqttEncoder<PUBCOMP> {
+public class Mqtt3PubcompEncoder implements MqttEncoder<PUBCOMP> {
 
+    public static final int ENCODED_PUBCOMP_SIZE = 4;
     private static final byte PUBCOMP_FIXED_HEADER = 0b0111_0000;
     private static final byte PUBCOMP_REMAINING_LENGTH = 0b0000_0010;
-    public static final int ENCODED_PUBCOMP_SIZE = 4;
 
     @Override
-    public void encode(final ChannelHandlerContext ctx, final PUBCOMP msg, final ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull PUBCOMP msg,
+            final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
@@ -44,9 +47,8 @@ public class Mqtt3PubcompEncoder extends FixedSizeMessageEncoder<PUBCOMP> implem
         out.writeShort(msg.getPacketIdentifier());
     }
 
-
     @Override
-    public int bufferSize(final ChannelHandlerContext ctx, final PUBCOMP msg) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBCOMP msg) {
         return ENCODED_PUBCOMP_SIZE;
     }
 }

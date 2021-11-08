@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -23,10 +24,8 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 /**
  * @author Florian Limpöck
@@ -41,16 +40,16 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
         this.serverDisconnector = serverDisconnector;
     }
 
-    @Nullable
     @Override
-    public PINGREQ decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
+    public @Nullable PINGREQ decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         //Pingreq of MQTTv5 is equal to MQTTv3_1_1
-        if (ProtocolVersion.MQTTv5 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
+        if (protocolVersion == ProtocolVersion.MQTTv5 || protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                serverDisconnector.disconnect(channel,
+                serverDisconnector.disconnect(clientConnection.getChannel(),
                         "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
                         "Sent a PINGREQ with invalid fixed header",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -59,7 +58,6 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
                 return null;
             }
         }
-
         return PINGREQ.INSTANCE;
     }
 }

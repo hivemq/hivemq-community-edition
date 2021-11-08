@@ -16,19 +16,19 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +40,19 @@ import java.util.List;
 public class Mqtt3SubackDecoder extends AbstractMqttDecoder<SUBACK> {
 
     @Inject
-    public Mqtt3SubackDecoder(final @NotNull MqttServerDisconnector disconnector,
-                              final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt3SubackDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
     @Override
-    public SUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
+    public @Nullable SUBACK decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                disconnectByInvalidFixedHeader(channel, MessageType.SUBACK);
+                disconnectByInvalidFixedHeader(clientConnection, MessageType.SUBACK);
                 buf.clear();
                 return null;
             }
@@ -60,7 +63,7 @@ public class Mqtt3SubackDecoder extends AbstractMqttDecoder<SUBACK> {
         while (buf.isReadable()) {
             final byte qos = buf.readByte();
             if (qos < 0 || qos > 2) {
-                disconnector.disconnect(channel,
+                disconnector.disconnect(clientConnection.getChannel(),
                         "A client (IP: {}) sent a SUBACK with an invalid QoS. Disconnecting client.",
                         "Sent SUBACK with invalid QoS",
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,

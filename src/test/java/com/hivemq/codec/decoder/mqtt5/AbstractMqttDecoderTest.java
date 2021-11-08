@@ -51,6 +51,8 @@ public class AbstractMqttDecoderTest {
 
     protected void createChannel() {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
+        clientConnection = new ClientConnection(channel, null);
+        clientConnection.setProtocolVersion(protocolVersion);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 }

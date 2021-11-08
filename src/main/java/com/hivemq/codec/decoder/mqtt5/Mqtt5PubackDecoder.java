@@ -15,8 +15,8 @@
  */
 package com.hivemq.codec.decoder.mqtt5;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -26,10 +26,10 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
+import com.hivemq.mqtt.message.puback.Mqtt5PUBACK;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 import javax.inject.Inject;
 
@@ -43,39 +43,40 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 @LazySingleton
 public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
-    @VisibleForTesting
     @Inject
-    public Mqtt5PubackDecoder(final @NotNull MqttServerDisconnector disconnector, final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt5PubackDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
-    @Nullable
     @Override
-    public PUBACK decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
+    public @Nullable PUBACK decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(channel, MessageType.PUBACK);
+            disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBACK);
             return null;
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByRemainingLengthToShort(channel, MessageType.PUBACK);
+            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBACK);
             return null;
         }
 
-        final int packetIdentifier = decodePacketIdentifier(channel, buf, MessageType.PUBACK);
+        final int packetIdentifier = decodePacketIdentifier(clientConnection, buf, MessageType.PUBACK);
         if (packetIdentifier == 0) {
             return null;
         }
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBACK(packetIdentifier, PUBACK.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBACK(packetIdentifier, Mqtt5PUBACK.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
-            disconnectByInvalidReasonCode(channel, MessageType.PUBACK);
+            disconnectByInvalidReasonCode(clientConnection, MessageType.PUBACK);
             return null;
         }
 
@@ -83,7 +84,7 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
             return new PUBACK(packetIdentifier, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
-        final int propertiesLength = decodePropertiesLengthNoPayload(buf, channel, MessageType.PUBACK);
+        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.PUBACK);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
@@ -96,28 +97,27 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
             switch (propertyIdentifier) {
                 case REASON_STRING:
-                    reasonString = decodeReasonString(channel, buf, reasonString, MessageType.PUBACK);
+                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.PUBACK);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(channel, buf, userPropertiesBuilder, MessageType.PUBACK);
+                    userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBACK);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(channel, propertyIdentifier, MessageType.PUBACK);
+                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.PUBACK);
                     return null;
             }
         }
 
-
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if(invalidUserPropertiesLength(channel, MessageType.PUBACK, userProperties)){
+        if (invalidUserPropertiesLength(clientConnection, MessageType.PUBACK, userProperties)) {
             return null;
         }
 

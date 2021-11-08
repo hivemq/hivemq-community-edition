@@ -15,23 +15,26 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3UnsubackEncoder extends FixedSizeMessageEncoder<UNSUBACK> implements MqttEncoder<UNSUBACK> {
+public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
 
+    public static final int ENCODED_UNSUBACK_SIZE = 4;
     private static final byte UNSUBACK_FIXED_HEADER = (byte) 0b1011_0000;
     private static final byte UNSUBACK_REMAINING_LENGTH = 0b0000_0010;
-    public static final int ENCODED_UNSUBACK_SIZE = 4;
 
     @Override
-    public void encode(final ChannelHandlerContext ctx, final UNSUBACK msg, final ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull UNSUBACK msg,
+            final @NotNull ByteBuf out) {
 
         out.writeByte(UNSUBACK_FIXED_HEADER);
         //The remaining length is always static for UNSUBACKs
@@ -41,7 +44,7 @@ public class Mqtt3UnsubackEncoder extends FixedSizeMessageEncoder<UNSUBACK> impl
     }
 
     @Override
-    public int bufferSize(final ChannelHandlerContext ctx, final UNSUBACK msg) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull UNSUBACK msg) {
         return ENCODED_UNSUBACK_SIZE;
     }
 }

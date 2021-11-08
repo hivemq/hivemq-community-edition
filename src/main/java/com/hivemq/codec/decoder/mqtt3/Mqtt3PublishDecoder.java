@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttPublishDecoder;
 import com.hivemq.configuration.HivemqId;
@@ -29,7 +30,6 @@ import com.hivemq.mqtt.message.publish.Mqtt3PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 /**
  * @author Dominik Obermaier
@@ -41,34 +41,34 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
     private final @NotNull HivemqId hivemqId;
 
     @Inject
-    public Mqtt3PublishDecoder(final @NotNull HivemqId hivemqId,
-                               final @NotNull MqttServerDisconnector disconnector,
-                               final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt3PublishDecoder(
+            final @NotNull HivemqId hivemqId,
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
         this.hivemqId = hivemqId;
     }
 
-    @Nullable
     @Override
-    public Mqtt3PUBLISH decode(@NotNull final Channel channel, @NotNull final ByteBuf buf, final byte header) {
+    public @Nullable Mqtt3PUBLISH decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
-
-        final int qos = decodeQoS(channel, header);
+        final int qos = decodeQoS(clientConnection, header);
         if (qos == DISCONNECTED) {
             return null;
         }
 
-        final Boolean dup = decodeDup(channel, header, qos);
+        final Boolean dup = decodeDup(clientConnection, header, qos);
         if (dup == null) {
             return null;
         }
 
-        final Boolean retain = decodeRetain(channel, header);
+        final Boolean retain = decodeRetain(clientConnection, header);
         if (retain == null) {
             return null;
         }
 
-        final int utf8StringLength = decodeUTF8StringLength(channel, buf, "topic", MessageType.PUBLISH);
+        final int utf8StringLength = decodeUTF8StringLength(clientConnection, buf, "topic", MessageType.PUBLISH);
         if (utf8StringLength == DISCONNECTED) {
             return null;
         }
@@ -76,7 +76,7 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         final String topicName;
 
         if (validateUTF8) {
-            topicName = decodeUTF8Topic(channel, buf, utf8StringLength, "topic", MessageType.PUBLISH);
+            topicName = decodeUTF8Topic(clientConnection, buf, utf8StringLength, "topic", MessageType.PUBLISH);
             if (topicName == null) {
                 return null;
             }
@@ -84,13 +84,13 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
             topicName = Strings.getPrefixedString(buf, utf8StringLength);
         }
 
-        if (topicInvalid(channel, topicName, MessageType.PUBLISH)) {
+        if (topicInvalid(clientConnection, topicName, MessageType.PUBLISH)) {
             return null;
         }
 
         final int packetIdentifier;
         if (qos > 0) {
-            packetIdentifier = decodePacketIdentifier(channel, buf);
+            packetIdentifier = decodePacketIdentifier(clientConnection, buf);
             if (packetIdentifier == 0) {
                 return null;
             }
@@ -112,7 +112,5 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
                 .withRetain(retain)
                 .withPayload(payload)
                 .build();
-
     }
-
 }

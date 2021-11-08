@@ -15,9 +15,8 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -35,11 +34,13 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_MET
  * @author Florian Limpöck
  * @since 4.0
  */
-public class Mqtt5AuthEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithOmissibleReasonCodeEncoder<AUTH, Mqtt5AuthReasonCode> implements MqttEncoder<AUTH> {
+public class Mqtt5AuthEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithOmissibleReasonCodeEncoder<AUTH, Mqtt5AuthReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.AUTH.ordinal() << 4;
 
-    public Mqtt5AuthEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5AuthEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
@@ -54,7 +55,7 @@ public class Mqtt5AuthEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt
     }
 
     @Override
-    int additionalPropertyLength(@NotNull final AUTH auth) {
+    int additionalPropertyLength(final @NotNull AUTH auth) {
         if (auth.getAuthMethod().isEmpty()) {
             return 0;
         }
@@ -65,7 +66,7 @@ public class Mqtt5AuthEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt
     }
 
     @Override
-    void encodeAdditionalProperties(@NotNull final AUTH auth, @NotNull final ByteBuf out) {
+    void encodeAdditionalProperties(final @NotNull AUTH auth, final @NotNull ByteBuf out) {
         if (auth.getAuthMethod().isEmpty()) {
             return;
         }

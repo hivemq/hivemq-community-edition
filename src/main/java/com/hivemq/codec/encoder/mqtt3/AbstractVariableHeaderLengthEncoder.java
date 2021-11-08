@@ -15,12 +15,12 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.codec.encoder.mqtt5.MqttMessageEncoderUtil;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * An abstract encoder for MQTT messages which have a variable payload length and
@@ -28,9 +28,9 @@ import io.netty.channel.ChannelHandlerContext;
  *
  * @author Dominik Obermaier
  */
-public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> extends FixedSizeMessageEncoder<T> {
+public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> implements MqttEncoder<T> {
 
-    protected ByteBuf createRemainingLength(final int messageLength, final ByteBuf buffer) {
+    protected static void createRemainingLength(final int messageLength, final @NotNull ByteBuf buffer) {
         int val = messageLength;
 
         do {
@@ -41,12 +41,10 @@ public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> ext
             }
             buffer.writeByte(b);
         } while (val > 0);
-
-        return buffer;
     }
 
     @Override
-    public int bufferSize(final @NotNull ChannelHandlerContext ctx, final @NotNull T msg) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull T msg) {
 
         final int remainingLength = remainingLength(msg);
         final int encodedLengthWithHeader = MqttMessageEncoderUtil.encodedPacketLength(remainingLength);
@@ -57,5 +55,5 @@ public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> ext
         return encodedLengthWithHeader;
     }
 
-    protected abstract int remainingLength(T msg);
+    protected abstract int remainingLength(@NotNull T msg);
 }
