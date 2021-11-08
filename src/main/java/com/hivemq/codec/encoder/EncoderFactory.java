@@ -163,14 +163,6 @@ public class EncoderFactory {
                 return mqtt5PublishEncoder;
             } else if (msg instanceof PINGRESP) {
                 return mqttPingrespEncoder;
-            } else if (msg instanceof CONNACK) {
-                return mqtt5ConnackEncoder;
-            } else if (msg instanceof SUBACK) {
-                return mqtt5SubackEncoder;
-            } else if (msg instanceof UNSUBACK) {
-                return mqtt5UnsubackEncoder;
-            } else if (msg instanceof DISCONNECT) {
-                return mqtt5DisconnectEncoder;
             } else if (msg instanceof PUBACK) {
                 return mqtt5PubackEncoder;
             } else if (msg instanceof PUBREC) {
@@ -179,6 +171,14 @@ public class EncoderFactory {
                 return mqtt5PubrelEncoder;
             } else if (msg instanceof PUBCOMP) {
                 return mqtt5PubCompEncoder;
+            } else if (msg instanceof CONNACK) {
+                return mqtt5ConnackEncoder;
+            } else if (msg instanceof SUBACK) {
+                return mqtt5SubackEncoder;
+            } else if (msg instanceof UNSUBACK) {
+                return mqtt5UnsubackEncoder;
+            } else if (msg instanceof DISCONNECT) {
+                return mqtt5DisconnectEncoder;
             } else if (msg instanceof AUTH) {
                 return mqtt5AuthEncoder;
             }
