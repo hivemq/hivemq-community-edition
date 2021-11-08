@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.codec.encoder.mqtt3;
+package util.encoder;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.codec.encoder.MqttEncoder;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
+import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
+import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.Strings;
 import com.hivemq.util.Utf8Utils;
 import io.netty.buffer.ByteBuf;
@@ -28,30 +30,32 @@ import java.util.List;
 /**
  * @author Lukas Brandl
  */
-public class Mqtt3UnsubscribeEncoder extends AbstractVariableHeaderLengthEncoder<UNSUBSCRIBE> implements MqttEncoder<UNSUBSCRIBE> {
-    private static final byte UNSUBSCRIBE_FIXED_HEADER = (byte) 0b1010_0010;
+public class Mqtt3SubscribeEncoder extends AbstractVariableHeaderLengthEncoder<SUBSCRIBE> implements MqttEncoder<SUBSCRIBE> {
+
+    private static final byte SUBSCRIBE_FIXED_HEADER = (byte) 0b1000_0010;
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull UNSUBSCRIBE msg, final @NotNull ByteBuf out) {
+    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg, final @NotNull ByteBuf out) {
 
-        out.writeByte(UNSUBSCRIBE_FIXED_HEADER);
+        out.writeByte(SUBSCRIBE_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);
 
         out.writeShort(msg.getPacketIdentifier());
 
-        final List<String> topics = msg.getTopics();
-        for (final String topic : topics) {
-            Strings.createPrefixedBytesFromString(topic, out);
+        final List<Topic> topics = msg.getTopics();
+        for (final Topic topic : topics) {
+            Strings.createPrefixedBytesFromString(topic.getTopic(), out);
+            out.writeByte(topic.getQoS().getQosNumber());
         }
     }
 
-    protected int remainingLength(final @NotNull UNSUBSCRIBE msg) {
+    protected int remainingLength(final @NotNull SUBSCRIBE msg) {
         int length = 0;
         length += 2; // message ID
-        for (final String topic : msg.getTopics()) {
-            length += Utf8Utils.encodedLength(topic) + 2;
+        for (final Topic topic : msg.getTopics()) {
+            length += Utf8Utils.encodedLength(topic.getTopic()) + 2;
+            length += 1; // QoS
         }
         return length;
     }
-
 }
