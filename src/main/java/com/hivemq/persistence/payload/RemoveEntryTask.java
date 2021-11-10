@@ -16,14 +16,12 @@
 package com.hivemq.persistence.payload;
 
 import com.google.common.cache.Cache;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.Exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
 
 /**
  * @author Lukas Brandl
@@ -35,7 +33,7 @@ public class RemoveEntryTask implements Runnable {
     private final BucketLock bucketLock;
     private final Queue<RemovablePayload> removablePayloads;
     private final long removeDelay;
-    private final ConcurrentHashMap<Long, AtomicLong> referenceCounter;
+    private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
     private final long taskMaxDuration;
 
     public RemoveEntryTask(final Cache<Long, byte[]> payloadCache,
@@ -43,7 +41,7 @@ public class RemoveEntryTask implements Runnable {
                            final BucketLock bucketLock,
                            final Queue<RemovablePayload> removablePayloads,
                            final long removeDelay,
-                           final ConcurrentHashMap<Long, AtomicLong> referenceCounter,
+                           final PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
                            final long taskMaxDuration) {
 
         this.payloadCache = payloadCache;
@@ -51,7 +49,7 @@ public class RemoveEntryTask implements Runnable {
         this.bucketLock = bucketLock;
         this.removablePayloads = removablePayloads;
         this.removeDelay = removeDelay;
-        this.referenceCounter = referenceCounter;
+        this.payloadReferenceCounterRegistry = payloadReferenceCounterRegistry;
         this.taskMaxDuration = taskMaxDuration;
     }
 
@@ -63,27 +61,18 @@ public class RemoveEntryTask implements Runnable {
             final long startTime = System.currentTimeMillis();
             while (removablePayload != null) {
                 if (System.currentTimeMillis() - removablePayload.getTimestamp() > removeDelay) {
-                    final Lock lock = bucketLock.get(Long.toString(removablePayload.getId()));
-                    lock.lock();
                     final long payloadId = removablePayload.getId();
-                    try {
-                        final AtomicLong referenceCount = referenceCounter.get(payloadId);
-                        if (referenceCount == null) {
-                            //The reference count can be null, if it was marked as removable twice.
-                            //Which is possible if a payload marked as removable and we receive the same payload again and mark it as removable again,
-                            //before the cleanup is able to remove the payload.
-                            removablePayload = removablePayloads.poll();
-                            continue;
-                        }
-                        if (referenceCount.get() == 0) {
+                    bucketLock.accessBucketByPaloadId(removablePayload.getId(), () -> {
+                        final int referenceCount = payloadReferenceCounterRegistry.get(payloadId);
+                        //The reference count can be UNKNOWN_PAYLOAD, if it was marked as removable twice.
+                        //Which is possible if a payload marked as removable and we receive the same payload again and mark it as removable again,
+                        //before the cleanup is able to remove the payload.
+                        if (referenceCount == 0) {
                             payloadCache.invalidate(payloadId);
                             localPersistence.remove(payloadId);
-                            referenceCounter.remove(payloadId);
+                            payloadReferenceCounterRegistry.remove(payloadId);
                         }
-
-                    } finally {
-                        lock.unlock();
-                    }
+                    });
                 } else {
                     notRemovedPayloads.add(removablePayload);
                 }

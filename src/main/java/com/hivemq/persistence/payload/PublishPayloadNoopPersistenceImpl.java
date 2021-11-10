@@ -22,8 +22,6 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * @author Daniel Krüger
  */
@@ -85,10 +83,9 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
         //NOOP
     }
 
-    @NotNull
     @Override
     @VisibleForTesting
-    public ImmutableMap<Long, AtomicLong> getReferenceCountersAsMap() {
+    public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
         throw new UnsupportedOperationException("getAllIds iys not supported for in-memory persistence");
     }
 

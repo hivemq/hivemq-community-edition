@@ -27,7 +27,6 @@ import util.LogbackCapturingAppender;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyLong;
@@ -76,8 +75,8 @@ public class PublishPayloadPersistenceImplTest {
         persistence.add(payload1, 1, 123);
         persistence.add(payload2, 2, 234);
 
-        assertEquals(1, persistence.referenceCounter.get(123L).get());
-        assertEquals(2, persistence.referenceCounter.get(234L).get());
+        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
+        assertEquals(2, (long)persistence.getReferenceCountersAsMap().get(234L));
         assertNotNull(persistence.payloadCache.getIfPresent(123L));
         assertNotNull(persistence.payloadCache.getIfPresent(234L));
     }
@@ -89,7 +88,7 @@ public class PublishPayloadPersistenceImplTest {
         persistence.add(payload, 2, 123);
 
 
-        assertEquals(3, persistence.referenceCounter.get(123L).get());
+        assertEquals(3, (long)persistence.getReferenceCountersAsMap().get(123L));
         assertNotNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(1, persistence.payloadCache.size());
     }
@@ -101,14 +100,14 @@ public class PublishPayloadPersistenceImplTest {
 
         final long hash = hashFunction.hashBytes(payload);
 
-        assertEquals(1, persistence.referenceCounter.get(123L).get());
+        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
         assertNotNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(1, persistence.payloadCache.size());
 
         final byte[] result = persistence.get(123);
 
         verify(localPersistence, never()).get(anyLong());
-        assertEquals(true, Arrays.equals(payload, result));
+        assertTrue(Arrays.equals(payload, result));
     }
 
     @Test
@@ -119,14 +118,14 @@ public class PublishPayloadPersistenceImplTest {
         when(localPersistence.get(123)).thenReturn(payload);
         persistence.payloadCache.invalidate(123L);
 
-        assertEquals(1, persistence.referenceCounter.get(123L).get());
+        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
         assertNull(persistence.payloadCache.getIfPresent(123L));
         assertEquals(0, persistence.payloadCache.size());
 
         final byte[] result = persistence.get(123);
 
         verify(localPersistence, times(1)).get(anyLong());
-        assertEquals(true, Arrays.equals(payload, result));
+        assertTrue(Arrays.equals(payload, result));
     }
 
     @Test(expected = PayloadPersistenceException.class)
@@ -143,44 +142,44 @@ public class PublishPayloadPersistenceImplTest {
     @Test
     public void increment_new_reference_count() throws Exception {
         persistence.incrementReferenceCounterOnBootstrap(0L);
-        assertEquals(1L, persistence.referenceCounter.get(0L).get());
+        assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
     }
 
     @Test
     public void increment_existing_reference_count() throws Exception {
-        persistence.referenceCounter.put(0L, new AtomicLong(1L));
         persistence.incrementReferenceCounterOnBootstrap(0L);
-        assertEquals(2L, persistence.referenceCounter.get(0L).get());
+        persistence.incrementReferenceCounterOnBootstrap(0L);
+        assertEquals(2L, (long)persistence.getReferenceCountersAsMap().get(0L));
     }
 
     @Test
     public void decrement_reference_count() throws Exception {
-        persistence.referenceCounter.put(0L, new AtomicLong(2L));
+        persistence.incrementReferenceCounterOnBootstrap(0L);
+        persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(1L, persistence.referenceCounter.get(0L).get());
+        assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
         assertEquals(0, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_to_zero() throws Exception {
-        persistence.referenceCounter.put(0L, new AtomicLong(1L));
+        persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(0L, persistence.referenceCounter.get(0L).get());
         assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_already_zero() throws Exception {
-        persistence.referenceCounter.put(0L, new AtomicLong(0L));
+        persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(0L, persistence.referenceCounter.get(0L).get());
-        assertEquals(0, persistence.removablePayloads.size());
+        persistence.decrementReferenceCounter(0L);
+        assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_null() throws Exception {
         persistence.decrementReferenceCounter(0L);
-        assertNull(persistence.referenceCounter.get(0L));
+        assertNull(persistence.getReferenceCountersAsMap().get(0L));
         assertEquals(0, persistence.removablePayloads.size());
     }
 
