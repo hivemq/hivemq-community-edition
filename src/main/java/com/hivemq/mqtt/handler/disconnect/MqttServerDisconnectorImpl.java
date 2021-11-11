@@ -82,12 +82,10 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
         Checkpoints.checkpoint("on-client-disconnect");
 
-        if (channel.isActive()) {
+        if (!clientConnection.getClientState().disconnected()) {
             log(clientConnection, logMessage, eventLogMessage);
             fireEvents(clientConnection, oldClientState, reasonCode, reasonString, userProperties, isAuthentication);
             closeConnection(clientConnection, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
-        } else {
-            clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
         }
     }
 
