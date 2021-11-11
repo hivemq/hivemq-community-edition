@@ -655,7 +655,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         ThreadPreConditions.inNettyChildEventloop();
 
         if (clientConnection.getClientState().disconnected()) {
-            return Futures.immediateFailedFuture(new RuntimeException("Disconnected before take-over. client id " + clientConnection.getClientId()));
+            return Futures.immediateFailedFuture(new RuntimeException("Disconnected before takeover."));
         }
 
         final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
@@ -686,7 +686,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         } else {
             // The client is currently taken over
             if (retry >= MAX_TAKEOVER_RETRIES) {
-                return Futures.immediateFailedFuture(new RuntimeException("maximum takeover retries exceeded"));
+                return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
             }
             nextRetry = retry + 1;
         }
