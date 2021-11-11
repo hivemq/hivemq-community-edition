@@ -79,6 +79,8 @@ public class DisconnectHandlerTest {
         channel = new EmbeddedChannel(disconnectHandler);
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
+        when(channelPersistence.getClientConnection(anyString())).thenReturn(clientConnection);
     }
 
     @Test
@@ -205,7 +207,6 @@ public class DisconnectHandlerTest {
         verify(eventLog, never()).clientDisconnectedUngracefully(clientConnection);
     }
 
-
     @Test
     public void test_DisconnectFutureListener_send_lwt() throws Exception {
 
@@ -244,22 +245,6 @@ public class DisconnectHandlerTest {
 
         verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), anyBoolean(), anyLong());
         verify(channelPersistence, never()).remove(clientConnection);
-    }
-
-    @Test
-    public void test_DisconnectFutureListener_future_channel_not_authenticated() throws Exception {
-        final SettableFuture<Void> disconnectFuture = SettableFuture.create();
-
-        clientConnection.setClientId("client");
-        clientConnection.setCleanStart(false);
-        clientConnection.setClientSessionExpiryInterval(0L);
-        clientConnection.setDisconnectFuture(disconnectFuture);
-        clientConnection.proposeClientState(ClientState.CONNECT_FAILED);
-
-        channel.disconnect().get();
-
-        verify(clientSessionPersistence, never()).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-        assertTrue(disconnectFuture.isDone());
     }
 
     @Test

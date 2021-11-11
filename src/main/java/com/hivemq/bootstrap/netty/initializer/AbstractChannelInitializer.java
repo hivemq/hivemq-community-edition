@@ -68,6 +68,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         Preconditions.checkNotNull(ch, "Channel must never be null");
 
+        final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
+        final ClientConnection clientConnection = new ClientConnection(ch, publishFlushHandler);
+        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+
         if (!legacyNettyShutdown && channelDependencies.getShutdownHooks().isShuttingDown()) {
             //during shutting down, we dont want new clients to create any pipeline,
             //and we dont want to read from their socket
@@ -75,10 +79,6 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
             ch.close();
             return;
         }
-
-        final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
-        final ClientConnection clientConnection = new ClientConnection(ch, publishFlushHandler);
-        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
         clientConnection.setConnectedListener(listener);
 

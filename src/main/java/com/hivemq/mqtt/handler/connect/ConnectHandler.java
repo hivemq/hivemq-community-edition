@@ -651,6 +651,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     private @NotNull ListenableFuture<Void> disconnectClientWithSameClientId(
             final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection, final int retry) {
 
+        // We need the sequential execution guarantee as we require the ClientState to be set for disconnected clients.
+        ThreadPreConditions.inNettyChildEventloop();
+
+        if (clientConnection.getClientState().disconnected()) {
+            return Futures.immediateFailedFuture(new RuntimeException("Disconnected before take-over. client id " + clientConnection.getClientId()));
+        }
+
         final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
         // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
         if (persistedClientConnection.getChannel().id().equals(clientConnection.getChannel().id())) {
