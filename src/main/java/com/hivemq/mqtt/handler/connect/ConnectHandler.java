@@ -191,7 +191,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                 new ModifiableClientSettingsImpl(connect.getReceiveMaximum(), null));
     }
 
-    public void connectSuccessfulUnauthenticated(
+    public void connectSuccessfulUndecided(
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull ClientConnection clientConnection,
             final @NotNull CONNECT connect,

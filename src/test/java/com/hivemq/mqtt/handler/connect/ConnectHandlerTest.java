@@ -1640,7 +1640,7 @@ public class ConnectHandlerTest {
 
         doAnswer(invocation -> {
             ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(defaultPermissions);
-            handler.connectSuccessfulUnauthenticated(
+            handler.connectSuccessfulUndecided(
                     invocation.getArgument(0),
                     invocation.getArgument(1),
                     invocation.getArgument(2),

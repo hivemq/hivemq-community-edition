@@ -137,7 +137,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap =
                 authenticators.getAuthenticatorProviderMap();
         if (authenticatorProviderMap.isEmpty()) {
-            connectHandler.connectSuccessfulUnauthenticated(ctx, clientConnection, connect, clientSettings);
+            connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, clientSettings);
             return;
         }
 

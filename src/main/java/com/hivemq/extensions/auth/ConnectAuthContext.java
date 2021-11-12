@@ -85,7 +85,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     void undecidedAuthentication(final @NotNull ConnectAuthOutput output) {
         if (initial) {
             final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
-            connectHandler.connectSuccessfulUnauthenticated(ctx, clientConnection, connect, output.getClientSettings());
+            connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, output.getClientSettings());
         } else {
             connacker.connackError(
                     ctx.channel(),
