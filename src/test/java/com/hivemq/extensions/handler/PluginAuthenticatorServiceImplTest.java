@@ -170,7 +170,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
-        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
+        verify(connectHandler).connectSuccessfulUndecided(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class PluginAuthenticatorServiceImplTest {
 
         pluginAuthenticatorService.authenticateConnect(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
-        verify(connectHandler).connectSuccessfulUnauthenticated(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
+        verify(connectHandler).connectSuccessfulUndecided(channelHandlerContext, clientConnection, fullMqtt5Connect, clientSettings);
 
     }
 
