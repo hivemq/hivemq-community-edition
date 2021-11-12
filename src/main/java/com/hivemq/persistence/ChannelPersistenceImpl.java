@@ -74,7 +74,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     }
 
     @Override
-    public @NotNull ClientConnection tryPersist(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
+    public @NotNull ClientConnection persistIfAbsent(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
         return clientConnectionMap.computeIfAbsent(clientId, id -> clientConnection);
     }
 
