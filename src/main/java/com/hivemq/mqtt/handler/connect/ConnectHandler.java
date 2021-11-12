@@ -666,36 +666,24 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         if (persistedClientConnection == clientConnection) {
             return Futures.immediateFuture(null);
         }
-        final SettableFuture<Void> disconnectFuture = persistedClientConnection.getDisconnectFuture();
-        if (disconnectFuture == null) {
-            return Futures.immediateFailedFuture(new IllegalStateException("disconnect future must be present"));
+        if (retry >= MAX_TAKEOVER_RETRIES) {
+            return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
         }
-        // We have to check if the old client is currently taken over
-        // Otherwise we could take over the same client twice
-        final int nextRetry;
-        if (persistedClientConnection.getClientState().disconnectingOrDisconnected()) {
-            // The client is currently taken over
-            if (retry >= MAX_TAKEOVER_RETRIES) {
-                return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
+        // It is ok that multiple clients can queue a task here as we guard the client with the check disconnectingOrDisconnected().
+        persistedClientConnection.getChannel().eventLoop().execute(() -> {
+            if (!persistedClientConnection.getClientState().disconnectingOrDisconnected()) {
+                mqttServerDisconnector.disconnect(persistedClientConnection.getChannel(),
+                        "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
+                        Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                        ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
             }
-            nextRetry = retry + 1;
-        } else {
-            persistedClientConnection.proposeClientState(ClientState.DISCONNECTING);
-
-            persistedClientConnection.getChannel().eventLoop().execute(() ->
-                    mqttServerDisconnector.disconnect(persistedClientConnection.getChannel(),
-                            "Disconnecting already connected client with id {} and ip {} because another client connects with that id",
-                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER,
-                            Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
-                            ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
-
-            nextRetry = retry;
-        }
+        });
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        Futures.addCallback(disconnectFuture, new FutureCallback<>() {
+        Futures.addCallback(persistedClientConnection.getDisconnectFuture(), new FutureCallback<>() {
             @Override
             public void onSuccess(final Void result) {
-                resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, nextRetry));
+                resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, retry + 1));
             }
 
             @Override
