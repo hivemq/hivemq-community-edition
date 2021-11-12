@@ -661,7 +661,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             return Futures.immediateFailedFuture(new RuntimeException("Disconnected before takeover."));
         }
 
-        final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
+        final ClientConnection persistedClientConnection = channelPersistence.persistIfAbsent(msg.getClientIdentifier(), clientConnection);
         // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
         if (persistedClientConnection == clientConnection) {
             return Futures.immediateFuture(null);

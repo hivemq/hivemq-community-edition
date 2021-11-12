@@ -97,7 +97,7 @@ public class LifecycleEventListenersImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        channelPersistence.tryPersist("client", clientConnection);
+        channelPersistence.persistIfAbsent("client", clientConnection);
 
         lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializer);
 
