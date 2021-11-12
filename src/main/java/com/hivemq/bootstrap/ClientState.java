@@ -45,4 +45,8 @@ public enum ClientState {
     public boolean disconnected() {
         return DISCONNECTED.contains(this);
     }
+
+    public boolean disconnectingOrDisconnected() {
+        return this == DISCONNECTING || disconnected();
+    }
 }
