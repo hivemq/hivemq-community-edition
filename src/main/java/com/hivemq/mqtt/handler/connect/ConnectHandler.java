@@ -673,9 +673,13 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         // We have to check if the old client is currently taken over
         // Otherwise we could take over the same client twice
         final int nextRetry;
-        if (persistedClientConnection.getClientState() != ClientState.DISCONNECTING
-                && !persistedClientConnection.getClientState().disconnected()) {
-
+        if (persistedClientConnection.getClientState().disconnectingOrDisconnected()) {
+            // The client is currently taken over
+            if (retry >= MAX_TAKEOVER_RETRIES) {
+                return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
+            }
+            nextRetry = retry + 1;
+        } else {
             persistedClientConnection.proposeClientState(ClientState.DISCONNECTING);
 
             persistedClientConnection.getChannel().eventLoop().execute(() ->
@@ -686,12 +690,6 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                             ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER));
 
             nextRetry = retry;
-        } else {
-            // The client is currently taken over
-            if (retry >= MAX_TAKEOVER_RETRIES) {
-                return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
-            }
-            nextRetry = retry + 1;
         }
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         Futures.addCallback(disconnectFuture, new FutureCallback<>() {
