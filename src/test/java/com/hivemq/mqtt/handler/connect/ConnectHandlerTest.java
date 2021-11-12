@@ -1081,6 +1081,8 @@ public class ConnectHandlerTest {
                 .withRetain(true)
                 .build();
 
+        when(channelPersistence.tryPersist(anyString(), any())).thenReturn(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get());
+
         final CONNECT connect = new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("123456")
                 .withWillPublish(willPublish)
