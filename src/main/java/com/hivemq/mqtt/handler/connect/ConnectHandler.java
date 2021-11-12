@@ -16,7 +16,10 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -660,7 +663,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         final ClientConnection persistedClientConnection = channelPersistence.tryPersist(msg.getClientIdentifier(), clientConnection);
         // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
-        if (persistedClientConnection.getChannel().id().equals(clientConnection.getChannel().id())) {
+        if (persistedClientConnection == clientConnection) {
             return Futures.immediateFuture(null);
         }
         final SettableFuture<Void> disconnectFuture = persistedClientConnection.getDisconnectFuture();
