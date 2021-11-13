@@ -86,7 +86,6 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
 public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> implements MessageHandler<CONNECT> {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
-    private static final int MAX_TAKEOVER_RETRIES = 100;
 
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ChannelPersistence channelPersistence;
@@ -421,23 +420,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
 
         clientConnection.getChannel().pipeline().fireUserEventTriggered(new OnAuthSuccessEvent());
 
-        final ListenableFuture<Void> disconnectFuture = disconnectClientWithSameClientId(msg, clientConnection, 0);
-
-        Futures.addCallback(disconnectFuture, new FutureCallback<>() {
-            @Override
-            public void onSuccess(final @Nullable Void result) {
-                afterTakeover(ctx, msg);
-            }
-
-            @Override
-            public void onFailure(final @NotNull Throwable throwable) {
-                clientConnection.proposeClientState(ClientState.DISCONNECTED_TAKE_OVER_FAILED);
-                clientConnection.getChannel().close();
-                log.warn("Exception on disconnecting client with same client identifier '{}'. Cause: {}",
-                        clientConnection.getClientId(),
-                        throwable.getMessage());
-            }
-        }, clientConnection.getChannel().eventLoop());
+        disconnectClientWithSameClientId(clientConnection, ctx, msg);
     }
 
     private void afterPublishAuthorizer(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg, @NotNull final PublishAuthorizerResult authorizerResult) {
@@ -651,24 +634,24 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         return builder.build();
     }
 
-    private @NotNull ListenableFuture<Void> disconnectClientWithSameClientId(
-            final @NotNull CONNECT msg, final @NotNull ClientConnection clientConnection, final int retry) {
-
-        // We need the sequential execution guarantee as we require the ClientState to be set for disconnected clients.
-        ThreadPreConditions.inNettyChildEventloop();
+    private void disconnectClientWithSameClientId(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull CONNECT msg) {
 
         if (clientConnection.getClientState().disconnected()) {
-            return Futures.immediateFailedFuture(new RuntimeException("Disconnected before takeover."));
+            log.warn("Disconnecting client with same client identifier '{}' failed. " +
+                    "Cause: Disconnected before takeover.", clientConnection.getClientId());
+            return;
         }
 
         final ClientConnection persistedClientConnection = channelPersistence.persistIfAbsent(msg.getClientIdentifier(), clientConnection);
         // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
         if (persistedClientConnection == clientConnection) {
-            return Futures.immediateFuture(null);
+            afterTakeover(ctx, msg);
+            return;
         }
-        if (retry >= MAX_TAKEOVER_RETRIES) {
-            return Futures.immediateFailedFuture(new RuntimeException("Maximum takeover retries exceeded."));
-        }
+
         // It is ok that multiple clients can queue a task here as we guard the client with the check disconnectingOrDisconnected().
         persistedClientConnection.getChannel().eventLoop().execute(() -> {
             if (!persistedClientConnection.getClientState().disconnectingOrDisconnected()) {
@@ -679,19 +662,20 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
                         ReasonStrings.DISCONNECT_SESSION_TAKEN_OVER);
             }
         });
-        final SettableFuture<Void> resultFuture = SettableFuture.create();
+
         Futures.addCallback(persistedClientConnection.getDisconnectFuture(), new FutureCallback<>() {
             @Override
             public void onSuccess(final Void result) {
-                resultFuture.setFuture(disconnectClientWithSameClientId(msg, clientConnection, retry + 1));
+                disconnectClientWithSameClientId(clientConnection, ctx, msg);
             }
 
             @Override
             public void onFailure(final @NotNull Throwable t) {
-                resultFuture.setException(t);
+                log.warn("Exception on disconnecting client with same client identifier '{}'. Cause: {}",
+                        clientConnection.getClientId(),
+                        t.getMessage());
             }
         }, clientConnection.getChannel().eventLoop());
-        return resultFuture;
     }
 
     private void addKeepAliveHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
