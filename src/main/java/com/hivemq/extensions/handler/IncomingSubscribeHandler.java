@@ -34,6 +34,10 @@ import com.hivemq.extensions.interceptor.subscribe.parameter.SubscribeInboundInp
 import com.hivemq.extensions.interceptor.subscribe.parameter.SubscribeInboundOutputImpl;
 import com.hivemq.extensions.packets.subscribe.ModifiableSubscribePacketImpl;
 import com.hivemq.extensions.packets.subscribe.SubscribePacketImpl;
+import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
+import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
@@ -66,6 +70,7 @@ public class IncomingSubscribeHandler {
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull PluginAuthorizerService authorizerService;
     private final @NotNull FullConfigurationService configurationService;
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
     public IncomingSubscribeHandler(
@@ -73,13 +78,15 @@ public class IncomingSubscribeHandler {
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull PluginAuthorizerService authorizerService,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.executorService = executorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
         this.authorizerService = authorizerService;
         this.configurationService = configurationService;
+        this.mqttServerDisconnector = mqttServerDisconnector;
     }
 
     /**
@@ -200,7 +207,22 @@ public class IncomingSubscribeHandler {
 
         private void prevent(final @NotNull SubscribeInboundOutputImpl output) {
             final int size = output.getSubscribePacket().getSubscriptions().size();
+            final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
             final List<Mqtt5SubAckReasonCode> reasonCodesBuilder = new ArrayList<>(size);
+
+            // MQTT 3.1 does not support SUBACK failure codes
+            if (version == ProtocolVersion.MQTTv3_1) {
+                mqttServerDisconnector.disconnect(ctx.channel(),
+                        null,
+                        "Negative SUBSCRIBE acknowledgement for an MQTT 3.1 client is not possible; the client was disconnected instead",
+                        Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                        null,
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        false,
+                        true);
+                return;
+            }
+
             for (int i = 0; i < size; i++) {
                 reasonCodesBuilder.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
             }
