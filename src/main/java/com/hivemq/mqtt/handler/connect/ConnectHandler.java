@@ -640,7 +640,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
             final @NotNull CONNECT msg) {
 
         if (clientConnection.getClientState().disconnected()) {
-            log.warn("Disconnecting client with same client identifier '{}' failed. " +
+            log.debug("Disconnecting client with same client identifier '{}' failed. " +
                     "Cause: Disconnected before takeover.", clientConnection.getClientId());
             return;
         }
