@@ -207,14 +207,16 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
         clientConnection.setConnectKeepAlive(keepAlive);
         clientConnection.setCleanStart(isCleanSessionFlag);
 
+        final long sessionExpiryInterval = isCleanSessionFlag ? 0 : maxSessionExpiryInterval;
+        clientConnection.setClientSessionExpiryInterval(sessionExpiryInterval);
+
         return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier(clientId)
                 .withUsername(userName)
                 .withPassword(password)
                 .withCleanStart(isCleanSessionFlag)
-                .withSessionExpiryInterval(isCleanSessionFlag ? 0 : maxSessionExpiryInterval)
+                .withSessionExpiryInterval(sessionExpiryInterval)
                 .withKeepAlive(keepAlive)
                 .withWillPublish(willPublish).build();
     }
-
 }
