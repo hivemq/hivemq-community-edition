@@ -30,6 +30,11 @@ import util.LogbackCapturingAppender;
 
 import java.net.InetSocketAddress;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -200,8 +205,10 @@ public class EventLogTest {
         final long disconnectedSince = 1534251898287L;
         eventLog.clientSessionExpired(disconnectedSince, clientId);
 
+        final ZoneId zoneId = ZoneId.systemDefault();
+        final String localizedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(disconnectedSince), zoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(" session has expired at ").append("2018-08-14 13:04:58")
+                .append(" session has expired at ").append(localizedDateTime)
                 .append(". All persistent data for this client has been removed.");
 
         assertLogging(sessionExpiredAppender);
@@ -216,6 +223,6 @@ public class EventLogTest {
             }
         }
 
-        assertTrue("The dropped message was not logged", isLogged);
+        assertTrue("The event message was not logged", isLogged);
     }
 }

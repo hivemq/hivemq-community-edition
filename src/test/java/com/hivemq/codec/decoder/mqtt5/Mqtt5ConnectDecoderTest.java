@@ -37,6 +37,7 @@ import util.TestMqttDecoder;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
 import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET;
 import static org.junit.Assert.*;
@@ -206,10 +207,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("test", connect.getClientIdentifier());
         assertFalse(connect.isCleanStart());
         assertNull(connect.getWillPublish());
-        assertEquals(MAXIMUM_PACKET_SIZE_NOT_SET, connect.getMaximumPacketSize());
-        assertEquals(SESSION_EXPIRY_NOT_SET, connect.getSessionExpiryInterval());
-        assertEquals(RECEIVE_MAXIMUM_NOT_SET, connect.getReceiveMaximum());
-        assertEquals(TOPIC_ALIAS_MAXIMUM_NOT_SET, connect.getTopicAliasMaximum());
+        assertEquals(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT, connect.getMaximumPacketSize());
+        assertEquals(SESSION_EXPIRE_ON_DISCONNECT, connect.getSessionExpiryInterval());
+        assertEquals(DEFAULT_RECEIVE_MAXIMUM, connect.getReceiveMaximum());
+        assertEquals(DEFAULT_TOPIC_ALIAS_MAXIMUM, connect.getTopicAliasMaximum());
         assertEquals(DEFAULT_RESPONSE_INFORMATION_REQUESTED, connect.isResponseInformationRequested());
         assertEquals(DEFAULT_PROBLEM_INFORMATION_REQUESTED, connect.isProblemInformationRequested());
 
@@ -3104,7 +3105,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 0,
         };
         final CONNECT connect = decodeInternal(encoded);
-        assertEquals(WILL_DELAY_INTERVAL_NOT_SET, connect.getWillPublish().getDelayInterval());
+        assertEquals(MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT, connect.getWillPublish().getDelayInterval());
     }
 
     private @NotNull CONNECT decodeInternal(final byte @NotNull [] encoded) {

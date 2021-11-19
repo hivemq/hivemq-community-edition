@@ -42,6 +42,7 @@ import com.hivemq.util.Strings;
 import com.hivemq.util.Topics;
 import io.netty.buffer.ByteBuf;
 
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
 import static com.hivemq.mqtt.message.connect.CONNECT.*;
 import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
@@ -56,6 +57,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     private static final String PROTOCOL_NAME = "MQTT";
     private final @NotNull HivemqId hiveMQId;
+    private final long maxMessageExpiryInterval;
 
     public Mqtt5ConnectDecoder(
             final @NotNull MqttConnacker mqttConnacker,
@@ -64,6 +66,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             final @NotNull FullConfigurationService configurationService) {
         super(mqttConnacker, configurationService, clientIds);
         this.hiveMQId = hiveMQId;
+        this.maxMessageExpiryInterval = fullMqttConfigurationService.mqttConfiguration().maxMessageExpiryInterval();
     }
 
     @Override
@@ -162,6 +165,13 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttWillPublish = decodeAndValidateWill(clientConnection, buf, willQos, willRetain);
             if (mqttWillPublish == null) {
                 return null;
+            } else {
+                if (mqttWillPublish.getMessageExpiryInterval() > maxMessageExpiryInterval) {
+                    mqttWillPublish.setMessageExpiryInterval(maxMessageExpiryInterval);
+                }
+                if (mqttWillPublish.getDelayInterval() == MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET) {
+                    mqttWillPublish.setDelayInterval(MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT);
+                }
             }
         } else {
             mqttWillPublish = null;
@@ -366,6 +376,19 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
         if (invalidUserPropertiesLength(clientConnection, userProperties)) {
             return false;
+        }
+
+        if (sessionExpiryInterval == SESSION_EXPIRY_NOT_SET) {
+            sessionExpiryInterval = SESSION_EXPIRE_ON_DISCONNECT;
+        }
+        if (receiveMaximum == RECEIVE_MAXIMUM_NOT_SET) {
+            receiveMaximum = DEFAULT_RECEIVE_MAXIMUM;
+        }
+        if (maximumPacketSize == MAXIMUM_PACKET_SIZE_NOT_SET) {
+            maximumPacketSize = DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
+        }
+        if (topicAliasMaximum == TOPIC_ALIAS_MAXIMUM_NOT_SET) {
+            topicAliasMaximum = DEFAULT_TOPIC_ALIAS_MAXIMUM;
         }
 
         clientConnection.setClientSessionExpiryInterval(sessionExpiryInterval);
