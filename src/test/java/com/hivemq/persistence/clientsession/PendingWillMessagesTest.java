@@ -36,9 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -77,7 +74,7 @@ public class PendingWillMessagesTest {
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         pendingWillMessages.addWill("client", clientSession);
 
-        final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.pendingWills.get("client");
+        final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.getPendingWills().get("client");
         assertEquals(pendingWill.getDelayInterval(), 5);
     }
 
@@ -90,7 +87,7 @@ public class PendingWillMessagesTest {
         final ClientSession clientSession = new ClientSession(false, 5, sessionWill, 123L);
         pendingWillMessages.addWill("client", clientSession);
 
-        final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.pendingWills.get("client");
+        final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.getPendingWills().get("client");
         assertEquals(pendingWill.getDelayInterval(), 5);
     }
 
@@ -134,8 +131,8 @@ public class PendingWillMessagesTest {
 
         pendingWillMessages.reset();
 
-        assertEquals(1, pendingWillMessages.pendingWills.size());
-        assertEquals(3, pendingWillMessages.pendingWills.get("client1").getDelayInterval());
+        assertEquals(1, pendingWillMessages.getPendingWills().size());
+        assertEquals(3, pendingWillMessages.getPendingWills().get("client1").getDelayInterval());
     }
 
     @Test
@@ -151,7 +148,6 @@ public class PendingWillMessagesTest {
         checkWillsTask.run();
 
         verify(publishService, never()).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
-
     }
 
     @Test
@@ -163,12 +159,11 @@ public class PendingWillMessagesTest {
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         when(clientSessionLocalPersistence.getSession("client", false)).thenReturn(clientSession);
-        pendingWillMessages.pendingWills.put("client", new PendingWillMessages.PendingWill(3, System.currentTimeMillis() - 5000));
+        pendingWillMessages.getPendingWills().put("client", new PendingWillMessages.PendingWill(3, System.currentTimeMillis() - 5000));
 
         final PendingWillMessages.CheckWillsTask checkWillsTask = pendingWillMessages.new CheckWillsTask();
         checkWillsTask.run();
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
-
     }
 }

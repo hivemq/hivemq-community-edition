@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.InternalPublishService;
@@ -50,25 +50,19 @@ public class PendingWillMessages {
 
     private static final Logger log = LoggerFactory.getLogger(PendingWillMessages.class);
 
-    @NotNull
-    private final InternalPublishService publishService;
-
-    @NotNull
-    private final ListeningScheduledExecutorService executorService;
-
-    @VisibleForTesting
-    final Map<String, PendingWill> pendingWills = new ConcurrentHashMap<>();
-    @NotNull
-    private final ClientSessionPersistence clientSessionPersistence;
-
-    @NotNull
-    private final ClientSessionLocalPersistence clientSessionLocalPersistence;
+    private final @NotNull InternalPublishService publishService;
+    private final @NotNull Map<String, PendingWill> pendingWills = new ConcurrentHashMap<>();
+    private final @NotNull ClientSessionPersistence clientSessionPersistence;
+    private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
+    private final @NotNull ListeningScheduledExecutorService executorService;
 
     @Inject
-    public PendingWillMessages(@NotNull final InternalPublishService publishService,
-                               @Persistence final ListeningScheduledExecutorService executorService,
-                               @NotNull final ClientSessionPersistence clientSessionPersistence,
-                               @NotNull final ClientSessionLocalPersistence clientSessionLocalPersistence) {
+    public PendingWillMessages(
+            final @NotNull InternalPublishService publishService,
+            @Persistence final @NotNull ListeningScheduledExecutorService executorService,
+            final @NotNull ClientSessionPersistence clientSessionPersistence,
+            final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence) {
+
         this.publishService = publishService;
         this.executorService = executorService;
         this.clientSessionPersistence = clientSessionPersistence;
@@ -77,21 +71,21 @@ public class PendingWillMessages {
 
     }
 
-    public void addWill(@NotNull final String clientId, @NotNull final ClientSession session) {
+    public void addWill(final @NotNull String clientId, final @NotNull ClientSession session) {
         checkNotNull(clientId, "Client id must not be null");
         checkNotNull(session, "Client session must not be null");
         final ClientSessionWill willPublish = session.getWillPublish();
         if (session.getWillPublish() == null) {
             return;
         }
-        if (willPublish.getDelayInterval() == 0 || session.getSessionExpiryInterval() == CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
+        if (willPublish.getDelayInterval() == 0 || session.getSessionExpiryInterval() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
             sendWill(clientId, session);
             return;
         }
         pendingWills.put(clientId, new PendingWill(Math.min(willPublish.getDelayInterval(), session.getSessionExpiryInterval()), System.currentTimeMillis()));
     }
 
-    public void cancelWill(@NotNull final String clientId) {
+    public void cancelWill(final @NotNull String clientId) {
         pendingWills.remove(clientId);
     }
 
@@ -100,18 +94,18 @@ public class PendingWillMessages {
         final ListenableFuture<Map<String, PendingWill>> future = clientSessionPersistence.pendingWills();
         FutureUtils.addPersistenceCallback(future, new FutureCallback<>() {
             @Override
-            public void onSuccess(@NotNull final Map<String, PendingWill> result) {
+            public void onSuccess(final @NotNull Map<String, PendingWill> result) {
                 pendingWills.putAll(result);
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable t) {
+            public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError("Exception when reading pending will messages", t);
             }
         });
     }
 
-    private void sendWill(@NotNull final String clientId, @Nullable final ClientSession session) {
+    private void sendWill(final @NotNull String clientId, final @Nullable ClientSession session) {
         if (session != null && session.getWillPublish() != null) {
             final PUBLISH publish = publishFromWill(session.getWillPublish());
             publishService.publish(publish, executorService, clientId);
@@ -119,12 +113,17 @@ public class PendingWillMessages {
         }
     }
 
-    private PUBLISH publishFromWill(final ClientSessionWill sessionWill) {
+    private static @NotNull PUBLISH publishFromWill(final @NotNull ClientSessionWill sessionWill) {
         return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic()).withQoS(sessionWill.getQos()).withOnwardQos(sessionWill.getQos()).withPayload(sessionWill.getPayload())
                 .withRetain(sessionWill.isRetain()).withHivemqId(sessionWill.getHivemqId()).withUserProperties(sessionWill.getUserProperties())
                 .withResponseTopic(sessionWill.getResponseTopic()).withCorrelationData(sessionWill.getCorrelationData())
                 .withContentType(sessionWill.getContentType()).withPayloadFormatIndicator(sessionWill.getPayloadFormatIndicator())
                 .withMessageExpiryInterval(sessionWill.getMessageExpiryInterval()).build();
+    }
+
+    @VisibleForTesting
+    public @NotNull Map<String, PendingWill> getPendingWills() {
+        return pendingWills;
     }
 
     class CheckWillsTask implements Runnable {
