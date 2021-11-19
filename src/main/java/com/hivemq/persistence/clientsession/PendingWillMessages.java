@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
@@ -28,6 +29,7 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.persistence.ioc.annotation.Persistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.util.FutureUtils;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +111,10 @@ public class PendingWillMessages {
         if (session != null && session.getWillPublish() != null) {
             final PUBLISH publish = publishFromWill(session.getWillPublish());
             publishService.publish(publish, executorService, clientId);
-            clientSessionPersistence.removeWill(clientId);
+            final ListenableFuture<Void> future = clientSessionPersistence.removeWill(clientId);
+            if (Checkpoints.enabled()) {
+                future.addListener(() -> Checkpoints.checkpoint("pending-will-removed"), MoreExecutors.directExecutor());
+            }
         }
     }
 
