@@ -33,6 +33,7 @@ import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -168,6 +169,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             @Override
             public void onSuccess(final @Nullable Void result) {
                 channelPersistence.remove(clientConnection);
+                Checkpoints.checkpoint("client-disconnected");
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
                 if (disconnectFuture != null) {
                     disconnectFuture.set(null);
