@@ -277,7 +277,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             if (value != null) {
                 final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
                 if (prevClientSession.getWillPublish() != null) {
-                    removeWillReference(prevClientSession);
+                    txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
                 }
 
                 final boolean prevIsPersistent = persistent(prevClientSession);
@@ -330,8 +330,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 sessionsCount.decrementAndGet();
             }
             clientSession.setConnected(false);
-            if (!sendWill) {
-                removeWillReference(clientSession);
+            if (!sendWill && clientSession.getWillPublish() != null) {
+                txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
                 clientSession.setWillPublish(null);
             }
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
@@ -360,9 +360,11 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 return null;
             }
             final long timestamp = serializer.deserializeTimestamp(byteIterableToBytes(byteIterable));
-            removeWillReference(clientSession);
-            clientSession.setWillPublish(null);
-            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            if (clientSession.getWillPublish() != null) {
+                txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
+                clientSession.setWillPublish(null);
+                bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            }
             return new PersistenceEntry<>(clientSession, timestamp);
         });
     }
@@ -438,7 +440,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 while (cursor.getNext()) {
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-
                     clientSessions.add(clientId);
                 }
             }
@@ -458,9 +459,11 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 if (persistent(clientSession) || clientSession.isConnected()) {
                     sessionsCount.decrementAndGet();
                 }
-                removeWillReference(clientSession);
+                if (clientSession.getWillPublish() != null) {
+                    txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
+                }
+                bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(client)));
             }
-            bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(client)));
         });
     }
 
@@ -599,14 +602,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    private void removeWillReference(final @NotNull ClientSession clientSession) {
-        final ClientSessionWill willPublish = clientSession.getWillPublish();
-        if (willPublish == null) {
-            return;
-        }
-        payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
-    }
-
     private void getWillPayload(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
@@ -626,5 +621,19 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     private static boolean persistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
+    }
+
+    private class RemoveWillReference implements Runnable {
+
+        private final @NotNull ClientSessionWill will;
+
+        RemoveWillReference(final @NotNull ClientSessionWill will) {
+            this.will = will;
+        }
+
+        @Override
+        public void run() {
+            payloadPersistence.decrementReferenceCounter(will.getPublishId());
+        }
     }
 }
