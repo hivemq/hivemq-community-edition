@@ -233,7 +233,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             }
 
             if (includeWill) {
-                dereferenceWillPayload(clientSession);
+                getWillPayload(clientSession);
             }
             return clientSession;
         });
@@ -342,7 +342,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 clientSession.setWillPublish(null);
             }
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
-            dereferenceWillPayload(clientSession);
+            getWillPayload(clientSession);
             return clientSession;
         });
     }
@@ -633,7 +633,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    private void removeWillReference(final ClientSession clientSession) {
+    private void removeWillReference(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -641,7 +641,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
     }
 
-    private void dereferenceWillPayload(final ClientSession clientSession) {
+    private void getWillPayload(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -658,7 +658,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         willPublish.getMqttWillPublish().setPayload(payload);
     }
 
-    private boolean persistent(final ClientSession clientSession) {
+    private static boolean persistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
     }
 }
