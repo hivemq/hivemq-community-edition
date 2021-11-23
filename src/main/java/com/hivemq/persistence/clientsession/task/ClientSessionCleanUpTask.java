@@ -15,10 +15,10 @@
  */
 package com.hivemq.persistence.clientsession.task;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.SingleWriterService;
+import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.util.Checkpoints;
@@ -26,13 +26,13 @@ import com.hivemq.util.Checkpoints;
 import java.util.Set;
 
 public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> {
-    @NotNull
-    private final ClientSessionLocalPersistence localPersistence;
-    @NotNull
-    private final ClientSessionPersistenceImpl clientSessionPersistence;
 
-    public ClientSessionCleanUpTask(@NotNull final ClientSessionLocalPersistence localPersistence,
-                                    @NotNull final ClientSessionPersistenceImpl clientSessionPersistence) {
+    private final @NotNull ClientSessionLocalPersistence localPersistence;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence;
+
+    public ClientSessionCleanUpTask(
+            final @NotNull ClientSessionLocalPersistence localPersistence,
+            final @NotNull ClientSessionPersistenceImpl clientSessionPersistence) {
 
         this.localPersistence = localPersistence;
         this.clientSessionPersistence = clientSessionPersistence;
@@ -40,10 +40,8 @@ public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> 
 
     @Override
     public @Nullable Void doTask(final int bucketIndex) {
-
         final Set<String> expiredSessions = localPersistence.cleanUp(bucketIndex);
         for (final String expiredSession : expiredSessions) {
-
             clientSessionPersistence.cleanClientData(expiredSession);
         }
         Checkpoints.checkpoint("ClientSessionCleanUpFinished");

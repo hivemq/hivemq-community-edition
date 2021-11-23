@@ -101,7 +101,7 @@ public class PendingWillMessagesTest {
         pendingWillMessages.addWill("client", clientSession);
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
-        verify(clientSessionPersistence).removeWill(eq("client"));
+        verify(clientSessionPersistence).deleteWill(eq("client"));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class PendingWillMessagesTest {
         pendingWillMessages.addWill("client", clientSession);
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
-        verify(clientSessionPersistence).removeWill(eq("client"));
+        verify(clientSessionPersistence).deleteWill(eq("client"));
     }
 
     @Test

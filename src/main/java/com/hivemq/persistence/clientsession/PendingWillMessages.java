@@ -110,7 +110,7 @@ public class PendingWillMessages {
         if (session != null && session.getWillPublish() != null) {
             final PUBLISH publish = publishFromWill(session.getWillPublish());
             publishService.publish(publish, executorService, clientId);
-            final ListenableFuture<Void> future = clientSessionPersistence.removeWill(clientId);
+            final ListenableFuture<Void> future = clientSessionPersistence.deleteWill(clientId);
             if (Checkpoints.enabled()) {
                 future.addListener(() -> Checkpoints.checkpoint("pending-will-removed"), MoreExecutors.directExecutor());
             }
