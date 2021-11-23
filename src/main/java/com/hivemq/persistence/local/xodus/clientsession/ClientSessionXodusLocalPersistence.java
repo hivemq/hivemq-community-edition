@@ -45,6 +45,7 @@ import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Cursor;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -257,12 +258,12 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     @Override
     public void put(
             final @NotNull String clientId,
-            final @NotNull ClientSession clientSession,
+            final @NotNull ClientSession newClientSession,
             final long timestamp,
             final int bucketIndex) {
 
         checkNotNull(clientId, "Client id must not be null");
-        checkNotNull(clientSession, "Client session must not be null");
+        checkNotNull(newClientSession, "Client session must not be null");
         checkArgument(timestamp > 0, "Timestamp must be greater than 0");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
@@ -271,28 +272,32 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
 
-            final boolean isPersistent = persistent(clientSession);
+            final boolean isPersistent = persistent(newClientSession);
 
             final ByteIterable value = bucket.getStore().get(txn, key);
-            if (value != null) {
-                final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
-                if (prevClientSession.getWillPublish() != null) {
-                    txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
+            if (value == null) {
+                if (isPersistent || newClientSession.isConnected()) {
+                    sessionsCount.incrementAndGet();
                 }
+                final ClientSessionWill willPublish = newClientSession.getWillPublish();
+                if (willPublish != null) {
+                    payloadPersistence.add(willPublish.getPayload(), 1, willPublish.getPublishId());
+                }
+            } else {
+                final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
+
+                handleWillPayloads(txn, prevClientSession.getWillPublish(), newClientSession.getWillPublish());
 
                 final boolean prevIsPersistent = persistent(prevClientSession);
 
-                if ((isPersistent || clientSession.isConnected()) && (!prevIsPersistent && !prevClientSession.isConnected())) {
+                if ((isPersistent || newClientSession.isConnected()) && (!prevIsPersistent && !prevClientSession.isConnected())) {
                     sessionsCount.incrementAndGet();
-                } else if ((prevIsPersistent || prevClientSession.isConnected()) && (!isPersistent && !clientSession.isConnected())) {
+                } else if ((prevIsPersistent || prevClientSession.isConnected()) && (!isPersistent && !newClientSession.isConnected())) {
                     sessionsCount.decrementAndGet();
                 }
-
-            } else if (isPersistent || clientSession.isConnected()) {
-                sessionsCount.incrementAndGet();
             }
 
-            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(newClientSession, timestamp)));
         });
     }
 
@@ -617,6 +622,27 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             return;
         }
         willPublish.getMqttWillPublish().setPayload(payload);
+    }
+
+    private void handleWillPayloads(
+            final @NotNull Transaction txn,
+            final @Nullable ClientSessionWill previousWill,
+            final @Nullable ClientSessionWill currentWill) {
+
+        if (previousWill != null && currentWill != null) {
+            // When equal we have the payload already.
+            if (previousWill.getPublishId() != currentWill.getPublishId()) {
+                txn.setCommitHook(new RemoveWillReference(previousWill));
+                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+            }
+        } else {
+            if (previousWill != null) {
+                txn.setCommitHook(new RemoveWillReference(previousWill));
+            }
+            if (currentWill != null) {
+                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+            }
+        }
     }
 
     private static boolean persistent(final @NotNull ClientSession clientSession) {

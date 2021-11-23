@@ -152,7 +152,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             return null;
         }
         if (includeWill) {
-            dereferenceWillPayload(clientSession);
+            getWillPayload(clientSession);
         }
         return clientSession;
     }
@@ -177,38 +177,41 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     @ExecuteInSingleWriter
     public void put(
             final @NotNull String clientId,
-            final @NotNull ClientSession clientSession,
+            final @NotNull ClientSession newClientSession,
             final long timestamp,
             final int bucketIndex) {
         checkNotNull(clientId, "Client id must not be null");
-        checkNotNull(clientSession, "Client session must not be null");
+        checkNotNull(newClientSession, "Client session must not be null");
         checkArgument(timestamp > 0, "Timestamp must be greater than 0");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
 
         final Map<String, PersistenceEntry<ClientSession>> sessions = getBucket(bucketIndex);
-        final ClientSession usedSession = clientSession.deepCopyWithoutPayload();
+        final ClientSession usedSession = newClientSession.deepCopyWithoutPayload();
 
         sessions.compute(clientId, (ignored, storedSession) -> {
 
             final boolean addClientIdSize;
-            if (storedSession != null) {
+            if (storedSession == null) {
+                sessionsCount.incrementAndGet();
+                addClientIdSize = true;
+
+                final ClientSessionWill willPublish = newClientSession.getWillPublish();
+                if (willPublish != null) {
+                    payloadPersistence.add(willPublish.getPayload(), 1, willPublish.getPublishId());
+                }
+            } else {
                 final ClientSession oldSession = storedSession.getObject();
 
                 currentMemorySize.addAndGet(-storedSession.getEstimatedSize());
 
-                if (oldSession.getWillPublish() != null) {
-                    removeWillReference(oldSession);
-                }
+                handleWillPayloads(oldSession.getWillPublish(), newClientSession.getWillPublish());
 
                 final boolean oldSessionIsPersistent = isPersistent(oldSession);
                 if (!oldSessionIsPersistent && !oldSession.isConnected()) {
                     sessionsCount.incrementAndGet();
                 }
                 addClientIdSize = false;
-            } else {
-                sessionsCount.incrementAndGet();
-                addClientIdSize = true;
             }
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);
@@ -262,7 +265,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             }
 
             newSession.setConnected(false);
-            checkForPayloadExistence(newSession, false);
+            getWillPayload(newSession, false);
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(newSession, timestamp);
             currentMemorySize.addAndGet(newEntry.getEstimatedSize());
@@ -270,7 +273,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         }).getObject().deepCopyWithoutPayload();
 
 
-        dereferenceWillPayload(storedSession);
+        getWillPayload(storedSession);
         return storedSession;
     }
 
@@ -486,7 +489,11 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
     }
 
-    private void checkForPayloadExistence(final @NotNull ClientSession clientSession, final boolean dereference) {
+    private void getWillPayload(final @NotNull ClientSession clientSession) {
+        getWillPayload(clientSession, true);
+    }
+
+    private void getWillPayload(final @NotNull ClientSession clientSession, final boolean dereference) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -508,8 +515,23 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         }
     }
 
-    private void dereferenceWillPayload(final @NotNull ClientSession clientSession) {
-        checkForPayloadExistence(clientSession, true);
+    private void handleWillPayloads(
+            final @Nullable ClientSessionWill previousWill, final @Nullable ClientSessionWill currentWill) {
+
+        if (previousWill != null && currentWill != null) {
+            // When equal we have the payload already.
+            if (previousWill.getPublishId() != currentWill.getPublishId()) {
+                payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
+                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+            }
+        } else {
+            if (previousWill != null) {
+                payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
+            }
+            if (currentWill != null) {
+                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+            }
+        }
     }
 
     private static boolean isPersistent(final @NotNull ClientSession clientSession) {
