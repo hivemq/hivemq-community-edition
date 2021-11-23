@@ -16,9 +16,9 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
@@ -34,7 +34,7 @@ import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.
  */
 public interface ClientSessionPersistence {
 
-    boolean isExistent(@NotNull final String client);
+    boolean isExistent(@NotNull String client);
 
     @NotNull ListenableFuture<Void> clientDisconnected(@NotNull String client, boolean sendWill, long sessionExpiry);
 
@@ -44,30 +44,32 @@ public interface ClientSessionPersistence {
      * @param client                The client ID
      * @param cleanStart            clean start or use previous session
      * @param sessionExpiryInterval The session expiry interval for this client
-     * @param queueLimit for this session specifically
+     * @param queueLimit            for this session specifically
      * @return The state of incomplete outgoing message transmissions for this client
      */
-    @NotNull
-    ListenableFuture<Void> clientConnected(final @NotNull String client, final boolean cleanStart, final long sessionExpiryInterval,
-                                           @Nullable MqttWillPublish willPublish, @Nullable Long queueLimit);
+    @NotNull ListenableFuture<Void> clientConnected(
+            @NotNull String client,
+            boolean cleanStart,
+            long sessionExpiryInterval,
+            @Nullable MqttWillPublish willPublish,
+            @Nullable Long queueLimit);
 
     /**
      * Close the persistence.
      *
      * @return a future which completes as soon as the persistence is closed.
      */
-    @NotNull
-    ListenableFuture<Void> closeDB();
+    @NotNull ListenableFuture<Void> closeDB();
 
     /**
      * Get a client session for a specific identifier.
      *
      * @param clientId    the client id.
-     * @param includeWill if the will message should be included, the will is set to <code>null</code> if this parameter is <code>false</code>.
-     * @return the client session for this identifier or <null>.
+     * @param includeWill if the Will message should be included, the will is set to {@code null} if this parameter
+     *                    is {@code false}.
+     * @return the client session for this identifier or {@code null}.
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId, boolean includeWill);
+    @Nullable ClientSession getSession(@NotNull String clientId, boolean includeWill);
 
     /**
      * Trigger a cleanup for a specific bucket
@@ -75,14 +77,12 @@ public interface ClientSessionPersistence {
      * @param bucketIndex the index of the bucket
      * @return a future which completes as soon as the clean up is done.
      */
-    @NotNull
-    ListenableFuture<Void> cleanUp(int bucketIndex);
+    @NotNull ListenableFuture<Void> cleanUp(int bucketIndex);
 
     /**
      * @return a future of all client ids in the persistence.
      */
-    @NotNull
-    ListenableFuture<Set<String>> getAllClients();
+    @NotNull ListenableFuture<Set<String>> getAllClients();
 
     /**
      * Enforce a client disconnect from a specific source, preventing or delivering the will message.
@@ -93,8 +93,8 @@ public interface ClientSessionPersistence {
      * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
      * connected (false).
      */
-    @NotNull
-    ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
+    @NotNull ListenableFuture<Boolean> forceDisconnectClient(
+            @NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
 
     /**
      * Enforce a client disconnect from a specific source, preventing or delivering the will message.
@@ -107,21 +107,12 @@ public interface ClientSessionPersistence {
      * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
      * connected (false).
      */
-    @NotNull
-    ListenableFuture<Boolean> forceDisconnectClient(@NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source,
-                                                    @Nullable Mqtt5DisconnectReasonCode reasonCode, @Nullable String reasonString);
-
-    /**
-     * Sets the session expiry interval for a client in seconds.
-     *
-     * @param clientId              the client identifier of the client
-     * @param sessionExpiryInterval session expiry interval for the client in seconds
-     * @return a {@link com.google.common.util.concurrent.ListenableFuture} which is returned when the Session Expiry
-     * Interval is set
-     * successfully or a Exception was caught.
-     */
-    @NotNull
-    ListenableFuture<Boolean> setSessionExpiryInterval(@NotNull final String clientId, long sessionExpiryInterval);
+    @NotNull ListenableFuture<Boolean> forceDisconnectClient(
+            @NotNull String clientId,
+            boolean preventLwtMessage,
+            @NotNull DisconnectSource source,
+            @Nullable Mqtt5DisconnectReasonCode reasonCode,
+            @Nullable String reasonString);
 
     /**
      * Returns the session expiry interval for a client in seconds.
@@ -133,8 +124,18 @@ public interface ClientSessionPersistence {
      * @param clientId the client identifier of the client
      * @return the {@link Integer} Session expiry interval in seconds.
      */
-    @Nullable
-    Long getSessionExpiryInterval(@NotNull final String clientId);
+    @Nullable Long getSessionExpiryInterval(@NotNull String clientId);
+
+    /**
+     * Sets the session expiry interval for a client in seconds.
+     *
+     * @param clientId              the client identifier of the client
+     * @param sessionExpiryInterval session expiry interval for the client in seconds
+     * @return a {@link com.google.common.util.concurrent.ListenableFuture} which is returned when the Session Expiry
+     * Interval is set
+     * successfully or a Exception was caught.
+     */
+    @NotNull ListenableFuture<Boolean> setSessionExpiryInterval(@NotNull String clientId, long sessionExpiryInterval);
 
     /**
      * Checks if there is a session for a given amount of clients.
@@ -142,8 +143,7 @@ public interface ClientSessionPersistence {
      * @param clients to check
      * @return The client id mapped to a boolean that is true if the session exists
      */
-    @NotNull
-    Map<String, Boolean> isExistent(@NotNull final Set<String> clients);
+    @NotNull Map<String, Boolean> isExistent(@NotNull Set<String> clients);
 
     /**
      * Invalidates the client session for a client with the given client identifier. If the client is currently
@@ -158,14 +158,13 @@ public interface ClientSessionPersistence {
      * true when the client has been actively disconnected by the broker otherwise false,
      * @since 3.4
      */
-    @NotNull
-    ListenableFuture<Boolean> invalidateSession(@NotNull String clientId, @NotNull DisconnectSource disconnectSource);
+    @NotNull ListenableFuture<Boolean> invalidateSession(
+            @NotNull String clientId, @NotNull DisconnectSource disconnectSource);
 
     /**
      * @return The delay of all will messages that have not been sent yet, mapped to the client id.
      */
-    @NotNull
-    ListenableFuture<Map<String, PendingWillMessages.PendingWill>> pendingWills();
+    @NotNull ListenableFuture<Map<String, PendingWillMessages.PendingWill>> pendingWills();
 
     /**
      * Remove a will message for a specific client.
@@ -173,9 +172,7 @@ public interface ClientSessionPersistence {
      * @param clientId The identifier of the client.
      * @return A future which completes as soon as the will is removed.
      */
-    @NotNull
-    ListenableFuture<Void> removeWill(@NotNull String clientId);
-
+    @NotNull ListenableFuture<Void> deleteWill(@NotNull String clientId);
 
     /**
      * Process a request for a chunk of all the client sessions from this node
@@ -183,7 +180,8 @@ public interface ClientSessionPersistence {
      * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
      * @return a result containing the new cursor and a map of clientIds to their session
      */
-    @NotNull
-    ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(@NotNull ChunkCursor cursor);
+    @NotNull ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(
+            @NotNull ChunkCursor cursor);
 
+    @NotNull ListenableFuture<Void> cleanClientData(@NotNull String expiredSession);
 }

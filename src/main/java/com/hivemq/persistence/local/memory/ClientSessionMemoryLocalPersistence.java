@@ -195,23 +195,26 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             if (storedSession == null) {
                 sessionsCount.incrementAndGet();
                 addClientIdSize = true;
-
-                final ClientSessionWill willPublish = newClientSession.getWillPublish();
-                if (willPublish != null) {
-                    payloadPersistence.add(willPublish.getPayload(), 1, willPublish.getPublishId());
-                }
             } else {
                 final ClientSession oldSession = storedSession.getObject();
 
                 currentMemorySize.addAndGet(-storedSession.getEstimatedSize());
 
-                handleWillPayloads(oldSession.getWillPublish(), newClientSession.getWillPublish());
+                final ClientSessionWill oldWill = oldSession.getWillPublish();
+                if (oldWill != null) {
+                    payloadPersistence.decrementReferenceCounter(oldWill.getPublishId());
+                }
 
                 final boolean oldSessionIsPersistent = isPersistent(oldSession);
                 if (!oldSessionIsPersistent && !oldSession.isConnected()) {
                     sessionsCount.incrementAndGet();
                 }
                 addClientIdSize = false;
+            }
+
+            final ClientSessionWill newWill = newClientSession.getWillPublish();
+            if (newWill != null) {
+                payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
             }
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);
@@ -512,25 +515,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         }
         if (dereference) {
             willPublish.getMqttWillPublish().setPayload(payload);
-        }
-    }
-
-    private void handleWillPayloads(
-            final @Nullable ClientSessionWill previousWill, final @Nullable ClientSessionWill currentWill) {
-
-        if (previousWill != null && currentWill != null) {
-            // When equal we have the payload already.
-            if (previousWill.getPublishId() != currentWill.getPublishId()) {
-                payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
-                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
-            }
-        } else {
-            if (previousWill != null) {
-                payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
-            }
-            if (currentWill != null) {
-                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
-            }
         }
     }
 
