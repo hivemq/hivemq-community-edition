@@ -70,7 +70,6 @@ public class PendingWillMessages {
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_SCHEDULE, WILL_DELAY_CHECK_SCHEDULE, TimeUnit.SECONDS);
-
     }
 
     public void addWill(final @NotNull String clientId, final @NotNull ClientSession session) {
