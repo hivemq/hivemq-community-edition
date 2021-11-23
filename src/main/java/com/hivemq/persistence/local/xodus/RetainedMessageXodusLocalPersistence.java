@@ -179,12 +179,13 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
         final Bucket bucket = buckets[bucketIndex];
 
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
-            final Cursor cursor = bucket.getStore().openCursor(txn);
-            while (cursor.getNext()) {
-                final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
-                payloadPersistence.decrementReferenceCounter(message.getPublishId());
-                retainMessageCounter.decrementAndGet();
-                cursor.deleteCurrent();
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
+                    payloadPersistence.decrementReferenceCounter(message.getPublishId());
+                    retainMessageCounter.decrementAndGet();
+                    cursor.deleteCurrent();
+                }
             }
         });
     }
