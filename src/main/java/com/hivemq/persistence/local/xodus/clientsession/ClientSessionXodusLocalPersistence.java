@@ -138,18 +138,19 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final Bucket bucket = buckets[i];
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 final Store store = bucket.getStore();
-                final Cursor cursor = bucket.getStore().openCursor(txn);
-                while (cursor.getNext()) {
-                    final byte[] bytes = byteIterableToBytes(cursor.getValue());
-                    final ClientSession clientSession = serializer.deserializeValue(bytes);
-                    if (persistent(clientSession)) {
-                        sessionsCount.incrementAndGet();
-                    }
-                    if (clientSession.getWillPublish() != null) {
-                        clientSession.setWillPublish(null);
-                        final long timestamp = serializer.deserializeTimestamp(bytes);
-                        final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
-                        store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
+                try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                    while (cursor.getNext()) {
+                        final byte[] bytes = byteIterableToBytes(cursor.getValue());
+                        final ClientSession clientSession = serializer.deserializeValue(bytes);
+                        if (persistent(clientSession)) {
+                            sessionsCount.incrementAndGet();
+                        }
+                        if (clientSession.getWillPublish() != null) {
+                            clientSession.setWillPublish(null);
+                            final long timestamp = serializer.deserializeTimestamp(bytes);
+                            final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
+                            store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
+                        }
                     }
                 }
             });
@@ -536,27 +537,28 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         }
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
-            final Cursor cursor = bucket.getStore().openCursor(txn);
-            while (cursor.getNext()) {
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
 
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
 
-                final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
-                final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
+                    final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
+                    final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
 
-                // Expired is true if the persistent date for the client has to be removed
-                final boolean expired = ClientSessions.isExpired(clientSession, timeSinceDisconnect);
-                if (expired) {
-                    if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
-                        sessionsCount.decrementAndGet();
+                    // Expired is true if the persistent date for the client has to be removed
+                    final boolean expired = ClientSessions.isExpired(clientSession, timeSinceDisconnect);
+                    if (expired) {
+                        if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
+                            sessionsCount.decrementAndGet();
+                        }
+
+                        eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId);
+                        cursor.deleteCurrent();
+                        expiredSessionsBuilder.add(clientId);
                     }
-
-                    eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId);
-                    cursor.deleteCurrent();
-                    expiredSessionsBuilder.add(clientId);
                 }
             }
         });
@@ -577,20 +579,21 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
             final Set<String> collectSet = new HashSet<>();
-            final Cursor cursor = bucket.getStore().openCursor(txn);
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
 
-            while (cursor.getNext()) {
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                if (!clientSession.isConnected() && clientSession.getSessionExpiryInterval() > 0) {
-                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
-                    final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
-                    final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryInterval() * 1000L;
-                    // We don't remove expired client sessions here, since this method is often called for all buckets at once.
-                    // Handling the TTL in the cleanup job will result in a more evenly distributed CPU usage.
-                    if (timeSinceDisconnect < sessionExpiryIntervalInMillis) {
-                        collectSet.add(clientId);
+                while (cursor.getNext()) {
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    if (!clientSession.isConnected() && clientSession.getSessionExpiryInterval() > 0) {
+                        final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                        final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
+                        final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryInterval() * 1000L;
+                        // We don't remove expired client sessions here, since this method is often called for all buckets at once.
+                        // Handling the TTL in the cleanup job will result in a more evenly distributed CPU usage.
+                        if (timeSinceDisconnect < sessionExpiryIntervalInMillis) {
+                            collectSet.add(clientId);
+                        }
                     }
                 }
             }
@@ -616,18 +619,19 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final Map<String, PendingWillMessages.PendingWill> resultMap = new HashMap<>();
-            final Cursor cursor = bucket.getStore().openCursor(txn);
-            while (cursor.getNext()) {
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                final long timestamp = serializer.deserializeTimestamp(valueBytes);
-                if (clientSession.isConnected() || clientSession.getWillPublish() == null) {
-                    // Will must not be sent
-                    continue;
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                    if (clientSession.isConnected() || clientSession.getWillPublish() == null) {
+                        // Will must not be sent
+                        continue;
+                    }
+                    final ClientSessionWill willPublish = clientSession.getWillPublish();
+                    resultMap.put(clientId, new PendingWillMessages.PendingWill(Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryInterval()), timestamp));
                 }
-                final ClientSessionWill willPublish = clientSession.getWillPublish();
-                resultMap.put(clientId, new PendingWillMessages.PendingWill(Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryInterval()), timestamp));
             }
             return resultMap;
         });
