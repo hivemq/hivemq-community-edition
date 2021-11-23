@@ -448,7 +448,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     public ListenableFuture<Void> removeWill(@NotNull final String clientId) {
         checkNotNull(clientId, "Client id must not be null");
         return singleWriter.submit(clientId, (bucketIndex) -> {
-            localPersistence.removeWill(clientId, bucketIndex);
+            localPersistence.deleteWill(clientId, bucketIndex);
             return null;
         });
     }

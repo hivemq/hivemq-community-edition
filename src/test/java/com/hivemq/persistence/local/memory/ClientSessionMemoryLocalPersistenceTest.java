@@ -522,7 +522,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                         .build(), 1L), 234L), 123L, 1);
 
         persistence.disconnect(client1, 124L, true, 1, 0L);
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertEquals(124L, entry.getTimestamp());
         assertNotNull(entry.getObject());
@@ -544,7 +544,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                         .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                         .build(), 1L), 234L), 123L, 1);
 
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertNull(entry);
         verify(payloadPersistence, never()).decrementReferenceCounter(1L);
@@ -722,7 +722,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         persistence.disconnect("client", System.currentTimeMillis() - 20000, true, 1, 10);
         assertEquals(peak, memoryGauge.getValue().longValue());
 
-        persistence.removeWill("client", 1);
+        persistence.deleteWill("client", 1);
         final long reduced = memoryGauge.getValue().longValue();
         assertTrue(reduced > 0);
         assertTrue(peak > reduced);
