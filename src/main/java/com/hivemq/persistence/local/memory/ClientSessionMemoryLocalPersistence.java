@@ -228,7 +228,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final long timestamp,
             final boolean sendWill,
             final int bucketIndex,
-            final long expiry) {
+            final long sessionExpiryInterval) {
 
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
@@ -253,8 +253,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 newSession = oldSession.copyWithoutWill();
             }
 
-            if (expiry != SESSION_EXPIRY_NOT_SET) {
-                newSession.setSessionExpiryInterval(expiry);
+            if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
+                newSession.setSessionExpiryInterval(sessionExpiryInterval);
             }
 
             if (newSession.isConnected() && !isPersistent(newSession)) {
@@ -413,7 +413,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     @Override
     @ExecuteInSingleWriter
-    public @Nullable PersistenceEntry<ClientSession> removeWill(final @NotNull String clientId, final int bucketIndex) {
+    public @Nullable PersistenceEntry<ClientSession> deleteWill(final @NotNull String clientId, final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
@@ -448,9 +448,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
     @Override
-    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(final int bucketIndex,
-                                                                                     final @Nullable String ignored,
-                                                                                     final int alsoIgnored) {
+    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
+            final int bucketIndex, final @Nullable String ignored, final int alsoIgnored) {
 
         final long currentTimeMillis = System.currentTimeMillis();
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
@@ -513,7 +512,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         checkForPayloadExistence(clientSession, true);
     }
 
-    private boolean isPersistent(final @NotNull ClientSession clientSession) {
+    private static boolean isPersistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
     }
 }
