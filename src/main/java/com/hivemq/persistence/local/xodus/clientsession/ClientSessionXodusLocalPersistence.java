@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -138,6 +139,9 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final Bucket bucket = buckets[i];
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 final Store store = bucket.getStore();
+
+                final ImmutableList.Builder<Long> willsToRemoveBuilder = ImmutableList.builder();
+
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                     while (cursor.getNext()) {
                         final byte[] bytes = byteIterableToBytes(cursor.getValue());
@@ -146,11 +150,20 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                             sessionsCount.incrementAndGet();
                         }
                         if (clientSession.getWillPublish() != null) {
+                            willsToRemoveBuilder.add(clientSession.getWillPublish().getPublishId());
                             clientSession.setWillPublish(null);
                             final long timestamp = serializer.deserializeTimestamp(bytes);
                             final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
                             store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
                         }
+                    }
+                    final ImmutableList<Long> willsToRemove = willsToRemoveBuilder.build();
+                    if (!willsToRemove.isEmpty()) {
+                        txn.setCommitHook(() -> {
+                            for (int e = 0; e < willsToRemove.size(); e++) {
+                                payloadPersistence.decrementReferenceCounter(willsToRemove.get(e));
+                            }
+                        });
                     }
                 }
             });
