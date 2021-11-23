@@ -35,6 +35,7 @@ import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import com.hivemq.util.Checkpoints;
 import com.hivemq.util.ClientSessions;
 import com.hivemq.util.ObjectMemoryEstimation;
 import com.hivemq.util.ThreadPreConditions;
@@ -498,6 +499,9 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (payload == null) {
             clientSession.setWillPublish(null);
             log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());
+            if (Checkpoints.enabled()) {
+                throw new IllegalArgumentException("Will Payload for payloadId " + willPublish.getPublishId() + ") not found.");
+            }
             return;
         }
         if (dereference) {
