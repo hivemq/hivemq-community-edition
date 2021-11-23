@@ -274,6 +274,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         checkNotNull(clientId, "Client id must not be null");
         checkNotNull(clientSession, "Client session must not be null");
         checkArgument(timestamp > 0, "Timestamp must be greater than 0");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
@@ -314,6 +315,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     @Override
     public ClientSession disconnect(@NotNull final String clientId, final long timestamp, final boolean sendWill, final int bucketIndex, final long sessionExpiry) {
         checkNotNull(clientId, "Client id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInTransaction(txn -> {
@@ -355,6 +357,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     @Nullable
     public PersistenceEntry<ClientSession> removeWill(@NotNull final String clientId, final int bucketIndex) {
         checkNotNull(clientId, "Client id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInTransaction(txn -> {
