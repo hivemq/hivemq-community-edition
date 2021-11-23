@@ -153,26 +153,26 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return resultFuture;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> clientConnected(@NotNull final String client,
-                                                  final boolean cleanStart,
-                                                  final long clientSessionExpiryInterval,
-                                                  @Nullable final MqttWillPublish willPublish,
-                                                  @Nullable final Long queueLimit) {
+    public @NotNull ListenableFuture<Void> clientConnected(
+            final @NotNull String client,
+            final boolean cleanStart,
+            final long clientSessionExpiryInterval,
+            final @Nullable MqttWillPublish willPublish,
+            final @Nullable Long queueLimit) {
+
         checkNotNull(client, "Client id must not be null");
+
         pendingWillMessages.cancelWill(client);
         final long timestamp = System.currentTimeMillis();
+
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
             final long publishId = PublishPayloadPersistenceImpl.createId();
-            final boolean removePayload = publishPayloadPersistence.add(willPublish.getPayload(), 1, publishId);
-            if (removePayload) {
-                willPublish.setPayload(null);
-            }
             sessionWill = new ClientSessionWill(willPublish, publishId);
         }
         final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
+
         final ListenableFuture<ConnectResult> submitFuture =
                 singleWriter.submit(client, (bucketIndex) -> {
                     final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
