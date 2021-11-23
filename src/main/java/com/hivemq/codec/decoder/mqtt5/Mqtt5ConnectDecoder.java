@@ -644,7 +644,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     private boolean readAndValidatePayload(
             final @NotNull ClientConnection clientConnection,
             final @NotNull ByteBuf buf,
-            final MqttWillPublish.@NotNull Mqtt5Builder mqtt5Builder) {
+            final @NotNull MqttWillPublish.Mqtt5Builder mqtt5Builder) {
 
         final byte[] payload = MqttBinaryData.decode(buf);
         if (payload == null) {

@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 public final class MqttBinaryData {
 
     private static final int MAX_LENGTH = 65_535;
+    private static final int EMPTY_LENGTH = 2;
 
     private MqttBinaryData() {
     }
@@ -42,7 +43,7 @@ public final class MqttBinaryData {
      * @return the decoded binary data or null if there are not enough bytes in the byte buffer.
      */
     public static byte @Nullable [] decode(final @NotNull ByteBuf byteBuf) {
-        if (byteBuf.readableBytes() < 2) {
+        if (byteBuf.readableBytes() < EMPTY_LENGTH) {
             return null;
         }
         final int length = byteBuf.readUnsignedShort();
@@ -74,7 +75,7 @@ public final class MqttBinaryData {
      * @return the decoded binary data or null if there are not enough bytes in the byte buffer.
      */
     public static @Nullable ByteBuffer decode(final @NotNull ByteBuf byteBuf, final boolean direct) {
-        if (byteBuf.readableBytes() < 2) {
+        if (byteBuf.readableBytes() < EMPTY_LENGTH) {
             return null;
         }
         final int length = byteBuf.readUnsignedShort();
@@ -156,7 +157,7 @@ public final class MqttBinaryData {
      * @return the encoded length of the byte array.
      */
     public static int encodedLength(final byte @NotNull [] binary) {
-        return 2 + binary.length;
+        return EMPTY_LENGTH + binary.length;
     }
 
     public static int encodedLength(final @NotNull String value) {
@@ -172,7 +173,7 @@ public final class MqttBinaryData {
      * @return the encoded length of the byte buffer.
      */
     public static int encodedLength(final @NotNull ByteBuffer byteBuffer) {
-        return 2 + byteBuffer.remaining();
+        return EMPTY_LENGTH + byteBuffer.remaining();
     }
 
     public static @NotNull ByteBuffer allocate(final int capacity, final boolean direct) {

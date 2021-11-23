@@ -51,9 +51,9 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
     public Mqtt311ConnectDecoder(
             final @NotNull MqttConnacker connacker,
             final @NotNull ClientIds clientIds,
-            final @NotNull FullConfigurationService fullConfigurationService,
+            final @NotNull FullConfigurationService configurationService,
             final @NotNull HivemqId hiveMQId) {
-        super(connacker, fullConfigurationService, clientIds);
+        super(connacker, configurationService, clientIds);
         this.hiveMQId = hiveMQId;
     }
 

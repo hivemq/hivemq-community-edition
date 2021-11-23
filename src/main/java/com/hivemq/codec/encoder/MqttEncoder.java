@@ -39,9 +39,12 @@ public interface MqttEncoder<T extends Message> {
     void encode(@NotNull ClientConnection clientConnection, @NotNull T msg, @NotNull ByteBuf out);
 
     /**
+     * Calculate the buffer size for an mqtt message. This method will be called everytime
+     * before {@link #encode} is called.
+     *
      * @param clientConnection the {@link ClientConnection} of the client
-     * @param msg              the message to get the buffer size for
-     * @return the buffer size a {@link Message} needs.
+     * @param msg              the message for which the buffer size should be calculated.
+     * @return the required buffer size for the {@code msg}.
      */
     int bufferSize(@NotNull ClientConnection clientConnection, @NotNull T msg);
 }

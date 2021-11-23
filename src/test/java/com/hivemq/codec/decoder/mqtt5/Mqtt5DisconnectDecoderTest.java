@@ -203,7 +203,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         //   remaining length
         byteBuf.writeByte(1);
         //var header
-        //   packet to large reason code
+        //   packet too large reason code
         byteBuf.writeByte(0x95);
 
         channel.writeInbound(byteBuf);
