@@ -96,6 +96,8 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt31_connack() {
 
+        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
+
         final CONNACK connack = new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED);
         channel.writeOutbound(connack);
 

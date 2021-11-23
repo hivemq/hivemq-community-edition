@@ -68,7 +68,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
     public void encode(
             final @NotNull ClientConnection clientConnection, final @NotNull T msg, final @NotNull ByteBuf out) {
 
-        Preconditions.checkNotNull(clientConnection, "ChannelHandlerContext must never be null");
+        Preconditions.checkNotNull(clientConnection, "ClientConnection must never be null");
         Preconditions.checkNotNull(msg, "Message must never be null");
         Preconditions.checkNotNull(out, "ByteBuf must never be null");
 
@@ -93,7 +93,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
             if (msg.getPropertyLength() < 0 && msg.getEncodedLength() > maximumPacketSize) {
                 messageDroppedService.messageMaxPacketSizeExceeded(clientId, msg.getType().name(), maximumPacketSize, msg.getEncodedLength());
                 if (log.isTraceEnabled()) {
-                    log.trace("Could not encode message of type {} for client {}: Packet to large", msg.getType(), clientId);
+                    log.trace("Could not encode message of type {} for client {}: Packet too large", msg.getType(), clientId);
                 }
                 throw new EncoderException("Maximum packet size exceeded");
             }
