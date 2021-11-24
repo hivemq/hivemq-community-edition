@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -79,7 +80,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         persistenceStartup = new PersistenceStartup();
 
         persistence = new ClientSessionXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(),
-                payloadPersistence, eventLog, persistenceStartup);
+                payloadPersistence, eventLog, persistenceStartup, mock(MetricRegistry.class));
         persistence.start();
     }
 

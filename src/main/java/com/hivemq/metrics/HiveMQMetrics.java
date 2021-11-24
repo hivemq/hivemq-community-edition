@@ -169,5 +169,13 @@ public class HiveMQMetrics {
      */
     public static final HiveMQMetric<Counter> MQTT_CONNECTION_NOT_WRITABLE_CURRENT =
             HiveMQMetric.valueOf("com.hivemq.mqtt.connection.not-writable.current", Counter.class);
+
+    /**
+     * Represents a {@link Gauge}, which holds the current amount of stored will messages.
+     *
+     * @since 2022.1
+     */
+    public static final HiveMQMetric<Gauge<Number>> WILL_MESSAGE_COUNT =
+            HiveMQMetric.gaugeValue("com.hivemq.messages.will.count.current");
 }
 
