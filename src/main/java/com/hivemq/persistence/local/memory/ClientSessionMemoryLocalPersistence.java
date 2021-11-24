@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_COUNT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
@@ -67,13 +68,11 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
-
     private final @NotNull Map<String, PersistenceEntry<ClientSession>> @NotNull [] buckets;
-
-    private final int bucketCount;
-
     private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
+    private final @NotNull AtomicInteger storedWillMessagesCount = new AtomicInteger(0);
     private final @NotNull AtomicLong currentMemorySize = new AtomicLong();
+    private final int bucketCount;
 
     @Inject
     ClientSessionMemoryLocalPersistence(
@@ -92,8 +91,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             buckets[i] = new HashMap<>();
         }
 
-        metricRegistry.register(
-                HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(WILL_MESSAGE_COUNT.name(), (Gauge<Integer>) storedWillMessagesCount::get);
+        metricRegistry.register(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
 
@@ -152,7 +151,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             return null;
         }
         if (includeWill) {
-            getWillPayload(clientSession);
+            loadWillPayload(clientSession);
         }
         return clientSession;
     }
@@ -200,10 +199,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
                 currentMemorySize.addAndGet(-storedSession.getEstimatedSize());
 
-                final ClientSessionWill oldWill = oldSession.getWillPublish();
-                if (oldWill != null) {
-                    payloadPersistence.decrementReferenceCounter(oldWill.getPublishId());
-                }
+                removeWillReference(oldSession);
 
                 final boolean oldSessionIsPersistent = isPersistent(oldSession);
                 if (!oldSessionIsPersistent && !oldSession.isConnected()) {
@@ -214,6 +210,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
+                storedWillMessagesCount.incrementAndGet();
                 payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
             }
 
@@ -268,7 +265,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             }
 
             newSession.setConnected(false);
-            getWillPayload(newSession, false);
+            loadWillPayload(newSession, false);
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(newSession, timestamp);
             currentMemorySize.addAndGet(newEntry.getEstimatedSize());
@@ -276,7 +273,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         }).getObject().deepCopyWithoutPayload();
 
 
-        getWillPayload(storedSession);
+        loadWillPayload(storedSession);
         return storedSession;
     }
 
@@ -489,14 +486,15 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish == null) {
             return;
         }
+        storedWillMessagesCount.decrementAndGet();
         payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
     }
 
-    private void getWillPayload(final @NotNull ClientSession clientSession) {
-        getWillPayload(clientSession, true);
+    private void loadWillPayload(final @NotNull ClientSession clientSession) {
+        loadWillPayload(clientSession, true);
     }
 
-    private void getWillPayload(final @NotNull ClientSession clientSession, final boolean dereference) {
+    private void loadWillPayload(final @NotNull ClientSession clientSession, final boolean setPayload) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -513,7 +511,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             }
             return;
         }
-        if (dereference) {
+        if (setPayload) {
             willPublish.getMqttWillPublish().setPayload(payload);
         }
     }

@@ -15,6 +15,8 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -58,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_COUNT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
@@ -83,8 +86,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull ClientSessionPersistenceSerializer serializer;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
-
-    private final AtomicInteger sessionsCount = new AtomicInteger(0);
+    private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
+    private final @NotNull AtomicInteger storedWillMessagesCount = new AtomicInteger(0);
 
     @Inject
     ClientSessionXodusLocalPersistence(
@@ -92,7 +95,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EventLog eventLog,
-            final @NotNull PersistenceStartup persistenceStartup) {
+            final @NotNull PersistenceStartup persistenceStartup,
+            final @NotNull MetricRegistry metricRegistry) {
 
         super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
@@ -100,6 +104,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
         serializer = new ClientSessionPersistenceSerializer();
+
+        metricRegistry.register(WILL_MESSAGE_COUNT.name(), (Gauge<Integer>) storedWillMessagesCount::get);
     }
 
     @Override
@@ -230,7 +236,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             }
 
             if (includeWill) {
-                getWillPayload(clientSession);
+                loadWillPayload(clientSession);
             }
             return clientSession;
         });
@@ -297,6 +303,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
+                storedWillMessagesCount.incrementAndGet();
                 payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
             }
 
@@ -343,7 +350,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 clientSession.setWillPublish(null);
             }
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
-            getWillPayload(clientSession);
+            loadWillPayload(clientSession);
             return clientSession;
         });
     }
@@ -610,7 +617,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    private void getWillPayload(final @NotNull ClientSession clientSession) {
+    private void loadWillPayload(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -621,7 +628,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
-            log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());
+            log.warn("Will Payload for payloadId {} not found", willPublish.getPublishId());
             return;
         }
         willPublish.getMqttWillPublish().setPayload(payload);
@@ -641,6 +648,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
         @Override
         public void run() {
+            storedWillMessagesCount.decrementAndGet();
             payloadPersistence.decrementReferenceCounter(will.getPublishId());
         }
     }
