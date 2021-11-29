@@ -144,7 +144,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             return null;
         }
 
-        final ClientSession clientSession = storedSession.getObject().deepCopyWithoutPayload();
+        final ClientSession clientSession = storedSession.getObject().deepCopy();
 
         if (checkExpired &&
                 ClientSessions.isExpired(clientSession, System.currentTimeMillis() - storedSession.getTimestamp())) {
@@ -186,7 +186,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
 
         final Map<String, PersistenceEntry<ClientSession>> sessions = getBucket(bucketIndex);
-        final ClientSession usedSession = newClientSession.deepCopyWithoutPayload();
+        final ClientSession usedSession = newClientSession.deepCopy();
 
         sessions.compute(clientId, (ignored, storedSession) -> {
 
@@ -270,7 +270,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(newSession, timestamp);
             currentMemorySize.addAndGet(newEntry.getEstimatedSize());
             return newEntry;
-        }).getObject().deepCopyWithoutPayload();
+        }).getObject().deepCopy();
 
 
         loadWillPayload(storedSession);
@@ -446,7 +446,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (session.isConnected()) {
             return null;
         }
-        return new PersistenceEntry<>(session.deepCopyWithoutPayload(), persistenceEntry.getTimestamp());
+        return new PersistenceEntry<>(session.deepCopy(), persistenceEntry.getTimestamp());
     }
 
     // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.

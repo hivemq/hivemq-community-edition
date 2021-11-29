@@ -82,11 +82,11 @@ public class ClientSession implements Sizable {
         return queueLimit;
     }
 
-    public @NotNull ClientSession deepCopyWithoutPayload() {
+    public @NotNull ClientSession deepCopy() {
         return new ClientSession(
                 connected,
                 sessionExpiryInterval,
-                willPublish != null ? willPublish.deepCopyWithoutPayload() : null,
+                willPublish != null ? willPublish.deepCopy() : null,
                 queueLimit);
     }
 
