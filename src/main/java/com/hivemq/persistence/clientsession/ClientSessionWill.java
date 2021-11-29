@@ -105,8 +105,8 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getUserProperties();
     }
 
-    public @NotNull ClientSessionWill deepCopyWithoutPayload() {
-        return new ClientSessionWill(this.getMqttWillPublish().deepCopyWithoutPayload(), this.getPublishId());
+    public @NotNull ClientSessionWill deepCopy() {
+        return new ClientSessionWill(this.getMqttWillPublish().deepCopy(), this.getPublishId());
     }
 
     @Override
