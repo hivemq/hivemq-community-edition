@@ -58,7 +58,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
     private static final String PROTOCOL_NAME = "MQTT";
     private final @NotNull HivemqId hiveMQId;
-    private final long maxMessageExpiryInterval;
     private static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
     private static final int RECEIVE_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
     private static final int TOPIC_ALIAS_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
@@ -71,7 +70,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             final @NotNull FullConfigurationService configurationService) {
         super(mqttConnacker, configurationService, clientIds);
         this.hiveMQId = hiveMQId;
-        this.maxMessageExpiryInterval = configurationService.mqttConfiguration().maxMessageExpiryInterval();
     }
 
     @Override
