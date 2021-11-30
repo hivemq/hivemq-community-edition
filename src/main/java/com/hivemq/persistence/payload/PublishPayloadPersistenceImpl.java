@@ -28,7 +28,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
-import com.hivemq.util.Checkpoints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,9 +190,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                             log.debug(Thread.currentThread().getStackTrace()[i].toString());
                         }
                     }
-                }
-                if (Checkpoints.enabled()) {
-                    throw new IllegalArgumentException("Tried to decrement a payload reference counter (" + id + ") that was already zero.");
                 }
             } else if (result == 0) {
                 //Note: We'll remove the reference counter entry  in the cleanup
