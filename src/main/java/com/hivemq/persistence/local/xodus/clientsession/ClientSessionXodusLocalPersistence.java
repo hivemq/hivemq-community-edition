@@ -160,7 +160,13 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     if (!willsToRemove.isEmpty()) {
                         txn.setCommitHook(() -> {
                             for (int e = 0; e < willsToRemove.size(); e++) {
-                                payloadPersistence.decrementReferenceCounter(willsToRemove.get(e));
+                                final Long payloadId = willsToRemove.get(e);
+                                // Workaround?
+                                // Since we are starting HiveMQ stateful the PublishPayloadPersistence has no references
+                                // to any stored payloads. In order to delete the payload we need to create a reference
+                                // and remove it again.
+                                payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
+                                payloadPersistence.decrementReferenceCounter(payloadId);
                             }
                         });
                     }
