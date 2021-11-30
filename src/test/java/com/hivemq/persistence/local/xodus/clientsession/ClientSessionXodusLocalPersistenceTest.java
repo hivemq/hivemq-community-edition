@@ -15,12 +15,13 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Counter;
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -79,8 +80,11 @@ public class ClientSessionXodusLocalPersistenceTest {
 
         persistenceStartup = new PersistenceStartup();
 
+        final MetricsHolder metricsHolder = mock(MetricsHolder.class);
+        when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
+
         persistence = new ClientSessionXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(),
-                payloadPersistence, eventLog, persistenceStartup, mock(MetricRegistry.class));
+                payloadPersistence, eventLog, persistenceStartup, metricsHolder);
         persistence.start();
     }
 

@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
@@ -23,6 +24,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.HiveMQMetrics;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -84,8 +86,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
                 temporaryFolder.newFolder());
 
+        final MetricsHolder metricsHolder = mock(MetricsHolder.class);
+        when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
+
         metricRegistry = new MetricRegistry();
-        persistence = new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, eventLog);
+        persistence = new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, metricsHolder, eventLog);
         memoryGauge = metricRegistry.gauge(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(), null);
     }
 
