@@ -26,6 +26,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.HiveMQMetrics;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.clientsession.ClientSession;
@@ -52,7 +53,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_COUNT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
@@ -66,10 +66,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     private static final @NotNull Logger log = LoggerFactory.getLogger(ClientSessionMemoryLocalPersistence.class);
 
     private final @NotNull PublishPayloadPersistence payloadPersistence;
+    private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull EventLog eventLog;
     private final @NotNull Map<String, PersistenceEntry<ClientSession>> @NotNull [] buckets;
     private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
-    private final @NotNull AtomicInteger storedWillMessagesCount = new AtomicInteger(0);
     private final @NotNull AtomicLong currentMemorySize = new AtomicLong();
     private final int bucketCount;
 
@@ -77,9 +77,11 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     ClientSessionMemoryLocalPersistence(
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull MetricRegistry metricRegistry,
+            final @NotNull MetricsHolder metricsHolder,
             final @NotNull EventLog eventLog) {
 
         this.payloadPersistence = payloadPersistence;
+        this.metricsHolder = metricsHolder;
         this.eventLog = eventLog;
 
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
@@ -90,7 +92,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             buckets[i] = new HashMap<>();
         }
 
-        metricRegistry.register(WILL_MESSAGE_COUNT.name(), (Gauge<Integer>) storedWillMessagesCount::get);
         metricRegistry.register(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
@@ -209,7 +210,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
-                storedWillMessagesCount.incrementAndGet();
+                metricsHolder.getStoredWillMessagesCount().inc();
                 payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
             }
 
@@ -485,7 +486,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish == null) {
             return;
         }
-        storedWillMessagesCount.decrementAndGet();
+        metricsHolder.getStoredWillMessagesCount().dec();
         payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
     }
 

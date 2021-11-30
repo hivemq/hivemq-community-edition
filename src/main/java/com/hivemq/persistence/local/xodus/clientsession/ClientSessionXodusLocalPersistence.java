@@ -15,8 +15,6 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -27,6 +25,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.PersistenceStartup;
@@ -60,7 +59,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_COUNT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
@@ -86,8 +84,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull ClientSessionPersistenceSerializer serializer;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
+    private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
-    private final @NotNull AtomicInteger storedWillMessagesCount = new AtomicInteger(0);
 
     @Inject
     ClientSessionXodusLocalPersistence(
@@ -96,16 +94,15 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EventLog eventLog,
             final @NotNull PersistenceStartup persistenceStartup,
-            final @NotNull MetricRegistry metricRegistry) {
+            final @NotNull MetricsHolder metricsHolder) {
 
         super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
 
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
+        this.metricsHolder = metricsHolder;
         serializer = new ClientSessionPersistenceSerializer();
-
-        metricRegistry.register(WILL_MESSAGE_COUNT.name(), (Gauge<Integer>) storedWillMessagesCount::get);
     }
 
     @Override
@@ -309,7 +306,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
-                storedWillMessagesCount.incrementAndGet();
+                metricsHolder.getStoredWillMessagesCount().inc();
                 payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
             }
 
@@ -654,7 +651,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
         @Override
         public void run() {
-            storedWillMessagesCount.decrementAndGet();
+            metricsHolder.getStoredWillMessagesCount().dec();
             payloadPersistence.decrementReferenceCounter(will.getPublishId());
         }
     }
