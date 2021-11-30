@@ -205,7 +205,7 @@ public class EventLogTest {
         final long disconnectedSince = 1534251898287L;
         eventLog.clientSessionExpired(disconnectedSince, clientId);
 
-        final ZoneId zoneId = ZoneId.systemDefault();
+        final ZoneId zoneId = ZoneId.of("UTC");
         final String localizedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(disconnectedSince), zoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         logMessageBuffer.append("Client ID: ").append(clientId)
                 .append(" session has expired at ").append(localizedDateTime)
