@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
@@ -105,7 +105,7 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
             switch (propertyIdentifier) {
                 case SESSION_EXPIRY_INTERVAL:
                     sessionExpiryInterval =
-                            decodeSessionExpiryInterval(clientConnection, buf, sessionExpiryInterval, MessageType.DISCONNECT);
+                            decodeSessionExpiryInterval(clientConnection, buf, sessionExpiryInterval, SESSION_EXPIRY_NOT_SET, MessageType.DISCONNECT);
                     if (sessionExpiryInterval == DISCONNECTED) {
                         return null;
                     }

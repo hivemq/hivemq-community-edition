@@ -30,8 +30,8 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.*;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Florian Limpöck

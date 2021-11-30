@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.*;
 
 /**

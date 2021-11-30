@@ -72,7 +72,7 @@ import java.util.concurrent.TimeUnit;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 
 /**
  * The handler which is responsible for CONNECT messages
@@ -155,6 +155,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
     @Override
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect)
             throws Exception {
+        adjustValuesAccordingToSettings(connect);
 
         if (!checkClientId(ctx, connect)) {
             return;
@@ -233,6 +234,15 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             }
         }
         clientConnection.setAuthConnect(null);
+    }
+
+    private void adjustValuesAccordingToSettings(final @NotNull CONNECT connect) {
+        if (connect.getWillPublish() != null) {
+            final MqttWillPublish willPublish = connect.getWillPublish();
+            if (willPublish.getMessageExpiryInterval() > maxMessageExpiryInterval) {
+                willPublish.setMessageExpiryInterval(maxMessageExpiryInterval);
+            }
+        }
     }
 
     private void addPublishFlowHandler(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {

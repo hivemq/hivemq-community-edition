@@ -44,6 +44,7 @@ import io.netty.buffer.ByteBuf;
 
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
 import static com.hivemq.mqtt.message.connect.CONNECT.*;
+import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT;
 import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
@@ -58,6 +59,10 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     private static final String PROTOCOL_NAME = "MQTT";
     private final @NotNull HivemqId hiveMQId;
     private final long maxMessageExpiryInterval;
+    private static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
+    private static final int RECEIVE_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
+    private static final int TOPIC_ALIAS_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
+    private static final long MAXIMUM_PACKET_SIZE_NOT_SET = Long.MAX_VALUE;
 
     public Mqtt5ConnectDecoder(
             final @NotNull MqttConnacker mqttConnacker,
@@ -66,7 +71,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             final @NotNull FullConfigurationService configurationService) {
         super(mqttConnacker, configurationService, clientIds);
         this.hiveMQId = hiveMQId;
-        this.maxMessageExpiryInterval = fullMqttConfigurationService.mqttConfiguration().maxMessageExpiryInterval();
+        this.maxMessageExpiryInterval = configurationService.mqttConfiguration().maxMessageExpiryInterval();
     }
 
     @Override
@@ -165,13 +170,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             mqttWillPublish = decodeAndValidateWill(clientConnection, buf, willQos, willRetain);
             if (mqttWillPublish == null) {
                 return null;
-            } else {
-                if (mqttWillPublish.getMessageExpiryInterval() > maxMessageExpiryInterval) {
-                    mqttWillPublish.setMessageExpiryInterval(maxMessageExpiryInterval);
-                }
-                if (mqttWillPublish.getDelayInterval() == MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET) {
-                    mqttWillPublish.setDelayInterval(MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT);
-                }
             }
         } else {
             mqttWillPublish = null;
@@ -643,6 +641,10 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             return null;
         }
 
+        if (willDelayInterval == WILL_DELAY_INTERVAL_NOT_SET) {
+            willDelayInterval = WILL_DELAY_INTERVAL_DEFAULT;
+        }
+
         mqtt5Builder.withUserProperties(userProperties);
         mqtt5Builder.withDelayInterval(willDelayInterval);
         mqtt5Builder.withMessageExpiryInterval(messageExpiryInterval);
@@ -1007,8 +1009,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      *
      * @param clientConnection      the connection of the mqtt client
      * @param buf                   the encoded ByteBuf of the message
-     * @param sessionExpiryInterval the initial session expiry interval (must be equal to {@link
-     *                              com.hivemq.mqtt.message.connect.Mqtt5CONNECT#SESSION_EXPIRY_NOT_SET})
+     * @param sessionExpiryInterval the initial session expiry interval (must be equal to SESSION_EXPIRY_NOT_SET)
      * @return the session expiry interval, or -1 when decoding failed.
      */
     private long decodeSessionExpiryInterval(

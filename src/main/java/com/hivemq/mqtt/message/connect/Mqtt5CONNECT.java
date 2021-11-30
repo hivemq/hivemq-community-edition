@@ -29,26 +29,18 @@ public interface Mqtt5CONNECT extends Message {
      * The default maximum amount of not acknowledged publishes with QoS 1 or 2 the client accepts concurrently.
      */
     int DEFAULT_RECEIVE_MAXIMUM = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
-    int RECEIVE_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
 
     /**
      * The default maximum amount of topic aliases the server accepts from the client.
      */
     int DEFAULT_TOPIC_ALIAS_MAXIMUM = 0;
-    int TOPIC_ALIAS_MAXIMUM_NOT_SET = Integer.MAX_VALUE;
 
     /**
      * The default maximum packet size the client accepts from the server which indicates that the packet size is
      * not limited beyond the restrictions of the encoding.
      */
     int DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT = MqttVariableByteInteger.MAXIMUM_PACKET_SIZE_LIMIT;
-    long MAXIMUM_PACKET_SIZE_NOT_SET = Long.MAX_VALUE;
 
-    int NO_KEEP_ALIVE = 0;
-    int DEFAULT_KEEP_ALIVE = 60;
-    int KEEP_ALIVE_NOT_SET = -1;
-    boolean DEFAULT_CLEAN_START = true;
-    long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
     long SESSION_EXPIRE_ON_DISCONNECT = 0;
     long SESSION_EXPIRY_MAX = UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE; // Unsigned Integer Max Value
 
