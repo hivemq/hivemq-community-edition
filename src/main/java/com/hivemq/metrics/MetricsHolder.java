@@ -48,6 +48,7 @@ public class MetricsHolder {
     private final @NotNull Counter channelNotWritableCounter;
 
     private final @NotNull Counter storedWillMessagesCount;
+    private final @NotNull Counter publishedWillMessagesCount;
 
     public MetricsHolder(final @NotNull MetricRegistry metricRegistry) {
 
@@ -70,6 +71,7 @@ public class MetricsHolder {
         channelNotWritableCounter = metricRegistry.counter(MQTT_CONNECTION_NOT_WRITABLE_CURRENT.name());
 
         storedWillMessagesCount = metricRegistry.counter(WILL_MESSAGE_COUNT.name());
+        publishedWillMessagesCount = metricRegistry.counter(WILL_MESSAGE_PUBLISHED_COUNT_TOTAL.name());
     }
 
     public @NotNull MetricRegistry getMetricRegistry() {
@@ -114,5 +116,9 @@ public class MetricsHolder {
 
     public @NotNull Counter getStoredWillMessagesCount() {
         return storedWillMessagesCount;
+    }
+
+    public @NotNull Counter getPublishedWillMessagesCount() {
+        return publishedWillMessagesCount;
     }
 }

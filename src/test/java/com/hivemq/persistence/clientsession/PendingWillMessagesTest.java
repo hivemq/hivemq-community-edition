@@ -15,21 +15,23 @@
  */
 package com.hivemq.persistence.clientsession;
 
+import com.codahale.metrics.Counter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.InitFutureUtilsExecutorRule;
 
 import java.util.concurrent.ExecutorService;
@@ -46,23 +48,32 @@ public class PendingWillMessagesTest {
     @Rule
     public InitFutureUtilsExecutorRule rule = new InitFutureUtilsExecutorRule();
 
-    @Mock
-    InternalPublishService publishService;
+    private final ListeningScheduledExecutorService executorService =
+            MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
 
-    @Mock
-    ClientSessionPersistence clientSessionPersistence;
-
-    @Mock
-    ClientSessionLocalPersistence clientSessionLocalPersistence;
-
-    ListeningScheduledExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
-
+    private InternalPublishService publishService;
+    private ClientSessionPersistence clientSessionPersistence;
+    private ClientSessionLocalPersistence clientSessionLocalPersistence;
     private PendingWillMessages pendingWillMessages;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        pendingWillMessages = new PendingWillMessages(publishService, executorService, clientSessionPersistence, clientSessionLocalPersistence);
+        clientSessionPersistence = mock(ClientSessionPersistence.class);
+        clientSessionLocalPersistence = mock(ClientSessionLocalPersistence.class);
+
+        publishService = mock(InternalPublishService.class);
+        when(publishService.publish(any(), any(), anyString())).thenReturn(mock(ListenableFuture.class));
+
+        final MetricsHolder metricsHolder = mock(MetricsHolder.class);
+        when(metricsHolder.getPublishedWillMessagesCount()).thenReturn(mock(Counter.class));
+
+        pendingWillMessages = new PendingWillMessages(publishService, executorService, clientSessionPersistence,
+                clientSessionLocalPersistence, metricsHolder);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        executorService.shutdown();
     }
 
     @Test
