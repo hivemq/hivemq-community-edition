@@ -16,12 +16,11 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.metrics.MetricsHolder;
+import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
@@ -52,23 +51,26 @@ public class PendingWillMessages {
 
     private static final Logger log = LoggerFactory.getLogger(PendingWillMessages.class);
 
-    private final @NotNull InternalPublishService publishService;
     private final @NotNull Map<String, PendingWill> pendingWills = new ConcurrentHashMap<>();
+    private final @NotNull InternalPublishService publishService;
+    private final @NotNull ListeningScheduledExecutorService executorService;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
-    private final @NotNull ListeningScheduledExecutorService executorService;
+    private final @NotNull MetricsHolder metricsHolder;
 
     @Inject
     public PendingWillMessages(
             final @NotNull InternalPublishService publishService,
-            @Persistence final @NotNull ListeningScheduledExecutorService executorService,
+            final @Persistence @NotNull ListeningScheduledExecutorService executorService,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
-            final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence) {
+            final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
+            final @NotNull MetricsHolder metricsHolder) {
 
         this.publishService = publishService;
         this.executorService = executorService;
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
+        this.metricsHolder = metricsHolder;
         executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_SCHEDULE, WILL_DELAY_CHECK_SCHEDULE, TimeUnit.SECONDS);
     }
 
@@ -108,8 +110,23 @@ public class PendingWillMessages {
 
     private void sendWill(final @NotNull String clientId, final @Nullable ClientSession session) {
         if (session != null && session.getWillPublish() != null) {
+
             final PUBLISH publish = publishFromWill(session.getWillPublish());
-            publishService.publish(publish, executorService, clientId);
+
+            Futures.addCallback(publishService.publish(publish, executorService, clientId), new FutureCallback<>() {
+                @Override
+                public void onSuccess(final PublishReturnCode result) {
+                    metricsHolder.getPublishedWillMessagesCount().inc();
+                }
+
+                @Override
+                public void onFailure(final @NotNull Throwable t) {
+                    log.error("Publish of Will message failed.", t);
+                    Exceptions.rethrowError(t);
+                }
+            }, MoreExecutors.directExecutor());
+
+
             final ListenableFuture<Void> future = clientSessionPersistence.deleteWill(clientId);
             if (Checkpoints.enabled()) {
                 future.addListener(() -> Checkpoints.checkpoint("pending-will-removed"), MoreExecutors.directExecutor());
