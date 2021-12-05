@@ -109,7 +109,7 @@ cd hivemq-community-edition
 ./gradlew hivemqZip
 ----
 
-The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/zip/`.
+The package `hivemq-ce-<version>.zip` is created in the sub-folder `build/distributions/`.
 
 ==== Building the Docker Image
 

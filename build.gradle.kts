@@ -217,25 +217,21 @@ tasks.jar {
 }
 
 tasks.shadowJar {
-    archiveClassifier.set("shaded")
     mergeServiceFiles()
 }
 
 val hivemqZip by tasks.registering(Zip::class) {
-    group = "build"
+    group = "distribution"
 
     val name = "hivemq-ce-${project.version}"
 
-    destinationDirectory.set(buildDir.resolve("zip"))
     archiveFileName.set("$name.zip")
 
-    from(projectDir.resolve("src/distribution")) { exclude("**/.gitkeep") }
-    from(projectDir.resolve("src/main/resources/config.xml")) { into("conf") }
+    from("src/distribution") { exclude("**/.gitkeep") }
+    from("src/main/resources/config.xml") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
 }
-
-defaultTasks("hivemqZip")
 
 tasks.javadoc {
     (options as StandardJavadocDocletOptions).addStringOption("-html5")
@@ -244,7 +240,7 @@ tasks.javadoc {
 
     doLast {
         javaexec {
-            classpath(projectDir.resolve("gradle/tools/javadoc-cleaner-1.0.jar"))
+            classpath("gradle/tools/javadoc-cleaner-1.0.jar")
         }
     }
 
@@ -312,7 +308,7 @@ tasks.forbiddenApisTest { enabled = false }
 /* ******************** compliance ******************** */
 
 license {
-    header = projectDir.resolve("HEADER")
+    header = file("HEADER")
     mapping("java", "SLASHSTAR_STYLE")
 }
 
@@ -417,7 +413,7 @@ val updateThirdPartyLicenses by tasks.registering {
     dependsOn(tasks.downloadLicenses)
     doLast {
         javaexec {
-            classpath(projectDir.resolve("gradle/tools/license-third-party-tool-2.0.jar"))
+            classpath("gradle/tools/license-third-party-tool-2.0.jar")
             args(
                 "$buildDir/reports/license/dependency-license.xml",
                 "$projectDir/src/distribution/third-party-licenses/licenses",
