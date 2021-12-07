@@ -306,8 +306,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
-                metricsHolder.getStoredWillMessagesCount().inc();
-                payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
+                txn.setCommitHook(new AddWillReference(newWill));
             }
 
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(newClientSession, timestamp)));
@@ -639,6 +638,21 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     private static boolean persistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
+    }
+
+    private class AddWillReference implements Runnable {
+
+        private final @NotNull ClientSessionWill will;
+
+        AddWillReference(final @NotNull ClientSessionWill will) {
+            this.will = will;
+        }
+
+        @Override
+        public void run() {
+            metricsHolder.getStoredWillMessagesCount().inc();
+            payloadPersistence.add(will.getPayload(), 1, will.getPublishId());
+        }
     }
 
     private class RemoveWillReference implements Runnable {
