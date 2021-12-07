@@ -15,13 +15,12 @@
  */
 package com.hivemq.metrics.gauges;
 
-import io.netty.channel.group.ChannelGroup;
+import com.hivemq.persistence.ChannelPersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,24 +28,18 @@ import static org.mockito.Mockito.when;
  */
 public class OpenConnectionsGaugeTest {
 
-    @Mock
-    ChannelGroup channelGroup;
-
+    private ChannelPersistence channelPersistence;
     private OpenConnectionsGauge gauge;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-        gauge = new OpenConnectionsGauge(channelGroup);
+        channelPersistence = mock(ChannelPersistence.class);
+        gauge = new OpenConnectionsGauge(channelPersistence);
     }
 
     @Test
-    public void test_getValue() throws Exception {
-
-        when(channelGroup.size()).thenReturn(243);
-
-        final Integer value = gauge.getValue();
-
-        assertEquals(243, value.intValue());
+    public void test_getValue() {
+        when(channelPersistence.size()).thenReturn(243);
+        assertEquals(243, gauge.getValue().longValue());
     }
 }

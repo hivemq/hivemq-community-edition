@@ -41,7 +41,7 @@ public interface ChannelPersistence {
     /**
      * Receive a {@link ClientConnection} from the persistence, for a specific client id.
      *
-     * @param clientId         The client identifier.
+     * @param clientId The client identifier.
      * @return The ClientConnection of the client or {@code null} if not found.
      */
     @Nullable ClientConnection getClientConnection(@NotNull String clientId);
@@ -65,7 +65,7 @@ public interface ChannelPersistence {
     /**
      * @return the amount of stored connections.
      */
-    long size();
+    int size();
 
     /**
      * Receive all ClientConnections with their corresponding client identifier as a set of map entries.

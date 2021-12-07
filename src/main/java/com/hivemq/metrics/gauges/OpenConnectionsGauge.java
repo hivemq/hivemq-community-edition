@@ -16,21 +16,22 @@
 package com.hivemq.metrics.gauges;
 
 import com.codahale.metrics.Gauge;
-import io.netty.channel.group.ChannelGroup;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.persistence.ChannelPersistence;
 
 /**
  * @author Christoph Schäbel
  */
 public class OpenConnectionsGauge implements Gauge<Integer> {
 
-    private final ChannelGroup allChannels;
+    private final @NotNull ChannelPersistence channelPersistence;
 
-    public OpenConnectionsGauge(final ChannelGroup allChannels) {
-        this.allChannels = allChannels;
+    public OpenConnectionsGauge(final @NotNull ChannelPersistence channelPersistence) {
+        this.channelPersistence = channelPersistence;
     }
 
     @Override
-    public Integer getValue() {
-        return allChannels.size();
+    public @NotNull Integer getValue() {
+        return channelPersistence.size();
     }
 }

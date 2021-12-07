@@ -26,13 +26,12 @@ import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
+import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.group.ChannelGroup;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -44,8 +43,6 @@ public class MetricsModuleTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -55,7 +52,7 @@ public class MetricsModuleTest {
                 when(nettyConfiguration.getChildEventLoopGroup()).thenReturn(mock(EventLoopGroup.class));
 
                 bind(NettyConfiguration.class).toInstance(nettyConfiguration);
-                bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
+                bind(ChannelPersistence.class).toInstance(mock(ChannelPersistence.class));
                 bind(ClientSessionLocalPersistence.class).toInstance(mock(ClientSessionLocalPersistence.class));
                 bind(LocalTopicTree.class).toInstance(mock(TopicTreeImpl.class));
                 bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));

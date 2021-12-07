@@ -16,9 +16,10 @@
 package com.hivemq.metrics.ioc.provider;
 
 import com.codahale.metrics.MetricRegistry;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
-import io.netty.channel.group.ChannelGroup;
+import com.hivemq.persistence.ChannelPersistence;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -30,18 +31,20 @@ import javax.inject.Singleton;
 @Singleton
 public class OpenConnectionsGaugeProvider implements Provider<OpenConnectionsGauge> {
 
-    private final MetricRegistry metricRegistry;
-    private final ChannelGroup allChannels;
+    private final @NotNull MetricRegistry metricRegistry;
+    private final @NotNull ChannelPersistence channelPersistence;
 
     @Inject
-    public OpenConnectionsGaugeProvider(final MetricRegistry metricRegistry, final ChannelGroup allChannels) {
+    public OpenConnectionsGaugeProvider(
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull ChannelPersistence channelPersistence) {
         this.metricRegistry = metricRegistry;
-        this.allChannels = allChannels;
+        this.channelPersistence = channelPersistence;
     }
 
     @Override
     public OpenConnectionsGauge get() {
-        final OpenConnectionsGauge connectionsGauge = new OpenConnectionsGauge(allChannels);
+        final OpenConnectionsGauge connectionsGauge = new OpenConnectionsGauge(channelPersistence);
         metricRegistry.register(HiveMQMetrics.CONNECTIONS_OVERALL_CURRENT.name(), connectionsGauge);
         return connectionsGauge;
     }

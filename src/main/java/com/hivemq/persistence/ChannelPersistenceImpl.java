@@ -84,7 +84,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     }
 
     @Override
-    public long size() {
+    public int size() {
         return clientConnectionMap.size();
     }
 
