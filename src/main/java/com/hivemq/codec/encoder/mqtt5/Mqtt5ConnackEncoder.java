@@ -26,10 +26,9 @@ import io.netty.buffer.ByteBuf;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.*;
 import static com.hivemq.mqtt.message.connack.CONNACK.*;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
-
 /**
  * @author Florian Limpöck
  */

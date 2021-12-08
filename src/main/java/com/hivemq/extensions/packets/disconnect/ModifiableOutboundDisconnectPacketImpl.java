@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
+import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 import java.util.Objects;
@@ -99,7 +99,7 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
                 Optional.of(sessionExpiryInterval);
     }
 

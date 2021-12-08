@@ -25,6 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 import static org.junit.Assert.*;
 
 /**
@@ -52,9 +54,9 @@ public class CONNACKBuilderTest {
         assertNull(connack.getMaximumQoS());
         assertEquals(connack.getReceiveMaximum(), CONNECT.DEFAULT_RECEIVE_MAXIMUM);
         assertNull(connack.getResponseInformation());
-        assertEquals(connack.getServerKeepAlive(), CONNECT.KEEP_ALIVE_NOT_SET);
+        assertEquals(connack.getServerKeepAlive(), KEEP_ALIVE_NOT_SET);
         assertNull(connack.getServerReference());
-        assertEquals(connack.getSessionExpiryInterval(), CONNECT.SESSION_EXPIRY_NOT_SET);
+        assertEquals(connack.getSessionExpiryInterval(), SESSION_EXPIRY_NOT_SET);
         assertEquals(connack.getTopicAliasMaximum(), CONNECT.DEFAULT_TOPIC_ALIAS_MAXIMUM);
         assertEquals(connack.getType(), MessageType.CONNACK);
         assertEquals(connack.getPacketIdentifier(), 0);

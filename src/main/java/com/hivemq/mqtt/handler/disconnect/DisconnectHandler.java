@@ -28,7 +28,6 @@ import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
-import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.persistence.ChannelPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
@@ -90,7 +89,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final String clientId = clientConnection.getClientId();
 
         //no version check necessary, because mqtt 3 disconnect session expiry interval = SESSION_EXPIRY_NOT_SET
-        if (msg.getSessionExpiryInterval() != Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) {
+        if (msg.getSessionExpiryInterval() != DISCONNECT.SESSION_EXPIRY_NOT_SET) {
             clientConnection.setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
         }
 
