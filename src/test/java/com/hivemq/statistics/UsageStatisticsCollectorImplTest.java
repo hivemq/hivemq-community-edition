@@ -27,8 +27,6 @@ import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.statistics.entity.Statistic;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT;
@@ -36,6 +34,7 @@ import static com.hivemq.configuration.service.RestrictionsConfigurationService.
 import static com.hivemq.metrics.HiveMQMetrics.CONNECTIONS_OVERALL_CURRENT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,21 +43,15 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class UsageStatisticsCollectorImplTest {
 
-    @Mock
-    HiveMQExtensions hiveMQExtensions;
-
-    @Mock
-    HiveMQExtension customExtension;
-
-    @Mock
-    HiveMQExtension officialExtension;
-
     private UsageStatisticsCollector collector;
     private MetricRegistry metricRegistry;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        final HiveMQExtensions extensions = mock(HiveMQExtensions.class);
+        final HiveMQExtension customExtension = mock(HiveMQExtension.class);
+        final HiveMQExtension officialExtensionDcSquare = mock(HiveMQExtension.class);
+        final HiveMQExtension officialExtensionHivemq = mock(HiveMQExtension.class);
 
         final FullConfigurationService configurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
@@ -67,13 +60,13 @@ public class UsageStatisticsCollectorImplTest {
         systemInformation.init();
         metricRegistry = new MetricRegistry();
         collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
-                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), hiveMQExtensions);
-        when(hiveMQExtensions.getEnabledHiveMQExtensions()).thenReturn(
-                ImmutableMap.of("1", customExtension, "2", officialExtension));
+                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), extensions);
+        when(extensions.getEnabledHiveMQExtensions()).thenReturn(
+                ImmutableMap.of("1", customExtension, "2", officialExtensionDcSquare, "3", officialExtensionHivemq));
 
         when(customExtension.getAuthor()).thenReturn("another company");
-        when(officialExtension.getAuthor()).thenReturn("dc-square Gmbh");
-
+        when(officialExtensionDcSquare.getAuthor()).thenReturn("dc-square Gmbh");
+        when(officialExtensionHivemq.getAuthor()).thenReturn("HiveMQ Gmbh");
     }
 
     @Test
@@ -96,7 +89,6 @@ public class UsageStatisticsCollectorImplTest {
         assertTrue(statistic.getOpenFileLimit() > 0);
         assertTrue(statistic.getDiskSize() > 0);
         assertTrue(statistic.getMemorySize() > 0);
-
     }
 
     @Test
@@ -127,7 +119,7 @@ public class UsageStatisticsCollectorImplTest {
         assertEquals(36, statistic.getId().length());
         assertFalse(statistic.getHivemqVersion().isEmpty());
         assertTrue(statistic.getHivemqUptime() >= 0);
-        assertEquals(1, statistic.getOfficialExtensions());
+        assertEquals(2, statistic.getOfficialExtensions());
         assertEquals(1, statistic.getCustomExtensions());
     }
 
