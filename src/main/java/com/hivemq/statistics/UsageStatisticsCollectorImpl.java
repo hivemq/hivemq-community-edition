@@ -120,7 +120,8 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         final Collection<HiveMQExtension> extensions = hiveMQExtensions.getEnabledHiveMQExtensions().values();
 
         for (final HiveMQExtension extension : extensions) {
-            if (extension.getAuthor() != null && extension.getAuthor().contains("dc-square")) {
+            final String author = extension.getAuthor();
+            if (author != null && (author.contains("dc-square") || author.contains("HiveMQ"))) {
                 official++;
             } else {
                 custom++;
