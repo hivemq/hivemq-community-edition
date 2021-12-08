@@ -251,8 +251,7 @@ public class PubrelInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBREL interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -342,8 +341,7 @@ public class PubrelInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBREL interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

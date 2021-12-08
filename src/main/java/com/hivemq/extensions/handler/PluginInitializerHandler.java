@@ -323,8 +323,8 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on initialize. Extensions are responsible on their own to handle exceptions.",
-                        pluginId);
-                log.debug("Original exception:", e);
+                        pluginId,
+                        e);
                 Exceptions.rethrowError(e);
             }
             return clientContext;

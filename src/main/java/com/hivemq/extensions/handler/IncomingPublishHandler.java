@@ -305,8 +305,7 @@ public class IncomingPublishHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBLISH interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception:", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.forciblyPreventPublishDelivery(output.getReasonCode(), output.getReasonString());
                 Exceptions.rethrowError(e);
             }

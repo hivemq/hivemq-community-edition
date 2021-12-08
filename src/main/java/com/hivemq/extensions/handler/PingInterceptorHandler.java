@@ -181,8 +181,7 @@ public class PingInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound PINGREQ interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original Exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 Exceptions.rethrowError(e);
             }
             return output;
@@ -216,8 +215,7 @@ public class PingInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound PINGRESP interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original Exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 Exceptions.rethrowError(e);
             }
             return output;

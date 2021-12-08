@@ -272,8 +272,8 @@ public class DisconnectInterceptorHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound DISCONNECT interception. " +
                                 "Extensions are responsible for their own exception handling.",
-                        extensionId);
-                log.debug("Original exception: ", e);
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -362,8 +362,8 @@ public class DisconnectInterceptorHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound DISCONNECT interception. " +
                                 "Extensions are responsible for their own exception handling.",
-                        extensionId);
-                log.debug("Original exception: ", e);
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

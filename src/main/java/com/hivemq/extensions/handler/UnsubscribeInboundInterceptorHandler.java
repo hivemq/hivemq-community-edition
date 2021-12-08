@@ -229,8 +229,7 @@ public class UnsubscribeInboundInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound UNSUBSCRIBE interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original Exception:" + e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.preventDelivery();
                 Exceptions.rethrowError(e);
             }

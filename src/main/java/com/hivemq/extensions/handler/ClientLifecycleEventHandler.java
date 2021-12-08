@@ -348,7 +348,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on a client lifecycle event. Extensions are responsible on their own to handle exceptions.",
-                        pluginId);
+                        pluginId,
+                        e);
                 Exceptions.rethrowError(e);
             }
         }
@@ -379,7 +380,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
                 } catch (final Throwable t) {
                     log.warn("Uncaught exception was thrown from extension with id \"{}\" in client lifecycle event listener provider. " +
                                     "Extensions are responsible on their own to handle exceptions.",
-                            pluginId);
+                            pluginId,
+                            t);
                     Exceptions.rethrowError(t);
                 }
             }
