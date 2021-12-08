@@ -37,7 +37,6 @@ import com.hivemq.util.Strings;
 import com.hivemq.util.Topics;
 import io.netty.buffer.ByteBuf;
 
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
 
 /**
@@ -551,8 +550,8 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      *
      * @param clientConnection      the clientConnection of the mqtt client
      * @param buf                   the encoded ByteBuf of the message
-     * @param sessionExpiryInterval the initial session expiry interval (must be equal to {@link
-     *                              com.hivemq.mqtt.message.connect.Mqtt5CONNECT#SESSION_EXPIRY_NOT_SET})
+     * @param sessionExpiryInterval the initial session expiry interval (must be equal to sessionExpiryNotSet)
+     * @param sessionExpiryNotSet   a value that is considered as session expiry not set
      * @param messageType           the type of the message
      * @return the session expiry interval, or -1 when decoding failed.
      */
@@ -560,9 +559,9 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
             final @NotNull ClientConnection clientConnection,
             final @NotNull ByteBuf buf,
             final long sessionExpiryInterval,
+            final long sessionExpiryNotSet,
             final @NotNull MessageType messageType) {
-
-        if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
+        if (sessionExpiryInterval != sessionExpiryNotSet) {
             disconnectByMoreThanOnce(clientConnection, "session expiry interval", messageType);
             return DISCONNECTED;
         }

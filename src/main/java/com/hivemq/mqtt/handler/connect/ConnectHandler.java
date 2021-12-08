@@ -39,7 +39,6 @@ import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.limitation.TopicAliasLimiter;
-import com.hivemq.mqtt.handler.MessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
@@ -73,7 +72,7 @@ import java.util.concurrent.TimeUnit;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 
 /**
  * The handler which is responsible for CONNECT messages
@@ -83,7 +82,7 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
  */
 @Singleton
 @ChannelHandler.Sharable
-public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> implements MessageHandler<CONNECT> {
+public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
 
@@ -156,8 +155,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
     @Override
     protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect)
             throws Exception {
-
-        overwriteNotSetValues(connect);
+        adjustValuesAccordingToSettings(connect);
 
         if (!checkClientId(ctx, connect)) {
             return;
@@ -238,28 +236,11 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> impleme
         clientConnection.setAuthConnect(null);
     }
 
-    @Override
-    public void overwriteNotSetValues(final @NotNull CONNECT connect) {
-
-        if (connect.getSessionExpiryInterval() == SESSION_EXPIRY_NOT_SET) {
-            connect.setSessionExpiryInterval(SESSION_EXPIRE_ON_DISCONNECT);
-        }
-        if (connect.getReceiveMaximum() == RECEIVE_MAXIMUM_NOT_SET) {
-            connect.setReceiveMaximum(DEFAULT_RECEIVE_MAXIMUM);
-        }
-        if (connect.getTopicAliasMaximum() == TOPIC_ALIAS_MAXIMUM_NOT_SET) {
-            connect.setTopicAliasMaximum(DEFAULT_TOPIC_ALIAS_MAXIMUM);
-        }
-        if (connect.getMaximumPacketSize() == MAXIMUM_PACKET_SIZE_NOT_SET) {
-            connect.setMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
-        }
+    private void adjustValuesAccordingToSettings(final @NotNull CONNECT connect) {
         if (connect.getWillPublish() != null) {
             final MqttWillPublish willPublish = connect.getWillPublish();
             if (willPublish.getMessageExpiryInterval() > maxMessageExpiryInterval) {
                 willPublish.setMessageExpiryInterval(maxMessageExpiryInterval);
-            }
-            if (willPublish.getDelayInterval() == MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET) {
-                willPublish.setDelayInterval(MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT);
             }
         }
     }
