@@ -252,8 +252,7 @@ public class PubcompInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBCOMP interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -344,8 +343,7 @@ public class PubcompInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBCOMP interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId);
-                log.debug("Original exception: ", e);
+                                "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
