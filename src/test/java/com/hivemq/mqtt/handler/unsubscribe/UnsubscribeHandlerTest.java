@@ -34,7 +34,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
@@ -47,7 +46,7 @@ import java.util.Queue;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -81,7 +80,7 @@ public class UnsubscribeHandlerTest {
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("myTestClient");
         when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(Futures.immediateFuture(null));
-        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), Matchers.any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
     }
 
     @Test
@@ -212,7 +211,7 @@ public class UnsubscribeHandlerTest {
     @Test
     public void test_unsubscribe_batched_and_acknowledge_error_mqtt5() {
 
-        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), Matchers.any(ImmutableSet.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
+        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
 
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 

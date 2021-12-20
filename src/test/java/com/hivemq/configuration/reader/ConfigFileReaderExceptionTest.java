@@ -22,7 +22,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 public class ConfigFileReaderExceptionTest extends AbstractConfigurationTest {

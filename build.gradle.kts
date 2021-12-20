@@ -152,7 +152,7 @@ dependencies {
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
 
     /* primitive data structures */
-    implementation("org.eclipse.collections:eclipse-collections:${property("ecliplse.collections.version")}")
+    implementation("org.eclipse.collections:eclipse-collections:${property("eclipse.collections.version")}")
 }
 
 
@@ -166,7 +166,7 @@ dependencies {
     testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property("shrinkwrap.version")}")
     testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
     testImplementation("net.bytebuddy:byte-buddy:${property("bytebuddy.version")}")
-    testImplementation("com.github.tomakehurst:wiremock-standalone:${property("wiremock.version")}")
+    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
     testImplementation("com.github.stefanbirkner:system-rules:${property("system-rules.version")}") {
         exclude("junit", "junit-dep")
     }
@@ -317,6 +317,7 @@ downloadLicenses {
         license("Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0") to listOf(
             "Apache 2",
             "Apache 2.0",
+            "Apache-2.0",
             "Apache License 2.0",
             "Apache License, 2.0",
             "Apache License v2.0",

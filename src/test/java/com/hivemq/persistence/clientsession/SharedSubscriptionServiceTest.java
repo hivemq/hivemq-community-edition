@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.splitTopicAndGroup;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**

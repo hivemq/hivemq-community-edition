@@ -39,7 +39,7 @@ import util.TestConfigurationBootstrap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class Mqtt31ConnectDecoderValidationsTest {

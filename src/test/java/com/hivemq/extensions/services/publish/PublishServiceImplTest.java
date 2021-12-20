@@ -52,7 +52,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,11 +137,11 @@ public class PublishServiceImplTest {
     @Test(timeout = 10000)
     public void test_publish() throws Throwable {
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
-        when(internalPublishService.publish(any(PUBLISH.class), any(ExecutorService.class), isNull(String.class)))
+        when(internalPublishService.publish(any(PUBLISH.class), any(ExecutorService.class), isNull()))
                 .thenReturn(Futures.immediateFuture(PublishReturnCode.DELIVERED));
 
         publishService.publish(publish).get();
-        verify(internalPublishService).publish(any(PUBLISH.class), any(ExecutorService.class), isNull(String.class));
+        verify(internalPublishService).publish(any(PUBLISH.class), any(ExecutorService.class), isNull());
     }
 
     @Test(timeout = 10000)
