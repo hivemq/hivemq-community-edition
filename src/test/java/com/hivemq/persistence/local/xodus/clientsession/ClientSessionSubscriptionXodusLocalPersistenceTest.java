@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.*;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**

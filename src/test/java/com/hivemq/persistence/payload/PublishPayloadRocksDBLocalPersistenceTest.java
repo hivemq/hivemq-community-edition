@@ -32,7 +32,7 @@ import util.LogbackCapturingAppender;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
