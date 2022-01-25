@@ -165,7 +165,6 @@ public class LoggingBootstrap {
     private static boolean overrideLogbackXml(final @NotNull File configFolder) {
         final File file = new File(configFolder, "logback.xml");
         if (file.canRead()) {
-            log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
             final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
                 context.reset();
@@ -175,6 +174,7 @@ public class LoggingBootstrap {
                 configurator.doConfigure(file);
 
                 context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(listAppender);
+                log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
                 return true;
             } catch (final JoranException je) {
                 // StatusPrinter will handle this
