@@ -170,6 +170,7 @@ public class ListenerConfigurator {
 
                 .withClientAuthMode(getClientAuthMode(entity.getClientAuthMode()))
                 .withCipherSuites(entity.getCipherSuites())
+                .withPreferServerCipherSuites(entity.isPreferServerCipherSuites())
 
                 .withHandshakeTimeout(entity.getHandshakeTimeout())
 
