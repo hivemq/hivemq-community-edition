@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.configuration.entity.listener;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
 import com.hivemq.configuration.entity.listener.tls.KeystoreEntity;
 import com.hivemq.configuration.entity.listener.tls.TruststoreEntity;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
@@ -53,6 +55,9 @@ public class TLSEntity {
     @XmlElement(name = "cipher-suite")
     private @NotNull List<String> cipherSuites = new ArrayList<>();
 
+    @XmlElement(name = "prefer-server-cipher-suites")
+    private @Nullable Boolean preferServerCipherSuites = null;
+
     public @NotNull KeystoreEntity getKeystoreEntity() {
         return keystoreEntity;
     }
@@ -75,6 +80,10 @@ public class TLSEntity {
 
     public @NotNull List<String> getCipherSuites() {
         return cipherSuites;
+    }
+
+    public @Nullable Boolean isPreferServerCipherSuites() {
+        return preferServerCipherSuites;
     }
 
 }

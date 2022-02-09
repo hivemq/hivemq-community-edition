@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -76,8 +77,17 @@ public class SslFactory {
         //set chosen protocols if available
         enableProtocols(sslEngine, tls.getProtocols());
 
-        //it's a server so we do not use client mode
+        //it's a server, so we do not use client mode
         sslEngine.setUseClientMode(false);
+
+        // if prefer server suites is null -> use default of the engine
+        if (tls.isPreferServerCipherSuites() != null) {
+
+            final SSLParameters params = sslEngine.getSSLParameters();
+            params.setUseCipherSuitesOrder(tls.isPreferServerCipherSuites());
+
+            sslEngine.setSSLParameters(params);
+        }
 
         //cert auth
         if (Tls.ClientAuthMode.REQUIRED.equals(tls.getClientAuthMode())) {

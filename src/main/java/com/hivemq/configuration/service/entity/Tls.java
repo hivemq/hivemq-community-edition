@@ -44,6 +44,7 @@ public class Tls {
     private final @NotNull ClientAuthMode clientAuthMode;
     private final @NotNull List<String> protocols;
     private final @NotNull List<String> cipherSuites;
+    private final @Nullable Boolean preferServerCipherSuites;
 
     /**
      * Creates a new TLS configuration
@@ -58,11 +59,10 @@ public class Tls {
      * @param handshakeTimeout         the TLS handshake timeout
      * @param clientAuthMode           the client authentication mode
      * @param protocols                the supported protocols. <code>null</code> means that all enabled protocols by
-     *                                 the JVM are
-     *                                 enabled
+     *                                 the JVM are enabled
      * @param cipherSuites             the supported cipher suites. <code>null</code> means that all enabled cipher
-     *                                 suites by the
-     *                                 JVM are enabled
+     *                                 suites by the JVM are enabled
+     * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher
      * @since 3.3
      */
     protected Tls(final @NotNull String keystorePath,
@@ -75,7 +75,8 @@ public class Tls {
                   final int handshakeTimeout,
                   final @NotNull ClientAuthMode clientAuthMode,
                   final @NotNull List<String> protocols,
-                  final @NotNull List<String> cipherSuites) {
+                  final @NotNull List<String> cipherSuites,
+                  final @Nullable Boolean preferServerCipherSuites) {
 
         checkNotNull(clientAuthMode, "clientAuthMode must not be null");
         checkNotNull(protocols, "protocols must not be null");
@@ -91,6 +92,7 @@ public class Tls {
         this.clientAuthMode = clientAuthMode;
         this.protocols = protocols;
         this.cipherSuites = cipherSuites;
+        this.preferServerCipherSuites = preferServerCipherSuites;
     }
 
     /**
@@ -170,6 +172,13 @@ public class Tls {
         return cipherSuites;
     }
 
+    /**
+     * @return if the server cipher suites should be preferred
+     */
+    public @Nullable Boolean isPreferServerCipherSuites() {
+        return preferServerCipherSuites;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -191,6 +200,8 @@ public class Tls {
             return false;
         if (clientAuthMode != tls.clientAuthMode) return false;
         if (!protocols.equals(tls.protocols)) return false;
+        if (preferServerCipherSuites != null ? !preferServerCipherSuites.equals(tls.preferServerCipherSuites) : tls.preferServerCipherSuites != null)
+            return false;
         return cipherSuites.equals(tls.cipherSuites);
     }
 
@@ -207,6 +218,7 @@ public class Tls {
         result = 31 * result + clientAuthMode.hashCode();
         result = 31 * result + protocols.hashCode();
         result = 31 * result + cipherSuites.hashCode();
+        result = 31 * result + (preferServerCipherSuites != null ? preferServerCipherSuites.hashCode() : 0);
         return result;
     }
 
@@ -255,6 +267,7 @@ public class Tls {
         private @Nullable ClientAuthMode clientAuthMode;
         private @Nullable List<String> protocols;
         private @Nullable List<String> cipherSuites;
+        private @Nullable Boolean preferServerCipherSuites;
 
         public @NotNull Builder withKeystorePath(final @NotNull String keystorePath) {
             this.keystorePath = keystorePath;
@@ -311,6 +324,11 @@ public class Tls {
             return this;
         }
 
+        public @NotNull Builder withPreferServerCipherSuites(final @Nullable Boolean preferServerCipherSuites) {
+            this.preferServerCipherSuites = preferServerCipherSuites;
+            return this;
+        }
+
         public @NotNull Tls build() {
             checkNotNull(keystorePath, "keystorePath must not be null");
             checkNotNull(keystorePassword, "keystorePassword must not be null");
@@ -330,7 +348,8 @@ public class Tls {
                     handshakeTimeout,
                     clientAuthMode,
                     protocols,
-                    cipherSuites) {
+                    cipherSuites,
+                    preferServerCipherSuites) {
             };
         }
     }
