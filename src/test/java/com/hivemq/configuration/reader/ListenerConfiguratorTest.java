@@ -22,8 +22,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
@@ -82,6 +81,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
         assertEquals("password-truststore", tlsTcpListener.getTls().getTruststorePassword());
         assertEquals("my-tls-tcp-listener", tlsTcpListener.getName());
 
+        assertNull(tlsTcpListener.getTls().isPreferServerCipherSuites());
     }
 
     @Test
@@ -103,6 +103,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                 "                    <private-key-password>password-key</private-key-password>" +
                 "                </keystore>" +
                 "                <native-ssl>false</native-ssl>" +
+                "                <prefer-server-cipher-suites>true</prefer-server-cipher-suites>" +
                 "            </tls>" +
                 "        </tls-tcp-listener>" +
                 "    </listeners>" +
@@ -123,6 +124,8 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         //Check if the relative path was made absolute
         assertNull(tlsTcpListener.getTls().getTruststorePath());
+
+        assertTrue(tlsTcpListener.getTls().isPreferServerCipherSuites());
     }
 
     @Test
@@ -265,6 +268,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                 "                  <password>password-truststore</password>" +
                 "              </truststore>" +
                 "              <client-authentication-mode>NONE</client-authentication-mode>" +
+                "              <prefer-server-cipher-suites>false</prefer-server-cipher-suites>" +
                 "           </tls>" +
                 "       </tls-websocket-listener>" +
                 "    </listeners>" +
@@ -288,6 +292,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
         assertEquals("/path/to/the/trust/store.jks", websocketListener.getTls().getTruststorePath());
         assertEquals("password-truststore", websocketListener.getTls().getTruststorePassword());
 
+        assertFalse(websocketListener.getTls().isPreferServerCipherSuites());
     }
 
 }
