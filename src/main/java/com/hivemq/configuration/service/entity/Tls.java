@@ -62,7 +62,7 @@ public class Tls {
      *                                 the JVM are enabled
      * @param cipherSuites             the supported cipher suites. <code>null</code> means that all enabled cipher
      *                                 suites by the JVM are enabled
-     * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher
+     * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher suites
      * @since 3.3
      */
     protected Tls(final @NotNull String keystorePath,
