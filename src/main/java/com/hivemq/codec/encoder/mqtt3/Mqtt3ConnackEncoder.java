@@ -15,22 +15,17 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3ConnackEncoder extends FixedSizeMessageEncoder<Mqtt3CONNACK> implements MqttEncoder<Mqtt3CONNACK> {
+public class Mqtt3ConnackEncoder implements MqttEncoder<Mqtt3CONNACK> {
 
     private static final byte CONNACK_FIXED_HEADER = 0b0010_0000;
     private static final byte CONNACK_REMAINING_LENGTH = 0b0000_0010;
@@ -39,19 +34,21 @@ public class Mqtt3ConnackEncoder extends FixedSizeMessageEncoder<Mqtt3CONNACK> i
     private static final int ENCODED_CONNACK_SIZE = 4;
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull Mqtt3CONNACK msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull Mqtt3CONNACK msg,
+            final @NotNull ByteBuf out) {
 
         out.writeByte(CONNACK_FIXED_HEADER);
         //The remaining length is always static for CONNACKs
         out.writeByte(CONNACK_REMAINING_LENGTH);
 
         final Mqtt3ConnAckReturnCode returnCode = msg.getReturnCode();
-        switch (ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
+        switch (clientConnection.getProtocolVersion()) {
             case MQTTv3_1:
                 out.writeByte(CONNACK_FLAGS_EMPTY);
                 break;
             case MQTTv3_1_1:
-
                 if (returnCode == Mqtt3ConnAckReturnCode.ACCEPTED && msg.isSessionPresent()) {
                     out.writeByte(CONNACK_FLAGS_SP_SET);
                 } else {
@@ -63,18 +60,7 @@ public class Mqtt3ConnackEncoder extends FixedSizeMessageEncoder<Mqtt3CONNACK> i
     }
 
     @Override
-    public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
-        super.write(ctx, msg, promise);
-        if (msg instanceof CONNACK) {
-            //We make sure we really disconnect the client when there's a wrong return code
-            if (((CONNACK) msg).getReturnCode() != Mqtt3ConnAckReturnCode.ACCEPTED) {
-                promise.addListener(ChannelFutureListener.CLOSE);
-            }
-        }
-    }
-
-    @Override
-    public int bufferSize(final @NotNull ChannelHandlerContext ctx, final @NotNull Mqtt3CONNACK connack) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull Mqtt3CONNACK connack) {
         return ENCODED_CONNACK_SIZE;
     }
 }

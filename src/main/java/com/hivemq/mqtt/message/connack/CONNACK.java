@@ -33,8 +33,6 @@ import java.nio.charset.StandardCharsets;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
 
 /**
  * The MQTT CONNACK message
@@ -45,6 +43,9 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SE
  */
 @Immutable
 public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> implements Mqtt3CONNACK, Mqtt5CONNACK {
+
+    public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
+    public static final int KEEP_ALIVE_NOT_SET = -1;
 
     private final boolean sessionPresent;
 
@@ -244,7 +245,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         checkArgument(UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
                 "A topic alias maximum must never be larger than 65.535");
 
-        if (serverKeepAlive != CONNECT.KEEP_ALIVE_NOT_SET) {
+        if (serverKeepAlive != KEEP_ALIVE_NOT_SET) {
             checkArgument(UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
                     "A server keep alive must never be larger than 65.535");
         }

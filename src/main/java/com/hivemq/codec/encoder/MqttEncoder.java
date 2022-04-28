@@ -15,12 +15,10 @@
  */
 package com.hivemq.codec.encoder;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * The Encoder is used to encode mqtt messages.
@@ -34,16 +32,19 @@ public interface MqttEncoder<T extends Message> {
      * Encode a mqtt message into a {@link ByteBuf}. This method will be called for each written message that can be
      * handled by this encoder.
      *
-     * @param ctx the {@link ChannelHandlerContext} which this {@link MessageToByteEncoder} belongs to
-     * @param msg the message to encode
-     * @param out the {@link ByteBuf} into which the encoded message will be written
+     * @param clientConnection the {@link ClientConnection} of the client
+     * @param msg              the message to encode
+     * @param out              the {@link ByteBuf} into which the encoded message will be written
      */
-    void encode(@NotNull ChannelHandlerContext ctx, @NotNull T msg, @NotNull ByteBuf out);
+    void encode(@NotNull ClientConnection clientConnection, @NotNull T msg, @NotNull ByteBuf out);
 
     /**
-     * @param ctx the channel handler context of the clients {@link Channel}
-     * @param msg the message to get the buffer size for
-     * @return the buffer size a {@link Message} needs.
+     * Calculate the buffer size for an mqtt message. This method will be called everytime
+     * before {@link #encode} is called.
+     *
+     * @param clientConnection the {@link ClientConnection} of the client
+     * @param msg              the message for which the buffer size should be calculated.
+     * @return the required buffer size for the {@code msg}.
      */
-    int bufferSize(@NotNull ChannelHandlerContext ctx, @NotNull T msg);
+    int bufferSize(@NotNull ClientConnection clientConnection, @NotNull T msg);
 }

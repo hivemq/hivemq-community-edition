@@ -15,9 +15,8 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
@@ -27,24 +26,24 @@ import io.netty.buffer.ByteBuf;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.*;
 import static com.hivemq.mqtt.message.connack.CONNACK.*;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
-
 /**
  * @author Florian Limpöck
  */
-public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> implements MqttEncoder<CONNACK> {
+public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> {
 
     private static final int CONNACK_FIXED_HEADER = MessageType.CONNACK.ordinal() << 4;
 
-    public Mqtt5ConnackEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5ConnackEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
     @Override
-    void encode(@NotNull final CONNACK connack,
-                @NotNull final ByteBuf out) {
+    void encode(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
 
@@ -53,14 +52,14 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
     }
 
     @Override
-    int calculateRemainingLengthWithoutProperties(@NotNull final CONNACK connack) {
+    int calculateRemainingLengthWithoutProperties(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
 
         return 2; // ConnectFlags Byte + ReasonCode Byte
     }
 
     @Override
-    int calculatePropertyLength(@NotNull final CONNACK connack) {
+    int calculatePropertyLength(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
 
         int propertyLength = 0;
@@ -74,7 +73,7 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         return propertyLength;
     }
 
-    private int fixedPropertyLength(@NotNull final CONNACK connack) {
+    private static int fixedPropertyLength(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
 
         int propertyLength = 0;
@@ -100,14 +99,13 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         return propertyLength;
     }
 
-    private void encodeFixedHeader(@NotNull final ByteBuf out, final int remainingLength) {
+    private static void encodeFixedHeader(final @NotNull ByteBuf out, final int remainingLength) {
         checkNotNull(out, "ByteBuf must not be null.");
         out.writeByte(CONNACK_FIXED_HEADER);
         MqttVariableByteInteger.encode(remainingLength, out);
     }
 
-    private void encodeVariableHeader(@NotNull final CONNACK connack,
-                                      @NotNull final ByteBuf out) {
+    private void encodeVariableHeader(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
 
@@ -121,7 +119,7 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         encodeProperties(connack, out);
     }
 
-    private void encodeProperties(@NotNull final CONNACK connack, @NotNull final ByteBuf out) {
+    private void encodeProperties(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
 
@@ -129,10 +127,9 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
 
         encodeFixedProperties(connack, out);
         encodeOmissibleProperties(connack, out);
-
     }
 
-    private void encodeFixedProperties(@NotNull final CONNACK connack, @NotNull final ByteBuf out) {
+    private static void encodeFixedProperties(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
 
@@ -153,6 +150,5 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         encodeNullableProperty(SERVER_REFERENCE, connack.getServerReference(), out);
         encodeNullableProperty(AUTHENTICATION_METHOD, connack.getAuthMethod(), out);
         encodeNullableProperty(AUTHENTICATION_DATA, connack.getAuthData(), out);
-
     }
 }

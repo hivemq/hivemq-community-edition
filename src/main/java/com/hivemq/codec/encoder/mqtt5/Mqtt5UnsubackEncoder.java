@@ -15,9 +15,8 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
@@ -33,16 +32,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @since 4.0.0
  */
 @Singleton
-public class Mqtt5UnsubackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<UNSUBACK> implements MqttEncoder<UNSUBACK> {
+public class Mqtt5UnsubackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<UNSUBACK> {
 
     private static final int FIXED_HEADER = MessageType.UNSUBACK.ordinal() << 4;
 
-    public Mqtt5UnsubackEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5UnsubackEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
     @Override
-    void encode(@NotNull final UNSUBACK unsuback, @NotNull final ByteBuf out) {
+    void encode(final @NotNull UNSUBACK unsuback, final @NotNull ByteBuf out) {
         checkNotNull(unsuback, "Unsuback must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
         encodeFixedHeader(out, unsuback.getRemainingLength());
@@ -50,10 +51,14 @@ public class Mqtt5UnsubackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.
         encodePayload(unsuback, out);
     }
 
-    private void encodePayload(final @NotNull UNSUBACK message, final @NotNull ByteBuf out) {
-        for (final Mqtt5UnsubAckReasonCode mqtt5SubAckReasonCode : message.getReasonCodes()) {
-            out.writeByte(mqtt5SubAckReasonCode.getCode());
-        }
+    @Override
+    int calculateRemainingLengthWithoutProperties(final @NotNull UNSUBACK message) {
+        return message.getReasonCodes().size() + 2; // + PacketIdentifier
+    }
+
+    @Override
+    int calculatePropertyLength(final @NotNull UNSUBACK message) {
+        return omissiblePropertiesLength(message);
     }
 
     private void encodeVariableHeader(final @NotNull UNSUBACK message, final @NotNull ByteBuf out) {
@@ -62,19 +67,14 @@ public class Mqtt5UnsubackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.
         encodeOmissibleProperties(message, out);
     }
 
-    private void encodeFixedHeader(final @NotNull ByteBuf out, final int remainingLength) {
+    private static void encodeFixedHeader(final @NotNull ByteBuf out, final int remainingLength) {
         out.writeByte(FIXED_HEADER);
         MqttVariableByteInteger.encode(remainingLength, out);
     }
 
-    @Override
-    int calculateRemainingLengthWithoutProperties(@NotNull final UNSUBACK message) {
-        return message.getReasonCodes().size() + 2; // + PacketIdentifier
+    private static void encodePayload(final @NotNull UNSUBACK message, final @NotNull ByteBuf out) {
+        for (final Mqtt5UnsubAckReasonCode mqtt5SubAckReasonCode : message.getReasonCodes()) {
+            out.writeByte(mqtt5SubAckReasonCode.getCode());
+        }
     }
-
-    @Override
-    int calculatePropertyLength(@NotNull final UNSUBACK message) {
-        return omissiblePropertiesLength(message);
-    }
-
 }

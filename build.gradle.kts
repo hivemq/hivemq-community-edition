@@ -154,7 +154,7 @@ dependencies {
     implementation("org.jctools:jctools-core:${property("jctools.version")}")
 
     /* primitive data structures */
-    implementation("org.eclipse.collections:eclipse-collections:${property("ecliplse.collections.version")}")
+    implementation("org.eclipse.collections:eclipse-collections:${property("eclipse.collections.version")}")
 }
 
 
@@ -168,7 +168,7 @@ dependencies {
     testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property("shrinkwrap.version")}")
     testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
     testImplementation("net.bytebuddy:byte-buddy:${property("bytebuddy.version")}")
-    testImplementation("com.github.tomakehurst:wiremock-standalone:${property("wiremock.version")}")
+    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
     testImplementation("com.github.stefanbirkner:system-rules:${property("system-rules.version")}") {
         exclude("junit", "junit-dep")
     }
@@ -219,25 +219,21 @@ tasks.jar {
 }
 
 tasks.shadowJar {
-    archiveClassifier.set("shaded")
     mergeServiceFiles()
 }
 
 val hivemqZip by tasks.registering(Zip::class) {
-    group = "build"
+    group = "distribution"
 
     val name = "hivemq-ce-${project.version}"
 
-    destinationDirectory.set(buildDir.resolve("zip"))
     archiveFileName.set("$name.zip")
 
-    from(projectDir.resolve("src/distribution")) { exclude("**/.gitkeep") }
-    from(projectDir.resolve("src/main/resources/config.xml")) { into("conf") }
+    from("src/distribution") { exclude("**/.gitkeep") }
+    from("src/main/resources/config.xml") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
 }
-
-defaultTasks("hivemqZip")
 
 tasks.javadoc {
     (options as StandardJavadocDocletOptions).addStringOption("-html5")
@@ -246,7 +242,7 @@ tasks.javadoc {
 
     doLast {
         javaexec {
-            classpath(projectDir.resolve("gradle/tools/javadoc-cleaner-1.0.jar"))
+            classpath("gradle/tools/javadoc-cleaner-1.0.jar")
         }
     }
 
@@ -314,7 +310,7 @@ tasks.forbiddenApisTest { enabled = false }
 /* ******************** compliance ******************** */
 
 license {
-    header = projectDir.resolve("HEADER")
+    header = file("HEADER")
     mapping("java", "SLASHSTAR_STYLE")
 }
 
@@ -323,6 +319,7 @@ downloadLicenses {
         license("Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0") to listOf(
             "Apache 2",
             "Apache 2.0",
+            "Apache-2.0",
             "Apache License 2.0",
             "Apache License, 2.0",
             "Apache License v2.0",
@@ -419,7 +416,7 @@ val updateThirdPartyLicenses by tasks.registering {
     dependsOn(tasks.downloadLicenses)
     doLast {
         javaexec {
-            classpath(projectDir.resolve("gradle/tools/license-third-party-tool-2.0.jar"))
+            classpath("gradle/tools/license-third-party-tool-2.0.jar")
             args(
                 "$buildDir/reports/license/dependency-license.xml",
                 "$projectDir/src/distribution/third-party-licenses/licenses",

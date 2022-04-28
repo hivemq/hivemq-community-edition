@@ -31,7 +31,6 @@ import com.hivemq.persistence.ChannelPersistenceImpl;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -39,8 +38,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.InitFutureUtilsExecutorRule;
 import util.TestSingleWriterFactory;
 
@@ -50,50 +47,38 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Lukas Brandl
  */
 public class ClientSessionPersistenceImplTest {
 
-    private AutoCloseable closeableMock;
-
     @Rule
     public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
-    @Mock
     private ClientSessionLocalPersistence localPersistence;
-    @Mock
     private ClientSessionSubscriptionPersistence subscriptionPersistence;
-    @Mock
     private ClientQueuePersistence clientQueuePersistence;
-
-    @Mock
-    private EventLog eventLog;
-    @Mock
-    private PublishPayloadPersistence publishPayloadPersistence;
-    @Mock
     private PendingWillMessages pendingWillMessages;
-    @Mock
     private MqttServerDisconnector mqttServerDisconnector;
-    @Mock
     private ChannelPersistenceImpl channelPersistence;
-
     private ClientSessionPersistenceImpl clientSessionPersistence;
-
     private SingleWriterService singleWriterService;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
+        localPersistence = mock(ClientSessionLocalPersistence.class);
+        subscriptionPersistence = mock(ClientSessionSubscriptionPersistence.class);
+        clientQueuePersistence = mock(ClientQueuePersistence.class);
+        pendingWillMessages = mock(PendingWillMessages.class);
+        mqttServerDisconnector = mock(MqttServerDisconnector.class);
+        channelPersistence = mock(ChannelPersistenceImpl.class);
+        clientSessionPersistence = mock(ClientSessionPersistenceImpl.class);
+
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence, clientQueuePersistence,
-                singleWriterService, channelPersistence, eventLog, publishPayloadPersistence, pendingWillMessages,
+        clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence,
+                clientQueuePersistence, singleWriterService, channelPersistence, mock(EventLog.class), pendingWillMessages,
                 mqttServerDisconnector, new Chunker());
     }
 
@@ -101,7 +86,6 @@ public class ClientSessionPersistenceImplTest {
     public void tearDown() throws Exception {
         singleWriterService.stop();
         clientSessionPersistence.closeDB();
-        closeableMock.close();
     }
 
     @Test
@@ -143,7 +127,6 @@ public class ClientSessionPersistenceImplTest {
         final MqttWillPublish willPublish = createWillPublish();
         clientSessionPersistence.clientConnected("client", true, 0, willPublish, 123L).get();
 
-        verify(publishPayloadPersistence).add(any(byte[].class), eq(1L), anyLong());
         verify(localPersistence).put(eq("client"), any(ClientSession.class), anyLong(), anyInt());
     }
 

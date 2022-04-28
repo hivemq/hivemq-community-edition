@@ -15,43 +15,25 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.mqtt.message.auth.AUTH;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.when;
 
 /**
  * @author Waldemar Ruck
  */
 public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
 
-
     private static final Mqtt5AuthReasonCode CONTINUE = Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION;
-
-    private Mqtt5AuthEncoder mqtt5AuthEncoder;
-
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mqtt5AuthEncoder = new Mqtt5AuthEncoder(messageDroppedService, securityConfigurationService);
-        super.setUp(mqtt5AuthEncoder);
-
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        super.setUp();
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
     }
 
     @Test
@@ -75,7 +57,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 Mqtt5UserProperties.NO_USER_PROPERTIES, null);
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -99,7 +81,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, Mqtt5AuthReasonCode.SUCCESS,
                 Mqtt5UserProperties.NO_USER_PROPERTIES, null);
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -125,7 +107,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, reauthenticateCode,
                 Mqtt5UserProperties.NO_USER_PROPERTIES, null);
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -161,7 +143,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
                 userProperties, "reason");
 
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -186,7 +168,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.NO_USER_PROPERTIES, null);
 
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -203,7 +185,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = AUTH.getSuccessAUTH();
 
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -230,7 +212,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.NO_USER_PROPERTIES, null);
 
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -257,13 +239,13 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
 
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
     public void test_encode_reason_string_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(false);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -283,13 +265,13 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
     public void test_encode_user_properties_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
@@ -313,13 +295,13 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 userProperties, null);
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
     public void test_encode_reason_string_and_user_properties_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(false);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -342,7 +324,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 userProperties, "reason");
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
 
@@ -372,8 +354,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 userProperties, null);
 
-
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -398,7 +379,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, CONTINUE,
                 Mqtt5UserProperties.NO_USER_PROPERTIES, "");
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
     @Test
@@ -424,7 +405,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
         final AUTH auth = new AUTH("x", null, Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
                 tooManyUserProperties, null);
 
-        encodeTestBufferSize(expected, auth, mqtt5AuthEncoder.bufferSize(channel.pipeline().context(mqtt5AuthEncoder), auth));
+        encodeTestBufferSize(expected, auth);
     }
 
 }

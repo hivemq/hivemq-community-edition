@@ -15,23 +15,26 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.codec.encoder.FixedSizeMessageEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Dominik Obermaier
  */
-public class Mqtt3PubrelEncoder extends FixedSizeMessageEncoder<PUBREL> implements MqttEncoder<PUBREL> {
+public class Mqtt3PubrelEncoder implements MqttEncoder<PUBREL> {
 
+    public static final int ENCODED_PUBREL_SIZE = 4;
     private static final byte PUBREL_FIXED_HEADER = 0b0110_0010;
     private static final byte PUBREL_REMAINING_LENGTH = 0b0000_0010;
-    public static final int ENCODED_PUBREL_SIZE = 4;
 
     @Override
-    public void encode(final ChannelHandlerContext ctx, final PUBREL msg, final ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull PUBREL msg,
+            final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
@@ -44,7 +47,7 @@ public class Mqtt3PubrelEncoder extends FixedSizeMessageEncoder<PUBREL> implemen
     }
 
     @Override
-    public int bufferSize(final ChannelHandlerContext ctx, final PUBREL msg) {
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBREL msg) {
         return ENCODED_PUBREL_SIZE;
     }
 }

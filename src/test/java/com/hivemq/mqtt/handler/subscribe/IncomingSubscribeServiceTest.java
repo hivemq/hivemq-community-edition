@@ -59,11 +59,10 @@ import java.util.HashSet;
 import java.util.Queue;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ALL")
@@ -118,7 +117,7 @@ public class IncomingSubscribeServiceTest {
         when(clientSessionSubscriptionPersistence.addSubscription(anyString(), any(Topic.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.addSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
         when(ctx.channel()).thenReturn(channel);
-        when(ctx.writeAndFlush(anyObject())).thenReturn(channelFuture);
+        when(ctx.writeAndFlush(any())).thenReturn(channelFuture);
         when(ctx.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
         when(restrictionsConfigurationService.maxTopicLength()).thenReturn(65535);
     }

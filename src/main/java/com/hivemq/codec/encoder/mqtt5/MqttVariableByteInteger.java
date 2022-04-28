@@ -23,7 +23,7 @@ import io.netty.buffer.ByteBuf;
  *
  * @author Silvio Giebl
  */
-public class MqttVariableByteInteger {
+public final class MqttVariableByteInteger {
 
     public static final int NOT_ENOUGH_BYTES = -1;
     public static final int TOO_LARGE = -2;
@@ -53,7 +53,7 @@ public class MqttVariableByteInteger {
      * more than 4 bytes or {@link #NOT_MINIMUM_BYTES} if the value is not encoded with a minimum
      * number of bytes.
      */
-    public static int decode(@NotNull final ByteBuf byteBuf) {
+    public static int decode(final @NotNull ByteBuf byteBuf) {
         byte encodedByte;
         int value = 0;
         byte shift = 0;
@@ -86,7 +86,7 @@ public class MqttVariableByteInteger {
      * @param value   the value to encode.
      * @param byteBuf the byte buffer to encode to.
      */
-    public static void encode(int value, @NotNull final ByteBuf byteBuf) {
+    public static void encode(int value, final @NotNull ByteBuf byteBuf) {
         do {
             int encodedByte = value & VALUE_MASK;
             value >>>= 7;
@@ -102,7 +102,7 @@ public class MqttVariableByteInteger {
      * <p>
      * This method does not check if the value is in range of a 4 byte variable byte integer.
      *
-     * @param value   the value to encode.
+     * @param value the value to encode.
      */
     public static int[] encode(int value) {
         final int[] ints = new int[encodedLength(value)];
@@ -149,5 +149,4 @@ public class MqttVariableByteInteger {
         }
         return length;
     }
-
 }

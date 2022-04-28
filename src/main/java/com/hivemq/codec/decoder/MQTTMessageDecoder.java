@@ -29,7 +29,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
@@ -53,11 +52,12 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
-    public MQTTMessageDecoder(final @NotNull MqttConnectDecoder connectDecoder,
-                              final @NotNull MqttConfigurationService mqttConfig,
-                              final @NotNull MqttDecoders mqttDecoders,
-                              final @NotNull MqttServerDisconnector mqttServerDisconnector,
-                              final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
+    public MQTTMessageDecoder(
+            final @NotNull MqttConnectDecoder connectDecoder,
+            final @NotNull MqttConfigurationService mqttConfig,
+            final @NotNull MqttDecoders mqttDecoders,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.connectDecoder = connectDecoder;
         this.mqttConfig = mqttConfig;
         this.mqttDecoders = mqttDecoders;
@@ -74,7 +74,9 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf buf, final @NotNull List<Object> out) {
+    protected void decode(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf buf, final @NotNull List<Object> out) {
+
         final int readableBytes = buf.readableBytes();
         if (readableBytes < MIN_FIXED_HEADER_LENGTH) {
             return;
@@ -91,9 +93,10 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
-        final Channel channel = ctx.channel();
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+
         if (remainingLength == MALFORMED_REMAINING_LENGTH) {
-            mqttServerDisconnector.disconnect(channel,
+            mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                     "A client (IP: {}) sent a message but the remaining length was malformed. Disconnecting client.",
                     "Sent a message with invalid remaining length",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -112,14 +115,13 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final int fixedHeaderSize = getFixedHeaderSize(remainingLength);
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
         //this is the message size HiveMQ allows for incoming messages
         if (remainingLength + fixedHeaderSize > mqttConfig.maxPacketSize()) {
 
             //force channel close for Mqtt3.1, Mqtt3.1.1 and null (before connect)
             final boolean forceClose = protocolVersion != ProtocolVersion.MQTTv5;
-            mqttServerDisconnector.disconnect(channel,
+            mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                     "A client (IP: {}) sent a message, that was bigger than the maximum message size. Disconnecting client.",
                     "Sent a message that was bigger than the maximum size",
                     Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
@@ -140,7 +142,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         final MessageType messageType = getMessageType(fixedHeader);
 
         if (protocolVersion == null && messageType != CONNECT) {
-            mqttServerDisconnector.logAndClose(channel,
+            mqttServerDisconnector.logAndClose(clientConnection.getChannel(),
                     "A client (IP: {}) sent other message before CONNECT. Disconnecting client.",
                     "Sent other message before CONNECT");
             buf.clear();
@@ -148,7 +150,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         }
 
         if (protocolVersion != null && messageType == CONNECT) {
-            mqttServerDisconnector.logAndClose(channel,
+            mqttServerDisconnector.logAndClose(clientConnection.getChannel(),
                     "A client (IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
                     "Sent second CONNECT message");
             buf.clear();
@@ -158,16 +160,16 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         globalMQTTMessageCounter.countInboundTraffic(readableBytes);
 
         if (messageType == CONNECT) {
-            message = connectDecoder.decode(channel, messageBuffer, fixedHeader);
+            message = connectDecoder.decode(clientConnection, messageBuffer, fixedHeader);
         } else {
             final MqttDecoder<?> decoder = mqttDecoders.decoder(messageType, protocolVersion);
 
             if (decoder != null) {
-                message = decoder.decode(channel, messageBuffer, fixedHeader);
+                message = decoder.decode(clientConnection, messageBuffer, fixedHeader);
             } else {
                 switch (messageType) {
                     case RESERVED_ZERO:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a message with an invalid message type '0'. This message type is reserved. Disconnecting client.",
                                 "Sent a message with message type '0'",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -175,7 +177,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     case CONNACK:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a CONNACK message. This is invalid because clients are not allowed to send CONNACKs. Disconnecting client.",
                                 "Sent a CONNACK message",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -183,7 +185,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     case SUBACK:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a SUBACK message. This is invalid because clients are not allowed to send SUBACKs. Disconnecting client.",
                                 "Sent a SUBACK message",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -191,7 +193,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     case UNSUBACK:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a UNSUBACK message. This is invalid because clients are not allowed to send UNSUBACKs. Disconnecting client.",
                                 "Sent a UNSUBACK message",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -199,7 +201,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     case PINGRESP:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a PINGRESP message. This is invalid because clients are not allowed to send PINGRESPs. Disconnecting client.",
                                 "Sent a PINGRESP message",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -207,7 +209,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     case AUTH:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) sent a message with an invalid message type '15'. This message type is reserved. Disconnecting client.",
                                 "Sent a message with message type '15'",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -215,7 +217,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                         buf.clear();
                         return;
                     default:
-                        mqttServerDisconnector.disconnect(channel,
+                        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                                 "A client (IP: {}) connected but the message type could not get determined. Disconnecting client.",
                                 "Sent a message with invalid message type",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -233,10 +235,9 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         globalMQTTMessageCounter.countInbound(message);
         out.add(message);
-
     }
 
-    private int getFixedHeaderSize(final int remainingLength) {
+    private static int getFixedHeaderSize(final int remainingLength) {
 
         // 2 = 1 byte fixed header + 1 byte first byte of remaining length
         int remainingLengthSize = 2;
@@ -259,7 +260,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
      * @param buf the message buffer
      * @return the remaining length, -1 if the remaining length is malformed or -2 if not enough bytes are available
      */
-    private int calculateRemainingLength(final @NotNull ByteBuf buf) {
+    private static int calculateRemainingLength(final @NotNull ByteBuf buf) {
 
         int remainingLength = 0;
         int multiplier = 1;
@@ -286,7 +287,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         return remainingLength;
     }
 
-    private MessageType getMessageType(final byte fixedHeader) {
+    private static @NotNull MessageType getMessageType(final byte fixedHeader) {
         return MessageType.valueOf((fixedHeader & 0b1111_0000) >> 4);
     }
 }

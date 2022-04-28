@@ -264,8 +264,8 @@ public class ConnectInboundInterceptorHandler {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. " +
                                 "Extensions are responsible for their own exception handling.",
-                        extensionId);
-                log.debug("Original exception:", e);
+                        extensionId,
+                        e);
                 output.prevent(String.format(ReasonStrings.CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION, clientId),
                         "Exception in CONNECT inbound interceptor");
                 Exceptions.rethrowError(e);

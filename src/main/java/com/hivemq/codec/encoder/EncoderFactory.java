@@ -16,6 +16,7 @@
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.*;
 import com.hivemq.codec.encoder.mqtt5.*;
 import com.hivemq.configuration.service.SecurityConfigurationService;
@@ -27,8 +28,6 @@ import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.mqtt.message.connack.Mqtt3CONNACK;
-import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -37,13 +36,8 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,9 +58,10 @@ public class EncoderFactory {
     private final @NotNull Mqtt3EncoderFactory mqtt3Instance;
 
     @Inject
-    public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
-                          final @NotNull SecurityConfigurationService securityConfigurationService,
-                          final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+    public EncoderFactory(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         mqtt5Instance = new Mqtt5EncoderFactory(messageDroppedService, securityConfigurationService);
         mqtt3Instance = new Mqtt3EncoderFactory(mqttServerDisconnector);
     }
@@ -74,15 +69,16 @@ public class EncoderFactory {
     /**
      * Finds the {@link MqttEncoder} encoder and encodes the {@link Message} message.
      *
-     * @param ctx the {@link ChannelHandlerContext} which this {@link MessageToByteEncoder} belongs to
-     * @param msg the {@link Message} to encode
-     * @param out the {@link ByteBuf} into which the encoded message will be written
+     * @param clientConnection the {@link ClientConnection} of the client
+     * @param msg              the {@link Message} to encode
+     * @param out              the {@link ByteBuf} into which the encoded message will be written
      */
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final @NotNull ByteBuf out) {
 
-        final MqttEncoder encoder = getEncoder(msg, ctx);
+        final MqttEncoder encoder = getEncoder(msg, clientConnection);
         if (encoder != null) {
-            encoder.encode(ctx, msg, out);
+            encoder.encode(clientConnection, msg, out);
         } else {
             log.error("No encoder found for msg: {} ", msg.getType());
         }
@@ -91,46 +87,45 @@ public class EncoderFactory {
     /**
      * This method finds the Mqtt encoder depending on the message and the protocol version.
      *
-     * @param msg the {@link Message} is used to identify the encoder
-     * @param ctx the {@link ChannelHandlerContext} of the mqtt client
+     * @param msg              the {@link Message} is used to identify the encoder
+     * @param clientConnection the {@link ClientConnection} of the mqtt client
      * @return {@link MqttEncoder} encoder depends on the message and protocol
      */
-    @Nullable
-    private MqttEncoder getEncoder(final @NotNull Message msg, final @NotNull ChannelHandlerContext ctx) {
+    protected @Nullable MqttEncoder getEncoder(
+            final @NotNull Message msg, final @NotNull ClientConnection clientConnection) {
 
-        final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
-        if (version == ProtocolVersion.MQTTv5) {
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             return mqtt5Instance.getEncoder(msg);
         } else {
             return mqtt3Instance.getEncoder(msg);
         }
-
     }
 
-    @NotNull ByteBuf allocateBuffer(final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final boolean preferDirect) {
+    protected @NotNull ByteBuf allocateBuffer(
+            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final boolean preferDirect) {
 
-        final MqttEncoder encoder = getEncoder(msg, ctx);
+        final MqttEncoder encoder = getEncoder(msg, clientConnection);
         if (encoder != null) {
-            final int bufferSize = encoder.bufferSize(ctx, msg);
+            final int bufferSize = encoder.bufferSize(clientConnection, msg);
             if (preferDirect) {
-                return ctx.alloc().ioBuffer(bufferSize);
+                return clientConnection.getChannel().alloc().ioBuffer(bufferSize);
             } else {
-                return ctx.alloc().heapBuffer(bufferSize);
+                return clientConnection.getChannel().alloc().heapBuffer(bufferSize);
             }
         }
 
         if (preferDirect) {
-            return ctx.alloc().ioBuffer();
+            return clientConnection.getChannel().alloc().ioBuffer();
         } else {
-            return ctx.alloc().heapBuffer();
+            return clientConnection.getChannel().alloc().heapBuffer();
         }
-
     }
 
     /**
      * Factory for Mqtt5 encoders.
      */
     private static class Mqtt5EncoderFactory {
+
         private final @NotNull Mqtt5PublishEncoder mqtt5PublishEncoder;
         private final @NotNull Mqtt5DisconnectEncoder mqtt5DisconnectEncoder;
         private final @NotNull Mqtt5SubackEncoder mqtt5SubackEncoder;
@@ -143,7 +138,10 @@ public class EncoderFactory {
         private final @NotNull Mqtt5UnsubackEncoder mqtt5UnsubackEncoder;
         private final @NotNull MqttPingrespEncoder mqttPingrespEncoder;
 
-        Mqtt5EncoderFactory(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+        Mqtt5EncoderFactory(
+                final @NotNull MessageDroppedService messageDroppedService,
+                final @NotNull SecurityConfigurationService securityConfigurationService) {
+
             mqtt5PublishEncoder = new Mqtt5PublishEncoder(messageDroppedService, securityConfigurationService);
             mqtt5DisconnectEncoder = new Mqtt5DisconnectEncoder(messageDroppedService, securityConfigurationService);
             mqtt5SubackEncoder = new Mqtt5SubackEncoder(messageDroppedService, securityConfigurationService);
@@ -158,19 +156,10 @@ public class EncoderFactory {
         }
 
         private @Nullable MqttEncoder getEncoder(final @NotNull Message msg) {
-
             if (msg instanceof PUBLISH) {
                 return mqtt5PublishEncoder;
             } else if (msg instanceof PINGRESP) {
                 return mqttPingrespEncoder;
-            } else if (msg instanceof CONNACK) {
-                return mqtt5ConnackEncoder;
-            } else if (msg instanceof SUBACK) {
-                return mqtt5SubackEncoder;
-            } else if (msg instanceof UNSUBACK) {
-                return mqtt5UnsubackEncoder;
-            } else if (msg instanceof DISCONNECT) {
-                return mqtt5DisconnectEncoder;
             } else if (msg instanceof PUBACK) {
                 return mqtt5PubackEncoder;
             } else if (msg instanceof PUBREC) {
@@ -179,10 +168,17 @@ public class EncoderFactory {
                 return mqtt5PubrelEncoder;
             } else if (msg instanceof PUBCOMP) {
                 return mqtt5PubCompEncoder;
+            } else if (msg instanceof CONNACK) {
+                return mqtt5ConnackEncoder;
+            } else if (msg instanceof SUBACK) {
+                return mqtt5SubackEncoder;
+            } else if (msg instanceof UNSUBACK) {
+                return mqtt5UnsubackEncoder;
+            } else if (msg instanceof DISCONNECT) {
+                return mqtt5DisconnectEncoder;
             } else if (msg instanceof AUTH) {
                 return mqtt5AuthEncoder;
             }
-
             return null;
         }
     }
@@ -200,26 +196,20 @@ public class EncoderFactory {
         private final @NotNull Mqtt3SubackEncoder subackEncoder;
         private final @NotNull Mqtt3UnsubackEncoder unsubackEncoder;
         private final @NotNull Mqtt3PublishEncoder publishEncoder;
-        private final @NotNull Mqtt3SubscribeEncoder subscribeEncoder;
-        private final @NotNull Mqtt3UnsubscribeEncoder unsubscribeEncoder;
         private final @NotNull Mqtt3DisconnectEncoder disconnectEncoder;
-        private final @NotNull Mqtt3ConnectEncoder connectEncoder;
         private final @NotNull MqttPingrespEncoder pingrespEncoder;
 
         Mqtt3EncoderFactory(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
-            this.connackEncoder = new Mqtt3ConnackEncoder();
-            this.pubackEncoder = new Mqtt3PubackEncoder();
-            this.pubrecEncoder = new Mqtt3PubrecEncoder();
-            this.pubrelEncoder = new Mqtt3PubrelEncoder();
-            this.pubcompEncoder = new Mqtt3PubcompEncoder();
-            this.subackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
-            this.unsubackEncoder = new Mqtt3UnsubackEncoder();
-            this.publishEncoder = new Mqtt3PublishEncoder();
-            this.subscribeEncoder = new Mqtt3SubscribeEncoder();
-            this.unsubscribeEncoder = new Mqtt3UnsubscribeEncoder();
-            this.disconnectEncoder = new Mqtt3DisconnectEncoder();
-            this.connectEncoder = new Mqtt3ConnectEncoder();
-            this.pingrespEncoder = new MqttPingrespEncoder();
+            connackEncoder = new Mqtt3ConnackEncoder();
+            pubackEncoder = new Mqtt3PubackEncoder();
+            pubrecEncoder = new Mqtt3PubrecEncoder();
+            pubrelEncoder = new Mqtt3PubrelEncoder();
+            pubcompEncoder = new Mqtt3PubcompEncoder();
+            subackEncoder = new Mqtt3SubackEncoder(mqttServerDisconnector);
+            unsubackEncoder = new Mqtt3UnsubackEncoder();
+            publishEncoder = new Mqtt3PublishEncoder();
+            disconnectEncoder = new Mqtt3DisconnectEncoder();
+            pingrespEncoder = new MqttPingrespEncoder();
         }
 
         private @Nullable MqttEncoder getEncoder(final @NotNull Message msg) {
@@ -235,24 +225,16 @@ public class EncoderFactory {
                 return pubrelEncoder;
             } else if (msg instanceof PUBCOMP) {
                 return pubcompEncoder;
-            } else if (msg instanceof Mqtt3CONNACK) {
+            } else if (msg instanceof CONNACK) {
                 return connackEncoder;
             } else if (msg instanceof SUBACK) {
                 return subackEncoder;
             } else if (msg instanceof UNSUBACK) {
                 return unsubackEncoder;
-            } else if (msg instanceof SUBSCRIBE) {
-                return subscribeEncoder;
-            } else if (msg instanceof UNSUBSCRIBE) {
-                return unsubscribeEncoder;
             } else if (msg instanceof DISCONNECT) {
                 return disconnectEncoder;
-            } else if (msg instanceof CONNECT) {
-                return connectEncoder;
             }
-
             return null;
         }
     }
-
 }

@@ -65,8 +65,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -227,7 +227,7 @@ public class PluginInitializerHandlerTest {
     @Test(timeout = 10000)
     public void test_write_will_publish_not_authorized() throws Exception {
 
-        when(clientSessionPersistence.removeWill(anyString())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.deleteWill(anyString())).thenReturn(Futures.immediateFuture(null));
 
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
 
@@ -257,7 +257,7 @@ public class PluginInitializerHandlerTest {
     @Test(timeout = 10000)
     public void test_write_will_publish_authorized() throws Exception {
 
-        when(clientSessionPersistence.removeWill(anyString())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.deleteWill(anyString())).thenReturn(Futures.immediateFuture(null));
 
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
 

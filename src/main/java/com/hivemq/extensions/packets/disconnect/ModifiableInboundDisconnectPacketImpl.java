@@ -24,7 +24,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableInboundDisconnectPacket;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
+import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 
 import java.util.Objects;
@@ -105,7 +105,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
                 Optional.of(sessionExpiryInterval);
     }
 
@@ -113,7 +113,7 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     public void setSessionExpiryInterval(final @Nullable Long sessionExpiryInterval) {
         final long interval;
         if (sessionExpiryInterval == null) {
-            interval = Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+            interval = DISCONNECT.SESSION_EXPIRY_NOT_SET;
         } else {
             interval = sessionExpiryInterval;
             checkArgument(interval >= 0, "Session expiry interval must be greater than 0");

@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.clientsession;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
@@ -41,7 +40,6 @@ import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
@@ -59,7 +57,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Lukas Brandl
@@ -75,52 +73,42 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     private final @NotNull ProducerQueues singleWriter;
     private final @NotNull ChannelPersistence channelPersistence;
     private final @NotNull EventLog eventLog;
-    private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
-
     private final @NotNull PendingWillMessages pendingWillMessages;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull Chunker chunker;
 
     @Inject
-    public ClientSessionPersistenceImpl(final @NotNull ClientSessionLocalPersistence localPersistence,
-                                        final @NotNull ClientSessionSubscriptionPersistence sessionSubscriptionPersistence,
-                                        final @NotNull ClientQueuePersistence clientQueuePersistence,
-                                        final @NotNull SingleWriterService singleWriterService,
-                                        final @NotNull ChannelPersistence channelPersistence,
-                                        final @NotNull EventLog eventLog,
-                                        final @NotNull PublishPayloadPersistence publishPayloadPersistence,
-                                        final @NotNull PendingWillMessages pendingWillMessages,
-                                        final @NotNull MqttServerDisconnector mqttServerDisconnector,
-                                        final @NotNull Chunker chunker) {
-
+    public ClientSessionPersistenceImpl(
+            final @NotNull ClientSessionLocalPersistence localPersistence,
+            final @NotNull ClientSessionSubscriptionPersistence sessionSubscriptionPersistence,
+            final @NotNull ClientQueuePersistence clientQueuePersistence,
+            final @NotNull SingleWriterService singleWriterService,
+            final @NotNull ChannelPersistence channelPersistence,
+            final @NotNull EventLog eventLog,
+            final @NotNull PendingWillMessages pendingWillMessages,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull Chunker chunker) {
 
         this.localPersistence = localPersistence;
-        this.subscriptionPersistence = sessionSubscriptionPersistence;
         this.clientQueuePersistence = clientQueuePersistence;
-        singleWriter = singleWriterService.getClientSessionQueue();
-
         this.channelPersistence = channelPersistence;
         this.eventLog = eventLog;
-        this.publishPayloadPersistence = publishPayloadPersistence;
         this.pendingWillMessages = pendingWillMessages;
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.chunker = chunker;
+        subscriptionPersistence = sessionSubscriptionPersistence;
+        singleWriter = singleWriterService.getClientSessionQueue();
     }
 
     @Override
-    public boolean isExistent(@NotNull final String client) {
+    public boolean isExistent(final @NotNull String client) {
         checkNotNull(client, "Client id must not be null");
 
         return isExistent(getSession(client, false));
     }
 
-    private boolean isExistent(@Nullable final ClientSession clientSession) {
-        return (clientSession != null) && (clientSession.getSessionExpiryInterval() > 0 || clientSession.isConnected());
-    }
-
-    @NotNull
     @Override
-    public Map<String, Boolean> isExistent(@NotNull final Set<String> clients) {
+    public @NotNull Map<String, Boolean> isExistent(final @NotNull Set<String> clients) {
         final ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
 
         for (final String client : clients) {
@@ -131,8 +119,11 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     }
 
     @Override
-    public @NotNull ListenableFuture<Void> clientDisconnected(final @NotNull String client, final boolean sendWill, final long sessionExpiry) {
+    public @NotNull ListenableFuture<Void> clientDisconnected(
+            final @NotNull String client, final boolean sendWill, final long sessionExpiry) {
+
         checkNotNull(client, "Client id must not be null");
+
         final long timestamp = System.currentTimeMillis();
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         singleWriter.submit(client, (SingleWriterService.Task<Void>) (bucketIndex) -> {
@@ -153,26 +144,26 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return resultFuture;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> clientConnected(@NotNull final String client,
-                                                  final boolean cleanStart,
-                                                  final long clientSessionExpiryInterval,
-                                                  @Nullable final MqttWillPublish willPublish,
-                                                  @Nullable final Long queueLimit) {
+    public @NotNull ListenableFuture<Void> clientConnected(
+            final @NotNull String client,
+            final boolean cleanStart,
+            final long clientSessionExpiryInterval,
+            final @Nullable MqttWillPublish willPublish,
+            final @Nullable Long queueLimit) {
+
         checkNotNull(client, "Client id must not be null");
+
         pendingWillMessages.cancelWill(client);
         final long timestamp = System.currentTimeMillis();
+
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
             final long publishId = PublishPayloadPersistenceImpl.createId();
-            final boolean removePayload = publishPayloadPersistence.add(willPublish.getPayload(), 1, publishId);
-            if (removePayload) {
-                willPublish.setPayload(null);
-            }
             sessionWill = new ClientSessionWill(willPublish, publishId);
         }
         final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
+
         final ListenableFuture<ConnectResult> submitFuture =
                 singleWriter.submit(client, (bucketIndex) -> {
                     final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
@@ -208,24 +199,23 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable t) {
+            public void onFailure(final @NotNull Throwable t) {
                 resultFuture.setException(t);
             }
         });
         return resultFuture;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Boolean> forceDisconnectClient(
+    public @NotNull ListenableFuture<Boolean> forceDisconnectClient(
             final @NotNull String clientId,
             final boolean preventLwtMessage,
             final @NotNull DisconnectSource source,
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
 
-        Preconditions.checkNotNull(clientId, "Parameter clientId cannot be null");
-        Preconditions.checkNotNull(source, "Disconnect source cannot be null");
+        checkNotNull(clientId, "Parameter clientId cannot be null");
+        checkNotNull(source, "Disconnect source cannot be null");
 
         final ClientSession session = getSession(clientId, false);
         if (session == null) {
@@ -270,8 +260,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return forceDisconnectClient(clientId, preventLwtMessage, source, null, null);
     }
 
-    @NotNull
-    public ListenableFuture<Void> cleanClientData(@NotNull final String clientId) {
+    @Override
+    public @NotNull ListenableFuture<Void> cleanClientData(final @NotNull String clientId) {
 
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
         builder.add(subscriptionPersistence.removeAll(clientId));
@@ -280,9 +270,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return FutureUtils.voidFutureFromList(builder.build());
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Set<String>> getAllClients() {
+    public @NotNull ListenableFuture<Set<String>> getAllClients() {
         final List<ListenableFuture<Set<String>>> futures = singleWriter.submitToAllBucketsParallel((bucketIndex) -> {
             final Set<String> clientSessions = new HashSet<>();
             clientSessions.addAll(localPersistence.getAllClients(bucketIndex));
@@ -291,20 +280,17 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return FutureUtils.combineSetResults(Futures.allAsList(futures));
     }
 
-    @Nullable
     @Override
-    public ClientSession getSession(@NotNull final String clientId, final boolean includeWill) {
+    public @Nullable ClientSession getSession(final @NotNull String clientId, final boolean includeWill) {
         checkNotNull(clientId, "Client id must not be null");
 
         return localPersistence.getSession(clientId, true, includeWill);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @NotNull
     @Override
-    public ListenableFuture<Boolean> setSessionExpiryInterval(@NotNull final String clientId, final long sessionExpiryInterval) {
+    public @NotNull ListenableFuture<Boolean> setSessionExpiryInterval(
+            final @NotNull String clientId, final long sessionExpiryInterval) {
+
         checkNotNull(clientId, "Client id must not be null");
 
         final ListenableFuture<Boolean> setTTlFuture =
@@ -324,19 +310,19 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         FutureUtils.addPersistenceCallback(setTTlFuture, new FutureCallback<>() {
             @Override
-            public void onSuccess(@Nullable final Boolean sessionExists) {
+            public void onSuccess(final @Nullable Boolean sessionExists) {
                 if (sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {
 
                     final ListenableFuture<Void> removeAllFuture = subscriptionPersistence.removeAll(clientId);
 
                     FutureUtils.addPersistenceCallback(removeAllFuture, new FutureCallback<>() {
                         @Override
-                        public void onSuccess(@Nullable final Void result) {
+                        public void onSuccess(final @Nullable Void result) {
                             settableFuture.set(sessionExists);
                         }
 
                         @Override
-                        public void onFailure(@NotNull final Throwable t) {
+                        public void onFailure(final @NotNull Throwable t) {
                             settableFuture.setException(t);
                         }
                     });
@@ -346,7 +332,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable t) {
+            public void onFailure(final @NotNull Throwable t) {
                 settableFuture.setException(t);
             }
         });
@@ -354,12 +340,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return settableFuture;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Nullable
     @Override
-    public Long getSessionExpiryInterval(@NotNull final String clientId) {
+    public @Nullable Long getSessionExpiryInterval(final @NotNull String clientId) {
 
         final ClientSession session = getSession(clientId, false);
         if (session == null) {
@@ -368,24 +350,22 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return session.getSessionExpiryInterval();
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> cleanUp(final int bucketIndex) {
+    public @NotNull ListenableFuture<Void> cleanUp(final int bucketIndex) {
         return singleWriter.submit(bucketIndex, new ClientSessionCleanUpTask(localPersistence, this));
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> closeDB() {
+    public @NotNull ListenableFuture<Void> closeDB() {
         return closeDB(localPersistence, singleWriter);
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Boolean> invalidateSession(final @NotNull String clientId, final @NotNull DisconnectSource disconnectSource) {
+    public @NotNull ListenableFuture<Boolean> invalidateSession(
+            final @NotNull String clientId, final @NotNull DisconnectSource disconnectSource) {
 
-        Preconditions.checkNotNull(clientId, "ClientId cannot be null");
-        Preconditions.checkNotNull(disconnectSource, "Disconnect source cannot be null");
+        checkNotNull(clientId, "ClientId cannot be null");
+        checkNotNull(disconnectSource, "Disconnect source cannot be null");
 
         final ListenableFuture<Boolean> setTTLFuture = setSessionExpiryInterval(clientId, 0);
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
@@ -403,7 +383,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             }
 
             @Override
-            public void onFailure(@NotNull final Throwable throwable) {
+            public void onFailure(final @NotNull Throwable throwable) {
                 resultFuture.setException(throwable);
             }
         });
@@ -411,9 +391,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return resultFuture;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Map<String, PendingWillMessages.PendingWill>> pendingWills() {
+    public @NotNull ListenableFuture<Map<String, PendingWillMessages.PendingWill>> pendingWills() {
 
         final List<ListenableFuture<Map<String, PendingWillMessages.PendingWill>>> futureList =
                 singleWriter.submitToAllBucketsParallel(localPersistence::getPendingWills);
@@ -421,7 +400,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final SettableFuture<Map<String, PendingWillMessages.PendingWill>> settableFuture = SettableFuture.create();
         FutureUtils.addPersistenceCallback(Futures.allAsList(futureList), new FutureCallback<>() {
             @Override
-            public void onSuccess(@Nullable final List<Map<String, PendingWillMessages.PendingWill>> result) {
+            public void onSuccess(final @Nullable List<Map<String, PendingWillMessages.PendingWill>> result) {
 
                 if (result == null) {
                     settableFuture.set(ImmutableMap.of());
@@ -443,18 +422,19 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         return settableFuture;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> removeWill(@NotNull final String clientId) {
+    public @NotNull ListenableFuture<Void> deleteWill(final @NotNull String clientId) {
         checkNotNull(clientId, "Client id must not be null");
         return singleWriter.submit(clientId, (bucketIndex) -> {
-            localPersistence.removeWill(clientId, bucketIndex);
+            localPersistence.deleteWill(clientId, bucketIndex);
             return null;
         });
     }
 
     @Override
-    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(@NotNull final ChunkCursor cursor) {
+    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, ClientSession>>> getAllLocalClientsChunk(
+            final @NotNull ChunkCursor cursor) {
+
         return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) -> singleWriter.submit(bucket,
@@ -464,6 +444,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                                         bucketIndex,
                                         lastKey,
                                         maxResults)));
+    }
+
+    private static boolean isExistent(final @Nullable ClientSession clientSession) {
+        return (clientSession != null) && (clientSession.getSessionExpiryInterval() > 0 || clientSession.isConnected());
     }
 
     public enum DisconnectSource {
@@ -483,8 +467,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             return number;
         }
 
-        @NotNull
-        public static DisconnectSource ofNumber(final int number) {
+        public static @NotNull DisconnectSource ofNumber(final int number) {
 
             for (final DisconnectSource value : values()) {
                 if (value.number == number) {

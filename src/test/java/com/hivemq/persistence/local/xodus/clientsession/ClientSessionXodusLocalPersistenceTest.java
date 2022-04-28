@@ -15,12 +15,13 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.codahale.metrics.Counter;
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -36,10 +37,11 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestBucketUtil;
 
 import java.util.*;
@@ -47,7 +49,6 @@ import java.util.*;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -56,31 +57,21 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientSessionXodusLocalPersistenceTest {
 
-    private AutoCloseable closeableMock;
-
     private static final int BUCKET_COUNT = 4;
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private ClientSessionXodusLocalPersistence persistence;
-
-    @Mock
-    private LocalPersistenceFileUtil localPersistenceFileUtil;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
-
-    @Mock
     private PublishPayloadPersistence payloadPersistence;
-
-    @Mock
     private EventLog eventLog;
-
     private PersistenceStartup persistenceStartup;
 
     @Before
     public void before() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
+        payloadPersistence = mock(PublishPayloadPersistence.class);
+        eventLog = mock(EventLog.class);
+
+        final LocalPersistenceFileUtil localPersistenceFileUtil = mock(LocalPersistenceFileUtil.class);
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
@@ -89,9 +80,11 @@ public class ClientSessionXodusLocalPersistenceTest {
 
         persistenceStartup = new PersistenceStartup();
 
-        persistence = new ClientSessionXodusLocalPersistence(localPersistenceFileUtil, mqttConfigurationService,
-                new EnvironmentUtil(), payloadPersistence, eventLog,
-                persistenceStartup);
+        final MetricsHolder metricsHolder = mock(MetricsHolder.class);
+        when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
+
+        persistence = new ClientSessionXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(),
+                payloadPersistence, eventLog, persistenceStartup, metricsHolder);
         persistence.start();
     }
 
@@ -99,7 +92,6 @@ public class ClientSessionXodusLocalPersistenceTest {
     public void cleanUp() throws Exception {
         persistence.closeDB();
         persistenceStartup.finish();
-        closeableMock.close();
     }
 
     @Test
@@ -281,11 +273,11 @@ public class ClientSessionXodusLocalPersistenceTest {
         final String clientid = "myClient";
         persistence.put(clientid, new ClientSession(false, SESSION_EXPIRY_MAX), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, 12345, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession updatedClientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(12345, updatedClientSession.getSessionExpiryInterval());
+        assertEquals(12345, updatedClientSession.getSessionExpiryInterval());
     }
 
     @Test(expected = NullPointerException.class)
@@ -299,7 +291,7 @@ public class ClientSessionXodusLocalPersistenceTest {
 
         persistence.put(clientid, new ClientSession(false, SESSION_EXPIRY_MAX), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, -1, BucketUtils.getBucket(clientid, BUCKET_COUNT));
     }
@@ -388,7 +380,7 @@ public class ClientSessionXodusLocalPersistenceTest {
                 234L), 123L, 1);
 
         persistence.disconnect(client1, 124L, true, 1, 0L);
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertEquals(124L, entry.getTimestamp());
         assertNotNull(entry.getObject());
@@ -406,7 +398,7 @@ public class ClientSessionXodusLocalPersistenceTest {
                         .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).build(), 1L),
                 234L), 123L, 1);
 
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertNull(entry);
         verify(payloadPersistence, never()).decrementReferenceCounter(1L);

@@ -29,8 +29,6 @@ import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import jetbrains.exodus.env.Cursor;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalExecutable;
 import net.jodah.concurrentunit.Waiter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
@@ -49,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.*;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -629,15 +627,12 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     private void countBucketEntries(final AtomicInteger count, final String client) {
         final Bucket bucket = persistence.getBucket(client);
-        bucket.getEnvironment().executeInReadonlyTransaction(new TransactionalExecutable() {
-            @Override
-            public void execute(@NotNull final Transaction txn) {
-                try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-                    while (cursor.getNext()) {
-                        final String clientId = persistence.serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                        if (clientId.equals(client)) {
-                            count.incrementAndGet();
-                        }
+        bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final String clientId = persistence.serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    if (clientId.equals(client)) {
+                        count.incrementAndGet();
                     }
                 }
             }

@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.memory;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
@@ -23,6 +24,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.HiveMQMetrics;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -84,8 +86,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
                 temporaryFolder.newFolder());
 
+        final MetricsHolder metricsHolder = mock(MetricsHolder.class);
+        when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
+
         metricRegistry = new MetricRegistry();
-        persistence = new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, eventLog);
+        persistence = new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, metricsHolder, eventLog);
         memoryGauge = metricRegistry.gauge(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(), null);
     }
 
@@ -522,7 +527,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                         .build(), 1L), 234L), 123L, 1);
 
         persistence.disconnect(client1, 124L, true, 1, 0L);
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertEquals(124L, entry.getTimestamp());
         assertNotNull(entry.getObject());
@@ -544,7 +549,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                         .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
                         .build(), 1L), 234L), 123L, 1);
 
-        final PersistenceEntry<ClientSession> entry = persistence.removeWill(client1, 1);
+        final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
         assertNull(entry);
         verify(payloadPersistence, never()).decrementReferenceCounter(1L);
@@ -722,7 +727,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         persistence.disconnect("client", System.currentTimeMillis() - 20000, true, 1, 10);
         assertEquals(peak, memoryGauge.getValue().longValue());
 
-        persistence.removeWill("client", 1);
+        persistence.deleteWill("client", 1);
         final long reduced = memoryGauge.getValue().longValue();
         assertTrue(reduced > 0);
         assertTrue(peak > reduced);

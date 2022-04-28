@@ -34,8 +34,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
-import util.TestMessageEncoder;
 import util.TestMqttDecoder;
+import util.encoder.TestMessageEncoder;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -203,7 +203,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         //   remaining length
         byteBuf.writeByte(1);
         //var header
-        //   packet to large reason code
+        //   packet too large reason code
         byteBuf.writeByte(0x95);
 
         channel.writeInbound(byteBuf);

@@ -15,23 +15,28 @@
  */
 package com.hivemq.codec.encoder;
 
-import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrelEncoder;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
+import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.encoder.TestMessageEncoder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class Mqtt3PubrelEncoderTest {
 
     private EmbeddedChannel channel;
+    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-
-        channel = new EmbeddedChannel(new Mqtt3PubrelEncoder());
+        channel = new EmbeddedChannel(new TestMessageEncoder());
+        clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
     }
 
     @Test
@@ -40,14 +45,10 @@ public class Mqtt3PubrelEncoderTest {
 
         final ByteBuf buf = channel.readOutbound();
 
-        final Mqtt3PubrelEncoder encoder = new Mqtt3PubrelEncoder();
-        assertEquals(encoder.bufferSize(channel.pipeline().context(encoder), new PUBREL(10)), buf.readableBytes());
-
         assertEquals((byte) 0b0110_0010, buf.readByte());
         assertEquals((byte) 0b0000_0010, buf.readByte());
         assertEquals(10, buf.readUnsignedShort());
 
-        assertEquals(0, buf.readableBytes());
+        assertFalse(buf.isReadable());
     }
-
 }

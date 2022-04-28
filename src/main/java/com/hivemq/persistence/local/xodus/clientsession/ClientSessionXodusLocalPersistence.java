@@ -15,16 +15,17 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.logging.EventLog;
+import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.persistence.NoSessionException;
 import com.hivemq.persistence.PersistenceEntry;
 import com.hivemq.persistence.PersistenceStartup;
@@ -59,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
@@ -83,48 +84,44 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull ClientSessionPersistenceSerializer serializer;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull EventLog eventLog;
-
-    private final AtomicInteger sessionsCount = new AtomicInteger(0);
+    private final @NotNull MetricsHolder metricsHolder;
+    private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
 
     @Inject
     ClientSessionXodusLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull MqttConfigurationService mqttConfigurationService,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EventLog eventLog,
-            final @NotNull PersistenceStartup persistenceStartup) {
+            final @NotNull PersistenceStartup persistenceStartup,
+            final @NotNull MetricsHolder metricsHolder) {
 
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
+        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
 
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
-        this.serializer = new ClientSessionPersistenceSerializer();
-
+        this.metricsHolder = metricsHolder;
+        serializer = new ClientSessionPersistenceSerializer();
     }
 
-
-    @NotNull
     @Override
-    protected String getName() {
+    protected @NotNull String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
     @Override
-    protected String getVersion() {
+    protected @NotNull String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
     @Override
-    protected StoreConfig getStoreConfig() {
+    protected @NotNull StoreConfig getStoreConfig() {
         return StoreConfig.WITHOUT_DUPLICATES;
     }
 
-    @NotNull
     @Override
-    protected Logger getLogger() {
+    protected @NotNull Logger getLogger() {
         return log;
     }
 
@@ -138,81 +135,90 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final Bucket bucket = buckets[i];
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 final Store store = bucket.getStore();
-                final Cursor cursor = bucket.getStore().openCursor(txn);
-                while (cursor.getNext()) {
-                    final byte[] bytes = byteIterableToBytes(cursor.getValue());
-                    final ClientSession clientSession = serializer.deserializeValue(bytes);
-                    if (persistent(clientSession)) {
-                        sessionsCount.incrementAndGet();
+
+                final ImmutableList.Builder<Long> willsToRemoveBuilder = ImmutableList.builder();
+
+                try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                    while (cursor.getNext()) {
+                        final byte[] bytes = byteIterableToBytes(cursor.getValue());
+                        final ClientSession clientSession = serializer.deserializeValue(bytes);
+                        if (persistent(clientSession)) {
+                            sessionsCount.incrementAndGet();
+                        }
+                        if (clientSession.getWillPublish() != null) {
+                            willsToRemoveBuilder.add(clientSession.getWillPublish().getPublishId());
+                            clientSession.setWillPublish(null);
+                            final long timestamp = serializer.deserializeTimestamp(bytes);
+                            final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
+                            store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
+                        }
                     }
-                    if (clientSession.getWillPublish() != null) {
-                        clientSession.setWillPublish(null);
-                        final long timestamp = serializer.deserializeTimestamp(bytes);
-                        final byte[] sessionsWithoutWill = serializer.serializeValue(clientSession, timestamp);
-                        store.put(txn, cursor.getKey(), bytesToByteIterable(sessionsWithoutWill));
+                    final ImmutableList<Long> willsToRemove = willsToRemoveBuilder.build();
+                    if (!willsToRemove.isEmpty()) {
+                        txn.setCommitHook(() -> {
+                            for (int e = 0; e < willsToRemove.size(); e++) {
+                                final Long payloadId = willsToRemove.get(e);
+                                // Workaround?
+                                // Since we are starting HiveMQ stateful the PublishPayloadPersistence has no references
+                                // to any stored payloads. In order to delete the payload we need to create a reference
+                                // and remove it again.
+                                payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
+                                payloadPersistence.decrementReferenceCounter(payloadId);
+                            }
+                        });
                     }
                 }
             });
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ClientSession getSession(@NotNull final String clientId, final int bucketIndex, final boolean checkExpired) {
+    public @Nullable ClientSession getSession(final @NotNull String clientId) {
         checkNotNull(clientId, "Client id must not be null");
-        checkBucketIndex(bucketIndex);
 
-        return getSession(clientId, buckets[bucketIndex], checkExpired, true);
+        return getSession(clientId, getBucket(clientId), true, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ClientSession getSession(@NotNull final String clientId, final int bucketIndex) {
+    public @Nullable ClientSession getSession(final @NotNull String clientId, final int bucketIndex) {
         checkNotNull(clientId, "Client id must not be null");
         checkBucketIndex(bucketIndex);
 
         return getSession(clientId, buckets[bucketIndex], true, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Nullable
     @Override
-    public ClientSession getSession(@NotNull final String clientId, final boolean checkExpired) {
+    public @Nullable ClientSession getSession(final @NotNull String clientId, final boolean checkExpired) {
         checkNotNull(clientId, "Client id must not be null");
 
         return getSession(clientId, getBucket(clientId), checkExpired, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Nullable
     @Override
-    public ClientSession getSession(@NotNull final String clientId, final boolean checkExpired, final boolean includeWill) {
+    public @Nullable ClientSession getSession(
+            final @NotNull String clientId, final int bucketIndex, final boolean checkExpired) {
+
+        checkNotNull(clientId, "Client id must not be null");
+        checkBucketIndex(bucketIndex);
+
+        return getSession(clientId, buckets[bucketIndex], checkExpired, true);
+    }
+
+    @Override
+    public @Nullable ClientSession getSession(
+            final @NotNull String clientId, final boolean checkExpired, final boolean includeWill) {
+
         checkNotNull(clientId, "Client id must not be null");
 
         return getSession(clientId, getBucket(clientId), checkExpired, includeWill);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Nullable
-    @Override
-    public ClientSession getSession(@NotNull final String clientId) {
-        checkNotNull(clientId, "Client id must not be null");
+    private @Nullable ClientSession getSession(
+            final @NotNull String clientId,
+            final Bucket bucket,
+            final boolean checkExpired,
+            final boolean includeWill) {
 
-        return getSession(clientId, getBucket(clientId), true, true);
-    }
-
-    @Nullable
-    private ClientSession getSession(@NotNull final String clientId, final Bucket bucket, final boolean checkExpired, final boolean includeWill) {
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
             final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
@@ -233,27 +239,19 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             }
 
             if (includeWill) {
-                dereferenceWillPayload(clientSession);
+                loadWillPayload(clientSession);
             }
             return clientSession;
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @Nullable
-    public Long getTimestamp(@NotNull final String clientId) {
+    public @Nullable Long getTimestamp(final @NotNull String clientId) {
         return getTimestamp(clientId, BucketUtils.getBucket(clientId, bucketCount));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @Nullable
-    public Long getTimestamp(@NotNull final String clientId, final int bucketIndex) {
+    public @Nullable Long getTimestamp(final @NotNull String clientId, final int bucketIndex) {
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
@@ -265,54 +263,66 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void put(@NotNull final String clientId, @NotNull final ClientSession clientSession, final long timestamp, final int bucketIndex) {
+    public void put(
+            final @NotNull String clientId,
+            final @NotNull ClientSession newClientSession,
+            final long timestamp,
+            final int bucketIndex) {
+
         checkNotNull(clientId, "Client id must not be null");
-        checkNotNull(clientSession, "Client session must not be null");
+        checkNotNull(newClientSession, "Client session must not be null");
         checkArgument(timestamp > 0, "Timestamp must be greater than 0");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
 
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
 
-            final boolean isPersistent = persistent(clientSession);
+            final boolean isPersistent = persistent(newClientSession);
 
             final ByteIterable value = bucket.getStore().get(txn, key);
-            if (value != null) {
+            if (value == null) {
+                if (isPersistent || newClientSession.isConnected()) {
+                    sessionsCount.incrementAndGet();
+                }
+            } else {
                 final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
-                if (prevClientSession.getWillPublish() != null) {
-                    removeWillReference(prevClientSession);
+
+                final ClientSessionWill oldWill = prevClientSession.getWillPublish();
+                if (oldWill != null) {
+                    txn.setCommitHook(new RemoveWillReference(oldWill));
                 }
 
                 final boolean prevIsPersistent = persistent(prevClientSession);
 
-                if ((isPersistent || clientSession.isConnected()) && (!prevIsPersistent && !prevClientSession.isConnected())) {
+                if ((isPersistent || newClientSession.isConnected()) && (!prevIsPersistent && !prevClientSession.isConnected())) {
                     sessionsCount.incrementAndGet();
-                } else if ((prevIsPersistent || prevClientSession.isConnected()) && (!isPersistent && !clientSession.isConnected())) {
+                } else if ((prevIsPersistent || prevClientSession.isConnected()) && (!isPersistent && !newClientSession.isConnected())) {
                     sessionsCount.decrementAndGet();
                 }
-
-            } else if (isPersistent || clientSession.isConnected()) {
-                sessionsCount.incrementAndGet();
             }
 
-            bucket.getStore().put(txn, key,
-                    bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            final ClientSessionWill newWill = newClientSession.getWillPublish();
+            if (newWill != null) {
+                txn.setCommitHook(new AddWillReference(newWill));
+            }
 
+            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(newClientSession, timestamp)));
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @NotNull
     @Override
-    public ClientSession disconnect(@NotNull final String clientId, final long timestamp, final boolean sendWill, final int bucketIndex, final long sessionExpiry) {
+    public @NotNull ClientSession disconnect(
+            final @NotNull String clientId,
+            final long timestamp,
+            final boolean sendWill,
+            final int bucketIndex,
+            final long sessionExpiryInterval) {
+
         checkNotNull(clientId, "Client id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInTransaction(txn -> {
@@ -329,31 +339,28 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
 
-            if (sessionExpiry != SESSION_EXPIRY_NOT_SET) {
-                clientSession.setSessionExpiryInterval(sessionExpiry);
+            if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
+                clientSession.setSessionExpiryInterval(sessionExpiryInterval);
             }
 
             if (clientSession.isConnected() && !persistent(clientSession)) {
                 sessionsCount.decrementAndGet();
             }
             clientSession.setConnected(false);
-            if (!sendWill) {
-                removeWillReference(clientSession);
+            if (!sendWill && clientSession.getWillPublish() != null) {
+                txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
                 clientSession.setWillPublish(null);
             }
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
-            dereferenceWillPayload(clientSession);
+            loadWillPayload(clientSession);
             return clientSession;
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @Nullable
-    public PersistenceEntry<ClientSession> removeWill(@NotNull final String clientId, final int bucketIndex) {
+    public @Nullable PersistenceEntry<ClientSession> deleteWill(final @NotNull String clientId, final int bucketIndex) {
         checkNotNull(clientId, "Client id must not be null");
+        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInTransaction(txn -> {
@@ -370,17 +377,18 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 return null;
             }
             final long timestamp = serializer.deserializeTimestamp(byteIterableToBytes(byteIterable));
-            removeWillReference(clientSession);
-            clientSession.setWillPublish(null);
-            bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            if (clientSession.getWillPublish() != null) {
+                txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
+                clientSession.setWillPublish(null);
+                bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
+            }
             return new PersistenceEntry<>(clientSession, timestamp);
         });
     }
 
     @Override
-    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(final int bucketIndex,
-                                                                                     @Nullable final String lastClientId,
-                                                                                     final int maxResults) {
+    public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
+            final int bucketIndex, final @Nullable String lastClientId, final int maxResults) {
 
         checkBucketIndex(bucketIndex);
 
@@ -411,7 +419,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 String lastKey = lastClientId;
 
                 do {
-
                     if (cursor.getKey() == ByteIterable.EMPTY) {
                         continue;
                     }
@@ -435,7 +442,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     if (counter >= maxResults) {
                         return new BucketChunkResult<>(resultMap, !cursor.getNext(), lastKey, bucketIndex);
                     }
-
                 } while (cursor.getNext());
 
                 return new BucketChunkResult<>(resultMap, true, lastKey, bucketIndex);
@@ -443,19 +449,14 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @NotNull
-    public Set<String> getAllClients(final int bucketIndex) {
+    public @NotNull Set<String> getAllClients(final int bucketIndex) {
         final ImmutableSet.Builder<String> clientSessions = ImmutableSet.builder();
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 while (cursor.getNext()) {
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-
                     clientSessions.add(clientId);
                 }
             }
@@ -463,9 +464,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         return clientSessions.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeWithTimestamp(final @NotNull String client, final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
@@ -478,17 +476,18 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 if (persistent(clientSession) || clientSession.isConnected()) {
                     sessionsCount.decrementAndGet();
                 }
-                removeWillReference(clientSession);
+                if (clientSession.getWillPublish() != null) {
+                    txn.setCommitHook(new RemoveWillReference(clientSession.getWillPublish()));
+                }
+                bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(client)));
             }
-            bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(client)));
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setSessionExpiryInterval(@NotNull final String clientId, final long sessionExpiryInterval, final int bucketIndex) {
+    public void setSessionExpiryInterval(
+            final @NotNull String clientId, final long sessionExpiryInterval, final int bucketIndex) {
+
         checkNotNull(clientId, "Client Id must not be null");
 
         if (sessionExpiryInterval < 0) {
@@ -507,7 +506,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             }
 
             final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(valueFromStore));
-
             // is tombstone?
             if (!clientSession.isConnected() && !persistent(clientSession)) {
                 throw NoSessionException.INSTANCE;
@@ -515,19 +513,13 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
             clientSession.setSessionExpiryInterval(sessionExpiryInterval);
 
-            final ByteIterable value = bytesToByteIterable(serializer.serializeValue(clientSession, System.currentTimeMillis()));
-
-            bucket.getStore().put(txn, key, value);
-
+            bucket.getStore().put(txn, key,
+                    bytesToByteIterable(serializer.serializeValue(clientSession, System.currentTimeMillis())));
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @NotNull
-    public Set<String> cleanUp(final int bucketIndex) {
+    public @NotNull Set<String> cleanUp(final int bucketIndex) {
 
         final ImmutableSet.Builder<String> expiredSessionsBuilder = ImmutableSet.builder();
 
@@ -536,39 +528,36 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         }
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
-            final Cursor cursor = bucket.getStore().openCursor(txn);
-            while (cursor.getNext()) {
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
 
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
 
-                final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
-                final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
+                    final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
+                    final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
 
-                // Expired is true if the persistent date for the client has to be removed
-                final boolean expired = ClientSessions.isExpired(clientSession, timeSinceDisconnect);
-                if (expired) {
-                    if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
-                        sessionsCount.decrementAndGet();
+                    // Expired is true if the persistent date for the client has to be removed
+                    final boolean expired = ClientSessions.isExpired(clientSession, timeSinceDisconnect);
+                    if (expired) {
+                        if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
+                            sessionsCount.decrementAndGet();
+                        }
+
+                        eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId);
+                        cursor.deleteCurrent();
+                        expiredSessionsBuilder.add(clientId);
                     }
-
-                    eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId);
-                    cursor.deleteCurrent();
-                    expiredSessionsBuilder.add(clientId);
                 }
             }
         });
         return expiredSessionsBuilder.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @NotNull
-    public Set<String> getDisconnectedClients(final int bucketIndex) {
+    public @NotNull Set<String> getDisconnectedClients(final int bucketIndex) {
 
         checkBucketIndex(bucketIndex);
 
@@ -577,20 +566,21 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
             final Set<String> collectSet = new HashSet<>();
-            final Cursor cursor = bucket.getStore().openCursor(txn);
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
 
-            while (cursor.getNext()) {
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                if (!clientSession.isConnected() && clientSession.getSessionExpiryInterval() > 0) {
-                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
-                    final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
-                    final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryInterval() * 1000L;
-                    // We don't remove expired client sessions here, since this method is often called for all buckets at once.
-                    // Handling the TTL in the cleanup job will result in a more evenly distributed CPU usage.
-                    if (timeSinceDisconnect < sessionExpiryIntervalInMillis) {
-                        collectSet.add(clientId);
+                while (cursor.getNext()) {
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    if (!clientSession.isConnected() && clientSession.getSessionExpiryInterval() > 0) {
+                        final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                        final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
+                        final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryInterval() * 1000L;
+                        // We don't remove expired client sessions here, since this method is often called for all buckets at once.
+                        // Handling the TTL in the cleanup job will result in a more evenly distributed CPU usage.
+                        if (timeSinceDisconnect < sessionExpiryIntervalInMillis) {
+                            collectSet.add(clientId);
+                        }
                     }
                 }
             }
@@ -598,50 +588,38 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getSessionsCount() {
         return sessionsCount.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @NotNull
-    public Map<String, PendingWillMessages.PendingWill> getPendingWills(final int bucketIndex) {
+    public @NotNull Map<String, PendingWillMessages.PendingWill> getPendingWills(final int bucketIndex) {
         final Bucket bucket = buckets[bucketIndex];
 
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final Map<String, PendingWillMessages.PendingWill> resultMap = new HashMap<>();
-            final Cursor cursor = bucket.getStore().openCursor(txn);
-            while (cursor.getNext()) {
-                final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
-                final ClientSession clientSession = serializer.deserializeValue(valueBytes);
-                final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                final long timestamp = serializer.deserializeTimestamp(valueBytes);
-                if (clientSession.isConnected() || clientSession.getWillPublish() == null) {
-                    // Will must not be sent
-                    continue;
+            try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                while (cursor.getNext()) {
+                    final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
+                    final ClientSession clientSession = serializer.deserializeValue(valueBytes);
+                    final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    final long timestamp = serializer.deserializeTimestamp(valueBytes);
+                    if (clientSession.isConnected() || clientSession.getWillPublish() == null) {
+                        // Will must not be sent
+                        continue;
+                    }
+                    final ClientSessionWill willPublish = clientSession.getWillPublish();
+                    resultMap.put(clientId, new PendingWillMessages.PendingWill(
+                            Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryInterval()),
+                            timestamp));
                 }
-                final ClientSessionWill willPublish = clientSession.getWillPublish();
-                resultMap.put(clientId, new PendingWillMessages.PendingWill(Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryInterval()), timestamp));
             }
             return resultMap;
         });
     }
 
-    private void removeWillReference(final ClientSession clientSession) {
-        final ClientSessionWill willPublish = clientSession.getWillPublish();
-        if (willPublish == null) {
-            return;
-        }
-        payloadPersistence.decrementReferenceCounter(willPublish.getPublishId());
-    }
-
-    private void dereferenceWillPayload(final ClientSession clientSession) {
+    private void loadWillPayload(final @NotNull ClientSession clientSession) {
         final ClientSessionWill willPublish = clientSession.getWillPublish();
         if (willPublish == null) {
             return;
@@ -652,13 +630,43 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
-            log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());
+            log.warn("Will Payload for payloadId {} not found", willPublish.getPublishId());
             return;
         }
         willPublish.getMqttWillPublish().setPayload(payload);
     }
 
-    private boolean persistent(final ClientSession clientSession) {
+    private static boolean persistent(final @NotNull ClientSession clientSession) {
         return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
+    }
+
+    private class AddWillReference implements Runnable {
+
+        private final @NotNull ClientSessionWill will;
+
+        AddWillReference(final @NotNull ClientSessionWill will) {
+            this.will = will;
+        }
+
+        @Override
+        public void run() {
+            metricsHolder.getStoredWillMessagesCount().inc();
+            payloadPersistence.add(will.getPayload(), 1, will.getPublishId());
+        }
+    }
+
+    private class RemoveWillReference implements Runnable {
+
+        private final @NotNull ClientSessionWill will;
+
+        RemoveWillReference(final @NotNull ClientSessionWill will) {
+            this.will = will;
+        }
+
+        @Override
+        public void run() {
+            metricsHolder.getStoredWillMessagesCount().dec();
+            payloadPersistence.decrementReferenceCounter(will.getPublishId());
+        }
     }
 }

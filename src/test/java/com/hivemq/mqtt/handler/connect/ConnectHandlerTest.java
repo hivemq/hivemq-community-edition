@@ -96,10 +96,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.NONE;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NullabilityAnnotations")
@@ -381,7 +382,7 @@ public class ConnectHandlerTest {
 
         assertNotNull(keepAlive);
         assertEquals(360, keepAlive.longValue());
-        assertEquals(Mqtt5CONNECT.KEEP_ALIVE_NOT_SET, keepAliveFromCONNACK.get());
+        assertEquals(KEEP_ALIVE_NOT_SET, keepAliveFromCONNACK.get());
     }
 
     @Test

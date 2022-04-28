@@ -46,8 +46,8 @@ import java.util.concurrent.ExecutorService;
 import static com.hivemq.mqtt.handler.publish.PublishReturnCode.FAILED;
 import static com.hivemq.mqtt.handler.publish.PublishReturnCode.NO_MATCHING_SUBSCRIBERS;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**

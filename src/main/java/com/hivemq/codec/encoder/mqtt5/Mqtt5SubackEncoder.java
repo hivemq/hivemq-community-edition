@@ -15,10 +15,9 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
@@ -34,16 +33,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Florian Limpöck
  */
 @Singleton
-public class Mqtt5SubackEncoder extends Mqtt5MessageWithReasonStringEncoder<SUBACK> implements MqttEncoder<SUBACK> {
+public class Mqtt5SubackEncoder extends Mqtt5MessageWithReasonStringEncoder<SUBACK> {
 
     private static final int FIXED_HEADER = MessageType.SUBACK.ordinal() << 4;
 
-    public Mqtt5SubackEncoder(final @NotNull MessageDroppedService messageDroppedService, final @NotNull SecurityConfigurationService securityConfigurationService) {
+    public Mqtt5SubackEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
 
     @Override
-    void encode(@NotNull final SUBACK suback, @NotNull final ByteBuf out) {
+    void encode(final @NotNull SUBACK suback, final @NotNull ByteBuf out) {
         checkNotNull(suback, "Suback must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
         encodeFixedHeader(out, suback.getRemainingLength());
@@ -51,10 +52,14 @@ public class Mqtt5SubackEncoder extends Mqtt5MessageWithReasonStringEncoder<SUBA
         encodePayload(suback, out);
     }
 
-    private void encodePayload(final @NotNull SUBACK message, final @NotNull ByteBuf out) {
-        for (final Mqtt5SubAckReasonCode mqtt5SubAckReasonCode : message.getReasonCodes()) {
-            out.writeByte(mqtt5SubAckReasonCode.getCode());
-        }
+    @Override
+    int calculateRemainingLengthWithoutProperties(final @NotNull SUBACK message) {
+        return message.getReasonCodes().size() + 2; // + PacketIdentifier
+    }
+
+    @Override
+    int calculatePropertyLength(final @NotNull SUBACK message) {
+        return omissiblePropertiesLength(message);
     }
 
     private void encodeVariableHeader(final @NotNull SUBACK message, final ByteBuf out) {
@@ -63,19 +68,14 @@ public class Mqtt5SubackEncoder extends Mqtt5MessageWithReasonStringEncoder<SUBA
         encodeOmissibleProperties(message, out);
     }
 
-    private void encodeFixedHeader(final ByteBuf out, final int remainingLength) {
+    private static void encodeFixedHeader(final @NotNull ByteBuf out, final int remainingLength) {
         out.writeByte(FIXED_HEADER);
         MqttVariableByteInteger.encode(remainingLength, out);
     }
 
-    @Override
-    int calculateRemainingLengthWithoutProperties(@NotNull final SUBACK message) {
-        return message.getReasonCodes().size() + 2; // + PacketIdentifier
+    private static void encodePayload(final @NotNull SUBACK message, final @NotNull ByteBuf out) {
+        for (final Mqtt5SubAckReasonCode mqtt5SubAckReasonCode : message.getReasonCodes()) {
+            out.writeByte(mqtt5SubAckReasonCode.getCode());
+        }
     }
-
-    @Override
-    int calculatePropertyLength(@NotNull final SUBACK message) {
-        return omissiblePropertiesLength(message);
-    }
-
 }

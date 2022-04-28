@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.codec.encoder.mqtt3;
+package util.encoder;
 
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.util.Strings;
 import com.hivemq.util.Utf8Utils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
 
 /**
  * @author Lukas Brandl
  */
-public class Mqtt3SubscribeEncoder extends AbstractVariableHeaderLengthEncoder<SUBSCRIBE> implements MqttEncoder<SUBSCRIBE> {
+public class Mqtt3SubscribeEncoder extends AbstractVariableHeaderLengthEncoder<SUBSCRIBE> {
 
     private static final byte SUBSCRIBE_FIXED_HEADER = (byte) 0b1000_0010;
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection, final @NotNull SUBSCRIBE msg, final @NotNull ByteBuf out) {
 
         out.writeByte(SUBSCRIBE_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);

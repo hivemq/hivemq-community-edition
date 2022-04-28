@@ -13,38 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.codec.encoder.mqtt3;
+package util.encoder;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.mqtt.message.unsuback.UNSUBACK;
+import com.hivemq.mqtt.message.PINGREQ;
 import io.netty.buffer.ByteBuf;
 
 /**
- * @author Dominik Obermaier
+ * @author Abdullah Imal
  */
-public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
+public class PingreqEncoder implements MqttEncoder<PINGREQ> {
 
-    public static final int ENCODED_UNSUBACK_SIZE = 4;
-    private static final byte UNSUBACK_FIXED_HEADER = (byte) 0b1011_0000;
-    private static final byte UNSUBACK_REMAINING_LENGTH = 0b0000_0010;
+    private static final byte PINGREQ_FIXED_HEADER = (byte) 0b1100_0000;
+    private static final byte PINGREQ_REMAINING_LENGTH = (byte) 0b0000_0000;
+    private static final int ENCODED_PINGREQ_SIZE = 2;
 
     @Override
     public void encode(
             final @NotNull ClientConnection clientConnection,
-            final @NotNull UNSUBACK msg,
+            final @NotNull PINGREQ msg,
             final @NotNull ByteBuf out) {
 
-        out.writeByte(UNSUBACK_FIXED_HEADER);
-        //The remaining length is always static for UNSUBACKs
-        out.writeByte(UNSUBACK_REMAINING_LENGTH);
-
-        out.writeShort(msg.getPacketIdentifier());
+        out.writeByte(PINGREQ_FIXED_HEADER);
+        out.writeByte(PINGREQ_REMAINING_LENGTH);
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull UNSUBACK msg) {
-        return ENCODED_UNSUBACK_SIZE;
+    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PINGREQ msg) {
+        return ENCODED_PINGREQ_SIZE;
     }
 }

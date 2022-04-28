@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -25,9 +26,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 
 /**
  * @author Dominik Obermaier
@@ -38,22 +37,22 @@ public class Mqtt3DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
     private static final DISCONNECT DISCONNECT = new DISCONNECT();
 
     @Inject
-    public Mqtt3DisconnectDecoder(final @NotNull MqttServerDisconnector disconnector,
-                                  final @NotNull FullConfigurationService fullConfigurationService) {
-        super(disconnector, fullConfigurationService);
+    public Mqtt3DisconnectDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
+            final @NotNull FullConfigurationService configurationService) {
+        super(disconnector, configurationService);
     }
 
-    @Nullable
     @Override
-    public DISCONNECT decode(final @NotNull Channel channel, final @NotNull ByteBuf buf, final byte header) {
+    public @Nullable DISCONNECT decode(
+            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
 
-        if (ProtocolVersion.MQTTv3_1_1 == channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion()) {
+        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                disconnectByInvalidFixedHeader(channel, MessageType.DISCONNECT);
+                disconnectByInvalidFixedHeader(clientConnection, MessageType.DISCONNECT);
                 return null;
             }
         }
-
         return DISCONNECT;
     }
 }

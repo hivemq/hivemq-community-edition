@@ -204,7 +204,10 @@ public class MqttWillPublish implements Sizable {
         this.delayInterval = delayInterval;
     }
 
-    public  @NotNull MqttWillPublish deepCopyWithoutPayload() {
+    /**
+     * Will publish payload is a shallow copy.
+     */
+    public  @NotNull MqttWillPublish deepCopy() {
         return new MqttWillPublish(
                 this.hivemqId,
                 this.topic,

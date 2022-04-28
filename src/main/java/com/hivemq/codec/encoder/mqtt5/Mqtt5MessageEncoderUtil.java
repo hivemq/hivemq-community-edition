@@ -26,28 +26,28 @@ import io.netty.buffer.ByteBuf;
  *
  * @author Silvio Giebl
  */
-class Mqtt5MessageEncoderUtil {
+final class Mqtt5MessageEncoderUtil {
 
     private Mqtt5MessageEncoderUtil() {
     }
 
-    static int propertyEncodedLength(@NotNull final String string) {
-        return 1 + MqttBinaryData.encodedLength(string);
+    static int propertyEncodedLength(final @NotNull String value) {
+        return 1 + MqttBinaryData.encodedLength(value);
     }
 
-    static int nullablePropertyEncodedLength(@Nullable final String string) {
-        return (string == null) ? 0 : propertyEncodedLength(string);
+    static int nullablePropertyEncodedLength(final @Nullable String value) {
+        return (value == null) ? 0 : propertyEncodedLength(value);
     }
 
-    static int nullablePropertyEncodedLength(@Nullable final byte[] binary) {
+    static int nullablePropertyEncodedLength(final byte @Nullable [] binary) {
         return (binary == null) ? 0 : 1 + MqttBinaryData.encodedLength(binary);
     }
 
-    static int nullablePropertyEncodedLength(@Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
+    static int nullablePropertyEncodedLength(final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator) {
         return (payloadFormatIndicator == null) ? 0 : 2;
     }
 
-    static int nullablePropertyEncodedLength(@Nullable final QoS qoS) {
+    static int nullablePropertyEncodedLength(final @Nullable QoS qoS) {
         return (qoS != null && qoS != QoS.EXACTLY_ONCE) ? 2 : 0;
     }
 
@@ -67,20 +67,23 @@ class Mqtt5MessageEncoderUtil {
         return 1 + MqttVariableByteInteger.encodedLength(value);
     }
 
-    static void encodeProperty(final int propertyIdentifier, @NotNull final String string, @NotNull final ByteBuf out) {
+    static void encodeProperty(
+            final int propertyIdentifier, final @NotNull String value, final @NotNull ByteBuf out) {
 
         out.writeByte(propertyIdentifier);
-        MqttBinaryData.encode(string.getBytes(Charsets.UTF_8), out);
+        MqttBinaryData.encode(value.getBytes(Charsets.UTF_8), out);
     }
 
-    static void encodeNullableProperty(final int propertyIdentifier, @Nullable final String string, @NotNull final ByteBuf out) {
+    static void encodeNullableProperty(
+            final int propertyIdentifier, final @Nullable String value, final @NotNull ByteBuf out) {
 
-        if (string != null) {
-            encodeProperty(propertyIdentifier, string, out);
+        if (value != null) {
+            encodeProperty(propertyIdentifier, value, out);
         }
     }
 
-    static void encodeNullableProperty(final int propertyIdentifier, @Nullable final byte[] binary, @NotNull final ByteBuf out) {
+    static void encodeNullableProperty(
+            final int propertyIdentifier, final byte @Nullable [] binary, final @NotNull ByteBuf out) {
 
         if (binary != null) {
             out.writeByte(propertyIdentifier);
@@ -88,7 +91,8 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeNullableProperty(final int propertyIdentifier, @Nullable final QoS qoS, @NotNull final ByteBuf out) {
+    static void encodeNullableProperty(
+            final int propertyIdentifier, final @Nullable QoS qoS, final @NotNull ByteBuf out) {
 
         if ((qoS != null) && (qoS.getQosNumber() < 2)) {
             out.writeByte(propertyIdentifier);
@@ -96,8 +100,10 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeNullableProperty(final int propertyIdentifier, @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
-                                       @NotNull final ByteBuf out) {
+    static void encodeNullableProperty(
+            final int propertyIdentifier,
+            final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+            final @NotNull ByteBuf out) {
 
         if (payloadFormatIndicator != null) {
             out.writeByte(propertyIdentifier);
@@ -105,7 +111,8 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeBooleanProperty(final int propertyIdentifier, final boolean value, final boolean defaultValue, @NotNull final ByteBuf out) {
+    static void encodeBooleanProperty(
+            final int propertyIdentifier, final boolean value, final boolean defaultValue, final @NotNull ByteBuf out) {
 
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
@@ -113,7 +120,8 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeShortProperty(final int propertyIdentifier, final int value, final int defaultValue, @NotNull final ByteBuf out) {
+    static void encodeShortProperty(
+            final int propertyIdentifier, final int value, final int defaultValue, final @NotNull ByteBuf out) {
 
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
@@ -121,7 +129,8 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeIntProperty(final int propertyIdentifier, final long value, final long defaultValue, @NotNull final ByteBuf out) {
+    static void encodeIntProperty(
+            final int propertyIdentifier, final long value, final long defaultValue, final @NotNull ByteBuf out) {
 
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
@@ -129,10 +138,10 @@ class Mqtt5MessageEncoderUtil {
         }
     }
 
-    static void encodeVariableByteIntegerProperty(final int propertyIdentifier, final int value, @NotNull final ByteBuf out) {
+    static void encodeVariableByteIntegerProperty(
+            final int propertyIdentifier, final int value, final @NotNull ByteBuf out) {
 
         out.writeByte(propertyIdentifier);
         MqttVariableByteInteger.encode(value, out);
     }
-
 }

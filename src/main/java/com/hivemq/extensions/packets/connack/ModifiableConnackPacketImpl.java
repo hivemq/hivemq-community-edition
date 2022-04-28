@@ -25,11 +25,13 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnackReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extensions.packets.general.ModifiableUserPropertiesImpl;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Lukas Brandl
@@ -123,7 +125,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        if (sessionExpiryInterval == Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET) {
+        if (sessionExpiryInterval == SESSION_EXPIRY_NOT_SET) {
             return Optional.empty();
         }
         return Optional.of(sessionExpiryInterval);
@@ -131,7 +133,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public @NotNull Optional<Integer> getServerKeepAlive() {
-        if (serverKeepAlive == Mqtt5CONNECT.KEEP_ALIVE_NOT_SET) {
+        if (serverKeepAlive == KEEP_ALIVE_NOT_SET) {
             return Optional.empty();
         }
         return Optional.of(serverKeepAlive);

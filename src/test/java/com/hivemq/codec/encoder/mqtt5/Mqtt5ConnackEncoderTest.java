@@ -15,11 +15,9 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
-import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -28,15 +26,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.*;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.KEEP_ALIVE_NOT_SET;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_NOT_SET;
-import static org.mockito.Mockito.when;
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Florian Limpöck
@@ -44,21 +39,10 @@ import static org.mockito.Mockito.when;
  */
 public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
 
-    private Mqtt5ConnackEncoder encoder;
-
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        encoder = new Mqtt5ConnackEncoder(messageDroppedService, securityConfigurationService);
-        super.setUp(encoder);
-
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        super.setUp();
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
     }
 
     @Test
@@ -144,9 +128,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference("server")
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -189,9 +171,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -236,9 +216,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -286,10 +264,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .build();
 
         // Do not omit reason string because it is a CONNACK packet!
-
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -344,10 +319,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .build();
 
         // Do not omit user properties because it is a CONNACK packet!
-
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -399,9 +371,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -444,9 +414,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -491,9 +459,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -538,9 +504,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -585,14 +549,11 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
     public void test_max_qos_2_not_encoded() {
-
 
         final byte[] expected = {
                 // fixed header
@@ -631,9 +592,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -678,9 +637,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -725,9 +682,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -772,8 +727,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -818,9 +772,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -865,9 +817,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -912,9 +862,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -959,9 +907,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -1006,8 +952,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -1052,9 +997,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -1099,9 +1042,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference("server")
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -1147,9 +1088,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 .withServerReference(null)
                 .build();
 
-
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
-
+        encodeTestBufferSize(expected, connack);
     }
 
     @Test
@@ -1195,9 +1134,8 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                     .withServerReference(null)
                     .build();
 
-            encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
+            encodeTestBufferSize(expected, connack);
         }
-
     }
 
     @Test
@@ -1254,7 +1192,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                         .withServerReference(null)
                         .build();
 
-        encodeTestBufferSize(expected.array(), connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
+        encodeTestBufferSize(expected.array(), connack);
         expected.release();
     }
 
@@ -1303,7 +1241,6 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                         .withServerReference(null)
                         .build();
 
-        encodeTestBufferSize(expected, connack, encoder.bufferSize(channel.pipeline().context(encoder), connack));
+        encodeTestBufferSize(expected, connack);
     }
-
 }

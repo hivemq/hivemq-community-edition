@@ -15,6 +15,7 @@
  */
 package com.hivemq.codec.decoder.mqtt311;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -22,32 +23,26 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ClientIds;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
-import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(Parameterized.class)
 public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
-    @Mock
-    Channel channel;
-
-    @Mock
-    MqttConnacker connacker;
-
+    private MqttConnacker connacker;
+    private ClientConnection clientConnection;
     private Mqtt311ConnectDecoder decoder;
 
     @Parameterized.Parameters
@@ -62,12 +57,12 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
     @Parameterized.Parameter
     public byte invalidBitHeader;
 
-
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-        when(channel.attr(any(AttributeKey.class))).thenReturn(mock(Attribute.class));
+        final Channel channel = mock(Channel.class);
+        connacker = mock(MqttConnacker.class);
+        clientConnection = new ClientConnection(channel, null);
+        when(channel.attr(any(AttributeKey.class))).thenReturn(new TestChannelAttribute(clientConnection));
 
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),
@@ -77,10 +72,8 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
     @Test
     public void test_fixed_header_reserved_bit_set() {
-
-        assertNull(decoder.decode(channel, null, invalidBitHeader));
-
-        verify(connacker).connackError(channel,
+        assertNull(decoder.decode(clientConnection, null, invalidBitHeader));
+        verify(connacker).connackError(clientConnection.getChannel(),
                 "A client (IP: {}) connected with an invalid fixed header.",
                 "Invalid CONNECT fixed header",
                 Mqtt5ConnAckReasonCode.MALFORMED_PACKET,

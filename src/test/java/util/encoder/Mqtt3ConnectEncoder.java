@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.codec.encoder.mqtt3;
+package util.encoder;
 
-import com.hivemq.codec.encoder.MqttEncoder;
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -23,14 +24,13 @@ import com.hivemq.util.Bytes;
 import com.hivemq.util.Strings;
 import com.hivemq.util.Utf8Utils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * A MQTT Encoder which encodes {@link com.hivemq.mqtt.message.connect.CONNECT} messages.
  *
  * @author Dominik Obermaier
  */
-public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CONNECT> implements MqttEncoder<CONNECT> {
+public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CONNECT> {
 
     private static final byte CONNECT_FIXED_HEADER = (byte) 0b0001_0000;
 
@@ -42,7 +42,9 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
             new byte[]{0, 6, 0b0100_1101, 0b0101_0001, 0b0100_1001, 0b0111_0011, 0b0110_0100, 0b0111_0000, 3};
 
     @Override
-    public void encode(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final @NotNull ByteBuf out) {
+    public void encode(
+            final @NotNull ClientConnection clientConnection, final @NotNull CONNECT msg, final @NotNull ByteBuf out) {
+
         out.writeByte(CONNECT_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);
 

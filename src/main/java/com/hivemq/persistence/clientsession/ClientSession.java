@@ -28,20 +28,21 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DIS
  */
 public class ClientSession implements Sizable {
 
+    private final @Nullable Long queueLimit;
     private boolean connected;
     private long sessionExpiryInterval;
     private int inMemorySize = SIZE_NOT_CALCULATED;
-    private final @Nullable Long queueLimit;
     private @Nullable ClientSessionWill willPublish;
 
     public ClientSession(final boolean connected, final long sessionExpiryInterval) {
         this(connected, sessionExpiryInterval, null, null);
     }
 
-    public ClientSession(final boolean connected,
-                         final long sessionExpiryInterval,
-                         final @Nullable ClientSessionWill willPublish,
-                         final @Nullable Long queueLimit) {
+    public ClientSession(
+            final boolean connected,
+            final long sessionExpiryInterval,
+            final @Nullable ClientSessionWill willPublish,
+            final @Nullable Long queueLimit) {
 
         Preconditions.checkArgument(
                 sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
@@ -69,8 +70,7 @@ public class ClientSession implements Sizable {
         this.sessionExpiryInterval = sessionExpiryInterval;
     }
 
-    @Nullable
-    public ClientSessionWill getWillPublish() {
+    public @Nullable ClientSessionWill getWillPublish() {
         return willPublish;
     }
 
@@ -82,16 +82,16 @@ public class ClientSession implements Sizable {
         return queueLimit;
     }
 
-    public @NotNull ClientSession deepCopyWithoutPayload() {
+    public @NotNull ClientSession deepCopy() {
         return new ClientSession(
-                this.connected,
-                this.sessionExpiryInterval,
-                this.willPublish != null ? this.willPublish.deepCopyWithoutPayload() : null,
-                this.queueLimit);
+                connected,
+                sessionExpiryInterval,
+                willPublish != null ? willPublish.deepCopy() : null,
+                queueLimit);
     }
 
     public @NotNull ClientSession copyWithoutWill() {
-        return new ClientSession(this.connected, this.sessionExpiryInterval, null, this.queueLimit);
+        return new ClientSession(connected, sessionExpiryInterval, null, queueLimit);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ClientSession implements Sizable {
         if (willPublish != null) {
             size += willPublish.getEstimatedSize();
         }
-        if(queueLimit != null){
+        if (queueLimit != null) {
             size += ObjectMemoryEstimation.longSize();
         }
 

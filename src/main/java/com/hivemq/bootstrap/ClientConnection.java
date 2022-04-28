@@ -101,7 +101,7 @@ public class ClientConnection {
     public ClientConnection(final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler) {
         this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
-        this.messageIDPool = new SequentialMessageIDPoolImpl();
+        messageIDPool = new SequentialMessageIDPoolImpl();
     }
 
     public @NotNull Channel getChannel() {

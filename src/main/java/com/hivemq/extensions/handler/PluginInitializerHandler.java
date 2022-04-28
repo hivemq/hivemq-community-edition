@@ -215,7 +215,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         clientConnection.setPreventLwt(true);
         //We have already added the will to the session, so we need to remove it again
         final ListenableFuture<Void> removeWillFuture =
-                clientSessionPersistence.removeWill(connect.getClientIdentifier());
+                clientSessionPersistence.deleteWill(connect.getClientIdentifier());
         Futures.addCallback(removeWillFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
@@ -323,8 +323,8 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on initialize. Extensions are responsible on their own to handle exceptions.",
-                        pluginId);
-                log.debug("Original exception:", e);
+                        pluginId,
+                        e);
                 Exceptions.rethrowError(e);
             }
             return clientContext;

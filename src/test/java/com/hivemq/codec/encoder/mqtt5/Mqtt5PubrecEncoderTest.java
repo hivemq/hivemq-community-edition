@@ -16,8 +16,6 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.configuration.service.SecurityConfigurationService;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
@@ -25,10 +23,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.util.ChannelAttributes;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.when;
 
 /**
  * @author Waldemar Ruck
@@ -38,21 +32,10 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
 
     private static final Mqtt5PubRecReasonCode SUCCESS = Mqtt5PubRecReasonCode.SUCCESS;
 
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
-    private Mqtt5PubrecEncoder encoder;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-
-        encoder = new Mqtt5PubrecEncoder(messageDroppedService, securityConfigurationService);
-        super.setUp(encoder);
+        super.setUp();
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
     }
 
     @Test
@@ -83,7 +66,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
 
         final PUBREC pubRec =
                 new PUBREC((127 * 256) + 1, SUCCESS, "reason", userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -108,7 +91,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         };
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -136,13 +119,13 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, null, userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
     public void encode_reason_string_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(false);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(false);
 
         // MQTT v5.0 Spec §3.4.2.2
         final byte[] expected = {
@@ -157,13 +140,13 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         };
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
     public void encode_user_property_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
@@ -182,13 +165,13 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, null, userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
     public void encode_reason_string_and_user_property_request_problem_information_false() {
 
-        when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
+        testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
@@ -209,7 +192,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
 
         final PUBREC pubRec = new PUBREC(1, Mqtt5PubRecReasonCode.NOT_AUTHORIZED, "reason", userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -226,7 +209,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         };
 
         final PUBREC pubRec = new PUBREC(1, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -254,7 +237,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty));
 
         final PUBREC pubRec = new PUBREC(1, Mqtt5PubRecReasonCode.SUCCESS, "", userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -276,7 +259,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         };
 
         final PUBREC pubRec = new PUBREC(1, notAuthorizedCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -309,7 +292,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
                 Mqtt5UserProperties.of(ImmutableList.of(userProperty, userProperty2));
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, "reason", userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -327,7 +310,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         final MaximumPacketBuilder maxPacket = new MaximumPacketBuilder().build(MAX_PACKET_SIZE);
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, null, getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
     @Test
@@ -347,7 +330,7 @@ public class Mqtt5PubrecEncoderTest extends AbstractMqtt5EncoderTest {
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.NO_USER_PROPERTIES;
 
         final PUBREC pubRec = new PUBREC(1, SUCCESS, null, userProperties);
-        encodeTestBufferSize(expected, pubRec, encoder.bufferSize(channel.pipeline().context(encoder), pubRec));
+        encodeTestBufferSize(expected, pubRec);
     }
 
 }

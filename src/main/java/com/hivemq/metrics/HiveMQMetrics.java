@@ -169,5 +169,23 @@ public class HiveMQMetrics {
      */
     public static final HiveMQMetric<Counter> MQTT_CONNECTION_NOT_WRITABLE_CURRENT =
             HiveMQMetric.valueOf("com.hivemq.mqtt.connection.not-writable.current", Counter.class);
+
+    /**
+     * Represents a {@link Counter}, which holds the current amount of stored LWT messages.
+     *
+     * @since 2022.1
+     */
+    public static final HiveMQMetric<Counter> WILL_MESSAGE_COUNT =
+            HiveMQMetric.valueOf("com.hivemq.messages.will.count.current", Counter.class);
+
+
+    /**
+     * Represents a {@link Counter}, which holds the total amount of published LWT messages.
+     *
+     * @since 2022.1
+     */
+    public static final HiveMQMetric<Counter> WILL_MESSAGE_PUBLISHED_COUNT_TOTAL =
+            HiveMQMetric.valueOf("com.hivemq.messages.will.published.count.total", Counter.class);
+
 }
 
