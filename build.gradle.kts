@@ -90,6 +90,8 @@ repositories {
 dependencies {
     api("com.hivemq:hivemq-extension-sdk:${property("hivemq-extension-sdk.version")}")
 
+    //Gson
+    implementation("com.google.code.gson:gson:${property("gson.version")}")
     // netty
     implementation("io.netty:netty-buffer:${property("netty.version")}")
     implementation("io.netty:netty-codec:${property("netty.version")}")

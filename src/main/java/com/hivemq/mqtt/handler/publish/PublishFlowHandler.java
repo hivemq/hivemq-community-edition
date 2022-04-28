@@ -21,6 +21,7 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
+import com.hivemq.mqtt.decode.Factory;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.message.MessageWithID;
@@ -177,7 +178,12 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         super.channelInactive(ctx);
     }
 
+    //TODO: 前置增强
+    //应该前置增强修改PUBLISH的时间戳
     private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
+        //对负载部分内容进行修改，如时间更新为当前服务器时间
+        Factory.refresh(publish);
+
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
             // QoS 1 or 2 duplicate delivery handling
@@ -227,6 +233,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
 
+    //TODO：待处理
+    //客户端收到PubACK
     private void handlePuback(final @NotNull ChannelHandlerContext ctx, final PUBACK msg, @NotNull final String client) {
 
         log.trace("Client {}: Received PUBACK", client);

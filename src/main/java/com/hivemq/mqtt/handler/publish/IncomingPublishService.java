@@ -28,9 +28,12 @@ import com.hivemq.extension.sdk.api.packets.auth.ModifiableDefaultPermissions;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
+import com.hivemq.mqtt.decode.Factory;
+import com.hivemq.mqtt.decode.GsonProvider;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
@@ -40,6 +43,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
+import com.hivemq.util.LocalDateTimeUtils;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -241,7 +245,7 @@ public class IncomingPublishService {
     }
 
     private void sendAck(@NotNull final ChannelHandlerContext ctx, final PUBLISH publish, @Nullable final PublishReturnCode publishReturnCode) {
-
+       //TODO 当CODE = SUCCESS 设置return string 为 PUBLISH时间戳
         switch (publish.getQoS()) {
             case AT_MOST_ONCE:
                 // do nothing
@@ -251,7 +255,8 @@ public class IncomingPublishService {
                     ctx.pipeline().writeAndFlush(new PUBACK(publish.getPacketIdentifier(), Mqtt5PubAckReasonCode.NO_MATCHING_SUBSCRIBERS,
                             null, Mqtt5UserProperties.NO_USER_PROPERTIES));
                 } else {
-                    ctx.pipeline().writeAndFlush(new PUBACK(publish.getPacketIdentifier()));
+                    String datetime = GsonProvider.getGson().toJson(LocalDateTimeUtils.timestampToDatetime(publish.getTimestamp()));
+                    ctx.pipeline().writeAndFlush(new PUBACK(publish.getPacketIdentifier(), datetime));
                 }
                 break;
             case EXACTLY_ONCE:

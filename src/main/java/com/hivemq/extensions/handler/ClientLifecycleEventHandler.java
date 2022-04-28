@@ -142,6 +142,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     }
 
+    //TODO:通知应用服务器用户下线
+    //服务器向客户端发送断开连接
     private void fireOnServerDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull OnServerDisconnectEvent disconnectEvent) {
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
@@ -171,6 +173,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         }
     }
 
+    //TODO:同步下线状态
+    //用户下线，可能用户主动下线，也可能异常下线，同步到应用服务器用户下线
     private void fireOnClientDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull OnClientDisconnectEvent disconnectEvent) {
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
@@ -230,6 +234,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         }
     }
 
+    //TODO：同步上线状态
+    //完成认证,连接成功,将上线状态写入redis
     private void fireOnAuthSuccess(final @NotNull ChannelHandlerContext ctx) {
 
         final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
@@ -259,6 +265,8 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         }
     }
 
+    //TODO：无需更改
+    //连接但未完成认证
     private void fireOnMqttConnect(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT connect) {
 
         final Map<String, ClientLifecycleEventListenerProvider> pluginEventListenerProviderMap = lifecycleEventListeners.getClientLifecycleEventListenerProviderMap();

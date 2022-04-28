@@ -1,0 +1,234 @@
+2022/04/28-10:54:35.491934 443c RocksDB version: 6.20.3
+2022/04/28-10:54:35.505790 443c Git sha 8608d75d85f8e1b3b64b73a4fb6d19baec61ba5c
+2022/04/28-10:54:35.505964 443c Compile date 2021-05-07 18:16:49
+2022/04/28-10:54:35.506024 443c DB SUMMARY
+2022/04/28-10:54:35.506106 443c DB Session ID:  KNESDX9HDB4H1X82GTHG
+2022/04/28-10:54:35.519552 443c CURRENT file:  CURRENT
+2022/04/28-10:54:35.519605 443c IDENTITY file:  IDENTITY
+2022/04/28-10:54:35.520172 443c MANIFEST file:  MANIFEST-000004 size: 57 Bytes
+2022/04/28-10:54:35.520225 443c SST files in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28 dir, Total Num: 0, files: 
+2022/04/28-10:54:35.520267 443c Write Ahead Log file in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28: 000005.log size: 0 ; 
+2022/04/28-10:54:35.580630 443c                         Options.error_if_exists: 0
+2022/04/28-10:54:35.580680 443c                       Options.create_if_missing: 1
+2022/04/28-10:54:35.580709 443c                         Options.paranoid_checks: 1
+2022/04/28-10:54:35.580738 443c                               Options.track_and_verify_wals_in_manifest: 0
+2022/04/28-10:54:35.580768 443c                                     Options.env: 0000019F7C4E2040
+2022/04/28-10:54:35.580794 443c                                      Options.fs: WinFS
+2022/04/28-10:54:35.580820 443c                                Options.info_log: 0000019F7DA0B9A0
+2022/04/28-10:54:35.580847 443c                Options.max_file_opening_threads: 16
+2022/04/28-10:54:35.580874 443c                              Options.statistics: 0000019F7EC3D250
+2022/04/28-10:54:35.580900 443c                               Options.use_fsync: 0
+2022/04/28-10:54:35.580926 443c                       Options.max_log_file_size: 512000
+2022/04/28-10:54:35.580955 443c                  Options.max_manifest_file_size: 1073741824
+2022/04/28-10:54:35.580984 443c                   Options.log_file_time_to_roll: 0
+2022/04/28-10:54:35.581011 443c                       Options.keep_log_file_num: 2
+2022/04/28-10:54:35.581038 443c                    Options.recycle_log_file_num: 0
+2022/04/28-10:54:35.581065 443c                         Options.allow_fallocate: 1
+2022/04/28-10:54:35.581092 443c                        Options.allow_mmap_reads: 0
+2022/04/28-10:54:35.581118 443c                       Options.allow_mmap_writes: 0
+2022/04/28-10:54:35.581144 443c                        Options.use_direct_reads: 0
+2022/04/28-10:54:35.581169 443c                        Options.use_direct_io_for_flush_and_compaction: 0
+2022/04/28-10:54:35.581195 443c          Options.create_missing_column_families: 0
+2022/04/28-10:54:35.581222 443c                              Options.db_log_dir: 
+2022/04/28-10:54:35.581250 443c                                 Options.wal_dir: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28
+2022/04/28-10:54:35.581277 443c                Options.table_cache_numshardbits: 6
+2022/04/28-10:54:35.581304 443c                         Options.WAL_ttl_seconds: 0
+2022/04/28-10:54:35.581333 443c                       Options.WAL_size_limit_MB: 0
+2022/04/28-10:54:35.581361 443c                        Options.max_write_batch_group_size_bytes: 1048576
+2022/04/28-10:54:35.581391 443c             Options.manifest_preallocation_size: 4194304
+2022/04/28-10:54:35.581419 443c                     Options.is_fd_close_on_exec: 1
+2022/04/28-10:54:35.581447 443c                   Options.advise_random_on_open: 1
+2022/04/28-10:54:35.581476 443c                    Options.db_write_buffer_size: 0
+2022/04/28-10:54:35.581505 443c                    Options.write_buffer_manager: 0000019F004C3660
+2022/04/28-10:54:35.581534 443c         Options.access_hint_on_compaction_start: 1
+2022/04/28-10:54:35.581565 443c  Options.new_table_reader_for_compaction_inputs: 0
+2022/04/28-10:54:35.581597 443c           Options.random_access_max_buffer_size: 1048576
+2022/04/28-10:54:35.581684 443c                      Options.use_adaptive_mutex: 0
+2022/04/28-10:54:35.581717 443c                            Options.rate_limiter: 0000000000000000
+2022/04/28-10:54:35.581749 443c     Options.sst_file_manager.rate_bytes_per_sec: 0
+2022/04/28-10:54:35.581775 443c                       Options.wal_recovery_mode: 2
+2022/04/28-10:54:35.581800 443c                  Options.enable_thread_tracking: 0
+2022/04/28-10:54:35.581825 443c                  Options.enable_pipelined_write: 0
+2022/04/28-10:54:35.581853 443c                  Options.unordered_write: 0
+2022/04/28-10:54:35.581884 443c         Options.allow_concurrent_memtable_write: 1
+2022/04/28-10:54:35.581914 443c      Options.enable_write_thread_adaptive_yield: 1
+2022/04/28-10:54:35.581942 443c             Options.write_thread_max_yield_usec: 100
+2022/04/28-10:54:35.581971 443c            Options.write_thread_slow_yield_usec: 3
+2022/04/28-10:54:35.582000 443c                               Options.row_cache: None
+2022/04/28-10:54:35.582028 443c                              Options.wal_filter: None
+2022/04/28-10:54:35.582053 443c             Options.avoid_flush_during_recovery: 0
+2022/04/28-10:54:35.582077 443c             Options.allow_ingest_behind: 0
+2022/04/28-10:54:35.582103 443c             Options.preserve_deletes: 0
+2022/04/28-10:54:35.582130 443c             Options.two_write_queues: 0
+2022/04/28-10:54:35.582159 443c             Options.manual_wal_flush: 0
+2022/04/28-10:54:35.582190 443c             Options.atomic_flush: 0
+2022/04/28-10:54:35.582223 443c             Options.avoid_unnecessary_blocking_io: 0
+2022/04/28-10:54:35.582253 443c                 Options.persist_stats_to_disk: 0
+2022/04/28-10:54:35.582283 443c                 Options.write_dbid_to_manifest: 0
+2022/04/28-10:54:35.582314 443c                 Options.log_readahead_size: 0
+2022/04/28-10:54:35.582344 443c                 Options.file_checksum_gen_factory: Unknown
+2022/04/28-10:54:35.582371 443c                 Options.best_efforts_recovery: 0
+2022/04/28-10:54:35.582396 443c                Options.max_bgerror_resume_count: 2147483647
+2022/04/28-10:54:35.582421 443c            Options.bgerror_resume_retry_interval: 1000000
+2022/04/28-10:54:35.582449 443c             Options.allow_data_in_errors: 0
+2022/04/28-10:54:35.582479 443c             Options.db_host_id: __hostname__
+2022/04/28-10:54:35.582510 443c             Options.max_background_jobs: 2
+2022/04/28-10:54:35.582538 443c             Options.max_background_compactions: -1
+2022/04/28-10:54:35.582566 443c             Options.max_subcompactions: 1
+2022/04/28-10:54:35.582594 443c             Options.avoid_flush_during_shutdown: 0
+2022/04/28-10:54:35.582622 443c           Options.writable_file_max_buffer_size: 1048576
+2022/04/28-10:54:35.582649 443c             Options.delayed_write_rate : 16777216
+2022/04/28-10:54:35.582676 443c             Options.max_total_wal_size: 0
+2022/04/28-10:54:35.582702 443c             Options.delete_obsolete_files_period_micros: 21600000000
+2022/04/28-10:54:35.582728 443c                   Options.stats_dump_period_sec: 0
+2022/04/28-10:54:35.582756 443c                 Options.stats_persist_period_sec: 0
+2022/04/28-10:54:35.582785 443c                 Options.stats_history_buffer_size: 65536
+2022/04/28-10:54:35.582816 443c                          Options.max_open_files: -1
+2022/04/28-10:54:35.582845 443c                          Options.bytes_per_sync: 0
+2022/04/28-10:54:35.582873 443c                      Options.wal_bytes_per_sync: 0
+2022/04/28-10:54:35.582902 443c                   Options.strict_bytes_per_sync: 0
+2022/04/28-10:54:35.582927 443c       Options.compaction_readahead_size: 0
+2022/04/28-10:54:35.582952 443c                  Options.max_background_flushes: -1
+2022/04/28-10:54:35.582977 443c Compression algorithms supported:
+2022/04/28-10:54:35.583004 443c 	kZSTD supported: 1
+2022/04/28-10:54:35.583036 443c 	kSnappyCompression supported: 1
+2022/04/28-10:54:35.583069 443c 	kBZip2Compression supported: 0
+2022/04/28-10:54:35.583101 443c 	kZlibCompression supported: 1
+2022/04/28-10:54:35.585613 443c 	kLZ4Compression supported: 1
+2022/04/28-10:54:35.585643 443c 	kXpressCompression supported: 0
+2022/04/28-10:54:35.585671 443c 	kLZ4HCCompression supported: 1
+2022/04/28-10:54:35.585696 443c 	kZSTDNotFinalCompression supported: 1
+2022/04/28-10:54:35.585722 443c Fast CRC32 supported: Supported on x86
+2022/04/28-10:54:35.591752 443c [db\version_set.cc:4627] Recovering from manifest file: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28/MANIFEST-000004
+2022/04/28-10:54:35.592095 443c [db\column_family.cc:598] --------------- Options for column family [default]:
+2022/04/28-10:54:35.592125 443c               Options.comparator: leveldb.BytewiseComparator
+2022/04/28-10:54:35.592151 443c           Options.merge_operator: None
+2022/04/28-10:54:35.592178 443c        Options.compaction_filter: None
+2022/04/28-10:54:35.592202 443c        Options.compaction_filter_factory: None
+2022/04/28-10:54:35.592227 443c  Options.sst_partitioner_factory: None
+2022/04/28-10:54:35.592251 443c         Options.memtable_factory: SkipListFactory
+2022/04/28-10:54:35.592277 443c            Options.table_factory: BlockBasedTable
+2022/04/28-10:54:35.592327 443c            table_factory options:   flush_block_policy_factory: FlushBlockBySizePolicyFactory (0000019F7EE12BE0)
+  cache_index_and_filter_blocks: 0
+  cache_index_and_filter_blocks_with_high_priority: 1
+  pin_l0_filter_and_index_blocks_in_cache: 0
+  pin_top_level_index_and_filter: 1
+  index_type: 0
+  data_block_index_type: 0
+  index_shortening: 1
+  data_block_hash_table_util_ratio: 0.750000
+  hash_index_allow_collision: 1
+  checksum: 1
+  no_block_cache: 0
+  block_cache: 0000019F7F2C31B0
+  block_cache_name: LRUCache
+  block_cache_options:
+    capacity : 266376000
+    num_shard_bits : 6
+    strict_capacity_limit : 0
+    memory_allocator : None
+    high_pri_pool_ratio: 0.000
+  block_cache_compressed: 0000000000000000
+  persistent_cache: 0000000000000000
+  block_size: 32768
+  block_size_deviation: 10
+  block_restart_interval: 16
+  index_block_restart_interval: 1
+  metadata_block_size: 4096
+  partition_filters: 0
+  use_delta_encoding: 1
+  filter_policy: nullptr
+  whole_key_filtering: 1
+  verify_compression: 0
+  read_amp_bytes_per_bit: 0
+  format_version: 5
+  enable_index_compression: 1
+  block_align: 0
+2022/04/28-10:54:35.592353 443c        Options.write_buffer_size: 8324250
+2022/04/28-10:54:35.592378 443c  Options.max_write_buffer_number: 2
+2022/04/28-10:54:35.592402 443c          Options.compression: Snappy
+2022/04/28-10:54:35.592428 443c                  Options.bottommost_compression: Disabled
+2022/04/28-10:54:35.592454 443c       Options.prefix_extractor: nullptr
+2022/04/28-10:54:35.592479 443c   Options.memtable_insert_with_hint_prefix_extractor: nullptr
+2022/04/28-10:54:35.592504 443c             Options.num_levels: 7
+2022/04/28-10:54:35.592528 443c        Options.min_write_buffer_number_to_merge: 1
+2022/04/28-10:54:35.592553 443c     Options.max_write_buffer_number_to_maintain: 0
+2022/04/28-10:54:35.592578 443c     Options.max_write_buffer_size_to_maintain: 0
+2022/04/28-10:54:35.592605 443c            Options.bottommost_compression_opts.window_bits: -14
+2022/04/28-10:54:35.592630 443c                  Options.bottommost_compression_opts.level: 32767
+2022/04/28-10:54:35.592656 443c               Options.bottommost_compression_opts.strategy: 0
+2022/04/28-10:54:35.592680 443c         Options.bottommost_compression_opts.max_dict_bytes: 0
+2022/04/28-10:54:35.592707 443c         Options.bottommost_compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:54:35.592731 443c         Options.bottommost_compression_opts.parallel_threads: 1
+2022/04/28-10:54:35.592760 443c                  Options.bottommost_compression_opts.enabled: false
+2022/04/28-10:54:35.592787 443c         Options.bottommost_compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:54:35.592814 443c            Options.compression_opts.window_bits: -14
+2022/04/28-10:54:35.592839 443c                  Options.compression_opts.level: 32767
+2022/04/28-10:54:35.592924 443c               Options.compression_opts.strategy: 0
+2022/04/28-10:54:35.592953 443c         Options.compression_opts.max_dict_bytes: 0
+2022/04/28-10:54:35.592978 443c         Options.compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:54:35.593003 443c         Options.compression_opts.parallel_threads: 1
+2022/04/28-10:54:35.593027 443c                  Options.compression_opts.enabled: false
+2022/04/28-10:54:35.593051 443c         Options.compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:54:35.593076 443c      Options.level0_file_num_compaction_trigger: 4
+2022/04/28-10:54:35.593100 443c          Options.level0_slowdown_writes_trigger: 20
+2022/04/28-10:54:35.593125 443c              Options.level0_stop_writes_trigger: 36
+2022/04/28-10:54:35.593151 443c                   Options.target_file_size_base: 67108864
+2022/04/28-10:54:35.593176 443c             Options.target_file_size_multiplier: 1
+2022/04/28-10:54:35.593201 443c                Options.max_bytes_for_level_base: 268435456
+2022/04/28-10:54:35.593227 443c Options.level_compaction_dynamic_level_bytes: 0
+2022/04/28-10:54:35.593253 443c          Options.max_bytes_for_level_multiplier: 10.000000
+2022/04/28-10:54:35.593279 443c Options.max_bytes_for_level_multiplier_addtl[0]: 1
+2022/04/28-10:54:35.593305 443c Options.max_bytes_for_level_multiplier_addtl[1]: 1
+2022/04/28-10:54:35.593332 443c Options.max_bytes_for_level_multiplier_addtl[2]: 1
+2022/04/28-10:54:35.593357 443c Options.max_bytes_for_level_multiplier_addtl[3]: 1
+2022/04/28-10:54:35.593384 443c Options.max_bytes_for_level_multiplier_addtl[4]: 1
+2022/04/28-10:54:35.593413 443c Options.max_bytes_for_level_multiplier_addtl[5]: 1
+2022/04/28-10:54:35.593439 443c Options.max_bytes_for_level_multiplier_addtl[6]: 1
+2022/04/28-10:54:35.593465 443c       Options.max_sequential_skip_in_iterations: 8
+2022/04/28-10:54:35.593491 443c                    Options.max_compaction_bytes: 1677721600
+2022/04/28-10:54:35.593517 443c                        Options.arena_block_size: 1044480
+2022/04/28-10:54:35.593542 443c   Options.soft_pending_compaction_bytes_limit: 68719476736
+2022/04/28-10:54:35.593568 443c   Options.hard_pending_compaction_bytes_limit: 274877906944
+2022/04/28-10:54:35.593593 443c       Options.rate_limit_delay_max_milliseconds: 100
+2022/04/28-10:54:35.593618 443c                Options.disable_auto_compactions: 0
+2022/04/28-10:54:35.593645 443c                        Options.compaction_style: kCompactionStyleLevel
+2022/04/28-10:54:35.593673 443c                          Options.compaction_pri: kMinOverlappingRatio
+2022/04/28-10:54:35.593702 443c Options.compaction_options_universal.size_ratio: 1
+2022/04/28-10:54:35.593734 443c Options.compaction_options_universal.min_merge_width: 2
+2022/04/28-10:54:35.593767 443c Options.compaction_options_universal.max_merge_width: 4294967295
+2022/04/28-10:54:35.593796 443c Options.compaction_options_universal.max_size_amplification_percent: 200
+2022/04/28-10:54:35.593825 443c Options.compaction_options_universal.compression_size_percent: -1
+2022/04/28-10:54:35.593854 443c Options.compaction_options_universal.stop_style: kCompactionStopStyleTotalSize
+2022/04/28-10:54:35.593884 443c Options.compaction_options_fifo.max_table_files_size: 1073741824
+2022/04/28-10:54:35.593917 443c Options.compaction_options_fifo.allow_compaction: 0
+2022/04/28-10:54:35.594572 443c                   Options.table_properties_collectors: 
+2022/04/28-10:54:35.594605 443c                   Options.inplace_update_support: 0
+2022/04/28-10:54:35.594633 443c                 Options.inplace_update_num_locks: 10000
+2022/04/28-10:54:35.594661 443c               Options.memtable_prefix_bloom_size_ratio: 0.000000
+2022/04/28-10:54:35.594689 443c               Options.memtable_whole_key_filtering: 0
+2022/04/28-10:54:35.594716 443c   Options.memtable_huge_page_size: 0
+2022/04/28-10:54:35.594742 443c                           Options.bloom_locality: 0
+2022/04/28-10:54:35.594771 443c                    Options.max_successive_merges: 0
+2022/04/28-10:54:35.594795 443c                Options.optimize_filters_for_hits: 0
+2022/04/28-10:54:35.594827 443c                Options.paranoid_file_checks: 0
+2022/04/28-10:54:35.594855 443c                Options.force_consistency_checks: 1
+2022/04/28-10:54:35.594881 443c                Options.report_bg_io_stats: 0
+2022/04/28-10:54:35.594905 443c                               Options.ttl: 2592000
+2022/04/28-10:54:35.594934 443c          Options.periodic_compaction_seconds: 0
+2022/04/28-10:54:35.594959 443c                    Options.enable_blob_files: false
+2022/04/28-10:54:35.594984 443c                        Options.min_blob_size: 0
+2022/04/28-10:54:35.595008 443c                       Options.blob_file_size: 268435456
+2022/04/28-10:54:35.595036 443c                Options.blob_compression_type: NoCompression
+2022/04/28-10:54:35.595063 443c       Options.enable_blob_garbage_collection: false
+2022/04/28-10:54:35.595090 443c   Options.blob_garbage_collection_age_cutoff: 0.250000
+2022/04/28-10:54:35.623390 443c [db\version_set.cc:4675] Recovered from manifest file:D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28/MANIFEST-000004 succeeded,manifest_file_number is 4, next_file_number is 6, last_sequence is 0, log_number is 0,prev_log_number is 0,max_column_family is 0,min_log_number_to_keep is 0
+2022/04/28-10:54:35.623427 443c [db\version_set.cc:4684] Column family [default] (ID 0), log number is 0
+2022/04/28-10:54:35.635459 443c [db\version_set.cc:4119] Creating manifest 8
+2022/04/28-10:54:36.133691 443c EVENT_LOG_v1 {"time_micros": 1651114476132769, "job": 1, "event": "recovery_started", "wal_files": [5]}
+2022/04/28-10:54:36.133719 443c [db\db_impl\db_impl_open.cc:856] Recovering log #5 mode 2
+2022/04/28-10:54:36.134263 443c [db\version_set.cc:4119] Creating manifest 9
+2022/04/28-10:54:37.794846 443c EVENT_LOG_v1 {"time_micros": 1651114477794837, "job": 1, "event": "recovery_finished"}
+2022/04/28-10:54:37.815949 443c [file\delete_scheduler.cc:77] Deleted file D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_28/000005.log immediately, rate_bytes_per_sec 0, total_trash_size 0 max_trash_db_ratio 0.250000
+2022/04/28-10:54:38.003306 443c [db\db_impl\db_impl_open.cc:1757] SstFileManager instance 0000019F00721D00
+2022/04/28-10:54:38.009647 443c DB pointer 0000019F002308F0

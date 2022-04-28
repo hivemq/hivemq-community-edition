@@ -270,6 +270,10 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
         return persistence.get(publishId);
     }
 
+    public void setPayload(final byte[] payload) {
+        this.payload = payload;
+    }
+
     @Override
     public @NotNull String getTopic() {
         return topic;

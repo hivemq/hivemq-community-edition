@@ -1,0 +1,234 @@
+2022/04/28-10:54:37.959929 d04 RocksDB version: 6.20.3
+2022/04/28-10:54:37.959983 d04 Git sha 8608d75d85f8e1b3b64b73a4fb6d19baec61ba5c
+2022/04/28-10:54:37.960027 d04 Compile date 2021-05-07 18:16:49
+2022/04/28-10:54:37.960067 d04 DB SUMMARY
+2022/04/28-10:54:37.960106 d04 DB Session ID:  FIOJWEYUR4KKYYL7BQCD
+2022/04/28-10:54:37.963148 d04 CURRENT file:  CURRENT
+2022/04/28-10:54:37.963200 d04 IDENTITY file:  IDENTITY
+2022/04/28-10:54:37.963324 d04 MANIFEST file:  MANIFEST-000004 size: 57 Bytes
+2022/04/28-10:54:37.963375 d04 SST files in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51 dir, Total Num: 0, files: 
+2022/04/28-10:54:37.963414 d04 Write Ahead Log file in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51: 000005.log size: 0 ; 
+2022/04/28-10:54:37.990980 d04                         Options.error_if_exists: 0
+2022/04/28-10:54:37.991015 d04                       Options.create_if_missing: 1
+2022/04/28-10:54:37.991035 d04                         Options.paranoid_checks: 1
+2022/04/28-10:54:37.991054 d04                               Options.track_and_verify_wals_in_manifest: 0
+2022/04/28-10:54:37.991097 d04                                     Options.env: 0000019F7C4E2040
+2022/04/28-10:54:37.991144 d04                                      Options.fs: WinFS
+2022/04/28-10:54:37.991167 d04                                Options.info_log: 0000019F00A3BF50
+2022/04/28-10:54:37.991188 d04                Options.max_file_opening_threads: 16
+2022/04/28-10:54:37.991211 d04                              Options.statistics: 0000019F7EC3D250
+2022/04/28-10:54:37.991239 d04                               Options.use_fsync: 0
+2022/04/28-10:54:37.991265 d04                       Options.max_log_file_size: 512000
+2022/04/28-10:54:37.991294 d04                  Options.max_manifest_file_size: 1073741824
+2022/04/28-10:54:37.991322 d04                   Options.log_file_time_to_roll: 0
+2022/04/28-10:54:37.991349 d04                       Options.keep_log_file_num: 2
+2022/04/28-10:54:37.991441 d04                    Options.recycle_log_file_num: 0
+2022/04/28-10:54:37.991476 d04                         Options.allow_fallocate: 1
+2022/04/28-10:54:37.991512 d04                        Options.allow_mmap_reads: 0
+2022/04/28-10:54:37.991628 d04                       Options.allow_mmap_writes: 0
+2022/04/28-10:54:37.991666 d04                        Options.use_direct_reads: 0
+2022/04/28-10:54:37.991696 d04                        Options.use_direct_io_for_flush_and_compaction: 0
+2022/04/28-10:54:37.991722 d04          Options.create_missing_column_families: 0
+2022/04/28-10:54:37.991784 d04                              Options.db_log_dir: 
+2022/04/28-10:54:37.991815 d04                                 Options.wal_dir: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51
+2022/04/28-10:54:37.991867 d04                Options.table_cache_numshardbits: 6
+2022/04/28-10:54:37.991895 d04                         Options.WAL_ttl_seconds: 0
+2022/04/28-10:54:37.991965 d04                       Options.WAL_size_limit_MB: 0
+2022/04/28-10:54:37.991996 d04                        Options.max_write_batch_group_size_bytes: 1048576
+2022/04/28-10:54:37.992026 d04             Options.manifest_preallocation_size: 4194304
+2022/04/28-10:54:37.992054 d04                     Options.is_fd_close_on_exec: 1
+2022/04/28-10:54:37.992204 d04                   Options.advise_random_on_open: 1
+2022/04/28-10:54:37.992289 d04                    Options.db_write_buffer_size: 0
+2022/04/28-10:54:37.992335 d04                    Options.write_buffer_manager: 0000019F7C1BC1A0
+2022/04/28-10:54:37.992362 d04         Options.access_hint_on_compaction_start: 1
+2022/04/28-10:54:37.992390 d04  Options.new_table_reader_for_compaction_inputs: 0
+2022/04/28-10:54:37.992453 d04           Options.random_access_max_buffer_size: 1048576
+2022/04/28-10:54:37.992482 d04                      Options.use_adaptive_mutex: 0
+2022/04/28-10:54:37.992566 d04                            Options.rate_limiter: 0000000000000000
+2022/04/28-10:54:37.992596 d04     Options.sst_file_manager.rate_bytes_per_sec: 0
+2022/04/28-10:54:37.992621 d04                       Options.wal_recovery_mode: 2
+2022/04/28-10:54:37.992646 d04                  Options.enable_thread_tracking: 0
+2022/04/28-10:54:37.992672 d04                  Options.enable_pipelined_write: 0
+2022/04/28-10:54:37.992697 d04                  Options.unordered_write: 0
+2022/04/28-10:54:37.992721 d04         Options.allow_concurrent_memtable_write: 1
+2022/04/28-10:54:37.992751 d04      Options.enable_write_thread_adaptive_yield: 1
+2022/04/28-10:54:37.992776 d04             Options.write_thread_max_yield_usec: 100
+2022/04/28-10:54:37.992803 d04            Options.write_thread_slow_yield_usec: 3
+2022/04/28-10:54:37.992828 d04                               Options.row_cache: None
+2022/04/28-10:54:37.992859 d04                              Options.wal_filter: None
+2022/04/28-10:54:37.992885 d04             Options.avoid_flush_during_recovery: 0
+2022/04/28-10:54:37.992910 d04             Options.allow_ingest_behind: 0
+2022/04/28-10:54:37.992935 d04             Options.preserve_deletes: 0
+2022/04/28-10:54:37.992959 d04             Options.two_write_queues: 0
+2022/04/28-10:54:37.992983 d04             Options.manual_wal_flush: 0
+2022/04/28-10:54:37.993007 d04             Options.atomic_flush: 0
+2022/04/28-10:54:37.993034 d04             Options.avoid_unnecessary_blocking_io: 0
+2022/04/28-10:54:37.993061 d04                 Options.persist_stats_to_disk: 0
+2022/04/28-10:54:37.993090 d04                 Options.write_dbid_to_manifest: 0
+2022/04/28-10:54:37.993122 d04                 Options.log_readahead_size: 0
+2022/04/28-10:54:37.993148 d04                 Options.file_checksum_gen_factory: Unknown
+2022/04/28-10:54:37.993172 d04                 Options.best_efforts_recovery: 0
+2022/04/28-10:54:37.993197 d04                Options.max_bgerror_resume_count: 2147483647
+2022/04/28-10:54:37.993245 d04            Options.bgerror_resume_retry_interval: 1000000
+2022/04/28-10:54:37.993273 d04             Options.allow_data_in_errors: 0
+2022/04/28-10:54:37.993297 d04             Options.db_host_id: __hostname__
+2022/04/28-10:54:37.993321 d04             Options.max_background_jobs: 2
+2022/04/28-10:54:37.993346 d04             Options.max_background_compactions: -1
+2022/04/28-10:54:37.993371 d04             Options.max_subcompactions: 1
+2022/04/28-10:54:37.993402 d04             Options.avoid_flush_during_shutdown: 0
+2022/04/28-10:54:37.993428 d04           Options.writable_file_max_buffer_size: 1048576
+2022/04/28-10:54:37.993458 d04             Options.delayed_write_rate : 16777216
+2022/04/28-10:54:37.993488 d04             Options.max_total_wal_size: 0
+2022/04/28-10:54:37.993518 d04             Options.delete_obsolete_files_period_micros: 21600000000
+2022/04/28-10:54:37.993549 d04                   Options.stats_dump_period_sec: 0
+2022/04/28-10:54:37.993589 d04                 Options.stats_persist_period_sec: 0
+2022/04/28-10:54:37.993615 d04                 Options.stats_history_buffer_size: 65536
+2022/04/28-10:54:37.993641 d04                          Options.max_open_files: -1
+2022/04/28-10:54:37.993666 d04                          Options.bytes_per_sync: 0
+2022/04/28-10:54:37.993691 d04                      Options.wal_bytes_per_sync: 0
+2022/04/28-10:54:37.993728 d04                   Options.strict_bytes_per_sync: 0
+2022/04/28-10:54:37.993762 d04       Options.compaction_readahead_size: 0
+2022/04/28-10:54:37.993789 d04                  Options.max_background_flushes: -1
+2022/04/28-10:54:37.993814 d04 Compression algorithms supported:
+2022/04/28-10:54:37.993841 d04 	kZSTD supported: 1
+2022/04/28-10:54:37.993866 d04 	kSnappyCompression supported: 1
+2022/04/28-10:54:37.993891 d04 	kBZip2Compression supported: 0
+2022/04/28-10:54:37.993917 d04 	kZlibCompression supported: 1
+2022/04/28-10:54:37.993942 d04 	kLZ4Compression supported: 1
+2022/04/28-10:54:37.993968 d04 	kXpressCompression supported: 0
+2022/04/28-10:54:37.994044 d04 	kLZ4HCCompression supported: 1
+2022/04/28-10:54:37.994071 d04 	kZSTDNotFinalCompression supported: 1
+2022/04/28-10:54:37.994098 d04 Fast CRC32 supported: Supported on x86
+2022/04/28-10:54:38.003221 d04 [db\version_set.cc:4627] Recovering from manifest file: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51/MANIFEST-000004
+2022/04/28-10:54:38.003805 d04 [db\column_family.cc:598] --------------- Options for column family [default]:
+2022/04/28-10:54:38.003830 d04               Options.comparator: leveldb.BytewiseComparator
+2022/04/28-10:54:38.003850 d04           Options.merge_operator: None
+2022/04/28-10:54:38.003869 d04        Options.compaction_filter: None
+2022/04/28-10:54:38.003886 d04        Options.compaction_filter_factory: None
+2022/04/28-10:54:38.003904 d04  Options.sst_partitioner_factory: None
+2022/04/28-10:54:38.003922 d04         Options.memtable_factory: SkipListFactory
+2022/04/28-10:54:38.003941 d04            Options.table_factory: BlockBasedTable
+2022/04/28-10:54:38.003982 d04            table_factory options:   flush_block_policy_factory: FlushBlockBySizePolicyFactory (0000019F7EE12BE0)
+  cache_index_and_filter_blocks: 0
+  cache_index_and_filter_blocks_with_high_priority: 1
+  pin_l0_filter_and_index_blocks_in_cache: 0
+  pin_top_level_index_and_filter: 1
+  index_type: 0
+  data_block_index_type: 0
+  index_shortening: 1
+  data_block_hash_table_util_ratio: 0.750000
+  hash_index_allow_collision: 1
+  checksum: 1
+  no_block_cache: 0
+  block_cache: 0000019F7F2C31B0
+  block_cache_name: LRUCache
+  block_cache_options:
+    capacity : 266376000
+    num_shard_bits : 6
+    strict_capacity_limit : 0
+    memory_allocator : None
+    high_pri_pool_ratio: 0.000
+  block_cache_compressed: 0000000000000000
+  persistent_cache: 0000000000000000
+  block_size: 32768
+  block_size_deviation: 10
+  block_restart_interval: 16
+  index_block_restart_interval: 1
+  metadata_block_size: 4096
+  partition_filters: 0
+  use_delta_encoding: 1
+  filter_policy: nullptr
+  whole_key_filtering: 1
+  verify_compression: 0
+  read_amp_bytes_per_bit: 0
+  format_version: 5
+  enable_index_compression: 1
+  block_align: 0
+2022/04/28-10:54:38.004003 d04        Options.write_buffer_size: 8324250
+2022/04/28-10:54:38.004022 d04  Options.max_write_buffer_number: 2
+2022/04/28-10:54:38.004041 d04          Options.compression: Snappy
+2022/04/28-10:54:38.004059 d04                  Options.bottommost_compression: Disabled
+2022/04/28-10:54:38.004078 d04       Options.prefix_extractor: nullptr
+2022/04/28-10:54:38.004096 d04   Options.memtable_insert_with_hint_prefix_extractor: nullptr
+2022/04/28-10:54:38.004120 d04             Options.num_levels: 7
+2022/04/28-10:54:38.004143 d04        Options.min_write_buffer_number_to_merge: 1
+2022/04/28-10:54:38.004162 d04     Options.max_write_buffer_number_to_maintain: 0
+2022/04/28-10:54:38.004181 d04     Options.max_write_buffer_size_to_maintain: 0
+2022/04/28-10:54:38.004199 d04            Options.bottommost_compression_opts.window_bits: -14
+2022/04/28-10:54:38.004220 d04                  Options.bottommost_compression_opts.level: 32767
+2022/04/28-10:54:38.004239 d04               Options.bottommost_compression_opts.strategy: 0
+2022/04/28-10:54:38.004263 d04         Options.bottommost_compression_opts.max_dict_bytes: 0
+2022/04/28-10:54:38.004290 d04         Options.bottommost_compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:54:38.004310 d04         Options.bottommost_compression_opts.parallel_threads: 1
+2022/04/28-10:54:38.004329 d04                  Options.bottommost_compression_opts.enabled: false
+2022/04/28-10:54:38.004348 d04         Options.bottommost_compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:54:38.004378 d04            Options.compression_opts.window_bits: -14
+2022/04/28-10:54:38.004404 d04                  Options.compression_opts.level: 32767
+2022/04/28-10:54:38.004429 d04               Options.compression_opts.strategy: 0
+2022/04/28-10:54:38.004454 d04         Options.compression_opts.max_dict_bytes: 0
+2022/04/28-10:54:38.004483 d04         Options.compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:54:38.004511 d04         Options.compression_opts.parallel_threads: 1
+2022/04/28-10:54:38.004536 d04                  Options.compression_opts.enabled: false
+2022/04/28-10:54:38.004563 d04         Options.compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:54:38.004588 d04      Options.level0_file_num_compaction_trigger: 4
+2022/04/28-10:54:38.004613 d04          Options.level0_slowdown_writes_trigger: 20
+2022/04/28-10:54:38.004637 d04              Options.level0_stop_writes_trigger: 36
+2022/04/28-10:54:38.004663 d04                   Options.target_file_size_base: 67108864
+2022/04/28-10:54:38.004689 d04             Options.target_file_size_multiplier: 1
+2022/04/28-10:54:38.004713 d04                Options.max_bytes_for_level_base: 268435456
+2022/04/28-10:54:38.004738 d04 Options.level_compaction_dynamic_level_bytes: 0
+2022/04/28-10:54:38.004764 d04          Options.max_bytes_for_level_multiplier: 10.000000
+2022/04/28-10:54:38.004789 d04 Options.max_bytes_for_level_multiplier_addtl[0]: 1
+2022/04/28-10:54:38.004815 d04 Options.max_bytes_for_level_multiplier_addtl[1]: 1
+2022/04/28-10:54:38.004840 d04 Options.max_bytes_for_level_multiplier_addtl[2]: 1
+2022/04/28-10:54:38.004865 d04 Options.max_bytes_for_level_multiplier_addtl[3]: 1
+2022/04/28-10:54:38.004889 d04 Options.max_bytes_for_level_multiplier_addtl[4]: 1
+2022/04/28-10:54:38.004914 d04 Options.max_bytes_for_level_multiplier_addtl[5]: 1
+2022/04/28-10:54:38.004939 d04 Options.max_bytes_for_level_multiplier_addtl[6]: 1
+2022/04/28-10:54:38.004964 d04       Options.max_sequential_skip_in_iterations: 8
+2022/04/28-10:54:38.004988 d04                    Options.max_compaction_bytes: 1677721600
+2022/04/28-10:54:38.005013 d04                        Options.arena_block_size: 1044480
+2022/04/28-10:54:38.005038 d04   Options.soft_pending_compaction_bytes_limit: 68719476736
+2022/04/28-10:54:38.005062 d04   Options.hard_pending_compaction_bytes_limit: 274877906944
+2022/04/28-10:54:38.005087 d04       Options.rate_limit_delay_max_milliseconds: 100
+2022/04/28-10:54:38.005111 d04                Options.disable_auto_compactions: 0
+2022/04/28-10:54:38.005141 d04                        Options.compaction_style: kCompactionStyleLevel
+2022/04/28-10:54:38.005168 d04                          Options.compaction_pri: kMinOverlappingRatio
+2022/04/28-10:54:38.005193 d04 Options.compaction_options_universal.size_ratio: 1
+2022/04/28-10:54:38.005219 d04 Options.compaction_options_universal.min_merge_width: 2
+2022/04/28-10:54:38.005244 d04 Options.compaction_options_universal.max_merge_width: 4294967295
+2022/04/28-10:54:38.005269 d04 Options.compaction_options_universal.max_size_amplification_percent: 200
+2022/04/28-10:54:38.005294 d04 Options.compaction_options_universal.compression_size_percent: -1
+2022/04/28-10:54:38.005321 d04 Options.compaction_options_universal.stop_style: kCompactionStopStyleTotalSize
+2022/04/28-10:54:38.005346 d04 Options.compaction_options_fifo.max_table_files_size: 1073741824
+2022/04/28-10:54:38.005371 d04 Options.compaction_options_fifo.allow_compaction: 0
+2022/04/28-10:54:38.005402 d04                   Options.table_properties_collectors: 
+2022/04/28-10:54:38.005426 d04                   Options.inplace_update_support: 0
+2022/04/28-10:54:38.005450 d04                 Options.inplace_update_num_locks: 10000
+2022/04/28-10:54:38.005475 d04               Options.memtable_prefix_bloom_size_ratio: 0.000000
+2022/04/28-10:54:38.005500 d04               Options.memtable_whole_key_filtering: 0
+2022/04/28-10:54:38.005525 d04   Options.memtable_huge_page_size: 0
+2022/04/28-10:54:38.005550 d04                           Options.bloom_locality: 0
+2022/04/28-10:54:38.005575 d04                    Options.max_successive_merges: 0
+2022/04/28-10:54:38.005600 d04                Options.optimize_filters_for_hits: 0
+2022/04/28-10:54:38.005624 d04                Options.paranoid_file_checks: 0
+2022/04/28-10:54:38.005649 d04                Options.force_consistency_checks: 1
+2022/04/28-10:54:38.005733 d04                Options.report_bg_io_stats: 0
+2022/04/28-10:54:38.005762 d04                               Options.ttl: 2592000
+2022/04/28-10:54:38.005787 d04          Options.periodic_compaction_seconds: 0
+2022/04/28-10:54:38.005813 d04                    Options.enable_blob_files: false
+2022/04/28-10:54:38.005834 d04                        Options.min_blob_size: 0
+2022/04/28-10:54:38.005854 d04                       Options.blob_file_size: 268435456
+2022/04/28-10:54:38.005873 d04                Options.blob_compression_type: NoCompression
+2022/04/28-10:54:38.005893 d04       Options.enable_blob_garbage_collection: false
+2022/04/28-10:54:38.005913 d04   Options.blob_garbage_collection_age_cutoff: 0.250000
+2022/04/28-10:54:38.030933 d04 [db\version_set.cc:4675] Recovered from manifest file:D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51/MANIFEST-000004 succeeded,manifest_file_number is 4, next_file_number is 6, last_sequence is 0, log_number is 0,prev_log_number is 0,max_column_family is 0,min_log_number_to_keep is 0
+2022/04/28-10:54:38.030972 d04 [db\version_set.cc:4684] Column family [default] (ID 0), log number is 0
+2022/04/28-10:54:38.033218 d04 [db\version_set.cc:4119] Creating manifest 8
+2022/04/28-10:54:38.520362 d04 EVENT_LOG_v1 {"time_micros": 1651114478518792, "job": 1, "event": "recovery_started", "wal_files": [5]}
+2022/04/28-10:54:38.520392 d04 [db\db_impl\db_impl_open.cc:856] Recovering log #5 mode 2
+2022/04/28-10:54:38.521029 d04 [db\version_set.cc:4119] Creating manifest 9
+2022/04/28-10:54:38.931280 d04 EVENT_LOG_v1 {"time_micros": 1651114478931103, "job": 1, "event": "recovery_finished"}
+2022/04/28-10:54:38.943087 d04 [file\delete_scheduler.cc:77] Deleted file D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_51/000005.log immediately, rate_bytes_per_sec 0, total_trash_size 0 max_trash_db_ratio 0.250000
+2022/04/28-10:54:39.298705 d04 [db\db_impl\db_impl_open.cc:1757] SstFileManager instance 0000019F0075F050
+2022/04/28-10:54:39.300444 d04 DB pointer 0000019F01245EA0

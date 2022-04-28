@@ -21,6 +21,7 @@ import com.hivemq.extensions.packets.puback.PubackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
+import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 
 /**
@@ -36,6 +37,11 @@ public class PUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     //MQTT 3
     public PUBACK(final int packetIdentifier) {
         super(packetIdentifier, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    }
+
+    //MQTT 5
+    public PUBACK(final int packetIdentifier,String reasonString) {
+        super(packetIdentifier, Mqtt5PubAckReasonCode.SUCCESS, reasonString,Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
     //MQTT 5

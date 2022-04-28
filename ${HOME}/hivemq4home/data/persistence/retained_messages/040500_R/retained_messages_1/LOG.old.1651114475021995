@@ -1,0 +1,227 @@
+2022/04/28-10:53:49.257347 73a4 RocksDB version: 6.20.3
+2022/04/28-10:53:49.287916 73a4 Git sha 8608d75d85f8e1b3b64b73a4fb6d19baec61ba5c
+2022/04/28-10:53:49.287981 73a4 Compile date 2021-05-07 18:16:49
+2022/04/28-10:53:49.288035 73a4 DB SUMMARY
+2022/04/28-10:53:49.288075 73a4 DB Session ID:  54V2MMX7GLDDXA9V2NTL
+2022/04/28-10:53:49.290624 73a4 SST files in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_1 dir, Total Num: 0, files: 
+2022/04/28-10:53:49.290693 73a4 Write Ahead Log file in D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_1: 
+2022/04/28-10:53:49.290764 73a4                         Options.error_if_exists: 0
+2022/04/28-10:53:49.304400 73a4                       Options.create_if_missing: 1
+2022/04/28-10:53:49.304431 73a4                         Options.paranoid_checks: 1
+2022/04/28-10:53:49.304461 73a4                               Options.track_and_verify_wals_in_manifest: 0
+2022/04/28-10:53:49.304487 73a4                                     Options.env: 000002507170E860
+2022/04/28-10:53:49.304513 73a4                                      Options.fs: WinFS
+2022/04/28-10:53:49.304572 73a4                                Options.info_log: 0000025072FC5A70
+2022/04/28-10:53:49.304601 73a4                Options.max_file_opening_threads: 16
+2022/04/28-10:53:49.304627 73a4                              Options.statistics: 00000250724BD530
+2022/04/28-10:53:49.304654 73a4                               Options.use_fsync: 0
+2022/04/28-10:53:49.304682 73a4                       Options.max_log_file_size: 512000
+2022/04/28-10:53:49.304714 73a4                  Options.max_manifest_file_size: 1073741824
+2022/04/28-10:53:49.304740 73a4                   Options.log_file_time_to_roll: 0
+2022/04/28-10:53:49.304767 73a4                       Options.keep_log_file_num: 2
+2022/04/28-10:53:49.304793 73a4                    Options.recycle_log_file_num: 0
+2022/04/28-10:53:49.304818 73a4                         Options.allow_fallocate: 1
+2022/04/28-10:53:49.304843 73a4                        Options.allow_mmap_reads: 0
+2022/04/28-10:53:49.304866 73a4                       Options.allow_mmap_writes: 0
+2022/04/28-10:53:49.304892 73a4                        Options.use_direct_reads: 0
+2022/04/28-10:53:49.304918 73a4                        Options.use_direct_io_for_flush_and_compaction: 0
+2022/04/28-10:53:49.304942 73a4          Options.create_missing_column_families: 0
+2022/04/28-10:53:49.304969 73a4                              Options.db_log_dir: 
+2022/04/28-10:53:49.304994 73a4                                 Options.wal_dir: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_1
+2022/04/28-10:53:49.305018 73a4                Options.table_cache_numshardbits: 6
+2022/04/28-10:53:49.305042 73a4                         Options.WAL_ttl_seconds: 0
+2022/04/28-10:53:49.305068 73a4                       Options.WAL_size_limit_MB: 0
+2022/04/28-10:53:49.305092 73a4                        Options.max_write_batch_group_size_bytes: 1048576
+2022/04/28-10:53:49.305121 73a4             Options.manifest_preallocation_size: 4194304
+2022/04/28-10:53:49.305147 73a4                     Options.is_fd_close_on_exec: 1
+2022/04/28-10:53:49.305172 73a4                   Options.advise_random_on_open: 1
+2022/04/28-10:53:49.305200 73a4                    Options.db_write_buffer_size: 0
+2022/04/28-10:53:49.305230 73a4                    Options.write_buffer_manager: 0000025073A58660
+2022/04/28-10:53:49.305258 73a4         Options.access_hint_on_compaction_start: 1
+2022/04/28-10:53:49.305288 73a4  Options.new_table_reader_for_compaction_inputs: 0
+2022/04/28-10:53:49.305317 73a4           Options.random_access_max_buffer_size: 1048576
+2022/04/28-10:53:49.305343 73a4                      Options.use_adaptive_mutex: 0
+2022/04/28-10:53:49.305368 73a4                            Options.rate_limiter: 0000000000000000
+2022/04/28-10:53:49.305396 73a4     Options.sst_file_manager.rate_bytes_per_sec: 0
+2022/04/28-10:53:49.305526 73a4                       Options.wal_recovery_mode: 2
+2022/04/28-10:53:49.305559 73a4                  Options.enable_thread_tracking: 0
+2022/04/28-10:53:49.305587 73a4                  Options.enable_pipelined_write: 0
+2022/04/28-10:53:49.305614 73a4                  Options.unordered_write: 0
+2022/04/28-10:53:49.305641 73a4         Options.allow_concurrent_memtable_write: 1
+2022/04/28-10:53:49.305667 73a4      Options.enable_write_thread_adaptive_yield: 1
+2022/04/28-10:53:49.305697 73a4             Options.write_thread_max_yield_usec: 100
+2022/04/28-10:53:49.305724 73a4            Options.write_thread_slow_yield_usec: 3
+2022/04/28-10:53:49.305752 73a4                               Options.row_cache: None
+2022/04/28-10:53:49.305781 73a4                              Options.wal_filter: None
+2022/04/28-10:53:49.305810 73a4             Options.avoid_flush_during_recovery: 0
+2022/04/28-10:53:49.305836 73a4             Options.allow_ingest_behind: 0
+2022/04/28-10:53:49.305864 73a4             Options.preserve_deletes: 0
+2022/04/28-10:53:49.305891 73a4             Options.two_write_queues: 0
+2022/04/28-10:53:49.305916 73a4             Options.manual_wal_flush: 0
+2022/04/28-10:53:49.305944 73a4             Options.atomic_flush: 0
+2022/04/28-10:53:49.305973 73a4             Options.avoid_unnecessary_blocking_io: 0
+2022/04/28-10:53:49.306003 73a4                 Options.persist_stats_to_disk: 0
+2022/04/28-10:53:49.306036 73a4                 Options.write_dbid_to_manifest: 0
+2022/04/28-10:53:49.306062 73a4                 Options.log_readahead_size: 0
+2022/04/28-10:53:49.306085 73a4                 Options.file_checksum_gen_factory: Unknown
+2022/04/28-10:53:49.306115 73a4                 Options.best_efforts_recovery: 0
+2022/04/28-10:53:49.306146 73a4                Options.max_bgerror_resume_count: 2147483647
+2022/04/28-10:53:49.306174 73a4            Options.bgerror_resume_retry_interval: 1000000
+2022/04/28-10:53:49.306200 73a4             Options.allow_data_in_errors: 0
+2022/04/28-10:53:49.306219 73a4             Options.db_host_id: __hostname__
+2022/04/28-10:53:49.306238 73a4             Options.max_background_jobs: 2
+2022/04/28-10:53:49.306256 73a4             Options.max_background_compactions: -1
+2022/04/28-10:53:49.306276 73a4             Options.max_subcompactions: 1
+2022/04/28-10:53:49.306294 73a4             Options.avoid_flush_during_shutdown: 0
+2022/04/28-10:53:49.306313 73a4           Options.writable_file_max_buffer_size: 1048576
+2022/04/28-10:53:49.306337 73a4             Options.delayed_write_rate : 16777216
+2022/04/28-10:53:49.306368 73a4             Options.max_total_wal_size: 0
+2022/04/28-10:53:49.306400 73a4             Options.delete_obsolete_files_period_micros: 21600000000
+2022/04/28-10:53:49.306421 73a4                   Options.stats_dump_period_sec: 0
+2022/04/28-10:53:49.306446 73a4                 Options.stats_persist_period_sec: 0
+2022/04/28-10:53:49.306472 73a4                 Options.stats_history_buffer_size: 65536
+2022/04/28-10:53:49.306492 73a4                          Options.max_open_files: -1
+2022/04/28-10:53:49.306512 73a4                          Options.bytes_per_sync: 0
+2022/04/28-10:53:49.306531 73a4                      Options.wal_bytes_per_sync: 0
+2022/04/28-10:53:49.306556 73a4                   Options.strict_bytes_per_sync: 0
+2022/04/28-10:53:49.306583 73a4       Options.compaction_readahead_size: 0
+2022/04/28-10:53:49.306610 73a4                  Options.max_background_flushes: -1
+2022/04/28-10:53:49.306636 73a4 Compression algorithms supported:
+2022/04/28-10:53:49.306663 73a4 	kZSTD supported: 1
+2022/04/28-10:53:49.306685 73a4 	kSnappyCompression supported: 1
+2022/04/28-10:53:49.306706 73a4 	kBZip2Compression supported: 0
+2022/04/28-10:53:49.306725 73a4 	kZlibCompression supported: 1
+2022/04/28-10:53:49.306754 73a4 	kLZ4Compression supported: 1
+2022/04/28-10:53:49.306786 73a4 	kXpressCompression supported: 0
+2022/04/28-10:53:49.306815 73a4 	kLZ4HCCompression supported: 1
+2022/04/28-10:53:49.306843 73a4 	kZSTDNotFinalCompression supported: 1
+2022/04/28-10:53:49.306925 73a4 Fast CRC32 supported: Supported on x86
+2022/04/28-10:53:49.473149 73a4 [db\db_impl\db_impl_open.cc:285] Creating manifest 1 
+2022/04/28-10:53:50.087685 73a4 [db\version_set.cc:4627] Recovering from manifest file: D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_1/MANIFEST-000001
+2022/04/28-10:53:50.089119 73a4 [db\column_family.cc:598] --------------- Options for column family [default]:
+2022/04/28-10:53:50.089154 73a4               Options.comparator: leveldb.BytewiseComparator
+2022/04/28-10:53:50.089181 73a4           Options.merge_operator: None
+2022/04/28-10:53:50.089208 73a4        Options.compaction_filter: None
+2022/04/28-10:53:50.089236 73a4        Options.compaction_filter_factory: None
+2022/04/28-10:53:50.089296 73a4  Options.sst_partitioner_factory: None
+2022/04/28-10:53:50.089325 73a4         Options.memtable_factory: SkipListFactory
+2022/04/28-10:53:50.089352 73a4            Options.table_factory: BlockBasedTable
+2022/04/28-10:53:50.089421 73a4            table_factory options:   flush_block_policy_factory: FlushBlockBySizePolicyFactory (0000025071659500)
+  cache_index_and_filter_blocks: 0
+  cache_index_and_filter_blocks_with_high_priority: 1
+  pin_l0_filter_and_index_blocks_in_cache: 0
+  pin_top_level_index_and_filter: 1
+  index_type: 0
+  data_block_index_type: 0
+  index_shortening: 1
+  data_block_hash_table_util_ratio: 0.750000
+  hash_index_allow_collision: 1
+  checksum: 1
+  no_block_cache: 0
+  block_cache: 0000025072F6BAD0
+  block_cache_name: LRUCache
+  block_cache_options:
+    capacity : 266376000
+    num_shard_bits : 6
+    strict_capacity_limit : 0
+    memory_allocator : None
+    high_pri_pool_ratio: 0.000
+  block_cache_compressed: 0000000000000000
+  persistent_cache: 0000000000000000
+  block_size: 32768
+  block_size_deviation: 10
+  block_restart_interval: 16
+  index_block_restart_interval: 1
+  metadata_block_size: 4096
+  partition_filters: 0
+  use_delta_encoding: 1
+  filter_policy: nullptr
+  whole_key_filtering: 1
+  verify_compression: 0
+  read_amp_bytes_per_bit: 0
+  format_version: 5
+  enable_index_compression: 1
+  block_align: 0
+2022/04/28-10:53:50.089451 73a4        Options.write_buffer_size: 8324250
+2022/04/28-10:53:50.089478 73a4  Options.max_write_buffer_number: 2
+2022/04/28-10:53:50.089504 73a4          Options.compression: Snappy
+2022/04/28-10:53:50.089531 73a4                  Options.bottommost_compression: Disabled
+2022/04/28-10:53:50.089556 73a4       Options.prefix_extractor: nullptr
+2022/04/28-10:53:50.089584 73a4   Options.memtable_insert_with_hint_prefix_extractor: nullptr
+2022/04/28-10:53:50.089609 73a4             Options.num_levels: 7
+2022/04/28-10:53:50.089635 73a4        Options.min_write_buffer_number_to_merge: 1
+2022/04/28-10:53:50.089672 73a4     Options.max_write_buffer_number_to_maintain: 0
+2022/04/28-10:53:50.089699 73a4     Options.max_write_buffer_size_to_maintain: 0
+2022/04/28-10:53:50.089726 73a4            Options.bottommost_compression_opts.window_bits: -14
+2022/04/28-10:53:50.089753 73a4                  Options.bottommost_compression_opts.level: 32767
+2022/04/28-10:53:50.089779 73a4               Options.bottommost_compression_opts.strategy: 0
+2022/04/28-10:53:50.089805 73a4         Options.bottommost_compression_opts.max_dict_bytes: 0
+2022/04/28-10:53:50.089831 73a4         Options.bottommost_compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:53:50.089856 73a4         Options.bottommost_compression_opts.parallel_threads: 1
+2022/04/28-10:53:50.089885 73a4                  Options.bottommost_compression_opts.enabled: false
+2022/04/28-10:53:50.089912 73a4         Options.bottommost_compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:53:50.089938 73a4            Options.compression_opts.window_bits: -14
+2022/04/28-10:53:50.089963 73a4                  Options.compression_opts.level: 32767
+2022/04/28-10:53:50.089988 73a4               Options.compression_opts.strategy: 0
+2022/04/28-10:53:50.090014 73a4         Options.compression_opts.max_dict_bytes: 0
+2022/04/28-10:53:50.090043 73a4         Options.compression_opts.zstd_max_train_bytes: 0
+2022/04/28-10:53:50.090072 73a4         Options.compression_opts.parallel_threads: 1
+2022/04/28-10:53:50.090097 73a4                  Options.compression_opts.enabled: false
+2022/04/28-10:53:50.090123 73a4         Options.compression_opts.max_dict_buffer_bytes: 0
+2022/04/28-10:53:50.090150 73a4      Options.level0_file_num_compaction_trigger: 4
+2022/04/28-10:53:50.090176 73a4          Options.level0_slowdown_writes_trigger: 20
+2022/04/28-10:53:50.090202 73a4              Options.level0_stop_writes_trigger: 36
+2022/04/28-10:53:50.090228 73a4                   Options.target_file_size_base: 67108864
+2022/04/28-10:53:50.090255 73a4             Options.target_file_size_multiplier: 1
+2022/04/28-10:53:50.090281 73a4                Options.max_bytes_for_level_base: 268435456
+2022/04/28-10:53:50.090307 73a4 Options.level_compaction_dynamic_level_bytes: 0
+2022/04/28-10:53:50.090333 73a4          Options.max_bytes_for_level_multiplier: 10.000000
+2022/04/28-10:53:50.090360 73a4 Options.max_bytes_for_level_multiplier_addtl[0]: 1
+2022/04/28-10:53:50.090386 73a4 Options.max_bytes_for_level_multiplier_addtl[1]: 1
+2022/04/28-10:53:50.090412 73a4 Options.max_bytes_for_level_multiplier_addtl[2]: 1
+2022/04/28-10:53:50.090438 73a4 Options.max_bytes_for_level_multiplier_addtl[3]: 1
+2022/04/28-10:53:50.090462 73a4 Options.max_bytes_for_level_multiplier_addtl[4]: 1
+2022/04/28-10:53:50.090489 73a4 Options.max_bytes_for_level_multiplier_addtl[5]: 1
+2022/04/28-10:53:50.090514 73a4 Options.max_bytes_for_level_multiplier_addtl[6]: 1
+2022/04/28-10:53:50.090540 73a4       Options.max_sequential_skip_in_iterations: 8
+2022/04/28-10:53:50.090566 73a4                    Options.max_compaction_bytes: 1677721600
+2022/04/28-10:53:50.090591 73a4                        Options.arena_block_size: 1044480
+2022/04/28-10:53:50.090618 73a4   Options.soft_pending_compaction_bytes_limit: 68719476736
+2022/04/28-10:53:50.090644 73a4   Options.hard_pending_compaction_bytes_limit: 274877906944
+2022/04/28-10:53:50.090669 73a4       Options.rate_limit_delay_max_milliseconds: 100
+2022/04/28-10:53:50.090696 73a4                Options.disable_auto_compactions: 0
+2022/04/28-10:53:50.090723 73a4                        Options.compaction_style: kCompactionStyleLevel
+2022/04/28-10:53:50.090749 73a4                          Options.compaction_pri: kMinOverlappingRatio
+2022/04/28-10:53:50.090775 73a4 Options.compaction_options_universal.size_ratio: 1
+2022/04/28-10:53:50.090799 73a4 Options.compaction_options_universal.min_merge_width: 2
+2022/04/28-10:53:50.090825 73a4 Options.compaction_options_universal.max_merge_width: 4294967295
+2022/04/28-10:53:50.090851 73a4 Options.compaction_options_universal.max_size_amplification_percent: 200
+2022/04/28-10:53:50.090882 73a4 Options.compaction_options_universal.compression_size_percent: -1
+2022/04/28-10:53:50.090909 73a4 Options.compaction_options_universal.stop_style: kCompactionStopStyleTotalSize
+2022/04/28-10:53:50.090935 73a4 Options.compaction_options_fifo.max_table_files_size: 1073741824
+2022/04/28-10:53:50.090961 73a4 Options.compaction_options_fifo.allow_compaction: 0
+2022/04/28-10:53:50.091923 73a4                   Options.table_properties_collectors: 
+2022/04/28-10:53:50.091958 73a4                   Options.inplace_update_support: 0
+2022/04/28-10:53:50.091984 73a4                 Options.inplace_update_num_locks: 10000
+2022/04/28-10:53:50.092010 73a4               Options.memtable_prefix_bloom_size_ratio: 0.000000
+2022/04/28-10:53:50.092036 73a4               Options.memtable_whole_key_filtering: 0
+2022/04/28-10:53:50.092056 73a4   Options.memtable_huge_page_size: 0
+2022/04/28-10:53:50.092086 73a4                           Options.bloom_locality: 0
+2022/04/28-10:53:50.092106 73a4                    Options.max_successive_merges: 0
+2022/04/28-10:53:50.092123 73a4                Options.optimize_filters_for_hits: 0
+2022/04/28-10:53:50.092142 73a4                Options.paranoid_file_checks: 0
+2022/04/28-10:53:50.092227 73a4                Options.force_consistency_checks: 1
+2022/04/28-10:53:50.092256 73a4                Options.report_bg_io_stats: 0
+2022/04/28-10:53:50.092276 73a4                               Options.ttl: 2592000
+2022/04/28-10:53:50.092293 73a4          Options.periodic_compaction_seconds: 0
+2022/04/28-10:53:50.092311 73a4                    Options.enable_blob_files: false
+2022/04/28-10:53:50.092328 73a4                        Options.min_blob_size: 0
+2022/04/28-10:53:50.092346 73a4                       Options.blob_file_size: 268435456
+2022/04/28-10:53:50.092364 73a4                Options.blob_compression_type: NoCompression
+2022/04/28-10:53:50.092382 73a4       Options.enable_blob_garbage_collection: false
+2022/04/28-10:53:50.092407 73a4   Options.blob_garbage_collection_age_cutoff: 0.250000
+2022/04/28-10:53:50.107500 73a4 [db\version_set.cc:4675] Recovered from manifest file:D:\IMSystem\Hive-MQ-CE\hivemq-community-edition\${HOME}\hivemq4home\data\persistence\retained_messages\040500_R\retained_messages_1/MANIFEST-000001 succeeded,manifest_file_number is 1, next_file_number is 3, last_sequence is 0, log_number is 0,prev_log_number is 0,max_column_family is 0,min_log_number_to_keep is 0
+2022/04/28-10:53:50.107536 73a4 [db\version_set.cc:4684] Column family [default] (ID 0), log number is 0
+2022/04/28-10:53:50.120078 73a4 [db\version_set.cc:4119] Creating manifest 4
+2022/04/28-10:53:50.894291 73a4 [db\db_impl\db_impl_open.cc:1757] SstFileManager instance 0000025073BF4460
+2022/04/28-10:53:50.894801 73a4 DB pointer 0000025073431000
