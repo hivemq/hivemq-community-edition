@@ -51,6 +51,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
     private final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
 
+    private final @NotNull CompressionType blobCompressionType;
     public static final String PERSISTENCE_VERSION = "040500_R";
     private final long memtableSize;
     private final boolean forceFlush;
@@ -75,6 +76,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
+        this.blobCompressionType = InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE;
     }
 
     @NotNull
@@ -94,7 +96,12 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     @Override
     protected @NotNull Options getOptions() {
-        return new Options().setCreateIfMissing(true).setStatistics(new Statistics());
+        return new Options()
+                .setEnableBlobFiles(true)
+                .setEnableBlobGarbageCollection(true)
+                .setBlobCompressionType(blobCompressionType)
+                .setCreateIfMissing(true)
+                .setStatistics(new Statistics());
     }
 
     @PostConstruct
