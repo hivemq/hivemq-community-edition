@@ -23,7 +23,7 @@ import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
-import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.connection.ConnectionPersistence;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;

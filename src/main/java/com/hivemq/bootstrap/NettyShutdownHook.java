@@ -17,7 +17,7 @@ package com.hivemq.bootstrap;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.connection.ConnectionPersistence;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;

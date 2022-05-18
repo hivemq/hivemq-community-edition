@@ -27,7 +27,7 @@ import com.hivemq.configuration.service.entity.*;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.util.Validators;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
