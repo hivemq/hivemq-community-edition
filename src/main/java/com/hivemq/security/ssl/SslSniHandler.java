@@ -56,7 +56,7 @@ public class SslSniHandler extends SniHandler {
         if (hostname != null) {
             ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthSniHostname(hostname);
             if (log.isTraceEnabled()) {
-                log.trace("Client with IP '{}' sent SNI hostname '{}'", ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), hostname);
+                log.trace("Client with IP '{}' sent SNI hostname '{}'", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), hostname);
             }
         }
 

@@ -15,7 +15,6 @@
  */
 package com.hivemq.util;
 
-import com.google.common.base.Optional;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -29,17 +28,15 @@ import io.netty.channel.Channel;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Various utilities for working with channels
- *
- * @author Dominik Obermaier
- * @author Christoph Schäbel
  */
-public class ChannelUtils {
+public final class ChannelUtils {
 
     private ChannelUtils() {
         //This is a utility class, don't instantiate it!
@@ -50,23 +47,23 @@ public class ChannelUtils {
         final Optional<InetAddress> inetAddress = getChannelAddress(channel);
 
         if (inetAddress.isPresent()) {
-            return Optional.fromNullable(inetAddress.get().getHostAddress());
+            return Optional.ofNullable(inetAddress.get().getHostAddress());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Optional<InetAddress> getChannelAddress(final Channel channel) {
 
-        final Optional<SocketAddress> socketAddress = Optional.fromNullable(channel.remoteAddress());
+        final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
         if (socketAddress.isPresent()) {
             final SocketAddress sockAddress = socketAddress.get();
             //If this is not an InetAddress, we're treating this as if there's no address
             if (sockAddress instanceof InetSocketAddress) {
-                return Optional.fromNullable(((InetSocketAddress) sockAddress).getAddress());
+                return Optional.ofNullable(((InetSocketAddress) sockAddress).getAddress());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -118,14 +115,14 @@ public class ChannelUtils {
         final byte[] password = clientConnection.getAuthPassword();
         final SslClientCertificate sslCert = clientConnection.getAuthCertificate();
         final Listener listener = clientConnection.getConnectedListener();
-        final Optional<Long> disconnectTimestampOptional = Optional.fromNullable(disconnectTimestamp);
+        final Optional<Long> disconnectTimestampOptional = Optional.ofNullable(disconnectTimestamp);
 
         final ClientToken clientToken = new ClientToken(clientId,
                 username,
                 password,
                 sslCert,
                 false,
-                getChannelAddress(channel).orNull(),
+                getChannelAddress(channel).orElse(null),
                 listener,
                 disconnectTimestampOptional);
 

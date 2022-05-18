@@ -15,11 +15,12 @@
  */
 package com.hivemq.bootstrap;
 
-import com.google.common.base.Optional;
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.service.entity.Listener;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,7 +46,7 @@ public class ListenerStartupInformation {
         this.port = port;
         this.successful = successful;
         this.originalListener = originalListener;
-        this.exception = Optional.fromNullable(exception);
+        this.exception = Optional.ofNullable(exception);
     }
 
     public int getPort() {

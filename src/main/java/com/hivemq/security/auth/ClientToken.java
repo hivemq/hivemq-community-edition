@@ -15,15 +15,14 @@
  */
 package com.hivemq.security.auth;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.configuration.service.entity.Listener;
 
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,7 +44,7 @@ public class ClientToken implements ClientCredentialsData {
 
     private final Optional<SslClientCertificate> certificate;
 
-    private boolean isAuthenticated = false;
+    private boolean isAuthenticated;
 
     private boolean isAnonymous = true;
 
@@ -62,7 +61,7 @@ public class ClientToken implements ClientCredentialsData {
                        final boolean isBridge,
                        @Nullable final InetAddress inetAddress,
                        @Nullable final Listener listener) {
-        this(clientId, username, password, certificate, isBridge, inetAddress, listener, Optional.absent());
+        this(clientId, username, password, certificate, isBridge, inetAddress, listener, Optional.empty());
     }
 
     public ClientToken(@NotNull final String clientId,
@@ -75,12 +74,12 @@ public class ClientToken implements ClientCredentialsData {
                        @Nullable final Optional<Long> disconnectTimestamp) {
 
         this.clientId = checkNotNull(clientId, "client identifier must not be null");
-        this.username = Optional.fromNullable(username);
-        this.password = Optional.fromNullable(password);
-        this.certificate = Optional.fromNullable(certificate);
-        this.inetAddress = Optional.fromNullable(inetAddress);
+        this.username = Optional.ofNullable(username);
+        this.password = Optional.ofNullable(password);
+        this.certificate = Optional.ofNullable(certificate);
+        this.inetAddress = Optional.ofNullable(inetAddress);
         bridge = isBridge;
-        this.listener = Optional.fromNullable(listener);
+        this.listener = Optional.ofNullable(listener);
         this.disconnectTimestamp = disconnectTimestamp;
     }
 
@@ -116,15 +115,7 @@ public class ClientToken implements ClientCredentialsData {
 
     @Override
     public Optional<String> getPassword() {
-        return password.transform(new Function<byte[], String>() {
-            @Override
-            public String apply(final byte[] input) {
-                if (input == null) {
-                    return null;
-                }
-                return new String(input, StandardCharsets.UTF_8);
-            }
-        });
+        return password.map((input) -> new String(input, StandardCharsets.UTF_8));
     }
 
     @Override
@@ -181,7 +172,7 @@ public class ClientToken implements ClientCredentialsData {
         if (clientId != null ? !clientId.equals(that.clientId) : that.clientId != null) return false;
         if (listener != null ? !listener.equals(that.listener) : that.listener != null) return false;
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
-        if ((password.isPresent() && !that.password.isPresent()) || (!password.isPresent() && that.password.isPresent())) {
+        if (password.isPresent() ? !that.password.isPresent() : that.password.isPresent()) {
             return false;
         }
         if ((password.isPresent() && that.password.isPresent()) && !Arrays.equals(password.get(), that.password.get())) {
@@ -189,7 +180,7 @@ public class ClientToken implements ClientCredentialsData {
         }
         if (certificate != null ? !certificate.equals(that.certificate) : that.certificate != null) return false;
         if (inetAddress != null ? !inetAddress.equals(that.inetAddress) : that.inetAddress != null) return false;
-        if ((listener.isPresent() && !that.listener.isPresent()) || (!listener.isPresent() && that.listener.isPresent()))
+        if (listener.isPresent() ? !that.listener.isPresent() : that.listener.isPresent())
             return false;
         if ((listener.isPresent() && that.listener.isPresent()) && !listener.get().equals(that.listener.get()))
             return false;

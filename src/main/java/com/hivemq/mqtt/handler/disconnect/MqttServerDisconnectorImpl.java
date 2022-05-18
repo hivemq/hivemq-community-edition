@@ -57,9 +57,9 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
     @Inject
     public MqttServerDisconnectorImpl(final @NotNull EventLog eventLog) {
-        this.disconnectWithReasonCode = InternalConfigurations.DISCONNECT_WITH_REASON_CODE.get();
-        this.disconnectWithReasonString = InternalConfigurations.DISCONNECT_WITH_REASON_STRING.get();
         this.eventLog = eventLog;
+        disconnectWithReasonCode = InternalConfigurations.DISCONNECT_WITH_REASON_CODE.get();
+        disconnectWithReasonString = InternalConfigurations.DISCONNECT_WITH_REASON_STRING.get();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+            log.debug(logMessage, getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {

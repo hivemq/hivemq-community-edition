@@ -15,11 +15,10 @@
  */
 package com.hivemq.util;
 
-import com.google.common.base.Optional;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Reflection Utilities
@@ -50,11 +49,11 @@ public class Reflections {
             for (final Method interfaceMethod : interfaceMethods) {
                 if (methodSignatureEquals(method, interfaceMethod)) {
 
-                    return Optional.fromNullable(interfaceMethod.getAnnotation(annotation));
+                    return Optional.ofNullable(interfaceMethod.getAnnotation(annotation));
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

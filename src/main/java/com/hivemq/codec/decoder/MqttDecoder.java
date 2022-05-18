@@ -59,7 +59,7 @@ public abstract class MqttDecoder<T extends Message> {
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
-                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
             }
             return true;
         }
@@ -68,7 +68,7 @@ public abstract class MqttDecoder<T extends Message> {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). " +
                                 "This is not allowed. Disconnecting client.",
-                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
             }
             return true;
         }
