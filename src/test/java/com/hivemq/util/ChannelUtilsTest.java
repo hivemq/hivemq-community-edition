@@ -15,7 +15,6 @@
  */
 package com.hivemq.util;
 
-import com.google.common.base.Optional;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.security.auth.ClientToken;
 import com.hivemq.security.ssl.SslClientCertificateImpl;
@@ -27,6 +26,7 @@ import util.DummyHandler;
 
 import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

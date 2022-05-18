@@ -93,7 +93,7 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
 
         } else {
             log.error("An unexpected error occurred for client with IP {}: {}",
-                    ChannelUtils.getChannelIP(channel).or("UNKNOWN"), ExceptionUtils.getStackTrace(cause));
+                    ChannelUtils.getChannelIP(channel).orElse("UNKNOWN"), ExceptionUtils.getStackTrace(cause));
         }
 
         if (channel != null) {

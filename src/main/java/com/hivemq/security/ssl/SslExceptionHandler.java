@@ -90,7 +90,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
             if (clientId != null) {
                 log.debug("SSL message transmission for client {} failed: {}", clientId, rootCause.getMessage());
             } else {
-                log.debug("SSL message transmission failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), rootCause.getMessage());
+                log.debug("SSL message transmission failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), rootCause.getMessage());
             }
             log.trace("Original Exception", rootCause);
         }
@@ -105,7 +105,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
             if (clientId != null) {
                 log.debug("SSL Handshake for client {} failed: {}", clientId, rootCause.getMessage());
             } else {
-                log.debug("SSL Handshake failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), rootCause.getMessage());
+                log.debug("SSL Handshake failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), rootCause.getMessage());
             }
             log.trace("Original Exception", rootCause);
         }
@@ -116,7 +116,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
 
         if (cause instanceof NotSslRecordException) {
             if (log.isDebugEnabled()) {
-                log.debug("Client {} sent data which is not SSL/TLS to a SSL/TLS listener. Disconnecting client.", ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"));
+                log.debug("Client {} sent data which is not SSL/TLS to a SSL/TLS listener. Disconnecting client.", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"));
                 log.trace("Original Exception:", cause);
             }
             //Just in case the client wasn't disconnected already

@@ -122,7 +122,7 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                     if (sessionExpiryInterval > maxSessionExpiryInterval) {
                         if (log.isDebugEnabled()) {
                             log.debug("A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'",
-                                    getChannelIP(clientConnection.getChannel()).or("UNKNOWN"),
+                                    getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"),
                                     sessionExpiryInterval,
                                     maxSessionExpiryInterval);
                         }

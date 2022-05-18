@@ -15,7 +15,7 @@
  */
 package com.hivemq.security.auth;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 /**
  * An extended version of {@link ClientData} which also contains

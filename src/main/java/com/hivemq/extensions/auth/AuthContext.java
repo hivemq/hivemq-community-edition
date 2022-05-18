@@ -123,7 +123,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
                 log.error("Execution of authentication was rejected for client with IP {}.",
-                        ChannelUtils.getChannelIP(ctx.channel()).or("UNKNOWN"), ex);
+                        ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), ex);
             }
         }
     }

@@ -80,7 +80,7 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
 
         if (grantedQos.isEmpty()) {
             log.error("Tried to write a SUBACK with empty payload to a client. Disconnecting client (IP: {}).",
-                    getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                    getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
             mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                     null, //already logged
                     "Tried to write a SUBACK with empty payload to a client.",
@@ -95,7 +95,7 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
         for (final Mqtt5SubAckReasonCode granted : grantedQos) {
             if ((granted.getCode() >= 128) && (protocolVersion == ProtocolVersion.MQTTv3_1)) {
                 log.error("Tried to write a failure code (0x80) to a MQTT 3.1 subscriber. Disconnecting client (IP: {}).",
-                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
                 mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                         null, //already logged
                         "Tried to write a failure code (0x80) to a MQTT 3.1 subscriber.",
@@ -110,7 +110,7 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
                     granted != GRANTED_QOS_2 &&
                     granted.getCode() < 128) {
                 log.error("Tried to write an invalid SUBACK return code to a subscriber. Disconnecting client (IP: {}).",
-                        getChannelIP(clientConnection.getChannel()).or("UNKNOWN"));
+                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
                 mqttServerDisconnector.disconnect(clientConnection.getChannel(),
                         null, //already logged
                         "Tried to write an invalid SUBACK return code to a subscriber.",

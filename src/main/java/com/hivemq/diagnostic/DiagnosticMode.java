@@ -18,7 +18,6 @@ package com.hivemq.diagnostic;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.diagnostic.data.DiagnosticData;
@@ -32,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -137,7 +137,7 @@ public class DiagnosticMode {
                 FileUtils.forceDelete(diagnosticsFolder);
             } catch (final IOException e) {
                 log.error("Could not delete diagnostics folder. Stopping Diagnostic Mode");
-                return Optional.absent();
+                return Optional.empty();
             }
         }
 
@@ -146,7 +146,7 @@ public class DiagnosticMode {
             FileUtils.forceMkdir(diagnosticsFolder);
         } catch (final IOException e) {
             log.error("Could not create diagnostics folder. Stopping Diagnostic Mode");
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(diagnosticsFolder);
