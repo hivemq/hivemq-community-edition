@@ -123,7 +123,7 @@ public class PublishPollServiceImplTest {
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
-        when(connectionPersistence.get(anyString())).thenReturn(channel);
+        when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
         when(channel.pipeline()).thenReturn(pipeline);
 
         clientConnection = spy(new ClientConnection(channel, publishFlushHandler));
@@ -253,7 +253,7 @@ public class PublishPollServiceImplTest {
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1),
                 new SubscriberWithQoS("client2", 2, flags, 2)));
-        when(connectionPersistence.get("client1")).thenReturn(channel);
+        when(connectionPersistence.get("client1")).thenReturn(clientConnection);
         when(connectionPersistence.get("client2")).thenReturn(null);
 
         when(clientQueuePersistence.readShared(eq("group/topic"), anyInt(), anyLong())).thenReturn(Futures.immediateFuture(
@@ -289,7 +289,7 @@ public class PublishPollServiceImplTest {
         final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
-        when(connectionPersistence.get("client1")).thenReturn(channel);
+        when(connectionPersistence.get("client1")).thenReturn(clientConnection);
 
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
@@ -307,7 +307,7 @@ public class PublishPollServiceImplTest {
         final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
-        when(connectionPersistence.get("client1")).thenReturn(channel);
+        when(connectionPersistence.get("client1")).thenReturn(clientConnection);
 
         when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);

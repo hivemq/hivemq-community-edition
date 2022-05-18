@@ -42,9 +42,7 @@ import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientSessions;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,13 +225,12 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         }
 
         log.debug("Request forced client disconnect for client {}.", clientId);
-        final Channel channel = connectionPersistence.get(clientId);
+        final ClientConnection clientConnection = connectionPersistence.get(clientId);
 
-        if (channel == null) {
+        if (clientConnection == null) {
             log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
             return Futures.immediateFuture(false);
         }
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         clientConnection.setPreventLwt(preventLwtMessage);
         if (session.getSessionExpiryInterval() != SESSION_EXPIRY_NOT_SET) {
             clientConnection.setClientSessionExpiryInterval(session.getSessionExpiryInterval());
@@ -245,10 +242,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final Mqtt5DisconnectReasonCode usedReasonCode =
                 reasonCode == null ? Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION : Mqtt5DisconnectReasonCode.valueOf(reasonCode.name());
 
-        mqttServerDisconnector.disconnect(channel, logMessage, eventLogMessage, usedReasonCode, reasonString);
+        mqttServerDisconnector.disconnect(clientConnection.getChannel(), logMessage, eventLogMessage, usedReasonCode, reasonString);
 
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
-        channel.closeFuture().addListener((ChannelFutureListener) future -> {
+        clientConnection.getChannel().closeFuture().addListener((ChannelFutureListener) future -> {
             resultFuture.set(true);
         });
         return resultFuture;

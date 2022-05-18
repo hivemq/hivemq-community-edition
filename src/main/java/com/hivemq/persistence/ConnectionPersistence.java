@@ -31,20 +31,12 @@ import java.util.Set;
 public interface ConnectionPersistence {
 
     /**
-     * Receive a {@link Channel} from the persistence, for a specific client id.
-     *
-     * @param clientId The client identifier.
-     * @return The Channel of the client or {@code null} if not found.
-     */
-    @Nullable Channel get(@NotNull String clientId);
-
-    /**
      * Receive a {@link ClientConnection} from the persistence, for a specific client id.
      *
      * @param clientId The client identifier.
      * @return The ClientConnection of the client or {@code null} if not found.
      */
-    @Nullable ClientConnection getClientConnection(@NotNull String clientId);
+    @Nullable ClientConnection get(@NotNull String clientId);
 
     /**
      * Try to put a ClientConnection for the client id. Return the old ClientConnection when there is already one.

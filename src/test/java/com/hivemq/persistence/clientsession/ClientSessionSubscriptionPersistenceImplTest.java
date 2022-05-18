@@ -149,8 +149,9 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.close();
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
 
-        when(connectionPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
 
         verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), anyInt(), any(Channel.class));
@@ -161,8 +162,9 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_invalidate_caches_empty_subs() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
 
-        when(connectionPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
 
         verify(publishPollService, never()).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), anyInt(), any(Channel.class));
@@ -175,9 +177,10 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_invalidate_caches_success() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        when(connectionPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of(new Subscription(new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 2, "group")));
 
         verify(publishPollService).pollSharedPublishesForClient(anyString(), anyString(), anyInt(), anyBoolean(), any(), any(Channel.class));

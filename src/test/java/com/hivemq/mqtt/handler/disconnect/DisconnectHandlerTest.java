@@ -80,7 +80,7 @@ public class DisconnectHandlerTest {
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        when(connectionPersistence.getClientConnection(anyString())).thenReturn(clientConnection);
+        when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
     }
 
     @Test
