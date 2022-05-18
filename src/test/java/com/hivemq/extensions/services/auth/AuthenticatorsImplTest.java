@@ -33,9 +33,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Georg Held
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class AuthenticatorsImplTest {
 
