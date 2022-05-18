@@ -43,9 +43,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Dominik Obermaier
  */
 @Singleton
-public class ChannelPersistenceImpl implements ChannelPersistence {
+public class ConnectionPersistenceImpl implements ConnectionPersistence {
 
-    private static final Logger log = LoggerFactory.getLogger(ChannelPersistenceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectionPersistenceImpl.class);
 
     private final @NotNull Map<String, ClientConnection> clientConnectionMap;
     private final @NotNull Map<String, Channel> serverChannelMap;
@@ -54,7 +54,7 @@ public class ChannelPersistenceImpl implements ChannelPersistence {
     private final int shutdownPartitionSize;
 
     @Inject
-    public ChannelPersistenceImpl() {
+    public ConnectionPersistenceImpl() {
         shutdownLegacy = InternalConfigurations.NETTY_SHUTDOWN_LEGACY;
         shutdownPartitionSize = InternalConfigurations.NETTY_SHUTDOWN_PARTITION_SIZE;
         interrupted = new AtomicBoolean(false);

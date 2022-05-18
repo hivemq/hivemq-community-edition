@@ -17,7 +17,7 @@ package com.hivemq.bootstrap;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
@@ -37,20 +37,20 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
     private final @NotNull EventLoopGroup workerGroup;
     private final @NotNull EventLoopGroup bossGroup;
     private final int eventLoopsShutdownTimeout;
-    private final int channelPersistenceShutdownTimeout;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final int connectionPersistenceShutdownTimeout;
+    private final @NotNull ConnectionPersistence connectionPersistence;
 
     public NettyShutdownHook(
             final @NotNull EventLoopGroup workerGroup,
             final @NotNull EventLoopGroup bossGroup,
             final int eventLoopsShutdownTimeout,
-            final int channelPersistenceShutdownTimeout,
-            final @NotNull ChannelPersistence channelPersistence) {
+            final int connectionPersistenceShutdownTimeout,
+            final @NotNull ConnectionPersistence connectionPersistence) {
         this.workerGroup = workerGroup;
         this.bossGroup = bossGroup;
         this.eventLoopsShutdownTimeout = eventLoopsShutdownTimeout;
-        this.channelPersistenceShutdownTimeout = channelPersistenceShutdownTimeout;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistenceShutdownTimeout = connectionPersistenceShutdownTimeout;
+        this.connectionPersistence = connectionPersistence;
     }
 
     @Override
@@ -68,19 +68,19 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
         log.debug("Shutting down listeners and clients");
         try {
             //we need to block the shutdown of the clients before we shutdown their executors.
-            channelPersistence.shutDown().get(channelPersistenceShutdownTimeout, TimeUnit.SECONDS);
+            connectionPersistence.shutDown().get(connectionPersistenceShutdownTimeout, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException e) {
             log.warn("Client shutdown failed exceptionally: {}", e.getMessage());
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Original Exception: ", e);
             }
         } catch (final TimeoutException e) {
             log.warn("Client shutdown timed out.");
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Original Exception: ", e);
             }
         } finally {
-            channelPersistence.interruptShutdown();
+            connectionPersistence.interruptShutdown();
         }
 
         log.debug("Shutting down worker and boss threads");

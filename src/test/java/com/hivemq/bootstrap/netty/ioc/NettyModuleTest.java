@@ -42,7 +42,7 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -52,27 +52,17 @@ import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.security.ioc.Security;
 import com.hivemq.security.ssl.SslContextFactory;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dominik Obermaier
- */
 public class NettyModuleTest {
 
-    @Before
-    public void set_up() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void test_netty_configuration_is_singleton() throws Exception {
+    public void test_netty_configuration_is_singleton() {
 
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -88,7 +78,7 @@ public class NettyModuleTest {
                 bind(MessageDroppedService.class).toInstance(mock(MessageDroppedService.class));
                 bind(PublishPayloadPersistence.class).toInstance(mock(PublishPayloadPersistence.class));
                 bind(TopicAliasLimiter.class).toInstance(mock(TopicAliasLimiter.class));
-                bind(ChannelPersistence.class).toInstance(mock(ChannelPersistence.class));
+                bind(ConnectionPersistence.class).toInstance(mock(ConnectionPersistence.class));
                 bind(ChannelDependencies.class).toInstance(mock(ChannelDependencies.class));
                 bind(SslContextFactory.class).toInstance(mock(SslContextFactory.class));
                 bind(PluginTaskExecutorService.class).toInstance(mock(PluginTaskExecutorService.class));

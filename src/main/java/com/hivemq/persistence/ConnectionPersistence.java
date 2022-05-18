@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Dominik Obermaier
  * @author Florian Limpöck
  */
-public interface ChannelPersistence {
+public interface ConnectionPersistence {
 
     /**
      * Receive a {@link Channel} from the persistence, for a specific client id.
@@ -41,7 +41,7 @@ public interface ChannelPersistence {
     /**
      * Receive a {@link ClientConnection} from the persistence, for a specific client id.
      *
-     * @param clientId         The client identifier.
+     * @param clientId The client identifier.
      * @return The ClientConnection of the client or {@code null} if not found.
      */
     @Nullable ClientConnection getClientConnection(@NotNull String clientId);

@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.events.EventRegistry;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
@@ -41,8 +40,6 @@ import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.exception.ExtensionLoadingException;
-import com.hivemq.extensions.handler.PluginAuthenticatorService;
-import com.hivemq.extensions.handler.PluginAuthorizerService;
 import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
 import com.hivemq.extensions.services.auth.AuthorizersImpl;
 import com.hivemq.extensions.services.auth.SecurityRegistryImpl;
@@ -51,7 +48,6 @@ import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorSer
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 import com.hivemq.extensions.services.initializer.InitializerRegistryImpl;
 import com.hivemq.extensions.services.initializer.InitializersImpl;
-import com.hivemq.persistence.ChannelPersistence;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -117,24 +113,13 @@ public class ExtensionStaticInitializerImplTest {
     private PublishService publishService;
 
     @Mock
-    private ChannelPersistence channelPersistence;
-
-    @Mock
     private EventRegistry eventRegistry;
-
-    private PluginAuthorizerService pluginAuthorizerService;
-
-    @Mock
-    private PluginAuthenticatorService pluginAuthenticatorService;
 
     @Mock
     private ClusterService clusterService;
 
     @Mock
     private GlobalInterceptorRegistry interceptorRegistry;
-
-    @Mock
-    private ServerInformation serverInformation;
 
     @Mock
     private AdminService adminService;
@@ -443,7 +428,7 @@ public class ExtensionStaticInitializerImplTest {
 
         //This classloader contains the classes from the jar file
         final IsolatedExtensionClassloader cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
         cl.loadClassesWithStaticContext();
         staticInitializer.initialize("pluginid", cl);
 

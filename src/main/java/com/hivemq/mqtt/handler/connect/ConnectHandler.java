@@ -52,7 +52,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.services.PublishPollService;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.util.*;
@@ -71,8 +71,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
-import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
 
 /**
  * The handler which is responsible for CONNECT messages
@@ -87,7 +87,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
     private static final @NotNull Logger log = LoggerFactory.getLogger(ConnectHandler.class);
 
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider;
     private final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider;
@@ -110,7 +110,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
     @Inject
     public ConnectHandler(
             final @NotNull ClientSessionPersistence clientSessionPersistence,
-            final @NotNull ChannelPersistence channelPersistence,
+            final @NotNull ConnectionPersistence connectionPersistence,
             final @NotNull FullConfigurationService configurationService,
             final @NotNull Provider<PublishFlowHandler> publishFlowHandlerProvider,
             final @NotNull Provider<FlowControlHandler> flowControlHandlerProvider,
@@ -124,7 +124,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.clientSessionPersistence = clientSessionPersistence;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         this.configurationService = configurationService;
         this.publishFlowHandlerProvider = publishFlowHandlerProvider;
         this.flowControlHandlerProvider = flowControlHandlerProvider;
@@ -626,8 +626,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             return;
         }
 
-        final ClientConnection persistedClientConnection = channelPersistence.persistIfAbsent(msg.getClientIdentifier(), clientConnection);
-        // We have written our ClientConnection to the ChannelPersistence. We are now able to connect.
+        final ClientConnection persistedClientConnection = connectionPersistence.persistIfAbsent(msg.getClientIdentifier(), clientConnection);
+        // We have written our ClientConnection to the ConnectionPersistence. We are now able to connect.
         if (persistedClientConnection == clientConnection) {
             afterTakeover(ctx, msg);
             return;

@@ -29,7 +29,7 @@ import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
@@ -60,7 +60,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull TopicAliasLimiter topicAliasLimiter;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final @NotNull ConnectionPersistence connectionPersistence;
 
     private final boolean logClientReasonString;
 
@@ -70,12 +70,12 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             final @NotNull MetricsHolder metricsHolder,
             final @NotNull TopicAliasLimiter topicAliasLimiter,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
-            final @NotNull ChannelPersistence channelPersistence) {
+            final @NotNull ConnectionPersistence connectionPersistence) {
         this.eventLog = eventLog;
         this.metricsHolder = metricsHolder;
         this.topicAliasLimiter = topicAliasLimiter;
         this.clientSessionPersistence = clientSessionPersistence;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
     }
 
@@ -144,7 +144,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
         if (clientConnection.getClientId() == null
-                || clientConnection != channelPersistence.getClientConnection(clientConnection.getClientId())) {
+                || clientConnection != connectionPersistence.getClientConnection(clientConnection.getClientId())) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
@@ -168,7 +168,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
-                channelPersistence.remove(clientConnection);
+                connectionPersistence.remove(clientConnection);
                 Checkpoints.checkpoint("client-disconnected");
                 final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
                 if (disconnectFuture != null) {

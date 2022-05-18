@@ -27,7 +27,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
-import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -37,7 +36,7 @@ import com.hivemq.mqtt.topic.SubscriptionFlags;
 import com.hivemq.mqtt.topic.TopicFilter;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
@@ -64,37 +63,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @LazySingleton
 public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistence implements ClientSessionSubscriptionPersistence {
 
-    private final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionPersistenceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionPersistenceImpl.class);
 
     private final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence;
     private final @NotNull LocalTopicTree topicTree;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull ProducerQueues singleWriter;
-    private final @NotNull EventLog eventLog;
     private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull Chunker chunker;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
-    ClientSessionSubscriptionPersistenceImpl(final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence,
-                                             final @NotNull LocalTopicTree topicTree,
-                                             final @NotNull SharedSubscriptionService sharedSubscriptionService,
-                                             final @NotNull SingleWriterService singleWriterService,
-                                             final @NotNull ChannelPersistence channelPersistence,
-                                             final @NotNull EventLog eventLog,
-                                             final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
-                                             final @NotNull PublishPollService publishPollService,
-                                             final @NotNull Chunker chunker,
-                                             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
+    ClientSessionSubscriptionPersistenceImpl(
+            final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence,
+            final @NotNull LocalTopicTree topicTree,
+            final @NotNull SharedSubscriptionService sharedSubscriptionService,
+            final @NotNull SingleWriterService singleWriterService,
+            final @NotNull ConnectionPersistence connectionPersistence,
+            final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
+            final @NotNull PublishPollService publishPollService,
+            final @NotNull Chunker chunker,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector) {
 
         this.localPersistence = localPersistence;
         this.topicTree = topicTree;
         this.sharedSubscriptionService = sharedSubscriptionService;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         this.singleWriter = singleWriterService.getSubscriptionQueue();
-        this.eventLog = eventLog;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.publishPollService = publishPollService;
         this.chunker = chunker;
@@ -344,7 +341,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             return;
         }
 
-        final Channel channel = channelPersistence.get(clientId);
+        final Channel channel = connectionPersistence.get(clientId);
         if (channel != null && channel.isActive()) {
             for (final Subscription sharedSub : sharedSubs) {
 
@@ -404,7 +401,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     }
 
     private void disconnectSharedSubscriberWithEmptyTopic(final @NotNull String clientId) {
-        final Channel channel = channelPersistence.get(clientId);
+        final Channel channel = connectionPersistence.get(clientId);
         if (channel != null) {
             channel.eventLoop().execute(() -> {
                 mqttServerDisconnector.disconnect(channel,
