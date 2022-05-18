@@ -39,9 +39,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * @author Dominik Obermaier
- */
 @Singleton
 public class ConnectionPersistenceImpl implements ConnectionPersistence {
 

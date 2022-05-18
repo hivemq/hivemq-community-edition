@@ -36,10 +36,6 @@ import java.util.Queue;
 
 /**
  * A message barrier which blocks (or queues) messages if they are sent before the connection was approved
- *
- * @author Dominik Obermaier
- * @author Christoph Schäbel
- * @author Silvio Giebl
  */
 public class MessageBarrier extends ChannelDuplexHandler {
 

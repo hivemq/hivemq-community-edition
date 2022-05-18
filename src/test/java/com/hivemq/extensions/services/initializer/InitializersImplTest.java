@@ -45,7 +45,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 @SuppressWarnings("NullabilityAnnotations")

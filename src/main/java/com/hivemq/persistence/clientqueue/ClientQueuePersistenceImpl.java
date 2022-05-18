@@ -49,9 +49,6 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 
-/**
- * @author Lukas Brandl
- */
 @LazySingleton
 public class ClientQueuePersistenceImpl extends AbstractPersistence implements ClientQueuePersistence {
 

@@ -43,9 +43,6 @@ import javax.inject.Singleton;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
-/**
- * @author Florian Limpöck
- */
 @Singleton
 public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 

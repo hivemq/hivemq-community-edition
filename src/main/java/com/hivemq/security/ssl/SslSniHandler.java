@@ -31,9 +31,6 @@ import java.util.NoSuchElementException;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_HANDLER;
 
-/**
- * @author Christoph Schäbel
- */
 public class SslSniHandler extends SniHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SslSniHandler.class);

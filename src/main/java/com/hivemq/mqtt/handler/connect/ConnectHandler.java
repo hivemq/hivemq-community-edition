@@ -76,9 +76,6 @@ import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKE
 
 /**
  * The handler which is responsible for CONNECT messages
- *
- * @author Dominik Obermaier
- * @author Christoph Schäbel
  */
 @Singleton
 @ChannelHandler.Sharable

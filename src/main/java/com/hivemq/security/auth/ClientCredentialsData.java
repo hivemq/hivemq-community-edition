@@ -21,8 +21,7 @@ import java.util.Optional;
  * An extended version of {@link ClientData} which also contains
  * the password the client used in the {@link com.hivemq.mqtt.message.connect.CONNECT}
  * message
- *
- * @author Christian Goetz
+
  * @since 1.4
  */
 public interface ClientCredentialsData extends ClientData {

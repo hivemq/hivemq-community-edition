@@ -20,11 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-/**
- * Reflection Utilities
- *
- * @author Dominik Obermaier
- */
 public class Reflections {
 
     /**

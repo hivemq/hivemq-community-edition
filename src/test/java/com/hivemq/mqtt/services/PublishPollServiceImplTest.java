@@ -65,9 +65,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Lukas Brandl
- */
 public class PublishPollServiceImplTest {
 
     private @NotNull AutoCloseable closeableMock;

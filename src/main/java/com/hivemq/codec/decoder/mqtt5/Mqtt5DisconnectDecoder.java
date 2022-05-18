@@ -39,9 +39,6 @@ import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_S
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
-/**
- * @author Florian Limpöck
- */
 @LazySingleton
 public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 

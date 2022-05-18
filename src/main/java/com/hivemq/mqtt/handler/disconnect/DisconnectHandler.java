@@ -46,10 +46,6 @@ import javax.inject.Singleton;
 
 import static com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
 
-/**
- * @author Florian Limpoeck
- * @author Dominik Obermaier
- */
 @Singleton
 @ChannelHandler.Sharable
 public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {

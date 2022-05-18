@@ -23,9 +23,7 @@ import java.util.Optional;
 /**
  * Represents information available of a connected client.
  *
- * @author Christian Goetz
- * @author Dominik Obermaier
- * @since 1.4
+ *  @since 1.4
  */
 public interface ClientData {
 

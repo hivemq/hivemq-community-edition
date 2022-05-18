@@ -49,9 +49,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Lukas Brandl
- */
 public class ClientSessionPersistenceImplTest {
 
     @Rule

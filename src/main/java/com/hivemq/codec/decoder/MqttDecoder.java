@@ -25,9 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
-/**
- * @author Dominik Obermaier
- */
 public abstract class MqttDecoder<T extends Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);

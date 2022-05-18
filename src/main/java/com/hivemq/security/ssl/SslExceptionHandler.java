@@ -36,9 +36,6 @@ import javax.net.ssl.SSLHandshakeException;
  * <p>
  * SSLExceptions are fatal most of the time (for a client which wants to connect with SSL :-) ),
  * so we typically can only log.
- *
- * @author Christoph Schäbel
- * @author Dominik Obermaier
  */
 public class SslExceptionHandler extends ChannelHandlerAdapter {
 

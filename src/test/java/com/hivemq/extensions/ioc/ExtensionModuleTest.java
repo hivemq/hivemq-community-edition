@@ -73,9 +73,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Georg Held
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class ExtensionModuleTest {
 

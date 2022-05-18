@@ -27,7 +27,6 @@ import static org.junit.Assert.assertEquals;
 
 public class ReflectionsTest {
 
-
     @Test
     public void test_interface_has_annotation() throws Exception {
 
