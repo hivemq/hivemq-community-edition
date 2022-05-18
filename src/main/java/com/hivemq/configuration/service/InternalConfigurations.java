@@ -16,6 +16,7 @@
 package com.hivemq.configuration.service;
 
 import com.hivemq.migration.meta.PersistenceType;
+import org.rocksdb.CompressionType;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -422,4 +423,6 @@ public class InternalConfigurations {
 
     public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
     public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
+
+    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE = CompressionType.NO_COMPRESSION;
 }
