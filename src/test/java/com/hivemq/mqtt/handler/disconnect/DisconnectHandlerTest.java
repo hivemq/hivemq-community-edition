@@ -29,9 +29,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.security.auth.ClientData;
 import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -168,23 +166,6 @@ public class DisconnectHandlerTest {
         final ChannelFuture future = channel.close();
         future.await();
         assertEquals(ClientState.DISCONNECTED_UNSPECIFIED, clientConnection.getClientState());
-    }
-
-    @Test
-    public void test_disconnect_timestamp() {
-        clientConnection.setClientId("clientId");
-
-        final Long timestamp = System.currentTimeMillis();
-        final ClientData clientData = ChannelUtils.tokenFromChannel(channel, timestamp);
-        assertEquals(timestamp, clientData.getDisconnectTimestamp().get());
-    }
-
-    @Test
-    public void test_disconnect_timestamp_not_present() {
-        clientConnection.setClientId("clientId");
-
-        final ClientData clientData = ChannelUtils.tokenFromChannel(channel);
-        assertFalse(clientData.getDisconnectTimestamp().isPresent());
     }
 
     @Test

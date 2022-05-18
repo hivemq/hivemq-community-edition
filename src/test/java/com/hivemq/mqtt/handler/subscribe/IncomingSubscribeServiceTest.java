@@ -263,14 +263,14 @@ public class IncomingSubscribeServiceTest {
     public void single_topic_dont_batch() throws Exception {
 
         final HashSet<Topic> topics = Sets.newHashSet(Topic.topicFromString("topic1"));
-        assertFalse(incomingSubscribeService.batch(topics));
+        assertFalse(IncomingSubscribeService.batch(topics));
     }
 
     @Test
     public void test_batch() throws Exception {
 
         final HashSet<Topic> topics = Sets.newHashSet(Topic.topicFromString("topic1"), Topic.topicFromString("topic2"));
-        assertTrue(incomingSubscribeService.batch(topics));
+        assertTrue(IncomingSubscribeService.batch(topics));
     }
 
     @Test

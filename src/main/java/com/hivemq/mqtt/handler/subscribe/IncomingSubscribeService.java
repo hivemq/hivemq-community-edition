@@ -45,8 +45,6 @@ import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.Shared
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.security.auth.ClientData;
-import com.hivemq.security.auth.ClientToken;
 import com.hivemq.util.*;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -132,27 +130,21 @@ public class IncomingSubscribeService {
             return;
         }
 
-        final ClientToken clientToken = ChannelUtils.tokenFromChannel(ctx.channel());
-
-        authorizeSubscriptions(ctx, clientToken, msg, providedCodes, reasonStrings, authorizersPresent);
-
+        authorizeSubscriptions(ctx, msg, providedCodes, reasonStrings, authorizersPresent);
     }
 
-    private void authorizeSubscriptions(final @NotNull ChannelHandlerContext ctx,
-                                        final @NotNull ClientToken clientToken,
-                                        final @NotNull SUBSCRIBE msg,
-                                        final @NotNull Mqtt5SubAckReasonCode[] providedCodes,
-                                        final @NotNull String[] reasonStrings,
-                                        final boolean authorizersPresent) {
-
-        final StringBuilder reasonStringBuilder = new StringBuilder();
+    private void authorizeSubscriptions(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull SUBSCRIBE msg,
+            final @NotNull Mqtt5SubAckReasonCode[] providedCodes,
+            final @NotNull String[] reasonStrings,
+            final boolean authorizersPresent) {
 
         final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         for (int i = 0; i < msg.getTopics().size(); i++) {
 
-            //noinspection ConstantConditions
             if (providedCodes[i] != null) {
                 continue;
             }
@@ -173,9 +165,10 @@ public class IncomingSubscribeService {
 
                 reasonStrings[i] = "Not authorized to subscribe to topic '" + subscription.getTopic() + "' with QoS '" +
                         subscription.getQoS().getQosNumber() + "'";
-
             }
         }
+
+        final StringBuilder reasonStringBuilder = new StringBuilder();
 
         for (final String reasonString : reasonStrings) {
             //noinspection ConstantConditions
@@ -184,7 +177,7 @@ public class IncomingSubscribeService {
             }
         }
 
-        persistSubscriptionForClient(ctx, clientToken, msg, providedCodes, reasonStringBuilder.length() > 0 ? reasonStringBuilder.toString() : null);
+        persistSubscriptionForClient(ctx, msg, providedCodes, reasonStringBuilder.length() > 0 ? reasonStringBuilder.toString() : null);
     }
 
     /**
@@ -223,11 +216,11 @@ public class IncomingSubscribeService {
         return true;
     }
 
-    private void persistSubscriptionForClient(final @NotNull ChannelHandlerContext ctx,
-                                              final @NotNull ClientData clientData,
-                                              final @NotNull SUBSCRIBE msg,
-                                              final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
-                                              final @Nullable String reasonString) {
+    private void persistSubscriptionForClient(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull SUBSCRIBE msg,
+            final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
+            final @Nullable String reasonString) {
 
         final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final String clientId = clientConnection.getClientId();
@@ -271,7 +264,7 @@ public class IncomingSubscribeService {
 
             if (answerCodes[i].getCode() >= 128) { // every code >= 128 is an error code
                 if (mqttVersion == ProtocolVersion.MQTTv3_1) {
-                    handleInsufficientPermissionsV31(ctx, clientData, topic);
+                    handleInsufficientPermissionsV31(ctx, topic);
                     return;
                 } else {
                     ignoredTopics.add(topic);
@@ -364,7 +357,7 @@ public class IncomingSubscribeService {
         if (size < 2) {
             return Sets.newHashSet(topics);
         }
-        final HashSet<Topic> cleanedTopics = Sets.newHashSetWithExpectedSize(size);
+        final Set<Topic> cleanedTopics = Sets.newHashSetWithExpectedSize(size);
         // we expect the topics to be mostly different
         for (final Topic topic : topics) {
             if (!cleanedTopics.add(topic)) {
@@ -376,7 +369,7 @@ public class IncomingSubscribeService {
     }
 
     @VisibleForTesting
-    boolean batch(@NotNull final Set<Topic> topics) {
+    static boolean batch(@NotNull final Set<Topic> topics) {
         return topics.size() >= 2;
     }
 
@@ -390,9 +383,10 @@ public class IncomingSubscribeService {
         return settableFuture;
     }
 
-    private void handleInsufficientPermissionsV31(final ChannelHandlerContext ctx, final ClientData clientData, final Topic topic) {
+    private void handleInsufficientPermissionsV31(final @NotNull ChannelHandlerContext ctx, final @NotNull Topic topic) {
+        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
         log.debug("MQTT v3.1 Client '{}' (IP: {}) is not authorized to subscribe to topic '{}' with QoS '{}'. Disconnecting client.",
-                clientData.getClientId(), ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
+                clientConnection.getClientId(), ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
         mqttServerDisconnector.disconnect(
                 ctx.channel(),
                 null, //already logged
