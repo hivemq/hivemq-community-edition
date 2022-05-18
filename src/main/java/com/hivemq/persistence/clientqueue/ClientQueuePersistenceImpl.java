@@ -31,7 +31,7 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSession;
@@ -70,7 +70,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     @NotNull
     private final LocalTopicTree topicTree;
     @NotNull
-    private final ChannelPersistence channelPersistence;
+    private final ConnectionPersistence connectionPersistence;
     @NotNull
     private final PublishPollService publishPollService;
 
@@ -82,7 +82,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             @NotNull final ClientSessionLocalPersistence clientSessionLocalPersistence,
             @NotNull final MessageDroppedService messageDroppedService,
             @NotNull final LocalTopicTree topicTree,
-            @NotNull final ChannelPersistence channelPersistence,
+            @NotNull final ConnectionPersistence connectionPersistence,
             @NotNull final PublishPollService publishPollService) {
         this.localPersistence = localPersistence;
         this.singleWriter = singleWriterService.getQueuedMessagesQueue();
@@ -90,7 +90,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.messageDroppedService = messageDroppedService;
         this.topicTree = topicTree;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         this.publishPollService = publishPollService;
     }
 
@@ -161,7 +161,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             return;
         }
 
-        final Channel channel = channelPersistence.get(client);
+        final Channel channel = connectionPersistence.get(client);
         if (channel == null || !channel.isActive()) {
             return;
         }

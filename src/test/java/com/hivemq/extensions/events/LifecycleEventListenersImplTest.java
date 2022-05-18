@@ -24,8 +24,8 @@ import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEven
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ChannelPersistenceImpl;
+import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.ConnectionPersistenceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -58,14 +58,14 @@ public class LifecycleEventListenersImplTest {
     private HiveMQExtensions hiveMQExtensions;
     private HiveMQExtension plugin1;
     private HiveMQExtension plugin2;
-    private ChannelPersistence channelPersistence;
+    private ConnectionPersistence connectionPersistence;
 
     @Before
     public void setUp() throws Exception {
         hiveMQExtensions = mock(HiveMQExtensions.class);
         plugin1 = mock(HiveMQExtension.class);
         plugin2 = mock(HiveMQExtension.class);
-        channelPersistence = new ChannelPersistenceImpl();
+        connectionPersistence = new ConnectionPersistenceImpl();
         lifecycleEventListeners = new LifecycleEventListenersImpl(hiveMQExtensions);
 
         when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
@@ -82,7 +82,7 @@ public class LifecycleEventListenersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classOne = cl.loadClass("com.hivemq.extensions.events.LifecycleEventListenersImplTest$TestClientLifecycleEventListenerProviderOne");
 
@@ -97,7 +97,7 @@ public class LifecycleEventListenersImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        channelPersistence.persistIfAbsent("client", clientConnection);
+        connectionPersistence.persistIfAbsent("client", clientConnection);
 
         lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializer);
 
@@ -125,7 +125,7 @@ public class LifecycleEventListenersImplTest {
         javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
 
         //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, this.getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, getClass().getClassLoader());
 
         final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.events.LifecycleEventListenersImplTest$TestClientLifecycleEventListenerProviderTwo");
 

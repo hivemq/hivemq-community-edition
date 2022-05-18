@@ -27,7 +27,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.ChannelPersistenceImpl;
+import com.hivemq.persistence.ConnectionPersistenceImpl;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
@@ -62,7 +62,7 @@ public class ClientSessionPersistenceImplTest {
     private ClientQueuePersistence clientQueuePersistence;
     private PendingWillMessages pendingWillMessages;
     private MqttServerDisconnector mqttServerDisconnector;
-    private ChannelPersistenceImpl channelPersistence;
+    private ConnectionPersistenceImpl connectionPersistence;
     private ClientSessionPersistenceImpl clientSessionPersistence;
     private SingleWriterService singleWriterService;
 
@@ -73,12 +73,12 @@ public class ClientSessionPersistenceImplTest {
         clientQueuePersistence = mock(ClientQueuePersistence.class);
         pendingWillMessages = mock(PendingWillMessages.class);
         mqttServerDisconnector = mock(MqttServerDisconnector.class);
-        channelPersistence = mock(ChannelPersistenceImpl.class);
+        connectionPersistence = mock(ConnectionPersistenceImpl.class);
         clientSessionPersistence = mock(ClientSessionPersistenceImpl.class);
 
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence,
-                clientQueuePersistence, singleWriterService, channelPersistence, mock(EventLog.class), pendingWillMessages,
+                clientQueuePersistence, singleWriterService, connectionPersistence, mock(EventLog.class), pendingWillMessages,
                 mqttServerDisconnector, new Chunker());
     }
 
@@ -140,7 +140,7 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_not_connected() throws ExecutionException, InterruptedException {
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
-        when(channelPersistence.get("client")).thenReturn(null);
+        when(connectionPersistence.get("client")).thenReturn(null);
         final Boolean result = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
         verify(pendingWillMessages).cancelWill("client");
@@ -152,7 +152,7 @@ public class ClientSessionPersistenceImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
         channel.disconnect();
@@ -168,7 +168,7 @@ public class ClientSessionPersistenceImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION, Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, "reason-string");
         channel.disconnect();

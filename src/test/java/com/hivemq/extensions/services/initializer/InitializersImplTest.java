@@ -23,8 +23,8 @@ import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ChannelPersistenceImpl;
+import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.ConnectionPersistenceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -58,7 +58,7 @@ public class InitializersImplTest {
     private HiveMQExtensions hiveMQExtensions;
     private HiveMQExtension plugin1;
     private HiveMQExtension plugin2;
-    private ChannelPersistence channelPersistence;
+    private ConnectionPersistence connectionPersistence;
 
     @Before
     public void setUp() throws Exception {
@@ -66,7 +66,8 @@ public class InitializersImplTest {
         hiveMQExtensions = mock(HiveMQExtensions.class);
         plugin1 = mock(HiveMQExtension.class);
         plugin2 = mock(HiveMQExtension.class);
-        channelPersistence = new ChannelPersistenceImpl();
+
+        connectionPersistence = new ConnectionPersistenceImpl();
         initializers = new InitializersImpl(hiveMQExtensions);
 
         when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
@@ -98,7 +99,7 @@ public class InitializersImplTest {
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        channelPersistence.persistIfAbsent("client", clientConnection);
+        connectionPersistence.persistIfAbsent("client", clientConnection);
 
         initializers.addClientInitializer(clientInitializer);
 

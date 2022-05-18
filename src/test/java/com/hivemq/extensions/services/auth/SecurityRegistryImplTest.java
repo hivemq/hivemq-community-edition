@@ -27,15 +27,10 @@ import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticator
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import com.hivemq.extensions.handler.PluginAuthenticatorService;
-import com.hivemq.extensions.handler.PluginAuthorizerService;
-import com.hivemq.persistence.ChannelPersistence;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.IsolatedPluginClassLoaderUtil;
 
 import java.util.Map;
@@ -44,31 +39,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Georg Held
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class SecurityRegistryImplTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
     private HiveMQExtensions hiveMQExtensions;
-
-    @Mock
     private HiveMQExtension hiveMQExtension;
-
-    @Mock
-    private ChannelPersistence channelPersistence;
-
-    @Mock
-    private PluginAuthorizerService pluginAuthorizerService;
-
-    @Mock
-    private PluginAuthenticatorService pluginAuthenticatorService;
 
     private Authenticator authenticator1;
     private Authenticator authenticator2;
@@ -86,7 +67,8 @@ public class SecurityRegistryImplTest {
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        hiveMQExtensions = mock(HiveMQExtensions.class);
+        hiveMQExtension = mock(HiveMQExtension.class);
 
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authorizers = new AuthorizersImpl(hiveMQExtensions);

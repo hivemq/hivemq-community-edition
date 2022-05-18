@@ -24,7 +24,6 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.mqtt.callback.PublishStatusFutureCallback;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageWithID;
@@ -39,7 +38,7 @@ import com.hivemq.mqtt.message.publish.PubrelWithFuture;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -73,21 +72,22 @@ public class PublishPollServiceImpl implements PublishPollService {
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishPollService.class);
 
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull MessageDroppedService messageDroppedService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
     private final @NotNull SingleWriterService singleWriterService;
 
     @Inject
-    public PublishPollServiceImpl(final @NotNull ClientQueuePersistence clientQueuePersistence,
-                                  final @NotNull ChannelPersistence channelPersistence,
-                                  final @NotNull PublishPayloadPersistence payloadPersistence,
-                                  final @NotNull MessageDroppedService messageDroppedService,
-                                  final @NotNull SharedSubscriptionService sharedSubscriptionService,
-                                  final @NotNull SingleWriterService singleWriterService) {
+    public PublishPollServiceImpl(
+            final @NotNull ClientQueuePersistence clientQueuePersistence,
+            final @NotNull ConnectionPersistence connectionPersistence,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull MessageDroppedService messageDroppedService,
+            final @NotNull SharedSubscriptionService sharedSubscriptionService,
+            final @NotNull SingleWriterService singleWriterService) {
         this.clientQueuePersistence = clientQueuePersistence;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         this.payloadPersistence = payloadPersistence;
         this.messageDroppedService = messageDroppedService;
         this.sharedSubscriptionService = sharedSubscriptionService;
@@ -122,7 +122,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                             topic.isRetainAsPublished(), topic.getSubscriptionIdentifier(), channel);
                 }
             } catch (final ExecutionException e) {
-                log.error("Exception while reading shared subscriptions for client " + client, e);
+                log.error("Exception while reading shared subscriptions for client {}", client, e);
             }
 
         } else {
@@ -135,7 +135,7 @@ public class PublishPollServiceImpl implements PublishPollService {
      */
     @Override
     public void pollNewMessages(final @NotNull String client) {
-        final Channel channel = channelPersistence.get(client);
+        final Channel channel = connectionPersistence.get(client);
         if (channel == null) {
             return; // client is disconnected
         }
@@ -295,7 +295,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         // We should shuffle here because otherwise one client could consume all messages if it is fast enough
         Collections.shuffle(subscribers);
         for (final SubscriberWithQoS subscriber : subscribers) {
-            final Channel channel = channelPersistence.get(subscriber.getSubscriber());
+            final Channel channel = connectionPersistence.get(subscriber.getSubscriber());
             if (channel == null) {
                 continue; // client is disconnected
             }

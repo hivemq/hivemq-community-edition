@@ -27,7 +27,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.security.auth.ClientData;
 import com.hivemq.util.ChannelAttributes;
@@ -62,7 +62,7 @@ public class DisconnectHandlerTest {
     private ClientSessionPersistence clientSessionPersistence;
 
     @Mock
-    private ChannelPersistence channelPersistence;
+    private ConnectionPersistence connectionPersistence;
 
     MetricsHolder metricsHolder;
     private ClientConnection clientConnection;
@@ -75,12 +75,12 @@ public class DisconnectHandlerTest {
 
         metricsHolder = new MetricsHolder(new MetricRegistry());
 
-        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, clientSessionPersistence, channelPersistence);
+        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter, clientSessionPersistence, connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
 
-        when(channelPersistence.getClientConnection(anyString())).thenReturn(clientConnection);
+        when(connectionPersistence.getClientConnection(anyString())).thenReturn(clientConnection);
     }
 
     @Test
@@ -244,7 +244,7 @@ public class DisconnectHandlerTest {
         channel.disconnect().get();
 
         verify(clientSessionPersistence, times(1)).clientDisconnected(eq("client"), anyBoolean(), anyLong());
-        verify(channelPersistence, never()).remove(clientConnection);
+        verify(connectionPersistence, never()).remove(clientConnection);
     }
 
     @Test

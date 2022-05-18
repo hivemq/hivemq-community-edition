@@ -22,8 +22,8 @@ import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
-import com.hivemq.persistence.ChannelPersistence;
-import com.hivemq.persistence.ChannelPersistenceImpl;
+import com.hivemq.persistence.ConnectionPersistence;
+import com.hivemq.persistence.ConnectionPersistenceImpl;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
@@ -71,7 +71,7 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
                 .in(LazySingleton.class);
 
         /* Channel */
-        bind(ChannelPersistence.class).to(ChannelPersistenceImpl.class).in(Singleton.class);
+        bind(ConnectionPersistence.class).to(ConnectionPersistenceImpl.class).in(Singleton.class);
 
         /* Client Session */
         bind(ClientSessionPersistence.class).toProvider(ClientSessionPersistenceProvider.class).in(LazySingleton.class);

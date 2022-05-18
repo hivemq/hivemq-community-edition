@@ -27,7 +27,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
@@ -88,7 +88,7 @@ public class ClientQueuePersistenceImplTest {
     LocalTopicTree topicTree;
 
     @Mock
-    private ChannelPersistence channelPersistence;
+    private ConnectionPersistence connectionPersistence;
     @Mock
     private PublishPollService publishPollService;
 
@@ -106,7 +106,7 @@ public class ClientQueuePersistenceImplTest {
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
         clientQueuePersistence =
                 new ClientQueuePersistenceImpl(localPersistence, singleWriterService, mqttConfigurationService,
-                        clientSessionLocalPersistence, messageDroppedService, topicTree, channelPersistence,
+                        clientSessionLocalPersistence, messageDroppedService, topicTree, connectionPersistence,
                         publishPollService);
     }
 
@@ -143,7 +143,7 @@ public class ClientQueuePersistenceImplTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
 
@@ -161,7 +161,7 @@ public class ClientQueuePersistenceImplTest {
         channel.close();
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
         verify(publishPollService, never()).pollNewMessages("client", channel);
@@ -175,7 +175,7 @@ public class ClientQueuePersistenceImplTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
 
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
@@ -191,7 +191,7 @@ public class ClientQueuePersistenceImplTest {
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(10));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
-        when(channelPersistence.get("client")).thenReturn(channel);
+        when(connectionPersistence.get("client")).thenReturn(channel);
 
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
@@ -202,7 +202,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_channel_null() {
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
-        when(channelPersistence.get("client")).thenReturn(null);
+        when(connectionPersistence.get("client")).thenReturn(null);
         clientQueuePersistence.publishAvailable("client");
         verify(publishPollService, never()).pollNewMessages(eq("client"), any(Channel.class));
     }

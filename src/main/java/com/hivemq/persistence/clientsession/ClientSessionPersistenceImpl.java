@@ -34,7 +34,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.AbstractPersistence;
-import com.hivemq.persistence.ChannelPersistence;
+import com.hivemq.persistence.ConnectionPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
@@ -71,7 +71,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence;
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull ProducerQueues singleWriter;
-    private final @NotNull ChannelPersistence channelPersistence;
+    private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull EventLog eventLog;
     private final @NotNull PendingWillMessages pendingWillMessages;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
@@ -83,7 +83,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             final @NotNull ClientSessionSubscriptionPersistence sessionSubscriptionPersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull SingleWriterService singleWriterService,
-            final @NotNull ChannelPersistence channelPersistence,
+            final @NotNull ConnectionPersistence connectionPersistence,
             final @NotNull EventLog eventLog,
             final @NotNull PendingWillMessages pendingWillMessages,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
@@ -91,7 +91,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         this.localPersistence = localPersistence;
         this.clientQueuePersistence = clientQueuePersistence;
-        this.channelPersistence = channelPersistence;
+        this.connectionPersistence = connectionPersistence;
         this.eventLog = eventLog;
         this.pendingWillMessages = pendingWillMessages;
         this.mqttServerDisconnector = mqttServerDisconnector;
@@ -227,7 +227,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         }
 
         log.debug("Request forced client disconnect for client {}.", clientId);
-        final Channel channel = channelPersistence.get(clientId);
+        final Channel channel = connectionPersistence.get(clientId);
 
         if (channel == null) {
             log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
