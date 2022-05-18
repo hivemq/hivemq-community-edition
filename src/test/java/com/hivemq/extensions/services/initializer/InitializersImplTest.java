@@ -95,10 +95,11 @@ public class InitializersImplTest {
         final Channel channelMock = mock(Channel.class);
         final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
         final ClientConnection clientConnection = new ClientConnection(channelMock, null);
+        clientConnection.setClientId("client");
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        connectionPersistence.persistIfAbsent("client", clientConnection);
+        connectionPersistence.persistIfAbsent(clientConnection);
 
         initializers.addClientInitializer(clientInitializer);
 

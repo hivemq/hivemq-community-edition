@@ -623,7 +623,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             return;
         }
 
-        final ClientConnection persistedClientConnection = connectionPersistence.persistIfAbsent(msg.getClientIdentifier(), clientConnection);
+        final ClientConnection persistedClientConnection = connectionPersistence.persistIfAbsent(clientConnection);
         // We have written our ClientConnection to the ConnectionPersistence. We are now able to connect.
         if (persistedClientConnection == clientConnection) {
             afterTakeover(ctx, msg);
