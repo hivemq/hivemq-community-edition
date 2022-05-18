@@ -16,13 +16,8 @@
 package com.hivemq.util;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.security.auth.ClientToken;
-import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
 
 import java.net.InetAddress;
@@ -30,8 +25,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Various utilities for working with channels
@@ -70,15 +63,6 @@ public final class ChannelUtils {
         return channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
     }
 
-    public static ClientToken tokenFromChannel(@NotNull final Channel channel, @NotNull final Long disconnectTimestamp) {
-        checkNotNull(disconnectTimestamp, "disconnectTimestamp must not be null");
-        return getClientToken(channel, disconnectTimestamp);
-    }
-
-    public static ClientToken tokenFromChannel(@NotNull final Channel channel) {
-        return getClientToken(channel, null);
-    }
-
     public static boolean messagesInFlight(@NotNull final Channel channel) {
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         final boolean inFlightMessagesSent = clientConnection.isInFlightMessagesSent();
@@ -100,37 +84,4 @@ public final class ChannelUtils {
         }
         return Math.min(clientReceiveMaximum, max);
     }
-
-    private static ClientToken getClientToken(@NotNull final Channel channel, @Nullable final Long disconnectTimestamp) {
-        checkNotNull(channel, "channel must not be null");
-
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
-
-        final String clientId = getClientId(channel);
-        //These things can all be null!
-        final String username = clientConnection.getAuthUsername();
-        final byte[] password = clientConnection.getAuthPassword();
-        final SslClientCertificate sslCert = clientConnection.getAuthCertificate();
-        final Listener listener = clientConnection.getConnectedListener();
-        final Optional<Long> disconnectTimestampOptional = Optional.ofNullable(disconnectTimestamp);
-
-        final ClientToken clientToken = new ClientToken(clientId,
-                username,
-                password,
-                sslCert,
-                false,
-                getChannelAddress(channel).orElse(null),
-                listener,
-                disconnectTimestampOptional);
-
-        final ClientState clientState = clientConnection.getClientState();
-        // Clients are seen as authenticated in both states.
-        final boolean authenticatedOrAuthenticating =
-                (clientState == ClientState.AUTHENTICATED) || (clientState == ClientState.RE_AUTHENTICATING);
-
-        clientToken.setAuthenticated(authenticatedOrAuthenticating);
-
-        return clientToken;
-    }
-
 }
