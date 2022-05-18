@@ -44,11 +44,10 @@ public interface ConnectionPersistence {
     /**
      * Try to put a ClientConnection for the client id. Return the old ClientConnection when there is already one.
      *
-     * @param clientId         The client id of which the channel should be persisted.
      * @param clientConnection The ClientConnection to persist.
      * @return The currently persisted ClientConnection.
      */
-    @NotNull ClientConnection persistIfAbsent(@NotNull String clientId, @NotNull ClientConnection clientConnection);
+    @NotNull ClientConnection persistIfAbsent(@NotNull ClientConnection clientConnection);
 
     /**
      * Remove a {@link ClientConnection} from the persistence, for a specific client id.

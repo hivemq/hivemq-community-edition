@@ -66,8 +66,8 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
     }
 
     @Override
-    public @NotNull ClientConnection persistIfAbsent(final @NotNull String clientId, final @NotNull ClientConnection clientConnection) {
-        return clientConnectionMap.computeIfAbsent(clientId, id -> clientConnection);
+    public @NotNull ClientConnection persistIfAbsent(final @NotNull ClientConnection clientConnection) {
+        return clientConnectionMap.computeIfAbsent(clientConnection.getClientId(), id -> clientConnection);
     }
 
     @Override
