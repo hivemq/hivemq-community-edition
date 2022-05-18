@@ -34,10 +34,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/**
- * @author Georg Held
- * @author Silvio Giebl
- */
 @Singleton
 @VisibleForTesting
 public class AuthenticatorsImpl implements Authenticators {
@@ -50,11 +46,9 @@ public class AuthenticatorsImpl implements Authenticators {
     private final @NotNull HiveMQExtensions hiveMQExtensions;
 
     @Inject
-    public AuthenticatorsImpl(
-            final @NotNull HiveMQExtensions hiveMQExtensions) {
-
-        this.authenticatorPluginMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
+    public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
+        authenticatorPluginMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
     }
 
     @Override

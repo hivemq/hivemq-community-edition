@@ -20,9 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
-/**
- * @author Daniel Krüger
- */
 public interface SingleWriterService {
 
     @NotNull ProducerQueues getRetainedMessageQueue();

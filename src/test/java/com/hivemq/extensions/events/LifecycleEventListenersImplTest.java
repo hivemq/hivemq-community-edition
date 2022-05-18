@@ -24,8 +24,8 @@ import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEven
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import com.hivemq.persistence.ConnectionPersistence;
-import com.hivemq.persistence.ConnectionPersistenceImpl;
+import com.hivemq.persistence.connection.ConnectionPersistence;
+import com.hivemq.persistence.connection.ConnectionPersistenceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
