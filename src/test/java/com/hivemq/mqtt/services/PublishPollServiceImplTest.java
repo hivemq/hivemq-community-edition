@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
@@ -120,11 +121,13 @@ public class PublishPollServiceImplTest {
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
-        when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
         when(channel.pipeline()).thenReturn(pipeline);
 
         clientConnection = spy(new ClientConnection(channel, publishFlushHandler));
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         when(clientConnection.getMessageIDPool()).thenReturn(messageIDPool);
+
+        when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
