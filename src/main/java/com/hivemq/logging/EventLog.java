@@ -34,8 +34,6 @@ import java.time.format.DateTimeFormatter;
 /**
  * The EventLog class is used to log certain events that could be important for customers to separate files.
  * In a future state of the implementation it may also be used to display those events in the web-interface.
- *
- * @author Lukas Brandl
  */
 @LazySingleton
 public class EventLog {

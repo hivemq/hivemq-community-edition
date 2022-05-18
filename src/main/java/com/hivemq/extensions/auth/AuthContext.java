@@ -33,9 +33,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-/**
- * @author Silvio Giebl
- */
 abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskContext<T> implements Supplier<T> {
 
     private static final Logger log = LoggerFactory.getLogger(AuthContext.class);

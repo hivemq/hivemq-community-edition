@@ -39,11 +39,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
 
-/**
- * @author Dominik Obermaier
- * @author Christoph Schäbel
- * @author Silvio Giebl
- */
 public abstract class AbstractChannelInitializer extends ChannelInitializer<Channel> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);

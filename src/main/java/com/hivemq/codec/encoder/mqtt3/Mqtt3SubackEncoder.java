@@ -32,9 +32,6 @@ import java.util.List;
 import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.*;
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
-/**
- * @author Dominik Obermaier
- */
 public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBACK> {
 
     private static final Logger log = LoggerFactory.getLogger(Mqtt3SubackEncoder.class);

@@ -49,9 +49,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Lukas Brandl
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientSessionSubscriptionPersistenceImplTest {
 

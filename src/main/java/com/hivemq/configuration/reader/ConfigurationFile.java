@@ -23,8 +23,6 @@ import java.util.Optional;
 /**
  * A wrapper class for the configuration file used
  * for initial configuration of HiveMQ on startup
- *
- * @author Dominik Obermaier
  */
 public class ConfigurationFile {
 

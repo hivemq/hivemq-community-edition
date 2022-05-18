@@ -41,9 +41,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static util.TlsTestUtil.createDefaultTLS;
 
-/**
- * @author Christoph Schäbel
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class HiveMQNettyBootstrapTest {
 

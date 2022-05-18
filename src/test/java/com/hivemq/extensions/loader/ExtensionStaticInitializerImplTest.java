@@ -70,9 +70,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Christoph Schäbel
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class ExtensionStaticInitializerImplTest {
 

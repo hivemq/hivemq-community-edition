@@ -29,9 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A client token which represents the session
  * information of a connected MQTT client
- *
- * @author Christian Goetz
- * @author Dominik Obermaier
  */
 public class ClientToken implements ClientCredentialsData {
 

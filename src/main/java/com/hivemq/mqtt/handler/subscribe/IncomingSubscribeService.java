@@ -69,11 +69,6 @@ import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.fromCode;
 
 /**
  * The service which is responsible for handling the subscriptions of MQTT clients
- *
- * @author Dominik Obermaier
- * @author Christian Götz
- * @author Christoph Schäbel
- * @author Florian Limpöck
  */
 @Singleton
 public class IncomingSubscribeService {

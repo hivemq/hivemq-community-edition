@@ -57,9 +57,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 
-/**
- * @author Lukas Brandl
- */
 @LazySingleton
 public class ClientSessionPersistenceImpl extends AbstractPersistence implements ClientSessionPersistence {
 

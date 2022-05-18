@@ -46,9 +46,6 @@ import java.nio.ByteBuffer;
 
 import static com.hivemq.util.ChannelUtils.getChannelIP;
 
-/**
- * @author Florian Limpöck
- */
 @Singleton
 public class MqttConnackerImpl implements MqttConnacker {
 

@@ -24,10 +24,6 @@ import io.netty.channel.Channel;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Dominik Obermaier
- * @author Florian Limpöck
- */
 public interface ConnectionPersistence {
 
     /**

@@ -24,9 +24,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * @author Dominik Obermaier
- */
 @Immutable
 public class ListenerStartupInformation {
 

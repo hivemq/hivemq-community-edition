@@ -41,9 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @author Dominik Obermaier
- */
 public class HiveMQNettyBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQNettyBootstrap.class);

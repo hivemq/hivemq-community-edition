@@ -40,9 +40,6 @@ import com.hivemq.persistence.retained.RetainedMessagePersistenceProvider;
 
 import javax.inject.Singleton;
 
-/**
- * @author Dominik Obermaier
- */
 class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModule>> {
 
     private final @NotNull Injector persistenceInjector;

@@ -28,7 +28,6 @@ import java.net.InetAddress;
 import java.util.Optional;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 public class ConnectionInformationImpl implements ConnectionInformation {
