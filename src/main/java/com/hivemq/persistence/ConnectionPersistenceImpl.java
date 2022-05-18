@@ -63,13 +63,7 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
     }
 
     @Override
-    public @Nullable Channel get(final @NotNull String clientId) {
-        final ClientConnection clientConnection = getClientConnection(clientId);
-        return clientConnection == null ? null : clientConnection.getChannel();
-    }
-
-    @Override
-    public @Nullable ClientConnection getClientConnection(final @NotNull String clientId) {
+    public @Nullable ClientConnection get(final @NotNull String clientId) {
         return clientConnectionMap.get(clientId);
     }
 

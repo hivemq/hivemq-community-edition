@@ -144,7 +144,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
         if (clientConnection.getClientId() == null
-                || clientConnection != connectionPersistence.getClientConnection(clientConnection.getClientId())) {
+                || clientConnection != connectionPersistence.get(clientConnection.getClientId())) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }

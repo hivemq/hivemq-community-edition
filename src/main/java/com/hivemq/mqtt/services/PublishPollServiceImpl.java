@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -62,9 +63,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_POLL_BATCH_MEMORY;
 
-/**
- * @author Lukas Brandl
- */
 @LazySingleton
 public class PublishPollServiceImpl implements PublishPollService {
 
@@ -94,9 +92,6 @@ public class PublishPollServiceImpl implements PublishPollService {
         this.singleWriterService = singleWriterService;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollMessages(final @NotNull String client, final @NotNull Channel channel) {
         checkNotNull(client, "Client must not be null");
@@ -130,21 +125,17 @@ public class PublishPollServiceImpl implements PublishPollService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollNewMessages(final @NotNull String client) {
-        final Channel channel = connectionPersistence.get(client);
-        if (channel == null) {
-            return; // client is disconnected
+        final ClientConnection clientConnection = connectionPersistence.get(client);
+        if (clientConnection == null
+                || clientConnection.getClientState() == ClientState.DISCONNECTING
+                || clientConnection.getClientState().disconnected()) {
+            return; // client is disconnecting or disconnected
         }
-        pollNewMessages(client, channel);
+        pollNewMessages(client, clientConnection.getChannel());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollNewMessages(final @NotNull String client, final @NotNull Channel channel) {
         final MessageIDPool messageIDPool = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMessageIDPool();
@@ -204,9 +195,6 @@ public class PublishPollServiceImpl implements PublishPollService {
         }, singleWriterService.callbackExecutor(client));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollInflightMessages(final @NotNull String client, final @NotNull Channel channel) {
         final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, PUBLISH_POLL_BATCH_MEMORY, pollMessageLimit(channel));
@@ -285,9 +273,6 @@ public class PublishPollServiceImpl implements PublishPollService {
         return clientConnection.getInFlightMessages();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollSharedPublishes(final @NotNull String sharedSubscription) {
         final List<SubscriberWithQoS> subscribers = new ArrayList<>(sharedSubscriptionService.getSharedSubscriber(sharedSubscription));
@@ -295,17 +280,15 @@ public class PublishPollServiceImpl implements PublishPollService {
         // We should shuffle here because otherwise one client could consume all messages if it is fast enough
         Collections.shuffle(subscribers);
         for (final SubscriberWithQoS subscriber : subscribers) {
-            final Channel channel = connectionPersistence.get(subscriber.getSubscriber());
-            if (channel == null) {
+            final ClientConnection clientConnection = connectionPersistence.get(subscriber.getSubscriber());
+            if (clientConnection == null || !clientConnection.getChannel().isActive()) {
                 continue; // client is disconnected
             }
-            pollSharedPublishesForClient(subscriber.getSubscriber(), sharedSubscription, subscriber.getQos(), subscriber.isRetainAsPublished(), subscriber.getSubscriptionIdentifier(), channel);
+
+            pollSharedPublishesForClient(subscriber.getSubscriber(), sharedSubscription, subscriber.getQos(), subscriber.isRetainAsPublished(), subscriber.getSubscriptionIdentifier(), clientConnection.getChannel());
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void pollSharedPublishesForClient(final @NotNull String client,
                                              final @NotNull String sharedSubscription,
@@ -386,45 +369,30 @@ public class PublishPollServiceImpl implements PublishPollService {
         }, singleWriterService.callbackExecutor(client));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     @Override
     public ListenableFuture<Void> removeMessageFromQueue(final @NotNull String client, final int packetId) {
         return clientQueuePersistence.remove(client, packetId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     @Override
     public ListenableFuture<Void> removeMessageFromSharedQueue(final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return clientQueuePersistence.removeShared(sharedSubscription, uniqueId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     @Override
     public ListenableFuture<Void> putPubrelInQueue(final @NotNull String client, final int packetId) {
         return clientQueuePersistence.putPubrel(client, packetId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     @Override
     public ListenableFuture<Void> removeInflightMarker(final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return clientQueuePersistence.removeInFlightMarker(sharedSubscription, uniqueId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @NotNull
     private ImmutableIntArray createMessageIds(final @NotNull MessageIDPool messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(pollMessageLimit);
