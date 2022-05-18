@@ -46,11 +46,8 @@ public final class ChannelUtils {
 
         final Optional<InetAddress> inetAddress = getChannelAddress(channel);
 
-        if (inetAddress.isPresent()) {
-            return Optional.ofNullable(inetAddress.get().getHostAddress());
-        }
+        return inetAddress.map(InetAddress::getHostAddress);
 
-        return Optional.empty();
     }
 
     public static Optional<InetAddress> getChannelAddress(final Channel channel) {
