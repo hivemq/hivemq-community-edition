@@ -251,10 +251,11 @@ public class InternalConfigurations {
 
     public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
 
+    public static final long DISCONNECT_KEEP_ALIVE_BATCH = 100;
+
     public static final double CONNECT_THROTTLING_INFLIGHT_TO_QUEUE_RATIO = 2.0;
     public static final double CONNECT_THROTTLING_FEEDBACK_TO_TIME_BETWEEN_RATIO = 2.0;
     public static final double CONNECT_THROTTLING_TIMEOUT_FACTOR = 2.0;
-
 
     public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT = 60;
     public static final int CHANNEL_PERSISTENCE_SHUTDOWN_TIMEOUT = 180;

@@ -45,6 +45,8 @@ import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 import com.hivemq.limitation.TopicAliasLimiterImpl;
 import com.hivemq.logging.EventLog;
+import com.hivemq.mqtt.handler.KeepAliveDisconnectHandler;
+import com.hivemq.mqtt.handler.KeepAliveDisconnectService;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
@@ -258,18 +260,9 @@ public class ConnectHandlerTest {
         assertTrue(channel.isOpen());
 
         final Integer keepAlive = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
-
-        boolean containsHandler = false;
-        for (final Map.Entry<String, ChannelHandler> handler : channel.pipeline()) {
-            if (handler.getValue() instanceof IdleStateHandler) {
-                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
-                assertEquals(
-                        ((long) (65535D * 1.5D) * 1000L),
-                        ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
-                containsHandler = true;
-            }
-        }
-        assertTrue(containsHandler);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = (KeepAliveDisconnectHandler) channel.pipeline().get(ChannelHandlerNames.MQTT_KEEPALIVE_IDLE_HANDLER);
+        assertEquals(TimeUnit.SECONDS.toNanos(((Double) (65535 * 1.5)).intValue()), keepAliveDisconnectHandler.getReaderIdleTimeNanos());
+        assertNotNull(keepAlive);
 
         assertNotNull(keepAlive);
         assertEquals(65535, keepAlive.longValue());
@@ -309,25 +302,14 @@ public class ConnectHandlerTest {
         assertTrue(channel.isOpen());
         channel.writeInbound(connect1);
         assertTrue(channel.isOpen());
-
         final Integer keepAlive = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
-
-        boolean containsHandler = false;
-        for (final Map.Entry<String, ChannelHandler> handler : channel.pipeline()) {
-            if (handler.getValue() instanceof IdleStateHandler) {
-                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
-                assertEquals(
-                        (long) (500 * 1.5 * 1000),
-                        ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
-                containsHandler = true;
-            }
-        }
-        assertTrue(containsHandler);
-
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = (KeepAliveDisconnectHandler) channel.pipeline().get(ChannelHandlerNames.MQTT_KEEPALIVE_IDLE_HANDLER);
+        assertEquals((long) (500 * 1.5 * 1000000000), keepAliveDisconnectHandler.getReaderIdleTimeNanos());
         assertNotNull(keepAlive);
         assertEquals(500, keepAlive.longValue());
         assertEquals(500, keepAliveFromCONNACK.get());
     }
+
 
     @Test
     public void test_connect_with_keep_alive_ok() {
@@ -366,17 +348,9 @@ public class ConnectHandlerTest {
 
         final Integer keepAlive = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive();
 
-        boolean containsHandler = false;
-        for (final Map.Entry<String, ChannelHandler> handler : channel.pipeline()) {
-            if (handler.getValue() instanceof IdleStateHandler) {
-                // Server-side  keepalive * Default 1.5x multiplier for keepalive interval * 1000x for milliseconds conversion
-                assertEquals(
-                        ((long) (360 * 1.5D) * 1000L),
-                        ((IdleStateHandler) handler.getValue()).getReaderIdleTimeInMillis());
-                containsHandler = true;
-            }
-        }
-        assertTrue(containsHandler);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = (KeepAliveDisconnectHandler) channel.pipeline().get(ChannelHandlerNames.MQTT_KEEPALIVE_IDLE_HANDLER);
+        assertEquals((long) (360 * 1.5 * 1000000000), keepAliveDisconnectHandler.getReaderIdleTimeNanos());
+        assertNotNull(keepAlive);
 
         assertNotNull(keepAlive);
         assertEquals(360, keepAlive.longValue());
@@ -1618,7 +1592,8 @@ public class ConnectHandlerTest {
                 internalAuthServiceImpl,
                 authorizers,
                 pluginAuthorizerService,
-                serverDisconnector);
+                serverDisconnector,
+                mock(KeepAliveDisconnectService.class));
 
         handler.postConstruct();
         channel.pipeline()
