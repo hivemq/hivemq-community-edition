@@ -67,7 +67,7 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bind(RetainedMessagePersistence.class).toProvider(RetainedMessagePersistenceProvider.class)
                 .in(LazySingleton.class);
 
-        /* Channel */
+        /* Connection */
         bind(ConnectionPersistence.class).to(ConnectionPersistenceImpl.class).in(Singleton.class);
 
         /* Client Session */

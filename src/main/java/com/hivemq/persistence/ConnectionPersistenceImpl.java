@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -75,25 +76,8 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
     }
 
     @Override
-    public long size() {
-        return clientConnectionMap.size();
-    }
-
-    @NotNull
-    @Override
-    public Set<Map.Entry<String, ClientConnection>> entries() {
-        return clientConnectionMap.entrySet();
-    }
-
-
-    @Override
     public void addServerChannel(final @NotNull String listenerName, final @NotNull Channel channel) {
         serverChannelMap.put(listenerName, channel);
-    }
-
-    @Override
-    public @NotNull Set<Map.Entry<String, Channel>> getServerChannels() {
-        return serverChannelMap.entrySet();
     }
 
     @Override
@@ -197,5 +181,10 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
         Futures.whenAllComplete(closeFutures).run(() -> {
             shutDownPartition(connectionPartitions, index + 1, closeFuture);
         }, MoreExecutors.directExecutor());
+    }
+
+    @VisibleForTesting
+    public @NotNull Set<Map.Entry<String, ClientConnection>> entries() {
+        return clientConnectionMap.entrySet();
     }
 }

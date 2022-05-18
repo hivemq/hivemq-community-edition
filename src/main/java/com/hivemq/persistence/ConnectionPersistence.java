@@ -21,9 +21,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
 
-import java.util.Map;
-import java.util.Set;
-
 public interface ConnectionPersistence {
 
     /**
@@ -50,21 +47,7 @@ public interface ConnectionPersistence {
      */
     void remove(@NotNull ClientConnection clientConnection);
 
-    /**
-     * @return the amount of stored connections.
-     */
-    long size();
-
-    /**
-     * Receive all ClientConnections with their corresponding client identifier as a set of map entries.
-     *
-     * @return all ClientConnections currently stored.
-     */
-    @NotNull Set<Map.Entry<String, ClientConnection>> entries();
-
     void addServerChannel(@NotNull String listenerName, @NotNull Channel channel);
-
-    @NotNull Set<Map.Entry<String, Channel>> getServerChannels();
 
     @NotNull ListenableFuture<Void> shutDown();
 
