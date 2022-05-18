@@ -21,6 +21,16 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
 
+/**
+ * The ConnectionPersistence contains the connections of all active clients. The connection however can be closed in
+ * the meantime when you try to get the connection. It is recommended to check the
+ * {@link com.hivemq.bootstrap.ClientState} of the connection to make sure if the connection is still open.
+ * <p>
+ * It guarantees even under heavy take over scenarios that only one client for one unique identifier is persisted.
+ * <p>
+ * The connections in here need to be shutdown gracefully with {@link ConnectionPersistence#shutDown} when HiveMQ is
+ * shutting down.
+ */
 public interface ConnectionPersistence {
 
     /**
