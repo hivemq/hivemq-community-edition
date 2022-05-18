@@ -31,8 +31,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * @author Lukas Brandl
- * @author Florian Limpöck
  * @since 4.0.0
  */
 @Singleton
@@ -50,8 +48,8 @@ public class AuthorizersImpl implements Authorizers {
     @Inject
     public AuthorizersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        this.authorizerProviderMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
-        this.readWriteLock = new ReentrantReadWriteLock();
+        authorizerProviderMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
+        readWriteLock = new ReentrantReadWriteLock();
     }
 
     @Override

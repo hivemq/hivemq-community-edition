@@ -40,7 +40,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * Highest priority comes first.
  *
- * @author Florian Limpöck
  * @since 4.0.0
  */
 @LazySingleton
@@ -59,8 +58,8 @@ public class InitializersImpl implements Initializers {
     @Inject
     public InitializersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        this.clientInitializerMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
-        this.readWriteLock = new ReentrantReadWriteLock();
+        clientInitializerMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
+        readWriteLock = new ReentrantReadWriteLock();
     }
 
     @Override

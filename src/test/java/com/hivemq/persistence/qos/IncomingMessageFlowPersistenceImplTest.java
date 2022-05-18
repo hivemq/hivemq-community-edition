@@ -26,7 +26,6 @@ import util.TestMessageUtil;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Florian Limpöck
  * @since 4.1.0
  */
 @SuppressWarnings("NullabilityAnnotations")
