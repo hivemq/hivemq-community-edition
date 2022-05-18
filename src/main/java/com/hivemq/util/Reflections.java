@@ -15,12 +15,17 @@
  */
 package com.hivemq.util;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class Reflections {
+public final class Reflections {
+
+    private Reflections() {
+    }
 
     /**
      * This method is a convenient way to ask for a specific annotation on the interface
@@ -34,7 +39,8 @@ public class Reflections {
      * @param annotation the annotation to search for
      * @return an Optional of the concrete annotation
      */
-    public static <T extends Annotation> Optional<T> getMethodAnnotationFromInterface(final Method method, final Class<T> annotation) {
+    public static <T extends Annotation> Optional<T> getMethodAnnotationFromInterface(
+            final @NotNull Method method, final @NotNull Class<? extends T> annotation) {
         final Class<?>[] interfaces = method.getDeclaringClass().getInterfaces();
 
         for (final Class<?> anInterface : interfaces) {
@@ -64,13 +70,11 @@ public class Reflections {
      *
      * @param method
      * @param anotherMethod
-     * @return if the methods are equal in regards to the conditions above
+     * @return if the methods are equal in regard to the conditions above
      */
-    private static boolean methodSignatureEquals(final Method method, final Method anotherMethod) {
+    private static boolean methodSignatureEquals(final @NotNull Method method, final @NotNull Method anotherMethod) {
         if (method.getReturnType().equals(anotherMethod.getReturnType())) {
-
             if (method.getName().equals(anotherMethod.getName())) {
-
                 return Arrays.equals(method.getParameterTypes(), anotherMethod.getParameterTypes());
             }
         }
