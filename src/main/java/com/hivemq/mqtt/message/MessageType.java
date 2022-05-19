@@ -15,6 +15,8 @@
  */
 package com.hivemq.mqtt.message;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 /**
  * @author Dominik Obermaier
  * @since 1.4
@@ -37,6 +39,8 @@ public enum MessageType {
     DISCONNECT(14),
     AUTH(15);
 
+    private static final @NotNull MessageType @NotNull [] VALUES = values();
+
     private final int type;
 
     MessageType(final int type) {
@@ -44,14 +48,12 @@ public enum MessageType {
         this.type = type;
     }
 
-    public static MessageType valueOf(final int i) {
-
-        for (final MessageType messageType : MessageType.values()) {
-            if (messageType.type == i) {
-                return messageType;
-            }
+    public static @NotNull MessageType valueOf(final int i) {
+        try {
+            return VALUES[i];
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("Invalid Message Type: " + i, e);
         }
-        throw new IllegalArgumentException("Invalid Message Type: " + i);
     }
 
     public int getType() {

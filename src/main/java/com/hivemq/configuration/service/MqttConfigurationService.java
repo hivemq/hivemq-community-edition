@@ -40,20 +40,20 @@ public interface MqttConfigurationService {
          */
         DISCARD(1);
 
+        private static final @NotNull QueuedMessagesStrategy @NotNull [] VALUES = values();
+
         private final int index;
 
         QueuedMessagesStrategy(final int index) {
             this.index = index;
         }
 
-        public static QueuedMessagesStrategy valueOf(final int index) {
-
-            for (final QueuedMessagesStrategy strategy : QueuedMessagesStrategy.values()) {
-                if (strategy.index == index) {
-                    return strategy;
-                }
+        public static @NotNull QueuedMessagesStrategy valueOf(final int index) {
+            try {
+                return VALUES[index];
+            } catch (final ArrayIndexOutOfBoundsException e) {
+                throw new IllegalArgumentException("No queued messages strategy for index " + index, e);
             }
-            throw new IllegalArgumentException("No queued messages strategy for index " + index);
         }
 
         public int getIndex() {

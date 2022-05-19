@@ -13,24 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.migration.meta;
+package com.hivemq.mqtt.message.mqtt5;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.junit.Test;
+import util.EnumTestUtil;
 
-/**
- * @author Florian Limpöck
- */
-public enum PersistenceType {
-    FILE, FILE_NATIVE;
+public class Mqtt5RetainHandlingTest {
 
-    private static final @NotNull PersistenceType @NotNull [] VALUES = values();
-
-    public static @NotNull PersistenceType forCode(final int code) {
-        try {
-            return VALUES[code];
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("No persistence type found for code: " + code, e);
-        }
+    @Test
+    public void test_all_fromCode() {
+        EnumTestUtil.assertAllValueOfWithFallback(
+                Mqtt5RetainHandling.class,
+                Mqtt5RetainHandling::getCode,
+                Mqtt5RetainHandling::fromCode,
+                null);
     }
 
 }

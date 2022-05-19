@@ -460,16 +460,5 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         public int getNumber() {
             return number;
         }
-
-        public static @NotNull DisconnectSource ofNumber(final int number) {
-
-            for (final DisconnectSource value : values()) {
-                if (value.number == number) {
-                    return value;
-                }
-            }
-
-            throw new IllegalArgumentException("No disconnect source found for number: " + number);
-        }
     }
 }

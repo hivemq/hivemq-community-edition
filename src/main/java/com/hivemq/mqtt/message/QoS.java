@@ -40,6 +40,8 @@ public enum QoS {
      */
     EXACTLY_ONCE(2);
 
+    private static final @NotNull QoS @NotNull [] VALUES = values();
+
     private final int qosNumber;
     private final @NotNull Qos qos;
 
@@ -75,13 +77,7 @@ public enum QoS {
      */
     @Nullable
     public static QoS valueOf(final int i) {
-
-        for (final QoS qoS : QoS.values()) {
-            if (qoS.getQosNumber() == i) {
-                return qoS;
-            }
-        }
-        return null;
+        return i >= 0 && i < VALUES.length ? VALUES[i] : null;
     }
 
     public static @NotNull QoS from(final @NotNull Qos qos) {
