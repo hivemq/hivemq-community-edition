@@ -6,7 +6,6 @@ import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ReasonStrings;
@@ -16,6 +15,7 @@ import org.jctools.queues.MpscLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class KeepAliveDisconnectService {
@@ -24,6 +24,7 @@ public class KeepAliveDisconnectService {
     private final @NotNull MpscLinkedQueue<Channel> disconnectQueue = new MpscLinkedQueue<>();
     private final @NotNull ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private final long disconnectBatch;
+    private final AtomicInteger submittedTasks = new AtomicInteger();
 
     @Inject
     public KeepAliveDisconnectService(@NotNull final MqttServerDisconnector mqttServerDisconnector,
@@ -46,23 +47,31 @@ public class KeepAliveDisconnectService {
 
     public void submitKeepAliveDisconnect(final @NotNull Channel channel) {
         disconnectQueue.offer(channel);
+        if (submittedTasks.getAndIncrement() == 0) {
+            scheduledExecutorService.schedule(new DisconnectorTask(), 100, TimeUnit.MILLISECONDS);
+        }
     }
 
     public class DisconnectorTask implements Runnable {
         @Override
         public void run() {
-            for (int i = 0; i < disconnectBatch; i++) {
+            int i = 0;
+            while (i < disconnectBatch) {
                 final Channel channel = disconnectQueue.relaxedPoll();
                 if (channel == null) {
-                    return;
+                    break;
                 }
-                channel.eventLoop().submit(() -> {
+                channel.eventLoop().execute(() -> {
                     mqttServerDisconnector.disconnect(channel,
                             "Client with ID {} and IP {} disconnected. The client was idle for too long without sending an MQTT control packet",
                             "Client was idle for too long",
                             Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT,
                             ReasonStrings.DISCONNECT_KEEP_ALIVE_TIMEOUT);
                 });
+                i++;
+            }
+            if (submittedTasks.addAndGet(-i) > 0) {
+                scheduledExecutorService.schedule(this, 100, TimeUnit.MILLISECONDS);
             }
         }
     }

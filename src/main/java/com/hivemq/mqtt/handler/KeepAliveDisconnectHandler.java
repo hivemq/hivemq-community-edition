@@ -1,7 +1,6 @@
 package com.hivemq.mqtt.handler;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.annotations.ExecuteInEventloop;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.Channel;
@@ -16,14 +15,15 @@ import java.util.concurrent.TimeUnit;
  * Basically a {@link IdleStateHandler} where all functions besides the read idle state are removed.
  */
 public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
-    private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
+    static final long MIN_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(1);
+    private static final byte NOT_INITIATED = 0;
+    private static final byte INITIATED = 1;
+    private static final byte DESTROYED = 2;
 
     private final long readerIdleTimeNanos;
-
     private @Nullable Future<?> timeoutTaskFuture;
     private long lastReadTime;
-
-    private byte state; // 0 - none, 1 - initialized, 2 - destroyed
+    private byte state = NOT_INITIATED;
     private boolean reading;
     private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService;
 
@@ -39,7 +39,7 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void handlerAdded(final ChannelHandlerContext ctx) throws Exception {
+    public void handlerAdded(final ChannelHandlerContext ctx) {
         if (ctx.channel().isActive() && ctx.channel().isRegistered()) {
             // channelActive() event has been fired already, which means this.channelActive() will
             // not be invoked. We have to initialize here instead.
@@ -48,7 +48,7 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void handlerRemoved(final @NotNull ChannelHandlerContext ctx) throws Exception {
+    public void handlerRemoved(final @NotNull ChannelHandlerContext ctx) {
         destroy();
     }
 
@@ -85,7 +85,7 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelReadComplete(final @NotNull ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(final @NotNull ChannelHandlerContext ctx) {
         if ((readerIdleTimeNanos > 0) && reading) {
             lastReadTime = ticksInNanos();
             reading = false;
@@ -96,12 +96,13 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     @VisibleForTesting
     void initialize(final @NotNull Channel channel) {
         //only initialize of it's not initialized
-        if (state == 0) {
-            state = 1;
-            lastReadTime = ticksInNanos();
-            if (readerIdleTimeNanos > 0) {
-                timeoutTaskFuture = channel.eventLoop().schedule(new ReaderIdleTimeoutTask(channel), readerIdleTimeNanos, TimeUnit.NANOSECONDS);
-            }
+        if (state > NOT_INITIATED) {
+            return;
+        }
+        state = INITIATED;
+        lastReadTime = ticksInNanos();
+        if (readerIdleTimeNanos > 0) {
+            timeoutTaskFuture = channel.eventLoop().schedule(new ReaderIdleTimeoutTask(channel), readerIdleTimeNanos, TimeUnit.NANOSECONDS);
         }
     }
 
@@ -112,26 +113,24 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
 
 
     private void destroy() {
-        state = 2;
+        state = DESTROYED;
         if (timeoutTaskFuture != null) {
             timeoutTaskFuture.cancel(false);
             timeoutTaskFuture = null;
         }
     }
 
-    @ExecuteInEventloop
-    public void pauseKeepAliveDisconnect() {
-        if (timeoutTaskFuture != null) {
-            timeoutTaskFuture.cancel(false);
-            timeoutTaskFuture = null;
-        }
+    @VisibleForTesting
+    public long getReaderIdleTimeNanos() {
+        return readerIdleTimeNanos;
     }
 
-    @ExecuteInEventloop
-    public void resumeKeepAliveDisconnect(final @NotNull Channel channel) {
-        if (timeoutTaskFuture == null) {
-            timeoutTaskFuture = channel.eventLoop().schedule(new ReaderIdleTimeoutTask(channel), readerIdleTimeNanos, TimeUnit.NANOSECONDS);
-        }
+    public int getState() {
+        return state;
+    }
+
+    public boolean isReading() {
+        return reading;
     }
 
     class ReaderIdleTimeoutTask implements Runnable {
@@ -144,36 +143,23 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
 
         @Override
         public void run() {
-            if (!channel.isOpen()) {
-                return;
-            }
             long nextDelay = readerIdleTimeNanos;
-            if (!reading) {
-                nextDelay -= ticksInNanos() - lastReadTime;
-            }
-
-            if (nextDelay <= 0) {
-                keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
-            } else {
-                // Read occurred before the timeout - set a new timeout with shorter delay.
+            try {
+                if (!channel.isOpen()) {
+                    return;
+                }
+                if (!reading) {
+                    nextDelay -= ticksInNanos() - lastReadTime;
+                }
+                if (nextDelay <= 0) {
+                    keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
+                } else {
+                    // Read occurred before the timeout - set a new timeout with shorter delay.
+                    timeoutTaskFuture = channel.eventLoop().schedule(this, nextDelay, TimeUnit.NANOSECONDS);
+                }
+            } catch (final Exception e) {
                 timeoutTaskFuture = channel.eventLoop().schedule(this, nextDelay, TimeUnit.NANOSECONDS);
             }
         }
-
-    }
-
-    @VisibleForTesting
-    public byte getState() {
-        return state;
-    }
-
-    @VisibleForTesting
-    public boolean isReading() {
-        return reading;
-    }
-
-    @VisibleForTesting
-    public long getReaderIdleTimeNanos() {
-        return readerIdleTimeNanos;
     }
 }
