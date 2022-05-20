@@ -40,26 +40,26 @@ public class Checkpoints {
     private static final ConcurrentHashMap<String, Integer> checkpointCounters = new ConcurrentHashMap<>(1);
     private static final ConcurrentHashMap<String, CountDownLatch> checkpointLatches = new ConcurrentHashMap<>(1);
     private static final ConcurrentHashMap<String, Runnable> checkPointCallbacks = new ConcurrentHashMap<>(1);
-    private static boolean enabled = false;
-    private static boolean debug = false;
+    private static boolean enabled;
+    private static boolean debug;
 
     public static boolean enabled() {
         return enabled;
     }
 
     public static void enable() {
-        Checkpoints.enabled = true;
+        enabled = true;
     }
 
     public static void disable() {
-        Checkpoints.enabled = false;
+        enabled = false;
     }
 
     /**
      * enables debug output for checkpoints
      */
     public static void debug() {
-        Checkpoints.debug = true;
+        debug = true;
     }
 
     /**
@@ -173,19 +173,16 @@ public class Checkpoints {
                 } else {
                     try {
                         Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        log.error("Wait for Checkpoint " + name + " interrupted");
-                        break;
+                    } catch (final InterruptedException e) {
+                        log.error("Wait for Checkpoint {} interrupted", name);
+                        throw new RuntimeException(e);
                     }
                 }
-
             } finally {
                 lock.unlock();
             }
-
         }
     }
-
 
     /**
      * blocks the executing code when it reaches the checkpoint until the latch is resumed (1 time)
