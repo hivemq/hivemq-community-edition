@@ -31,7 +31,6 @@ public class KeepAliveDisconnectService {
                                       @NotNull final ShutdownHooks shutdownHooks) {
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.disconnectBatch = InternalConfigurations.DISCONNECT_KEEP_ALIVE_BATCH;
-        this.scheduledExecutorService.scheduleWithFixedDelay(new DisconnectorTask(), 100, 100, TimeUnit.MILLISECONDS);
         shutdownHooks.add(new HiveMQShutdownHook() {
             @Override
             public @NotNull String name() {
