@@ -13,6 +13,7 @@ import io.netty.channel.Channel;
 import org.jctools.queues.MpscLinkedQueue;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +48,11 @@ public class KeepAliveDisconnectService {
     public void submitKeepAliveDisconnect(final @NotNull Channel channel) {
         disconnectQueue.offer(channel);
         if (submittedTasks.getAndIncrement() == 0) {
-            scheduledExecutorService.schedule(new DisconnectorTask(), 100, TimeUnit.MILLISECONDS);
+            try {
+                scheduledExecutorService.schedule(new DisconnectorTask(), 100, TimeUnit.MILLISECONDS);
+            } catch (final RejectedExecutionException rejectedExecutionException) {
+                // can be ignored, can happen during Shutdown
+            }
         }
     }
 
@@ -55,22 +60,30 @@ public class KeepAliveDisconnectService {
         @Override
         public void run() {
             int i = 0;
-            while (i < disconnectBatch) {
-                final Channel channel = disconnectQueue.relaxedPoll();
-                if (channel == null) {
-                    break;
+            try {
+                while (i < disconnectBatch) {
+                    final Channel channel = disconnectQueue.relaxedPoll();
+                    if (channel == null) {
+                        break;
+                    }
+                    i++;
+                    channel.eventLoop().execute(() -> {
+                        mqttServerDisconnector.disconnect(channel,
+                                "Client with ID {} and IP {} disconnected. The client was idle for too long without sending an MQTT control packet",
+                                "Client was idle for too long",
+                                Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT,
+                                ReasonStrings.DISCONNECT_KEEP_ALIVE_TIMEOUT);
+                    });
                 }
-                channel.eventLoop().execute(() -> {
-                    mqttServerDisconnector.disconnect(channel,
-                            "Client with ID {} and IP {} disconnected. The client was idle for too long without sending an MQTT control packet",
-                            "Client was idle for too long",
-                            Mqtt5DisconnectReasonCode.KEEP_ALIVE_TIMEOUT,
-                            ReasonStrings.DISCONNECT_KEEP_ALIVE_TIMEOUT);
-                });
-                i++;
-            }
-            if (submittedTasks.addAndGet(-i) > 0) {
-                scheduledExecutorService.schedule(this, 100, TimeUnit.MILLISECONDS);
+            } finally {
+                // always reschedule even if an exception happens within the while loop
+                if (submittedTasks.addAndGet(-i) > 0) {
+                    try {
+                        scheduledExecutorService.schedule(this, 100, TimeUnit.MILLISECONDS);
+                    } catch (final RejectedExecutionException rejectedExecutionException) {
+                        // can be ignored, can happen during Shutdown
+                    }
+                }
             }
         }
     }

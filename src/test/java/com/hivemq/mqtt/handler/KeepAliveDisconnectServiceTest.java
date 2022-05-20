@@ -11,9 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,6 +113,46 @@ public class KeepAliveDisconnectServiceTest {
         try {
             await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() == 2000);
+        } finally {
+            executorService.shutdown();
+        }
+    }
+
+    @Test
+    public void test_whenTasksAreSlowlySubmittedAndThrowExceptions_thenAllTasksWillBeExecuted() {
+        // TestChannel behaves odd sometimes, this is safe
+        final Channel channel = mock(Channel.class);
+        final EventLoop eventLoop = mock(EventLoop.class);
+        when(channel.eventLoop()).thenReturn(eventLoop);
+        final Random random = new Random();
+        final AtomicInteger withoutException = new AtomicInteger(0);
+        final ExecutorService executorService = Executors.newFixedThreadPool(2);
+        doAnswer(invocation -> {
+            final Runnable runnable = invocation.getArgument(0);
+            if (random.nextInt(10) == 7) {
+                throw new RuntimeException();
+            } else {
+                withoutException.incrementAndGet();
+            }
+
+            executorService.execute(runnable);
+            return null;
+        }).when(eventLoop).execute(any());
+
+        new Thread(() -> {
+            while (withoutException.get() <= 100) {
+                keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
+                try {
+                    Thread.sleep(1);
+                } catch (final InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
+        try {
+            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
+                    .until(() -> channelArgumentCaptor.getAllValues().size() >= 100);
         } finally {
             executorService.shutdown();
         }
