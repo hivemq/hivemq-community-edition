@@ -29,6 +29,8 @@ public enum Mqtt5PayloadFormatIndicator {
     UNSPECIFIED,
     UTF_8;
 
+    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] VALUES = values();
+
     private final @NotNull PayloadFormatIndicator payloadFormatIndicator;
 
     Mqtt5PayloadFormatIndicator() {
@@ -63,11 +65,7 @@ public enum Mqtt5PayloadFormatIndicator {
      * Format Indicator.
      */
     public static @Nullable Mqtt5PayloadFormatIndicator fromCode(final int code) {
-        final Mqtt5PayloadFormatIndicator[] values = values();
-        if (code < 0 || code >= values.length) {
-            return null;
-        }
-        return values[code];
+        return (code >= 0 && code < VALUES.length) ? VALUES[code] : null;
     }
 
     public static @NotNull Mqtt5PayloadFormatIndicator from(

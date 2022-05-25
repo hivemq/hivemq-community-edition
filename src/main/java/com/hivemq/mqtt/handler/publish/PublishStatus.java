@@ -47,6 +47,7 @@ public enum PublishStatus {
      */
     CHANNEL_NOT_WRITABLE(5);
 
+    private static final @NotNull PublishStatus @NotNull [] VALUES = values();
 
     private final int id;
 
@@ -58,14 +59,11 @@ public enum PublishStatus {
         return id;
     }
 
-    @NotNull
-    public static PublishStatus valueOf(final int i) {
-
-        for (final PublishStatus type : PublishStatus.values()) {
-            if (type.getId() == i) {
-                return type;
-            }
+    public static @NotNull PublishStatus valueOf(final int i) {
+        try {
+            return VALUES[i - 1];
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("No state found for the given value : " + i + ".", e);
         }
-        throw new IllegalArgumentException("No state found for the given value : " + i + ".");
     }
 }

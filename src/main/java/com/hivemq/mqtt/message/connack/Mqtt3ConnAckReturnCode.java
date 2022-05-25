@@ -35,6 +35,8 @@ public enum Mqtt3ConnAckReturnCode {
     REFUSED_BAD_USERNAME_OR_PASSWORD(4),
     REFUSED_NOT_AUTHORIZED(5);
 
+    private static final @NotNull Mqtt3ConnAckReturnCode @NotNull [] VALUES = values();
+
     private final int code;
 
     Mqtt3ConnAckReturnCode(final int code) {
@@ -46,11 +48,11 @@ public enum Mqtt3ConnAckReturnCode {
     }
 
     public static @NotNull Mqtt3ConnAckReturnCode fromCode(final int code) {
-        final Mqtt3ConnAckReturnCode[] values = values();
-        if (code < 0 || code >= values.length) {
-            throw new IllegalArgumentException("No Return code with value " + code + " defined");
+        try {
+            return VALUES[code];
+        } catch (final IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("No Return code with value " + code + " defined", e);
         }
-        return values[code];
     }
 
     public static @NotNull Mqtt3ConnAckReturnCode fromReasonCode(final @NotNull Mqtt5ConnAckReasonCode reasonCode) {

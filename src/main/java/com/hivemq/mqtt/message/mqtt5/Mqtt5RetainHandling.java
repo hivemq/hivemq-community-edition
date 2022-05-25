@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.message.mqtt5;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
@@ -30,6 +31,8 @@ public enum Mqtt5RetainHandling {
     SEND(0),
     SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST(1),
     DO_NOT_SEND(2);
+
+    private static final @NotNull Mqtt5RetainHandling @NotNull [] VALUES = values();
 
     final int code;
 
@@ -52,11 +55,7 @@ public enum Mqtt5RetainHandling {
      */
     @Nullable
     public static Mqtt5RetainHandling fromCode(final int code) {
-        final Mqtt5RetainHandling[] values = values();
-        if (code < 0 || code >= values.length) {
-            return null;
-        }
-        return values[code];
+        return (code >= 0 && code < VALUES.length) ? VALUES[code] : null;
     }
 
 }

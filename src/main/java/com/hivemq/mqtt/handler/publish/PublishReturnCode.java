@@ -38,6 +38,8 @@ public enum PublishReturnCode {
      */
     FAILED(2);
 
+    private static final @NotNull PublishReturnCode @NotNull [] VALUES = values();
+
     private final int id;
 
     PublishReturnCode(final int id) {
@@ -48,14 +50,11 @@ public enum PublishReturnCode {
         return id;
     }
 
-    @NotNull
-    public static PublishReturnCode valueOf(final int i) {
-
-        for (final PublishReturnCode type : PublishReturnCode.values()) {
-            if (type.getId() == i) {
-                return type;
-            }
+    public static @NotNull PublishReturnCode valueOf(final int i) {
+        try {
+            return VALUES[i];
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("No publish return code found for the given value : " + i + ".", e);
         }
-        throw new IllegalArgumentException("No publish return code found for the given value : " + i + ".");
     }
 }
