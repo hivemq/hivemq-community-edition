@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extension.sdk.api.classloader;
+
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * This class must have this package because of plugin class loading.
- *
- * @author Dominik Obermaier
- * @author Georg Held
  */
 public class ClassLoaderTestClass {
 
-    public String get() {
-
+    public @NotNull String get() {
         return "original";
     }
 }

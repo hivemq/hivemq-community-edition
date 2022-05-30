@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler.testextensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.PublishAuthorizer;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
@@ -29,20 +29,22 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Test extension used in PluginAuthorizerServiceImplTest
  */
-@SuppressWarnings("unused")
 public final class TestPubAuthorizerNextProvider implements AuthorizerProvider {
 
-    private final CountDownLatch countDownLatch;
+    private final @NotNull CountDownLatch countDownLatch;
 
-    public TestPubAuthorizerNextProvider(final CountDownLatch countDownLatch) {
+    public TestPubAuthorizerNextProvider(final @NotNull CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
 
     @Override
-    public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
+    public @NotNull Authorizer getAuthorizer(final @NotNull AuthorizerProviderInput authorizerProviderInput) {
+        //noinspection Convert2Lambda
         return new PublishAuthorizer() {
             @Override
-            public void authorizePublish(final PublishAuthorizerInput input, final PublishAuthorizerOutput output) {
+            public void authorizePublish(
+                    final @NotNull PublishAuthorizerInput input,
+                    final @NotNull PublishAuthorizerOutput output) {
                 System.out.println("authorize");
                 output.nextExtensionOrDefault();
                 countDownLatch.countDown();

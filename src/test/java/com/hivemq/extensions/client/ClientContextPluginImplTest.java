@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -23,47 +24,38 @@ import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterc
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestInterceptorUtil;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 public class ClientContextPluginImplTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-
-    @Mock
-    private ServerInformation serverInformation;
-
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-    }
+    private final @NotNull ServerInformation serverInformation = mock(ServerInformation.class);
 
     @Test
     public void test_add_and_get_only_interceptors_from_my_class_loader() throws Exception {
-
-        final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
-        final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
+        final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
+        final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
 
         final ClientContextImpl clientContext =
                 new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
-        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
-        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
+        final IsolatedExtensionClassloader classloader =
+                (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader =
+                (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
 
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);
@@ -83,7 +75,6 @@ public class ClientContextPluginImplTest {
         assertEquals(1, contextPlugin2.getPublishInboundInterceptors().size());
         assertEquals(1, contextPlugin2.getSubscribeInboundInterceptors().size());
 
-
         for (final Interceptor interceptor : contextPlugin1.getAllInterceptors()) {
             assertFalse(contextPlugin2.getAllInterceptors().contains(interceptor));
         }
@@ -95,20 +86,20 @@ public class ClientContextPluginImplTest {
         for (final SubscribeInboundInterceptor interceptor : contextPlugin1.getSubscribeInboundInterceptors()) {
             assertFalse(contextPlugin2.getSubscribeInboundInterceptors().contains(interceptor));
         }
-
     }
 
     @Test
     public void test_add_and_remove_and_get_only_interceptors_from_my_class_loader() throws Exception {
-
-        final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
-        final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder, this.getClass().getClassLoader());
+        final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
+        final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
 
         final ClientContextImpl clientContext =
                 new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
-        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
-        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
+        final IsolatedExtensionClassloader classloader =
+                (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader =
+                (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
 
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);
@@ -122,7 +113,6 @@ public class ClientContextPluginImplTest {
 
         removeInterceptors(interceptorList, contextPlugin1);
 
-
         assertEquals(0, contextPlugin1.getAllInterceptors().size());
         assertEquals(0, contextPlugin1.getPublishInboundInterceptors().size());
         assertEquals(0, contextPlugin1.getSubscribeInboundInterceptors().size());
@@ -130,10 +120,10 @@ public class ClientContextPluginImplTest {
         assertEquals(2, contextPlugin2.getAllInterceptors().size());
         assertEquals(1, contextPlugin2.getPublishInboundInterceptors().size());
         assertEquals(1, contextPlugin2.getSubscribeInboundInterceptors().size());
-
     }
 
-    private void addInterceptors(final List<Interceptor> interceptorList, @NotNull final ClientContextPluginImpl contextPlugin) {
+    private void addInterceptors(
+            final List<Interceptor> interceptorList, @NotNull final ClientContextPluginImpl contextPlugin) {
         for (final Interceptor interceptor : interceptorList) {
             if (interceptor instanceof PublishInboundInterceptor) {
                 contextPlugin.addPublishInboundInterceptor((PublishInboundInterceptor) interceptor);
@@ -144,7 +134,8 @@ public class ClientContextPluginImplTest {
         }
     }
 
-    private void removeInterceptors(final List<Interceptor> interceptorList, @NotNull final ClientContextPluginImpl contextPlugin) {
+    private void removeInterceptors(
+            final List<Interceptor> interceptorList, @NotNull final ClientContextPluginImpl contextPlugin) {
         for (final Interceptor interceptor : interceptorList) {
             if (interceptor instanceof PublishInboundInterceptor) {
                 contextPlugin.removePublishInboundInterceptor((PublishInboundInterceptor) interceptor);

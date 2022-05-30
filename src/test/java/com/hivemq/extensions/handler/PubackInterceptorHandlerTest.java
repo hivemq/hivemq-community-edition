@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -31,13 +32,13 @@ import com.hivemq.extension.sdk.api.packets.puback.ModifiablePubackPacket;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -48,20 +49,14 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
-import java.io.File;
-import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -74,49 +69,46 @@ import static org.mockito.Mockito.when;
 public class PubackInterceptorHandlerTest {
 
     @Rule
-    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private @NotNull HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
+    private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
 
-    @Mock
-    private @NotNull HiveMQExtension extension;
-
-    @Mock
-    private @NotNull ClientContextImpl clientContext;
-
-    private @NotNull PluginTaskExecutor executor1;
-
+    private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
-
     private @NotNull PubackInterceptorHandler handler;
-    private @NotNull PluginOutputAsyncerImpl asyncer;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        executor1 = new PluginTaskExecutor(new AtomicLong());
-        executor1.postConstruct();
+        executor = new PluginTaskExecutor(new AtomicLong());
+        executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION)
+                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        when(extension.getId()).thenReturn("plugin");
+        when(extension.getId()).thenReturn("extension");
 
         final FullConfigurationService configurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
-        handler = new PubackInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        handler = new PubackInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test1", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(@NotNull final ChannelHandlerContext ctx, @NotNull final Object msg, @NotNull final ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) {
                 handler.handleOutboundPuback(ctx, ((PUBACK) msg), promise);
             }
         });
@@ -130,12 +122,11 @@ public class PubackInterceptorHandlerTest {
 
     @After
     public void tearDown() throws Exception {
-        executor1.stop();
+        executor.stop();
     }
 
     @Test(timeout = 5000)
     public void test_inbound_client_id_not_set() {
-
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeInbound(testPuback());
@@ -157,7 +148,6 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_no_interceptors() {
-
         when(clientContext.getPubackInboundInterceptors()).thenReturn(ImmutableList.of());
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
 
@@ -175,8 +165,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_modify() throws Exception {
-
-        final PubackInboundInterceptor interceptor = getInboundInterceptor("TestModifyInboundInterceptor");
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -196,8 +186,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_plugin_null() throws Exception {
-
-        final PubackInboundInterceptor interceptor = getInboundInterceptor("TestModifyInboundInterceptor");
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -216,8 +206,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 10_000)
     public void test_inbound_timeout_failed() throws Exception {
-
-        final PubackInboundInterceptor interceptor = getInboundInterceptor("TestTimeoutFailedInboundInterceptor");
+        final PubackInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
+                temporaryFolder,
+                TestTimeoutFailedInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -233,8 +224,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_exception() throws Exception {
-
-        final PubackInboundInterceptor interceptor = getInboundInterceptor("TestExceptionInboundInterceptor");
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -250,9 +241,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_noPartialModificationWhenException() throws Exception {
-
-        final PubackInboundInterceptor interceptor =
-                getInboundInterceptor("TestPartialModifiedInboundInterceptor");
+        final PubackInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
+                temporaryFolder,
+                TestPartialModifiedInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -268,12 +259,11 @@ public class PubackInterceptorHandlerTest {
         }
 
         assertNotEquals("modified", puback.getReasonString());
-        assertNotEquals(AckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
+        assertNotEquals(Mqtt5PubAckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
     }
 
     @Test(timeout = 5000)
     public void test_outbound_client_id_not_set() {
-
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeOutbound(testPuback());
@@ -284,7 +274,6 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_channel_inactive() {
-
         final ChannelHandlerContext context = channel.pipeline().context("test1");
 
         channel.close();
@@ -314,8 +303,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_modify() throws Exception {
-
-        final PubackOutboundInterceptor interceptor = getOutboundInterceptor("TestModifyOutboundInterceptor");
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
@@ -335,8 +324,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_plugin_null() throws Exception {
-
-        final PubackOutboundInterceptor interceptor = getOutboundInterceptor("TestModifyOutboundInterceptor");
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -355,8 +344,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 10_000)
     public void test_outbound_timeout_failed() throws Exception {
-
-        final PubackOutboundInterceptor interceptor = getOutboundInterceptor("TestTimeoutFailedOutboundInterceptor");
+        final PubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
+                temporaryFolder,
+                TestTimeoutFailedOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
@@ -373,8 +363,8 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_exception() throws Exception {
-
-        final PubackOutboundInterceptor interceptor = getOutboundInterceptor("TestExceptionOutboundInterceptor");
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
@@ -389,8 +379,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_noPartialModificationWhenException() throws Exception {
-
-        final PubackOutboundInterceptor interceptor = getOutboundInterceptor("TestPartialModifiedOutboundInterceptor");
+        final PubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
+                temporaryFolder,
+                TestPartialModifiedOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
@@ -406,47 +397,7 @@ public class PubackInterceptorHandlerTest {
         }
 
         assertNotEquals("modified", puback.getReasonString());
-        assertNotEquals(AckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
-    }
-
-    @NotNull
-    private PubackInboundInterceptor getInboundInterceptor(@NotNull final String name) throws Exception {
-
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PubackInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader
-                cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.PubackInterceptorHandlerTest$" + name);
-
-        return (PubackInboundInterceptor) interceptorClass.newInstance();
-    }
-
-    @NotNull
-    private PubackOutboundInterceptor getOutboundInterceptor(@NotNull final String name) throws Exception {
-
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.PubackInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader
-                cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.PubackInterceptorHandlerTest$" + name);
-
-        return (PubackOutboundInterceptor) interceptorClass.newInstance();
+        assertNotEquals(Mqtt5PubAckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
     }
 
     @NotNull
@@ -458,34 +409,31 @@ public class PubackInterceptorHandlerTest {
 
         @Override
         public void onInboundPuback(
-                @NotNull final PubackInboundInput pubackInboundInput,
-                @NotNull final PubackInboundOutput pubackInboundOutput) {
+                final @NotNull PubackInboundInput pubackInboundInput,
+                final @NotNull PubackInboundOutput pubackInboundOutput) {
             @Immutable final ModifiablePubackPacket pubackPacket = pubackInboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
         }
-
     }
 
     public static class TestTimeoutFailedInboundInterceptor implements PubackInboundInterceptor {
 
         @Override
         public void onInboundPuback(
-                @NotNull final PubackInboundInput pubackInboundInput,
-                @NotNull final PubackInboundOutput pubackInboundOutput) {
+                final @NotNull PubackInboundInput pubackInboundInput,
+                final @NotNull PubackInboundOutput pubackInboundOutput) {
             pubackInboundOutput.async(Duration.ofMillis(10));
         }
-
     }
 
     public static class TestExceptionInboundInterceptor implements PubackInboundInterceptor {
 
         @Override
         public void onInboundPuback(
-                @NotNull final PubackInboundInput pubackInboundInput,
-                @NotNull final PubackInboundOutput pubackInboundOutput) {
+                final @NotNull PubackInboundInput pubackInboundInput,
+                final @NotNull PubackInboundOutput pubackInboundOutput) {
             throw new RuntimeException();
         }
-
     }
 
     public static class TestPartialModifiedInboundInterceptor implements PubackInboundInterceptor {
@@ -494,61 +442,54 @@ public class PubackInterceptorHandlerTest {
         public void onInboundPuback(
                 final @NotNull PubackInboundInput pubackInboundInput,
                 final @NotNull PubackInboundOutput pubackInboundOutput) {
-            final ModifiablePubackPacket pubackPacket =
-                    pubackInboundOutput.getPubackPacket();
+            final ModifiablePubackPacket pubackPacket = pubackInboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
             pubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
             throw new RuntimeException();
         }
-
     }
 
     public static class TestModifyOutboundInterceptor implements PubackOutboundInterceptor {
 
         @Override
         public void onOutboundPuback(
-                @NotNull final PubackOutboundInput pubackOutboundInput,
-                @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+                final @NotNull PubackOutboundInput pubackOutboundInput,
+                final @NotNull PubackOutboundOutput pubackOutboundOutput) {
             @Immutable final ModifiablePubackPacket pubackPacket = pubackOutboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
         }
-
     }
 
     public static class TestTimeoutFailedOutboundInterceptor implements PubackOutboundInterceptor {
 
         @Override
         public void onOutboundPuback(
-                @NotNull final PubackOutboundInput pubackOutboundInput,
-                @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+                final @NotNull PubackOutboundInput pubackOutboundInput,
+                final @NotNull PubackOutboundOutput pubackOutboundOutput) {
             pubackOutboundOutput.async(Duration.ofMillis(10));
         }
-
     }
 
     public static class TestExceptionOutboundInterceptor implements PubackOutboundInterceptor {
 
         @Override
         public void onOutboundPuback(
-                @NotNull final PubackOutboundInput pubackOutboundInput,
-                @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+                final @NotNull PubackOutboundInput pubackOutboundInput,
+                final @NotNull PubackOutboundOutput pubackOutboundOutput) {
             throw new RuntimeException();
         }
-
     }
 
     public static class TestPartialModifiedOutboundInterceptor implements PubackOutboundInterceptor {
 
         @Override
         public void onOutboundPuback(
-                @NotNull final PubackOutboundInput pubrecOutboundInput,
-                @NotNull final PubackOutboundOutput pubackOutboundOutput) {
+                final @NotNull PubackOutboundInput pubrecOutboundInput,
+                final @NotNull PubackOutboundOutput pubackOutboundOutput) {
             final ModifiablePubackPacket pubackPacket = pubackOutboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
             pubackPacket.setReasonCode(AckReasonCode.NOT_AUTHORIZED);
             throw new RuntimeException();
         }
-
     }
-
 }

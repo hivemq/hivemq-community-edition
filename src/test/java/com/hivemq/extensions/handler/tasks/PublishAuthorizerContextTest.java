@@ -13,63 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutionException;
 
 import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Christoph Schäbel
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class PublishAuthorizerContextTest {
 
-    private PublishAuthorizerContext context;
-    private SettableFuture<PublishAuthorizerOutputImpl> resultFuture;
-    private PublishAuthorizerOutputImpl output;
+    private final @NotNull ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
 
-    @Mock
-    private ChannelHandlerContext ctx;
-
-    private Channel channel;
+    private @NotNull Channel channel;
+    private @NotNull SettableFuture<PublishAuthorizerOutputImpl> resultFuture;
+    private @NotNull PublishAuthorizerOutputImpl output;
+    private @NotNull PublishAuthorizerContext context;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION)
+                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
         when(ctx.channel()).thenReturn(channel);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();
         output = new PublishAuthorizerOutputImpl(asyncer);
-        context = new PublishAuthorizerContext("clientid", output, resultFuture, 1, ctx);
+        context = new PublishAuthorizerContext("clientId", output, resultFuture, 1, ctx);
     }
 
     @Test(timeout = 5000)
-    public void test_async_timeout_fail() throws ExecutionException, InterruptedException {
-
+    public void test_async_timeout_fail() throws Exception {
         output.markAsAsync();
         output.markAsTimedOut();
 
@@ -78,12 +71,11 @@ public class PublishAuthorizerContextTest {
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals(true, result.isCompleted());
+        assertTrue(result.isCompleted());
     }
 
     @Test(timeout = 5000)
-    public void test_async_timeout_success() throws ExecutionException, InterruptedException {
-
+    public void test_async_timeout_success() throws Exception {
         output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
         output.markAsAsync();
         output.markAsTimedOut();
@@ -92,64 +84,59 @@ public class PublishAuthorizerContextTest {
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
-        assertEquals(false, result.isCompleted());
+        assertFalse(result.isCompleted());
     }
 
     @Test(timeout = 5000)
-    public void test_success() throws ExecutionException, InterruptedException {
-
+    public void test_success() throws Exception {
         output.authorizeSuccessfully();
 
         context.pluginPost(output);
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(SUCCESS, result.getAuthorizationState());
-        assertEquals(true, result.isCompleted());
+        assertTrue(result.isCompleted());
     }
 
     @Test(timeout = 5000)
-    public void test_fail() throws ExecutionException, InterruptedException {
-
+    public void test_fail() throws Exception {
         output.failAuthorization();
 
         context.pluginPost(output);
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
-        assertEquals(true, result.isCompleted());
-        assertEquals(true, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
+        assertTrue(result.isCompleted());
+        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)
-    public void test_disconnect() throws ExecutionException, InterruptedException {
-
+    public void test_disconnect() throws Exception {
         output.disconnectClient();
 
         context.pluginPost(output);
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(DISCONNECT, result.getAuthorizationState());
-        assertEquals(true, result.isCompleted());
-        assertEquals(true, channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
+        assertTrue(result.isCompleted());
+        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)
-    public void test_undecided() throws ExecutionException, InterruptedException {
-
+    public void test_undecided() throws Exception {
         context.pluginPost(output);
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
-        assertEquals(false, result.isCompleted());
+        assertFalse(result.isCompleted());
     }
 
     @Test(timeout = 5000)
-    public void test_increment_future_returns() throws ExecutionException, InterruptedException {
-
+    public void test_increment_future_returns() throws Exception {
         context.increment();
 
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
-        assertEquals(false, result.isCompleted());
+        assertFalse(result.isCompleted());
     }
 }

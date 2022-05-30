@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -30,55 +31,48 @@ import java.util.Optional;
 /**
  * @author Georg Held
  */
-abstract public class PluginAbstractTest {
+abstract public class AbstractExtensionTest {
 
-    protected ExtensionStartOutput getTestPluginStartOutput() {
+    protected @NotNull ExtensionStartOutput getTestExtensionStartOutput() {
         return reason -> {
         };
     }
 
-    protected ExtensionStartInput getTestPluginStartInput() {
+    protected @NotNull ExtensionStartInput getTestExtensionStartInput() {
         return new ExtensionStartInput() {
-            @NotNull
             @Override
-            public ExtensionInformation getExtensionInformation() {
+            public @NotNull ExtensionInformation getExtensionInformation() {
                 return new ExtensionInformation() {
-                    @NotNull
                     @Override
-                    public String getId() {
+                    public @NotNull String getId() {
                         return "id";
                     }
 
-                    @NotNull
-
                     @Override
-                    public String getName() {
+                    public @NotNull String getName() {
                         return "name";
                     }
 
-                    @NotNull
-
                     @Override
-                    public String getVersion() {
+                    public @NotNull String getVersion() {
                         return "1";
                     }
 
                     @Override
-                    public Optional<String> getAuthor() {
+                    public @NotNull Optional<String> getAuthor() {
                         return Optional.of("me");
                     }
 
                     @Override
-                    public File getExtensionHomeFolder() {
+                    public @NotNull File getExtensionHomeFolder() {
                         return new File("/tmp");
                     }
                 };
             }
 
-            @NotNull
             @Override
             @SuppressWarnings("unchecked")
-            public Map<String, ExtensionInformation> getEnabledExtensions() {
+            public @NotNull Map<String, ExtensionInformation> getEnabledExtensions() {
                 return Collections.EMPTY_MAP;
             }
 
@@ -88,7 +82,7 @@ abstract public class PluginAbstractTest {
             }
 
             @Override
-            public Optional<String> getPreviousVersion() {
+            public @NotNull Optional<String> getPreviousVersion() {
                 return Optional.of("0");
             }
         };

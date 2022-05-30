@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.exception.LimitExceededException;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import org.apache.commons.lang3.RandomUtils;
@@ -35,20 +38,17 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Silvio Giebl
- */
 public class ConnectionAttributesTest {
 
-    private ConnectionAttributes connectionAttributes;
-    private Channel channel;
-    private ClientConnection clientConnection;
+    private @NotNull ConnectionAttributes connectionAttributes;
+    private @NotNull ClientConnection clientConnection;
+    private @NotNull Channel channel;
 
     @Before
     public void setUp() {
         connectionAttributes = new ConnectionAttributes(1000);
         channel = mock(Channel.class);
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
         when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
@@ -128,6 +128,7 @@ public class ConnectionAttributesTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_put_null_key() {
         final String key = null;
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
@@ -136,6 +137,7 @@ public class ConnectionAttributesTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_put_null_value() {
         final String key = "test.key";
         final ByteBuffer value = null;
@@ -181,6 +183,7 @@ public class ConnectionAttributesTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_get_null_key() {
         final String key = null;
 
@@ -189,9 +192,10 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getAll() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1", ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2", ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of("test.key1",
+                ByteBuffer.wrap("test.value1".getBytes()),
+                "test.key2",
+                ByteBuffer.wrap("test.value2".getBytes()));
 
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
@@ -212,9 +216,10 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getAll_immutable() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1", ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2", ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of("test.key1",
+                ByteBuffer.wrap("test.value1".getBytes()),
+                "test.key2",
+                ByteBuffer.wrap("test.value2".getBytes()));
 
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
@@ -265,6 +270,7 @@ public class ConnectionAttributesTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_remove_null_key() {
         final String key = null;
 
@@ -324,5 +330,4 @@ public class ConnectionAttributesTest {
             assertEquals(expected.get(key), expected.get(key));
         }
     }
-
 }

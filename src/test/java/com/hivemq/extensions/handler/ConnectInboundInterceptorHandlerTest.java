@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
@@ -22,16 +23,13 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
-import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundOutput;
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundProviderInput;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
@@ -39,6 +37,7 @@ import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -47,81 +46,72 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
-import java.io.File;
-import java.net.URL;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Lukas Brandl
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class ConnectInboundInterceptorHandlerTest {
 
-    private final HivemqId hivemqId = new HivemqId();
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
-    @Mock
-    private HiveMQExtension plugin;
-    @Mock
-    private Interceptors interceptors;
-    @Mock
-    private ServerInformation serverInformation;
-    @Mock
-    private MqttConnacker connacker;
-    private PluginOutPutAsyncer asyncer;
-    private FullConfigurationService configurationService;
-    private PluginTaskExecutor executor1;
-    private EmbeddedChannel channel;
-    private PluginTaskExecutorService pluginTaskExecutorService;
-    private ConnectInboundInterceptorHandler handler;
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    private final @NotNull HivemqId hivemqId = new HivemqId();
+
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
+    private final @NotNull Interceptors interceptors = mock(Interceptors.class);
+    private final @NotNull ServerInformation serverInformation = mock(ServerInformation.class);
+    private final @NotNull MqttConnacker connacker = mock(MqttConnacker.class);
+    private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
+
+    private @NotNull PluginTaskExecutor executor;
+    private @NotNull EmbeddedChannel channel;
+    private @NotNull ConnectInboundInterceptorHandler handler;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        executor1 = new PluginTaskExecutor(new AtomicLong());
-        executor1.postConstruct();
+        executor = new PluginTaskExecutor(new AtomicLong());
+        executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, publishFlushHandler));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        when(plugin.getId()).thenReturn("plugin");
+        when(extension.getId()).thenReturn("extension");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor1, mock(ShutdownHooks.class));
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
-        handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        handler = new ConnectInboundInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService,
-                hivemqId, interceptors, serverInformation, connacker);
+                hivemqId,
+                interceptors,
+                serverInformation,
+                connacker);
 
         channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
             @Override
-            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
                 handler.handleInboundConnect(ctx, ((CONNECT) msg));
             }
         });
@@ -129,7 +119,6 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
-
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
 
         channel.writeInbound(testConnect());
@@ -139,10 +128,11 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modify() throws Exception {
-
-        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestModifyInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
+                "extension",
+                interceptorProvider));
+        when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
 
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
@@ -158,10 +148,11 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_null_interceptor() throws Exception {
-
-        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestNullInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestNullInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
+                "extension",
+                interceptorProvider));
+        when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
 
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
@@ -177,49 +168,68 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_timeout_failed() throws Exception {
-
-        final ConnectInboundInterceptorProvider interceptorProvider =
-                getInterceptor("TestTimeoutFailedInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(
-                ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestTimeoutFailedInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
+                "extension",
+                interceptorProvider));
+        when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
         doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
-                .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
+                .connackError(any(Channel.class),
+                        anyString(),
+                        anyString(),
+                        any(Mqtt5ConnAckReasonCode.class),
                         anyString());
 
         channel.writeInbound(testConnect());
 
         channel.runPendingTasks();
-        while (counter.get() == 0) {
-            Thread.sleep(10);
-            channel.runPendingTasks();
-        }
+        await().pollInterval(10, TimeUnit.MILLISECONDS).until(() -> {
+            if (counter.get() == 0) {
+                channel.runPendingTasks();
+                return false;
+            }
+            return true;
+        });
         verify(connacker, timeout(5000)).connackError(
-                any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
+                any(Channel.class),
+                anyString(),
+                anyString(),
+                any(Mqtt5ConnAckReasonCode.class),
+                anyString());
     }
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-
-        final ConnectInboundInterceptorProvider interceptorProvider = getInterceptor("TestExceptionInboundInterceptor");
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(
-                ImmutableMap.of("plugin", interceptorProvider));
-        when(hiveMQExtensions.getExtension(eq("plugin"))).thenReturn(plugin);
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
+                "extension",
+                interceptorProvider));
+        when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
         doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
-                .connackError(any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class),
+                .connackError(any(Channel.class),
+                        anyString(),
+                        anyString(),
+                        any(Mqtt5ConnAckReasonCode.class),
                         anyString());
 
         channel.writeInbound(testConnect());
 
         channel.runPendingTasks();
-        while (counter.get() == 0) {
-            Thread.sleep(10);
-            channel.runPendingTasks();
-        }
+        await().pollInterval(10, TimeUnit.MILLISECONDS).until(() -> {
+            if (counter.get() == 0) {
+                channel.runPendingTasks();
+                return false;
+            }
+            return true;
+        });
         verify(connacker, timeout(5000)).connackError(
-                any(Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
+                any(Channel.class),
+                anyString(),
+                anyString(),
+                any(Mqtt5ConnAckReasonCode.class),
+                anyString());
     }
 
     @NotNull
@@ -227,28 +237,10 @@ public class ConnectInboundInterceptorHandlerTest {
         return new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
     }
 
-    @NotNull
-    private ConnectInboundInterceptorProvider getInterceptor(@NotNull final String name) throws Exception {
-
-
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.ConnectInboundInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> providerClass = cl.loadClass("com.hivemq.extensions.handler.ConnectInboundInterceptorHandlerTest$" + name);
-
-        return (ConnectInboundInterceptorProvider) providerClass.newInstance();
-    }
-
     public static class TestModifyInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(final @NotNull ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
                 // this is getting called
@@ -260,10 +252,10 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestTimeoutFailedInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(final @NotNull ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
-                final Async<ConnectInboundOutput> async = output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
+                output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException e) {
@@ -276,7 +268,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestExceptionInboundInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(final @NotNull ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return (input, output) -> {
                 throw new RuntimeException("test");
@@ -287,7 +279,7 @@ public class ConnectInboundInterceptorHandlerTest {
     public static class TestNullInterceptor implements ConnectInboundInterceptorProvider {
 
         @Override
-        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput providerInput) {
+        public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(final @NotNull ConnectInboundProviderInput providerInput) {
             System.out.println("Provider called");
             return null;
         }

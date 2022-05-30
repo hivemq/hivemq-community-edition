@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.auth;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.Authenticator;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
@@ -22,72 +24,61 @@ import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.net.URL;
+import util.IsolatedExtensionClassloaderUtil;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
-/**
- * @author Georg Held
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class WrappedAuthenticatorProviderTest {
 
-    @Mock
-    private EnhancedAuthenticator enhancedAuthenticator;
+    private final @NotNull EnhancedAuthenticator enhancedAuthenticator = mock(EnhancedAuthenticator.class);
+    private final @NotNull SimpleAuthenticator simpleAuthenticator = mock(SimpleAuthenticator.class);
+    private final @NotNull Authenticator authenticator = mock(Authenticator.class);
+    private final @NotNull AuthenticatorProviderInput input = mock(AuthenticatorProviderInput.class);
 
-    @Mock
-    private SimpleAuthenticator simpleAuthenticator;
-
-    @Mock
-    private Authenticator authenticator;
-
-    @Mock
-    private AuthenticatorProviderInput input;
-    private IsolatedExtensionClassloader isolatedExtensionClassloader;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        isolatedExtensionClassloader = new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
-    }
+    private final @NotNull IsolatedExtensionClassloader isolatedExtensionClassloader =
+            IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
 
     @Test(timeout = 5000)
     public void test_null_provider_returns_null() {
-        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> null, isolatedExtensionClassloader);
+        final WrappedAuthenticatorProvider wrapped =
+                new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> null, isolatedExtensionClassloader);
         assertNull(wrapped.getAuthenticator(input));
     }
 
     @Test(timeout = 5000)
     public void test_simple_provider_returns_simple() {
-        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator, isolatedExtensionClassloader);
+        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider =
+                new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator,
+                        isolatedExtensionClassloader);
         assertSame(simpleAuthenticator, wrappedAuthenticatorProvider.getAuthenticator(input));
         assertNull(wrappedAuthenticatorProvider.getEnhancedAuthenticator(input));
     }
 
     @Test(timeout = 5000)
     public void test_other_provider_returns_null() {
-        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> authenticator, isolatedExtensionClassloader);
+        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider =
+                new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> authenticator,
+                        isolatedExtensionClassloader);
         assertNull(wrappedAuthenticatorProvider.getAuthenticator(input));
     }
 
     @Test(timeout = 5000)
     public void test_enhanced_null_provider_returns_null() {
-        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) i -> null, isolatedExtensionClassloader);
+        final WrappedAuthenticatorProvider wrapped =
+                new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) i -> null,
+                        isolatedExtensionClassloader);
         assertNull(wrapped.getEnhancedAuthenticator(input));
     }
 
     @Test(timeout = 5000)
     public void test_enhanced_provider_returns_simple() {
-        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider = new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) i -> enhancedAuthenticator, isolatedExtensionClassloader);
+        final WrappedAuthenticatorProvider wrappedAuthenticatorProvider =
+                new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) i -> enhancedAuthenticator,
+                        isolatedExtensionClassloader);
         assertSame(enhancedAuthenticator, wrappedAuthenticatorProvider.getEnhancedAuthenticator(input));
         assertNull(wrappedAuthenticatorProvider.getAuthenticator(input));
     }
-
 }

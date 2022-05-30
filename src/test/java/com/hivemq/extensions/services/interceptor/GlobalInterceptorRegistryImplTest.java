@@ -13,41 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.interceptor;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.connack.ConnackOutboundInterceptorProvider;
 import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundInterceptorProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Florian Limpöck
  * @since 4.2.0
  */
 public class GlobalInterceptorRegistryImplTest {
 
-    private GlobalInterceptorRegistryImpl globalInterceptorRegistry;
+    private final @NotNull Interceptors interceptors = mock(Interceptors.class);
 
-    @Mock
-    private Interceptors interceptors;
+    private @NotNull GlobalInterceptorRegistryImpl globalInterceptorRegistry;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         globalInterceptorRegistry = new GlobalInterceptorRegistryImpl(interceptors);
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_add_null_connect_inbound() {
         globalInterceptorRegistry.setConnectInboundInterceptorProvider(null);
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_add_null_connack_outbound() {
         globalInterceptorRegistry.setConnackOutboundInterceptorProvider(null);
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -28,172 +29,134 @@ import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 
-import java.io.File;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-/**
- * @author Lukas Brandl
- */
 public class InterceptorsImplTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private InterceptorsImpl interceptors;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
 
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
-
-    @Mock
-    private HiveMQExtension plugin1;
+    private @NotNull InterceptorsImpl interceptors;
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         interceptors = new InterceptorsImpl(hiveMQExtensions);
 
-        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
+        when(hiveMQExtensions.getExtension("extension")).thenReturn(extension);
     }
-
 
     @Test
     public void test_add_and_remove() throws Exception {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder,
+                new Class[]{TestConnectInboundInterceptorProvider.class})) {
+            final ConnectInboundInterceptorProvider connectInterceptorProvider =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl,
+                            TestConnectInboundInterceptorProvider.class);
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
+            when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(
+                    extension);
+            when(extension.getId()).thenReturn("extension");
 
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+            final Channel channelMock = mock(Channel.class);
+            final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+            when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
+            interceptors.addConnectInboundInterceptorProvider(connectInterceptorProvider);
 
-        final ConnectInboundInterceptorProvider connectInterceptorProvider = (ConnectInboundInterceptorProvider) classOne.newInstance();
+            //noinspection unchecked
+            final ArgumentCaptor<Consumer<HiveMQExtension>> captor = ArgumentCaptor.forClass(Consumer.class);
+            verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin1);
-        when(plugin1.getId()).thenReturn("plugin1");
+            assertSame(connectInterceptorProvider, interceptors.connectInboundInterceptorProviders().get("extension"));
 
-        final Channel channelMock = Mockito.mock(Channel.class);
-        final ChannelPipeline pipelineMock = Mockito.mock(ChannelPipeline.class);
-
-        when(channelMock.pipeline()).thenReturn(pipelineMock);
-
-        interceptors.addConnectInboundInterceptorProvider(connectInterceptorProvider);
-
-        final ArgumentCaptor<Consumer> captor = ArgumentCaptor.forClass(Consumer.class);
-        verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
-
-        assertSame(connectInterceptorProvider, interceptors.connectInboundInterceptorProviders().get("plugin1"));
-
-        when(plugin1.getExtensionClassloader()).thenReturn(cl);
-        captor.getValue().accept(plugin1);
-        assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
-
+            when(extension.getExtensionClassloader()).thenReturn(cl);
+            captor.getValue().accept(extension);
+            assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
+        }
     }
 
     @Test
     public void test_add_and_remove_connack() throws Exception {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder,
+                new Class[]{TestConnackOutboundInterceptorProvider.class})) {
+            final ConnackOutboundInterceptorProvider connackInterceptorProvider =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl,
+                            TestConnackOutboundInterceptorProvider.class);
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnackOutboundInterceptorProvider");
+            when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(
+                    extension);
+            when(extension.getId()).thenReturn("extension");
 
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+            final Channel channelMock = mock(Channel.class);
+            final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+            when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnackOutboundInterceptorProvider");
+            interceptors.addConnackOutboundInterceptorProvider(connackInterceptorProvider);
 
-        final ConnackOutboundInterceptorProvider connackInterceptorProvider = (ConnackOutboundInterceptorProvider) classOne.newInstance();
+            //noinspection unchecked
+            final ArgumentCaptor<Consumer<HiveMQExtension>> captor = ArgumentCaptor.forClass(Consumer.class);
+            verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
 
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(plugin1);
-        when(plugin1.getId()).thenReturn("plugin1");
+            assertSame(connackInterceptorProvider,
+                    interceptors.connackOutboundInterceptorProviders().get("extension"));
 
-        final Channel channelMock = Mockito.mock(Channel.class);
-        final ChannelPipeline pipelineMock = Mockito.mock(ChannelPipeline.class);
-
-        when(channelMock.pipeline()).thenReturn(pipelineMock);
-
-        interceptors.addConnackOutboundInterceptorProvider(connackInterceptorProvider);
-
-        final ArgumentCaptor<Consumer> captor = ArgumentCaptor.forClass(Consumer.class);
-        verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
-
-        assertSame(connackInterceptorProvider, interceptors.connackOutboundInterceptorProviders().get("plugin1"));
-
-        when(plugin1.getExtensionClassloader()).thenReturn(cl);
-        captor.getValue().accept(plugin1);
-        assertEquals(0, interceptors.connackOutboundInterceptorProviders().size());
-
+            when(extension.getExtensionClassloader()).thenReturn(cl);
+            captor.getValue().accept(extension);
+            assertEquals(0, interceptors.connackOutboundInterceptorProviders().size());
+        }
     }
 
     @Test
-    public void test_plugin_null() throws Exception {
-
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.interceptor.InterceptorsImplTest$TestConnectInboundInterceptorProvider");
-
-        final ConnectInboundInterceptorProvider connectInterceptorProvider = (ConnectInboundInterceptorProvider) classOne.newInstance();
+    public void test_extension_null() throws Exception {
+        final ConnectInboundInterceptorProvider connectInterceptorProvider =
+                IsolatedExtensionClassloaderUtil.loadIsolated(
+                        temporaryFolder,
+                        TestConnectInboundInterceptorProvider.class);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(null);
-        when(plugin1.getId()).thenReturn("plugin1");
+        when(extension.getId()).thenReturn("extension");
 
-        final Channel channelMock = Mockito.mock(Channel.class);
-        final ChannelPipeline pipelineMock = Mockito.mock(ChannelPipeline.class);
+        final Channel channelMock = mock(Channel.class);
+        final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
 
         when(channelMock.pipeline()).thenReturn(pipelineMock);
 
         interceptors.addConnectInboundInterceptorProvider(connectInterceptorProvider);
 
         assertEquals(0, interceptors.connectInboundInterceptorProviders().size());
-
     }
 
     public static class TestConnectInboundInterceptorProvider implements ConnectInboundInterceptorProvider {
+
         @Override
         public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(@NotNull final ConnectInboundProviderInput input) {
             return (connectInterceptorInput, connectInterceptorOutput) -> {
-
             };
         }
     }
 
     public static class TestConnackOutboundInterceptorProvider implements ConnackOutboundInterceptorProvider {
+
         @Override
         public @Nullable ConnackOutboundInterceptor getConnackOutboundInterceptor(@NotNull final ConnackOutboundProviderInput input) {
             return (connectInterceptorInput, connectInterceptorOutput) -> {
-
             };
         }
     }

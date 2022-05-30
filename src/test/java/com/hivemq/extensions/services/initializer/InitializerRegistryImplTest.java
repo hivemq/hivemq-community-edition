@@ -13,53 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.initializer;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class InitializerRegistryImplTest {
 
-    @Mock
-    private Initializers initializers;
+    private final @NotNull Initializers initializers = mock(Initializers.class);
 
-    private InitializerRegistry registry;
-
-    @Before
-    public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-        registry = new InitializerRegistryImpl(initializers);
-
-    }
+    private final @NotNull InitializerRegistry registry = new InitializerRegistryImpl(initializers);
 
     @Test
     public void test_set() {
-
         final ClientInitializer clientInitializer = (input, pipeline) -> {
         };
 
         registry.setClientInitializer(clientInitializer);
 
         verify(initializers).addClientInitializer(clientInitializer);
-
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_set_null() {
-
         registry.setClientInitializer(null);
-
     }
 }

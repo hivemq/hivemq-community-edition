@@ -37,16 +37,13 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import util.IsolatedPluginClassLoaderUtil;
+import util.IsolatedExtensionClassloaderUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Florian Limpöck
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class ReAuthTaskTest {
 
@@ -77,8 +74,8 @@ public class ReAuthTaskTest {
         auth = new AtomicBoolean();
         reAuth = new AtomicBoolean();
 
-        classloader = IsolatedPluginClassLoaderUtil.buildClassLoader(temporaryFolder, new Class[]{TestAuthenticator.class});
-        enhancedAuthenticator = IsolatedPluginClassLoaderUtil.instanceFromClassloader(classloader, TestAuthenticator.class);
+        classloader = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, new Class[]{TestAuthenticator.class});
+        enhancedAuthenticator = IsolatedExtensionClassloaderUtil.instanceFromClassloader(classloader, TestAuthenticator.class);
 
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(enhancedAuthenticator);
         authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new ExtensionPriorityComparator(extensions)));

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.initializer;
 
 import com.hivemq.bootstrap.ClientConnection;
@@ -23,20 +24,17 @@ import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistenceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import util.IsolatedExtensionClassloaderUtil;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -47,166 +45,134 @@ import static org.mockito.Mockito.when;
 /**
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class InitializersImplTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private InitializersImpl initializers;
-    private HiveMQExtensions hiveMQExtensions;
-    private HiveMQExtension plugin1;
-    private HiveMQExtension plugin2;
-    private ConnectionPersistence connectionPersistence;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension1 = mock(HiveMQExtension.class);
+    private final @NotNull HiveMQExtension extension2 = mock(HiveMQExtension.class);
+    private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
+
+    private @NotNull InitializersImpl initializers;
+    private @NotNull ConnectionPersistence connectionPersistence;
 
     @Before
     public void setUp() throws Exception {
-
-        hiveMQExtensions = mock(HiveMQExtensions.class);
-        plugin1 = mock(HiveMQExtension.class);
-        plugin2 = mock(HiveMQExtension.class);
-
         connectionPersistence = new ConnectionPersistenceImpl();
         initializers = new InitializersImpl(hiveMQExtensions);
 
-        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
-        when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
+        when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
+        when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
     }
 
     @Test
     public void test_add_success() throws Exception {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder,
+                new Class[]{TestClientInitializerOne.class})) {
+            final ClientInitializer clientInitializer =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, TestClientInitializerOne.class);
+            when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
+            when(extension1.getId()).thenReturn("extension1");
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
+            final Channel channelMock = mock(Channel.class);
+            final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
+            final ClientConnection clientConnection = new ClientConnection(channelMock, publishFlushHandler);
+            clientConnection.setClientId("client");
 
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+            when(channelMock.pipeline()).thenReturn(pipelineMock);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
+            connectionPersistence.persistIfAbsent(clientConnection);
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
+            initializers.addClientInitializer(clientInitializer);
 
-        final ClientInitializer clientInitializer = (ClientInitializer) classOne.newInstance();
-
-        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
-        when(plugin1.getId()).thenReturn("plugin1");
-
-        final Channel channelMock = mock(Channel.class);
-        final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
-        final ClientConnection clientConnection = new ClientConnection(channelMock, null);
-        clientConnection.setClientId("client");
-
-        when(channelMock.pipeline()).thenReturn(pipelineMock);
-
-        connectionPersistence.persistIfAbsent(clientConnection);
-
-        initializers.addClientInitializer(clientInitializer);
-
-        assertEquals(clientInitializer, initializers.getClientInitializerMap().get("plugin1"));
+            assertEquals(clientInitializer, initializers.getClientInitializerMap().get("extension1"));
+        }
     }
 
     @Test
     public void test_add_two_different_priorities() throws Exception {
+        final Class<?>[] classes = {
+                TestClientInitializerOne.class, TestClientInitializerTwo.class
+        };
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne")
-                .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder,
+                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder,
+                classes)) {
+            final ClientInitializer clientInitializerOne =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1, TestClientInitializerOne.class);
+            final ClientInitializer clientInitializerTwo =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2, TestClientInitializerTwo.class);
 
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+            when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
+            when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
+            when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
+            when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
+            when(extension1.getId()).thenReturn("extension1");
+            when(extension2.getId()).thenReturn("extension2");
 
-        final ClientInitializer clientInitializer = (ClientInitializer) classOne.newInstance();
+            when(extension1.getPriority()).thenReturn(100);
+            when(extension2.getPriority()).thenReturn(101);
 
-        final File jarFile2 = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
+            initializers.addClientInitializer(clientInitializerOne);
+            initializers.addClientInitializer(clientInitializerTwo);
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, getClass().getClassLoader());
+            final Map<String, ClientInitializer> initializerMap = initializers.getClientInitializerMap();
 
-        final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
+            assertEquals(2, initializerMap.size());
 
-        final ClientInitializer clientInitializerTwo = (ClientInitializer) classTwo.newInstance();
+            final Iterator<Map.Entry<String, ClientInitializer>> iterator = initializerMap.entrySet().iterator();
 
-        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
-        when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(plugin2);
-
-        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
-        when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
-
-        when(plugin1.getId()).thenReturn("plugin1");
-        when(plugin2.getId()).thenReturn("plugin2");
-
-        when(plugin1.getPriority()).thenReturn(100);
-        when(plugin2.getPriority()).thenReturn(101);
-
-        initializers.addClientInitializer(clientInitializer);
-        initializers.addClientInitializer(clientInitializerTwo);
-
-        final Map<String, ClientInitializer> initializerMap = initializers.getClientInitializerMap();
-
-        assertEquals(2, initializerMap.size());
-
-        final Iterator<Map.Entry<String, ClientInitializer>> iterator = initializerMap.entrySet().iterator();
-
-        assertEquals(clientInitializerTwo, iterator.next().getValue());
-        assertEquals(clientInitializer, iterator.next().getValue());
+            assertEquals(clientInitializerTwo, iterator.next().getValue());
+            assertEquals(clientInitializerOne, iterator.next().getValue());
+        }
     }
 
     @Test
     public void test_add_two_equal_priorities() throws Exception {
+        final Class<?>[] classes = {
+                TestClientInitializerOne.class, TestClientInitializerTwo.class
+        };
 
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne")
-                .addClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder,
+                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder,
+                classes)) {
+            final ClientInitializer clientInitializerOne =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1, TestClientInitializerOne.class);
+            final ClientInitializer clientInitializerTwo =
+                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2, TestClientInitializerTwo.class);
 
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+            when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
+            when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
+            when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
+            when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
+            when(extension1.getId()).thenReturn("extension1");
+            when(extension2.getId()).thenReturn("extension2");
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
+            when(extension1.getPriority()).thenReturn(100);
+            when(extension2.getPriority()).thenReturn(100);
 
-        final Class<?> classOne = cl.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerOne");
+            initializers.addClientInitializer(clientInitializerOne);
+            initializers.addClientInitializer(clientInitializerTwo);
 
-        final ClientInitializer clientInitializer = (ClientInitializer) classOne.newInstance();
+            final Map<String, ClientInitializer> initializerMap = initializers.getClientInitializerMap();
 
-        final File jarFile2 = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile2, true);
+            assertEquals(2, initializerMap.size());
 
-        //This classloader contains the classes from the jar file
-        final IsolatedExtensionClassloader cl2 = new IsolatedExtensionClassloader(new URL[]{jarFile2.toURI().toURL()}, getClass().getClassLoader());
+            final Iterator<Map.Entry<String, ClientInitializer>> iterator = initializerMap.entrySet().iterator();
 
-        final Class<?> classTwo = cl2.loadClass("com.hivemq.extensions.services.initializer.InitializersImplTest$TestClientInitializerTwo");
-
-        final ClientInitializer clientInitializerTwo = (ClientInitializer) classTwo.newInstance();
-
-        when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(plugin1);
-        when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(plugin2);
-        when(hiveMQExtensions.getExtension("plugin1")).thenReturn(plugin1);
-        when(hiveMQExtensions.getExtension("plugin2")).thenReturn(plugin2);
-        when(plugin1.getId()).thenReturn("plugin1");
-        when(plugin2.getId()).thenReturn("plugin2");
-
-        when(plugin1.getPriority()).thenReturn(100);
-        when(plugin2.getPriority()).thenReturn(100);
-
-        initializers.addClientInitializer(clientInitializer);
-        initializers.addClientInitializer(clientInitializerTwo);
-
-        final Map<String, ClientInitializer> initializerMap = initializers.getClientInitializerMap();
-
-        assertEquals(2, initializerMap.size());
-
-        final Iterator<Map.Entry<String, ClientInitializer>> iterator = initializerMap.entrySet().iterator();
-
-        //the first one added is the first one shown
-        assertEquals(clientInitializer, iterator.next().getValue());
-        assertEquals(clientInitializerTwo, iterator.next().getValue());
+            // the first one added is the first one shown
+            assertEquals(clientInitializerOne, iterator.next().getValue());
+            assertEquals(clientInitializerTwo, iterator.next().getValue());
+        }
     }
 
     public static class TestClientInitializerOne implements ClientInitializer {

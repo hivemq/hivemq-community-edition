@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableList;
@@ -22,13 +23,12 @@ import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ListenerType;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -38,41 +38,35 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class ServerInformationImplTest {
 
-    private ServerInformation serverInformation;
+    private final @NotNull ListenerConfigurationService listenerConfigurationService =
+            mock(ListenerConfigurationService.class);
 
-    private SystemInformation systemInformation;
-
-    @Mock
-    private ListenerConfigurationService listenerConfigurationService;
+    private @NotNull ServerInformation serverInformation;
+    private @NotNull SystemInformation systemInformation;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         systemInformation = new SystemInformationImpl();
         serverInformation = new ServerInformationImpl(systemInformation, listenerConfigurationService);
     }
 
     @Test
     public void test_server_and_system_information_equal() {
-
         assertEquals(systemInformation.getDataFolder(), serverInformation.getDataFolder());
         assertEquals(systemInformation.getHiveMQHomeFolder(), serverInformation.getHomeFolder());
         assertEquals(systemInformation.getLogFolder(), serverInformation.getLogFolder());
         assertEquals(systemInformation.getExtensionsFolder(), serverInformation.getExtensionsFolder());
         assertEquals(systemInformation.getHiveMQVersion(), serverInformation.getVersion());
-
     }
 
     @Test
     public void test_get_listeners() {
-        final TcpListener tcpListener = new TcpListener(1883, "127.0.0.1");
-        final TlsTcpListener tlsTcpListener = new TlsTcpListener(1883, "127.0.0.1", mock(Tls.class));
+        final TcpListener tcpListener = new TcpListener(1883, "127.0.0.1", "test");
+        final TlsTcpListener tlsTcpListener = new TlsTcpListener(1883, "127.0.0.1", mock(Tls.class), "test");
         when(listenerConfigurationService.getListeners()).thenReturn(ImmutableList.of(tcpListener, tlsTcpListener));
         final Set<Listener> listeners = serverInformation.getListener();
         final Iterator<Listener> iterator = listeners.iterator();
@@ -85,6 +79,5 @@ public class ServerInformationImplTest {
             assertEquals(ListenerType.TLS_TCP_LISTENER, first.getListenerType());
             assertEquals(ListenerType.TCP_LISTENER, second.getListenerType());
         }
-
     }
 }
