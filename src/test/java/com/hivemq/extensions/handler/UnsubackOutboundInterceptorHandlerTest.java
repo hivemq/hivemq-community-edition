@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -35,6 +36,7 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
@@ -44,75 +46,68 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-/**
- * @author Robin Atherton
- */
 public class UnsubackOutboundInterceptorHandlerTest {
 
     public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
+
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-    @Mock
-    private @NotNull HiveMQExtension extension;
-    @Mock
-    private @NotNull HiveMQExtensions extensions;
-    @Mock
-    private @NotNull ClientContextImpl clientContext;
-    @Mock
-    private @NotNull FullConfigurationService configurationService;
+
+    private final @NotNull HiveMQExtensions extensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
+    private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
+
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
-    private @NotNull ClientConnection clientConnection;
-
 
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
         isTriggered.set(false);
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
 
-
         when(extension.getId()).thenReturn("extension");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
-        final UnsubackOutboundInterceptorHandler handler =
-                new UnsubackOutboundInterceptorHandler(configurationService, asyncer,
-                        extensions, pluginTaskExecutorService);
+        final UnsubackOutboundInterceptorHandler handler = new UnsubackOutboundInterceptorHandler(configurationService,
+                asyncer,
+                extensions,
+                pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) {
                 handler.handleOutboundUnsuback(ctx, ((UNSUBACK) msg), promise);
             }
         });
@@ -128,7 +123,8 @@ public class UnsubackOutboundInterceptorHandlerTest {
     public void test_intercept_simple_unsuback() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestSimpleUnsubackInterceptor");
+        final UnsubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSimpleUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -143,14 +139,15 @@ public class UnsubackOutboundInterceptorHandlerTest {
             unsuback = channel.readOutbound();
         }
         Assert.assertNotNull(unsuback);
-        Assert.assertTrue(isTriggered.get());
+        assertTrue(isTriggered.get());
     }
 
     @Test
     public void test_intercept_modify() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubackOutboundInterceptor interceptor = getIsolatedOutboundInterceptor("TestModifyUnsubackInterceptor");
+        final UnsubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -164,17 +161,16 @@ public class UnsubackOutboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             unsuback = channel.readOutbound();
         }
-        Assert.assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().get(0));
-        Assert.assertTrue(isTriggered.get());
+        assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().get(0));
+        assertTrue(isTriggered.get());
     }
 
     @Test
     public void test_outbound_exception() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-
         final UnsubackOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("TestExceptionUnsubackInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -188,29 +184,14 @@ public class UnsubackOutboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             unsuback = channel.readOutbound();
         }
-        Assert.assertTrue(isTriggered.get());
+        assertTrue(isTriggered.get());
     }
 
     private @NotNull UNSUBACK testUnsuback() {
-        return new UNSUBACK(1, ImmutableList.of(Mqtt5UnsubAckReasonCode.TOPIC_FILTER_INVALID), "reason",
+        return new UNSUBACK(1,
+                ImmutableList.of(Mqtt5UnsubAckReasonCode.TOPIC_FILTER_INVALID),
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
-    }
-
-    private UnsubackOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name) throws Exception {
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.UnsubackOutboundInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        final IsolatedExtensionClassloader
-                cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.UnsubackOutboundInterceptorHandlerTest$" + name);
-
-        return (UnsubackOutboundInterceptor) interceptorClass.newInstance();
     }
 
     public static class TestSimpleUnsubackInterceptor implements UnsubackOutboundInterceptor {
@@ -242,8 +223,8 @@ public class UnsubackOutboundInterceptorHandlerTest {
 
         @Override
         public void onOutboundUnsuback(
-                @NotNull final UnsubackOutboundInput unsubackOutboundInput,
-                @NotNull final UnsubackOutboundOutput unsubackOutboundOutput) {
+                final @NotNull UnsubackOutboundInput unsubackOutboundInput,
+                final @NotNull UnsubackOutboundOutput unsubackOutboundOutput) {
             isTriggered.set(true);
             final ModifiableUnsubackPacket packet = unsubackOutboundOutput.getUnsubackPacket();
             final ArrayList<UnsubackReasonCode> unsubackReasonCodes = new ArrayList<>();

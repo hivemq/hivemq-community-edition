@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler.testextensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
@@ -29,22 +29,22 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Test extension used in PluginAuthorizerServiceImplTest
  */
-@SuppressWarnings("unused")
 public final class TestAuthorizerDisconnectProvider implements AuthorizerProvider {
 
-    private final CountDownLatch countDownLatch;
+    private final @NotNull CountDownLatch countDownLatch;
 
-    public TestAuthorizerDisconnectProvider(final CountDownLatch countDownLatch) {
+    public TestAuthorizerDisconnectProvider(final @NotNull CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
 
     @Override
-    public @Nullable Authorizer getAuthorizer(@NotNull final AuthorizerProviderInput authorizerProviderInput) {
+    public @NotNull Authorizer getAuthorizer(final @NotNull AuthorizerProviderInput authorizerProviderInput) {
+        //noinspection Convert2Lambda
         return new SubscriptionAuthorizer() {
             @Override
             public void authorizeSubscribe(
-                    @NotNull final SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                    @NotNull final SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
+                    final @NotNull SubscriptionAuthorizerInput subscriptionAuthorizerInput,
+                    final @NotNull SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
                 System.out.println("authorize");
                 subscriptionAuthorizerOutput.disconnectClient();
                 countDownLatch.countDown();

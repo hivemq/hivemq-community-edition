@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionAttributeStore;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
@@ -38,29 +41,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("ConstantConditions")
 public class ConnectionAttributeStoreImplTest {
 
-    private Channel channel;
-    private ConnectionAttributes connectionAttributes;
-    private ConnectionAttributeStore connectionAttributeStore;
-    private ClientConnection clientConnection;
+    private @NotNull Channel channel;
+    private @NotNull ConnectionAttributes connectionAttributes;
+    private @NotNull ConnectionAttributeStore connectionAttributeStore;
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() {
-
-        clientConnection = new ClientConnection(channel, null);
-
         channel = mock(Channel.class);
-        final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
-        when(clientConnectionAttribute.get()).thenReturn(clientConnection);
 
         connectionAttributes = new ConnectionAttributes(1000);
         connectionAttributeStore = new ConnectionAttributeStoreImpl(channel);
+
+        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+
+        //noinspection unchecked
+        final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
+        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(clientConnectionAttribute.get()).thenReturn(clientConnection);
     }
 
     @Test
@@ -101,6 +103,7 @@ public class ConnectionAttributeStoreImplTest {
         clientConnection.setConnectionAttributes(null);
 
         connectionAttributeStore.put(key, value);
+        assertNotNull(clientConnection.getConnectionAttributes());
 
         final Optional<ByteBuffer> setValue = clientConnection.getConnectionAttributes().get(key);
         assertTrue(setValue.isPresent());
@@ -108,6 +111,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_put_null_key() {
         final String key = null;
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
@@ -116,6 +120,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_put_null_value() {
         final String key = "test.key";
         final ByteBuffer value = null;
@@ -161,6 +166,7 @@ public class ConnectionAttributeStoreImplTest {
         clientConnection.setConnectionAttributes(null);
 
         connectionAttributeStore.putAsString(key, value);
+        assertNotNull(clientConnection.getConnectionAttributes());
 
         final Optional<ByteBuffer> setValue = clientConnection.getConnectionAttributes().get(key);
         assertTrue(setValue.isPresent());
@@ -168,6 +174,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_putAsString_null_key() {
         final String key = null;
         final String value = "test.value";
@@ -176,6 +183,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_putAsString_null_value() {
         final String key = "test.key";
         final String value = null;
@@ -224,6 +232,7 @@ public class ConnectionAttributeStoreImplTest {
         clientConnection.setConnectionAttributes(null);
 
         connectionAttributeStore.putAsString(key, value, charset);
+        assertNotNull(clientConnection.getConnectionAttributes());
 
         final Optional<ByteBuffer> setValue = clientConnection.getConnectionAttributes().get(key);
         assertTrue(setValue.isPresent());
@@ -231,6 +240,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_putAsString_charset_null_key() {
         final String key = null;
         final String value = "test.value";
@@ -240,6 +250,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_putAsString_charset_null_value() {
         final String key = "test.key";
         final String value = null;
@@ -249,6 +260,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_putAsString_charset_null_charset() {
         final String key = "test.key";
         final String value = "test.value";
@@ -280,6 +292,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_get_null_key() {
         final String key = null;
 
@@ -324,6 +337,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_getAsString_null_key() {
         final String key = null;
 
@@ -371,6 +385,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_getAsString_charset_null_key() {
         final String key = null;
         final Charset charset = StandardCharsets.ISO_8859_1;
@@ -379,6 +394,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_getAsString_charset_null_charset() {
         final String key = "test.key";
         final Charset charset = null;
@@ -388,9 +404,10 @@ public class ConnectionAttributeStoreImplTest {
 
     @Test
     public void test_getAll() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1", ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2", ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of("test.key1",
+                ByteBuffer.wrap("test.value1".getBytes()),
+                "test.key2",
+                ByteBuffer.wrap("test.value2".getBytes()));
 
         clientConnection.setConnectionAttributes(connectionAttributes);
 
@@ -467,6 +484,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_remove_null_key() {
         final String key = null;
 
@@ -538,7 +556,9 @@ public class ConnectionAttributeStoreImplTest {
             putRunnables[i] = new ExceptionCountRunnable(EXECUTIONS) {
                 @Override
                 public void runCount() {
-                    connectionAttributeStore.putAsString("test.key" + random.nextInt(EXECUTIONS / 10), RandomStringUtils.random(10));
+                    connectionAttributeStore.putAsString(
+                            "test.key" + random.nextInt(EXECUTIONS / 10),
+                            RandomStringUtils.random(10));
                 }
             };
             getRunnables[i] = new ExceptionCountRunnable(EXECUTIONS) {
@@ -610,6 +630,7 @@ public class ConnectionAttributeStoreImplTest {
     }
 
     private static abstract class ExceptionCountRunnable implements Runnable {
+
         private final AtomicInteger exceptionCount = new AtomicInteger();
         private final int runCount;
 
@@ -635,5 +656,4 @@ public class ConnectionAttributeStoreImplTest {
             return exceptionCount.get();
         }
     }
-
 }

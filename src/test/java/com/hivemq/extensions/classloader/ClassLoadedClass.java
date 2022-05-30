@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.classloader;
 
-/**
- * @author Dominik Obermaier
- */
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 public class ClassLoadedClass {
 
-    public String get() {
-
+    public @NotNull String get() {
         return "original";
     }
 }

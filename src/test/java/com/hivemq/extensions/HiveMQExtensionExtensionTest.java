@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -30,80 +31,84 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
 import util.TestExtensionUtil;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Georg Held
  */
 @SuppressWarnings("NullabilityAnnotations")
-public class HiveMQExtensionTest extends PluginAbstractTest {
+public class HiveMQExtensionExtensionTest extends AbstractExtensionTest {
 
     @Rule
-    public TemporaryFolder tmpFolder = new TemporaryFolder();
-    private File validPluginFolder;
-    private HiveMQExtensionEntity pluginEntityFromXML;
-    private HiveMQExtension enabledStartPlugin;
-    private Map<String, HiveMQExtension> enabledPlugins;
-    private ExtensionStartOutputImpl pluginStartOutput;
-    private ExtensionStartStopInputImpl enabledPluginStartInput;
-    private ExtensionStopOutputImpl pluginStopOutput;
-    private HiveMQExtension enabledStopPlugin;
-    private HiveMQExtension enabledReasonPlugin;
+    public final @NotNull TemporaryFolder tmpFolder = new TemporaryFolder();
 
-    @Mock
-    private ServerInformation serverInformation;
+    private final @NotNull ServerInformation serverInformation = mock(ServerInformation.class);
+
+    private HiveMQExtension startExtension;
+    private HiveMQExtension stopExtension;
+    private HiveMQExtension reasonExtension;
+
+    private ExtensionStartOutputImpl extensionStartOutput;
+    private ExtensionStopOutputImpl extensionStopOutput;
+    private ExtensionStartStopInputImpl extensionStartStopInput;
 
     @Before
     public void setUp() throws Exception {
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(tmpFolder.newFolder("extension"), "id");
+        final Optional<HiveMQExtensionEntity> extensionEntityFromXML =
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(validExtensionFolder.toPath(), true);
+        assertTrue(extensionEntityFromXML.isPresent());
+        final HiveMQExtensionEntity hiveMQExtensionEntity = extensionEntityFromXML.get();
 
-        validPluginFolder = TestExtensionUtil.createValidExtension(tmpFolder.newFolder("extension"), "id");
-        pluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(validPluginFolder.toPath(), true).get();
+        startExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new StartTestExtension(),
+                true);
+        stopExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new StopTestExtension(),
+                true);
+        reasonExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new ReasonTestExtension(),
+                true);
 
-        enabledStartPlugin =
-                new HiveMQExtensionImpl(
-                        pluginEntityFromXML, validPluginFolder.toPath(), new StartTestExtension(), true);
-        enabledStopPlugin =
-                new HiveMQExtensionImpl(pluginEntityFromXML, validPluginFolder.toPath(), new StopTestExtension(), true);
-        enabledReasonPlugin =
-                new HiveMQExtensionImpl(
-                        pluginEntityFromXML, validPluginFolder.toPath(), new ReasonTestExtension(), true);
-
-
-        enabledPlugins = Collections.singletonMap(enabledStartPlugin.getId(), enabledStartPlugin);
-        pluginStartOutput = new ExtensionStartOutputImpl();
-        pluginStopOutput = new ExtensionStopOutputImpl();
-        enabledPluginStartInput =
-                new ExtensionStartStopInputImpl(enabledStartPlugin, enabledPlugins, serverInformation);
+        extensionStartOutput = new ExtensionStartOutputImpl();
+        extensionStopOutput = new ExtensionStopOutputImpl();
+        extensionStartStopInput = new ExtensionStartStopInputImpl(startExtension,
+                Collections.singletonMap(startExtension.getId(), startExtension),
+                serverInformation);
     }
 
     @Test(timeout = 5000)
     public void test_instantiate_and_start() throws Throwable {
-        enabledStartPlugin.start(enabledPluginStartInput, pluginStartOutput);
+        startExtension.start(extensionStartStopInput, extensionStartOutput);
         assertTrue(StartTestExtension.start);
     }
 
     @Test(timeout = 5000)
     public void test_plugin_stop() throws Throwable {
-        enabledStopPlugin.start(enabledPluginStartInput, pluginStartOutput);
-        enabledStopPlugin.stop(enabledPluginStartInput, pluginStopOutput);
+        stopExtension.start(extensionStartStopInput, extensionStartOutput);
+        stopExtension.stop(extensionStartStopInput, extensionStopOutput);
 
         assertTrue(StopTestExtension.stop);
     }
 
     @Test(timeout = 5000)
     public void test_start_reason_gets_set() throws Throwable {
-        enabledReasonPlugin.start(enabledPluginStartInput, pluginStartOutput);
+        reasonExtension.start(extensionStartStopInput, extensionStartOutput);
 
-        assertTrue(pluginStartOutput.getReason().isPresent());
-        assertSame(ReasonTestExtension.reason, pluginStartOutput.getReason().get());
+        assertTrue(extensionStartOutput.getReason().isPresent());
+        assertSame(ReasonTestExtension.reason, extensionStartOutput.getReason().get());
     }
 
     public static class StartTestExtension implements ExtensionMain {

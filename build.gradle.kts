@@ -167,6 +167,8 @@ dependencies {
     testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
     testImplementation("net.bytebuddy:byte-buddy:${property("bytebuddy.version")}")
     testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
+    testImplementation("org.javassist:javassist:${property("javassist.version")}")
+    testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
     testImplementation("com.github.stefanbirkner:system-rules:${property("system-rules.version")}") {
         exclude("junit", "junit-dep")
     }

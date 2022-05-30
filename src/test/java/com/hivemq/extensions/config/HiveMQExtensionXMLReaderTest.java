@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.config;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtensionEntity;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -27,25 +29,23 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Georg Held
- */
 public class HiveMQExtensionXMLReaderTest {
+
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void test_unmarschal_plugin_meta() throws Exception {
-        final File pluginXML = temporaryFolder.newFile("hivemq-extension.xml");
-        FileUtils.writeStringToFile(pluginXML,
-                "<hivemq-extension>" +
-                        "<id>some-id</id>" +
-                        "<name>Some Name</name>" +
-                        "<version>1.0.0</version>" +
-                        "<priority>1000</priority>" +
-                        "<author>Some Author</author>" +
-                        "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginXML.toPath().getParent(), true);
+        final File extensionXML = temporaryFolder.newFile("hivemq-extension.xml");
+        FileUtils.writeStringToFile(extensionXML, "<hivemq-extension>" + //
+                "<id>some-id</id>" + //
+                "<name>Some Name</name>" + //
+                "<version>1.0.0</version>" + //
+                "<priority>1000</priority>" + //
+                "<author>Some Author</author>" + //
+                "</hivemq-extension>", Charset.defaultCharset());
+        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML =
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
         assertTrue(optionalPluginEntityFromXML.isPresent());
         final HiveMQExtensionEntity hiveMQExtensionEntity = optionalPluginEntityFromXML.get();
         assertEquals("some-id", hiveMQExtensionEntity.getId());
@@ -57,14 +57,14 @@ public class HiveMQExtensionXMLReaderTest {
 
     @Test(timeout = 5000)
     public void test_missing_id_in_plugin_meta() throws Exception {
-        final File pluginXML = temporaryFolder.newFile("hivemq-extension.xml");
-        FileUtils.writeStringToFile(pluginXML,
-                "<hivemq-extension>" +
-                        "<name>Some Name</name>" +
-                        "<version>1.0.0</version>" +
-                        "<priority>1000</priority>" +
-                        "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML = HiveMQExtensionXMLReader.getExtensionEntityFromXML(pluginXML.toPath().getParent(), true);
-        assertFalse(optionalPluginEntityFromXML.isPresent());
+        final File extensionXML = temporaryFolder.newFile("hivemq-extension.xml");
+        FileUtils.writeStringToFile(extensionXML, "<hivemq-extension>" + //
+                "<name>Some Name</name>" + //
+                "<version>1.0.0</version>" + //
+                "<priority>1000</priority>" + //
+                "</hivemq-extension>", Charset.defaultCharset());
+        final Optional<HiveMQExtensionEntity> optionalExtensionEntityFromXML =
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
+        assertFalse(optionalExtensionEntityFromXML.isPresent());
     }
 }

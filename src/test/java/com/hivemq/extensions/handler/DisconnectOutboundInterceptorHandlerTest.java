@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -26,13 +27,13 @@ import com.hivemq.extension.sdk.api.interceptor.disconnect.parameter.DisconnectO
 import com.hivemq.extension.sdk.api.packets.disconnect.ModifiableOutboundDisconnectPacket;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.client.ClientContextImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -42,19 +43,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -66,40 +61,24 @@ import static org.mockito.Mockito.when;
 public class DisconnectOutboundInterceptorHandlerTest {
 
     @Rule
-    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private @NotNull HiveMQExtensions hiveMQExtensions;
-
-    @Mock
-    private @NotNull HiveMQExtension extension;
-
-    @Mock
-    private @NotNull ClientContextImpl clientContext;
-
-    private @NotNull PluginOutPutAsyncer asyncer;
-
-    private @NotNull FullConfigurationService configurationService;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
+    private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
 
     private @NotNull PluginTaskExecutor executor;
-
     private @NotNull EmbeddedChannel channel;
-
-    private @NotNull PluginTaskExecutorService pluginTaskExecutorService;
-
     private @NotNull DisconnectInterceptorHandler handler;
-
     private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
@@ -107,15 +86,22 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
         when(extension.getId()).thenReturn("extension");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
-        handler = new DisconnectInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        handler = new DisconnectInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(@NotNull ChannelHandlerContext ctx, @NotNull Object msg, @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) {
                 handler.handleOutboundDisconnect(ctx, ((DISCONNECT) msg), promise);
             }
         });
@@ -154,14 +140,12 @@ public class DisconnectOutboundInterceptorHandlerTest {
             readDisconnect = channel.readOutbound();
         }
         assertEquals(disconnect.getReasonCode(), readDisconnect.getReasonCode());
-
     }
 
     @Test(timeout = 5000)
     public void test_plugin_null() throws Exception {
-
         final DisconnectOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("TestModifyOutboundInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
@@ -181,9 +165,8 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modified() throws Exception {
-
         final DisconnectOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("TestModifyOutboundInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> interceptors = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(interceptors);
@@ -205,9 +188,8 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-
         final DisconnectOutboundInterceptor interceptor =
-                getIsolatedOutboundInterceptor("TestExceptionOutboundInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
@@ -223,26 +205,11 @@ public class DisconnectOutboundInterceptorHandlerTest {
     }
 
     private @NotNull DISCONNECT testDisconnect() {
-        return new DISCONNECT(
-                Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES,
-                "serverReference", 1);
-    }
-
-    private DisconnectOutboundInterceptor getIsolatedOutboundInterceptor(final @NotNull String name) throws Exception {
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.DisconnectOutboundInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        final IsolatedExtensionClassloader
-                cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.DisconnectOutboundInterceptorHandlerTest$" + name);
-
-        return (DisconnectOutboundInterceptor) interceptorClass.newInstance();
+        return new DISCONNECT(Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                "reason",
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "serverReference",
+                1);
     }
 
     public static class TestModifyOutboundInterceptor implements DisconnectOutboundInterceptor {
@@ -265,5 +232,4 @@ public class DisconnectOutboundInterceptorHandlerTest {
             throw new RuntimeException();
         }
     }
-
 }

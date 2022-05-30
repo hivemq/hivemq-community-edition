@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler.tasks;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
@@ -24,6 +26,7 @@ import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.handler.publish.IncomingPublishService;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -43,19 +46,14 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Christoph Schäbel
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class PublishAuthorizationProcessedTaskTest {
 
-    private MqttServerDisconnectorImpl mqtt5ServerDisconnector;
-    private IncomingPublishService incomingPublishService;
-    private PublishAuthorizationProcessedTask task;
-    private EmbeddedChannel channel;
-    private ClientConnection clientConnection;
-    private PublishAuthorizerOutputImpl output;
-    private PluginOutputAsyncerImpl asyncer;
+    private @NotNull MqttServerDisconnectorImpl mqtt5ServerDisconnector;
+    private @NotNull IncomingPublishService incomingPublishService;
+    private @NotNull PublishAuthorizationProcessedTask task;
+    private @NotNull EmbeddedChannel channel;
+    private @NotNull ClientConnection clientConnection;
+    private @NotNull PublishAuthorizerOutputImpl output;
 
     @Before
     public void before() {
@@ -63,7 +61,7 @@ public class PublishAuthorizationProcessedTaskTest {
         incomingPublishService = mock(IncomingPublishService.class);
 
         channel = new EmbeddedChannel(new DummyHandler());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         final ChannelHandlerContext ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
@@ -73,7 +71,6 @@ public class PublishAuthorizationProcessedTaskTest {
         output = new PublishAuthorizerOutputImpl(asyncer);
     }
 
-
     @Test
     public void test_mqtt5_disconnect() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -82,8 +79,11 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED),
+                eq(null));
     }
 
     @Test
@@ -94,8 +94,11 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED),
+                eq(null));
     }
 
     @Test
@@ -106,8 +109,11 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED), eq("test-string"));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED),
+                eq("test-string"));
     }
 
     @Test
@@ -118,7 +124,11 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED),
+                eq(null));
     }
 
     @Test
@@ -129,7 +139,11 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED),
+                eq(null));
     }
 
     @Test
@@ -146,7 +160,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'", result.getReasonString());
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+                result.getReasonString());
     }
 
     @Test
@@ -163,7 +178,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.TOPIC_NAME_INVALID, result.getAckReasonCode());
-        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'", result.getReasonString());
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+                result.getReasonString());
     }
 
     @Test
@@ -199,7 +215,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'", result.getReasonString());
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+                result.getReasonString());
     }
 
     @Test
@@ -218,9 +235,9 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'", result.getReasonString());
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+                result.getReasonString());
     }
-
 
     @Test
     public void test_success() {
@@ -269,7 +286,6 @@ public class PublishAuthorizationProcessedTaskTest {
         assertNull(result.getReasonString());
     }
 
-
     @Test
     public void test_undecided_authorizers_present() {
         final ArgumentCaptor<PublishAuthorizerResult> captor = ArgumentCaptor.forClass(PublishAuthorizerResult.class);
@@ -283,7 +299,8 @@ public class PublishAuthorizationProcessedTaskTest {
 
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'", result.getReasonString());
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+                result.getReasonString());
     }
 
     @Test
@@ -293,7 +310,10 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel.runPendingTasks();
 
-        verify(mqtt5ServerDisconnector).disconnect(any(), anyString(), anyString(),
-                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED), eq(null));
+        verify(mqtt5ServerDisconnector).disconnect(any(),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED),
+                eq(null));
     }
 }

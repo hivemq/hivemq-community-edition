@@ -17,18 +17,17 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.HiveMQExtensionEvent;
 import com.hivemq.extensions.HiveMQExtensions;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,31 +35,29 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Christoph Schäbel
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class ExtensionLifecycleHandlerImplTest {
 
-    private ExtensionLifecycleHandlerImpl pluginLifecycleHandler;
-
-    ExecutorService pluginStartStopExecutor = Executors.newSingleThreadExecutor();
-
-    @Mock
-    HiveMQExtensions hiveMQExtensions;
-
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    private final @NotNull ExecutorService pluginStartStopExecutor = Executors.newSingleThreadExecutor();
+
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+
+    private @NotNull ExtensionLifecycleHandlerImpl pluginLifecycleHandler;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         pluginLifecycleHandler = new ExtensionLifecycleHandlerImpl(hiveMQExtensions, pluginStartStopExecutor);
     }
 
-    @Test(timeout = 5000)
-    public void test_handlePluginEvents_enable() throws ExecutionException, InterruptedException {
+    @After
+    public void tearDown() throws Exception {
+        pluginStartStopExecutor.shutdown();
+    }
 
+    @Test(timeout = 5000)
+    public void test_handlePluginEvents_enable() throws Exception {
         final ImmutableList<HiveMQExtensionEvent> events =
                 ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension",
@@ -73,7 +70,7 @@ public class ExtensionLifecycleHandlerImplTest {
     }
 
     @Test(timeout = 5000)
-    public void handlePluginEvents_inStartPriority() throws ExecutionException, InterruptedException {
+    public void handlePluginEvents_inStartPriority() throws Exception {
         final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(
                 new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                         "test-extension-100",
@@ -109,7 +106,7 @@ public class ExtensionLifecycleHandlerImplTest {
     }
 
     @Test(timeout = 5000)
-    public void handlePluginEvents_inStartPriority_exception() throws ExecutionException, InterruptedException {
+    public void handlePluginEvents_inStartPriority_exception() throws Exception {
         when(hiveMQExtensions.extensionStart(eq("test-extension-100"))).thenThrow(new RuntimeException());
 
         final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(
@@ -147,8 +144,7 @@ public class ExtensionLifecycleHandlerImplTest {
     }
 
     @Test(timeout = 5000)
-    public void test_handlePluginEvents_disable() throws ExecutionException, InterruptedException {
-
+    public void test_handlePluginEvents_disable() throws Exception {
         final ImmutableList<HiveMQExtensionEvent> events =
                 ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE,
                         "test-extension",

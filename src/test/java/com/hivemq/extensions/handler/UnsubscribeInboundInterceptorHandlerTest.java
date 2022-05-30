@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -34,6 +35,7 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
@@ -41,73 +43,68 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class UnsubscribeInboundInterceptorHandlerTest {
 
-    public static AtomicBoolean isTriggered = new AtomicBoolean();
-    @Rule
-    public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-    @Mock
-    private HiveMQExtension extension;
-    @Mock
-    private HiveMQExtensions extensions;
-    @Mock
-    private ClientContextImpl clientContext;
-    @Mock
-    private FullConfigurationService configurationService;
-    private PluginTaskExecutor executor;
-    private EmbeddedChannel channel;
-    private UnsubscribeInboundInterceptorHandler handler;
+    public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
 
+    @Rule
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    private final @NotNull HiveMQExtensions extensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
+    private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
+
+    private @NotNull PluginTaskExecutor executor;
+    private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
+    private @NotNull UnsubscribeInboundInterceptorHandler handler;
 
     @Before
     public void setup() {
         isTriggered.set(false);
-        MockitoAnnotations.initMocks(this);
 
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
 
-        configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
 
-        handler =
-                new UnsubscribeInboundInterceptorHandler(configurationService, asyncer, extensions,
-                        pluginTaskExecutorService);
+        handler = new UnsubscribeInboundInterceptorHandler(configurationService,
+                asyncer,
+                extensions,
+                pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelInboundHandlerAdapter() {
             @Override
-            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
                 handler.handleInboundUnsubscribe(ctx, ((UNSUBSCRIBE) msg));
             }
         });
@@ -127,20 +124,19 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         assertNull(channel.readInbound());
     }
 
-
     @Test
     public void test_simple_intercept() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-
         final UnsubscribeInboundInterceptor interceptor =
-                getIsolatedInboundInterceptor("SimpleUnsubscribeTestInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, SimpleUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
-        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(extension);
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(
+                extension);
 
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();
@@ -149,23 +145,23 @@ public class UnsubscribeInboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             unsubscribe = channel.readInbound();
         }
-        Assert.assertNotNull(unsubscribe);
-        Assert.assertTrue(isTriggered.get());
+        assertNotNull(unsubscribe);
+        assertTrue(isTriggered.get());
     }
 
     @Test
     public void test_modifying_topics() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-
         final UnsubscribeInboundInterceptor interceptor =
-                getIsolatedInboundInterceptor("ModifyUnsubscribeTestInterceptor");
+                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, ModifyUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
-        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(extension);
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(
+                extension);
 
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();
@@ -181,30 +177,11 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         return new UNSUBSCRIBE(ImmutableList.of("topics"), 1, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    private @NotNull UnsubscribeInboundInterceptor getIsolatedInboundInterceptor(final @NotNull String name)
-            throws Exception {
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addClass("com.hivemq.extensions.handler.UnsubscribeInboundInterceptorHandlerTest$" + name);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        final IsolatedExtensionClassloader
-                cl =
-                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-
-        final Class<?> interceptorClass =
-                cl.loadClass("com.hivemq.extensions.handler.UnsubscribeInboundInterceptorHandlerTest$" + name);
-
-        return (UnsubscribeInboundInterceptor) interceptorClass.newInstance();
-    }
-
     public static class SimpleUnsubscribeTestInterceptor implements UnsubscribeInboundInterceptor {
 
         @Override
         public void onInboundUnsubscribe(
-                final @NotNull UnsubscribeInboundInput input,
-                final @NotNull UnsubscribeInboundOutput output) {
+                final @NotNull UnsubscribeInboundInput input, final @NotNull UnsubscribeInboundOutput output) {
             isTriggered.set(true);
         }
     }
@@ -213,8 +190,7 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
         @Override
         public void onInboundUnsubscribe(
-                final @NotNull UnsubscribeInboundInput input,
-                final @NotNull UnsubscribeInboundOutput output) {
+                final @NotNull UnsubscribeInboundInput input, final @NotNull UnsubscribeInboundOutput output) {
             final ModifiableUnsubscribePacket packet = output.getUnsubscribePacket();
             packet.setTopicFilters(Collections.singletonList("not topics"));
             isTriggered.set(true);

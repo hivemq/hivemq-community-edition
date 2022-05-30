@@ -13,57 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.auth;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
+import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import util.IsolatedExtensionClassloaderUtil;
 
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("NullabilityAnnotations")
 public class AuthenticatorsImplTest {
 
-    @Mock
-    private SimpleAuthenticator simpleAuthenticator1;
-    @Mock
-    private SimpleAuthenticator simpleAuthenticator2;
+    private final @NotNull SimpleAuthenticator simpleAuthenticator1 = mock(SimpleAuthenticator.class);
+    private final @NotNull SimpleAuthenticator simpleAuthenticator2 = mock(SimpleAuthenticator.class);
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
+    private final @NotNull HiveMQExtension extension1 = mock(HiveMQExtension.class);
+    private final @NotNull HiveMQExtension extension2 = mock(HiveMQExtension.class);
 
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
-
-    @Mock
-    private HiveMQExtension extension1;
-
-    @Mock
-    private HiveMQExtension extension2;
-
-    private WrappedAuthenticatorProvider simpleProvider1;
-    private WrappedAuthenticatorProvider simpleProvider2;
-
-    private AuthenticatorsImpl authenticators;
-    private IsolatedExtensionClassloader isolatedExtensionClassloader1;
-    private IsolatedExtensionClassloader isolatedExtensionClassloader2;
+    private @NotNull AuthenticatorsImpl authenticators;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-
-        isolatedExtensionClassloader1 = new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
-        isolatedExtensionClassloader2 = new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
+        final IsolatedExtensionClassloader isolatedExtensionClassloader1 =
+                IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
+        final IsolatedExtensionClassloader isolatedExtensionClassloader2 =
+                IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
 
         when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader1)).thenReturn(extension1);
         when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader2)).thenReturn(extension2);
@@ -77,8 +64,13 @@ public class AuthenticatorsImplTest {
         when(extension1.getId()).thenReturn("extension1");
         when(extension2.getId()).thenReturn("extension2");
 
-        simpleProvider1 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator1, isolatedExtensionClassloader1);
-        simpleProvider2 = new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2, isolatedExtensionClassloader2);
+        final WrappedAuthenticatorProvider simpleProvider1 = new WrappedAuthenticatorProvider(
+                (AuthenticatorProvider) i -> simpleAuthenticator1,
+                isolatedExtensionClassloader1);
+        final WrappedAuthenticatorProvider simpleProvider2 = new WrappedAuthenticatorProvider(
+                (AuthenticatorProvider) i -> simpleAuthenticator2,
+                isolatedExtensionClassloader2);
+
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authenticators.registerAuthenticatorProvider(simpleProvider1);
         authenticators.registerAuthenticatorProvider(simpleProvider2);
@@ -86,14 +78,14 @@ public class AuthenticatorsImplTest {
 
     @Test(timeout = 5000)
     public void test_registered_authenticators_are_ordered() {
-
-        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators = authenticators.getAuthenticatorProviderMap();
+        final Map<String, WrappedAuthenticatorProvider> registeredAuthenticators =
+                authenticators.getAuthenticatorProviderMap();
 
         assertEquals(2, registeredAuthenticators.size());
 
         final Iterator<WrappedAuthenticatorProvider> iterator = registeredAuthenticators.values().iterator();
 
-        assertSame(simpleAuthenticator1, iterator.next().getAuthenticator(null));
-        assertSame(simpleAuthenticator2, iterator.next().getAuthenticator(null));
+        assertSame(simpleAuthenticator1, iterator.next().getAuthenticator(mock(AuthenticatorProviderInput.class)));
+        assertSame(simpleAuthenticator2, iterator.next().getAuthenticator(mock(AuthenticatorProviderInput.class)));
     }
 }

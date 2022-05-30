@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -34,74 +36,69 @@ import static org.junit.Assert.assertEquals;
 
 public class ClassServiceLoaderTest {
 
-    public static String theInterface = "" +
+    public static @NotNull String theInterface = "" +
             " public interface TheInterface {" +
             "   int doSomething();" +
             " }";
 
-    public static String theImpl = "" +
+    public static @NotNull String theImpl = "" +
             " public class TheImpl implements TheInterface {" +
             "        public int doSomething() {" +
             "            return 1;}" +
             " }";
 
-    public static String theImpl2 = "" +
+    public static @NotNull String theImpl2 = "" +
             " public class TheImpl2 implements TheInterface {" +
             "        public int doSomething() {" +
             "            return 2;}" +
             " }";
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    /**
+     * Tests the actual service loader mechanism with a real JAR file.
+     * <p>
+     * The concrete steps are:
+     * <ul>
+     * <li>Compile the classes on the fly</li>
+     * <li>Create a JAR file with these classes</li>
+     * <li>Load the JAR file and test the service loader mechanism</li>
+     * </ul>
+     */
     @Test
     public void test_load_classes_from_jar_file_with_service_loader() throws Exception {
-
-        /*
-             This test tests the actual service loader mechanism with a real JAR file.
-             The concrete steps are
-
-             1. Compile the classes on the fly
-             2. Create a JAR file with these classes
-             3. Load the JAR file and test the service loader mechanism
-         */
-
-        //Compile classes on the fly
+        // compile classes on the fly
         final ClassLoader compile = OnTheFlyCompilationUtil.compile(
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheInterface", theInterface),
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl));
 
-        //Creating the JAR file with the compiled classes + service loader
-
+        // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
         final Class<?> implClass = Class.forName("TheImpl", false, compile);
-
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addAsServiceProviderAndClasses(interfaceClass, implClass);
 
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-
-        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
-        //This classloader contains the classes from the jar file
+        // this classloader contains the classes from the JAR file
         final URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
 
+        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
         final Iterable<? extends Class<?>> loadedClasses = classServiceLoader.load(Class.forName("TheInterface", true, cl), cl);
 
         assertEquals(1, Iterables.size(loadedClasses));
-        //Although they have the same canonical name, they are not equal because they come from different classloaders
+        // although they have the same canonical name, they are not equal because they come from different classloaders
         assertEquals(implClass.getCanonicalName(), loadedClasses.iterator().next().getCanonicalName());
     }
 
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_empty_services_file() throws Exception {
-
-        //Compile classes on the fly
+        // compile classes on the fly
         final ClassLoader compile = OnTheFlyCompilationUtil.compile(new OnTheFlyCompilationUtil.StringJavaFileObject("TheInterface", theInterface));
 
-        //Creating the JAR file with the compiled classes + service loader
-
+        // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addAsServiceProviderAndClasses(interfaceClass);
@@ -109,11 +106,10 @@ public class ClassServiceLoaderTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-
-        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
-        //This classloader contains the classes from the jar file
+        // this classloader contains the classes from the JAR file
         final URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
 
+        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
         final Iterable<? extends Class<?>> loadedClasses = classServiceLoader.load(Class.forName("TheInterface", true, cl), cl);
 
         assertEquals(0, Iterables.size(loadedClasses));
@@ -121,19 +117,16 @@ public class ClassServiceLoaderTest {
 
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_multiple_classes() throws Exception {
-
-        //Compile classes on the fly
+        // compile classes on the fly
         final ClassLoader compile = OnTheFlyCompilationUtil.compile(
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheInterface", theInterface),
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl),
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl2", theImpl2));
 
-        //Creating the JAR file with the compiled classes + service loader
-
+        // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
         final Class<?> implClass = Class.forName("TheImpl", false, compile);
         final Class<?> impl2Class = Class.forName("TheImpl2", false, compile);
-
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).
                 addAsServiceProviderAndClasses(interfaceClass, implClass, impl2Class);
@@ -141,11 +134,10 @@ public class ClassServiceLoaderTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-
-        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
-        //This classloader contains the classes from the jar file
+        // this classloader contains the classes from the JAR file
         final URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
 
+        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
         final Iterable<? extends Class<?>> loadedClasses = classServiceLoader.load(Class.forName("TheInterface", true, cl), cl);
 
         assertEquals(2, Iterables.size(loadedClasses));
@@ -153,15 +145,13 @@ public class ClassServiceLoaderTest {
 
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_with_comments() throws Exception {
-
-        //Compile classes on the fly
+        // compile classes on the fly
         final ClassLoader compile = OnTheFlyCompilationUtil.compile(
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheInterface", theInterface),
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl),
                 new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl2", theImpl2));
 
-        //Creating the JAR file with the compiled classes + service loader
-
+        // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
         final Class<?> implClass = Class.forName("TheImpl", false, compile);
         final Class<?> impl2Class = Class.forName("TheImpl2", false, compile);
@@ -169,7 +159,7 @@ public class ClassServiceLoaderTest {
         final String fileContents = "#" + implClass.getCanonicalName() + "\n" +
                 impl2Class.getCanonicalName() + " # Comment";
         final File servicesDescriptionFile = temporaryFolder.newFile();
-        Files.write(fileContents, servicesDescriptionFile, StandardCharsets.UTF_8);
+        Files.asCharSink(servicesDescriptionFile, StandardCharsets.UTF_8).write(fileContents);
 
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).
                 addAsResource(servicesDescriptionFile, "META-INF/services/" + interfaceClass.getCanonicalName()).
@@ -178,10 +168,10 @@ public class ClassServiceLoaderTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
 
-
-        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
+        // this classloader contains the classes from the JAR file
         final URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
 
+        final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
         final Iterable<? extends Class<?>> loadedClasses = classServiceLoader.load(Class.forName("TheInterface", true, cl), cl);
 
         assertEquals(1, Iterables.size(loadedClasses));
@@ -189,12 +179,14 @@ public class ClassServiceLoaderTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_class_to_load_null() throws Exception {
         final ClassServiceLoader loader = new ClassServiceLoader();
         loader.load(null, ClassLoader.getSystemClassLoader());
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
     public void test_classloader_null() throws Exception {
         final ClassServiceLoader loader = new ClassServiceLoader();
         loader.load(Object.class, null);

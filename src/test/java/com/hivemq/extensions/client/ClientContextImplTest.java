@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -36,14 +37,10 @@ import com.hivemq.extension.sdk.api.interceptor.pubrel.PubrelOutboundInterceptor
 import com.hivemq.extension.sdk.api.interceptor.subscribe.SubscribeInboundInterceptor;
 import com.hivemq.extensions.HiveMQExtension;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestInterceptorUtil;
 
 import java.util.List;
@@ -54,25 +51,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class ClientContextImplTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
 
-    private ClientContextImpl clientContext;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-    }
+    private final @NotNull ClientContextImpl clientContext =
+            new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
     @Test
     public void test_get_interceptors_return_correct_instances() {
@@ -268,6 +257,7 @@ public class ClientContextImplTest {
     }
 
     private static class MultipleInterceptors implements PublishInboundInterceptor, PublishOutboundInterceptor {
+
         @Override
         public void onInboundPublish(
                 final @NotNull PublishInboundInput publishInboundInput,
@@ -287,23 +277,22 @@ public class ClientContextImplTest {
                 TestInterceptorUtil.getIsolatedInterceptor(TestPublishInboundInterceptor.class, temporaryFolder);
         final PublishInboundInterceptor interceptor2 =
                 TestInterceptorUtil.getIsolatedInterceptor(TestPublishInboundInterceptor.class, temporaryFolder);
-        final List<? extends PublishInboundInterceptor> interceptors3And4 = TestInterceptorUtil.getIsolatedInterceptors(
-                List.of(TestPublishInboundInterceptor.class, TestPublishInboundInterceptor.class), temporaryFolder);
+        final List<? extends PublishInboundInterceptor> interceptors3And4 =
+                TestInterceptorUtil.getIsolatedInterceptors(List.of(
+                        TestPublishInboundInterceptor.class,
+                        TestPublishInboundInterceptor.class), temporaryFolder);
         final PublishInboundInterceptor interceptor3 = interceptors3And4.get(0);
         final PublishInboundInterceptor interceptor4 = interceptors3And4.get(1);
 
         final HiveMQExtension extension1 = mock(HiveMQExtension.class);
         final HiveMQExtension extension2 = mock(HiveMQExtension.class);
         final HiveMQExtension extension3 = mock(HiveMQExtension.class);
-        when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedExtensionClassloader) interceptor1.getClass().getClassLoader()))
-                .thenReturn(extension1);
-        when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedExtensionClassloader) interceptor2.getClass().getClassLoader()))
-                .thenReturn(extension2);
-        when(hiveMQExtensions.getExtensionForClassloader(
-                (IsolatedExtensionClassloader) interceptor3.getClass().getClassLoader()))
-                .thenReturn(extension3);
+        when(hiveMQExtensions.getExtensionForClassloader(interceptor1.getClass().getClassLoader())).thenReturn(
+                extension1);
+        when(hiveMQExtensions.getExtensionForClassloader(interceptor2.getClass().getClassLoader())).thenReturn(
+                extension2);
+        when(hiveMQExtensions.getExtensionForClassloader(interceptor3.getClass().getClassLoader())).thenReturn(
+                extension3);
         when(extension1.getPriority()).thenReturn(1);
         when(extension2.getPriority()).thenReturn(2);
         when(extension3.getPriority()).thenReturn(3);
@@ -329,6 +318,7 @@ public class ClientContextImplTest {
     }
 
     public static class TestPublishInboundInterceptor implements PublishInboundInterceptor {
+
         @Override
         public void onInboundPublish(
                 final @NotNull PublishInboundInput publishInboundInput,
