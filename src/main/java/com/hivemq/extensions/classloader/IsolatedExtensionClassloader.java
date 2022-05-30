@@ -50,6 +50,7 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
             // JDK
             "java.",
             "javax.annotation",
+            "jdk.",
 
             // HiveMQ
             "com.hivemq.extension.sdk.api",
