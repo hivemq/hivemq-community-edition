@@ -35,36 +35,40 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A classloader which is meant to be used for the isolated HiveMQ extensions. This is a parent-last classloader which
- * means, classes which are available locally have priority over classes in the parent classloaders
+ * A classloader which is meant to be used for the isolated HiveMQ extensions. This is a parent-last
+ * classloader which means, classes which are available locally have priority over classes in the parent classloaders.
  * <p>
  * It's not possible to access classes from a sibling IsolatedPluginClassloader because the parent-last approach gives
- * us some kind of (soft) isolation
- *
- * @author Dominik Obermaier
- * @author Georg Held
+ * us some kind of (soft) isolation.
  */
 public class IsolatedExtensionClassloader extends URLClassLoader {
 
     private static final Logger log = LoggerFactory.getLogger(IsolatedExtensionClassloader.class);
 
-    private final @Nullable ClassLoader delegate;
-
     @VisibleForTesting
-    private static final ImmutableSet<String> restrictedPackages = new ImmutableSet.Builder<String>().add("java.",
-            "com.hivemq.extension.sdk.api",
+    private static final ImmutableSet<String> restrictedPackages = new ImmutableSet.Builder<String>().add(
+            // JDK
+            "java.",
             "javax.annotation",
-            "org.slf4j",
-            "com.codahale.metrics").build();
 
-    private static final ImmutableSet<Class> classesWithStaticContext =
-            new ImmutableSet.Builder<Class>().add(Services.class, Builders.class).build();
+            // HiveMQ
+            "com.hivemq.extension.sdk.api",
+
+            // HiveMQ dependencies
+            "org.slf4j",
+            "com.codahale.metrics"
+    ).build();
+
+    private static final ImmutableSet<Class<?>> classesWithStaticContext =
+            new ImmutableSet.Builder<Class<?>>().add(Services.class, Builders.class).build();
 
     private static final ImmutableSet<String> classNamesWithStaticContext =
             new ImmutableSet.Builder<String>().add(Services.class.getCanonicalName(), Builders.class.getCanonicalName())
                     .build();
 
-    public IsolatedExtensionClassloader(@NotNull final URL[] classpath, @NotNull final ClassLoader parent) {
+    private final @Nullable ClassLoader delegate;
+
+    public IsolatedExtensionClassloader(@NotNull final URL @NotNull [] classpath, @NotNull final ClassLoader parent) {
         super(classpath, parent);
         this.delegate = null;
     }
@@ -75,58 +79,56 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
     }
 
     public void loadClassesWithStaticContext() {
-
-        for (final Class staticClass : classesWithStaticContext) {
-
+        for (final Class<?> staticClass : classesWithStaticContext) {
             try (final InputStream resourceAsStream = staticClass.getResourceAsStream(
                     staticClass.getSimpleName() + ".class")) {
-                final byte[] bytes = resourceAsStream.readAllBytes();
-                defineClass(staticClass.getCanonicalName(), bytes, 0, bytes.length);
+                if (resourceAsStream != null) {
+                    final byte[] bytes = resourceAsStream.readAllBytes();
+                    defineClass(staticClass.getCanonicalName(), bytes, 0, bytes.length);
+                }
             } catch (final IOException e) {
                 log.error("Not able to load extension class files for classes with static context", e);
             }
         }
-
     }
 
     @Override
-    @NotNull
-    protected synchronized Class<?> loadClass(@NotNull final String name, final boolean resolve)
+    protected synchronized @NotNull Class<?> loadClass(@NotNull final String name, final boolean resolve)
             throws ClassNotFoundException {
-
         if (delegate != null) {
             return delegate.loadClass(name);
         }
 
-        // First, check if the class has already been loaded
+        // first, check if the class has already been loaded
         Class<?> c = findLoadedClass(name);
-
         if (c != null) {
             return c;
         }
 
-        //Load static accessors only from child classloader
+        // load static accessors only from child classloader
         if (classNamesWithStaticContext.contains(name)) {
-            //don't catch this ClassNotFoundException, we want it to be propagated
+            // don't catch this ClassNotFoundException, we want it to be propagated
             c = findClass(name);
+            if (resolve) {
+                resolveClass(c);
+            }
+            return c;
         }
 
         if (mustLoadFromParentClassloader(name)) {
             try {
-                //try the parent first
+                // try the parent first
                 c = super.loadClass(name, resolve);
             } catch (final ClassNotFoundException e) {
                 // checking local
                 c = findClass(name);
             }
-
         } else {
             try {
                 // checking local
                 c = findClass(name);
             } catch (final ClassNotFoundException e) {
-                // checking parent
-                // This call to loadClass may eventually call findClass again, in case the parent doesn't find anything.
+                // checking parent (this call to loadClass may eventually call findClass again, in case the parent doesn't find anything)
                 c = super.loadClass(name, resolve);
             }
         }
@@ -134,25 +136,20 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
         if (resolve) {
             resolveClass(c);
         }
-
         return c;
     }
 
     private boolean mustLoadFromParentClassloader(@NotNull final String name) {
-
         for (final String packageName : restrictedPackages) {
             if (name.startsWith(packageName)) {
                 return true;
             }
         }
-
         return false;
     }
 
     @Override
-    @NotNull
-    public URL getResource(@NotNull final String name) {
-
+    public @Nullable URL getResource(@NotNull final String name) {
         URL url;
         if (delegate != null) {
             url = delegate.getResource(name);
@@ -160,18 +157,15 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
             url = findResource(name);
         }
         if (url == null) {
-            // This call to getResource may eventually call findResource again, in case the parent doesn't find anything.
+            // this call to getResource may eventually call findResource again, in case the parent doesn't find anything
             url = super.getResource(name);
         }
         return url;
     }
 
     @Override
-    @NotNull
-    public Enumeration<URL> getResources(@NotNull final String name) throws IOException {
-        /*
-         * Similar to super, but local resources are enumerated before parent resources
-         */
+    public @NotNull Enumeration<URL> getResources(@NotNull final String name) throws IOException {
+        // similar to super, but local resources are enumerated before parent resources
         final Enumeration<URL> localUrls;
         if (delegate != null) {
             localUrls = delegate.getResources(name);
@@ -182,8 +176,8 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
         if (getParent() != null) {
             parentUrls = getParent().getResources(name);
         }
-        final List<URL> urls = new ArrayList<>();
 
+        final List<URL> urls = new ArrayList<>();
         if (localUrls != null) {
             while (localUrls.hasMoreElements()) {
                 urls.add(localUrls.nextElement());
@@ -195,14 +189,15 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
             }
         }
         return new Enumeration<>() {
-            final Iterator<URL> iter = urls.iterator();
+            final Iterator<URL> iterator = urls.iterator();
 
             public boolean hasMoreElements() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
+            @NotNull
             public URL nextElement() {
-                return iter.next();
+                return iterator.next();
             }
         };
     }
@@ -214,8 +209,7 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
         try {
             return url != null ? url.openStream() : null;
         } catch (final IOException e) {
+            return null;
         }
-        return null;
     }
-
 }
