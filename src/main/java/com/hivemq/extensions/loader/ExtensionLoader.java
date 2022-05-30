@@ -28,23 +28,20 @@ import com.hivemq.extensions.HiveMQExtensionEvent;
 import java.nio.file.Path;
 
 /**
- * The extension loader is responsible for searching extension implementations in a given folder or in a given Set of
- * Resources. This is most useful if you have a folder with extension folders to read.
+ * The extension loader is responsible for searching extension implementations
+ * in a given folder or in a given Set of Resources. This is most useful
+ * if you have a folder with extension folders to read.
  * <p>
- * All extensions loaded with these ExtensionLoader have their <b>own classloader</b>, so essentially there's an classpath
- * isolation between all extensions.
- *
- * @author Dominik Obermaier
- * @author Georg Held
- * @author Christoph Schäbel
+ * All extensions loaded with these ExtensionLoader have their <b>own classloader</b>,
+ * so essentially there's a classpath isolation between all extensions.
  */
 public interface ExtensionLoader {
 
     /**
      * Loads extension implementations from a given folder. The folder must exist but may be empty.
      * <p>
-     * Note that only valid extension folders are considered, it's not possible to add .class files or other resources
-     * from the given folder.
+     * Note that only valid extension folders are considered,
+     * it's not possible to add .class files or other resources from the given folder.
      *
      * @param extensionFolder       the folder to search extension folders from
      * @param permissive            is a not existing extension folder allowed
@@ -56,7 +53,7 @@ public interface ExtensionLoader {
      */
     @ReadOnly
     @NotNull <T extends ExtensionMain> ImmutableList<HiveMQExtensionEvent> loadExtensions(
-            @NotNull final Path extensionFolder, boolean permissive, @NotNull final Class<T> desiredExtensionClass);
+            final @NotNull Path extensionFolder, boolean permissive, final @NotNull Class<T> desiredExtensionClass);
 
     /**
      * Loads a single extension.
@@ -65,8 +62,7 @@ public interface ExtensionLoader {
      * @return An Optional of a loaded extension. Empty if loading fails or extension <id> already known.
      */
     @Nullable <T extends ExtensionMain> HiveMQExtensionEvent processSingleExtensionFolder(
-            @NotNull final Path extensionFolder, @NotNull final Class<T> desiredClass);
-
+            final @NotNull Path extensionFolder, final @NotNull Class<T> desiredClass);
 
     @Nullable HiveMQExtensionEvent loadEmbeddedExtension(@NotNull EmbeddedExtension extensionMain);
 }

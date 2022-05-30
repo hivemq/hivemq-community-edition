@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -30,11 +31,6 @@ import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
-/**
- * @author Christoph Schäbel
- * @author Silvio Giebl
- * @author Georg Held
- */
 @Singleton
 public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler {
 
@@ -48,18 +44,15 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
     public ExtensionLifecycleHandlerImpl(
             final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor) {
-
         this.hiveMQExtensions = hiveMQExtensions;
         this.pluginStartStopExecutor = pluginStartStopExecutor;
     }
 
     @Override
     public @NotNull CompletableFuture<Void> handleExtensionEvents(final @NotNull ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents) {
-
         final ImmutableList<HiveMQExtensionEvent> sorted = analyzePluginEvents(hiveMQExtensionEvents);
 
         CompletableFuture<Void> returnFuture = CompletableFuture.completedFuture(null);
-
         for (final HiveMQExtensionEvent hiveMQExtensionEvent : sorted) {
             returnFuture = returnFuture
                     .thenComposeAsync((v) -> handlePluginEvent(hiveMQExtensionEvent), pluginStartStopExecutor)
@@ -69,7 +62,6 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
                         }
                         return null;
                     });
-
         }
         return returnFuture;
     }
@@ -99,7 +91,7 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
     }
 
     private @NotNull ImmutableList<HiveMQExtensionEvent> analyzePluginEvents(final @NotNull ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents) {
-        // Here duplicate start priority logging can be added, once it is specified
+        // here duplicate start priority logging can be added, once it is specified
         return ImmutableList.sortedCopyOf(
                 Comparator.comparingInt(HiveMQExtensionEvent::getPriority).reversed(), hiveMQExtensionEvents);
     }

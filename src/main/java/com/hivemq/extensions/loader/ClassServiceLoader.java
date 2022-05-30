@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
@@ -37,12 +38,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * return the implementation class.
  * <p>
  * All classes which are loaded by this service loader are initialized.
- *
- * @author Dominik Obermaier
  */
 @Singleton
 public class ClassServiceLoader {
-
 
     private static final String META_INF_SERVICES = "META-INF/services/";
 
@@ -50,7 +48,7 @@ public class ClassServiceLoader {
      * Loads all classes defined in the <code>META-INF/services/CLASS_TO_LOAD</code> file. The classes
      * get initialized when loading. Comments in the file (prefixed with a # character) are ignored.
      *
-     * @param classToLoad the class to load. Typically this is an interface.
+     * @param classToLoad the class to load. Typically, this is an interface.
      * @param classLoader the classloader to load the classes from
      * @param <S>         The type of the class to load
      * @return an immutable Iterable which contains all classes found via the service loader mechanism. All classes get
@@ -61,25 +59,18 @@ public class ClassServiceLoader {
      * @throws java.lang.NullPointerException If <code>null</code> is passed to any parameter
      */
     @ReadOnly
-    @NotNull
-    public <S> Iterable<Class<? extends S>> load(@NotNull final Class<S> classToLoad, @NotNull final ClassLoader classLoader) throws IOException, ClassNotFoundException {
-
+    public <S> @NotNull Iterable<Class<? extends S>> load(final @NotNull Class<S> classToLoad, final @NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
         checkNotNull(classToLoad, "Class to load mus not be null");
         checkNotNull(classLoader, "Classloader must not be null");
 
         final ImmutableList.Builder<Class<? extends S>> services = ImmutableList.builder();
-
         final Enumeration<URL> urls = classLoader.getResources(META_INF_SERVICES + classToLoad.getName());
-
         while (urls.hasMoreElements()) {
-
             final URL url = urls.nextElement();
-
             try (final InputStream is = url.openStream();
                  final InputStreamReader isr = new InputStreamReader(is, UTF_8);
                  final BufferedReader r = new BufferedReader((isr))) {
-
-                // Read until the stream is empty
+                // read until the stream is empty
                 while (true) {
                     String line = r.readLine();
                     if (line == null) {
@@ -88,7 +79,6 @@ public class ClassServiceLoader {
                     line = stripComments(line);
                     final String name = line.trim();
                     if (!(name.isEmpty())) {
-
                         final Class<?> clazz = Class.forName(name, true, classLoader);
                         services.add(clazz.asSubclass(classToLoad));
                     }
@@ -99,7 +89,7 @@ public class ClassServiceLoader {
     }
 
     @NotNull
-    private String stripComments(@NotNull final String line) {
+    private String stripComments(final @NotNull String line) {
         String tempLine = line;
         final int comment = line.indexOf('#');
         if (comment >= 0) {
@@ -107,5 +97,4 @@ public class ClassServiceLoader {
         }
         return tempLine;
     }
-
 }

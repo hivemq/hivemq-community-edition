@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
@@ -36,9 +37,6 @@ import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtensio
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/**
- * @author Christoph Schäbel
- */
 @Singleton
 public class ExtensionServicesDependenciesImpl implements ExtensionServicesDependencies {
 
@@ -89,9 +87,8 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     }
 
     @NotNull
-    public ImmutableMap<String, Object> getDependenciesMap(@NotNull final ClassLoader classLoader) {
-        //classLoader is unused but prepared here for future use
-
+    public ImmutableMap<String, Object> getDependenciesMap(final @NotNull ClassLoader classLoader) {
+        // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         builder.put(MetricRegistry.class.getCanonicalName(), metricRegistry);
@@ -112,7 +109,7 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
 
     @NotNull
     private ManagedExecutorServicePerExtension getManagedExecutorService(
-            @NotNull final ClassLoader classLoader) {
+            final @NotNull ClassLoader classLoader) {
         return new ManagedExecutorServicePerExtension(
                 globalManagedExtensionExecutorService, classLoader, hiveMQExtensions);
     }

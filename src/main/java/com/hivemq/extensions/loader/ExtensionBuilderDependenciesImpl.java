@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
@@ -24,9 +25,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.function.Supplier;
 
-/**
- * @author Christoph Schäbel
- */
 @Singleton
 public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDependencies {
 
@@ -51,15 +49,14 @@ public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDepende
 
     @NotNull
     public ImmutableMap<String, Supplier<Object>> getDependenciesMap() {
-        //classLoader is unused but prepared here for future use
-
+        // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Supplier<Object>> builder = ImmutableMap.builder();
 
-        builder.put(RetainedPublishBuilder.class.getCanonicalName(), () -> retainedPublishBuilderProvider.get());
-        builder.put(TopicSubscriptionBuilder.class.getCanonicalName(), () -> topicSubscriptionBuilderProvider.get());
-        builder.put(PublishBuilder.class.getCanonicalName(), () -> publishBuilderProvider.get());
-        builder.put(TopicPermissionBuilder.class.getCanonicalName(), () -> topicPermissionBuilderProvider.get());
-        builder.put(WillPublishBuilder.class.getCanonicalName(), () -> willPublishBuilderProvider.get());
+        builder.put(RetainedPublishBuilder.class.getCanonicalName(), retainedPublishBuilderProvider::get);
+        builder.put(TopicSubscriptionBuilder.class.getCanonicalName(), topicSubscriptionBuilderProvider::get);
+        builder.put(PublishBuilder.class.getCanonicalName(), publishBuilderProvider::get);
+        builder.put(TopicPermissionBuilder.class.getCanonicalName(), topicPermissionBuilderProvider::get);
+        builder.put(WillPublishBuilder.class.getCanonicalName(), willPublishBuilderProvider::get);
 
         return builder.build();
     }
