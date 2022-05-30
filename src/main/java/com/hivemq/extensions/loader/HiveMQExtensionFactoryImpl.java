@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -24,18 +25,14 @@ import com.hivemq.extensions.HiveMQExtensionImpl;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 
-/**
- * @author Christoph Schäbel
- */
 @Singleton
 public class HiveMQExtensionFactoryImpl implements HiveMQExtensionFactory {
 
-    @NotNull
     @Override
-    public HiveMQExtension createHiveMQExtension(@NotNull final ExtensionMain extensionMainInstance,
-                                                 @NotNull final Path extensionFolder,
-                                                 @NotNull final HiveMQExtensionEntity extensionConfig,
-                                                 final boolean enabled) {
+    public @NotNull HiveMQExtension createHiveMQExtension(final @NotNull ExtensionMain extensionMainInstance,
+                                                          final @NotNull Path extensionFolder,
+                                                          final @NotNull HiveMQExtensionEntity extensionConfig,
+                                                          final boolean enabled) {
         return new HiveMQExtensionImpl(extensionConfig, extensionFolder, extensionMainInstance, enabled);
     }
 }

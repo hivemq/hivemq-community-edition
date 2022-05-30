@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
@@ -28,9 +29,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * @author Christoph Schäbel
- */
 @Singleton
 public class ExtensionStaticInitializerImpl implements ExtensionStaticInitializer {
 
@@ -44,13 +42,13 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
     private final ExtensionBuilderDependencies builderDependencies;
 
     @Inject
-    public ExtensionStaticInitializerImpl(@NotNull final ExtensionServicesDependencies servicesDependencies,
-                                          @NotNull final ExtensionBuilderDependencies builderDependencies) {
+    public ExtensionStaticInitializerImpl(final @NotNull ExtensionServicesDependencies servicesDependencies,
+                                          final @NotNull ExtensionBuilderDependencies builderDependencies) {
         this.servicesDependencies = servicesDependencies;
         this.builderDependencies = builderDependencies;
     }
 
-    public void initialize(@NotNull final String pluginId, @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
+    public void initialize(final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
         checkNotNull(pluginId, "extension id must not be null");
         checkNotNull(classLoader, "classLoader must not be null");
 
@@ -58,11 +56,9 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
         initializeBuilders(pluginId, classLoader);
     }
 
-    private void initializeServices(@NotNull final String pluginId,
-                                    @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
-
+    private void initializeServices(final @NotNull String pluginId,
+                                    final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
         try {
-
             final Class<?> servicesClass = classLoader.loadClass(SERVICES_CLASS);
             final Field servicesField = servicesClass.getDeclaredField("services");
             servicesField.setAccessible(true);
@@ -72,25 +68,18 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
         } catch (final Exception e) {
             throw new ExtensionLoadingException("Not able to initialize Services for extension with id " + pluginId, e);
         }
-
     }
 
-    private void initializeBuilders(@NotNull final String pluginId,
-                                    @NotNull final ClassLoader classLoader) throws ExtensionLoadingException {
-
+    private void initializeBuilders(final @NotNull String pluginId,
+                                    final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
         try {
-
             final Class<?> buildersClass = classLoader.loadClass(BUILDERS_CLASS);
             final Field buildersField = buildersClass.getDeclaredField("builders");
             buildersField.setAccessible(true);
             final ImmutableMap<String, Supplier<Object>> dependencies = builderDependencies.getDependenciesMap();
             buildersField.set(null, dependencies);
-
         } catch (final Exception e) {
             throw new ExtensionLoadingException("Not able to initialize Builders for extension with id " + pluginId, e);
         }
-
     }
-
-
 }

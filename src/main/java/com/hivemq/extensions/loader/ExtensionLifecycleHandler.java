@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
@@ -21,9 +22,6 @@ import com.hivemq.extensions.HiveMQExtensionEvent;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * @author Christoph Schäbel
- */
 public interface ExtensionLifecycleHandler {
 
     /**

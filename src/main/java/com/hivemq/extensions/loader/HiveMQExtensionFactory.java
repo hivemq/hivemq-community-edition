@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -22,13 +23,10 @@ import com.hivemq.extensions.HiveMQExtensionEntity;
 
 import java.nio.file.Path;
 
-/**
- * @author Christoph Schäbel
- */
 public interface HiveMQExtensionFactory {
 
     /**
-     * creates a {@link HiveMQExtension} with the following information
+     * Creates a {@link HiveMQExtension} with the following information.
      *
      * @param extensionMainInstance the instance of the extension's implementation of {@link ExtensionMain}
      * @param extensionFolder       the extension's folder

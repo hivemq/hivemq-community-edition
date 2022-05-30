@@ -48,11 +48,6 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * @author Dominik Obermaier
- * @author Georg Held
- * @author Christoph Schäbel
- */
 @Singleton
 public class ExtensionLoaderImpl implements ExtensionLoader {
 
@@ -81,10 +76,8 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             final @NotNull Path extensionFolder,
             final boolean permissive,
             final @NotNull Class<T> desiredExtensionClass) {
-
         checkNotNull(desiredExtensionClass, "extension class must not be null");
         checkNotNull(extensionFolder, "extension folder must not be null");
-
 
         try {
             checkArgument(Files.exists(extensionFolder), "%s does not exist", extensionFolder.toAbsolutePath());
@@ -115,107 +108,12 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         } catch (final IOException e) {
             log.error("Could not read extensions. Original exception:", e);
         }
-
         return extensions.build();
-    }
-
-    @VisibleForTesting
-    <T extends ExtensionMain> @NotNull Optional<Class<? extends T>> loadFromUrls(
-            final @NotNull Collection<URL> urls,
-            final @NotNull Class<T> desiredExtensionClass,
-            final @NotNull String extensionId) {
-
-        checkNotNull(desiredExtensionClass, "extension class must not be null");
-        checkNotNull(urls, "urls must not be null");
-
-        if (urls.isEmpty()) {
-            return Optional.empty();
-        }
-
-        final TypeToken<T> type = TypeToken.of(desiredExtensionClass);
-        final ImmutableList.Builder<Class<? extends T>> desiredExtensions = ImmutableList.builder();
-
-
-        /*
-         * We are using a Service Loader mechanism similar to the original Java service
-         * loader mechanism (e.g read from META-INF/services).
-         * We are not using the default JDK Service Loader, though, because it returns direct instances of the
-         * desired Extension classes.
-         */
-
-        try {
-            final ImmutableList.Builder<Class<? extends ExtensionMain>> allImplementations = ImmutableList.builder();
-
-            for (final URL extensionFileUrl : urls) {
-
-
-                //We are creating an isolated extension classloader for each extension.
-                final URL[] classpath = {extensionFileUrl};
-
-                final IsolatedExtensionClassloader extensionClassloader =
-                        new IsolatedExtensionClassloader(classpath, getClass().getClassLoader());
-
-                extensionClassloader.loadClassesWithStaticContext();
-
-                if (!initializeStaticContext(extensionId, extensionClassloader)) {
-                    return Optional.empty();
-                }
-
-                final Iterable<Class<? extends T>> allExtensionModuleStartingPoints =
-                        serviceLoader.load(desiredExtensionClass, extensionClassloader);
-                if (Iterables.size(allExtensionModuleStartingPoints) > 1) {
-                    log.warn(
-                            "Extension {} contains more than one implementation of ExtensionMain. The extension will be disabled.",
-                            extensionFileUrl.toString());
-                    return Optional.empty();
-                }
-                for (final Class<? extends ExtensionMain> startingPoint : allExtensionModuleStartingPoints) {
-                    allImplementations.add(startingPoint);
-                }
-            }
-
-            for (final Class<? extends ExtensionMain> implementation : allImplementations.build()) {
-                if (type.getRawType().isAssignableFrom(implementation)) {
-                    @SuppressWarnings("unchecked") final Class<? extends T> extensionClass =
-                            (Class<? extends T>) implementation;
-                    desiredExtensions.add(extensionClass);
-                } else {
-                    log.debug("Extension {} is not a {} Extension and will be ignored",
-                            implementation.getName(),
-                            type.getRawType().getName());
-                }
-            }
-        } catch (final IOException | ClassNotFoundException | SecurityException e) {
-            log.error(
-                    "An error occurred while searching the implementations for the extension {}. The extension will be disabled. {} : {}",
-                    extensionId,
-                    e.getClass().getSimpleName(),
-                    e.getMessage());
-            return Optional.empty();
-        }
-
-        final ImmutableList<Class<? extends T>> desired = desiredExtensions.build();
-
-        if (desired.size() == 1) {
-            return Optional.of(desired.get(0));
-        }
-
-        if (desired.size() == 0) {
-            log.warn(
-                    "No implementation of the interface ExtensionMain found in the extension with id \"{}\". The extension will be disabled.",
-                    extensionId);
-            return Optional.empty();
-        }
-        log.error(
-                "More than one implementation of the interface ExtensionMain found in extension with id {}, this interface can only be implemented once. The extension will be disabled.",
-                extensionId);
-        return Optional.empty();
     }
 
     @VisibleForTesting
     public <T extends ExtensionMain> @Nullable HiveMQExtensionEvent processSingleExtensionFolder(
             final @NotNull Path extensionFolder, final @NotNull Class<T> desiredClass) {
-
         final Optional<HiveMQExtensionEntity> xmlEntityOptional =
                 HiveMQExtensionXMLReader.getExtensionEntityFromXML(extensionFolder, true);
         if (xmlEntityOptional.isEmpty()) {
@@ -223,7 +121,6 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         }
 
         final HiveMQExtensionEntity xmlEntity = xmlEntityOptional.get();
-
         final String[] folderContents = extensionFolder.toFile().list();
         if (folderContents == null || folderContents.length < 1) {
             return null;
@@ -231,21 +128,20 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
 
         final boolean folderEnabled = !extensionFolder.resolve("DISABLED").toFile().exists();
 
-        //ignore, if this extension with this state is already known to HiveMQ
+        // ignore, if this extension with this state is already known to HiveMQ
         if (hiveMQExtensions.isHiveMQExtensionKnown(xmlEntity.getId(), extensionFolder, folderEnabled)) {
             return null;
         }
 
+        // ignore, if folder and extension disabled
         final boolean extensionEnabled = hiveMQExtensions.isHiveMQExtensionEnabled(xmlEntity.getId());
-
-        //ignore, if folder and extension disabled.
         if (!folderEnabled && !extensionEnabled) {
             return null;
         }
 
         final String fileName = extensionFolder.getFileName().toString();
 
-        //check for matching directory name and extensionId
+        // check for matching directory name and extensionId
         if (!fileName.equals(xmlEntity.getId())) {
             log.warn(
                     "Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}",
@@ -254,9 +150,9 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             return null;
         }
 
-        //check if folder is disabled
+        // check if folder is disabled
         if (!folderEnabled) {
-            //extension is always enabled here
+            // extension is always enabled here
             return new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE,
                     xmlEntity.getId(),
                     xmlEntity.getStartPriority(),
@@ -271,9 +167,8 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             return null;
         }
 
-        //load the extension
+        // load the extension
         final HiveMQExtension hiveMQExtension = loadSingleExtension(extensionFolder, xmlEntity, desiredClass);
-
         if (hiveMQExtension == null) {
             return null;
         }
@@ -289,8 +184,6 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
 
     @Override
     public @Nullable HiveMQExtensionEvent loadEmbeddedExtension(final @NotNull EmbeddedExtension embeddedExtension) {
-
-
         final HiveMQEmbeddedExtensionImpl extension = new HiveMQEmbeddedExtensionImpl(embeddedExtension.getId(),
                 embeddedExtension.getVersion(),
                 embeddedExtension.getName(),
@@ -312,10 +205,15 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             throw new IllegalStateException("The extensions class loader must not be null at loading stage");
         }
 
-        //need wrapper to load static context and classes.
-        final IsolatedExtensionClassloader isolatedExtensionClassloader =
-                new IsolatedExtensionClassloader(extensionClassloader, HiveMQServer.class.getClassLoader());
-        isolatedExtensionClassloader.loadClassesWithStaticContext();
+        // need wrapper to load static context and classes
+        try {
+            final IsolatedExtensionClassloader isolatedExtensionClassloader =
+                    new IsolatedExtensionClassloader(extensionClassloader, HiveMQServer.class.getClassLoader());
+            isolatedExtensionClassloader.loadClassesWithStaticContext();
+            isolatedExtensionClassloader.close();
+        } catch (final IOException e) {
+            // nothing to do
+        }
 
         try {
             staticInitializer.initialize(embeddedExtension.getId(), extensionClassloader);
@@ -328,7 +226,6 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             Exceptions.rethrowError(e);
             return null;
         }
-
         return hiveMQExtensionEvent;
     }
 
@@ -340,7 +237,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(extensionFolder)) {
             for (final Path path : stream) {
                 if (path.toString().endsWith(".jar")) {
-                    log.trace("Found extension jar {}", path.toString());
+                    log.trace("Found extension jar {}", path);
                     jarPaths.add(path);
                 }
             }
@@ -363,7 +260,6 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         }
 
         final Optional<Class<? extends T>> classOptional = loadFromUrls(urls.build(), desiredClass, xmlEntity.getId());
-
         if (classOptional.isEmpty()) {
             try {
                 ExtensionUtil.disableExtensionFolder(extensionFolder);
@@ -374,26 +270,106 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         }
 
         final Class<? extends T> extensionMainClass = classOptional.get();
-
-        final T instance;
         try {
-            instance = extensionMainClass.getDeclaredConstructor().newInstance();
-        } catch (final NoSuchMethodException nsme) {
+            final T instance = extensionMainClass.getDeclaredConstructor().newInstance();
+            return hiveMQExtensionFactory.createHiveMQExtension(instance, extensionFolder, xmlEntity, true);
+        } catch (final NoSuchMethodException e) {
             log.warn("Extension {} cannot be loaded. The {} has no constructor without parameters, " +
                             "a no-arg constructor for a ExtensionMain is required by HiveMQ.",
                     extensionFolder.toAbsolutePath(),
                     extensionMainClass);
-            return null;
         } catch (final Exception e) {
             log.warn("Extension {} cannot be loaded. The class {} cannot be instantiated, reason: {}",
                     extensionFolder.toAbsolutePath(),
                     extensionMainClass.getCanonicalName(),
                     e.getMessage());
             log.debug("Original exception:", e);
-            return null;
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("UnstableApiUsage")
+    <T extends ExtensionMain> @NotNull Optional<Class<? extends T>> loadFromUrls(
+            final @NotNull Collection<URL> urls,
+            final @NotNull Class<T> desiredExtensionClass,
+            final @NotNull String extensionId) {
+        checkNotNull(desiredExtensionClass, "extension class must not be null");
+        checkNotNull(urls, "urls must not be null");
+
+        if (urls.isEmpty()) {
+            return Optional.empty();
         }
 
-        return hiveMQExtensionFactory.createHiveMQExtension(instance, extensionFolder, xmlEntity, true);
+        final TypeToken<T> type = TypeToken.of(desiredExtensionClass);
+        final ImmutableList.Builder<Class<? extends T>> desiredExtensions = ImmutableList.builder();
+
+        /*
+         * We are using a Service Loader mechanism similar to the original Java service
+         * loader mechanism (e.g. read from META-INF/services).
+         * We are not using the default JDK Service Loader, though, because it returns direct instances of the
+         * desired Extension classes.
+         */
+        try {
+            final ImmutableList.Builder<Class<? extends ExtensionMain>> allImplementations = ImmutableList.builder();
+            for (final URL extensionFileUrl : urls) {
+                // we are creating an isolated extension classloader for each extension
+                final URL[] classpath = {extensionFileUrl};
+
+                final IsolatedExtensionClassloader extensionClassloader =
+                        new IsolatedExtensionClassloader(classpath, getClass().getClassLoader());
+                extensionClassloader.loadClassesWithStaticContext();
+                if (!initializeStaticContext(extensionId, extensionClassloader)) {
+                    return Optional.empty();
+                }
+
+                final Iterable<Class<? extends T>> allExtensionModuleStartingPoints =
+                        serviceLoader.load(desiredExtensionClass, extensionClassloader);
+                if (Iterables.size(allExtensionModuleStartingPoints) > 1) {
+                    log.warn(
+                            "Extension {} contains more than one implementation of ExtensionMain. The extension will be disabled.",
+                            extensionFileUrl.toString());
+                    return Optional.empty();
+                }
+                for (final Class<? extends ExtensionMain> startingPoint : allExtensionModuleStartingPoints) {
+                    allImplementations.add(startingPoint);
+                }
+            }
+
+            for (final Class<? extends ExtensionMain> implementation : allImplementations.build()) {
+                if (type.getRawType().isAssignableFrom(implementation)) {
+                    //noinspection unchecked
+                    final Class<? extends T> extensionClass = (Class<? extends T>) implementation;
+                    desiredExtensions.add(extensionClass);
+                } else {
+                    log.debug("Extension {} is not a {} Extension and will be ignored",
+                            implementation.getName(),
+                            type.getRawType().getName());
+                }
+            }
+        } catch (final IOException | ClassNotFoundException | SecurityException e) {
+            log.error(
+                    "An error occurred while searching the implementations for the extension {}. The extension will be disabled. {} : {}",
+                    extensionId,
+                    e.getClass().getSimpleName(),
+                    e.getMessage());
+            return Optional.empty();
+        }
+
+        final ImmutableList<Class<? extends T>> desired = desiredExtensions.build();
+        if (desired.size() == 1) {
+            return Optional.of(desired.get(0));
+        }
+        if (desired.size() == 0) {
+            log.warn(
+                    "No implementation of the interface ExtensionMain found in the extension with id \"{}\". The extension will be disabled.",
+                    extensionId);
+            return Optional.empty();
+        }
+        log.error(
+                "More than one implementation of the interface ExtensionMain found in extension with id {}, this interface can only be implemented once. The extension will be disabled.",
+                extensionId);
+        return Optional.empty();
     }
 
     private boolean initializeStaticContext(
