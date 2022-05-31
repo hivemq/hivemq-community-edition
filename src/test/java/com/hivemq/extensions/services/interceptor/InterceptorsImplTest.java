@@ -62,11 +62,10 @@ public class InterceptorsImplTest {
 
     @Test
     public void test_add_and_remove() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder,
-                new Class[]{TestConnectInboundInterceptorProvider.class})) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), new Class[]{TestConnectInboundInterceptorProvider.class})) {
             final ConnectInboundInterceptorProvider connectInterceptorProvider =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl,
-                            TestConnectInboundInterceptorProvider.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestConnectInboundInterceptorProvider.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(
                     extension);
@@ -93,11 +92,10 @@ public class InterceptorsImplTest {
 
     @Test
     public void test_add_and_remove_connack() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder,
-                new Class[]{TestConnackOutboundInterceptorProvider.class})) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), new Class[]{TestConnackOutboundInterceptorProvider.class})) {
             final ConnackOutboundInterceptorProvider connackInterceptorProvider =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl,
-                            TestConnackOutboundInterceptorProvider.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestConnackOutboundInterceptorProvider.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(
                     extension);
@@ -114,8 +112,7 @@ public class InterceptorsImplTest {
             final ArgumentCaptor<Consumer<HiveMQExtension>> captor = ArgumentCaptor.forClass(Consumer.class);
             verify(hiveMQExtensions).addAfterExtensionStopCallback(captor.capture());
 
-            assertSame(connackInterceptorProvider,
-                    interceptors.connackOutboundInterceptorProviders().get("extension"));
+            assertSame(connackInterceptorProvider, interceptors.connackOutboundInterceptorProviders().get("extension"));
 
             when(extension.getExtensionClassloader()).thenReturn(cl);
             captor.getValue().accept(extension);
@@ -126,8 +123,7 @@ public class InterceptorsImplTest {
     @Test
     public void test_extension_null() throws Exception {
         final ConnectInboundInterceptorProvider connectInterceptorProvider =
-                IsolatedExtensionClassloaderUtil.loadIsolated(
-                        temporaryFolder,
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
                         TestConnectInboundInterceptorProvider.class);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(null);

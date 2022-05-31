@@ -157,8 +157,9 @@ public class ConnackOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_null_interceptors() throws Exception {
-        final ConnackOutboundInterceptorProvider interceptorProvider =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestNullOutboundInterceptor.class);
+        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestNullOutboundInterceptor.class);
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
 
@@ -176,8 +177,9 @@ public class ConnackOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modify() throws Exception {
-        final ConnackOutboundInterceptorProvider interceptorProvider =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
@@ -196,8 +198,9 @@ public class ConnackOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_plugin_null() throws Exception {
-        final ConnackOutboundInterceptorProvider interceptorProvider =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(null);
@@ -216,8 +219,8 @@ public class ConnackOutboundInterceptorHandlerTest {
 
     @Test(timeout = 10_000)
     public void test_timeout_failed() throws Exception {
-        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(
-                temporaryFolder,
+        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
                 TestTimeoutFailedOutboundInterceptor.class);
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
@@ -225,24 +228,23 @@ public class ConnackOutboundInterceptorHandlerTest {
 
         channel.writeOutbound(testConnack());
 
-        await().atMost(10, TimeUnit.SECONDS)
-                .pollInterval(10, TimeUnit.MILLISECONDS)
-                .until(() -> {
-                    if (channel.isActive()) {
-                        channel.runPendingTasks();
-                        channel.runScheduledPendingTasks();
-                        return false;
-                    }
-                    return true;
-                });
+        await().atMost(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.MILLISECONDS).until(() -> {
+            if (channel.isActive()) {
+                channel.runPendingTasks();
+                channel.runScheduledPendingTasks();
+                return false;
+            }
+            return true;
+        });
 
         assertFalse(channel.isActive());
     }
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-        final ConnackOutboundInterceptorProvider interceptorProvider =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionOutboundInterceptor.class);
+        final ConnackOutboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionOutboundInterceptor.class);
         when(interceptors.connackOutboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);

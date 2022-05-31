@@ -144,8 +144,9 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_plugin_null() throws Exception {
-        final DisconnectOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final DisconnectOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);
@@ -165,8 +166,9 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modified() throws Exception {
-        final DisconnectOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final DisconnectOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> interceptors = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(interceptors);
@@ -188,8 +190,9 @@ public class DisconnectOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-        final DisconnectOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionOutboundInterceptor.class);
+        final DisconnectOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionOutboundInterceptor.class);
         final List<DisconnectOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectOutboundInterceptors()).thenReturn(list);

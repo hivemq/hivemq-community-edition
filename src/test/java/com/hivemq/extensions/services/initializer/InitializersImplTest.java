@@ -69,11 +69,10 @@ public class InitializersImplTest {
 
     @Test
     public void test_add_success() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                new Class[]{TestClientInitializerOne.class})) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), new Class[]{TestClientInitializerOne.class})) {
             final ClientInitializer clientInitializer =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, TestClientInitializerOne.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestClientInitializerOne.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
             when(extension1.getId()).thenReturn("extension1");
 
@@ -98,15 +97,14 @@ public class InitializersImplTest {
                 TestClientInitializerOne.class, TestClientInitializerTwo.class
         };
 
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes)) {
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), classes);
+             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                     .toPath(), classes)) {
             final ClientInitializer clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1, TestClientInitializerOne.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1, TestClientInitializerOne.class);
             final ClientInitializer clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2, TestClientInitializerTwo.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2, TestClientInitializerTwo.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
@@ -140,15 +138,14 @@ public class InitializersImplTest {
                 TestClientInitializerOne.class, TestClientInitializerTwo.class
         };
 
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes)) {
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), classes);
+             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                     .toPath(), classes)) {
             final ClientInitializer clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1, TestClientInitializerOne.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1, TestClientInitializerOne.class);
             final ClientInitializer clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2, TestClientInitializerTwo.class);
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2, TestClientInitializerTwo.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);

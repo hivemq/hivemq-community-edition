@@ -168,8 +168,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_modify() throws Exception {
-        final PubrelInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
+        final PubrelInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyInboundInterceptor.class);
         final List<PubrelInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelInboundInterceptors()).thenReturn(list);
@@ -189,8 +190,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_plugin_null() throws Exception {
-        final PubrelInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
+        final PubrelInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyInboundInterceptor.class);
         final List<PubrelInboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubrelInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -209,9 +211,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 10_000)
     public void test_inbound_timeout_failed() throws Exception {
-        final PubrelInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
-                temporaryFolder,
-                TestTimeoutFailedInboundInterceptor.class);
+        final PubrelInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestTimeoutFailedInboundInterceptor.class);
         final List<PubrelInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelInboundInterceptors()).thenReturn(list);
@@ -227,8 +229,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_exception() throws Exception {
-        final PubrelInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionInboundInterceptor.class);
+        final PubrelInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionInboundInterceptor.class);
         final List<PubrelInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelInboundInterceptors()).thenReturn(list);
@@ -244,9 +247,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_noPartialModificationWhenException() throws Exception {
-        final PubrelInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
-                temporaryFolder,
-                TestPartialModifiedInboundInterceptor.class);
+        final PubrelInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestPartialModifiedInboundInterceptor.class);
         final List<PubrelInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelInboundInterceptors()).thenReturn(list);
@@ -305,8 +308,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_modify() throws Exception {
-        final PubrelOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final PubrelOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         final List<PubrelOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelOutboundInterceptors()).thenReturn(list);
@@ -326,8 +330,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_plugin_null() throws Exception {
-        final PubrelOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyOutboundInterceptor.class);
+        final PubrelOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyOutboundInterceptor.class);
         final List<PubrelOutboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubrelOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -346,9 +351,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 10_000)
     public void test_outbound_timeout_failed() throws Exception {
-        final PubrelOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
-                temporaryFolder,
-                TestTimeoutFailedOutboundInterceptor.class);
+        final PubrelOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestTimeoutFailedOutboundInterceptor.class);
         final List<PubrelOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelOutboundInterceptors()).thenReturn(list);
@@ -365,8 +370,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_exception() throws Exception {
-        final PubrelOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionOutboundInterceptor.class);
+        final PubrelOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionOutboundInterceptor.class);
         final List<PubrelOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelOutboundInterceptors()).thenReturn(list);
@@ -381,9 +387,9 @@ public class PubrelInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_noPartialModificationWhenException() throws Exception {
-        final PubrelOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadIsolated(
-                temporaryFolder,
-                TestPartialModifiedOutboundInterceptor.class);
+        final PubrelOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestPartialModifiedOutboundInterceptor.class);
         final List<PubrelOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubrelOutboundInterceptors()).thenReturn(list);
@@ -404,8 +410,7 @@ public class PubrelInterceptorHandlerTest {
 
     @NotNull
     private PUBREL testPubrel() {
-        return new PUBREL(
-                1,
+        return new PUBREL(1,
                 Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
                 "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);

@@ -70,12 +70,10 @@ public class LifecycleEventListenersImplTest {
 
     @Test
     public void test_add_success() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
             final ClientLifecycleEventListenerProvider clientInitializer =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                            cl,
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl,
                             TestClientLifecycleEventListenerProviderOne.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
             when(extension1.getId()).thenReturn("extension1");
@@ -91,8 +89,7 @@ public class LifecycleEventListenersImplTest {
 
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializer);
 
-            assertEquals(
-                    clientInitializer,
+            assertEquals(clientInitializer,
                     lifecycleEventListeners.getClientLifecycleEventListenerProviderMap().get("extension1"));
         }
     }
@@ -103,18 +100,15 @@ public class LifecycleEventListenersImplTest {
                 TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class
         };
 
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes)) {
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), classes);
+             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                     .toPath(), classes)) {
             final ClientLifecycleEventListenerProvider clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                            cl1,
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1,
                             TestClientLifecycleEventListenerProviderOne.class);
             final ClientLifecycleEventListenerProvider clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                            cl2,
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2,
                             TestClientLifecycleEventListenerProviderTwo.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
@@ -146,16 +140,15 @@ public class LifecycleEventListenersImplTest {
                 TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class
         };
 
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes); final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                classes)) {
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), classes);
+             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                     .toPath(), classes)) {
             final ClientLifecycleEventListenerProvider clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1,
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1,
                             TestClientLifecycleEventListenerProviderOne.class);
             final ClientLifecycleEventListenerProvider clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2,
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2,
                             TestClientLifecycleEventListenerProviderTwo.class);
 
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);

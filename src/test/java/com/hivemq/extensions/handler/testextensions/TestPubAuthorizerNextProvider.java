@@ -20,8 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.PublishAuthorizer;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
-import com.hivemq.extension.sdk.api.auth.parameter.PublishAuthorizerInput;
-import com.hivemq.extension.sdk.api.auth.parameter.PublishAuthorizerOutput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 
 import java.util.concurrent.CountDownLatch;
@@ -39,16 +37,10 @@ public final class TestPubAuthorizerNextProvider implements AuthorizerProvider {
 
     @Override
     public @NotNull Authorizer getAuthorizer(final @NotNull AuthorizerProviderInput authorizerProviderInput) {
-        //noinspection Convert2Lambda
-        return new PublishAuthorizer() {
-            @Override
-            public void authorizePublish(
-                    final @NotNull PublishAuthorizerInput input,
-                    final @NotNull PublishAuthorizerOutput output) {
-                System.out.println("authorize");
-                output.nextExtensionOrDefault();
-                countDownLatch.countDown();
-            }
+        return (PublishAuthorizer) (input, output) -> {
+            System.out.println("authorize");
+            output.nextExtensionOrDefault();
+            countDownLatch.countDown();
         };
     }
 }

@@ -21,8 +21,6 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
 import com.hivemq.extension.sdk.api.auth.SubscriptionAuthorizer;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
-import com.hivemq.extension.sdk.api.auth.parameter.SubscriptionAuthorizerInput;
-import com.hivemq.extension.sdk.api.auth.parameter.SubscriptionAuthorizerOutput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
 
 import java.time.Duration;
@@ -41,24 +39,18 @@ public final class TestTimeoutAuthorizerProvider implements AuthorizerProvider {
 
     @Override
     public @NotNull Authorizer getAuthorizer(final @NotNull AuthorizerProviderInput authorizerProviderInput) {
-        //noinspection Convert2Lambda
-        return new SubscriptionAuthorizer() {
-            @Override
-            public void authorizeSubscribe(
-                    final @NotNull SubscriptionAuthorizerInput subscriptionAuthorizerInput,
-                    final @NotNull SubscriptionAuthorizerOutput subscriptionAuthorizerOutput) {
-                subscriptionAuthorizerOutput.async(Duration.ofMillis(1), TimeoutFallback.FAILURE);
+        return (SubscriptionAuthorizer) (subscriptionAuthorizerInput, subscriptionAuthorizerOutput) -> {
+            subscriptionAuthorizerOutput.async(Duration.ofMillis(1), TimeoutFallback.FAILURE);
 
-                System.out.println("authorize async");
+            System.out.println("authorize async");
 
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                countDownLatch.countDown();
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                e.printStackTrace();
             }
+
+            countDownLatch.countDown();
         };
     }
 }

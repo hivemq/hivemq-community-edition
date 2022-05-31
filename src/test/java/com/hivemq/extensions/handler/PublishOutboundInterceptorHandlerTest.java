@@ -122,8 +122,9 @@ public class PublishOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5_000)
     public void test_extension_null() throws Exception {
-        final PublishOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestInterceptor.class);
+        final PublishOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestInterceptor.class);
         when(clientContext.getPublishOutboundInterceptors()).thenReturn(ImmutableList.of(interceptor));
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -135,8 +136,9 @@ public class PublishOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5_000)
     public void test_extension_prevented() throws Exception {
-        final PublishOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestInterceptor.class);
+        final PublishOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestInterceptor.class);
         when(clientContext.getPublishOutboundInterceptors()).thenReturn(ImmutableList.of(interceptor));
 
         final CollectUserEventsHandler<PublishDroppedEvent> events =

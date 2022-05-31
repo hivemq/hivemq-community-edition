@@ -74,8 +74,8 @@ public class ReAuthTaskTest {
         auth = new AtomicBoolean();
         reAuth = new AtomicBoolean();
 
-        classloader = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, new Class[]{TestAuthenticator.class});
-        enhancedAuthenticator = IsolatedExtensionClassloaderUtil.instanceFromClassloader(classloader, TestAuthenticator.class);
+        classloader = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{TestAuthenticator.class});
+        enhancedAuthenticator = IsolatedExtensionClassloaderUtil.loadInstance(classloader, TestAuthenticator.class);
 
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(enhancedAuthenticator);
         authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1", new ClientAuthenticatorsImpl(new ExtensionPriorityComparator(extensions)));

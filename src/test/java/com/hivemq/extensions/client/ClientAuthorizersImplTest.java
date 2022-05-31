@@ -56,10 +56,12 @@ public class ClientAuthorizersImplTest {
 
     @Test
     public void test_put_get_authorizers() throws Exception {
-        final SubscriptionAuthorizer authorizer1 =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSubscriptionAuthorizer.class);
-        final SubscriptionAuthorizer authorizer2 =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer1 = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer2 = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestSubscriptionAuthorizer.class);
 
         authorizers.put("extension-1", authorizer1);
         authorizers.put("extension-2", authorizer2);
@@ -72,10 +74,12 @@ public class ClientAuthorizersImplTest {
 
     @Test
     public void test_remove_authorizers() throws Exception {
-        final SubscriptionAuthorizer authorizer1 =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSubscriptionAuthorizer.class);
-        final SubscriptionAuthorizer authorizer2 =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer1 = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer2 = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestSubscriptionAuthorizer.class);
 
         authorizers.put("extension-1", authorizer1);
         authorizers.put("extension-2", authorizer2);

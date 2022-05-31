@@ -128,9 +128,10 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modify() throws Exception {
-        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyInboundInterceptor.class);
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
-                "extension",
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
 
@@ -148,9 +149,10 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_null_interceptor() throws Exception {
-        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestNullInterceptor.class);
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
-                "extension",
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestNullInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
 
@@ -168,9 +170,10 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_timeout_failed() throws Exception {
-        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestTimeoutFailedInboundInterceptor.class);
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
-                "extension",
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestTimeoutFailedInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
@@ -191,8 +194,7 @@ public class ConnectInboundInterceptorHandlerTest {
             }
             return true;
         });
-        verify(connacker, timeout(5000)).connackError(
-                any(Channel.class),
+        verify(connacker, timeout(5000)).connackError(any(Channel.class),
                 anyString(),
                 anyString(),
                 any(Mqtt5ConnAckReasonCode.class),
@@ -201,9 +203,10 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionInboundInterceptor.class);
-        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of(
-                "extension",
+        final ConnectInboundInterceptorProvider interceptorProvider = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionInboundInterceptor.class);
+        when(interceptors.connectInboundInterceptorProviders()).thenReturn(ImmutableMap.of("extension",
                 interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
@@ -224,8 +227,7 @@ public class ConnectInboundInterceptorHandlerTest {
             }
             return true;
         });
-        verify(connacker, timeout(5000)).connackError(
-                any(Channel.class),
+        verify(connacker, timeout(5000)).connackError(any(Channel.class),
                 anyString(),
                 anyString(),
                 any(Mqtt5ConnAckReasonCode.class),

@@ -48,9 +48,9 @@ public class AuthenticatorsImplTest {
     @Before
     public void setUp() {
         final IsolatedExtensionClassloader isolatedExtensionClassloader1 =
-                IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
+                IsolatedExtensionClassloaderUtil.buildClassLoader();
         final IsolatedExtensionClassloader isolatedExtensionClassloader2 =
-                IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
+                IsolatedExtensionClassloaderUtil.buildClassLoader();
 
         when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader1)).thenReturn(extension1);
         when(hiveMQExtensions.getExtensionForClassloader(isolatedExtensionClassloader2)).thenReturn(extension2);
@@ -64,12 +64,12 @@ public class AuthenticatorsImplTest {
         when(extension1.getId()).thenReturn("extension1");
         when(extension2.getId()).thenReturn("extension2");
 
-        final WrappedAuthenticatorProvider simpleProvider1 = new WrappedAuthenticatorProvider(
-                (AuthenticatorProvider) i -> simpleAuthenticator1,
-                isolatedExtensionClassloader1);
-        final WrappedAuthenticatorProvider simpleProvider2 = new WrappedAuthenticatorProvider(
-                (AuthenticatorProvider) i -> simpleAuthenticator2,
-                isolatedExtensionClassloader2);
+        final WrappedAuthenticatorProvider simpleProvider1 =
+                new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator1,
+                        isolatedExtensionClassloader1);
+        final WrappedAuthenticatorProvider simpleProvider2 =
+                new WrappedAuthenticatorProvider((AuthenticatorProvider) i -> simpleAuthenticator2,
+                        isolatedExtensionClassloader2);
 
         authenticators = new AuthenticatorsImpl(hiveMQExtensions);
         authenticators.registerAuthenticatorProvider(simpleProvider1);

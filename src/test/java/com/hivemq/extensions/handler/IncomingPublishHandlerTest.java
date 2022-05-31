@@ -630,27 +630,26 @@ public class IncomingPublishHandlerTest {
         };
 
         final IsolatedExtensionClassloader cl1 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, classes);
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
         final IsolatedExtensionClassloader cl2 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, classes);
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
         final IsolatedExtensionClassloader cl3 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, classes);
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
         final IsolatedExtensionClassloader cl4 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, classes);
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
         final IsolatedExtensionClassloader cl5 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, classes);
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
 
         final PublishInboundInterceptor interceptorOne =
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl1, TestInterceptorChangeTopic.class);
+                IsolatedExtensionClassloaderUtil.loadInstance(cl1, TestInterceptorChangeTopic.class);
         final PublishInboundInterceptor interceptorTwo =
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl2, TestInterceptorPrevent.class);
-        final PublishInboundInterceptor interceptorThree = IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                cl3,
-                TestInterceptorPreventWithReasonCode.class);
+                IsolatedExtensionClassloaderUtil.loadInstance(cl2, TestInterceptorPrevent.class);
+        final PublishInboundInterceptor interceptorThree =
+                IsolatedExtensionClassloaderUtil.loadInstance(cl3, TestInterceptorPreventWithReasonCode.class);
         final PublishInboundInterceptor interceptorFour =
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl4, TestInterceptorThrowsException.class);
+                IsolatedExtensionClassloaderUtil.loadInstance(cl4, TestInterceptorThrowsException.class);
         final PublishInboundInterceptor interceptorFive =
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl5, TestInterceptorTimeout.class);
+                IsolatedExtensionClassloaderUtil.loadInstance(cl5, TestInterceptorTimeout.class);
 
         return Lists.newArrayList(interceptorOne, interceptorTwo, interceptorThree, interceptorFour, interceptorFive);
     }

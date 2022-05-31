@@ -63,12 +63,11 @@ public class SecurityRegistryImplTest {
 
     @Before
     public void setUp() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                new Class[]{
-                        TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class,
-                        EnhancedTestProvider1.class, EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
-                })) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), new Class[]{
+                TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class, EnhancedTestProvider1.class,
+                EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
+        })) {
             final HiveMQExtension hiveMQExtension = mock(HiveMQExtension.class);
             when(hiveMQExtension.getId()).thenReturn("extension");
             when(hiveMQExtension.getPriority()).thenReturn(1);
@@ -82,8 +81,8 @@ public class SecurityRegistryImplTest {
             authenticators = new AuthenticatorsImpl(hiveMQExtensions);
             securityRegistry = new SecurityRegistryImpl(authenticators, authorizers, hiveMQExtensions);
 
-            provider1 = IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, TestProvider1.class);
-            provider2 = IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, TestProvider2.class);
+            provider1 = IsolatedExtensionClassloaderUtil.loadInstance(cl, TestProvider1.class);
+            provider2 = IsolatedExtensionClassloaderUtil.loadInstance(cl, TestProvider2.class);
             final Authenticator auth1 = provider1.getAuthenticator(input);
             assertNotNull(auth1);
             authenticator1 = auth1;
@@ -91,10 +90,8 @@ public class SecurityRegistryImplTest {
             assertNotNull(auth2);
             authenticator2 = auth2;
 
-            enhancedProvider1 =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, EnhancedTestProvider1.class);
-            enhancedProvider2 =
-                    IsolatedExtensionClassloaderUtil.instanceFromClassloader(cl, EnhancedTestProvider2.class);
+            enhancedProvider1 = IsolatedExtensionClassloaderUtil.loadInstance(cl, EnhancedTestProvider1.class);
+            enhancedProvider2 = IsolatedExtensionClassloaderUtil.loadInstance(cl, EnhancedTestProvider2.class);
             final EnhancedAuthenticator enhancedAuth1 = enhancedProvider1.getEnhancedAuthenticator(input);
             assertNotNull(enhancedAuth1);
             enhancedAuthenticator1 = enhancedAuth1;

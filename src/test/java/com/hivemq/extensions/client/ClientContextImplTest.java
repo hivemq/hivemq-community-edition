@@ -278,8 +278,7 @@ public class ClientContextImplTest {
         final PublishInboundInterceptor interceptor2 =
                 TestInterceptorUtil.getIsolatedInterceptor(TestPublishInboundInterceptor.class, temporaryFolder);
         final List<? extends PublishInboundInterceptor> interceptors3And4 =
-                TestInterceptorUtil.getIsolatedInterceptors(List.of(
-                        TestPublishInboundInterceptor.class,
+                TestInterceptorUtil.getIsolatedInterceptors(List.of(TestPublishInboundInterceptor.class,
                         TestPublishInboundInterceptor.class), temporaryFolder);
         final PublishInboundInterceptor interceptor3 = interceptors3And4.get(0);
         final PublishInboundInterceptor interceptor4 = interceptors3And4.get(1);

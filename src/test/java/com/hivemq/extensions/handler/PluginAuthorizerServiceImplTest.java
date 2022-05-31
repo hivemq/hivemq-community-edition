@@ -56,7 +56,6 @@ import util.CollectUserEventsHandler;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestMessageUtil;
 
-import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -517,10 +516,13 @@ public class PluginAuthorizerServiceImplTest {
         return map;
     }
 
-    private AuthorizerProvider getTestAuthorizerProvider(final @NotNull Class<?> clazz, final @NotNull CountDownLatch countDownLatch) throws Exception {
-        final File jarFile = IsolatedExtensionClassloaderUtil.createJarFile(temporaryFolder, clazz);
-        final Class<?> providerClass = IsolatedExtensionClassloaderUtil.loadIsolatedClass(jarFile, clazz);
-        return (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class).newInstance(countDownLatch);
+    private AuthorizerProvider getTestAuthorizerProvider(
+            final @NotNull Class<?> clazz,
+            final @NotNull CountDownLatch countDownLatch) throws Exception {
+        final Class<?> providerClass =
+                IsolatedExtensionClassloaderUtil.loadClass(temporaryFolder.getRoot().toPath(), clazz);
+        return (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
+                .newInstance(countDownLatch);
     }
 
     private @NotNull HiveMQExtension getHiveMQExtension() {
