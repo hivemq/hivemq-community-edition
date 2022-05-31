@@ -15,9 +15,11 @@
  */
 package com.hivemq.exceptions;
 
-/**
- * @author Abdullah Imal
- */
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 public class StartAbortedException extends RuntimeException {
 
+    public StartAbortedException(final @NotNull String message) {
+        super(message);
+    }
 }
