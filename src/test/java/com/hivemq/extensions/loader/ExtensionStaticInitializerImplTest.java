@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
@@ -103,20 +104,28 @@ public class ExtensionStaticInitializerImplTest {
         final FullConfigurationService fullConfigurationService =
                 new TestConfigurationBootstrap().getFullConfigurationService();
         metricRegistry = new MetricRegistry();
-        initializerRegistry =
-                new InitializerRegistryImpl(new InitializersImpl(hiveMQExtensions));
+        initializerRegistry = new InitializerRegistryImpl(new InitializersImpl(hiveMQExtensions));
         retainedPublishBuilder = new RetainedPublishBuilderImpl(fullConfigurationService);
         topicSubscriptionBuilder = new TopicSubscriptionBuilderImpl(fullConfigurationService);
         topicPermissionBuilder = new TopicPermissionBuilderImpl(fullConfigurationService);
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
         securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions),
-                new AuthorizersImpl(hiveMQExtensions), hiveMQExtensions);
-        servicesDependencies = Mockito.spy(
-                new ExtensionServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
-                        clientService, subscriptionStore, globalManagedExtensionExecutorService, publishService,
-                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry,
-                        adminService));
+                new AuthorizersImpl(hiveMQExtensions),
+                hiveMQExtensions);
+        servicesDependencies = Mockito.spy(new ExtensionServicesDependenciesImpl(metricRegistry,
+                initializerRegistry,
+                retainedMessageStore,
+                clientService,
+                subscriptionStore,
+                globalManagedExtensionExecutorService,
+                publishService,
+                hiveMQExtensions,
+                securityRegistry,
+                eventRegistry,
+                clusterService,
+                interceptorRegistry,
+                adminService));
         builderDependencies = Mockito.spy(new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder,
                 () -> topicSubscriptionBuilder,
                 () -> topicPermissionBuilder,
@@ -335,15 +344,14 @@ public class ExtensionStaticInitializerImplTest {
 
     @Test(expected = ExtensionLoadingException.class)
     public void test_exception_at_static_initialization() throws Exception {
-        when(servicesDependencies.getDependenciesMap(any(IsolatedExtensionClassloader.class))).thenThrow(
-                new RuntimeException("Test-Exception"));
+        when(servicesDependencies.getDependenciesMap(any(IsolatedExtensionClassloader.class))).thenThrow(new RuntimeException(
+                "Test-Exception"));
         createAndLoadExtension();
     }
 
     @Test(expected = ExtensionLoadingException.class)
     public void test_exception_at_static_builders_initialization() throws Exception {
-        when(builderDependencies.getDependenciesMap()).thenThrow(
-                new RuntimeException("Test-Exception"));
+        when(builderDependencies.getDependenciesMap()).thenThrow(new RuntimeException("Test-Exception"));
         createAndLoadExtension();
     }
 
@@ -403,6 +411,7 @@ public class ExtensionStaticInitializerImplTest {
     }
 
     public static class TestExtensionMain implements ExtensionMain {
+
         // check if Services and Builders can also be used in a static block
         static {
             System.out.println(Services.metricRegistry());
@@ -418,7 +427,9 @@ public class ExtensionStaticInitializerImplTest {
         }
 
         @Override
-        public void extensionStart(final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+        public void extensionStart(
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
         }
 
         @Override

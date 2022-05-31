@@ -123,8 +123,9 @@ public class UnsubackOutboundInterceptorHandlerTest {
     public void test_intercept_simple_unsuback() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestSimpleUnsubackInterceptor.class);
+        final UnsubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestSimpleUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -146,8 +147,9 @@ public class UnsubackOutboundInterceptorHandlerTest {
     public void test_intercept_modify() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestModifyUnsubackInterceptor.class);
+        final UnsubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestModifyUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
@@ -169,8 +171,9 @@ public class UnsubackOutboundInterceptorHandlerTest {
     public void test_outbound_exception() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadIsolated(temporaryFolder, TestExceptionUnsubackInterceptor.class);
+        final UnsubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
+                temporaryFolder.getRoot().toPath(),
+                TestExceptionUnsubackInterceptor.class);
         clientContext.addUnsubackOutboundInterceptor(interceptor);
 
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);

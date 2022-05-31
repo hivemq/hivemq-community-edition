@@ -39,7 +39,7 @@ public class WrappedAuthenticatorProviderTest {
     private final @NotNull AuthenticatorProviderInput input = mock(AuthenticatorProviderInput.class);
 
     private final @NotNull IsolatedExtensionClassloader isolatedExtensionClassloader =
-            IsolatedExtensionClassloaderUtil.getIsolatedExtensionClassloader();
+            IsolatedExtensionClassloaderUtil.buildClassLoader();
 
     @Test(timeout = 5000)
     public void test_null_provider_returns_null() {

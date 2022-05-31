@@ -22,73 +22,55 @@ import javassist.ClassPool;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Creates JAR files for a given class on the fly and loads them via the {@link IsolatedExtensionClassloader}.
- *
- * @author Silvio Giebl
  */
 public class IsolatedExtensionClassloaderUtil {
 
     /**
-     * Creates a JAR file of the given class in a temporary folder.
-     * <p>
-     * All subclasses of the given class are explicitly added to the file.
-     *
-     * @param temporaryFolder the folder to create the JAR file in
-     * @param clazz           the class to be compiled into the JAR file
-     * @return the created JAR file
-     */
-    public static @NotNull File createJarFile(final @NotNull TemporaryFolder temporaryFolder,
-            final @NotNull Class<?> clazz) throws Exception {
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClass(clazz);
-        for (final String subclass : getSubclasses(clazz)) {
-            javaArchive.addClass(subclass);
-        }
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-        return jarFile;
-    }
-
-    /**
      * Loads the given class from a JAR file.
      * <p>
-     * All subclasses of the given class are explicitly loaded as well.
+     * All referenced classes of the given class are explicitly loaded as well.
      *
-     * @param jarFile the JAR file to be used
-     * @param clazz   the class to be loaded
-     * @param <T>     the type of the loaded class
+     * @param temporaryFolder the folder to create the JAR file in
+     * @param mainClass       the class to be loaded
+     * @param <T>             the type of the loaded class
      * @return the loaded class
      */
-    public static <T> @NotNull Class<T> loadIsolatedClass(final @NotNull File jarFile,
-            final @NotNull Class<?> clazz) throws Exception {
-        try (final IsolatedExtensionClassloader cl = getIsolatedExtensionClassloader(jarFile)) {
-            //noinspection unchecked
-            final Class<T> isolatedClass = (Class<T>) cl.loadClass(clazz.getName());
-            for (final String subclass : getSubclasses(clazz)) {
-                cl.loadClass(subclass);
-            }
-            return isolatedClass;
-        }
-    }
+    public static <T> @NotNull Class<T> loadClass(final @NotNull Path temporaryFolder,
+            final @NotNull Class<T> mainClass) throws Exception {
+        final String mainClassName = mainClass.getName();
 
-    private static @NotNull List<String> getSubclasses(final @NotNull Class<?> clazz) throws Exception {
-        final List<String> subClasses = new ArrayList<>();
-        final Set<String> subClassNames = ClassPool.getDefault().get(clazz.getName()).getClassFile().getConstPool().getClassNames();
-        for (final String subClassName : subClassNames) {
-            final String className = subClassName.replaceAll("/", ".");
-            if (!className.startsWith("[L")) {
-                subClasses.add(className);
+        // get referenced classes from same package
+        final Set<String> referencedClasses = new HashSet<>();
+        for (final String referencedClassName : ClassPool.getDefault().get(mainClassName).getClassFile().getConstPool().getClassNames()) {
+            final String className = referencedClassName.replace("/", ".");
+            if (!className.equals(mainClassName) && className.startsWith(mainClass.getPackageName())) {
+                referencedClasses.add(className);
             }
         }
-        return subClasses;
+
+        // create JAR file
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClass(mainClass);
+        for (final String clazz : referencedClasses) {
+            javaArchive.addClass(clazz);
+        }
+        final File jarFile = createJarFile(temporaryFolder, mainClass, javaArchive);
+
+        try (final IsolatedExtensionClassloader cl = buildClassLoader(jarFile)) {
+            for (final String clazz : referencedClasses) {
+                cl.loadClass(clazz);
+            }
+            //noinspection unchecked
+            return (Class<T>) cl.loadClass(mainClassName);
+        }
     }
 
     /**
@@ -99,10 +81,25 @@ public class IsolatedExtensionClassloaderUtil {
      * @param <T>             the type of the loaded class
      * @return an instance of the given class (using the default constructor)
      */
-    public static <T> @NotNull T loadIsolated(final @NotNull TemporaryFolder temporaryFolder,
+    public static <T> @NotNull T loadInstance(final @NotNull Path temporaryFolder,
             final @NotNull Class<T> clazz) throws Exception {
         final IsolatedExtensionClassloader cl = buildClassLoader(temporaryFolder, new Class[]{clazz});
-        return instanceFromClassloader(cl, clazz);
+        return loadInstance(cl, clazz);
+    }
+
+    /**
+     * Loads an instance of the given class from an {@link IsolatedExtensionClassloader}.
+     *
+     * @param classLoader the {@link IsolatedExtensionClassloader} to load the class from
+     * @param clazz       the class to be loaded
+     * @param <T>         the type of the loaded class
+     * @return an instance of the given class (using the default constructor)
+     */
+    public static <T> @NotNull T loadInstance(final @NotNull IsolatedExtensionClassloader classLoader,
+            final @NotNull Class<T> clazz) throws Exception {
+        //noinspection unchecked
+        final Class<T> isolatedClazz = (Class<T>) classLoader.loadClass(clazz.getName());
+        return isolatedClazz.getDeclaredConstructor().newInstance();
     }
 
     /**
@@ -112,38 +109,11 @@ public class IsolatedExtensionClassloaderUtil {
      * @param classes         the classes to be compiled into the JAR file
      * @return an {@link IsolatedExtensionClassloader} for the given classes
      */
-    public static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull TemporaryFolder temporaryFolder,
+    public static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull Path temporaryFolder,
             final @NotNull Class<?> @NotNull [] classes) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClasses(classes);
-
-        final File jarFile = temporaryFolder.newFile();
-        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
-
-        return getIsolatedExtensionClassloader(jarFile);
-    }
-
-    /**
-     * Creates an instance of the given class from an {@link IsolatedExtensionClassloader}.
-     *
-     * @param classLoader the {@link IsolatedExtensionClassloader} to load the class from
-     * @param clazz       the class to be loaded
-     * @param <T>         the type of the loaded class
-     * @return an instance of the given class (using the default constructor)
-     */
-    public static <T> @NotNull T instanceFromClassloader(final @NotNull IsolatedExtensionClassloader classLoader,
-            final @NotNull Class<T> clazz) throws Exception {
-        //noinspection unchecked
-        final Class<T> isolatedClazz = (Class<T>) classLoader.loadClass(clazz.getName());
-        return isolatedClazz.getDeclaredConstructor().newInstance();
-    }
-
-    /**
-     * Creates an empty {@link IsolatedExtensionClassloader} with the default parameters.
-     *
-     * @return a default instance of {@link IsolatedExtensionClassloader}
-     */
-    public static @NotNull IsolatedExtensionClassloader getIsolatedExtensionClassloader() {
-        return new IsolatedExtensionClassloader(new URL[]{}, Thread.currentThread().getContextClassLoader());
+        final File jarFile = createJarFile(temporaryFolder, classes[0], javaArchive);
+        return buildClassLoader(jarFile);
     }
 
     /**
@@ -152,7 +122,28 @@ public class IsolatedExtensionClassloaderUtil {
      * @param jarFile the JAR file to be used
      * @return an instance of {@link IsolatedExtensionClassloader}
      */
-    public static @NotNull IsolatedExtensionClassloader getIsolatedExtensionClassloader(final @NotNull File jarFile) throws Exception {
-        return new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, Thread.currentThread().getContextClassLoader());
+    public static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull File jarFile) throws Exception {
+        return buildClassLoader(new URL[]{jarFile.toURI().toURL()});
+    }
+
+    /**
+     * Creates an empty {@link IsolatedExtensionClassloader} with the default parameters.
+     *
+     * @return a default instance of {@link IsolatedExtensionClassloader}
+     */
+    public static @NotNull IsolatedExtensionClassloader buildClassLoader() {
+        return buildClassLoader(new URL[]{});
+    }
+
+    private static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull URL @NotNull [] classpath) {
+        return new IsolatedExtensionClassloader(classpath, Thread.currentThread().getContextClassLoader());
+    }
+
+    private static @NotNull File createJarFile(final @NotNull Path temporaryFolder, final @NotNull Class<?> mainClass, final JavaArchive javaArchive) {
+        // just in case someone uses this with an inner class like TestClass$1
+        final String jarFileName = mainClass.getSimpleName().replace("$", "_") + ".jar";
+        final File jarFile = temporaryFolder.resolve(jarFileName).toFile();
+        javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
+        return jarFile;
     }
 }

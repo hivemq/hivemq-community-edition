@@ -21,8 +21,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.builder.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.function.Supplier;
 
@@ -45,7 +43,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Before
     public void before() {
-        pluginBuilderDependencies = new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder,
+        pluginBuilderDependencies = new ExtensionBuilderDependenciesImpl(
+                () -> retainedPublishBuilder,
                 () -> topicSubscriptionBuilder,
                 () -> topicPermissionBuilderProvider,
                 () -> publishBuilder,

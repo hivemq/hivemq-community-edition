@@ -130,8 +130,7 @@ public class PluginInitializerHandlerTest {
 
     @Test(timeout = 10000)
     public void test_write_connack_not_success() throws Exception {
-        pluginInitializerHandler.write(
-                channelHandlerContext,
+        pluginInitializerHandler.write(channelHandlerContext,
                 new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET).build(),
                 channelPromise);
 
@@ -262,27 +261,22 @@ public class PluginInitializerHandlerTest {
 
     private Map<String, ClientInitializer> createClientInitializerMap() throws Exception {
         final IsolatedExtensionClassloader cl1 =
-                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder, new Class[]{
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{
                         InitializersImplTest.TestClientInitializerOne.class,
                         InitializersImplTest.TestClientInitializerTwo.class
                 });
-        final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder,
-                new Class[]{
+        final IsolatedExtensionClassloader cl2 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{
                         InitializersImplTest.TestClientInitializerOne.class,
                         InitializersImplTest.TestClientInitializerTwo.class
                 });
 
         final TreeMap<String, ClientInitializer> clientInitializerTreeMap = new TreeMap<>();
-        clientInitializerTreeMap.put(
-                "extension1",
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                        cl1,
+        clientInitializerTreeMap.put("extension1",
+                IsolatedExtensionClassloaderUtil.loadInstance(cl1,
                         InitializersImplTest.TestClientInitializerOne.class));
-        clientInitializerTreeMap.put(
-                "extension2",
-                IsolatedExtensionClassloaderUtil.instanceFromClassloader(
-                        cl2,
+        clientInitializerTreeMap.put("extension2",
+                IsolatedExtensionClassloaderUtil.loadInstance(cl2,
                         InitializersImplTest.TestClientInitializerTwo.class));
         return clientInitializerTreeMap;
     }

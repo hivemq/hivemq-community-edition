@@ -51,7 +51,6 @@ import org.junit.rules.TemporaryFolder;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestMessageUtil;
 
-import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
@@ -103,8 +102,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch connectLatch1 = new CountDownLatch(1);
         final CountDownLatch connectLatch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                connectLatch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(connectLatch1,
                 connectLatch2));
 
         clientLifecycleEventHandler.channelRead0(channelHandlerContext, connect);
@@ -143,8 +141,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
         clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnAuthSuccessEvent());
@@ -157,12 +154,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "reason", null));
         assertTrue(latch1.await(3, TimeUnit.SECONDS));
         assertTrue(latch2.await(3, TimeUnit.SECONDS));
@@ -173,12 +168,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnClientDisconnectEvent(DisconnectedReasonCode.NORMAL_DISCONNECTION, "reason", null, true));
         assertTrue(latch1.await(3, TimeUnit.SECONDS));
         assertTrue(latch2.await(3, TimeUnit.SECONDS));
@@ -189,12 +182,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnClientDisconnectEvent(null, null, null, false));
         assertTrue(latch1.await(3, TimeUnit.SECONDS));
         assertTrue(latch2.await(3, TimeUnit.SECONDS));
@@ -205,12 +196,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnServerDisconnectEvent(null, null, null));
         assertTrue(latch1.await(3, TimeUnit.SECONDS));
         assertTrue(latch2.await(3, TimeUnit.SECONDS));
@@ -221,12 +210,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnServerDisconnectEvent(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                         "reason",
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
@@ -242,8 +229,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
         clientLifecycleEventHandler.userEventTriggered(channelHandlerContext, new OnAuthSuccessEvent());
@@ -256,12 +242,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnAuthFailedEvent(DisconnectedReasonCode.NOT_AUTHORIZED, "reason", null));
         assertNull(clientLifecycleEventHandler.providerInput);
     }
@@ -272,12 +256,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnClientDisconnectEvent(DisconnectedReasonCode.NORMAL_DISCONNECTION, "reason", null, true));
         assertNull(clientLifecycleEventHandler.providerInput);
     }
@@ -288,12 +270,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnClientDisconnectEvent(null, null, null, false));
         assertNull(clientLifecycleEventHandler.providerInput);
     }
@@ -304,12 +284,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnServerDisconnectEvent(null, null, null));
         assertNull(clientLifecycleEventHandler.providerInput);
     }
@@ -320,12 +298,10 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch2 = new CountDownLatch(1);
 
         channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
-        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(
-                latch1,
+        when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
-        clientLifecycleEventHandler.userEventTriggered(
-                channelHandlerContext,
+        clientLifecycleEventHandler.userEventTriggered(channelHandlerContext,
                 new OnServerDisconnectEvent(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                         "reason",
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
@@ -335,8 +311,8 @@ public class ClientLifecycleEventHandlerTest {
     }
 
     private Map<String, ClientLifecycleEventListenerProvider> createMap(
-            final @NotNull CountDownLatch countDownLatch1,
-            final @NotNull CountDownLatch countDownLatch2) throws Exception {
+            final @NotNull CountDownLatch countDownLatch1, final @NotNull CountDownLatch countDownLatch2)
+            throws Exception {
         final Map<String, ClientLifecycleEventListenerProvider> map = new TreeMap<>();
         map.put("plugin1", getTestProvider(countDownLatch1));
         map.put("plugin2", getTestProvider(countDownLatch2));
@@ -376,8 +352,8 @@ public class ClientLifecycleEventHandlerTest {
 
     private ClientLifecycleEventListenerProvider getTestProvider(final @NotNull CountDownLatch countDownLatch)
             throws Exception {
-        final File jarFile = IsolatedExtensionClassloaderUtil.createJarFile(temporaryFolder, TestProvider.class);
-        final Class<?> providerClass = IsolatedExtensionClassloaderUtil.loadIsolatedClass(jarFile, TestProvider.class);
+        final Class<?> providerClass =
+                IsolatedExtensionClassloaderUtil.loadClass(temporaryFolder.getRoot().toPath(), TestProvider.class);
         return (ClientLifecycleEventListenerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
                 .newInstance(countDownLatch);
     }
