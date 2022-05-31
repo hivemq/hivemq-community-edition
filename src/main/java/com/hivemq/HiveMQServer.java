@@ -44,22 +44,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.configuration.service.PersistenceConfigurationService.PersistenceMode;
 
-/**
- * @author Dominik Obermaier
- * @author Florian Limpöck
- */
 public class HiveMQServer {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQServer.class);
 
     private final @NotNull HivemqId hivemqId;
     private final @NotNull LifecycleModule lifecycleModule;
+    private final @NotNull DataLock dataLock;
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
     private final boolean migrate;
@@ -83,6 +84,7 @@ public class HiveMQServer {
             final boolean migrate) {
         hivemqId = new HivemqId();
         lifecycleModule = new LifecycleModule();
+        dataLock = new DataLock();
         this.systemInformation = systemInformation;
         this.metricRegistry = metricRegistry;
         this.configService = configService;
@@ -93,8 +95,8 @@ public class HiveMQServer {
         final HiveMQServer server = new HiveMQServer();
         try {
             server.start();
-        } catch (final StartAbortedException ignored) {
-            // This exception is ignored as we throw it ourselves when HiveMQ shutdown is initiated during the startup.
+        } catch (final StartAbortedException e) {
+            log.info("HiveMQ start was cancelled. {}", e.getMessage());
         }
     }
 
@@ -123,6 +125,9 @@ public class HiveMQServer {
         log.trace("Initializing Exception handlers");
         HiveMQExceptionHandlerBootstrap.addUnrecoverableExceptionHandler();
 
+        log.trace("Locking data folder.");
+        dataLock.lock(systemInformation.getDataFolder().toPath());
+
         if (configService == null) {
             log.trace("Initializing configuration");
             configService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
@@ -147,13 +152,13 @@ public class HiveMQServer {
         persistenceInjector.getInstance(PersistenceStartup.class).finish();
 
         if (persistenceInjector.getInstance(ShutdownHooks.class).isShuttingDown()) {
-            throw new StartAbortedException();
+            throw new StartAbortedException("User aborted.");
         }
 
         if (migrate && configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
 
             if (migrations.size() + valueMigrations.size() > 0) {
-                if (migrations.size() > 0) {
+                if (!migrations.isEmpty()) {
                     log.info("Persistence types has been changed, migrating persistent data.");
                 } else {
                     log.info("Persistence values has been changed, migrating persistent data.");
@@ -187,7 +192,7 @@ public class HiveMQServer {
         }
         final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
         if (shutdownHooks.isShuttingDown()) {
-            throw new StartAbortedException();
+            throw new StartAbortedException("User aborted.");
         }
 
         final HiveMQInstance instance = injector.getInstance(HiveMQInstance.class);
@@ -201,7 +206,7 @@ public class HiveMQServer {
         }
 
         if (shutdownHooks.isShuttingDown()) {
-            throw new StartAbortedException();
+            throw new StartAbortedException("User aborted.");
         }
 
         /* It's important that we are modifying the log levels after Guice is initialized,
@@ -216,7 +221,7 @@ public class HiveMQServer {
         }
         final ShutdownHooks shutdownHooks = injector.getInstance(ShutdownHooks.class);
         if (shutdownHooks.isShuttingDown()) {
-            throw new StartAbortedException();
+            throw new StartAbortedException("User aborted.");
         }
 
         final UsageStatistics usageStatistics = injector.getInstance(UsageStatistics.class);
@@ -227,9 +232,7 @@ public class HiveMQServer {
 
         final long startTime = System.nanoTime();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            stop();
-        }, "shutdown-thread," + hivemqId.get()));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-thread," + hivemqId.get()));
 
         bootstrap();
         startInstance(null);
@@ -254,5 +257,29 @@ public class HiveMQServer {
 
     public @Nullable Injector getInjector() {
         return injector;
+    }
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private static final class DataLock {
+
+        // Do not move FileChannel and FileLock variables as they should not be garbage collected in order to keep the
+        // lock on them.
+        private @Nullable FileChannel channel;
+        private @Nullable FileLock fileLock;
+
+        public void lock(final @NotNull Path dataPath) {
+            final Path lockFile = dataPath.resolve("data.lock");
+            try {
+                // Do not close the lock for this file as we want to hold it for the lifecycle of our application in
+                // order to avoid a second one starting in the same working directory.
+                channel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                fileLock = channel.tryLock();
+            } catch (final Throwable e) {
+                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+            }
+            if (fileLock == null) {
+                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+            }
+        }
     }
 }

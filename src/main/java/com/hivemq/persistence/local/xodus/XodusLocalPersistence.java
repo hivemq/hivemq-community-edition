@@ -25,6 +25,8 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import jetbrains.exodus.ExodusException;
 import jetbrains.exodus.env.*;
+import jetbrains.exodus.io.FileDataWriter;
+import jetbrains.exodus.log.LogConfig;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -35,9 +37,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRIES;
 import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL;
 
-/**
- * @author Silvio Giebl
- */
 public abstract class XodusLocalPersistence implements LocalPersistence, FilePersistence {
 
 
@@ -145,7 +144,12 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                 persistenceStartup.submitEnvironmentCreate(() -> {
 
                     final File persistenceFile = new File(persistenceFolder, name + "_" + finalI);
-                    final Environment environment = Environments.newContextualInstance(persistenceFile, environmentConfig);
+
+                    final LogConfig logConfig = new LogConfig();
+                    logConfig.setDir(persistenceFile);
+                    logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
+
+                    final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
                     final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
 
                     buckets[finalI] = new Bucket(environment, store);
@@ -162,7 +166,6 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         }
 
         init();
-
     }
 
     protected abstract void init();
@@ -203,5 +206,17 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
     protected void checkBucketIndex(final int bucketIndex) {
         checkArgument(bucketIndex >= 0 && bucketIndex < buckets.length, "Invalid bucket index: " + bucketIndex);
+    }
+
+    private static final class XodusNoLockDataWriter extends FileDataWriter {
+
+        private XodusNoLockDataWriter(final @NotNull File persistenceFile, final @NotNull LogConfig logConfig) {
+            super(persistenceFile, logConfig.getLockId());
+        }
+
+        @Override
+        public boolean lock(final long timeout) {
+            return true;
+        }
     }
 }
