@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Path;
@@ -158,10 +159,10 @@ public class HiveMQServer {
         if (migrate && configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
 
             if (migrations.size() + valueMigrations.size() > 0) {
-                if (!migrations.isEmpty()) {
-                    log.info("Persistence types has been changed, migrating persistent data.");
-                } else {
+                if (migrations.isEmpty()) {
                     log.info("Persistence values has been changed, migrating persistent data.");
+                } else {
+                    log.info("Persistence types has been changed, migrating persistent data.");
                 }
                 for (final MigrationUnit migrationUnit : migrations.keySet()) {
                     log.debug("{} needs to be migrated.", StringUtils.capitalize(migrationUnit.toString()));
@@ -253,25 +254,25 @@ public class HiveMQServer {
         }
 
         shutdownHooks.runShutdownHooks();
+        dataLock.unlock();
     }
 
     public @Nullable Injector getInjector() {
         return injector;
     }
 
-    @SuppressWarnings("FieldCanBeLocal")
+    /**
+     * Create a lock file in the data folder of HiveMQ and hold the lock until released in order to avoid a second
+     * HiveMQ instance starting with the same data folder.
+     */
     private static final class DataLock {
 
-        // Do not move FileChannel and FileLock variables as they should not be garbage collected in order to keep the
-        // lock on them.
         private @Nullable FileChannel channel;
         private @Nullable FileLock fileLock;
 
         public void lock(final @NotNull Path dataPath) {
             final Path lockFile = dataPath.resolve("data.lock");
             try {
-                // Do not close the lock for this file as we want to hold it for the lifecycle of our application in
-                // order to avoid a second one starting in the same working directory.
                 channel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                 fileLock = channel.tryLock();
             } catch (final Throwable e) {
@@ -279,6 +280,23 @@ public class HiveMQServer {
             }
             if (fileLock == null) {
                 throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+            }
+        }
+
+        public void unlock() {
+            try {
+                if (fileLock != null && fileLock.isValid()) {
+                    fileLock.release();
+                }
+            } catch (final IOException e) {
+                log.error("An error occurred while releasing lock of data folder.");
+            }
+            try {
+                if (channel != null) {
+                    channel.close();
+                }
+            } catch (final IOException e) {
+                log.error("An error occurred while closing lock file in data folder.");
             }
         }
     }
