@@ -39,11 +39,11 @@ public class ExtensionBuilderDependenciesImplTest {
     private final @NotNull PublishBuilder publishBuilder = mock(PublishBuilder.class);
     private final @NotNull WillPublishBuilder willPublishBuilder = mock(WillPublishBuilder.class);
 
-    private @NotNull ExtensionBuilderDependenciesImpl pluginBuilderDependencies;
+    private @NotNull ExtensionBuilderDependenciesImpl extensionBuilderDependencies;
 
     @Before
     public void before() {
-        pluginBuilderDependencies = new ExtensionBuilderDependenciesImpl(
+        extensionBuilderDependencies = new ExtensionBuilderDependenciesImpl(
                 () -> retainedPublishBuilder,
                 () -> topicSubscriptionBuilder,
                 () -> topicPermissionBuilderProvider,
@@ -53,7 +53,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_retained_message_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = pluginBuilderDependencies.getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
 
         final Supplier<Object> o = dependenciesMap.get(RetainedPublishBuilder.class.getCanonicalName());
 
@@ -63,7 +64,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_subscription_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = pluginBuilderDependencies.getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
 
         final Supplier<Object> o = dependenciesMap.get(TopicSubscriptionBuilder.class.getCanonicalName());
 
@@ -73,7 +75,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_topic_permission_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = pluginBuilderDependencies.getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
 
         final Supplier<Object> o = dependenciesMap.get(TopicPermissionBuilder.class.getCanonicalName());
 
@@ -83,7 +86,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_publish_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = pluginBuilderDependencies.getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
 
         final Supplier<Object> o = dependenciesMap.get(PublishBuilder.class.getCanonicalName());
 
@@ -93,7 +97,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_will_publish_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = pluginBuilderDependencies.getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
 
         final Supplier<Object> o = dependenciesMap.get(WillPublishBuilder.class.getCanonicalName());
 
