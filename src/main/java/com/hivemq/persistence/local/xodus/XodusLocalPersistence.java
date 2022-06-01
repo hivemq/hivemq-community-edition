@@ -109,6 +109,10 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
             for (int i = 0; i < bucketCount; i++) {
                 final File persistenceFile = new File(persistenceFolder, name + "_" + i);
+                if (!persistenceFile.mkdirs()) {
+                    logger.error("Failed to create directory: {}", persistenceFile);
+                    throw new UnrecoverableException();
+                }
 
                 final LogConfig logConfig = new LogConfig();
                 logConfig.setDir(persistenceFile);
@@ -149,6 +153,9 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                 persistenceStartup.submitEnvironmentCreate(() -> {
 
                     final File persistenceFile = new File(persistenceFolder, name + "_" + finalI);
+                    if (!persistenceFile.mkdirs()) {
+                        throw new ExodusException("Failed to create directory: " + persistenceFile);
+                    }
 
                     final LogConfig logConfig = new LogConfig();
                     logConfig.setDir(persistenceFile);
