@@ -22,4 +22,8 @@ public class StartAbortedException extends RuntimeException {
     public StartAbortedException(final @NotNull String message) {
         super(message);
     }
+
+    public StartAbortedException(final @NotNull String message, final @NotNull Throwable cause) {
+        super(message, cause);
+    }
 }

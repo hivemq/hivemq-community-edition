@@ -126,12 +126,14 @@ public class HiveMQServer {
         log.trace("Initializing Exception handlers");
         HiveMQExceptionHandlerBootstrap.addUnrecoverableExceptionHandler();
 
-        log.trace("Locking data folder.");
-        dataLock.lock(systemInformation.getDataFolder().toPath());
-
         if (configService == null) {
             log.trace("Initializing configuration");
             configService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
+        }
+
+        if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
+            log.trace("Locking data folder.");
+            dataLock.lock(systemInformation.getDataFolder().toPath());
         }
 
         log.info("This HiveMQ ID is {}", hivemqId.get());
@@ -254,7 +256,10 @@ public class HiveMQServer {
         }
 
         shutdownHooks.runShutdownHooks();
-        dataLock.unlock();
+
+        if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
+            dataLock.unlock();
+        }
     }
 
     public @Nullable Injector getInjector() {
@@ -274,9 +279,12 @@ public class HiveMQServer {
             final Path lockFile = dataPath.resolve("data.lock");
             try {
                 channel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-                fileLock = channel.tryLock();
             } catch (final Throwable e) {
-                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?", e);
+            }
+            try {
+                fileLock = channel.tryLock();
+            } catch (final Throwable ignored) {
             }
             if (fileLock == null) {
                 throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
