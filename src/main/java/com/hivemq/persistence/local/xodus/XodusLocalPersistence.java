@@ -109,7 +109,12 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
             for (int i = 0; i < bucketCount; i++) {
                 final File persistenceFile = new File(persistenceFolder, name + "_" + i);
-                final Environment environment = Environments.newContextualInstance(persistenceFile, environmentConfig);
+
+                final LogConfig logConfig = new LogConfig();
+                logConfig.setDir(persistenceFile);
+                logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
+
+                final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
                 final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
 
                 buckets[i] = new Bucket(environment, store);
