@@ -673,7 +673,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     }
 
     /*******************************
-     * loadSinglePlugin(...) Tests *
+     * loadSingleExtension(...) Tests *
      *******************************/
 
     @Test(timeout = 5000)

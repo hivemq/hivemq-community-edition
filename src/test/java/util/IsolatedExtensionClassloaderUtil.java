@@ -64,7 +64,7 @@ public class IsolatedExtensionClassloaderUtil {
         }
         final File jarFile = createJarFile(temporaryFolder, mainClass, javaArchive);
 
-        try (final IsolatedExtensionClassloader cl = buildClassLoader(jarFile)) {
+        try (final IsolatedExtensionClassloader cl = buildClassLoader(new URL[]{jarFile.toURI().toURL()})) {
             for (final String clazz : referencedClasses) {
                 cl.loadClass(clazz);
             }
@@ -83,8 +83,9 @@ public class IsolatedExtensionClassloaderUtil {
      */
     public static <T> @NotNull T loadInstance(final @NotNull Path temporaryFolder,
             final @NotNull Class<T> clazz) throws Exception {
-        final IsolatedExtensionClassloader cl = buildClassLoader(temporaryFolder, new Class[]{clazz});
-        return loadInstance(cl, clazz);
+        try (final IsolatedExtensionClassloader cl = buildClassLoader(temporaryFolder, new Class[]{clazz})) {
+            return loadInstance(cl, clazz);
+        }
     }
 
     /**
@@ -103,6 +104,15 @@ public class IsolatedExtensionClassloaderUtil {
     }
 
     /**
+     * Creates an empty {@link IsolatedExtensionClassloader} with the default parameters.
+     *
+     * @return a default instance of {@link IsolatedExtensionClassloader}
+     */
+    public static @NotNull IsolatedExtensionClassloader buildClassLoader() {
+        return buildClassLoader(new URL[]{});
+    }
+
+    /**
      * Creates a JAR file for multiple classes and returns an {@link IsolatedExtensionClassloader} for this file.
      *
      * @param temporaryFolder the folder to create the JAR file in
@@ -113,26 +123,7 @@ public class IsolatedExtensionClassloaderUtil {
             final @NotNull Class<?> @NotNull [] classes) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClasses(classes);
         final File jarFile = createJarFile(temporaryFolder, classes[0], javaArchive);
-        return buildClassLoader(jarFile);
-    }
-
-    /**
-     * Creates an {@link IsolatedExtensionClassloader} for the given JAR file.
-     *
-     * @param jarFile the JAR file to be used
-     * @return an instance of {@link IsolatedExtensionClassloader}
-     */
-    public static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull File jarFile) throws Exception {
         return buildClassLoader(new URL[]{jarFile.toURI().toURL()});
-    }
-
-    /**
-     * Creates an empty {@link IsolatedExtensionClassloader} with the default parameters.
-     *
-     * @return a default instance of {@link IsolatedExtensionClassloader}
-     */
-    public static @NotNull IsolatedExtensionClassloader buildClassLoader() {
-        return buildClassLoader(new URL[]{});
     }
 
     private static @NotNull IsolatedExtensionClassloader buildClassLoader(final @NotNull URL @NotNull [] classpath) {
