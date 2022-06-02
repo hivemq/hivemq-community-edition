@@ -280,7 +280,8 @@ public class HiveMQServer {
             try {
                 channel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             } catch (final Throwable e) {
-                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?", e);
+                log.error("Could not open data lock file.", e);
+                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
             }
             try {
                 fileLock = channel.tryLock();
