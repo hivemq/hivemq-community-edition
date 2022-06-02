@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hivemq.extensions.services.executor;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
-import org.junit.Before;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,23 +28,15 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class ManagedPluginExecutorShutdownHookTest {
 
-    @Mock
-    GlobalManagedExtensionExecutorService executorService;
-
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-    }
+    private final @NotNull GlobalManagedExtensionExecutorService executorService =
+            mock(GlobalManagedExtensionExecutorService.class);
 
     @Test
-    public void test_run() throws Exception {
-
+    public void test_run() {
         final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook =
                 new ManagedPluginExecutorShutdownHook(executorService, 60);
 
@@ -55,7 +46,6 @@ public class ManagedPluginExecutorShutdownHookTest {
         pluginExecutorShutdownHook.run();
 
         verify(executorService, times(1)).shutdownNow();
-
     }
 
     @Test
@@ -63,11 +53,11 @@ public class ManagedPluginExecutorShutdownHookTest {
         final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook =
                 new ManagedPluginExecutorShutdownHook(executorService, 60);
 
-        when(executorService.awaitTermination(anyLong(), any(TimeUnit.class))).thenThrow(
-                new InterruptedException("test"));
+        when(executorService.awaitTermination(
+                anyLong(),
+                any(TimeUnit.class))).thenThrow(new InterruptedException("test"));
         pluginExecutorShutdownHook.run();
 
         verify(executorService, times(1)).shutdownNow();
     }
-
 }

@@ -205,15 +205,12 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             throw new IllegalStateException("The extensions class loader must not be null at loading stage");
         }
 
-        // need wrapper to load static context and classes
-        try {
-            final IsolatedExtensionClassloader isolatedExtensionClassloader =
-                    new IsolatedExtensionClassloader(extensionClassloader, HiveMQServer.class.getClassLoader());
-            isolatedExtensionClassloader.loadClassesWithStaticContext();
-            isolatedExtensionClassloader.close();
-        } catch (final IOException e) {
-            // nothing to do
-        }
+        // need wrapper to load static context and classes (we cannot close the classloader here,
+        // since the lifecycle of the embedded extension ends outside this method call)
+        //noinspection resource
+        final IsolatedExtensionClassloader isolatedExtensionClassloader =
+                new IsolatedExtensionClassloader(extensionClassloader, HiveMQServer.class.getClassLoader());
+        isolatedExtensionClassloader.loadClassesWithStaticContext();
 
         try {
             staticInitializer.initialize(embeddedExtension.getId(), extensionClassloader);

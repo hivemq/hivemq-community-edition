@@ -17,34 +17,28 @@ package com.hivemq.extensions.services.executor;
 
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("NullabilityAnnotations")
 public class GlobalManagedExtensionExecutorServiceTest {
 
-    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
+    private @NotNull GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
-    @Mock
-    ShutdownHooks shutdownHooks;
+    private final @NotNull ShutdownHooks shutdownHooks = mock(ShutdownHooks.class);
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_KEEP_ALIVE_SECONDS.set(60);
         InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_SIZE.set(4);
 
         managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
-
     }
 
     @Test
