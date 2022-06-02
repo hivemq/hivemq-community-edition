@@ -526,8 +526,8 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private @NotNull HiveMQExtension getHiveMQExtension() {
-        final HiveMQExtension plugin = mock(HiveMQExtension.class);
-        when(plugin.getPriority()).thenReturn(10);
-        return plugin;
+        final HiveMQExtension extension = mock(HiveMQExtension.class);
+        when(extension.getPriority()).thenReturn(10);
+        return extension;
     }
 }

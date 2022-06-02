@@ -69,10 +69,8 @@ public class ExtensionPriorityComparatorTest {
 
     @NotNull
     private HiveMQExtension getHiveMQPlugin(final int priority) {
-        final HiveMQExtension plugin = mock(HiveMQExtension.class);
-        when(plugin.getPriority()).thenReturn(priority);
-        return plugin;
+        final HiveMQExtension extension = mock(HiveMQExtension.class);
+        when(extension.getPriority()).thenReturn(priority);
+        return extension;
     }
-
-
 }
