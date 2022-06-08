@@ -43,8 +43,8 @@ public class KeepAliveDisconnectService {
     private final AtomicInteger submittedTasks = new AtomicInteger();
 
     @Inject
-    public KeepAliveDisconnectService(@NotNull final MqttServerDisconnector mqttServerDisconnector,
-                                      @NotNull final ShutdownHooks shutdownHooks) {
+    public KeepAliveDisconnectService(final @NotNull MqttServerDisconnector mqttServerDisconnector,
+                                      final @NotNull ShutdownHooks shutdownHooks) {
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.disconnectBatch = InternalConfigurations.DISCONNECT_KEEP_ALIVE_BATCH;
         shutdownHooks.add(new HiveMQShutdownHook() {
