@@ -159,8 +159,19 @@ public class InternalConfigurations {
     // The bucket count for the payload persistence.
     public static final AtomicInteger PAYLOAD_PERSISTENCE_BUCKET_COUNT = new AtomicInteger(64);
 
+    public static final AtomicBoolean PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED = new AtomicBoolean(true);
+
     //The type of storage underlying the payload persistence (for example, rocks db or xodus).
     public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
+
+    //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
+
+    //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+    public static final AtomicInteger PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = new AtomicInteger(64);
+
+    //The block size used by rocksdb for the retained message persistence
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES = 32 * 1024; // 32 KB
 
     // If this flag is true, then on an attempt to decrement a reference counter that was already zero, a stacktrace will be logged to warn (by default logged to debug)
     public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
@@ -187,15 +198,6 @@ public class InternalConfigurations {
     public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
 
     public static final int SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS = 10000;
-
-    //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
-
-    //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-    public static final AtomicInteger PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = new AtomicInteger(64);
-
-    //The block size used by rocksdb for the retained message persistence
-    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES = 32 * 1024; // 32 KB
 
     // The period with which stats are written to the LOG file. Periodic writes are disabled when set to '0'.
     public static final int ROCKSDB_STATS_PERSIST_PERIOD_SEC = 0;
@@ -314,5 +316,4 @@ public class InternalConfigurations {
 
     public static final AtomicInteger AUTH_PROCESS_TIMEOUT_SEC = new AtomicInteger(30);
 
-    public static final AtomicBoolean PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED = new AtomicBoolean(true);
 }
