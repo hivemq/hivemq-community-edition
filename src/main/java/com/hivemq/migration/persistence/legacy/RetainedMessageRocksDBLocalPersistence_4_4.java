@@ -87,14 +87,6 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
 
     @NotNull
     @Override
-    protected Options getOptions() {
-        return new Options()
-                .setCreateIfMissing(true)
-                .setStatistics(new Statistics());
-    }
-
-    @NotNull
-    @Override
     protected Logger getLogger() {
         return log;
     }

@@ -76,13 +76,6 @@ public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersi
         return log;
     }
 
-    @Override
-    protected @NotNull Options getOptions() {
-        return new Options()
-                .setCreateIfMissing(true)
-                .setStatistics(new Statistics());
-    }
-
     @PostConstruct
     protected void postConstruct() {
         super.postConstruct();

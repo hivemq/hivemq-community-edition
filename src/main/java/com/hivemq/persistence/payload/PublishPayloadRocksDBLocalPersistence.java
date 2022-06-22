@@ -51,20 +51,17 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
     private final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
 
-    private final @NotNull CompressionType blobCompressionType;
     public static final String PERSISTENCE_VERSION = "040500_R";
     private final long memtableSize;
     private final boolean forceFlush;
 
-    @NotNull
-    private long[] rocksdbToMemTableSize;
+     private long @NotNull [] rocksdbToMemTableSize;
 
     @Inject
     public PublishPayloadRocksDBLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(
-                localPersistenceFileUtil,
+        super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
@@ -76,7 +73,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
-        this.blobCompressionType = InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE;
     }
 
     @NotNull
@@ -95,14 +91,17 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     }
 
     @Override
-    protected @NotNull Options getOptions() {
-        return new Options()
-                .setEnableBlobFiles(true)
-                .setEnableBlobGarbageCollection(true)
-                .setBlobCompressionType(blobCompressionType)
-                .setCreateIfMissing(true)
-                .setStatistics(new Statistics());
+    protected void configureOptions(final @NotNull Options options) {
+        if (InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_ENABLED) {
+            options.setEnableBlobFiles(true)
+                    .setEnableBlobGarbageCollection(true)
+                    .setCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION)
+                    .setBlobCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE)
+                    .setTargetFileSizeBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES)
+                    .setMaxBytesForLevelBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_MAX_BYTES_LEVEL_BASE);
+        }
     }
+
 
     @PostConstruct
     protected void postConstruct() {
