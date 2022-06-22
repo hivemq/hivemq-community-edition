@@ -69,8 +69,8 @@ public class HiveMQNettyBootstrap {
     public @NotNull ListenableFuture<List<ListenerStartupInformation>> bootstrapServer() {
 
         //Adding shutdown hook for graceful shutdown
-        final int shutdownTimeout = InternalConfigurations.EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT;
-        final int channelsShutdownTimeout = InternalConfigurations.CHANNEL_PERSISTENCE_SHUTDOWN_TIMEOUT;
+        final int shutdownTimeout = InternalConfigurations.EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT_SEC;
+        final int channelsShutdownTimeout = InternalConfigurations.CONNECTION_PERSISTENCE_SHUTDOWN_TIMEOUT_SEC;
         shutdownHooks.add(new NettyShutdownHook(
                 nettyConfiguration.getChildEventLoopGroup(),
                 nettyConfiguration.getParentEventLoopGroup(),
@@ -203,8 +203,8 @@ public class HiveMQNettyBootstrap {
      */
     private void setAdvancedOptions(final @NotNull ServerBootstrap b) {
 
-        final int sendBufferSize = InternalConfigurations.LISTENER_SOCKET_SEND_BUFFER_SIZE;
-        final int receiveBufferSize = InternalConfigurations.LISTENER_SOCKET_RECEIVE_BUFFER_SIZE;
+        final int sendBufferSize = InternalConfigurations.LISTENER_SOCKET_SEND_BUFFER_SIZE_BYTES;
+        final int receiveBufferSize = InternalConfigurations.LISTENER_SOCKET_RECEIVE_BUFFER_SIZE_BYTES;
 
         if (sendBufferSize > -1) {
             b.childOption(ChannelOption.SO_SNDBUF, sendBufferSize);
@@ -213,8 +213,8 @@ public class HiveMQNettyBootstrap {
             b.childOption(ChannelOption.SO_RCVBUF, receiveBufferSize);
         }
 
-        final int writeBufferHigh = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD;
-        final int writeBufferLow = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD;
+        final int writeBufferHigh = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES;
+        final int writeBufferLow = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES;
 
         final ClientWriteBufferProperties properties =
                 Validators.validateWriteBufferProperties(new ClientWriteBufferProperties(writeBufferHigh,

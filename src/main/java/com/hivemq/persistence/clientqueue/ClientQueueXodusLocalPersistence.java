@@ -123,7 +123,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
         retainedMessageMax = InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.get();
-        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.get();
+        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.get();
 
         this.serializer = new ClientQueuePersistenceSerializer(payloadPersistence);
         this.messageDroppedService = messageDroppedService;
@@ -134,7 +134,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         this.qos0MemoryLimit = getQos0MemoryLimit();
         this.clientQos0MemoryMap = new ConcurrentHashMap<>();
         this.sharedSubLastPacketWithoutIdCache = CacheBuilder.newBuilder()
-                .maximumSize(InternalConfigurations.SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE.get())
+                .maximumSize(InternalConfigurations.SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE_ENTRIES.get())
                 .expireAfterAccess(60, TimeUnit.SECONDS)
                 .build();
     }
@@ -1031,7 +1031,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     final MessageWithID message = serializer.deserializeValue(serializedValue);
                     if (message instanceof PUBREL) {
                         final PUBREL pubrel = (PUBREL) message;
-                        if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS) {
+                        if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
                             return true;
                         }
                         if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
@@ -1048,7 +1048,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
 
                     } else if (message instanceof PUBLISH) {
                         final PUBLISH publish = (PUBLISH) message;
-                        final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
+                        final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES_ENABLED;
                         final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
                         final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                         if (drop) {

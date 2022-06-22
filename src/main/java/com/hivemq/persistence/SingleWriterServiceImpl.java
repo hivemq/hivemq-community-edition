@@ -30,11 +30,10 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.SplittableRandom;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.hivemq.configuration.service.InternalConfigurations.SINGLE_WRITER_CHECK_SCHEDULE;
+import static com.hivemq.configuration.service.InternalConfigurations.SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC;
 
 /**
  * @author Lukas Brandl
@@ -79,7 +78,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
-        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
+        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.get();
 
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("single-writer-%d");
         singleWriterExecutor = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
@@ -119,7 +118,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
             } catch (final Exception e) {
                 log.error("Exception in single writer check task ", e);
             }
-        }, SINGLE_WRITER_CHECK_SCHEDULE.get(), SINGLE_WRITER_CHECK_SCHEDULE.get(), TimeUnit.MILLISECONDS);
+        }, SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(), SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(), TimeUnit.MILLISECONDS);
     }
 
     @VisibleForTesting

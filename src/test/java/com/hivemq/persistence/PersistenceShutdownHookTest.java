@@ -98,7 +98,7 @@ public class PersistenceShutdownHookTest {
         final SettableFuture<Void> voidSettableFuture = SettableFuture.create();
         when(retainedMessagePersistence.closeDB()).thenReturn(voidSettableFuture);
 
-        InternalConfigurations.PERSISTENCE_SHUTDOWN_TIMEOUT.set(1);
+        InternalConfigurations.PERSISTENCE_SHUTDOWN_TIMEOUT_SEC.set(1);
 
         final long start = System.currentTimeMillis();
         persistenceShutdownHook.run();

@@ -40,7 +40,7 @@ public class SingleWriterServiceImplTest {
     public void setUp() throws Exception {
         InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(4);
         InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.set(200);
-        InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(200);
+        InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.set(200);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
 
         singleWriterServiceImpl = new SingleWriterServiceImpl();

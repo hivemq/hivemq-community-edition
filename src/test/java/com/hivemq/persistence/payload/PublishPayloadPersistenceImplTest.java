@@ -52,10 +52,10 @@ public class PublishPayloadPersistenceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InternalConfigurations.PAYLOAD_CACHE_DURATION.set(1000L);
+        InternalConfigurations.PAYLOAD_CACHE_DURATION_MSEC.set(1000L);
         InternalConfigurations.PAYLOAD_CACHE_SIZE.set(1000);
-        InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL.set(1);
-        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.set(10000);
+        InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS.set(1);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.set(10000);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
 
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
@@ -186,7 +186,7 @@ public class PublishPayloadPersistenceImplTest {
     @Test
     public void init_persistence() throws Exception {
 
-        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.set(250);
+        InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.set(250);
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.set(4);
 
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);

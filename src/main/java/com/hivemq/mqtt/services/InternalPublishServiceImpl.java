@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import static com.hivemq.configuration.service.InternalConfigurations.ACKNOWLEDGE_AFTER_PERSIST;
+import static com.hivemq.configuration.service.InternalConfigurations.ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED;
 
 /**
  * @author Christoph Schäbel
@@ -67,7 +67,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.topicTree = topicTree;
         this.publishDistributor = publishDistributor;
-        this.acknowledgeAfterPersist = ACKNOWLEDGE_AFTER_PERSIST.get();
+        this.acknowledgeAfterPersist = ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED.get();
     }
 
     @NotNull

@@ -95,7 +95,7 @@ public class CleanUpService {
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.persistenceBucketCount = PERSISTENCE_BUCKET_COUNT.get();
-        this.cleanUpJobSchedule = CLEANUP_JOB_SCHEDULE.get();
+        this.cleanUpJobSchedule = INTERVAL_BETWEEN_CLEANUP_JOBS_SEC.get();
     }
 
     @PostConstruct

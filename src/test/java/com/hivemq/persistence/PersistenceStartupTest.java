@@ -74,7 +74,7 @@ public class PersistenceStartupTest {
     @Test
     public void test_shut_down_interrupts_environment_creation_at_timeout() throws InterruptedException {
 
-        InternalConfigurations.PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT.set(0);
+        InternalConfigurations.PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.set(0);
 
         persistenceStartup = new PersistenceStartup();
 
@@ -102,7 +102,7 @@ public class PersistenceStartupTest {
     @Test
     public void test_shut_down_interrupts_start_at_timeout() throws InterruptedException {
 
-        InternalConfigurations.PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT.set(0);
+        InternalConfigurations.PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.set(0);
 
         persistenceStartup = new PersistenceStartup();
 

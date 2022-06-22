@@ -52,7 +52,7 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
         if (msg instanceof PUBLISH) {
             final PUBLISH publish = (PUBLISH) msg;
             checkAndSetPublishExpiry(publish);
-            final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
+            final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES_ENABLED;
             final boolean isInflight = (publish.getQoS() == QoS.EXACTLY_ONCE) && publish.isDuplicateDelivery();
             final boolean drop = (publish.getMessageExpiryInterval() == 0) && (!isInflight || expireInflight);
             if (drop) {
@@ -62,7 +62,7 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
         } else if (msg instanceof PUBREL) {
             final PUBREL pubrel = (PUBREL) msg;
             checkAndSetPubrelExpiry(pubrel);
-            final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS;
+            final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED;
             final boolean drop = (pubrel.getExpiryInterval() != null) && (pubrel.getExpiryInterval() == 0) && expireInflight;
             if (drop) {
                 ctx.fireUserEventTriggered(new PubrelDroppedEvent(pubrel));

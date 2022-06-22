@@ -54,7 +54,7 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
     @Inject
     public ConnectionPersistenceImpl() {
         shutdownLegacy = InternalConfigurations.NETTY_SHUTDOWN_LEGACY;
-        shutdownPartitionSize = InternalConfigurations.NETTY_SHUTDOWN_PARTITION_SIZE;
+        shutdownPartitionSize = InternalConfigurations.NETTY_COUNT_OF_CONNECTIONS_IN_SHUTDOWN_PARTITION;
         interrupted = new AtomicBoolean(false);
         clientConnectionMap = new ConcurrentHashMap<>();
         serverChannelMap = new ConcurrentHashMap<>();

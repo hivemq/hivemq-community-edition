@@ -24,7 +24,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
-import com.hivemq.extensions.services.publish.RetainedPublishImpl;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.AbstractPersistence;
 import com.hivemq.persistence.ProducerQueues;
@@ -183,7 +182,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @Override
     public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
             @NotNull ChunkCursor cursor) {
-        return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY,
+        return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) ->
                         // actual single writer call

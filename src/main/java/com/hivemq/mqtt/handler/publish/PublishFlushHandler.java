@@ -41,7 +41,7 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
 
     public PublishFlushHandler(final @NotNull MetricsHolder metricsHolder) {
         channelNotWritable = metricsHolder.getChannelNotWritableCounter();
-        maxWritesBeforeFlush = InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.get();
+        maxWritesBeforeFlush = InternalConfigurations.COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH.get();
     }
 
     @Override

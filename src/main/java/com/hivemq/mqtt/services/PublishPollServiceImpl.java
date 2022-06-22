@@ -61,7 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_POLL_BATCH_MEMORY;
+import static com.hivemq.configuration.service.InternalConfigurations.PUBLISH_POLL_BATCH_SIZE_BYTES;
 
 @LazySingleton
 public class PublishPollServiceImpl implements PublishPollService {
@@ -148,7 +148,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             return;
         }
 
-        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readNew(client, false, messageIds, PUBLISH_POLL_BATCH_MEMORY);
+        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readNew(client, false, messageIds, PUBLISH_POLL_BATCH_SIZE_BYTES);
 
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
@@ -197,7 +197,7 @@ public class PublishPollServiceImpl implements PublishPollService {
 
     @Override
     public void pollInflightMessages(final @NotNull String client, final @NotNull Channel channel) {
-        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, PUBLISH_POLL_BATCH_MEMORY, pollMessageLimit(channel));
+        final ListenableFuture<ImmutableList<MessageWithID>> future = clientQueuePersistence.readInflight(client, PUBLISH_POLL_BATCH_SIZE_BYTES, pollMessageLimit(channel));
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final ImmutableList<MessageWithID> messages) {
@@ -300,7 +300,7 @@ public class PublishPollServiceImpl implements PublishPollService {
             return;
         }
 
-        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readShared(sharedSubscription, pollMessageLimit(channel), PUBLISH_POLL_BATCH_MEMORY);
+        final ListenableFuture<ImmutableList<PUBLISH>> future = clientQueuePersistence.readShared(sharedSubscription, pollMessageLimit(channel), PUBLISH_POLL_BATCH_SIZE_BYTES);
 
         Futures.addCallback(future, new FutureCallback<>() {
             @Override

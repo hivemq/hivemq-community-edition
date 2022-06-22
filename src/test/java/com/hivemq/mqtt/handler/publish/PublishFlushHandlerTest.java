@@ -110,7 +110,7 @@ public class PublishFlushHandlerTest {
     public void whenMaxPublishesBeforeFlushIsOne_thenFlushIsTriggeredAfterEachPublish() {
         when(channel.isWritable()).thenReturn(true);
         when(channel.isActive()).thenReturn(true);
-        InternalConfigurations.MAX_PUBLISHES_BEFORE_FLUSH.set(1);
+        InternalConfigurations.COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH.set(1);
         publishFlushHandler = new PublishFlushHandler(metricsHolder);
         publishFlushHandler.handlerAdded(channelHandlerContext);
         final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withTopic("topic").withHivemqId("hivemqId").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withPayload(new byte[100]).build();

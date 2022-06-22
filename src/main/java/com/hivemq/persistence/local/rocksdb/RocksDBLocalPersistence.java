@@ -109,11 +109,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
 
-            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
-            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
-            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
-            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
-            options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
+            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
+            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
+            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE_BYTES);
+            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILES_COUNT);
+            options.setStatsHistoryBufferSize(InternalConfigurations.OCKSDB_STATS_HISTORY_BUFFER_SIZE_BYTES);
 
             for (int i = 0; i < bucketCount; i++) {
                 final File persistenceFile = new File(persistenceFolder, name + "_" + i);
@@ -149,11 +149,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
 
-            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
-            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD);
-            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE);
-            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILE_NUMBER);
-            options.setStatsHistoryBufferSize(InternalConfigurations.ROCKSDB_STATS_HISTORY_BUFFER_SIZE);
+            options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
+            options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
+            options.setMaxLogFileSize(InternalConfigurations.ROCKSDB_MAX_LOG_FILE_SIZE_BYTES);
+            options.setKeepLogFileNum(InternalConfigurations.ROCKSDB_LOG_FILES_COUNT);
+            options.setStatsHistoryBufferSize(InternalConfigurations.OCKSDB_STATS_HISTORY_BUFFER_SIZE_BYTES);
 
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
             final CountDownLatch counter = new CountDownLatch(bucketCount);

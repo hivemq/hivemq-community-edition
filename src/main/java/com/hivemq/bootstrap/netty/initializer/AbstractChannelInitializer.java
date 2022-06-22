@@ -53,7 +53,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         this.channelDependencies = channelDependencies;
         this.listener = listener;
         final boolean incomingEnabled = channelDependencies.getRestrictionsConfigurationService().incomingLimit() > 0;
-        final boolean outgoingEnabled = InternalConfigurations.OUTGOING_BANDWIDTH_THROTTLING_DEFAULT > 0;
+        final boolean outgoingEnabled = InternalConfigurations.OUTGOING_BANDWIDTH_THROTTLING_DEFAULT_BYTES_PER_SEC > 0;
         legacyNettyShutdown = InternalConfigurations.NETTY_SHUTDOWN_LEGACY;
         throttlingEnabled = incomingEnabled || outgoingEnabled;
     }

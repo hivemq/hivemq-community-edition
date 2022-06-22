@@ -172,7 +172,7 @@ public class MessageExpiryHandlerTest {
 
     @Test
     public void test_message_expired_qos_2_dup() throws Exception {
-        InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES = true;
+        InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES_ENABLED = true;
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.EXACTLY_ONCE);
         publish.setMessageExpiryInterval(1);
         publish.setDuplicateDelivery(true);
@@ -197,7 +197,7 @@ public class MessageExpiryHandlerTest {
 
     @Test
     public void test_pubrel_expired() throws InterruptedException {
-        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS = true;
+        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = true;
 
         final PUBREL pubrel = new PUBREL(1);
         pubrel.setExpiryInterval(0L);
@@ -221,7 +221,7 @@ public class MessageExpiryHandlerTest {
 
     @Test
     public void test_pubrel_dont_expired() throws InterruptedException {
-        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS = false;
+        InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
         final PUBREL pubrel = new PUBREL(1);
         pubrel.setExpiryInterval(0L);
         pubrel.setPublishTimestamp(System.currentTimeMillis());

@@ -136,7 +136,7 @@ public class PublishPollServiceImplTest {
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
 
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
-        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE = 50;
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
 
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 

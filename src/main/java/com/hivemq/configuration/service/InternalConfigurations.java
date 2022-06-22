@@ -50,14 +50,14 @@ public class InternalConfigurations {
      *****************/
 
     // The "persistence shutdown grace period" represents the time span,
-    // in which single writer tasks are still processed after the persistence shutdown hook was called (in milliseconds).
-    public static final AtomicInteger PERSISTENCE_SHUTDOWN_GRACE_PERIOD = new AtomicInteger(2000);
+    // in which single writer tasks are still processed after the persistence shutdown hook was called.
+    public static final AtomicInteger PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC = new AtomicInteger(2000);
 
-    //timeout to wait in seconds for persistence shutdown to finish on HiveMQ shutdown
-    public static final AtomicInteger PERSISTENCE_SHUTDOWN_TIMEOUT = new AtomicInteger(300);
+    //timeout to wait for persistence shutdown to finish on HiveMQ shutdown
+    public static final AtomicInteger PERSISTENCE_SHUTDOWN_TIMEOUT_SEC = new AtomicInteger(300);
 
-    //timeout to wait in seconds for persistence startup executors shutdown to finish on HiveMQ shutdown
-    public static final AtomicInteger PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT = new AtomicInteger(300);
+    //timeout to wait for persistence startup executors shutdown to finish on HiveMQ shutdown
+    public static final AtomicInteger PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC = new AtomicInteger(300);
 
     //the factor to multiply core size with to calculate thread count for initializing persistences
     public static final AtomicInteger PERSISTENCE_STARTUP_THREAD_POOL_SIZE = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_FOUR);
@@ -65,10 +65,10 @@ public class InternalConfigurations {
     public static final AtomicInteger PERSISTENCE_BUCKET_COUNT = new AtomicInteger(64);
     public static final AtomicInteger SINGLE_WRITER_THREAD_POOL_SIZE = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
     public static final AtomicInteger SINGLE_WRITER_CREDITS_PER_EXECUTION = new AtomicInteger(65);
-    public static final AtomicInteger SINGLE_WRITER_CHECK_SCHEDULE = new AtomicInteger(500);
+    public static final AtomicInteger SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC = new AtomicInteger(500);
 
     public static final AtomicInteger PERSISTENCE_CLOSE_RETRIES = new AtomicInteger(500);
-    public static final AtomicInteger PERSISTENCE_CLOSE_RETRY_INTERVAL = new AtomicInteger(100);
+    public static final AtomicInteger PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC = new AtomicInteger(100);
 
     //max amount of subscriptions to pull from the peristence for extension iterate chunk
     public static final int PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE = 2000;
@@ -77,7 +77,7 @@ public class InternalConfigurations {
     public static final int PERSISTENCE_CLIENT_SESSIONS_MAX_CHUNK_SIZE = 2000;
 
     //max amount of memory for retained messages to pull from the peristence for extension iterate chunk
-    public static final int PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY = 10485760; //10 MByte
+    public static final int PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES = 10485760; //10 MByte
 
     //The threshold at which the topic tree starts to map entries instead of storing them in an array
     public static final AtomicInteger TOPIC_TREE_MAP_CREATION_THRESHOLD = new AtomicInteger(16);
@@ -85,49 +85,45 @@ public class InternalConfigurations {
     public static final AtomicInteger QOS_0_MEMORY_HARD_LIMIT_DIVISOR = new AtomicInteger(4);
 
     // The configuration for qos 0 memory limit per client, must be greater than 0.
-    public static final AtomicInteger QOS_0_MEMORY_LIMIT_PER_CLIENT = new AtomicInteger(1024 * 1024 * 5);
+    public static final AtomicInteger QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES = new AtomicInteger(1024 * 1024 * 5);
 
     // The configuration for shared sub caching of publish without packet-id
-    public static final AtomicInteger SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE = new AtomicInteger(10000);
-
-    // The  expiry in seconds for entries of the cache for the first publish without packetId for shared subscriptions
-    public static final AtomicInteger SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_EXPIRY_SECONDS = new AtomicInteger(60);
+    public static final AtomicInteger SHARED_SUBSCRIPTION_WITHOUT_PACKET_ID_CACHE_MAX_SIZE_ENTRIES = new AtomicInteger(10000);
 
     // The amount of qos 0 messages that are queued if the channel is not writable
     public static final AtomicInteger NOT_WRITABLE_QUEUE_SIZE = new AtomicInteger(1000);
 
     // The limit of unacknowledged messages that hivemq will handle, regardless of the client receive maximum
-    public static int MAX_INFLIGHT_WINDOW_SIZE = 50;
+    public static int MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
 
-
-    //The maximum allowed size of the passed value for the ConnectionAttributeStore in bytes
-    public static final int CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE = 10240; //10Kb
+    //The maximum allowed size of the passed value for the ConnectionAttributeStore
+    public static final int CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE_BYTES = 10240; //10Kb
 
     // The configuration for xodus persistence environment jmx
     public static final boolean XODUS_PERSISTENCE_ENVIRONMENT_JMX = false;
     // The configuration for xodus persistence environment garbage collection type
     public static final GCType XODUS_PERSISTENCE_ENVIRONMENT_GC_TYPE = GCType.DELETE;
-    // The configuration for xodus persistence environment garbage collection deletion delay in ms
-    public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY = 60000;
-    // The configuration for xodus persistence environment garbage collection run period in ms
-    public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD = 30000;
+    // The configuration for xodus persistence environment garbage collection deletion delay
+    public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY_MSEC = 60000;
+    // The configuration for xodus persistence environment garbage collection run period
+    public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD_MSEC = 30000;
     // The configuration for xodus persistence environment garbage collection files interval
     public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_FILES_INTERVAL = 1;
     // The configuration for xodus persistence environment garbage collection min age
     public static final int XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE = 2;
-    // The configuration for xodus persistence environment sync period in ms
-    public static final int XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD = 1000;
+    // The configuration for xodus persistence environment sync period
+    public static final int XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD_MSEC = 1000;
     // The configuration for xodus persistence environment durable writes
-    public static final boolean XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES = false;
-    // The the memory limit used by the xodus environments in percentage of the JVM heap (Xmx).
-    public static final int XODUS_PERSISTENCE_LOG_MEMORY_PERCENTAGE = 25;
+    public static final boolean XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES_ENABLED = false;
+    // The memory limit used by the xodus environments in percentage of the JVM heap (Xmx).
+    public static final int XODUS_PERSISTENCE_LOG_MEMORY_HEAP_PERCENTAGE = 25;
 
 
     // The amount of publishes that are polled per batch
     public static int PUBLISH_POLL_BATCH_SIZE = 50;
 
-    // The amount of bytes that are polled per batch
-    public static final int PUBLISH_POLL_BATCH_MEMORY = 1024 * 1024 * 5; // 5Mb
+    // The amount of bytes that are polled per batch (one publish min)
+    public static final int PUBLISH_POLL_BATCH_SIZE_BYTES = 1024 * 1024 * 5; // 5Mb
 
     // The amount of qos > 0 retained messages that are queued
     public static final AtomicInteger RETAINED_MESSAGE_QUEUE_SIZE = new AtomicInteger(100_000);
@@ -141,32 +137,32 @@ public class InternalConfigurations {
     //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
     public static final int RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION = 64;
 
-    //The block size used by rocksdb for the retained message persistence in bytes
-    public static final int RETAINED_MESSAGE_BLOCK_SIZE = 32 * 1024;
+    //The block size used by rocksdb for the retained message persistence
+    public static final int RETAINED_MESSAGE_BLOCK_SIZE_BYTES = 32 * 1024;
 
     /* ************************
      *   Payload Persistence  *
      **************************/
 
-    // The time that entries are cached in memory, in the payload persistence in milliseconds.
-    public static final AtomicLong PAYLOAD_CACHE_DURATION = new AtomicLong(10000);
-    // The maximum amount of entries that are cached in memory, in the payload persistence.
+    // The time that entries are cached in memory by the payload persistence.
+    public static final AtomicLong PAYLOAD_CACHE_DURATION_MSEC = new AtomicLong(10000);
+    // The maximum amount of entries that are cached in memory by the payload persistence.
     public static final AtomicInteger PAYLOAD_CACHE_SIZE = new AtomicInteger(10000);
     // The maximum amount of threads that can access the cache at the same time.
-    public static final AtomicInteger PAYLOAD_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(16);
-    // The schedule in which the cleanup for payloads that are not referenced anymore are executed.
-    public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE = new AtomicInteger(250);
-    // The amount of time that a payload is preserved after the last reference was removed. In case the same payload is published again.
-    public static final AtomicLong PAYLOAD_PERSISTENCE_CLEANUP_DELAY = new AtomicLong(2000);
+    public static final AtomicInteger PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS = new AtomicInteger(16);
+    // An interval of time between two consecutively executed payload cleanups for payloads that are not referenced anymore.
+    public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC = new AtomicInteger(250);
+    // The amount of time that a payload is preserved after the last reference was removed in case the same payload is published again.
+    public static final AtomicLong PAYLOAD_PERSISTENCE_CLEANUP_DELAY_MSEC = new AtomicLong(2000);
     // The amount of threads in the cleanup job thread pool.
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_THREADS = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
     // The bucket count for the payload persistence.
     public static final AtomicInteger PAYLOAD_PERSISTENCE_BUCKET_COUNT = new AtomicInteger(64);
 
-    //The configuration if rocks db is used instead of xodus for payload persistence.
+    //The type of storage underlying the payload persistence (for example, rocks db or xodus).
     public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
-    // In case we tried to decrement a reference count that was already zero, a stacktrace will be logged to warn, if this flag is true (default is debug)
+    // If this flag is true, then on an attempt to decrement a reference counter that was already zero, a stacktrace will be logged to warn (by default logged to debug)
     public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
 
 
@@ -174,37 +170,23 @@ public class InternalConfigurations {
      *     Misc     *
      *******************/
 
-    /**
-     * The concurrency level of the shared subscription cache
-     */
     public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
-    /**
-     * The concurrency level of the shared subscriber service cache
-     */
+
     public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
 
-    public static final AtomicInteger CLEANUP_JOB_SCHEDULE = new AtomicInteger(4);
+    public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
 
     public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
 
     public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
 
-    /**
-     * The amount of clean up job tasks that are processed at the same time, in each schedule interval
-     */
-    public static final AtomicBoolean ACKNOWLEDGE_AFTER_PERSIST = new AtomicBoolean(true);
+    public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
 
     public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
 
-    /**
-     * The live time of a entry in the shared subscription cache in milliseconds
-     */
-    public static final long SHARED_SUBSCRIPTION_CACHE_DURATION = 1000;
+    public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
 
-    /**
-     * The maximum of entries in the shared subscription cache
-     */
-    public static final int SHARED_SUBSCRIPTION_CACHE_SIZE = 10000;
+    public static final int SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS = 10000;
 
     //The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
     public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
@@ -212,79 +194,56 @@ public class InternalConfigurations {
     //The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
     public static final AtomicInteger PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = new AtomicInteger(64);
 
-    //The block size used by rocksdb for the retained message persistence in bytes
-    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE = 32 * 1024;
+    //The block size used by rocksdb for the retained message persistence
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES = 32 * 1024; // 32 KB
 
-    // The period with which stats are written to the LOG file in seconds. Periodic writes are disabled when set to '0'.
-    public static final int ROCKSDB_STATS_PERSIST_PERIOD = 0;
+    // The period with which stats are written to the LOG file. Periodic writes are disabled when set to '0'.
+    public static final int ROCKSDB_STATS_PERSIST_PERIOD_SEC = 0;
 
-    // The maximum size of each LOG file in bytes
-    public static final int ROCKSDB_MAX_LOG_FILE_SIZE = 1024 * 500; // 500KB
+    // The maximum size of each LOG file
+    public static final int ROCKSDB_MAX_LOG_FILE_SIZE_BYTES = 1024 * 500; // 500KB
 
     // The maximum amount of LOG files per RocksDB (bucket)
-    public static final int ROCKSDB_LOG_FILE_NUMBER = 2;
+    public static final int ROCKSDB_LOG_FILES_COUNT = 2;
 
     // The maximum size stats history buffer that is used to dump stats to the LOG file
-    public static final int ROCKSDB_STATS_HISTORY_BUFFER_SIZE = 64 * 1024; // 64KB
+    public static final int OCKSDB_STATS_HISTORY_BUFFER_SIZE_BYTES = 64 * 1024; // 64KB
 
-    /**
-     * The maximum number of publishes until a flush is triggered on the Netty pipeline.
-     */
-    public static final AtomicInteger MAX_PUBLISHES_BEFORE_FLUSH = new AtomicInteger(128);
+    public static final AtomicInteger COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH = new AtomicInteger(128);
 
 
-    /**
-     * The live time of a entry in the shared subscriber cache in milliseconds
-     */
-    public static final long SHARED_SUBSCRIBER_CACHE_DURATION = 1000;
+    public static final long SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC = 1000;
 
-    /**
-     * The maximum of a entries in the shared subscriber cache
-     */
-    public static final int SHARED_SUBSCRIBER_CACHE_SIZE = 10000;
+    public static final int SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS = 10000;
 
     public static final int CLEANUP_JOB_PARALLELISM = 1;
 
     // set to true to close all client connections at netty-event-loop shutdown
     public static final boolean NETTY_SHUTDOWN_LEGACY = false;
-    public static final int NETTY_SHUTDOWN_PARTITION_SIZE = 100;
+    public static final int NETTY_COUNT_OF_CONNECTIONS_IN_SHUTDOWN_PARTITION = 100;
 
     public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
 
     public static final long DISCONNECT_KEEP_ALIVE_BATCH = 100;
 
-    public static final double CONNECT_THROTTLING_INFLIGHT_TO_QUEUE_RATIO = 2.0;
-    public static final double CONNECT_THROTTLING_FEEDBACK_TO_TIME_BETWEEN_RATIO = 2.0;
-    public static final double CONNECT_THROTTLING_TIMEOUT_FACTOR = 2.0;
+    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT_SEC = 60;
+    public static final int CONNECTION_PERSISTENCE_SHUTDOWN_TIMEOUT_SEC = 180;
 
-    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT = 60;
-    public static final int CHANNEL_PERSISTENCE_SHUTDOWN_TIMEOUT = 180;
-
-    public static final boolean DROP_MESSAGES_QOS_0 = true;
+    public static final boolean DROP_MESSAGES_QOS_0_ENABLED = true;
 
 
-    public static final int WILL_DELAY_CHECK_SCHEDULE = 1;
+    public static final int WILL_DELAY_CHECK_INTERVAL_SEC = 1;
 
 
-    public static final int LISTENER_SOCKET_RECEIVE_BUFFER_SIZE = -1;
-    public static final int LISTENER_SOCKET_SEND_BUFFER_SIZE = -1;
-    public static final int LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD = 65536; // 64Kb
-    public static final int LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD = 32768;  // 32Kb
+    public static final int LISTENER_SOCKET_RECEIVE_BUFFER_SIZE_BYTES = -1;
+    public static final int LISTENER_SOCKET_SEND_BUFFER_SIZE_BYTES = -1;
+    public static final int LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES = 65536; // 64Kb
+    public static final int LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES = 32768;  // 32Kb
 
-    /**
-     * the outgoing bandwidth throttling config in bytes per second.
-     */
-    public static final int OUTGOING_BANDWIDTH_THROTTLING_DEFAULT = 0; // unlimited
+    public static final int OUTGOING_BANDWIDTH_THROTTLING_DEFAULT_BYTES_PER_SEC = 0; // unlimited
 
-    /**
-     * publishes are removed after the message expiry even if they are already in-flight.
-     */
-    public static boolean EXPIRE_INFLIGHT_MESSAGES = false;
-
-    /**
-     * pubrels are removed after the message expiry.
-     */
-    public static boolean EXPIRE_INFLIGHT_PUBRELS = false;
+    public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
+    public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
 
 
     /* *****************
