@@ -45,7 +45,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD_ENABLED;
-import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD_INTERVAL;
+import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD_INTERVAL_SEC;
 
 /**
  * @author Christoph Schäbel
@@ -88,7 +88,7 @@ public class SslContextStore {
             executorService.schedule(new SslContextFirstTimeRunnable(tls,
                             sslContextMap,
                             checksumMap,
-                            SSL_RELOAD_INTERVAL,
+                            SSL_RELOAD_INTERVAL_SEC,
                             executorService,
                             sslUtil),
                     0,
@@ -106,7 +106,7 @@ public class SslContextStore {
             new SslContextFirstTimeRunnable(tls,
                     sslContextMap,
                     checksumMap,
-                    SSL_RELOAD_INTERVAL,
+                    SSL_RELOAD_INTERVAL_SEC,
                     executorService,
                     sslUtil).run();
         }

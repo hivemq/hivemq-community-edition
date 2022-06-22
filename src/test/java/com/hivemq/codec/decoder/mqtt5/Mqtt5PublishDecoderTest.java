@@ -166,7 +166,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
 
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
-        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(47);
+        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.set(47);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         clientConnection = new ClientConnection(channel, null);
@@ -197,7 +197,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
 
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
-        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(100);
+        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.set(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         clientConnection = new ClientConnection(channel, null);
@@ -1163,7 +1163,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Test
     public void decode_noTopicAliasFound_returnsNull() {
-        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.set(1024 * 1024 * 200);
+        InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.set(1024 * 1024 * 200);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);

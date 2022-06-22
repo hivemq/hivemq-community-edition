@@ -59,8 +59,8 @@ public class MqttConnackerImpl implements MqttConnacker {
     @Inject
     public MqttConnackerImpl(final @NotNull EventLog eventLog) {
         this.eventLog = eventLog;
-        connackWithReasonCode = InternalConfigurations.CONNACK_WITH_REASON_CODE.get();
-        connackWithReasonString = InternalConfigurations.CONNACK_WITH_REASON_STRING.get();
+        connackWithReasonCode = InternalConfigurations.CONNACK_WITH_REASON_CODE_ENABLED.get();
+        connackWithReasonString = InternalConfigurations.CONNACK_WITH_REASON_STRING_ENABLED.get();
     }
 
     @Override

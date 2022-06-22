@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.configuration.service.InternalConfigurations.PLUGIN_TASK_QUEUE_EXECUTOR_COUNT;
+import static com.hivemq.configuration.service.InternalConfigurations.EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT;
 
 /**
  * @author Christoph Schäbel
@@ -44,7 +44,7 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
             final @NotNull Provider<PluginTaskExecutor> taskExecutorProvider,
             final @NotNull ShutdownHooks shutdownHooks) {
 
-        taskExecutorCount = PLUGIN_TASK_QUEUE_EXECUTOR_COUNT.get();
+        taskExecutorCount = EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.get();
 
         taskExecutors = new PluginTaskExecutor[taskExecutorCount];
 

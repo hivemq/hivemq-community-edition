@@ -67,7 +67,7 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
     public void cleanUp() throws InterruptedException {
         LogbackCapturingAppender.Factory.cleanUp();
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
-        InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH.set(true);
+        InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.set(true);
         persistence.closeDB();
         persistenceStartup.finish();
     }
@@ -199,7 +199,7 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         persistenceStartup.finish();
         persistence.closeDB();
         persistenceStartup = new PersistenceStartup();
-        InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH.set(false);
+        InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.set(false);
         persistence = new PublishPayloadRocksDBLocalPersistence(localPersistenceFileUtil, persistenceStartup);
         persistence.start();
 

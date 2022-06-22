@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-import static com.hivemq.configuration.service.InternalConfigurations.MANAGED_PLUGIN_EXECUTOR_SHUTDOWN_TIMEOUT;
+import static com.hivemq.configuration.service.InternalConfigurations.MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC;
 
 /**
  * @author Florian Limpöck
@@ -57,8 +57,8 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
 
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("managed-extension-executor-%d");
 
-        final int corePoolSize = InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_SIZE.get();
-        final int keepAlive = InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_KEEP_ALIVE_SECONDS.get();
+        final int corePoolSize = InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_THREADS_COUNT.get();
+        final int keepAlive = InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_KEEP_ALIVE_SEC.get();
 
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
         log.debug("Set extension executor thread pool size to {}", corePoolSize);
@@ -71,7 +71,7 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
         //for instrumentation (metrics)
         scheduledExecutorService = scheduledThreadPoolExecutor;
 
-        shutdownHooks.add(new ManagedPluginExecutorShutdownHook(this, MANAGED_PLUGIN_EXECUTOR_SHUTDOWN_TIMEOUT.get()));
+        shutdownHooks.add(new ManagedPluginExecutorShutdownHook(this, MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC.get()));
     }
 
     public int getCorePoolSize() {

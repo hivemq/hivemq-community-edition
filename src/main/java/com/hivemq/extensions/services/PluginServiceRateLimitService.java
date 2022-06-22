@@ -21,7 +21,7 @@ import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededExceptio
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.hivemq.configuration.service.InternalConfigurations.PLUGIN_SERVICE_RATE_LIMIT;
+import static com.hivemq.configuration.service.InternalConfigurations.EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC;
 
 /**
  * @author Lukas Brandl
@@ -39,7 +39,7 @@ public class PluginServiceRateLimitService {
     private final int rateLimit;
 
     public PluginServiceRateLimitService() {
-        rateLimit = PLUGIN_SERVICE_RATE_LIMIT.get();
+        rateLimit = EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.get();
     }
 
     static {

@@ -58,7 +58,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         this.mqttConnacker = mqttConnacker;
         this.clientIds = clientIds;
         validateUTF8 = configurationService.securityConfiguration().validateUTF8();
-        maxUserPropertiesLength = InternalConfigurations.USER_PROPERTIES_MAX_SIZE;
+        maxUserPropertiesLength = InternalConfigurations.USER_PROPERTIES_MAX_SIZE_BYTES;
         maxSessionExpiryInterval = configurationService.mqttConfiguration().maxSessionExpiryInterval();
         allowAssignedClientId = configurationService.securityConfiguration().allowServerAssignedClientId();
     }

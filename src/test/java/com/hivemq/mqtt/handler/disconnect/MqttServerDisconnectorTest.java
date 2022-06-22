@@ -58,8 +58,8 @@ public class MqttServerDisconnectorTest {
 
     @After
     public void tearDown() throws Exception {
-        InternalConfigurations.DISCONNECT_WITH_REASON_CODE.set(true);
-        InternalConfigurations.DISCONNECT_WITH_REASON_STRING.set(true);
+        InternalConfigurations.DISCONNECT_WITH_REASON_CODE_ENABLED.set(true);
+        InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.set(true);
     }
 
     @Test
@@ -105,8 +105,8 @@ public class MqttServerDisconnectorTest {
     @Test
     public void test_disconnect_channel_without_reason_code_and_reason_string() throws InterruptedException {
 
-        InternalConfigurations.DISCONNECT_WITH_REASON_CODE.set(false);
-        InternalConfigurations.DISCONNECT_WITH_REASON_STRING.set(false);
+        InternalConfigurations.DISCONNECT_WITH_REASON_CODE_ENABLED.set(false);
+        InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.set(false);
 
         mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
@@ -166,7 +166,7 @@ public class MqttServerDisconnectorTest {
     @Test
     public void test_disconnect_channel_with_reason_code_and_reason_string_not_wanted() throws InterruptedException {
 
-        InternalConfigurations.DISCONNECT_WITH_REASON_STRING.set(false);
+        InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.set(false);
 
         mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 

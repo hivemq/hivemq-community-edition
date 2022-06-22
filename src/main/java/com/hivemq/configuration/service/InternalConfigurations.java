@@ -251,18 +251,15 @@ public class InternalConfigurations {
      *******************/
 
     public static final boolean SSL_RELOAD_ENABLED = true;
-    public static final int SSL_RELOAD_INTERVAL = 10;
+    public static final int SSL_RELOAD_INTERVAL_SEC = 10;
 
-    /**
-     * Executes a Garbage collection after the initialization of HiveMQ
-     */
-    public static final boolean GC_AFTER_STARTUP = true;
+    public static final boolean GC_AFTER_STARTUP_ENABLED = true;
 
     /* *****************
      *      Metrics     *
      *******************/
 
-    //Toggles for system metrics via oshi
+    //Toggles for system metrics via OSHI
     public static final boolean SYSTEM_METRICS_ENABLED = true;
 
     // register metrics for jmx reporting on startup if enabled
@@ -272,98 +269,50 @@ public class InternalConfigurations {
      *      MQTT 5     *
      *******************/
 
-    /**
-     * the global memory hard limit topic aliases may use in bytes.
-     */
-    public static final AtomicInteger TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT = new AtomicInteger(1024 * 1024 * 200); //200Mb
+    public static final AtomicInteger TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES = new AtomicInteger(1024 * 1024 * 200); //200Mb
+    public static final AtomicInteger TOPIC_ALIAS_GLOBAL_MEMORY_SOFT_LIMIT_BYTES = new AtomicInteger(1024 * 1024 * 50); //50Mb
 
-    /**
-     * the global memory soft limit topic aliases may use in bytes.
-     */
-    public static final AtomicInteger TOPIC_ALIAS_GLOBAL_MEMORY_SOFT_LIMIT = new AtomicInteger(1024 * 1024 * 50); //50Mb
-    /**
-     * Disconnect Client with reason code?
-     */
-    public static final AtomicBoolean DISCONNECT_WITH_REASON_CODE = new AtomicBoolean(true);
+    public static final AtomicBoolean DISCONNECT_WITH_REASON_CODE_ENABLED = new AtomicBoolean(true);
+    public static final AtomicBoolean DISCONNECT_WITH_REASON_STRING_ENABLED = new AtomicBoolean(true);
 
-    /**
-     * Disconnect Client with reason string?
-     */
-    public static final AtomicBoolean DISCONNECT_WITH_REASON_STRING = new AtomicBoolean(true);
+    public static final AtomicBoolean CONNACK_WITH_REASON_CODE_ENABLED = new AtomicBoolean(true);
+    public static final AtomicBoolean CONNACK_WITH_REASON_STRING_ENABLED = new AtomicBoolean(true);
 
-    /**
-     * Send CONNACK with reason code?
-     */
-    public static final AtomicBoolean CONNACK_WITH_REASON_CODE = new AtomicBoolean(true);
+    public static final int USER_PROPERTIES_MAX_SIZE_BYTES = 1024 * 1024 * 5; //5Mb
 
-    /**
-     * Send CONNACK with reason string?
-     */
-    public static final AtomicBoolean CONNACK_WITH_REASON_STRING = new AtomicBoolean(true);
-
-    /**
-     * The maximum allowed size of the user properties in bytes
-     */
-    public static final int USER_PROPERTIES_MAX_SIZE = 1024 * 1024 * 5; //5Mb
-
-
-    /**
-     * Log the clients reason string when they send a DISCONNECT?
-     */
-    public static final boolean LOG_CLIENT_REASON_STRING_ON_DISCONNECT = true;
+    public static final boolean LOG_CLIENT_REASON_STRING_ON_DISCONNECT_ENABLED = true;
 
     /* *****************
      *    Statistics   *
      *******************/
 
-    /**
-     * Interval in minutes for the anonymous usage statistics
-     */
-    public static final int STATISTICS_SEND_EVERY_MINUTES = 1440; //24h
+    public static final int USAGE_STATISTICS_SEND_INTERVAL_MINUTES = 1440; //24h
 
 
     /* ***********************
      *    Extension System   *
      *************************/
 
-    /**
-     * Amount of threads used for the extension task queues
-     */
-    public static final AtomicInteger PLUGIN_TASK_QUEUE_EXECUTOR_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS);
+    public static final AtomicInteger EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS);
+    public static final AtomicInteger MANAGED_EXTENSION_THREAD_POOL_KEEP_ALIVE_SEC = new AtomicInteger(30);
+    public static final AtomicInteger MANAGED_EXTENSION_THREAD_POOL_THREADS_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS);
 
     /**
-     * The keep alive of the managed extension executor service thread pool
+     * The amount of time the extension executor shutdown awaits task termination until shutdownNow() is called.
      */
-    public static final AtomicInteger MANAGED_PLUGIN_THREAD_POOL_KEEP_ALIVE_SECONDS = new AtomicInteger(30);
+    public static final AtomicInteger MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC = new AtomicInteger(180);
 
-    /**
-     * Amount of threads used for the managed extension executor service
-     */
-    public static final AtomicInteger MANAGED_PLUGIN_THREAD_POOL_SIZE = new AtomicInteger(AVAILABLE_PROCESSORS);
-
-    /**
-     * The amount of time the extension executor shutdown awaits task termination until shutdownNow() is called. In
-     * seconds.
-     */
-    public static final AtomicInteger MANAGED_PLUGIN_EXECUTOR_SHUTDOWN_TIMEOUT = new AtomicInteger(180);
-
-    /**
-     * The amount of service calls the extension system is allowed to do per second.
-     */
-    public static final AtomicInteger PLUGIN_SERVICE_RATE_LIMIT = new AtomicInteger(0); //unlimited
+    public static final AtomicInteger EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC = new AtomicInteger(0); //unlimited
 
     /* ********************
      *        Auth        *
      **********************/
     /**
-     * Denies the bypassing of authentication if no authenticator is registered
+     * Denies bypassing of authentication if no authenticator is registered.
      */
     public static final AtomicBoolean AUTH_DENY_UNAUTHENTICATED_CONNECTIONS = new AtomicBoolean(true);
 
-    /**
-     * The timeout in seconds between two auth steps
-     */
-    public static final AtomicInteger AUTH_PROCESS_TIMEOUT = new AtomicInteger(30);
+    public static final AtomicInteger AUTH_PROCESS_TIMEOUT_SEC = new AtomicInteger(30);
 
-    public static final AtomicBoolean PUBLISH_PAYLOAD_FORCE_FLUSH = new AtomicBoolean(true);
+    public static final AtomicBoolean PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED = new AtomicBoolean(true);
 }

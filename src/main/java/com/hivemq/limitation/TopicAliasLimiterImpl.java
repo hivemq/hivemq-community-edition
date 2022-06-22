@@ -37,8 +37,8 @@ public class TopicAliasLimiterImpl implements TopicAliasLimiter {
     public TopicAliasLimiterImpl() {
         this.memoryUsage = new AtomicLong(0);
         this.topicAliasesTotal = new AtomicLong(0);
-        this.memorySoftLimit = InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_SOFT_LIMIT.get();
-        this.memoryHardLimit = InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT.get();
+        this.memorySoftLimit = InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_SOFT_LIMIT_BYTES.get();
+        this.memoryHardLimit = InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.get();
     }
 
     @Override

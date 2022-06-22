@@ -58,7 +58,7 @@ public class PluginTaskExecutorServiceImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        InternalConfigurations.PLUGIN_TASK_QUEUE_EXECUTOR_COUNT.set(2);
+        InternalConfigurations.EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.set(2);
 
         executorService =
                 new PluginTaskExecutorServiceImpl(new ExecutorProvider(Lists.newArrayList(executor1, executor2)),

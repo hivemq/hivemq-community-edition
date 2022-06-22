@@ -65,7 +65,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         this.disconnector = disconnector;
         validateUTF8 = configurationService.securityConfiguration().validateUTF8();
         maxMessageExpiryInterval = configurationService.mqttConfiguration().maxMessageExpiryInterval();
-        maxUserPropertiesLength = InternalConfigurations.USER_PROPERTIES_MAX_SIZE;
+        maxUserPropertiesLength = InternalConfigurations.USER_PROPERTIES_MAX_SIZE_BYTES;
         subscriptionIdentifiersAvailable = configurationService.mqttConfiguration().subscriptionIdentifierEnabled();
     }
 

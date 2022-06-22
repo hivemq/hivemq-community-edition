@@ -200,7 +200,7 @@ public class HiveMQServer {
 
         final HiveMQInstance instance = injector.getInstance(HiveMQInstance.class);
 
-        if (InternalConfigurations.GC_AFTER_STARTUP) {
+        if (InternalConfigurations.GC_AFTER_STARTUP_ENABLED) {
             log.trace("Starting initial garbage collection after startup");
             final long start = System.currentTimeMillis();
             //Start garbage collection of objects we don't need anymore after starting up
