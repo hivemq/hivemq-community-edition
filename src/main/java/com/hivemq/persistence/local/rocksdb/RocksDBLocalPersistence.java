@@ -73,9 +73,6 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     protected abstract String getVersion();
 
     @NotNull
-    protected abstract Options getOptions();
-
-    @NotNull
     protected abstract Logger getLogger();
 
     public int getBucketCount() {
@@ -96,16 +93,17 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
 
         final String name = getName();
         final String version = getVersion();
-        final Options options = getOptions();
+        final Options options = new Options();
         final Logger logger = getLogger();
         try {
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
-
             final long memtableSize = PhysicalMemoryUtil.physicalMemory() / memtableSizePortion / bucketCount;
             final LRUCache cache = new LRUCache(PhysicalMemoryUtil.physicalMemory() / blockCacheSizePortion / bucketCount);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
             tableConfig.setBlockSize(blockSize);
+            options.setStatistics(new Statistics());
+            options.setCreateIfMissing(true);
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
 
@@ -136,7 +134,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
 
         final String name = getName();
         final String version = getVersion();
-        final Options options = getOptions();
+        final Options options = new Options();
         final Logger logger = getLogger();
 
         try {
@@ -146,6 +144,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
             tableConfig.setBlockSize(blockSize);
+            options.setStatistics(new Statistics());
+            options.setCreateIfMissing(true);
             options.setTableFormatConfig(tableConfig);
             options.setWriteBufferSize(memtableSize);
 
@@ -188,6 +188,14 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
 
     }
 
+    /**
+     * Overwrite this method to configure options and overwrite default values
+     *
+     * @param options the options object which can be configured
+     */
+    protected void configureOptions(final @NotNull Options options) {
+        // default noop
+    }
 
     protected abstract void init();
 

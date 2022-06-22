@@ -99,14 +99,6 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     @NotNull
     @Override
-    protected Options getOptions() {
-        return new Options()
-                .setCreateIfMissing(true)
-                .setStatistics(new Statistics());
-    }
-
-    @NotNull
-    @Override
     protected Logger getLogger() {
         return log;
     }

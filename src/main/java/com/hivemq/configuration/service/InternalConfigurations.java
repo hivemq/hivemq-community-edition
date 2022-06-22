@@ -17,6 +17,7 @@ package com.hivemq.configuration.service;
 
 import com.hivemq.migration.meta.PersistenceType;
 import org.rocksdb.CompressionType;
+import org.rocksdb.MutableColumnFamilyOptionsInterface;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -256,6 +257,70 @@ public class InternalConfigurations {
      */
     public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
+    // In case we tried to decrement a reference count that was already zero, a stacktrace will be logged to warn, if this flag is true (default is debug)
+    public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
+
+    /**
+     * Activates the usage of BLOB files within RocksDB for the payload persistence.
+     * default: true
+     */
+    public static final boolean PAYLOAD_PERSISTENCE_BLOB_ENABLED = true;
+
+    /**
+     * See {@link org.rocksdb.AdvancedMutableColumnFamilyOptionsInterface#setTargetFileSizeBase(long)}
+     * default: 1KB
+     */
+    public static final long PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES = 1024;
+
+    /**
+     * See {@link MutableColumnFamilyOptionsInterface#setMaxBytesForLevelBase(long)}
+     * default: 10KB (10 * 1KB (PAYLOAD_PERSISTENCE_BLOB_DB_FILE_SIZE_BASE))
+     */
+    public static final long PAYLOAD_PERSISTENCE_BLOB_MAX_BYTES_LEVEL_BASE = 10240;
+
+    /**
+     * The {@link CompressionType} for references within the LSM tree (the values are within the blob files)
+     * default: NONE
+     */
+    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION = CompressionType.NO_COMPRESSION;
+
+    /**
+     * The compression type for the BLOB files, see {@link CompressionType} for possible values.
+     */
+    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE = CompressionType.NO_COMPRESSION;
+
+
+    /* *****************
+     *     Misc     *
+     *******************/
+
+    /**
+     * The concurrency level of the shared subscription cache
+     */
+    public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
+    /**
+     * The concurrency level of the shared subscriber service cache
+     */
+    public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
+
+    public static final AtomicInteger CLEANUP_JOB_SCHEDULE = new AtomicInteger(4);
+
+    public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
+
+    public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
+
+    /**
+     * The amount of clean up job tasks that are processed at the same time, in each schedule interval
+     */
+    public static final AtomicBoolean ACKNOWLEDGE_AFTER_PERSIST = new AtomicBoolean(true);
+
+    public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
+
+    /**
+     * The live time of a entry in the shared subscription cache in milliseconds
+     */
+    public static final long SHARED_SUBSCRIPTION_CACHE_DURATION = 1000;
+
     /**
      * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
      */
@@ -424,5 +489,4 @@ public class InternalConfigurations {
     public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
     public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
 
-    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE = CompressionType.NO_COMPRESSION;
 }
