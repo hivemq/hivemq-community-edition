@@ -176,78 +176,6 @@ public class InternalConfigurations {
     // If this flag is true, then on an attempt to decrement a reference counter that was already zero, a stacktrace will be logged to warn (by default logged to debug)
     public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
 
-
-    /* *****************
-     *     Misc     *
-     *******************/
-
-    public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
-
-    public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
-
-    public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
-
-    public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
-
-    public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
-
-    public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
-
-    public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
-
-    public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
-
-    public static final int SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS = 10000;
-
-    // The period with which stats are written to the LOG file. Periodic writes are disabled when set to '0'.
-    public static final int ROCKSDB_STATS_PERSIST_PERIOD_SEC = 0;
-
-    // The maximum size of each LOG file
-    public static final int ROCKSDB_MAX_LOG_FILE_SIZE_BYTES = 1024 * 500; // 500KB
-
-    // The maximum amount of LOG files per RocksDB (bucket)
-    public static final int ROCKSDB_LOG_FILES_COUNT = 2;
-
-    // The maximum size stats history buffer that is used to dump stats to the LOG file
-    public static final int OCKSDB_STATS_HISTORY_BUFFER_SIZE_BYTES = 64 * 1024; // 64KB
-
-    public static final AtomicInteger COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH = new AtomicInteger(128);
-
-
-    public static final long SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC = 1000;
-
-    public static final int SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS = 10000;
-
-    public static final int CLEANUP_JOB_PARALLELISM = 1;
-
-    // set to true to close all client connections at netty-event-loop shutdown
-    public static final boolean NETTY_SHUTDOWN_LEGACY = false;
-    public static final int NETTY_COUNT_OF_CONNECTIONS_IN_SHUTDOWN_PARTITION = 100;
-
-    public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
-
-    public static final long DISCONNECT_KEEP_ALIVE_BATCH = 100;
-
-    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT_SEC = 60;
-    public static final int CONNECTION_PERSISTENCE_SHUTDOWN_TIMEOUT_SEC = 180;
-
-    public static final boolean DROP_MESSAGES_QOS_0_ENABLED = true;
-
-
-    public static final int WILL_DELAY_CHECK_INTERVAL_SEC = 1;
-
-
-    public static final int LISTENER_SOCKET_RECEIVE_BUFFER_SIZE_BYTES = -1;
-    public static final int LISTENER_SOCKET_SEND_BUFFER_SIZE_BYTES = -1;
-    public static final int LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES = 65536; // 64Kb
-    public static final int LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES = 32768;  // 32Kb
-
-    public static final int OUTGOING_BANDWIDTH_THROTTLING_DEFAULT_BYTES_PER_SEC = 0; // unlimited
-
-    public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
-    public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
-
-
     /* *****************
      *      SSL       *
      *******************/
@@ -290,7 +218,6 @@ public class InternalConfigurations {
 
     public static final int USAGE_STATISTICS_SEND_INTERVAL_MINUTES = 1440; //24h
 
-
     /* ***********************
      *    Extension System   *
      *************************/
@@ -316,4 +243,70 @@ public class InternalConfigurations {
 
     public static final AtomicInteger AUTH_PROCESS_TIMEOUT_SEC = new AtomicInteger(30);
 
+    /* *****************
+     *     Misc     *
+     *******************/
+
+    public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
+
+    public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
+
+    public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
+
+    public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
+
+    public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
+
+    public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
+
+    public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
+
+    public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
+
+    public static final int SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS = 10000;
+
+    // The period with which stats are written to the LOG file. Periodic writes are disabled when set to '0'.
+    public static final int ROCKSDB_STATS_PERSIST_PERIOD_SEC = 0;
+
+    // The maximum size of each LOG file
+    public static final int ROCKSDB_MAX_LOG_FILE_SIZE_BYTES = 1024 * 500; // 500KB
+
+    // The maximum amount of LOG files per RocksDB (bucket)
+    public static final int ROCKSDB_LOG_FILES_COUNT = 2;
+
+    // The maximum size stats history buffer that is used to dump stats to the LOG file
+    public static final int OCKSDB_STATS_HISTORY_BUFFER_SIZE_BYTES = 64 * 1024; // 64KB
+
+    public static final AtomicInteger COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH = new AtomicInteger(128);
+
+    public static final long SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC = 1000;
+
+    public static final int SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS = 10000;
+
+    public static final int CLEANUP_JOB_PARALLELISM = 1;
+
+    // set to true to close all client connections at netty-event-loop shutdown
+    public static final boolean NETTY_SHUTDOWN_LEGACY = false;
+    public static final int NETTY_COUNT_OF_CONNECTIONS_IN_SHUTDOWN_PARTITION = 100;
+
+    public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
+
+    public static final long DISCONNECT_KEEP_ALIVE_BATCH = 100;
+
+    public static final int EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT_SEC = 60;
+    public static final int CONNECTION_PERSISTENCE_SHUTDOWN_TIMEOUT_SEC = 180;
+
+    public static final boolean DROP_MESSAGES_QOS_0_ENABLED = true;
+
+    public static final int WILL_DELAY_CHECK_INTERVAL_SEC = 1;
+
+    public static final int LISTENER_SOCKET_RECEIVE_BUFFER_SIZE_BYTES = -1;
+    public static final int LISTENER_SOCKET_SEND_BUFFER_SIZE_BYTES = -1;
+    public static final int LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES = 65536; // 64Kb
+    public static final int LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES = 32768;  // 32Kb
+
+    public static final int OUTGOING_BANDWIDTH_THROTTLING_DEFAULT_BYTES_PER_SEC = 0; // unlimited
+
+    public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
+    public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
 }
