@@ -276,13 +276,13 @@ public class InternalConfigurations {
      * See {@link MutableColumnFamilyOptionsInterface#setMaxBytesForLevelBase(long)}
      * default: 10KB (10 * 1KB (PAYLOAD_PERSISTENCE_BLOB_DB_FILE_SIZE_BASE))
      */
-    public static final long PAYLOAD_PERSISTENCE_BLOB_MAX_BYTES_LEVEL_BASE = 10240;
+    public static final long PAYLOAD_PERSISTENCE_BLOB_MAX_SIZE_LEVEL_BASE_BYTES = 10 * PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES;
 
     /**
      * The {@link CompressionType} for references within the LSM tree (the values are within the blob files)
      * default: NONE
      */
-    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION = CompressionType.NO_COMPRESSION;
+    public static final CompressionType PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION_TYPE = CompressionType.NO_COMPRESSION;
 
     /**
      * The compression type for the BLOB files, see {@link CompressionType} for possible values.

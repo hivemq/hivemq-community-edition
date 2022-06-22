@@ -95,10 +95,10 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         if (InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_ENABLED) {
             options.setEnableBlobFiles(true)
                     .setEnableBlobGarbageCollection(true)
-                    .setCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION)
+                    .setCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION_TYPE)
                     .setBlobCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE)
                     .setTargetFileSizeBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES)
-                    .setMaxBytesForLevelBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_MAX_BYTES_LEVEL_BASE);
+                    .setMaxBytesForLevelBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_MAX_SIZE_LEVEL_BASE_BYTES);
         }
     }
 
