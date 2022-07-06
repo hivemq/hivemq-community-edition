@@ -55,8 +55,8 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
     @Inject
     public MqttServerDisconnectorImpl(final @NotNull EventLog eventLog) {
         this.eventLog = eventLog;
-        disconnectWithReasonCode = InternalConfigurations.DISCONNECT_WITH_REASON_CODE.get();
-        disconnectWithReasonString = InternalConfigurations.DISCONNECT_WITH_REASON_STRING.get();
+        disconnectWithReasonCode = InternalConfigurations.DISCONNECT_WITH_REASON_CODE_ENABLED.get();
+        disconnectWithReasonString = InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.get();
     }
 
     @Override

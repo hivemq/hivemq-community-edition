@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.configuration.service.InternalConfigurations.WILL_DELAY_CHECK_SCHEDULE;
+import static com.hivemq.configuration.service.InternalConfigurations.WILL_DELAY_CHECK_INTERVAL_SEC;
 
 /**
  * @author Lukas Brandl
@@ -71,7 +71,7 @@ public class PendingWillMessages {
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.metricsHolder = metricsHolder;
-        executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_SCHEDULE, WILL_DELAY_CHECK_SCHEDULE, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_INTERVAL_SEC, WILL_DELAY_CHECK_INTERVAL_SEC, TimeUnit.SECONDS);
     }
 
     public void addWill(final @NotNull String clientId, final @NotNull ClientSession session) {

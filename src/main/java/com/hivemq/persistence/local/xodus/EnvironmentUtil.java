@@ -53,12 +53,12 @@ public class EnvironmentUtil {
 
         return createEnvironmentConfig(
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE,
-                XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY,
+                XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY_MSEC,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_FILES_INTERVAL,
-                XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD,
+                XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD_MSEC,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_TYPE,
-                XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD,
-                XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES,
+                XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD_MSEC,
+                XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES_ENABLED,
                 XODUS_PERSISTENCE_ENVIRONMENT_JMX,
                 name
         );
@@ -128,7 +128,7 @@ public class EnvironmentUtil {
         final PersistenceType retainedMessagePersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
         // Use the default cache size if only xodus persistences are used.
         if (payloadPersistenceType != PersistenceType.FILE && retainedMessagePersistenceType != PersistenceType.FILE) {
-            final int logCacheMemory = InternalConfigurations.XODUS_PERSISTENCE_LOG_MEMORY_PERCENTAGE;
+            final int logCacheMemory = InternalConfigurations.XODUS_PERSISTENCE_LOG_MEMORY_HEAP_PERCENTAGE;
             log.trace("Setting log cache memory percentage for persistence {} to {}", name, logCacheMemory);
             environmentConfig.setMemoryUsagePercentage(logCacheMemory);
         }

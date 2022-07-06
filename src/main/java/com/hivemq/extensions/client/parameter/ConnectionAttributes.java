@@ -73,7 +73,7 @@ public class ConnectionAttributes {
             return connectionAttributes;
         }
 
-        final int maxValueSizeBytes = InternalConfigurations.CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE;
+        final int maxValueSizeBytes = InternalConfigurations.CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE_BYTES;
 
         final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
         return clientConnection.setConnectionAttributesIfAbsent(new ConnectionAttributes(maxValueSizeBytes));

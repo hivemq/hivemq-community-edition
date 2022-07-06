@@ -44,7 +44,7 @@ public class PluginServiceRateLimitServiceTest {
 
     @Test
     public void test_limit() {
-        InternalConfigurations.PLUGIN_SERVICE_RATE_LIMIT.set(10);
+        InternalConfigurations.EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.set(10);
 
         pluginServiceRateLimitService = new PluginServiceRateLimitService();
 
@@ -61,7 +61,7 @@ public class PluginServiceRateLimitServiceTest {
 
     @Test
     public void test_limit_not_exceeded() {
-        InternalConfigurations.PLUGIN_SERVICE_RATE_LIMIT.set(2);
+        InternalConfigurations.EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.set(2);
 
         pluginServiceRateLimitService = new PluginServiceRateLimitService();
 

@@ -115,7 +115,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         this.authSender = authSender;
         this.priorityComparator = new ExtensionPriorityComparator(extensions);
         this.serverInformation = serverInformation;
-        this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT.get();
+        this.timeout = InternalConfigurations.AUTH_PROCESS_TIMEOUT_SEC.get();
         this.validateUTF8 = configurationService.securityConfiguration().validateUTF8();
     }
 

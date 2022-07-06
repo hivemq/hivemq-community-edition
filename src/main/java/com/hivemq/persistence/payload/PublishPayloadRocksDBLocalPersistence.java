@@ -68,13 +68,13 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
-                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE,
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
         this.memtableSize = PhysicalMemoryUtil.physicalMemory() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
-        this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH.get();
+        this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
     }
 
     @NotNull

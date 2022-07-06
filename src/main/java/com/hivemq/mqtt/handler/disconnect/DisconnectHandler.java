@@ -72,7 +72,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         this.topicAliasLimiter = topicAliasLimiter;
         this.clientSessionPersistence = clientSessionPersistence;
         this.connectionPersistence = connectionPersistence;
-        logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT;
+        logClientReasonString = InternalConfigurations.LOG_CLIENT_REASON_STRING_ON_DISCONNECT_ENABLED;
     }
 
     @Override

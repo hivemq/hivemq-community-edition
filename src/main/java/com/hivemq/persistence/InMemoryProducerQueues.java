@@ -25,8 +25,6 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.jctools.queues.MpscUnboundedArrayQueue;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -70,7 +68,7 @@ public class InMemoryProducerQueues implements ProducerQueues {
         this.persistenceBucketCount = persistenceBucketCount;
         this.amountOfQueues = amountOfQueues;
         bucketsPerQueue = persistenceBucketCount / amountOfQueues;
-        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.get();
+        shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.get();
 
         final ImmutableList.Builder<AtomicLong> counterBuilder = ImmutableList.builder();
 

@@ -56,8 +56,8 @@ public class ManagedExecutorServicePerExtensionTest {
 
     @Before
     public void setUp() throws Exception {
-        InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_KEEP_ALIVE_SECONDS.set(60);
-        InternalConfigurations.MANAGED_PLUGIN_THREAD_POOL_SIZE.set(4);
+        InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_KEEP_ALIVE_SEC.set(60);
+        InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_THREADS_COUNT.set(4);
 
         when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(extension);
 

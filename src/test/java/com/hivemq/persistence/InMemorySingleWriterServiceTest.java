@@ -37,7 +37,7 @@ public class InMemorySingleWriterServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD.set(200);
+        InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.set(200);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
         singleWriterServiceImpl = new InMemorySingleWriter();
     }

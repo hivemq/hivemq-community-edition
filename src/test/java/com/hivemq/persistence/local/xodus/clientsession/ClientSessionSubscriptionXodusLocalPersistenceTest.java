@@ -74,7 +74,7 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
         closeableMock = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
-        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
+        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
 

@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRIES;
-import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL;
+import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC;
 
 public abstract class XodusLocalPersistence implements LocalPersistence, FilePersistence {
 
@@ -67,7 +67,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         this.enabled = enabled;
 
         this.closeRetries = PERSISTENCE_CLOSE_RETRIES.get();
-        this.closeRetryInterval = PERSISTENCE_CLOSE_RETRY_INTERVAL.get();
+        this.closeRetryInterval = PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.get();
     }
 
     @NotNull

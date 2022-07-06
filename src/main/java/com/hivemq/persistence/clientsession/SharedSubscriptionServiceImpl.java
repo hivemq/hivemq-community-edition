@@ -28,7 +28,6 @@ import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -77,16 +76,16 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
     void postConstruct() {
 
         sharedSubscriberCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(SHARED_SUBSCRIBER_CACHE_DURATION, TimeUnit.MILLISECONDS)
+                .expireAfterWrite(SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIBER_CACHE_SIZE)
+                .maximumSize(SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS)
                 .recordStats()
                 .build();
 
         sharedSubscriptionCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(SHARED_SUBSCRIPTION_CACHE_DURATION, TimeUnit.MILLISECONDS)
+                .expireAfterWrite(SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIPTION_CACHE_SIZE)
+                .maximumSize(SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS)
                 .recordStats()
                 .build();
     }

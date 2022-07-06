@@ -124,7 +124,7 @@ public class UsageStatistics {
             } finally {
                 //reschedule
                 scheduledExecutorService.schedule(new SendStatisticsTask(statisticsSender, statisticsCollector,
-                        scheduledExecutorService, "runtime"), InternalConfigurations.STATISTICS_SEND_EVERY_MINUTES, TimeUnit.MINUTES);
+                        scheduledExecutorService, "runtime"), InternalConfigurations.USAGE_STATISTICS_SEND_INTERVAL_MINUTES, TimeUnit.MINUTES);
             }
         }
     }

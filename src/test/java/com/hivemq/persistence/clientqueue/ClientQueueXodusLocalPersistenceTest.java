@@ -87,12 +87,12 @@ public class ClientQueueXodusLocalPersistenceTest {
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
-        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
+        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString()))
                 .thenReturn(temporaryFolder.newFolder());
 
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
-        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024);
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024);
         InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
 
         persistenceStartup = new PersistenceStartup();
@@ -1016,7 +1016,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_read_byte_limit_respected_qos0() {
 
-        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         persistence.stop();
         persistence = new ClientQueueXodusLocalPersistence(
@@ -1049,7 +1049,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_read_byte_limit_respected_qos1() {
 
-        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         persistence.stop();
         persistence = new ClientQueueXodusLocalPersistence(
@@ -1093,7 +1093,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_read_byte_limit_respected_qos0_and_qos1() {
 
-        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.set(1024 * 100);
+        InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         persistence.stop();
         persistence = new ClientQueueXodusLocalPersistence(

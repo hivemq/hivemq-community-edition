@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_SHUTDOWN_TIMEOUT;
+import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_SHUTDOWN_TIMEOUT_SEC;
 
 /**
  * @author Lukas Brandl
@@ -105,7 +105,7 @@ public class PersistenceShutdownHook implements HiveMQShutdownHook {
         //We have to use a direct executor service here because the usual persistence executor might already be shut down
         final ListenableFuture<Void> combinedFuture = FutureUtils.voidFutureFromList(builder.build());
 
-        final int shutdownTimeout = PERSISTENCE_SHUTDOWN_TIMEOUT.get();
+        final int shutdownTimeout = PERSISTENCE_SHUTDOWN_TIMEOUT_SEC.get();
 
         try {
             payloadPersistenceExecutor.awaitTermination(shutdownTimeout, TimeUnit.SECONDS);

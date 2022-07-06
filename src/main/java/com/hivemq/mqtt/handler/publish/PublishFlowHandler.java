@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0;
+import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0_ENABLED;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
 /**
@@ -134,7 +134,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             return;
         }
 
-        if (DROP_MESSAGES_QOS_0) {
+        if (DROP_MESSAGES_QOS_0_ENABLED) {
             final boolean messageDropped = dropOutgoingPublishesHandler.checkChannelNotWritable(ctx, msg, promise);
             if (messageDropped) {
                 return;

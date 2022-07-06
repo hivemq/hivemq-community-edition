@@ -70,8 +70,8 @@ public class MqttConnackerTest {
     @After
     public void tearDown() throws Exception {
         LogbackCapturingAppender.Factory.cleanUp();
-        InternalConfigurations.CONNACK_WITH_REASON_CODE.set(true);
-        InternalConfigurations.CONNACK_WITH_REASON_STRING.set(true);
+        InternalConfigurations.CONNACK_WITH_REASON_CODE_ENABLED.set(true);
+        InternalConfigurations.CONNACK_WITH_REASON_STRING_ENABLED.set(true);
     }
 
     @Test(expected = NullPointerException.class)
@@ -266,7 +266,7 @@ public class MqttConnackerTest {
 
     @Test(timeout = 20000)
     public void test_connackError_mqtt_3_1_without_reason_code() {
-        InternalConfigurations.CONNACK_WITH_REASON_CODE.set(false);
+        InternalConfigurations.CONNACK_WITH_REASON_CODE_ENABLED.set(false);
         mqttConnacker = new MqttConnackerImpl(eventLog);
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
@@ -384,7 +384,7 @@ public class MqttConnackerTest {
 
     @Test(timeout = 20000)
     public void test_connackError_mqtt_5_without_reason_string() throws InterruptedException {
-        InternalConfigurations.CONNACK_WITH_REASON_STRING.set(false);
+        InternalConfigurations.CONNACK_WITH_REASON_STRING_ENABLED.set(false);
         mqttConnacker = new MqttConnackerImpl(eventLog);
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
@@ -403,7 +403,7 @@ public class MqttConnackerTest {
 
     @Test(timeout = 20000)
     public void test_connackError_mqtt_5_without_reason_code() {
-        InternalConfigurations.CONNACK_WITH_REASON_CODE.set(false);
+        InternalConfigurations.CONNACK_WITH_REASON_CODE_ENABLED.set(false);
         mqttConnacker = new MqttConnackerImpl(eventLog);
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);

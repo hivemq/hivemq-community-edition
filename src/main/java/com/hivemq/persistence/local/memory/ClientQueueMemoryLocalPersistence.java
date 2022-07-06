@@ -101,7 +101,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         this.messageDroppedService = messageDroppedService;
 
         qos0MemoryLimit = getQos0MemoryLimit();
-        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT.get();
+        qos0ClientMemoryLimit = InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.get();
         retainedMessageMax = InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.get();
 
         qos0MessagesMemory = new AtomicLong();
@@ -820,7 +820,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             final MessageWithID messageWithID = qos12iterator.next();
             if (messageWithID instanceof PubrelWithRetained) {
                 final PubrelWithRetained pubrel = (PubrelWithRetained) messageWithID;
-                if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS) {
+                if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
                     continue;
                 }
                 if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
@@ -837,7 +837,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
             } else if (messageWithID instanceof PublishWithRetained) {
                 final PublishWithRetained publish = (PublishWithRetained) messageWithID;
-                final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES;
+                final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES_ENABLED;
                 final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
                 final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
                 if (drop) {

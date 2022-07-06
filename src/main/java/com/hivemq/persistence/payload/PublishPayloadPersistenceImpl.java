@@ -72,11 +72,11 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         this.scheduledExecutorService = scheduledExecutorService;
 
         payloadCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(InternalConfigurations.PAYLOAD_CACHE_DURATION.get(), TimeUnit.MILLISECONDS)
+                .expireAfterAccess(InternalConfigurations.PAYLOAD_CACHE_DURATION_MSEC.get(), TimeUnit.MILLISECONDS)
                 .maximumSize(InternalConfigurations.PAYLOAD_CACHE_SIZE.get())
-                .concurrencyLevel(InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL.get())
+                .concurrencyLevel(InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS.get())
                 .build();
-        removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE.get();
+        removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
         int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         bucketLock = new BucketLock(bucketLockCount);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
@@ -85,7 +85,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     // The payload persistence has to be initialized after the other persistence bootstraps are finished.
     @Override
     public void init() {
-        final long removeDelay = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_DELAY.get();
+        final long removeDelay = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_DELAY_MSEC.get();
         final int cleanupThreadCount = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
         final long taskSchedule = removeSchedule * cleanupThreadCount;
         for (int i = 0; i < cleanupThreadCount; i++) {

@@ -74,7 +74,7 @@ public class ClientSessionXodusLocalPersistenceTest {
         final LocalPersistenceFileUtil localPersistenceFileUtil = mock(LocalPersistenceFileUtil.class);
 
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
-        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL.set(5);
+        InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(BUCKET_COUNT);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
 
