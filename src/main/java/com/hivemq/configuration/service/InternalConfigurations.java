@@ -257,9 +257,6 @@ public class InternalConfigurations {
      */
     public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
-    // In case we tried to decrement a reference count that was already zero, a stacktrace will be logged to warn, if this flag is true (default is debug)
-    public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
-
     /**
      * Activates the usage of BLOB files within RocksDB for the payload persistence.
      * default: true
@@ -416,19 +413,9 @@ public class InternalConfigurations {
      *     Misc     *
      *******************/
 
-    public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
-
-    public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
-
     public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
 
-    public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
-
-    public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
-
     public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
-
-    public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
 
     public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
 
