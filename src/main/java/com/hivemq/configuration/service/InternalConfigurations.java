@@ -231,21 +231,6 @@ public class InternalConfigurations {
     public static final AtomicInteger PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS = new AtomicInteger(16);
 
     /**
-     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-     */
-    public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
-
-    /**
-     * The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
-     */
-    public static final AtomicInteger PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = new AtomicInteger(64);
-
-    /**
-     * The block size used by rocksdb for the retained message persistence
-     */
-    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES = 32 * 1024; // 32 KB
-
-    /**
      * An interval of time between two consecutively executed payload cleanups for payloads that are not referenced anymore.
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC = new AtomicInteger(250);
@@ -271,6 +256,26 @@ public class InternalConfigurations {
      * The type of storage underlying the payload persistence (for example, rocks db or xodus).
      */
     public static final AtomicReference<PersistenceType> PAYLOAD_PERSISTENCE_TYPE = new AtomicReference<>(PersistenceType.FILE_NATIVE);
+
+    /**
+     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+     */
+    public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
+
+    /**
+     * The memory that is used for rocksdb block-cache as a portion of the RAM for the retained message persistence. (size = RAM/configValue)
+     */
+    public static final AtomicInteger PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION = new AtomicInteger(64);
+
+    /**
+     * The block size used by rocksdb for the retained message persistence
+     */
+    public static final int PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES = 32 * 1024; // 32 KB
+
+    /**
+     * If this flag is true, then on an attempt to decrement a reference counter that was already zero, a stacktrace will be logged to warn (by default logged to debug)
+     */
+    public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
 
     /**
      * Activates the usage of BLOB files within RocksDB for the payload persistence.
@@ -380,12 +385,13 @@ public class InternalConfigurations {
      * The concurrency level of the shared subscription cache
      */
     public static final AtomicInteger SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
+
     /**
      * The concurrency level of the shared subscriber service cache
      */
     public static final AtomicInteger SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL = new AtomicInteger(AVAILABLE_PROCESSORS);
 
-    public static final AtomicInteger CLEANUP_JOB_SCHEDULE = new AtomicInteger(4);
+    public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
 
     public static final AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
 
@@ -394,24 +400,9 @@ public class InternalConfigurations {
     /**
      * The amount of clean up job tasks that are processed at the same time, in each schedule interval
      */
-    public static final AtomicBoolean ACKNOWLEDGE_AFTER_PERSIST = new AtomicBoolean(true);
+    public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
 
     public static final boolean XODUS_LOG_CACHE_USE_NIO = false;
-
-    /**
-     * The live time of a entry in the shared subscription cache in milliseconds
-     */
-    public static final long SHARED_SUBSCRIPTION_CACHE_DURATION = 1000;
-
-
-    /**
-     * If this flag is true, then on an attempt to decrement a reference counter that was already zero, a stacktrace will be logged to warn (by default logged to debug)
-     */
-    public static final boolean LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING = false;
-
-    public static final AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
-
-    public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
 
     public static final long SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC = 1000;
 
