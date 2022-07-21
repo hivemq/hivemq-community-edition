@@ -54,7 +54,7 @@ The ideal place for questions or discussions about the HiveMQ Community Edition 
 
 === Quick Start
 
-* Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2021.3/hivemq-ce-2021.3.zip[HiveMQ CE binary package].
+* Download the latest https://github.com/hivemq/hivemq-community-edition/releases/download/2022.1/hivemq-ce-2022.1.zip[HiveMQ CE binary package].
 * Unzip the package.
 * Run the run.sh (Linux/OSX) or run.bat (Windows) in the bin folder of the package.
 
@@ -140,7 +140,7 @@ If you use Gradle, include the following code in your `build.gradle(.kts)` file.
 ----
 
 dependencies {
-    implementation("com.hivemq:hivemq-community-edition-embedded:2021.3")
+    implementation("com.hivemq:hivemq-community-edition-embedded:2022.1")
 }
 ----
 
@@ -156,7 +156,7 @@ If you use Maven, include the following code in your `pom.xml` file.
         <dependency>
             <groupId>com.hivemq</groupId>
             <artifactId>hivemq-community-edition-embedded</artifactId>
-            <version>2021.3</version>
+            <version>2022.1</version>
         </dependency>
     </dependencies>
     ...
