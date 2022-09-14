@@ -1,0 +1,44 @@
+<!--
+
+    Copyright 2019-present HiveMQ GmbH
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<configuration scan="false">
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-30(%d %level)- %msg%n%ex</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="migrations" level="WARN" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+    <logger name="jetbrains.exodus" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="ERROR"/>
+    <logger name="com.google.common.util.concurrent.Futures.CombinedFuture" level="OFF"/>
+    <logger name="oshi" level="ERROR"/>
+
+</configuration>

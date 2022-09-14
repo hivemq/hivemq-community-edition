@@ -13,6 +13,7 @@ pluginManagement {
         id("io.github.gradle-nexus.publish-plugin") version "${extra["plugin.nexus-publish.version"]}"
         id("com.github.breadmoirai.github-release") version "${extra["plugin.github-release.version"]}"
         id("com.github.ben-manes.versions") version "${extra["plugin.versions.version"]}"
+        id("com.google.cloud.tools.jib") version "${extra["plugin.jib.version"]}"
     }
 }
 

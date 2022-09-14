@@ -16,6 +16,7 @@ plugins {
     id("com.github.hierynomus.license")
     id("org.owasp.dependencycheck")
     id("com.github.ben-manes.versions")
+    id("com.google.cloud.tools.jib")
 
     /* Code Quality Plugins */
     id("jacoco")
@@ -23,7 +24,6 @@ plugins {
     id("com.github.spotbugs")
     id("de.thetaphi.forbiddenapis")
 }
-
 
 /* ******************** metadata ******************** */
 
@@ -468,4 +468,69 @@ githubRelease {
 val javaComponent = components["java"] as AdhocComponentWithVariants
 javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) {
     skip()
+}
+
+
+jib {
+    from {
+        image = "gcr.io/distroless/java11-debian11:debug"
+    }
+    to {
+        image = "hivemq/hivemq-ce:${project.version}"
+    }
+    extraDirectories {
+        paths {
+            path {
+                setFrom("src/distribution")  // workaround to set the from because of kotlin dsl
+                into = "/app"
+            }
+            path {
+                setFrom("src/main/jib")
+                into = "/"
+            }
+        }
+    }
+    container {
+        appRoot = "/app"
+        mainClass = "com.hivemq.HiveMQServer"
+        jvmFlags = mutableListOf(
+                "-Djava.net.preferIPv4Stack=true",
+                "--add-opens",
+                "java.base/java.lang=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.nio=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/sun.nio.ch=ALL-UNNAMED",
+                "--add-opens",
+                "jdk.management/com.sun.management.internal=ALL-UNNAMED",
+                "--add-exports",
+                "java.base/jdk.internal.misc=ALL-UNNAMED",
+                "-Djava.security.egd=file:/dev/./urandom",
+                "-Dcom.sun.management.jmxremote",
+                "-Dcom.sun.management.jmxremote.port=9010",
+                "-Dcom.sun.management.jmxremote.local.only=false",
+                "-Dcom.sun.management.jmxremote.authenticate=false",
+                "-Dcom.sun.management.jmxremote.ssl=false",
+                "-Dhivemq.home=/app",
+                "-XX:+CrashOnOutOfMemoryError",
+                "-XX:+HeapDumpOnOutOfMemoryError",
+                "-XX:HeapDumpPath=/app/heap-dump.hprof",
+                "-XX:ErrorFile=/app/hs_err_pid%p.log",
+                "-XX:+UnlockExperimentalVMOptions",
+                "-XX:+UseNUMA"
+        )
+        ports = mutableListOf(
+                "1883",
+                "8000"
+        )
+        volumes = mutableListOf(
+                "/app/data",
+                "/app/log"
+        )
+        environment = mutableMapOf(
+                "HIVEMQ_ALLOW_ALL_CLIENTS" to "true"
+        )
+        workingDirectory = "/app"
+        // user = "nonroot:nonroot"
+    }
 }
