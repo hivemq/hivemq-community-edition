@@ -41,7 +41,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -57,9 +56,6 @@ public class ExtensionBootstrapImplTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    @Rule
-    public InitFutureUtilsExecutorRule executorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private ExtensionLoader extensionLoader;

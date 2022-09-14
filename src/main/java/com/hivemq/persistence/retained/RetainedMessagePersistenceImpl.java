@@ -15,9 +15,11 @@
  */
 package com.hivemq.persistence.retained;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -37,6 +39,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -147,7 +151,11 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                     singleWriter.submitToAllBucketsParallel((bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(
                             subscription,
                             bucketIndex)));
-            return FutureUtils.combineSetResults(Futures.allAsList(futures));
+            return Futures.transform(Futures.allAsList(futures), listOfSets -> listOfSets
+                            .stream()
+                            .flatMap(Set::stream)
+                            .collect(Collectors.toSet()),
+                    MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }

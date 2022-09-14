@@ -32,11 +32,9 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -58,9 +56,6 @@ import static org.mockito.Mockito.when;
 public class PublishDistributorImplTest {
 
     private AutoCloseable closeableMock;
-
-    @Rule
-    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private @NotNull PublishPayloadPersistence payloadPersistence;

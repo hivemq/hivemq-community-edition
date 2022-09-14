@@ -32,9 +32,7 @@ import com.hivemq.persistence.ioc.annotation.Persistence;
 import com.hivemq.persistence.ioc.provider.local.PayloadPersistenceScheduledExecutorProvider;
 import com.hivemq.persistence.ioc.provider.local.PersistenceExecutorProvider;
 import com.hivemq.persistence.ioc.provider.local.PersistenceScheduledExecutorProvider;
-import com.hivemq.persistence.util.AbstractFutureUtils;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.persistence.util.FutureUtilsImpl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -92,7 +90,6 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
 
         bind(CleanUpService.class).asEagerSingleton();
 
-        bind(AbstractFutureUtils.class).to(FutureUtilsImpl.class).asEagerSingleton();
         requestStaticInjection(FutureUtils.class);
     }
 

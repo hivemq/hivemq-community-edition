@@ -30,9 +30,7 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import util.InitFutureUtilsExecutorRule;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,9 +42,6 @@ import static org.mockito.Mockito.*;
  * @author Lukas Brandl
  */
 public class PendingWillMessagesTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule rule = new InitFutureUtilsExecutorRule();
 
     private final ListeningScheduledExecutorService executorService =
             MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());

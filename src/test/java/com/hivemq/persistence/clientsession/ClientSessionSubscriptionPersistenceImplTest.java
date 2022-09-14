@@ -34,11 +34,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestSingleWriterFactory;
 
 import java.util.concurrent.ExecutionException;
@@ -53,9 +51,6 @@ import static org.mockito.Mockito.*;
 public class ClientSessionSubscriptionPersistenceImplTest {
 
     private AutoCloseable closeableMock;
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private ClientSessionSubscriptionLocalPersistence localPersistence;

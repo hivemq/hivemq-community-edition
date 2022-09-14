@@ -156,7 +156,7 @@ public class CleanUpService {
         public Void call() {
             try {
                 final ListenableFuture<Void> future = cleanUpService.cleanUp(bucketIndex, persistenceIndex);
-                FutureUtils.addPersistenceCallback(future, new FutureCallback<Void>() {
+                Futures.addCallback(future, new FutureCallback<>() {
 
                     @Override
                     public void onSuccess(final Void aVoid) {
@@ -168,7 +168,7 @@ public class CleanUpService {
                         log.error("Exception during cleanup.", throwable);
                         cleanUpService.scheduleCleanUpTask();
                     }
-                });
+                }, MoreExecutors.directExecutor());
             } catch (final Exception e) {
                 log.error("Exception in clean up job ", e);
                 cleanUpService.scheduleCleanUpTask();

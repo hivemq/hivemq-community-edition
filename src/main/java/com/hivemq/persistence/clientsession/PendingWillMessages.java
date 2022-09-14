@@ -95,7 +95,7 @@ public class PendingWillMessages {
     public void reset() {
         pendingWills.clear();
         final ListenableFuture<Map<String, PendingWill>> future = clientSessionPersistence.pendingWills();
-        FutureUtils.addPersistenceCallback(future, new FutureCallback<>() {
+        Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(final @NotNull Map<String, PendingWill> result) {
                 pendingWills.putAll(result);
@@ -105,7 +105,7 @@ public class PendingWillMessages {
             public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError("Exception when reading pending will messages", t);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private void sendWill(final @NotNull String clientId, final @Nullable ClientSession session) {

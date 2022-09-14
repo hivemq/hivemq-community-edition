@@ -39,11 +39,9 @@ import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriptionFlags;
 import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
@@ -60,9 +58,6 @@ import static org.mockito.Mockito.when;
  * @author Lukas Brandl
  */
 public class PublishServiceImplTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     PluginServiceRateLimitService rateLimitService;

@@ -17,42 +17,67 @@
 package com.hivemq.persistence.util;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.*;
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * @author Lukas Brandl
  */
 public class FutureUtils {
 
-    @Inject
-    public static AbstractFutureUtils delegate;
+    private static final Logger log = LoggerFactory.getLogger(FutureUtils.class);
 
-    public static @NotNull ListenableFuture<Void> mergeVoidFutures(
-            final @NotNull ListenableFuture<Void> future1, final @NotNull ListenableFuture<Void> future2) {
-        return delegate.mergeVoidFutures(future1, future2);
+    public static ListenableFuture<Void> voidFutureFromList(final ImmutableList<ListenableFuture<Void>> futures) {
+        final SettableFuture<Void> result = SettableFuture.create();
+        Futures.whenAllComplete(futures).call((Callable<Void>) () -> {
+            final List<Throwable> throwables = new ArrayList<>();
+            for (final ListenableFuture<Void> future : futures) {
+                // The callback is executed immediately because the future is already completed.
+                Futures.addCallback(future, new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(final Void entry) {
+
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        throwables.add(t);
+                    }
+                }, MoreExecutors.directExecutor());
+            }
+            if (throwables.isEmpty()) {
+                result.set(null);
+            } else if (throwables.size() == 1) {
+                result.setException(throwables.get(0));
+            } else {
+                result.setException(new BatchedException(throwables));
+            }
+            return null;
+        }, MoreExecutors.directExecutor());
+        return result;
     }
 
-    public static <T> @NotNull ListenableFuture<Void> voidFutureFromList(final @NotNull ImmutableList<ListenableFuture<T>> futureList) {
-        return delegate.voidFutureFromList(futureList);
-    }
+    public static void addExceptionLogger(final ListenableFuture<?> listenableFuture) {
+        Futures.addCallback(listenableFuture, new FutureCallback<Object>() {
+            @Override
+            public void onSuccess(@Nullable final Object o) {
+                //no op
+            }
 
-    public static void addExceptionLogger(final @NotNull ListenableFuture<?> listenableFuture) {
-        delegate.addExceptionLogger(listenableFuture);
-    }
-
-    public static <T> void addPersistenceCallback(
-            final @NotNull ListenableFuture<T> future, final @NotNull FutureCallback<? super T> callback) {
-        delegate.addPersistenceCallback(future, callback);
-    }
-
-    public static <E, C extends Collection<Set<E>>> @NotNull ListenableFuture<Set<E>> combineSetResults(
-            final @NotNull ListenableFuture<C> collectionFuture) {
-        return delegate.combineSetResults(collectionFuture);
+            @Override
+            public void onFailure(final Throwable throwable) {
+                log.error("Uncaught exception", throwable);
+            }
+        }, MoreExecutors.directExecutor());
     }
 }

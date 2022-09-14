@@ -27,11 +27,9 @@ import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestException;
 import util.TestMessageUtil;
 
@@ -48,9 +46,6 @@ import static org.mockito.Mockito.*;
  * @since 4.1.0
  */
 public class PublishStatusFutureCallbackTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule futureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     private PublishStatusFutureCallback publishStatusFutureCallback;
 
