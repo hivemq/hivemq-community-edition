@@ -49,12 +49,10 @@ import io.netty.channel.ChannelPromise;
 import io.netty.util.Attribute;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -69,9 +67,6 @@ import static org.mockito.Mockito.*;
 public class PublishPollServiceImplTest {
 
     private @NotNull AutoCloseable closeableMock;
-
-    @Rule
-    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     @NotNull

@@ -35,12 +35,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -57,9 +55,6 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class SendRetainedMessagesListenerTest {
-
-    @Rule
-    public final InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private RetainedMessagePersistence retainedMessagePersistence;

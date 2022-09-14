@@ -42,11 +42,9 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestMessageUtil;
 
 import static org.junit.Assert.*;
@@ -56,9 +54,6 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class PublishFlowHandlerTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     public static final String CLIENT_ID = "client";
 

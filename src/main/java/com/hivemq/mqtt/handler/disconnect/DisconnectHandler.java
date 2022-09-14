@@ -15,9 +15,7 @@
  */
 package com.hivemq.mqtt.handler.disconnect;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -161,7 +159,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
                 clientConnection.getClientId(),
                 clientConnection.isSendWill(),
                 clientConnection.getClientSessionExpiryInterval());
-        FutureUtils.addPersistenceCallback(persistenceFuture, new FutureCallback<>() {
+        Futures.addCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
                 connectionPersistence.remove(clientConnection);
@@ -178,6 +176,6 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
                 Exceptions.rethrowError("Unable to update client session data for disconnecting client " +
                         clientConnection.getClientId() + " with clean session set to " + !persistent + ".", throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 }

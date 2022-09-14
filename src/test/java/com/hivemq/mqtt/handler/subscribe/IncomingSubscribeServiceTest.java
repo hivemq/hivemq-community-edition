@@ -47,12 +47,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestConfigurationBootstrap;
 
 import java.util.HashSet;
@@ -67,9 +65,6 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ALL")
 public class IncomingSubscribeServiceTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;

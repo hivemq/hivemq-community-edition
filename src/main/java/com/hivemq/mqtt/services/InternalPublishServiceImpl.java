@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -182,9 +183,9 @@ public class InternalPublishServiceImpl implements InternalPublishService {
             publishFinishedFutureShared = Futures.immediateFuture(null);
         }
 
-        Futures.addCallback(FutureUtils.mergeVoidFutures(publishFinishedFutureNonShared, publishFinishedFutureShared), new FutureCallback<>() {
+        Futures.addCallback(Futures.allAsList(publishFinishedFutureNonShared, publishFinishedFutureShared), new FutureCallback<>() {
             @Override
-            public void onSuccess(final @Nullable Void result) {
+            public void onSuccess(final @Nullable List<Void> result) {
                 if (returnCodeFuture != null) {
                     returnCodeFuture.set(PublishReturnCode.DELIVERED);
                 }

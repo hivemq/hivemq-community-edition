@@ -17,10 +17,7 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -52,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
@@ -130,7 +128,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             final ListenableFuture<Void> removeQos0Future = clientQueuePersistence.removeAllQos0Messages(client, false);
             if (disconnectSession.getSessionExpiryInterval() == SESSION_EXPIRE_ON_DISCONNECT) {
                 final ListenableFuture<Void> removeSubFuture = subscriptionPersistence.removeAll(client);
-                resultFuture.setFuture(FutureUtils.mergeVoidFutures(removeQos0Future, removeSubFuture));
+                resultFuture.setFuture(Futures.transform(Futures.allAsList(removeQos0Future, removeSubFuture),
+                        voids -> null, MoreExecutors.directExecutor()));
                 return null;
             }
             resultFuture.setFuture(removeQos0Future);
@@ -168,7 +167,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 });
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        FutureUtils.addPersistenceCallback(submitFuture, new FutureCallback<>() {
+        Futures.addCallback(submitFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final ConnectResult connectResult) {
                 final Long previousTimestamp = connectResult.getPreviousTimestamp();
@@ -197,7 +196,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             public void onFailure(final @NotNull Throwable t) {
                 resultFuture.setException(t);
             }
-        });
+        }, MoreExecutors.directExecutor());
         return resultFuture;
     }
 
@@ -271,7 +270,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             clientSessions.addAll(localPersistence.getAllClients(bucketIndex));
             return clientSessions;
         });
-        return FutureUtils.combineSetResults(Futures.allAsList(futures));
+        return Futures.transform(
+                Futures.allAsList(futures),
+                sets -> sets.stream().flatMap(Set::stream).collect(Collectors.toSet()),
+                MoreExecutors.directExecutor());
     }
 
     @Override
@@ -302,14 +304,14 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         final SettableFuture<Boolean> settableFuture = SettableFuture.create();
 
-        FutureUtils.addPersistenceCallback(setTTlFuture, new FutureCallback<>() {
+        Futures.addCallback(setTTlFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Boolean sessionExists) {
                 if (sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {
 
                     final ListenableFuture<Void> removeAllFuture = subscriptionPersistence.removeAll(clientId);
 
-                    FutureUtils.addPersistenceCallback(removeAllFuture, new FutureCallback<>() {
+                    Futures.addCallback(removeAllFuture, new FutureCallback<>() {
                         @Override
                         public void onSuccess(final @Nullable Void result) {
                             settableFuture.set(sessionExists);
@@ -319,7 +321,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                         public void onFailure(final @NotNull Throwable t) {
                             settableFuture.setException(t);
                         }
-                    });
+                    }, MoreExecutors.directExecutor());
                 } else {
                     settableFuture.set(sessionExists);
                 }
@@ -329,7 +331,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             public void onFailure(final @NotNull Throwable t) {
                 settableFuture.setException(t);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return settableFuture;
     }
@@ -364,7 +366,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final ListenableFuture<Boolean> setTTLFuture = setSessionExpiryInterval(clientId, 0);
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
 
-        FutureUtils.addPersistenceCallback(setTTLFuture, new FutureCallback<>() {
+        Futures.addCallback(setTTLFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final Boolean sessionExists) {
 
@@ -380,7 +382,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             public void onFailure(final @NotNull Throwable throwable) {
                 resultFuture.setException(throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return resultFuture;
     }
@@ -392,7 +394,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 singleWriter.submitToAllBucketsParallel(localPersistence::getPendingWills);
 
         final SettableFuture<Map<String, PendingWillMessages.PendingWill>> settableFuture = SettableFuture.create();
-        FutureUtils.addPersistenceCallback(Futures.allAsList(futureList), new FutureCallback<>() {
+        Futures.addCallback(Futures.allAsList(futureList), new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable List<Map<String, PendingWillMessages.PendingWill>> result) {
 
@@ -412,7 +414,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             public void onFailure(final Throwable t) {
                 settableFuture.setException(t);
             }
-        });
+        }, MoreExecutors.directExecutor());
         return settableFuture;
     }
 

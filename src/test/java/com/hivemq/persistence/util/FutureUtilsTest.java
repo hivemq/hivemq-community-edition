@@ -18,9 +18,7 @@ package com.hivemq.persistence.util;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.junit.Rule;
 import org.junit.Test;
-import util.InitFutureUtilsExecutorRule;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -32,22 +30,6 @@ import static org.junit.Assert.assertThat;
  * @author Lukas Brandl
  */
 public class FutureUtilsTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
-
-    @Test
-    public void test_future_merge() throws Exception {
-        final SettableFuture<Void> future1 = SettableFuture.create();
-        final SettableFuture<Void> future2 = SettableFuture.create();
-
-        final ListenableFuture<Void> resultFuture = FutureUtils.mergeVoidFutures(future1, future2);
-        assertEquals(false, resultFuture.isDone());
-        future1.set(null);
-        assertEquals(false, resultFuture.isDone());
-        future2.set(null);
-        assertEquals(true, resultFuture.isDone());
-    }
 
     @Test
     public void test_void_future_from_list() throws Exception {

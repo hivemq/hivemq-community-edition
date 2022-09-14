@@ -25,12 +25,10 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,9 +43,6 @@ import static org.mockito.Mockito.*;
  */
 @SuppressWarnings({"unchecked", "NullabilityAnnotations"})
 public class CleanUpServiceTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     private final ListeningScheduledExecutorService scheduledExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
 

@@ -82,7 +82,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import net.jodah.concurrentunit.Waiter;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -107,9 +106,6 @@ import static org.mockito.Mockito.*;
 public class ConnectHandlerTest {
 
     private EmbeddedChannel channel;
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;

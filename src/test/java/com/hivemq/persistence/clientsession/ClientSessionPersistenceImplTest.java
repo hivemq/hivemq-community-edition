@@ -36,9 +36,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import util.InitFutureUtilsExecutorRule;
 import util.TestSingleWriterFactory;
 
 import java.util.Map;
@@ -50,9 +48,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class ClientSessionPersistenceImplTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     private ClientSessionLocalPersistence localPersistence;
     private ClientSessionSubscriptionPersistence subscriptionPersistence;

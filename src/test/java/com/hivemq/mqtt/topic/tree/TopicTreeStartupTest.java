@@ -32,11 +32,9 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 
 import java.util.Set;
 
@@ -52,9 +50,6 @@ import static org.mockito.Mockito.when;
  * @author Dominik Obermaier
  */
 public class TopicTreeStartupTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule executorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     ClientSessionPersistence clientSessionPersistence;

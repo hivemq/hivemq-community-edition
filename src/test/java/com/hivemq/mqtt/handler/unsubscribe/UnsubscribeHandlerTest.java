@@ -32,12 +32,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
-import util.InitFutureUtilsExecutorRule;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,9 +53,6 @@ import static org.mockito.Mockito.when;
  */
 @SuppressWarnings("unchecked")
 public class UnsubscribeHandlerTest {
-
-    @Rule
-    public @NotNull InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;

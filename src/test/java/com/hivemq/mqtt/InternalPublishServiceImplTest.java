@@ -29,12 +29,10 @@ import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicSubscribers;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.InitFutureUtilsExecutorRule;
 import util.TestException;
 import util.TestMessageUtil;
 
@@ -55,9 +53,6 @@ import static org.mockito.Mockito.*;
  */
 @SuppressWarnings("unchecked")
 public class InternalPublishServiceImplTest {
-
-    @Rule
-    public InitFutureUtilsExecutorRule initFutureUtilsExecutorRule = new InitFutureUtilsExecutorRule();
 
     @Mock
     private RetainedMessagePersistence retainedMessagePersistence;
