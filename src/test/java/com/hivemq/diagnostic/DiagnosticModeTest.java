@@ -19,48 +19,39 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.diagnostic.data.DiagnosticData;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DiagnosticModeTest {
 
-    private AutoCloseable closeableMock;
-
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    private final @NotNull DiagnosticData diagnosticData = mock(DiagnosticData.class);
 
-    @Mock
-    private DiagnosticData diagnosticData;
+    private final @NotNull SystemInformation systemInformation = mock(SystemInformation.class);
 
-    @Mock
-    private SystemInformation systemInformation;
+    private @NotNull File hivemqHomeFolder;
 
-    private File hivemqHomeFolder;
+    private @NotNull MetricRegistry metricRegistry;
 
-    private MetricRegistry metricRegistry;
-
-    private DiagnosticMode diagnosticMode;
+    private @NotNull DiagnosticMode diagnosticMode;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         hivemqHomeFolder = temporaryFolder.newFolder();
 
         when(diagnosticData.get()).thenReturn("value");
@@ -68,20 +59,19 @@ public class DiagnosticModeTest {
         when(systemInformation.getHiveMQHomeFolder()).thenReturn(hivemqHomeFolder);
 
         metricRegistry = new MetricRegistry();
-        System.setProperty("hivemq.home", hivemqHomeFolder.getAbsolutePath());
+
+        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (diagnosticMode != null) {
             diagnosticMode.stop();
         }
-        closeableMock.close();
     }
 
     @Test(timeout = 5000)
     public void test_metric_logging() throws Exception {
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
         assertTrue(diagnosticsFolder.isDirectory());
@@ -99,7 +89,6 @@ public class DiagnosticModeTest {
 
     @Test
     public void test_diagnostic_mode_creates_files() throws Exception {
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
 
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
@@ -121,7 +110,6 @@ public class DiagnosticModeTest {
         assertTrue(diagnosticsFolder.createNewFile());
         assertTrue(diagnosticsFolder.isFile());
 
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
 
         //We're making sure that the file was deleted and a folder is now there instead
@@ -129,10 +117,9 @@ public class DiagnosticModeTest {
     }
 
     @Test
-    public void test_can_not_create_diagnostic_folder() throws Exception {
+    public void test_can_not_create_diagnostic_folder() {
         hivemqHomeFolder.setWritable(false);
 
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
 
         //No Exception, this is good!
@@ -146,7 +133,6 @@ public class DiagnosticModeTest {
         assertTrue(diagnosticsFolder.createNewFile());
         hivemqHomeFolder.setWritable(false);
 
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
 
         //No Exception, this is good!
@@ -163,7 +149,6 @@ public class DiagnosticModeTest {
         final File migrationLogFile = new File(logFolder, DiagnosticMode.FILE_NAME_MIGRATION_LOG);
         assertTrue(migrationLogFile.createNewFile());
 
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
         diagnosticMode.init();
 
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
