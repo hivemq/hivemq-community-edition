@@ -29,4 +29,6 @@ public class SystemProperties {
     public static final String DATA_FOLDER = "hivemq.data.folder";
 
     public static final String EXTENSIONS_FOLDER = "hivemq.extensions.folder";
+
+    public static final String DIAGNOSTIC_MODE = "diagnosticMode";
 }

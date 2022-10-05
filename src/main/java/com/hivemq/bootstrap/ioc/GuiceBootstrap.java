@@ -24,6 +24,7 @@ import com.google.inject.Stage;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.bootstrap.netty.ioc.NettyModule;
 import com.hivemq.configuration.HivemqId;
+import com.hivemq.configuration.SystemProperties;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.ioc.ConfigurationModule;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -61,7 +62,7 @@ public class GuiceBootstrap {
             final @NotNull Injector persistenceInjector,
             final @NotNull LifecycleModule lifecycleModule) {
 
-        if (!Boolean.parseBoolean(System.getProperty("diagnosticMode"))) {
+        if (!Boolean.parseBoolean(System.getProperty(SystemProperties.DIAGNOSTIC_MODE))) {
             log.trace("Turning Guice stack traces off");
             System.setProperty("guice_include_stack_traces", "OFF");
         }

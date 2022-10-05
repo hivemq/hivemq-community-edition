@@ -16,6 +16,7 @@
 package com.hivemq.diagnostic;
 
 import com.google.inject.AbstractModule;
+import com.hivemq.configuration.SystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class DiagnosticModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        final boolean diagnosticMode = Boolean.parseBoolean(System.getProperty("diagnosticMode"));
+        final boolean diagnosticMode = Boolean.parseBoolean(System.getProperty(SystemProperties.DIAGNOSTIC_MODE));
         if (diagnosticMode) {
             log.info("Starting with Diagnostic mode");
             bind(DiagnosticMode.class).asEagerSingleton();

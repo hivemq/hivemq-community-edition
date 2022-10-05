@@ -16,6 +16,7 @@
 package com.hivemq.diagnostic;
 
 import com.google.inject.*;
+import com.hivemq.configuration.SystemProperties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -30,7 +31,7 @@ public class DiagnosticModuleTest {
 
     @Test
     public void test_diagnostic_mode_enabled() throws Exception {
-        System.setProperty("diagnosticMode", "true");
+        System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "true");
         try {
 
             Guice.createInjector(new DiagnosticModule());
@@ -42,7 +43,7 @@ public class DiagnosticModuleTest {
 
     @Test
     public void test_diagnostic_mode_disabled() throws Exception {
-        System.setProperty("diagnosticMode", "false");
+        System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "false");
 
         final Injector injector = Guice.createInjector(new DiagnosticModule());
 
