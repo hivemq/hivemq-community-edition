@@ -17,23 +17,28 @@ package com.hivemq.diagnostic;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.diagnostic.data.DiagnosticData;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class DiagnosticModeTest {
 
@@ -44,11 +49,17 @@ public class DiagnosticModeTest {
 
     private final @NotNull SystemInformation systemInformation = mock(SystemInformation.class);
 
+    private final @NotNull ShutdownHooks shutdownHooks = mock(ShutdownHooks.class);
+
+    private final @NotNull ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+
     private @NotNull File hivemqHomeFolder;
 
     private @NotNull MetricRegistry metricRegistry;
 
     private @NotNull DiagnosticMode diagnosticMode;
+
+    private @Nullable HiveMQShutdownHook shutdownHook;
 
     @Before
     public void setUp() throws Exception {
@@ -58,21 +69,38 @@ public class DiagnosticModeTest {
         when(systemInformation.getLogFolder()).thenReturn(temporaryFolder.newFolder());
         when(systemInformation.getHiveMQHomeFolder()).thenReturn(hivemqHomeFolder);
 
+        when(executor.scheduleWithFixedDelay(any(), anyLong(), anyLong(), any())).thenAnswer(invocation -> {
+            assertTrue(invocation.getArgument(0) instanceof Runnable);
+            final Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return mock(ScheduledFuture.class);
+        });
+        when(executor.awaitTermination(anyLong(), any())).thenReturn(true);
+
         metricRegistry = new MetricRegistry();
 
-        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry);
+        diagnosticMode = new DiagnosticMode(diagnosticData, systemInformation, metricRegistry, shutdownHooks, executor);
     }
 
     @After
     public void tearDown() {
-        if (diagnosticMode != null) {
-            diagnosticMode.stop();
+        if (shutdownHook != null) {
+            shutdownHook.run();
+            verify(executor).shutdown();
         }
+    }
+
+    private void captureShutdownHook() {
+        final ArgumentCaptor<HiveMQShutdownHook> stopShutdownHookCaptor =
+                ArgumentCaptor.forClass(HiveMQShutdownHook.class);
+        verify(shutdownHooks).add(stopShutdownHookCaptor.capture());
+        shutdownHook = stopShutdownHookCaptor.getValue();
     }
 
     @Test(timeout = 5000)
     public void test_metric_logging() throws Exception {
         diagnosticMode.init();
+        captureShutdownHook();
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
         assertTrue(diagnosticsFolder.isDirectory());
 
@@ -90,6 +118,7 @@ public class DiagnosticModeTest {
     @Test
     public void test_diagnostic_mode_creates_files() throws Exception {
         diagnosticMode.init();
+        captureShutdownHook();
 
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
         assertTrue(diagnosticsFolder.isDirectory());
@@ -111,6 +140,7 @@ public class DiagnosticModeTest {
         assertTrue(diagnosticsFolder.isFile());
 
         diagnosticMode.init();
+        captureShutdownHook();
 
         //We're making sure that the file was deleted and a folder is now there instead
         assertTrue(diagnosticsFolder.isDirectory());
@@ -121,6 +151,7 @@ public class DiagnosticModeTest {
         hivemqHomeFolder.setWritable(false);
 
         diagnosticMode.init();
+        // Expect init to have failed and logged an error message. No need to get the shutdownHook.
 
         //No Exception, this is good!
         assertTrue(hivemqHomeFolder.listFiles().length == 0);
@@ -134,6 +165,7 @@ public class DiagnosticModeTest {
         hivemqHomeFolder.setWritable(false);
 
         diagnosticMode.init();
+        // Expect init to have failed and logged an error message. No need to get the shutdownHook.
 
         //No Exception, this is good!
         assertNull(diagnosticsFolder.listFiles());
@@ -150,6 +182,7 @@ public class DiagnosticModeTest {
         assertTrue(migrationLogFile.createNewFile());
 
         diagnosticMode.init();
+        // Expect init to have failed and logged an error message. No need to get the shutdownHook.
 
         final File diagnosticsFolder = new File(hivemqHomeFolder, DiagnosticMode.FILE_NAME_DIAGNOSTICS_FOLDER);
         final File file = new File(diagnosticsFolder, DiagnosticMode.FILE_NAME_MIGRATION_LOG);
