@@ -52,8 +52,10 @@ public class ExtensionPriorityComparator implements Comparator<String> {
 
         if (extension1.getPriority() > extension2.getPriority()) {
             return -1;
-        } else {
+        } else if (extension1.getPriority() < extension2.getPriority()) {
             return 1;
+        } else {
+            return o1.compareTo(o2);
         }
     }
 }
