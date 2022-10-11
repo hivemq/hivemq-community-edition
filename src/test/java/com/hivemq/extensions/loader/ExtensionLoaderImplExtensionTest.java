@@ -17,6 +17,7 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -241,7 +242,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     public void loadExtensions_folderDoesNotExist_permissive() throws Exception {
         final File extensionFolder = temporaryFolder.newFolder();
         assertTrue(extensionFolder.delete());
-        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+        final @NotNull ImmutableSet<HiveMQExtensionEvent> hiveMQExtensionEvents =
                 extensionLoader.loadExtensions(extensionFolder.toPath(), true, ExtensionMain.class);
 
         assertTrue(hiveMQExtensionEvents.isEmpty());
@@ -251,7 +252,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     public void loadExtensions_folderNotReadable_permissive() throws Exception {
         final File extensionFolder = temporaryFolder.newFolder();
         assertTrue(extensionFolder.setReadable(false));
-        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+        final @NotNull ImmutableSet<HiveMQExtensionEvent> hiveMQExtensionEvents =
                 extensionLoader.loadExtensions(extensionFolder.toPath(), true, ExtensionMain.class);
 
         assertTrue(hiveMQExtensionEvents.isEmpty());
@@ -260,7 +261,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     @Test
     public void loadExtensions_folderIsNotAFolder_permissive() throws Exception {
         final File extensionFolder = temporaryFolder.newFile();
-        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents =
+        final @NotNull ImmutableSet<HiveMQExtensionEvent> hiveMQExtensionEvents =
                 extensionLoader.loadExtensions(extensionFolder.toPath(), true, ExtensionMain.class);
 
         assertTrue(hiveMQExtensionEvents.isEmpty());
@@ -331,7 +332,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
 
         assertTrue(extensionFolder.setWritable(false));
 
-        final ImmutableList<HiveMQExtensionEvent> extensionEvents =
+        final @NotNull ImmutableSet<HiveMQExtensionEvent> extensionEvents =
                 extensionLoader.loadExtensions(extensionsFolder.toPath(), false, ExtensionMain.class);
         assertEquals(0, extensionEvents.size());
 
@@ -364,7 +365,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
 
         javaArchive.as(ZipExporter.class).exportTo(file);
 
-        final ImmutableList<HiveMQExtensionEvent> extensionEvents =
+        final @NotNull ImmutableSet<HiveMQExtensionEvent> extensionEvents =
                 extensionLoader.loadExtensions(extensionsFolder.toPath(), false, ExtensionMain.class);
         assertEquals(0, extensionEvents.size());
 

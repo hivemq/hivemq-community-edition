@@ -16,6 +16,7 @@
 
 package com.hivemq.extensions;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
@@ -76,7 +77,7 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
         final Path extensionFolder = systemInformation.getExtensionsFolder().toPath();
 
         //load already installed extensions
-        final ImmutableList<HiveMQExtensionEvent> hiveMQExtensionEvents = extensionLoader.loadExtensions(extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
+        final @NotNull ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents = extensionLoader.loadExtensions(extensionFolder, systemInformation.isEmbedded(), ExtensionMain.class);
 
         final ImmutableList.Builder<HiveMQExtensionEvent> extensionEventBuilder = ImmutableList.<HiveMQExtensionEvent>builder().addAll(hiveMQExtensionEvents);
 

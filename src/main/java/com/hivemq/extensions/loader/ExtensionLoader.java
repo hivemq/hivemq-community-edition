@@ -16,7 +16,7 @@
 
 package com.hivemq.extensions.loader;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableCollection;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -52,7 +52,7 @@ public interface ExtensionLoader {
      *                                            of the folder
      */
     @ReadOnly
-    @NotNull <T extends ExtensionMain> ImmutableList<HiveMQExtensionEvent> loadExtensions(
+    @NotNull <T extends ExtensionMain> ImmutableCollection<HiveMQExtensionEvent> loadExtensions(
             final @NotNull Path extensionFolder, boolean permissive, final @NotNull Class<T> desiredExtensionClass);
 
     /**
