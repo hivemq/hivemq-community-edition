@@ -17,8 +17,6 @@ package com.hivemq.security.ioc;
 
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.security.ssl.SslContextFactory;
-import com.hivemq.security.ssl.SslContextFactoryImpl;
 import com.hivemq.security.ssl.SslContextStore;
 import com.hivemq.security.ssl.SslFactory;
 
@@ -38,7 +36,6 @@ public class SecurityModule extends SingletonModule<Class<SecurityModule>> {
         bind(SslFactory.class).in(LazySingleton.class);
         bind(SslContextStore.class).in(LazySingleton.class);
 
-        bind(SslContextFactory.class).to(SslContextFactoryImpl.class);
         bind(ScheduledExecutorService.class).annotatedWith(Security.class)
                 .toProvider(SecurityExecutorProvider.class)
                 .in(LazySingleton.class);

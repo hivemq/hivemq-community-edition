@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
 import com.hivemq.util.DefaultSslEngineUtil;
 import io.netty.buffer.ByteBufAllocator;
@@ -41,37 +42,42 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class SslFactoryTest {
 
     @Mock
-    private SocketChannel socketChannel;
+    private @NotNull SocketChannel socketChannel;
 
     @Mock
-    private ByteBufAllocator byteBufAllocator;
+    private @NotNull ByteBufAllocator byteBufAllocator;
 
     @Mock
-    private ListeningScheduledExecutorService executorService;
+    private @NotNull ListeningScheduledExecutorService executorService;
 
-    private SslFactory sslFactory;
+    private @NotNull SslFactory sslFactory;
 
-    private TestKeyStoreGenerator testKeyStoreGenerator;
+    private @NotNull TestKeyStoreGenerator testKeyStoreGenerator;
     private final DefaultSslEngineUtil defaultSslEngineUtil = new DefaultSslEngineUtil();
 
-    private LogbackCapturingAppender logCapture;
+    private @NotNull LogbackCapturingAppender logCapture;
+
+    private @NotNull AutoCloseable openMocks;
 
     @Before
     public void before() {
-
-        MockitoAnnotations.initMocks(this);
+        openMocks = MockitoAnnotations.openMocks(this);
 
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(logger);
 
-        final SslContextStore sslContextStore = new SslContextStore(executorService, new SslUtil());
-        sslFactory = new SslFactory(sslContextStore, new SslContextFactoryImpl(new SslUtil()));
+        final SslContextStore sslContextStore = new SslContextStore(executorService, new SslContextFactory());
+        sslFactory = new SslFactory(sslContextStore);
 
         when(socketChannel.alloc()).thenReturn(byteBufAllocator);
 
@@ -80,7 +86,9 @@ public class SslFactoryTest {
 
     @After
     public void tearDown() throws Exception {
+        openMocks.close();
         LogbackCapturingAppender.Factory.cleanUp();
+        testKeyStoreGenerator.release();
     }
 
     @Test
@@ -133,6 +141,7 @@ public class SslFactoryTest {
 
 
         //Only check if the exception is really thrown and not caught somewhere by accident
+        //noinspection unused
         final SslContext sslContext = sslFactory.getSslContext(tls);
     }
 
@@ -157,6 +166,7 @@ public class SslFactoryTest {
 
 
         //Only check if the exception is really thrown and not caught somewhere by accident
+        //noinspection unused
         final SslContext sslContext = sslFactory.getSslContext(tls);
     }
 
@@ -438,6 +448,7 @@ public class SslFactoryTest {
                 .withHandshakeTimeout(10000)
                 .build();
 
+        //noinspection deprecation
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(0, "0", tls);
 
         sslFactory.verifySslAtBootstrap(tlsTcpListener, tls);
@@ -469,6 +480,7 @@ public class SslFactoryTest {
                 .withHandshakeTimeout(10000)
                 .build();
 
+        //noinspection deprecation
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(0, "0", tls);
 
         sslFactory.verifySslAtBootstrap(tlsTcpListener, tls);
