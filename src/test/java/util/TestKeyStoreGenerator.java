@@ -18,7 +18,11 @@ package util;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -35,7 +39,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
@@ -47,8 +58,15 @@ public class TestKeyStoreGenerator {
 
     public static final String KEY_ALIAS = "hivemqkeys";
 
+    private final @NotNull BouncyCastleProvider bouncyCastleProvider;
+
     public TestKeyStoreGenerator() {
-        Security.addProvider(new BouncyCastleProvider());
+        bouncyCastleProvider = new BouncyCastleProvider();
+        Security.addProvider(bouncyCastleProvider);
+    }
+
+    public void release() {
+        Security.removeProvider(bouncyCastleProvider.getName());
     }
 
     @NotNull
@@ -80,39 +98,6 @@ public class TestKeyStoreGenerator {
     }
 
     @NotNull
-    public File generateKeyStoreWithChain(final @NotNull String nameCert1, final @NotNull String nameCert2, final @NotNull String keystoreType, final String keyStorePassword, final String privateKeyPassword) throws Exception {
-        final KeyStore ks = KeyStore.getInstance(keystoreType);
-        ks.load(null);
-
-        final KeyPair keyPair = generateRSAKeyPair();
-        final X509Certificate certificate = generateX509Certificate(keyPair, nameCert1);
-        final X509Certificate certificate2 = generateX509Certificate(keyPair, nameCert2);
-
-        final X509Certificate[] certificateChain = {certificate, certificate2};
-
-        ks.setKeyEntry(KEY_ALIAS, keyPair.getPrivate(), privateKeyPassword.toCharArray(), certificateChain);
-
-        final File keyStoreFile = File.createTempFile(nameCert1, null);
-        keyStoreFile.deleteOnExit();
-
-        final FileOutputStream fos = new FileOutputStream(
-                keyStoreFile);
-        ks.store(fos, keyStorePassword.toCharArray());
-        fos.close();
-        return keyStoreFile;
-    }
-
-    @NotNull
-    public X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name) throws Exception {
-        return generateX509Certificate(keyPair, name, true);
-    }
-
-    @NotNull
-    public X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name, final boolean withX500) throws Exception {
-        return generateX509Certificate(keyPair, name, withX500, false);
-    }
-
-    @NotNull
     private X509Certificate generateX509Certificate(final @NotNull KeyPair keyPair, final @NotNull String name, final boolean withX500, final boolean eclipticCurve) throws Exception {
 
         final X500Name x500Name;
@@ -134,7 +119,7 @@ public class TestKeyStoreGenerator {
                 x500Name,
                 SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
 
-        final List<GeneralName> altNames = new ArrayList<GeneralName>();
+        final List<GeneralName> altNames = new ArrayList<>();
         altNames.add(new GeneralName(GeneralName.dNSName, "localhost"));
         altNames.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
         final GeneralNames subjectAltNames = GeneralNames.getInstance(new DERSequence(

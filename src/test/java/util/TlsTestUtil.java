@@ -20,9 +20,13 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class TlsTestUtil {
+public final class TlsTestUtil {
 
     public static @NotNull Tls createDefaultTLS() {
+        return createDefaultTLSBuilder().build();
+    }
+
+    public static @NotNull Tls.Builder createDefaultTLSBuilder() {
         return new Tls.Builder()
                 .withKeystorePath("")
                 .withKeystorePassword("")
@@ -31,21 +35,9 @@ public class TlsTestUtil {
                 .withHandshakeTimeout(10)
                 .withClientAuthMode(Tls.ClientAuthMode.NONE)
                 .withCipherSuites(new ArrayList<>())
-                .withProtocols(new ArrayList<>())
-                .build();
+                .withProtocols(new ArrayList<>());
     }
 
-    public static @NotNull Tls createTLS(int timeout) {
-        return new Tls.Builder()
-                .withKeystorePath("")
-                .withKeystorePassword("")
-                .withKeystoreType("JKS")
-                .withPrivateKeyPassword("")
-                .withHandshakeTimeout(timeout)
-                .withClientAuthMode(Tls.ClientAuthMode.NONE)
-                .withCipherSuites(new ArrayList<>())
-                .withProtocols(new ArrayList<>())
-                .build();
+    private TlsTestUtil() {
     }
-
 }

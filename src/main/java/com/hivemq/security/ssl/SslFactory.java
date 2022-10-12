@@ -33,106 +33,64 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author Christoph Schäbel
- */
 @LazySingleton
 public class SslFactory {
+    private static final @NotNull Logger log = LoggerFactory.getLogger(SslFactory.class);
 
     private final @NotNull SslContextStore sslContextStore;
-    private final @NotNull SslContextFactory sslContextFactory;
-
-
-    private static final Logger log = LoggerFactory.getLogger(SslFactory.class);
 
     @Inject
-    public SslFactory(@NotNull final SslContextStore sslContextStore,
-                      @NotNull final SslContextFactory sslContextFactory) {
+    public SslFactory(final @NotNull SslContextStore sslContextStore) {
         this.sslContextStore = sslContextStore;
-        this.sslContextFactory = sslContextFactory;
     }
 
-    @NotNull
-    public SslHandler getSslHandler(@NotNull final Channel ch, @NotNull final Tls tls, final @NotNull SslContext sslContext) throws SslException {
-
-        final SslHandler sslHandler = new SslHandler(getSslEngine(ch, tls, sslContext));
-
-        sslHandler.setHandshakeTimeoutMillis(tls.getHandshakeTimeout());
-
-        return sslHandler;
-    }
-
-    @NotNull
-    protected SSLEngine getSslEngine(@NotNull final Channel ch, @NotNull final Tls tls, @NotNull final SslContext sslContext) throws SslException {
+    public @NotNull SslHandler getSslHandler(
+            final @NotNull Channel ch, final @NotNull Tls tls, final @NotNull SslContext sslContext)
+            throws SslException {
 
         final SSLEngine sslEngine = sslContext.newEngine(ch.alloc());
 
-        //set chosen protocols if available
-        enableProtocols(sslEngine, tls.getProtocols());
-
-        //it's a server, so we do not use client mode
-        sslEngine.setUseClientMode(false);
-
         // if prefer server suites is null -> use default of the engine
-        if (tls.isPreferServerCipherSuites() != null) {
-
+        final Boolean preferServerCipherSuites = tls.isPreferServerCipherSuites();
+        if (preferServerCipherSuites != null) {
             final SSLParameters params = sslEngine.getSSLParameters();
-            params.setUseCipherSuitesOrder(tls.isPreferServerCipherSuites());
-
+            params.setUseCipherSuitesOrder(preferServerCipherSuites);
             sslEngine.setSSLParameters(params);
         }
 
-        //cert auth
-        if (Tls.ClientAuthMode.REQUIRED.equals(tls.getClientAuthMode())) {
-            sslEngine.setNeedClientAuth(true);
-        }
-
-        if (Tls.ClientAuthMode.OPTIONAL.equals(tls.getClientAuthMode())) {
-            sslEngine.setWantClientAuth(true);
-        }
-
-        return sslEngine;
+        final SslHandler sslHandler = new SslHandler(sslEngine);
+        sslHandler.setHandshakeTimeoutMillis(tls.getHandshakeTimeout());
+        return sslHandler;
     }
 
-    @NotNull
-    public SslContext getSslContext(@NotNull final Tls tls) throws SslException {
-
-        try {
-            final SslContext sslContextFromCache = sslContextStore.get(tls);
-            if (sslContextFromCache != null) {
-                return sslContextFromCache;
-            }
-
-            final SslContext sslContext = sslContextFactory.createSslContext(tls);
-            sslContextStore.put(tls, sslContext);
-            return sslContext;
-
-        } catch (final SSLException e) {
-            throw new SslException("Not able to create SSL server context", e);
-        }
+    public @NotNull SslContext getSslContext(final @NotNull Tls tls) throws SslException {
+        return sslContextStore.getAndInitAsync(tls);
     }
 
-    public void verifySslAtBootstrap(@NotNull final Listener listener, @NotNull final Tls tls) {
+    public void verifySslAtBootstrap(final @NotNull Listener listener, final @NotNull Tls tls) {
         try {
-            if (!sslContextStore.contains(tls)) {
-                final SslContext sslContext = sslContextFactory.createSslContext(tls);
-                sslContextStore.putAtStart(tls, sslContext);
-
+            sslContextStore.createAndInitIfAbsent(tls, sslContext -> {
                 final SSLEngine sslEngine = sslContext.newEngine(new PooledByteBufAllocator());
-                enableProtocols(sslEngine, tls.getProtocols());
-                log.info("Enabled protocols for {} at address {} and port {}: {}", listener.readableName(), listener.getBindAddress(), listener.getPort(), Arrays.toString(sslEngine.getEnabledProtocols()));
+                log.info("Enabled protocols for {} at address {} and port {}: {}",
+                        listener.readableName(),
+                        listener.getBindAddress(),
+                        listener.getPort(),
+                        Arrays.toString(sslEngine.getEnabledProtocols()));
                 final String[] enabledCipherSuites = sslEngine.getEnabledCipherSuites();
-                log.info("Enabled cipher suites for {} at address {} and port {}: {}", listener.readableName(), listener.getBindAddress(), listener.getPort(), Arrays.toString(enabledCipherSuites));
+                log.info("Enabled cipher suites for {} at address {} and port {}: {}",
+                        listener.readableName(),
+                        listener.getBindAddress(),
+                        listener.getPort(),
+                        Arrays.toString(enabledCipherSuites));
 
                 final List<String> cipherSuites = tls.getCipherSuites();
-                if (cipherSuites.size() > 0) {
+                if (!cipherSuites.isEmpty()) {
                     final Set<String> unknownCipherSuitesSet;
 
                     if (sslContext instanceof OpenSslServerContext) {
@@ -153,28 +111,23 @@ public class SslFactory {
                             }
                         }
                     } else {
-                        unknownCipherSuitesSet = Sets.difference(ImmutableSet.copyOf(cipherSuites), ImmutableSet.copyOf(enabledCipherSuites));
+                        unknownCipherSuitesSet = Sets.difference(ImmutableSet.copyOf(cipherSuites),
+                                ImmutableSet.copyOf(enabledCipherSuites));
                     }
 
-                    if (unknownCipherSuitesSet.size() > 0) {
-                        log.warn("Unknown cipher suites for {} at address {} and port {}: {}", listener.readableName(), listener.getBindAddress(), listener.getPort(), unknownCipherSuitesSet);
+                    if (!unknownCipherSuitesSet.isEmpty()) {
+                        log.warn("Unknown cipher suites for {} at address {} and port {}: {}",
+                                listener.readableName(),
+                                listener.getBindAddress(),
+                                listener.getPort(),
+                                unknownCipherSuitesSet);
                     }
                 }
-            }
+            });
         } catch (final Exception e) {
             log.error("Not able to create SSL server context. Reason: {}", e.getMessage());
             log.debug("Original exception", e);
             throw new UnrecoverableException(false);
         }
     }
-
-
-    private void enableProtocols(@NotNull final SSLEngine sslEngine, @NotNull final List<String> protocolList) {
-        if (protocolList.size() > 0) {
-            final String[] protocols = protocolList.toArray(new String[protocolList.size()]);
-            sslEngine.setEnabledProtocols(protocols);
-        }
-    }
-
-
 }
