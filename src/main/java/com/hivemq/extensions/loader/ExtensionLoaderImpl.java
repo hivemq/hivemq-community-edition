@@ -18,6 +18,7 @@ package com.hivemq.extensions.loader;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.hivemq.HiveMQServer;
@@ -72,7 +73,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
     }
 
     @ReadOnly
-    public <T extends ExtensionMain> @NotNull ImmutableList<HiveMQExtensionEvent> loadExtensions(
+    public <T extends ExtensionMain> @NotNull ImmutableSet<HiveMQExtensionEvent> loadExtensions(
             final @NotNull Path extensionFolder,
             final boolean permissive,
             final @NotNull Class<T> desiredExtensionClass) {
@@ -89,12 +90,12 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         } catch (final @NotNull IllegalArgumentException exception) {
             if (permissive) {
                 log.warn("Extension folder could not be used: \"{}\"", exception.getMessage());
-                return ImmutableList.of();
+                return ImmutableSet.of();
             }
             throw exception;
         }
 
-        final ImmutableList.Builder<HiveMQExtensionEvent> extensions = ImmutableList.builder();
+        final ImmutableSet.Builder<HiveMQExtensionEvent> extensions = ImmutableSet.builder();
         try {
             final Collection<Path> folders = ExtensionUtil.findAllExtensionFolders(extensionFolder);
 

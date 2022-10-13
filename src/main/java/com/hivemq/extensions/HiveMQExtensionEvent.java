@@ -18,27 +18,28 @@ package com.hivemq.extensions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * @author Georg Held
  */
 public class HiveMQExtensionEvent {
     private final Change change;
-    private final String pluginId;
+    private final String extensionId;
     private final int priority;
-    private final Path pluginFolder;
+    private final Path extensionFolder;
     private final boolean embedded;
 
     public HiveMQExtensionEvent(
             @NotNull final Change change,
-            @NotNull final String pluginId,
+            @NotNull final String extensionId,
             final int priority,
-            @NotNull final Path pluginFolder,
+            @NotNull final Path extensionFolder,
             final boolean embedded) {
         this.change = change;
-        this.pluginId = pluginId;
+        this.extensionId = extensionId;
         this.priority = priority;
-        this.pluginFolder = pluginFolder;
+        this.extensionFolder = extensionFolder;
         this.embedded = embedded;
     }
 
@@ -48,8 +49,8 @@ public class HiveMQExtensionEvent {
     }
 
     @NotNull
-    public String getPluginId() {
-        return pluginId;
+    public String getExtensionId() {
+        return extensionId;
     }
 
     public int getPriority() {
@@ -57,8 +58,8 @@ public class HiveMQExtensionEvent {
     }
 
     @NotNull
-    public Path getPluginFolder() {
-        return pluginFolder;
+    public Path getExtensionFolder() {
+        return extensionFolder;
     }
 
     public boolean isEmbedded() {
@@ -66,4 +67,27 @@ public class HiveMQExtensionEvent {
     }
 
     public enum Change {ENABLE, DISABLE}
+
+    @Override
+    public String toString() {
+        return "HiveMQExtensionEvent{" +
+                "change=" + change +
+                ", extensionId='" + extensionId + '\'' +
+                ", priority=" + priority +
+                ", extensionFolder=" + extensionFolder +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HiveMQExtensionEvent that = (HiveMQExtensionEvent) o;
+        return priority == that.priority && change == that.change && Objects.equals(extensionId, that.extensionId) && Objects.equals(extensionFolder, that.extensionFolder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(change, extensionId, priority, extensionFolder);
+    }
 }
