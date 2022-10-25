@@ -231,6 +231,7 @@ val hivemqZip by tasks.registering(Zip::class) {
 
     from("src/distribution") { exclude("**/.gitkeep") }
     from("src/main/resources/config.xml") { into("conf") }
+    from("src/main/resources/config.xsd") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
 }
