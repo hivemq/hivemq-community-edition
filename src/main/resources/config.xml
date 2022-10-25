@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<hivemq>
+<hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="config.xsd">
 
     <listeners>
         <tcp-listener>
