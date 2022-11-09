@@ -78,7 +78,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.getPendingWills().get("client");
         assertEquals(pendingWill.getDelayInterval(), 5);
@@ -91,7 +91,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(10).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 5, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         final PendingWillMessages.PendingWill pendingWill = pendingWillMessages.getPendingWills().get("client");
         assertEquals(pendingWill.getDelayInterval(), 5);
@@ -104,7 +104,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(0).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
         verify(clientSessionPersistence).deleteWill(eq("client"));
@@ -117,7 +117,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(10).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 0, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
         verify(clientSessionPersistence).deleteWill(eq("client"));
@@ -130,7 +130,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         when(clientSessionPersistence.pendingWills()).thenReturn(Futures.immediateFuture(ImmutableMap.of("client1",
                 new PendingWillMessages.PendingWill(3, System.currentTimeMillis()))));
@@ -148,7 +148,7 @@ public class PendingWillMessagesTest {
                 .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
-        pendingWillMessages.addWill("client", clientSession);
+        pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
 
         final PendingWillMessages.CheckWillsTask checkWillsTask = pendingWillMessages.new CheckWillsTask();
         checkWillsTask.run();
@@ -171,5 +171,29 @@ public class PendingWillMessagesTest {
         checkWillsTask.run();
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq("client"));
+    }
+
+    @Test
+    public void sendWillIfPending_sendsPendingWillIfAvailable_andRemovesIt() {
+        final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder()
+                .withHivemqId("hivemqId")
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE).withTopic("topic")
+                .withDelayInterval(1000)
+                .build();
+        final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
+        final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
+        final String clientId = "client";
+        when(clientSessionLocalPersistence.getSession(eq(clientId), anyBoolean())).thenReturn(clientSession);
+
+        pendingWillMessages.sendWillIfPending("foobar");
+        verify(publishService, never()).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
+        pendingWillMessages.sendOrEnqueueWillIfAvailable(clientId, clientSession);
+        verify(publishService, never()).publish(any(PUBLISH.class), any(ExecutorService.class), eq(clientId));
+        pendingWillMessages.sendWillIfPending(clientId);
+        verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq(clientId));
+        pendingWillMessages.sendWillIfPending(clientId);
+        verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), eq(clientId));
     }
 }

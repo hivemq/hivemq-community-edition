@@ -18,7 +18,6 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
@@ -27,7 +26,6 @@ import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.persistence.ioc.annotation.Persistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Checkpoints;
 import com.hivemq.util.Exceptions;
 import org.slf4j.Logger;
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -74,21 +71,37 @@ public class PendingWillMessages {
         executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_INTERVAL_SEC, WILL_DELAY_CHECK_INTERVAL_SEC, TimeUnit.SECONDS);
     }
 
-    public void addWill(final @NotNull String clientId, final @NotNull ClientSession session) {
+    public void sendOrEnqueueWillIfAvailable(final @NotNull String clientId, final @NotNull ClientSession session) {
         checkNotNull(clientId, "Client id must not be null");
         checkNotNull(session, "Client session must not be null");
-        final ClientSessionWill willPublish = session.getWillPublish();
+        final ClientSessionWill sessionWill = session.getWillPublish();
         if (session.getWillPublish() == null) {
             return;
         }
-        if (willPublish.getDelayInterval() == 0 || session.getSessionExpiryInterval() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
-            sendWill(clientId, session);
+        if (sessionWill.getDelayInterval() == 0 || session.getSessionExpiryInterval() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
+            sendWill(clientId, publishFromWill(sessionWill));
             return;
         }
-        pendingWills.put(clientId, new PendingWill(Math.min(willPublish.getDelayInterval(), session.getSessionExpiryInterval()), System.currentTimeMillis()));
+        pendingWills.put(clientId, new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryInterval()), System.currentTimeMillis()));
     }
 
-    public void cancelWill(final @NotNull String clientId) {
+    public void sendWillIfPending(final @NotNull String clientId) {
+        checkNotNull(clientId, "Client id must not be null");
+        final PendingWill pendingWill = pendingWills.remove(clientId);
+        if (pendingWill != null) {
+            getAndSendPendingWill(clientId);
+        }
+    }
+
+    private void getAndSendPendingWill(final @NotNull String clientId) {
+        final ClientSession session = clientSessionLocalPersistence.getSession(clientId, false);
+        checkNotNull(session, "Missing expected session to get will message from for client: " + clientId);
+        final ClientSessionWill sessionWill = session.getWillPublish();
+        checkNotNull(sessionWill, "Missing expected will message in session of client: " + clientId);
+        sendWill(clientId, publishFromWill(sessionWill));
+    }
+
+    public void cancelWillIfPending(final @NotNull String clientId) {
         pendingWills.remove(clientId);
     }
 
@@ -108,29 +121,24 @@ public class PendingWillMessages {
         }, MoreExecutors.directExecutor());
     }
 
-    private void sendWill(final @NotNull String clientId, final @Nullable ClientSession session) {
-        if (session != null && session.getWillPublish() != null) {
-
-            final PUBLISH publish = publishFromWill(session.getWillPublish());
-
-            Futures.addCallback(publishService.publish(publish, executorService, clientId), new FutureCallback<>() {
-                @Override
-                public void onSuccess(final PublishReturnCode result) {
-                    metricsHolder.getPublishedWillMessagesCount().inc();
-                }
-
-                @Override
-                public void onFailure(final @NotNull Throwable t) {
-                    log.error("Publish of Will message failed.", t);
-                    Exceptions.rethrowError(t);
-                }
-            }, MoreExecutors.directExecutor());
-
-
-            final ListenableFuture<Void> future = clientSessionPersistence.deleteWill(clientId);
-            if (Checkpoints.enabled()) {
-                future.addListener(() -> Checkpoints.checkpoint("pending-will-removed"), MoreExecutors.directExecutor());
+    private void sendWill(final @NotNull String clientId, final @NotNull PUBLISH willPublish) {
+        Futures.addCallback(publishService.publish(willPublish, executorService, clientId), new FutureCallback<>() {
+            @Override
+            public void onSuccess(final @NotNull PublishReturnCode result) {
+                metricsHolder.getPublishedWillMessagesCount().inc();
             }
+
+            @Override
+            public void onFailure(final @NotNull Throwable t) {
+                log.error("Publish of Will message failed.", t);
+                Exceptions.rethrowError(t);
+            }
+        }, MoreExecutors.directExecutor());
+
+
+        final ListenableFuture<Void> future = clientSessionPersistence.deleteWill(clientId);
+        if (Checkpoints.enabled()) {
+            future.addListener(() -> Checkpoints.checkpoint("pending-will-removed"), MoreExecutors.directExecutor());
         }
     }
 
@@ -151,15 +159,17 @@ public class PendingWillMessages {
         @Override
         public void run() {
             try {
-                final Iterator<Map.Entry<String, PendingWill>> iterator = pendingWills.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    final Map.Entry<String, PendingWill> entry = iterator.next();
-                    final String clientId = entry.getKey();
-                    final PendingWill pendingWill = entry.getValue();
-                    if (pendingWill.getStartTime() + pendingWill.getDelayInterval() * 1000 < System.currentTimeMillis()) {
-                        sendWill(clientId, clientSessionLocalPersistence.getSession(clientId, false));
-                        iterator.remove();
-                    }
+                for (final String clientId : pendingWills.keySet()) {
+                    // To avoid a race that could lead to sending duplicates, we must use a compute method to atomically
+                    // treat a PendingWill because there could be concurrent calls to sendWillIfPending which remove and
+                    // treat an entry.
+                    pendingWills.computeIfPresent(clientId, (clientIdKey, pendingWill) -> {
+                        if (pendingWill.getStartTime() + pendingWill.getDelayInterval() * 1000 < System.currentTimeMillis()) {
+                            getAndSendPendingWill(clientIdKey);
+                            return null;
+                        }
+                        return pendingWill;
+                    });
                 }
             } catch (final Exception e) {
                 log.error("Exception while checking pending will messages", e);
