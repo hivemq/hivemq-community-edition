@@ -105,7 +105,7 @@ public class ClientSessionPersistenceImplTest {
         when(localPersistence.disconnect(eq("client"), anyLong(), eq(true), anyInt(), eq(10L))).
                 thenReturn(previousSession);
         clientSessionPersistence.clientDisconnected("client", true, 10).get();
-        verify(pendingWillMessages).addWill("client", previousSession);
+        verify(pendingWillMessages).sendOrEnqueueWillIfAvailable("client", previousSession);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ClientSessionPersistenceImplTest {
         when(connectionPersistence.get("client")).thenReturn(null);
         final Boolean result = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
-        verify(pendingWillMessages).cancelWill("client");
+        verify(pendingWillMessages).cancelWillIfPending("client");
     }
 
     @Test
@@ -150,7 +150,7 @@ public class ClientSessionPersistenceImplTest {
         channel.disconnect();
         final Boolean result = future.get();
         assertTrue(result);
-        verify(pendingWillMessages).cancelWill("client");
+        verify(pendingWillMessages).cancelWillIfPending("client");
         verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), any());
     }
 
@@ -166,7 +166,7 @@ public class ClientSessionPersistenceImplTest {
         channel.disconnect();
         final Boolean result = future.get();
         assertTrue(result);
-        verify(pendingWillMessages).cancelWill("client");
+        verify(pendingWillMessages).cancelWillIfPending("client");
         verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER), eq("reason-string"));
     }
 

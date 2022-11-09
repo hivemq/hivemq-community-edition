@@ -122,7 +122,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         singleWriter.submit(client, (SingleWriterService.Task<Void>) (bucketIndex) -> {
             final ClientSession disconnectSession = localPersistence.disconnect(client, timestamp, sendWill, bucketIndex, sessionExpiry);
             if (sendWill) {
-                pendingWillMessages.addWill(client, disconnectSession);
+                pendingWillMessages.sendOrEnqueueWillIfAvailable(client, disconnectSession);
             }
 
             final ListenableFuture<Void> removeQos0Future = clientQueuePersistence.removeAllQos0Messages(client, false);
@@ -148,7 +148,6 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         checkNotNull(client, "Client id must not be null");
 
-        pendingWillMessages.cancelWill(client);
         final long timestamp = System.currentTimeMillis();
 
         ClientSessionWill sessionWill = null;
@@ -173,9 +172,20 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 final Long previousTimestamp = connectResult.getPreviousTimestamp();
                 final ClientSession previousClientSession = connectResult.getPreviousClientSession();
 
-                final ListenableFuture<Void> cleanupFuture;
+                // Send any pending will if requesting a clean start.
+                // As per the specification, a clean start "ends" any existing session and requires its will to be sent,
+                // if available.
+                // Therefore, immediately send any pending will that was created during the preceding disconnect.
+                // If no clean start is required, a client might be re-connecting to the existing session.
+                // In this case, cancel any pending send of a will.
+                if (cleanStart) {
+                    pendingWillMessages.sendWillIfPending(client);
+                } else {
+                    pendingWillMessages.cancelWillIfPending(client);
+                }
 
                 // CleanUp the client session if the session is expired OR the client is clean start client.
+                final ListenableFuture<Void> cleanupFuture;
                 if (cleanStart) {
                     cleanupFuture = cleanClientData(client);
                 } else {
@@ -217,7 +227,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             return Futures.immediateFuture(false);
         }
         if (preventLwtMessage) {
-            pendingWillMessages.cancelWill(clientId);
+            pendingWillMessages.cancelWillIfPending(clientId);
         }
 
         log.debug("Request forced client disconnect for client {}.", clientId);
