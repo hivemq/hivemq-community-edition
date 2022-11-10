@@ -358,7 +358,9 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @Override
     public @NotNull ListenableFuture<Void> cleanUp(final int bucketIndex) {
-        return singleWriter.submit(bucketIndex, new ClientSessionCleanUpTask(localPersistence, this));
+        return singleWriter.submit(
+                bucketIndex,
+                new ClientSessionCleanUpTask(localPersistence, this, pendingWillMessages));
     }
 
     @Override
