@@ -20,6 +20,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
+import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.util.Checkpoints;
 
@@ -29,19 +30,23 @@ public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> 
 
     private final @NotNull ClientSessionLocalPersistence localPersistence;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
+    private final @NotNull PendingWillMessages pendingWillMessages;
 
     public ClientSessionCleanUpTask(
             final @NotNull ClientSessionLocalPersistence localPersistence,
-            final @NotNull ClientSessionPersistenceImpl clientSessionPersistence) {
+            final @NotNull ClientSessionPersistenceImpl clientSessionPersistence,
+            final @NotNull PendingWillMessages pendingWillMessages) {
 
         this.localPersistence = localPersistence;
         this.clientSessionPersistence = clientSessionPersistence;
+        this.pendingWillMessages = pendingWillMessages;
     }
 
     @Override
     public @Nullable Void doTask(final int bucketIndex) {
         final Set<String> expiredSessions = localPersistence.cleanUp(bucketIndex);
         for (final String expiredSession : expiredSessions) {
+            pendingWillMessages.sendWillIfPending(expiredSession);
             clientSessionPersistence.cleanClientData(expiredSession);
         }
         Checkpoints.checkpoint("ClientSessionCleanUpFinished");

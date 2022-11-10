@@ -15,9 +15,9 @@
  */
 package com.hivemq.persistence.clientsession.task;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
+import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -39,18 +38,23 @@ public class ClientSessionCleanUpTaskTest {
     @Mock
     private ClientSessionPersistenceImpl clientSessionPersistence;
 
+    @Mock
+    private PendingWillMessages pendingWillMessages;
+
     private ClientSessionCleanUpTask task;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        task = new ClientSessionCleanUpTask(localPersistence, clientSessionPersistence);
+        task = new ClientSessionCleanUpTask(localPersistence, clientSessionPersistence, pendingWillMessages);
     }
 
     @Test
-    public void test_clean_up_clean_task() throws Exception {
-        Mockito.when(localPersistence.cleanUp(0)).thenReturn(ImmutableSet.of("client"));
+    public void test_clean_up_clean_task() {
+        final String clientId = "client";
+        Mockito.when(localPersistence.cleanUp(0)).thenReturn(ImmutableSet.of(clientId));
         task.doTask(0);
-        verify(clientSessionPersistence, times(1)).cleanClientData("client");
+        verify(pendingWillMessages).sendWillIfPending(clientId);
+        verify(clientSessionPersistence).cleanClientData(clientId);
     }
 }
