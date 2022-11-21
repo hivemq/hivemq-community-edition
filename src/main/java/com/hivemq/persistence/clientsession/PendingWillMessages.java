@@ -86,10 +86,16 @@ public class PendingWillMessages {
     }
 
     public void sendWillIfPending(final @NotNull String clientId) {
-        checkNotNull(clientId, "Client id must not be null");
         final PendingWill pendingWill = pendingWills.remove(clientId);
         if (pendingWill != null) {
             getAndSendPendingWill(clientId);
+        }
+    }
+
+    public void sendWillIfPending(final @NotNull String clientId, final @NotNull ClientSession session) {
+        final PendingWill pendingWill = pendingWills.remove(clientId);
+        if (pendingWill != null) {
+            getAndSendPendingWill(clientId, session);
         }
     }
 
@@ -106,6 +112,15 @@ public class PendingWillMessages {
             log.warn("Unable to send pending will for client {} because the session is gone.", clientId);
             return;
         }
+        getAndSendPendingWill(clientId, session);
+    }
+
+    private void getAndSendPendingWill(final @NotNull String clientId, final @NotNull ClientSession session) {
+        // We expect that the session and its will still exist if we found a pending will to send.
+        // Assert this to fail early.
+        // Because assertions are removed in production, additionally log a warning because if the session is gone,
+        // we can't reason about whether we ever send the will or not before, here or via another component.
+        // This may or may not indicate a previously unknown race condition.
         final ClientSessionWill sessionWill = session.getWillPublish();
         assert sessionWill != null : "Missing expected will message in session of client: " + clientId;
         //noinspection ConstantConditions

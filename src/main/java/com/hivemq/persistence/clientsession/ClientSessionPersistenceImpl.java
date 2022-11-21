@@ -179,7 +179,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 // If no clean start is required, a client might be re-connecting to the existing session.
                 // In this case, cancel any pending send of a will.
                 if (cleanStart) {
-                    pendingWillMessages.sendWillIfPending(client);
+                    pendingWillMessages.sendWillIfPending(client, previousClientSession);
                 } else {
                     pendingWillMessages.cancelWillIfPending(client);
                 }
