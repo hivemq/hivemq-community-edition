@@ -46,6 +46,7 @@ import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Cursor;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -287,13 +288,15 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 if (isPersistent || newClientSession.isConnected()) {
                     sessionsCount.incrementAndGet();
                 }
+
+                final ClientSessionWill newWill = newClientSession.getWillPublish();
+                if (newWill != null) {
+                    txn.setCommitHook(new AddWillReference(newWill));
+                }
             } else {
                 final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
 
-                final ClientSessionWill oldWill = prevClientSession.getWillPublish();
-                if (oldWill != null) {
-                    txn.setCommitHook(new RemoveWillReference(oldWill));
-                }
+                handleWillPayloads(txn, prevClientSession.getWillPublish(), newClientSession.getWillPublish());
 
                 final boolean prevIsPersistent = persistent(prevClientSession);
 
@@ -302,11 +305,6 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 } else if ((prevIsPersistent || prevClientSession.isConnected()) && (!isPersistent && !newClientSession.isConnected())) {
                     sessionsCount.decrementAndGet();
                 }
-            }
-
-            final ClientSessionWill newWill = newClientSession.getWillPublish();
-            if (newWill != null) {
-                txn.setCommitHook(new AddWillReference(newWill));
             }
 
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(newClientSession, timestamp)));
@@ -667,6 +665,29 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         public void run() {
             metricsHolder.getStoredWillMessagesCount().dec();
             payloadPersistence.decrementReferenceCounter(will.getPublishId());
+        }
+    }
+
+    private void handleWillPayloads(
+            final @NotNull Transaction txn,
+            final @Nullable ClientSessionWill previousWill,
+            final @Nullable ClientSessionWill currentWill) {
+
+        if (previousWill != null && currentWill != null) {
+            // When equal we have the payload already.
+            if (previousWill.getPublishId() != currentWill.getPublishId()) {
+                txn.setCommitHook(() -> {
+                    payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
+                    payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+                });
+            }
+        } else {
+            if (previousWill != null) {
+                txn.setCommitHook(new RemoveWillReference(previousWill));
+            }
+            if (currentWill != null) {
+                txn.setCommitHook(new AddWillReference(currentWill));
+            }
         }
     }
 }
