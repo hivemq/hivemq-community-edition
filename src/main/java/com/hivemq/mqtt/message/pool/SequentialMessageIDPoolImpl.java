@@ -27,12 +27,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-/**
- * Implementation note: Benchmarks revealed that the implementation with synchronized
- * methods is fast enough for our use case
- *
- * @author Dominik Obermaier
- */
 @ThreadSafe
 public class SequentialMessageIDPoolImpl implements MessageIDPool {
 
