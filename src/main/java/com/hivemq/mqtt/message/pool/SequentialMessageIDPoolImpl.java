@@ -18,13 +18,12 @@ package com.hivemq.mqtt.message.pool;
 import com.google.common.primitives.Ints;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
+import org.eclipse.collections.impl.set.mutable.primitive.ShortHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -51,8 +50,11 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
 
     /**
      * The set with all already used ids. These ids must not be reused until they are returned.
+     * Because the IDs are in the unsigned short range, and because Java only has signed primitive types, we store
+     * primitive short values of integer IDs that get "shifted" into the signed short range.
+     * This reduces the memory footprint per connected client.
      */
-    private final Set<Integer> usedMessageIds = new HashSet<>(50);
+    private final ShortHashSet usedMessageIds = new ShortHashSet(50);
 
     private int circularTicker;
 
@@ -64,14 +66,16 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         }
 
         //We're searching (sequentially) until we hit a message id which is not used already
+        short shiftedCircularTicker;
         do {
             circularTicker += 1;
             if (circularTicker > MAX_MESSAGE_ID) {
                 circularTicker = 1;
             }
-        } while (usedMessageIds.contains(circularTicker));
+            shiftedCircularTicker = shiftToSignedShort(circularTicker);
+        } while (usedMessageIds.contains(shiftedCircularTicker));
 
-        usedMessageIds.add(circularTicker);
+        usedMessageIds.add(shiftedCircularTicker);
 
         return circularTicker;
     }
@@ -83,11 +87,13 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         checkArgument(id > MIN_MESSAGE_ID);
         checkArgument(id <= MAX_MESSAGE_ID);
 
-        if (usedMessageIds.contains(id)) {
+        final short shiftedId = shiftToSignedShort(id);
+
+        if (usedMessageIds.contains(shiftedId)) {
             return takeNextId();
         }
 
-        usedMessageIds.add(id);
+        usedMessageIds.add(shiftedId);
 
         if (id > circularTicker) {
             circularTicker = id;
@@ -105,7 +111,7 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         checkArgument(id > MIN_MESSAGE_ID, "MessageID must be larger than 0");
         checkArgument(id <= MAX_MESSAGE_ID, "MessageID must be smaller than 65536");
 
-        final boolean removed = usedMessageIds.remove(id);
+        final boolean removed = usedMessageIds.remove(shiftToSignedShort(id));
 
         if (!removed) {
             log.trace("Tried to return message id {} although it was already returned. This is could mean a DUP was acked", id);
@@ -126,6 +132,13 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         final List<Integer> idList = Ints.asList(ids);
         Collections.sort(idList);
         circularTicker = idList.get(idList.size() - 1);
-        usedMessageIds.addAll(idList);
+        idList.forEach(id -> usedMessageIds.add(shiftToSignedShort(id)));
+    }
+
+    private static short shiftToSignedShort(final int intIdInUnsignedShortRange) {
+        // Don't assert using the min/max constants in case anyone ever decides to change them. :)
+        assert intIdInUnsignedShortRange >= 0 : "Outside unsigned short range: " + intIdInUnsignedShortRange;
+        assert intIdInUnsignedShortRange <= 65535 : "Outside unsigned short range: " + intIdInUnsignedShortRange;
+        return (short) (intIdInUnsignedShortRange + Short.MIN_VALUE);
     }
 }
