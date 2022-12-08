@@ -23,19 +23,17 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-import java.util.Collection;
 
 /**
- * Various utilities for dealing with Exceptions
- *
- * @author Dominik Obermaier
+ * Various utilities for dealing with exceptions.
  */
 public class Exceptions {
 
     private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
 
     /**
-     * Throwables are rethrown if they are an error. Otherwise they will just be logged.
+     * {@link Throwable} instances are rethrown if they are an {@link Error}.
+     * Otherwise, they will just be logged.
      *
      * @param throwable the throwable to guard HiveMQ from
      */
@@ -47,6 +45,10 @@ public class Exceptions {
         }
     }
 
+    /**
+     * {@link Throwable} instances are rethrown if they are an {@link Error}.
+     * Otherwise, this is a noop.
+     */
     public static void rethrowError(final @NotNull Throwable throwable) {
         if (throwable instanceof Error) {
             throw (Error) throwable;
@@ -64,8 +66,8 @@ public class Exceptions {
             return true;
         }
         if (throwable instanceof BatchedException) {
-            final Collection<Throwable> throwables = ((BatchedException) throwable).getThrowables();
-            for (final Throwable inner : throwables) {
+            final BatchedException batchedException = (BatchedException) throwable;
+            for (final Throwable inner : batchedException.getThrowables()) {
                 if (!(inner instanceof ClosedChannelException)) {
                     return false;
                 }
