@@ -17,6 +17,8 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -45,15 +47,13 @@ public interface ExtensionLoader {
      *
      * @param extensionFolder       the folder to search extension folders from
      * @param permissive            is a not existing extension folder allowed
-     * @param desiredExtensionClass the desired extension superclass to search implementations for
      * @return a Collection of {@link HiveMQExtension} from the extension folder.
      * @throws java.lang.NullPointerException     if <code>null</code> is passed to any parameter
      * @throws java.lang.IllegalArgumentException If the folder does not exist HiveMQ is not able to read the contents
      *                                            of the folder
      */
     @ReadOnly
-    @NotNull <T extends ExtensionMain> ImmutableCollection<HiveMQExtensionEvent> loadExtensions(
-            final @NotNull Path extensionFolder, boolean permissive, final @NotNull Class<T> desiredExtensionClass);
+    @NotNull ImmutableCollection<HiveMQExtensionEvent> loadExtensions(final @NotNull Path extensionFolder, boolean permissive);
 
     /**
      * Loads a single extension.
@@ -61,8 +61,7 @@ public interface ExtensionLoader {
      * @param extensionFolder a valid extension folder.
      * @return An Optional of a loaded extension. Empty if loading fails or extension <id> already known.
      */
-    @Nullable <T extends ExtensionMain> HiveMQExtensionEvent processSingleExtensionFolder(
-            final @NotNull Path extensionFolder, final @NotNull Class<T> desiredClass);
+    @Nullable HiveMQExtensionEvent processSingleExtensionFolder(final @NotNull Path extensionFolder);
 
     @Nullable HiveMQExtensionEvent loadEmbeddedExtension(@NotNull EmbeddedExtension extensionMain);
 }
