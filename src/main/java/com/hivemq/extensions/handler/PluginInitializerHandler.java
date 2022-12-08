@@ -127,6 +127,9 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         if (pluginInitializerMap.isEmpty() && msg != null) {
             clientConnection.setPreventLwt(false);
             ctx.writeAndFlush(msg, promise);
+            // Prevent leaking the retained CONNECT message for any existing ClientConnection.
+            // The CONNECT message would otherwise be owned by the plugin initialization below outside this scope.
+            clientConnection.setConnectMessage(null);
             return;
         }
 

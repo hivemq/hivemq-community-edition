@@ -61,8 +61,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -88,6 +87,7 @@ public class PluginInitializerHandlerTest {
             mock(ListenerConfigurationService.class);
     private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
 
+    private @NotNull ClientConnection clientConnection;
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
     private @NotNull PluginInitializerHandler pluginInitializerHandler;
@@ -97,11 +97,13 @@ public class PluginInitializerHandlerTest {
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
-        channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection.setConnectMessage(mock(CONNECT.class));
+        clientConnection.setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+
+        channel = new EmbeddedChannel();
         channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
 
         when(channelHandlerContext.channel()).thenReturn(channel);
         when(channelHandlerContext.pipeline()).thenReturn(channelPipeline);
@@ -148,11 +150,11 @@ public class PluginInitializerHandlerTest {
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
         assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertNull(clientConnection.getConnectMessage());
     }
 
     @Test(timeout = 10000)
     public void test_write_connack_with_initializer_channel_inactive() throws Exception {
-        final EmbeddedChannel channel = new EmbeddedChannel();
         channel.close();
 
         when(channelHandlerContext.channel()).thenReturn(channel);
@@ -178,13 +180,11 @@ public class PluginInitializerHandlerTest {
         verify(initializers, timeout(5000).times(1)).getClientInitializerMap();
         verify(channelHandlerContext, timeout(5000)).writeAndFlush(any(Object.class), eq(channelPromise));
         verify(channelPipeline).remove(any(ChannelHandler.class));
+        assertNull(clientConnection.getConnectMessage());
     }
 
     @Test(timeout = 10000)
     public void test_user_event_other_event() {
-        final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, publishFlushHandler));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
         channel.pipeline().addLast(pluginInitializerHandler);
 
         channel.pipeline().fireUserEventTriggered("Hallo");
@@ -225,6 +225,7 @@ public class PluginInitializerHandlerTest {
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
         assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertNull(clientConnection.getConnectMessage());
     }
 
     @Test(timeout = 10000)
@@ -257,6 +258,7 @@ public class PluginInitializerHandlerTest {
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
         assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertNull(clientConnection.getConnectMessage());
     }
 
     private Map<String, ClientInitializer> createClientInitializerMap() throws Exception {
