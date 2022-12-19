@@ -22,7 +22,6 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,9 +30,15 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.ExecutionException;
 
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.splitTopicAndGroup;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dominik Obermaier
@@ -42,7 +47,7 @@ import static org.mockito.Mockito.*;
 public class SharedSubscriptionServiceTest {
 
     @Mock
-    TopicTreeImpl topicTree;
+    LocalTopicTree topicTree;
 
     @Mock
     ClientSessionSubscriptionPersistence subscriptionPersistence;

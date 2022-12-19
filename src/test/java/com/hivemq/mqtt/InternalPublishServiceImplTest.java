@@ -25,8 +25,8 @@ import com.hivemq.mqtt.services.InternalPublishServiceImpl;
 import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriptionFlag;
+import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicSubscribers;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +65,7 @@ public class InternalPublishServiceImplTest {
     private RetainedMessagePersistence retainedMessagePersistence;
 
     @Mock
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
 
     @Mock
     private PublishDistributor publishDistributor;

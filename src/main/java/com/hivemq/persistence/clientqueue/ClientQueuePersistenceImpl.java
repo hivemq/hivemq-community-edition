@@ -31,7 +31,6 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.AbstractPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.SingleWriterService;
@@ -66,7 +65,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     @NotNull
     private final MessageDroppedService messageDroppedService;
     @NotNull
-    private final TopicTreeImpl topicTree;
+    private final LocalTopicTree topicTree;
     @NotNull
     private final ConnectionPersistence connectionPersistence;
     @NotNull
@@ -79,7 +78,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             @NotNull final MqttConfigurationService mqttConfigurationService,
             @NotNull final ClientSessionLocalPersistence clientSessionLocalPersistence,
             @NotNull final MessageDroppedService messageDroppedService,
-            @NotNull final TopicTreeImpl topicTree,
+            @NotNull final LocalTopicTree topicTree,
             @NotNull final ConnectionPersistence connectionPersistence,
             @NotNull final PublishPollService publishPollService) {
         this.localPersistence = localPersistence;
