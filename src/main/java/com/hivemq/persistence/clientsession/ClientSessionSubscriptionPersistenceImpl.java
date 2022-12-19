@@ -32,7 +32,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.services.PublishPollService;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.mqtt.topic.TopicFilter;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.AbstractPersistence;
@@ -121,7 +121,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             final ListenableFuture<Void> persistFuture;
             if (sharedSubscription == null) {
                 //not a shared subscription
-                subscriberExisted = topicTree.addTopic(client, topic, SubscriptionFlags.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
+                subscriberExisted = topicTree.addTopic(client, topic, SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
                 persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                     localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
                     return null;
@@ -139,10 +139,10 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(),
                         topic.isRetainAsPublished(), topic.getRetainHandling(), topic.getSubscriptionIdentifier());
 
-                subscriberExisted = topicTree.addTopic(client, sharedTopic, SubscriptionFlags.getDefaultFlags(true,
+                subscriberExisted = topicTree.addTopic(client, sharedTopic, SubscriptionFlag.getDefaultFlags(true,
                         topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
 
-                final Subscription subscription = new Subscription(sharedTopic, SubscriptionFlags.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
+                final Subscription subscription = new Subscription(sharedTopic, SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
 
                 persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                     localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
@@ -284,7 +284,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             final SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
             if (sharedSubscription == null) {
                 //not a shared subscription
-                subscriptions.add(new Subscription(topic, SubscriptionFlags.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null));
+                subscriptions.add(new Subscription(topic, SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null));
             } else {
                 if (sharedSubscription.getTopicFilter().isEmpty()) {
                     disconnectSharedSubscriberWithEmptyTopic(clientId);
@@ -299,7 +299,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
 
                 final Subscription sharedSub = new Subscription(new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(),
                         topic.isRetainAsPublished(), topic.getRetainHandling(), topic.getSubscriptionIdentifier()),
-                        SubscriptionFlags.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
+                        SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
 
                 sharedSubs.add(sharedSub);
                 subscriptions.add(sharedSub);

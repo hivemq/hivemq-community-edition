@@ -26,7 +26,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
@@ -42,13 +42,12 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dominik Obermaier
- */
 public class TopicTreeStartupTest {
 
     @Mock
@@ -61,7 +60,7 @@ public class TopicTreeStartupTest {
     SharedSubscriptionService sharedSubscriptionService;
 
 
-    private LocalTopicTree topicTree;
+    private TopicTreeImpl topicTree;
     private TopicTreeStartup topicTreeStartup;
 
     @Before
@@ -95,8 +94,8 @@ public class TopicTreeStartupTest {
 
         assertThat(subscribersForTopic1, hasItems(new SubscriberWithIdentifiers("client1", 1, (byte) 0, null, ImmutableList.of(), null),
                 new SubscriberWithIdentifiers("client2", 1, (byte) 0, null, ImmutableList.of(), null)));
-        assertThat(subscribersForTopic2, hasItems(new SubscriberWithIdentifiers("client2", 2, SubscriptionFlags.getDefaultFlags(false, false, false), null, ImmutableList.of(), null)));
-        assertThat(subscribersForTopic3, hasItems(new SubscriberWithIdentifiers("client3", 0, SubscriptionFlags.getDefaultFlags(false, true, true), null, ImmutableList.of(), null)));
+        assertThat(subscribersForTopic2, hasItems(new SubscriberWithIdentifiers("client2", 2, SubscriptionFlag.getDefaultFlags(false, false, false), null, ImmutableList.of(), null)));
+        assertThat(subscribersForTopic3, hasItems(new SubscriberWithIdentifiers("client3", 0, SubscriptionFlag.getDefaultFlags(false, true, true), null, ImmutableList.of(), null)));
     }
 
     @Test

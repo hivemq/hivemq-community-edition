@@ -35,7 +35,7 @@ import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -60,9 +60,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PublishPollServiceImplTest {
 
@@ -244,7 +252,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_poll_shared_publishes() throws NoMessageIdAvailableException {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1),
                 new SubscriberWithQoS("client2", 2, flags, 2)));
@@ -281,7 +289,7 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_poll_shared_publishes_messages_in_flight() throws NoMessageIdAvailableException {
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);
@@ -299,7 +307,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_poll_shared_publishes_messages_qos0_in_flight() throws NoMessageIdAvailableException {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);

@@ -39,6 +39,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import org.junit.Before;
@@ -50,6 +51,7 @@ import util.TestException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +74,7 @@ public class SubscriptionStoreImplTest {
     private PluginServiceRateLimitService rateLimitService;
 
     @Mock
-    private LocalTopicTree topicTree;
+    private TopicTreeImpl topicTree;
 
     @Mock
     private AsyncIteratorFactory asyncIteratorFactory;
@@ -547,7 +549,7 @@ public class SubscriptionStoreImplTest {
         }
 
         when(topicTree.getSubscribersForTopic(
-                anyString(), any(LocalTopicTree.ItemFilter.class), anyBoolean())).thenReturn(builder.build());
+                anyString(), any(Predicate.class), anyBoolean())).thenReturn(builder.build());
 
 
         final ImmutableSet.Builder<String> resultBuilder = ImmutableSet.builder();
@@ -561,7 +563,7 @@ public class SubscriptionStoreImplTest {
     @Test(timeout = 10_000)
     public void test_iterate_topic_empty_result() throws Exception {
 
-        when(topicTree.getSubscribersForTopic(anyString(), any(LocalTopicTree.ItemFilter.class), anyBoolean()))
+        when(topicTree.getSubscribersForTopic(anyString(), any(Predicate.class), anyBoolean()))
                 .thenReturn(ImmutableSet.of());
 
         subscriptionStore.iterateAllSubscribersForTopic("topic", (context, value) -> {
@@ -578,7 +580,7 @@ public class SubscriptionStoreImplTest {
             builder.add("client-" + i);
         }
 
-        when(topicTree.getSubscribersForTopic(anyString(), any(LocalTopicTree.ItemFilter.class), anyBoolean()))
+        when(topicTree.getSubscribersForTopic(anyString(), any(Predicate.class), anyBoolean()))
                 .thenReturn(builder.build());
 
         final ImmutableSet.Builder<String> resultBuilder = ImmutableSet.builder();
@@ -597,7 +599,7 @@ public class SubscriptionStoreImplTest {
     @Test(timeout = 10_000, expected = ExecutionException.class)
     public void test_iterate_topic_throw_exception() throws Exception {
 
-        when(topicTree.getSubscribersForTopic(anyString(), any(LocalTopicTree.ItemFilter.class), anyBoolean()))
+        when(topicTree.getSubscribersForTopic(anyString(), any(Predicate.class), anyBoolean()))
                 .thenReturn(ImmutableSet.of("client"));
 
         final CompletableFuture<Void> future =
@@ -629,7 +631,7 @@ public class SubscriptionStoreImplTest {
             builder.add("client-" + i);
         }
 
-        when(topicTree.getSubscribersWithFilter(anyString(), any(LocalTopicTree.ItemFilter.class)))
+        when(topicTree.getSubscribersWithFilter(anyString(), any(Predicate.class)))
                 .thenReturn(builder.build());
 
 
@@ -644,7 +646,7 @@ public class SubscriptionStoreImplTest {
     @Test(timeout = 10_000)
     public void test_iterate_topic_filter_empty_result() throws Exception {
 
-        when(topicTree.getSubscribersForTopic(anyString(), any(LocalTopicTree.ItemFilter.class), anyBoolean()))
+        when(topicTree.getSubscribersForTopic(anyString(), any(Predicate.class), anyBoolean()))
                 .thenReturn(ImmutableSet.of());
 
         subscriptionStore.iterateAllSubscribersForTopic("topic", (context, value) -> {
@@ -661,7 +663,7 @@ public class SubscriptionStoreImplTest {
             builder.add("client-" + i);
         }
 
-        when(topicTree.getSubscribersWithFilter(anyString(), any(LocalTopicTree.ItemFilter.class))).thenReturn(
+        when(topicTree.getSubscribersWithFilter(anyString(), any(Predicate.class))).thenReturn(
                 builder.build());
 
         final ImmutableSet.Builder<String> resultBuilder = ImmutableSet.builder();
@@ -680,7 +682,7 @@ public class SubscriptionStoreImplTest {
     @Test(timeout = 10_000, expected = ExecutionException.class)
     public void test_iterate_topic_filter_throw_exception() throws Exception {
 
-        when(topicTree.getSubscribersWithFilter(anyString(), any(LocalTopicTree.ItemFilter.class)))
+        when(topicTree.getSubscribersWithFilter(anyString(), any(Predicate.class)))
                 .thenReturn(ImmutableSet.of("client"));
 
         final CompletableFuture<Void> future =

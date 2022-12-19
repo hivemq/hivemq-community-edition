@@ -19,17 +19,18 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionType;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
-public class SubscriptionTypeItemFilter implements LocalTopicTree.ItemFilter {
+import java.util.function.Predicate;
 
-    @NotNull
-    private final SubscriptionType subscriptionType;
+public class SubscriptionTypeItemFilter implements Predicate<SubscriberWithQoS> {
+
+    private final @NotNull SubscriptionType subscriptionType;
 
     public SubscriptionTypeItemFilter(@NotNull final SubscriptionType subscriptionType) {
         this.subscriptionType = subscriptionType;
     }
 
     @Override
-    public boolean checkItem(@NotNull final SubscriberWithQoS subscriber) {
+    public boolean test(final @NotNull SubscriberWithQoS subscriber) {
         switch (subscriptionType) {
             case ALL:
                 return true;

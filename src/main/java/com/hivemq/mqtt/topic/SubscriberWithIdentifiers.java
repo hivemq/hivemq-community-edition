@@ -110,15 +110,15 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
     }
 
     public boolean isSharedSubscription() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.SHARED_SUBSCRIPTION);
+        return Bytes.isBitSet(flags, SubscriptionFlag.SHARED_SUBSCRIPTION.flagIndex);
     }
 
     public boolean isRetainAsPublished() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.RETAIN_AS_PUBLISHED);
+        return Bytes.isBitSet(flags, SubscriptionFlag.RETAIN_AS_PUBLISHED.flagIndex);
     }
 
     public boolean isNoLocal() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.NO_LOCAL);
+        return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.flagIndex);
     }
 
     public @Nullable String getTopicFilter() {

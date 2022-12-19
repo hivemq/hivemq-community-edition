@@ -187,5 +187,13 @@ public class HiveMQMetrics {
     public static final HiveMQMetric<Counter> WILL_MESSAGE_PUBLISHED_COUNT_TOTAL =
             HiveMQMetric.valueOf("com.hivemq.messages.will.published.count.total", Counter.class);
 
+    /**
+     * represents a {@link Counter}, which measures the current count of shared subscriptions
+     *
+     * @since 2022.2
+     */
+    public static final HiveMQMetric<Counter> SHARED_SUBSCRIPTIONS_CURRENT =
+            HiveMQMetric.valueOf("com.hivemq.shared-subscriptions.overall.current", Counter.class);
+
 }
 

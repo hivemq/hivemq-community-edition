@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import javax.inject.Singleton;
 
 import static com.hivemq.metrics.HiveMQMetrics.*;
+import static com.hivemq.metrics.HiveMQMetrics.SHARED_SUBSCRIPTIONS_CURRENT;
 
 /**
  * @author Christoph Schäbel
@@ -42,6 +43,7 @@ public class MetricsHolder {
     private final @NotNull Counter droppedMessageCounter;
 
     private final @NotNull Counter subscriptionCounter;
+    private final @NotNull Counter sharedSubscriptionCounter;
 
     private final @NotNull Counter closedConnectionsCounter;
 
@@ -67,6 +69,7 @@ public class MetricsHolder {
         closedConnectionsCounter = metricRegistry.counter(CONNECTIONS_CLOSED_COUNT.name());
 
         subscriptionCounter = metricRegistry.counter(SUBSCRIPTIONS_CURRENT.name());
+        sharedSubscriptionCounter = metricRegistry.counter(SHARED_SUBSCRIPTIONS_CURRENT.name());
 
         channelNotWritableCounter = metricRegistry.counter(MQTT_CONNECTION_NOT_WRITABLE_CURRENT.name());
 
@@ -104,6 +107,10 @@ public class MetricsHolder {
 
     public @NotNull Counter getSubscriptionCounter() {
         return subscriptionCounter;
+    }
+
+    public @NotNull Counter getSharedSubscriptionCounter() {
+        return sharedSubscriptionCounter;
     }
 
     public @NotNull Counter getClosedConnectionsCounter() {

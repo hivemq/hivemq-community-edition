@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.topic.tree;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -24,62 +23,56 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriberWithQoS;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-/**
- * @author Christoph Schäbel
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
-
     private TopicTreeImpl topicTree;
 
-    private Counter subscriptionCounter;
-    private Counter staleSubscriptionsCounter;
+    private static final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
+    private static final byte nonSharedFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
 
     @Before
     public void setUp() {
-        subscriptionCounter = new Counter();
-        staleSubscriptionsCounter = new Counter();
         topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
-
     }
 
     @Test
-    public void test_empty_topic_tree_get_subscribers() throws Exception {
-
+    public void test_empty_topic_tree_get_subscribers() {
         final Set<String> any = topicTree.getSubscribersWithFilter("any", getMatchAllFilter());
         assertEquals(true, any.isEmpty());
     }
 
     @Test
-    public void test_empty_topic_tree_get_subscribers_wildcard() throws Exception {
-
+    public void test_empty_topic_tree_get_subscribers_wildcard() {
         final Set<String> any = topicTree.getSubscribersWithFilter("topic/#", getMatchAllFilter());
         assertEquals(true, any.isEmpty());
     }
 
     @Test
-    public void test_empty_topic_tree_get_subscribers_root_wildcard() throws Exception {
-
+    public void test_empty_topic_tree_get_subscribers_root_wildcard() {
         final Set<String> any = topicTree.getSubscribersWithFilter("#", getMatchAllFilter());
         assertEquals(true, any.isEmpty());
     }
 
 
     @Test
-    public void test_empty_no_subscriber_for_topic_filter() throws Exception {
-
+    public void test_empty_no_subscriber_for_topic_filter() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("anothertopic", getMatchAllFilter());
@@ -88,8 +81,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
 
     @Test
-    public void test_get_single_subscriber_for_topic_filter() throws Exception {
-
+    public void test_get_single_subscriber_for_topic_filter() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("topic", getMatchAllFilter());
@@ -98,8 +90,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_single_subscriber_for_long_topic_filter() throws Exception {
-
+    public void test_get_single_subscriber_for_long_topic_filter() {
         topicTree.addTopic("subscriber", new Topic("topic/1/2/3/4/5/6/7/8/9/0", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("topic/1/2/3/4/5/6/7/8/9/0", getMatchAllFilter());
@@ -108,8 +99,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_single_subscriber_for_long_topic_filter_wildcard() throws Exception {
-
+    public void test_get_single_subscriber_for_long_topic_filter_wildcard() {
         topicTree.addTopic("subscriber", new Topic("topic/1/2/3/4/5/6/7/8/9/0/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("topic/1/2/3/4/5/6/7/8/9/0/#", getMatchAllFilter());
@@ -118,8 +108,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_single_subscriber_for_long_topic_filter_plus_wildcard() throws Exception {
-
+    public void test_get_single_subscriber_for_long_topic_filter_plus_wildcard() {
         topicTree.addTopic("subscriber", new Topic("topic/1/2/3/4/+/6/7/8/9/0/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("topic/1/2/3/4/+/6/7/8/9/0/#", getMatchAllFilter());
@@ -128,8 +117,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_single_subscriber_for_topic_filter_with_flags() throws Exception {
-
+    public void test_get_single_subscriber_for_topic_filter_with_flags() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE, true, true), (byte) 12, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("topic", getMatchAllFilter());
@@ -138,8 +126,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_multiple_subscribers_for_topic_filter() throws Exception {
-
+    public void test_multiple_subscribers_for_topic_filter() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
@@ -149,8 +136,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_same_subscriber_two_times_for_same_topic() throws Exception {
-
+    public void test_same_subscriber_two_times_for_same_topic() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
@@ -160,8 +146,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_same_subscriber_two_times_for_same_topic_different_flags() throws Exception {
-
+    public void test_same_subscriber_two_times_for_same_topic_different_flags() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE, true, true), (byte) 12, null);
 
@@ -171,8 +156,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_same_subscriber_two_times_for_same_topic_with_different_qos() throws Exception {
-
+    public void test_same_subscriber_two_times_for_same_topic_with_different_qos() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.EXACTLY_ONCE), (byte) 0, null);
@@ -183,8 +167,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_root_wildcard_subscriber() throws Exception {
-
+    public void test_root_wildcard_subscriber() {
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("#", getMatchAllFilter());
@@ -193,8 +176,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_root_level_wildcard_subscriber() throws Exception {
-
+    public void test_root_level_wildcard_subscriber() {
         topicTree.addTopic("subscriber", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("+", getMatchAllFilter());
@@ -203,8 +185,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_two_level_wildcard_subscriber() throws Exception {
-
+    public void test_two_level_wildcard_subscriber() {
         topicTree.addTopic("subscriber", new Topic("+/+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("+/+", getMatchAllFilter());
@@ -213,8 +194,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_root_level_wildcard_subscriber_with_wildcard() throws Exception {
-
+    public void test_root_level_wildcard_subscriber_with_wildcard() {
         topicTree.addTopic("subscriber", new Topic("+/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("+/#", getMatchAllFilter());
@@ -223,8 +203,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_root_level_wildcard_multiple_subscribers_with_wildcard() throws Exception {
-
+    public void test_root_level_wildcard_multiple_subscribers_with_wildcard() {
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -234,8 +213,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_subscriber_add_and_delete() throws Exception {
-
+    public void test_subscriber_add_and_delete() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.removeSubscriber("subscriber", "topic", null);
 
@@ -244,8 +222,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_subscriber_add_and_delete_multiple_topics_per_subscriber() throws Exception {
-
+    public void test_subscriber_add_and_delete_multiple_topics_per_subscriber() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.EXACTLY_ONCE), (byte) 0, null);
@@ -256,7 +233,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_qos_subscriptions_multiple_subscribers() throws Exception {
+    public void test_qos_subscriptions_multiple_subscribers() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.EXACTLY_ONCE), (byte) 0, null);
@@ -268,8 +245,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_multiple_subscribers_for_sys_topic() throws Exception {
-
+    public void test_multiple_subscribers_for_sys_topic() {
         topicTree.addTopic("subscriber", new Topic("$SYS/topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("$SYS/topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
@@ -279,8 +255,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_sys_topic_wildcard_subscriber() throws Exception {
-
+    public void test_sys_topic_wildcard_subscriber() {
         topicTree.addTopic("subscriber", new Topic("$SYS/+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("$SYS/+", getMatchAllFilter());
@@ -289,8 +264,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_same_subscriber_for_same_topic_with_subscriber_map() throws Exception {
-
+    public void test_same_subscriber_for_same_topic_with_subscriber_map() {
         topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -303,8 +277,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_root_level_wildcard_multiple_subscribers_with_wildcard_with_subscriber_map() throws Exception {
-
+    public void test_root_level_wildcard_multiple_subscribers_with_wildcard_with_subscriber_map() {
         topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -316,7 +289,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_subscriber_from_index_map() throws Exception {
+    public void test_get_subscriber_from_index_map() {
         topicTree.addTopic("subscriber1", new Topic("this/topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("this/topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("this/topic3", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -327,7 +300,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_topc_level_subscriber_from_index_map() throws Exception {
+    public void test_get_topc_level_subscriber_from_index_map() {
         topicTree.addTopic("subscriber1", new Topic("topic1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("topic3", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -338,7 +311,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     }
 
     @Test
-    public void test_get_wildcard_subscriber_from_index_map() throws Exception {
+    public void test_get_wildcard_subscriber_from_index_map() {
         topicTree.addTopic("subscriber1", new Topic("this/+", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("this/topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("this/topic3", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -351,11 +324,9 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
 
         topicTree.addTopic("sub1", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "group");
-        topicTree.addTopic("sub2", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+        topicTree.addTopic("sub2", new Topic("topic", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         topicTree.addTopic("sub3", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "group2");
         topicTree.addTopic("sub4", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "group");
 
@@ -393,7 +364,6 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber_overlapping() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
 
         topicTree.addTopic("sub1", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "group1");
         topicTree.addTopic("sub2", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "group2");
@@ -409,7 +379,6 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber_with_same_id() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
 
         topicTree.addTopic("client", new Topic("topic/a", QoS.AT_LEAST_ONCE), sharedFlag, "group");
         topicTree.addTopic("client", new Topic("topic/+", QoS.AT_LEAST_ONCE), sharedFlag, "group");
@@ -423,23 +392,20 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void get_subscriber_shared_overlapping() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
 
-        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), sharedFlag, null);
+        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), nonSharedFlag, null);
         topicTree.addTopic("client1", new Topic("topic/+", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 2), sharedFlag, "group");
 
         final SubscriberWithIdentifiers subscribers = topicTree.findSubscriber("client1", "topic/a");
-
+        assertNotNull(subscribers);
         assertEquals(1, subscribers.getSubscriptionIdentifier().length());
-        assertTrue(subscribers.getSubscriptionIdentifier().contains(2));
+        assertTrue(subscribers.getSubscriptionIdentifier().contains(1));//shared subscription is hidden by the non-shared
     }
 
     @Test
     public void get_subscriber_non_shared_overlapping() {
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
-
-        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), notSharedFlag, null);
-        topicTree.addTopic("client1", new Topic("topic/+", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 2), notSharedFlag, null);
+        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), nonSharedFlag, null);
+        topicTree.addTopic("client1", new Topic("topic/+", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 2), nonSharedFlag, null);
 
         final SubscriberWithIdentifiers subscribers = topicTree.findSubscriber("client1", "topic/a");
 
@@ -450,10 +416,8 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void get_subscriber_shared_and_non_shared_overlapping() {
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
 
-        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), notSharedFlag, null);
+        topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1), nonSharedFlag, null);
         topicTree.addTopic("client1", new Topic("topic/+", QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 2), sharedFlag, "group");
 
         final SubscriberWithIdentifiers subscribers = topicTree.findSubscriber("client1", "topic/a");
@@ -465,10 +429,8 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_normal_and_shared_subscription() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
 
-        topicTree.addTopic("client", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+        topicTree.addTopic("client", new Topic("topic", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         topicTree.addTopic("client", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "name");
 
         final TopicSubscribers topicSubscribers = topicTree.findTopicSubscribers("topic");
@@ -479,26 +441,20 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
     @Test
     public void test_normal_and_shared_subscription_with_map() {
         topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
 
-        topicTree.addTopic("client1", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+        topicTree.addTopic("client1", new Topic("topic", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         topicTree.addTopic("client1", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "name");
-        topicTree.addTopic("client2", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+        topicTree.addTopic("client2", new Topic("topic", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         topicTree.addTopic("client2", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "name");
 
         final ImmutableSet<String> subscribers = topicTree.getSubscribersWithFilter("topic", getMatchAllFilter());
         assertEquals(2, subscribers.size());
-
-
     }
 
     @Test
     public void test_multiple_root_wildcards() {
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
-
         for (int i = 0; i < 20; i++) {
-            topicTree.addTopic("client" + i, new Topic("#", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+            topicTree.addTopic("client" + i, new Topic("#", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         }
 
         final ImmutableSet<String> subscribers = topicTree.getSubscribersWithFilter("#", getMatchAllFilter());
@@ -509,10 +465,8 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_multiple_wildcards() {
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
-
         for (int i = 0; i < 20; i++) {
-            topicTree.addTopic("client" + i, new Topic("topic/#", QoS.AT_LEAST_ONCE), notSharedFlag, null);
+            topicTree.addTopic("client" + i, new Topic("topic/#", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         }
 
         final ImmutableSet<String> subscribers = topicTree.getSubscribersWithFilter("topic/#", getMatchAllFilter());
@@ -524,8 +478,6 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_add_shared_wildcard() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-
         topicTree.addTopic("client", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "name1");
         topicTree.addTopic("client", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "name2");
 
@@ -537,7 +489,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
 
     @NotNull
-    public LocalTopicTree.ItemFilter getMatchAllFilter() {
+    public Predicate<SubscriberWithQoS> getMatchAllFilter() {
         return subscriber -> true;
     }
 }

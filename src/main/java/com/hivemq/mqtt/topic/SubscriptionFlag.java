@@ -17,19 +17,24 @@ package com.hivemq.mqtt.topic;
 
 import com.hivemq.util.Bytes;
 
-/**
- * @author Christoph Schäbel
- */
-public class SubscriptionFlags {
+public enum SubscriptionFlag {
 
-    public static final int SHARED_SUBSCRIPTION = 1;
-    public static final int RETAIN_AS_PUBLISHED = 2;
-    public static final int NO_LOCAL = 3;
+    SHARED_SUBSCRIPTION(1),
+
+    RETAIN_AS_PUBLISHED(2),
+
+    NO_LOCAL(3);
+
+    public final int flagIndex;
+
+    SubscriptionFlag(int flagIndex) {
+        this.flagIndex = flagIndex;
+    }
 
     public static byte getDefaultFlags(final boolean isSharedSubscription, final boolean retainAsPublished, final boolean noLocal) {
-        byte flags = Bytes.setBit((byte) 0, SHARED_SUBSCRIPTION, isSharedSubscription);
-        flags = Bytes.setBit(flags, RETAIN_AS_PUBLISHED, retainAsPublished);
-        return Bytes.setBit(flags, NO_LOCAL, noLocal);
+        byte flags = Bytes.setBit((byte) 0, SHARED_SUBSCRIPTION.flagIndex, isSharedSubscription);
+        flags = Bytes.setBit(flags, RETAIN_AS_PUBLISHED.flagIndex, retainAsPublished);
+        return Bytes.setBit(flags, NO_LOCAL.flagIndex, noLocal);
     }
 
 }

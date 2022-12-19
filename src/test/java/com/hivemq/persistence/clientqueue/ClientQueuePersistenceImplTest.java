@@ -27,6 +27,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.connection.ConnectionPersistence;
@@ -72,7 +73,7 @@ public class ClientQueuePersistenceImplTest {
     MessageDroppedService messageDroppedService;
 
     @Mock
-    LocalTopicTree topicTree;
+    TopicTreeImpl topicTree;
 
     @Mock
     private ConnectionPersistence connectionPersistence;

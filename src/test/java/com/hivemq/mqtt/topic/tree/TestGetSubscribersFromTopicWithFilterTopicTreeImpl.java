@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.topic.tree;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
@@ -23,34 +22,25 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-/**
- * @author Christoph Schäbel
- */
 public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
-
 
     private TopicTreeImpl topicTree;
 
-    private Counter subscriptionCounter;
-    private Counter staleSubscriptionsCounter;
-
     @Before
     public void setUp() {
-        subscriptionCounter = new Counter();
-        staleSubscriptionsCounter = new Counter();
         topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
-
     }
 
     @Test
@@ -324,8 +314,8 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
+        final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
+        final byte notSharedFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
 
         topicTree.addTopic("sub1", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "group");
         topicTree.addTopic("sub2", new Topic("topic", QoS.AT_LEAST_ONCE), notSharedFlag, null);
@@ -344,8 +334,8 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber_overlapping() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
+        final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
+        final byte notSharedFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
 
         topicTree.addTopic("sub1", new Topic("#", QoS.AT_LEAST_ONCE), sharedFlag, "group1");
         topicTree.addTopic("sub2", new Topic("#", QoS.AT_LEAST_ONCE), notSharedFlag, null);
@@ -364,7 +354,7 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
     @Test
     public void get_shared_subscriber_with_same_id() {
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
 
         topicTree.addTopic("client", new Topic("topic/a", QoS.AT_LEAST_ONCE), sharedFlag, "group");
         topicTree.addTopic("client", new Topic("topic/+", QoS.AT_LEAST_ONCE), sharedFlag, "group");
@@ -376,8 +366,8 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
     @Test
     public void get_subscriber() {
-        final byte notSharedFlag = SubscriptionFlags.getDefaultFlags(false, false, false);
-        final byte sharedFlag = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte notSharedFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
+        final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
 
         topicTree.addTopic("client1", new Topic("topic/a", QoS.AT_MOST_ONCE), notSharedFlag, null);
         topicTree.addTopic("client2", new Topic("topic/+", QoS.AT_LEAST_ONCE), notSharedFlag, null);
@@ -389,32 +379,17 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
     }
 
     @NotNull
-    public LocalTopicTree.ItemFilter getMatchAllFilter() {
-        return new LocalTopicTree.ItemFilter() {
-            @Override
-            public boolean checkItem(@NotNull final SubscriberWithQoS subscriber) {
-                return true;
-            }
-        };
+    public Predicate<SubscriberWithQoS> getMatchAllFilter() {
+        return subscriber -> true;
     }
 
     @NotNull
-    public LocalTopicTree.ItemFilter getSharedSubFilter() {
-        return new LocalTopicTree.ItemFilter() {
-            @Override
-            public boolean checkItem(@NotNull final SubscriberWithQoS subscriber) {
-                return subscriber.isSharedSubscription();
-            }
-        };
+    public Predicate<SubscriberWithQoS> getSharedSubFilter() {
+        return SubscriberWithQoS::isSharedSubscription;
     }
 
     @NotNull
-    public LocalTopicTree.ItemFilter getIndividualSubFilter() {
-        return new LocalTopicTree.ItemFilter() {
-            @Override
-            public boolean checkItem(@NotNull final SubscriberWithQoS subscriber) {
-                return !subscriber.isSharedSubscription();
-            }
-        };
+    public Predicate<SubscriberWithQoS> getIndividualSubFilter() {
+        return subscriber -> !subscriber.isSharedSubscription();
     }
 }

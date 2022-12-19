@@ -27,15 +27,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This represents a subscriber (client ID) with a Quality of Service Level
- *
- * @author Dominik Obermaier
  */
 @Immutable
 public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
 
     private final @NotNull String subscriber;
     private final int qos;
-    private final byte flags;
+    private byte flags;
     private final @Nullable String sharedName;
     private final @Nullable Integer subscriptionIdentifier;
 
@@ -73,16 +71,28 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
         return flags;
     }
 
+    public void addFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
+        for (final SubscriptionFlag flag : subscriptionFlags) {
+            flags = Bytes.setBit(flags, flag.flagIndex);
+        }
+    }
+
+    public void removeFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
+        for (final SubscriptionFlag flag : subscriptionFlags) {
+            flags = Bytes.unsetBit(flags, flag.flagIndex);
+        }
+    }
+
     public boolean isSharedSubscription() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.SHARED_SUBSCRIPTION);
+        return Bytes.isBitSet(flags, SubscriptionFlag.SHARED_SUBSCRIPTION.flagIndex);
     }
 
     public boolean isRetainAsPublished() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.RETAIN_AS_PUBLISHED);
+        return Bytes.isBitSet(flags, SubscriptionFlag.RETAIN_AS_PUBLISHED.flagIndex);
     }
 
     public boolean isNoLocal() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.NO_LOCAL);
+        return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.flagIndex);
     }
 
     @Nullable

@@ -19,33 +19,30 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Christoph Schäbel
- */
-public class SubscriptionFlagsTest {
+public class SubscriptionFlagTest {
 
     @Test
-    public void test_getDefaultFlags() throws Exception {
+    public void test_getDefaultFlags() {
 
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, true, true);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, true, true);
         assertEquals((byte) 0b1110, flags);
 
-        final byte flags2 = SubscriptionFlags.getDefaultFlags(false, true, true);
+        final byte flags2 = SubscriptionFlag.getDefaultFlags(false, true, true);
         assertEquals((byte) 0b1100, flags2);
 
-        final byte flags3 = SubscriptionFlags.getDefaultFlags(false, false, false);
+        final byte flags3 = SubscriptionFlag.getDefaultFlags(false, false, false);
         assertEquals((byte) 0b0000, flags3);
 
-        final byte flags4 = SubscriptionFlags.getDefaultFlags(false, false, false);
+        final byte flags4 = SubscriptionFlag.getDefaultFlags(false, false, false);
         assertEquals((byte) 0b0000, flags4);
 
-        final byte flags5 = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags5 = SubscriptionFlag.getDefaultFlags(true, false, false);
         assertEquals((byte) 0b0010, flags5);
 
-        final byte flags6 = SubscriptionFlags.getDefaultFlags(false, true, false);
+        final byte flags6 = SubscriptionFlag.getDefaultFlags(false, true, false);
         assertEquals((byte) 0b0100, flags6);
 
-        final byte flags7 = SubscriptionFlags.getDefaultFlags(false, false, true);
+        final byte flags7 = SubscriptionFlag.getDefaultFlags(false, false, true);
         assertEquals((byte) 0b1000, flags7);
     }
 
