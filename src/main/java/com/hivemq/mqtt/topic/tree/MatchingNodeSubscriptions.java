@@ -21,13 +21,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -212,14 +206,6 @@ class MatchingNodeSubscriptions {
         }
 
         return Stream.concat(sharedSubscriptions, nonSharedSubscriptions);
-    }
-
-    @ReadOnly
-    public @NotNull Set<SubscriberWithQoS> getAllSubscribers() {
-        final Stream<SubscriberWithQoS> subscriptions = getAllSubscriptions();
-        return subscriptions == null
-                ? Collections.emptySet()
-                : subscriptions.collect(Collectors.toSet());
     }
 
     @ReadOnly

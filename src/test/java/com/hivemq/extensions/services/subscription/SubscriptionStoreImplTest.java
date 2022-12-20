@@ -32,13 +32,7 @@ import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededExceptio
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extension.sdk.api.services.subscription.SubscriptionsForClientResult;
 import com.hivemq.extension.sdk.api.services.subscription.TopicSubscription;
-import com.hivemq.extensions.iteration.AllItemsItemCallback;
-import com.hivemq.extensions.iteration.AsyncIterator;
-import com.hivemq.extensions.iteration.AsyncIteratorFactory;
-import com.hivemq.extensions.iteration.BucketChunkResult;
-import com.hivemq.extensions.iteration.ChunkResult;
-import com.hivemq.extensions.iteration.FetchCallback;
-import com.hivemq.extensions.iteration.MultipleChunkResult;
+import com.hivemq.extensions.iteration.*;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.mqtt.message.QoS;
@@ -53,31 +47,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @since 4.0.0

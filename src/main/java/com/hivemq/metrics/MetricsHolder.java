@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import javax.inject.Singleton;
 
 import static com.hivemq.metrics.HiveMQMetrics.*;
-import static com.hivemq.metrics.HiveMQMetrics.SHARED_SUBSCRIPTIONS_CURRENT;
 
 /**
  * @author Christoph Schäbel

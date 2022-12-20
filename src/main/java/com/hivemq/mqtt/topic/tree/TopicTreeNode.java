@@ -112,26 +112,6 @@ class TopicTreeNode {
         return node;
     }
 
-    public @Nullable TopicTreeNode getChildNodeForTopicPart(final @NotNull String part) {
-        if (children == null && childrenMap == null) {
-            return null;
-        }
-
-        if (children != null) {
-            for (final TopicTreeNode child : children) {
-                if (child != null && child.getTopicPart().equals(part)) {
-                    return child;
-                }
-            }
-        }
-
-        if (childrenMap != null) {
-            return childrenMap.get(part);
-        }
-
-        return null;
-    }
-
     /**
      * Checks if the node is empty, that is if:
      * <p>
@@ -159,27 +139,6 @@ class TopicTreeNode {
 
     public @NotNull String getTopicPart() {
         return topicPart;
-    }
-
-    @VisibleForTesting
-    public int getSegmentSubscriptionCount() { // Not used in production code
-        int segmentSubscriptionCount = wildcardSubscriptions.getSubscriberCount() + exactSubscriptions.getSubscriberCount();
-
-        if (childrenMap != null && !childrenMap.isEmpty()) {
-            for (final TopicTreeNode child : childrenMap.values()) {
-                segmentSubscriptionCount += child.getSegmentSubscriptionCount();
-            }
-        }
-
-        if (children != null && !isEmptyArray(children)) {
-            for (final TopicTreeNode child : children) {
-                if (child != null) {
-                    segmentSubscriptionCount += child.getSegmentSubscriptionCount();
-                }
-            }
-        }
-
-        return segmentSubscriptionCount;
     }
 
     private boolean isEmptyArray(final @Nullable TopicTreeNode @Nullable [] array) {

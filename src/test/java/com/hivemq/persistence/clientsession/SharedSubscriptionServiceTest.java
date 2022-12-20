@@ -30,15 +30,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.ExecutionException;
 
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.splitTopicAndGroup;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Dominik Obermaier
