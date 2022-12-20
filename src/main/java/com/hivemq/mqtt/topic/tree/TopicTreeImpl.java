@@ -397,14 +397,10 @@ public class TopicTreeImpl implements LocalTopicTree {
      */
     private boolean removeRootWildcardSubscriber(final @NotNull String subscriber, final @Nullable String sharedName) {
         final ImmutableList.Builder<SubscriberWithQoS> foundSubscribers = ImmutableList.builder();
-        int sharedSubscriptionCount = 0;
         for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
             if (rootWildcardSubscriber.getSubscriber().equals(subscriber) &&
                     Objects.equals(rootWildcardSubscriber.getSharedName(), sharedName)) {
                 foundSubscribers.add(rootWildcardSubscriber);
-                if (rootWildcardSubscriber.isSharedSubscription()) {
-                    sharedSubscriptionCount++;
-                }
             }
         }
         final ImmutableList<SubscriberWithQoS> foundSubscriberList = foundSubscribers.build();
