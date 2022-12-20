@@ -24,6 +24,10 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 import java.util.function.Predicate;
 
+/**
+ * @author Lukas Brandl
+ * @author Christoph Schäbel
+ */
 public interface LocalTopicTree {
 
     boolean addTopic(@NotNull String subscriber, @NotNull Topic topic, byte flags, @Nullable String sharedGroup);

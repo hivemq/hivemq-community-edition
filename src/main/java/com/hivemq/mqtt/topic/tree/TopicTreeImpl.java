@@ -409,13 +409,6 @@ public class TopicTreeImpl implements LocalTopicTree {
         return foundSubscriberList.size() > 0;
     }
 
-    /**
-     * Remove a subscription for a client
-     *
-     * @param subscriber for which the subscription should be removed
-     * @param topic      of the subscription
-     * @param sharedName of the subscription or null if it is not a shared subscription
-     */
     @Override
     public void removeSubscriber(final @NotNull String subscriber,
                                  final @NotNull String topic,
