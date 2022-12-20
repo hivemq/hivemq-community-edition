@@ -71,9 +71,6 @@ class MatchingNodeSubscriptions {
         final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus = storeSubscriberInStructures(subscriberToAdd, topicFilter, subscriberMapCreationThreshold);
         if (subscriptionInfoPresenceStatus == null) {
             counters.getSubscriptionCounter().inc();
-            if (subscriberToAdd.isSharedSubscription()) {
-                counters.getSharedSubscriptionCounter().inc();
-            }
         }
 
         return subscriptionInfoPresenceStatus != null;
@@ -96,9 +93,6 @@ class MatchingNodeSubscriptions {
         final SubscriptionInfoRemovalStatus subscriptionInfoRemovalStatus = removeSubscriberFromStructures(subscriber, sharedName, topicFilter);
         if (subscriptionInfoRemovalStatus != null) {
             counters.getSubscriptionCounter().dec();
-            if (subscriptionInfoRemovalStatus.wasSharedSubscription) {
-                counters.getSharedSubscriptionCounter().dec();
-            }
         }
     }
 

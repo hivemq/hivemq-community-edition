@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 
 public class MatchingNodeSubscriptionsTest {
 
-    private final SubscriptionCounters counters = new SubscriptionCounters(new Counter(), new Counter());
+    private final SubscriptionCounters counters = new SubscriptionCounters(new Counter());
 
     @Test
     public void addSubscriber_whenTwoSubscribersAddedWithDefaultMapCreationThreshold_thenBothArePresent() {

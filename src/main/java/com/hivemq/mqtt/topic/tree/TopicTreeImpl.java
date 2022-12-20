@@ -72,7 +72,7 @@ public class TopicTreeImpl implements LocalTopicTree {
     @Inject
     public TopicTreeImpl(final @NotNull MetricsHolder metricsHolder) {
 
-        this.counters = new SubscriptionCounters(metricsHolder.getSubscriptionCounter(), metricsHolder.getSharedSubscriptionCounter());
+        this.counters = new SubscriptionCounters(metricsHolder.getSubscriptionCounter());
         this.mapCreationThreshold = TOPIC_TREE_MAP_CREATION_THRESHOLD.get();
 
         segmentLocks = Striped.readWriteLock(64);
@@ -108,9 +108,6 @@ public class TopicTreeImpl implements LocalTopicTree {
                 rootWildcardSubscribers.add(entry);
                 counters.getSubscriptionCounter().inc();
 
-                if (entry.isSharedSubscription()) {
-                    counters.getSharedSubscriptionCounter().inc();
-                }
                 return removed;
             }
             return true;
@@ -413,7 +410,6 @@ public class TopicTreeImpl implements LocalTopicTree {
         final ImmutableList<SubscriberWithQoS> foundSubscriberList = foundSubscribers.build();
         rootWildcardSubscribers.removeAll(foundSubscriberList);
         counters.getSubscriptionCounter().dec(foundSubscriberList.size());
-        counters.getSharedSubscriptionCounter().dec(sharedSubscriptionCount);
         return foundSubscriberList.size() > 0;
     }
 
