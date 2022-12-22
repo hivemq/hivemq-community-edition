@@ -217,10 +217,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void resentWithDUPFlag(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
-        final boolean alreadySent = qos1AlreadySentPacketIds.contains(
-                ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()));
-        if (alreadySent) {
-
+        if (qos1AlreadySentPacketIds.contains(ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()))) {
             log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored", client, publish.getPacketIdentifier());
         } else {
             super.channelRead(ctx, publish);
