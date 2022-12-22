@@ -20,11 +20,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.packetid.ShortPacketIdEncodingUtils;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
@@ -37,12 +39,11 @@ import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.*;
+import org.eclipse.collections.impl.set.mutable.primitive.ShortHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.hivemq.configuration.service.InternalConfigurations.DROP_MESSAGES_QOS_0_ENABLED;
@@ -65,7 +66,9 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull IncomingPublishHandler incomingPublishHandler;
     private final @NotNull DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
-    private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
+    // We lazy-initialize this to save memory for QoS 0+2 message flows.
+    @VisibleForTesting
+    @Nullable ShortHashSet qos1AlreadySentPacketIds;
 
     @VisibleForTesting
     @Inject
@@ -77,9 +80,14 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         this.publishPollService = publishPollService;
         this.persistence = persistence;
         this.orderedTopicService = orderedTopicService;
-        this.qos1And2AlreadySentMap = new HashMap<>();
         this.incomingPublishHandler = incomingPublishHandler;
         this.dropOutgoingPublishesHandler = dropOutgoingPublishesHandler;
+    }
+
+    private void lazyInitializeQos1AlreadySentPacketIds() {
+        if (qos1AlreadySentPacketIds == null) {
+            qos1AlreadySentPacketIds = new ShortHashSet();
+        }
     }
 
     @Override
@@ -115,6 +123,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+        lazyInitializeQos1AlreadySentPacketIds();
 
         if (!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)) {
             super.write(ctx, msg, promise);
@@ -126,7 +135,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
             final int messageId = puback.getPacketIdentifier();
             persistence.addOrReplace(client, messageId, puback);
-            promise.addListener(new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
+            promise.addListener(new PUBLISHFlowCompleteListener(messageId, client, qos1AlreadySentPacketIds, persistence));
         }
 
         final boolean flowComplete = orderedTopicService.handlePublish(ctx.channel(), msg, promise);
@@ -178,6 +187,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
+        lazyInitializeQos1AlreadySentPacketIds();
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
             // QoS 1 or 2 duplicate delivery handling
@@ -202,20 +212,21 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private void firstPublishForMessageIdReceived(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client, final int messageId) throws Exception {
         persistence.addOrReplace(client, messageId, publish);
         incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
-        qos1And2AlreadySentMap.put(messageId, true);
+        qos1AlreadySentPacketIds.add(ShortPacketIdEncodingUtils.encode(messageId));
         log.trace("Client {} sent a publish message with id {} which was not forwarded before. This message is processed normally", client, messageId);
     }
 
     private void resentWithDUPFlag(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
-        final Boolean alreadySent = qos1And2AlreadySentMap.get(publish.getPacketIdentifier());
-        if (alreadySent != null && alreadySent) {
+        final boolean alreadySent = qos1AlreadySentPacketIds.contains(
+                ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()));
+        if (alreadySent) {
 
             log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored", client, publish.getPacketIdentifier());
         } else {
             super.channelRead(ctx, publish);
             log.debug("Client {} sent a duplicate publish message with id {} which was not forwarded before. This message is processed normally", client, publish.getPacketIdentifier());
         }
-        qos1And2AlreadySentMap.put(publish.getPacketIdentifier(), true);
+        qos1AlreadySentPacketIds.add(ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()));
     }
 
     private void resentWithoutDUPFlag(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
@@ -223,7 +234,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
                 client, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());
         persistence.addOrReplace(client, publish.getPacketIdentifier(), publish);
         incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
-        qos1And2AlreadySentMap.put(publish.getPacketIdentifier(), true);
+        qos1AlreadySentPacketIds.add(ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()));
     }
 
 
@@ -257,13 +268,14 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void handlePubrel(final ChannelHandlerContext ctx, final PUBREL pubrel) {
+        lazyInitializeQos1AlreadySentPacketIds();
         final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         final int messageId = pubrel.getPacketIdentifier();
 
         persistence.addOrReplace(client, messageId, pubrel);
         ctx.writeAndFlush(new PUBCOMP(messageId)).addListener(
-                new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
+                new PUBLISHFlowCompleteListener(messageId, client, qos1AlreadySentPacketIds, persistence));
     }
 
     private void handlePubcomp(final @NotNull ChannelHandlerContext ctx, @NotNull final PUBCOMP msg, @NotNull final String client) {
@@ -298,24 +310,24 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         private final int messageId;
         private final @NotNull String client;
-        private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
+        private final @NotNull ShortHashSet qos1AlreadySentPacketIds;
         private final @NotNull IncomingMessageFlowPersistence persistence;
 
         PUBLISHFlowCompleteListener(final int messageId,
                                     final @NotNull String client,
-                                    final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap,
+                                    final @NotNull ShortHashSet qos1AlreadySentPacketIds,
                                     final @NotNull IncomingMessageFlowPersistence persistence) {
             this.messageId = messageId;
             this.client = client;
-            this.qos1And2AlreadySentMap = qos1And2AlreadySentMap;
+            this.qos1AlreadySentPacketIds = qos1AlreadySentPacketIds;
             this.persistence = persistence;
         }
 
         @Override
-        public void operationComplete(final ChannelFuture future) throws Exception {
+        public void operationComplete(final ChannelFuture future) {
             if (future.isSuccess()) {
                 UNACKNOWLEDGED_PUBLISHES_COUNTER.decrementAndGet();
-                qos1And2AlreadySentMap.remove(messageId);
+                qos1AlreadySentPacketIds.remove(ShortPacketIdEncodingUtils.encode(messageId));
                 persistence.remove(client, messageId);
                 log.trace("Client '{}' completed a PUBLISH flow with QoS 1 or 2 for packet identifier '{}'", client, messageId);
             }

@@ -122,12 +122,10 @@ public class PublishFlowHandlerTest {
     }
 
     @Test
-    public void test_dont_return_invalid_message_id() {
+    public void writeInbound_whenThePacketIdIsOutOfRange_throwsIllegalArgumentException() {
 
         final PUBACK puback = new PUBACK(-1);
-        channel.writeInbound(puback);
-
-        verify(pool, never()).returnId(anyInt());
+        assertThrows(IllegalArgumentException.class, () -> channel.writeInbound(puback));
     }
 
     @Test

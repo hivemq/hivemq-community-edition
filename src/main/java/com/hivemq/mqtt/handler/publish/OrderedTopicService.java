@@ -16,9 +16,12 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.message.packetid.ShortPacketIdEncodingUtils;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
@@ -27,6 +30,8 @@ import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import org.eclipse.collections.impl.map.mutable.primitive.ShortObjectHashMap;
+import org.eclipse.collections.impl.set.mutable.primitive.ShortHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,24 +58,42 @@ public class OrderedTopicService {
         CLOSED_CHANNEL_EXCEPTION.setStackTrace(new StackTraceElement[0]);
     }
 
-    private final @NotNull Map<Integer, SettableFuture<PublishStatus>> messageIdToFutureMap = new ConcurrentHashMap<>();
-
+    // We lazy-initialize these member variables to save memory for outgoing (broker to client) QoS 0 message flows.
+    // They aren't required to be concurrent, because OrderedTopicService is part of the PublishFlowHandler, which
+    // implements a non-shared ChannelInboundHandler for which netty guarantees us that no concurrent invocations of
+    // handler methods happen.
     @VisibleForTesting
-    final @NotNull Queue<QueuedMessage> queue = new ArrayDeque<>();
+    @Nullable Queue<QueuedMessage> queue;
+    private @Nullable AtomicBoolean closedAlready;
+    private @Nullable ShortHashSet unacknowledgedMessages;
+    private @Nullable ShortObjectHashMap<SettableFuture<PublishStatus>> messageIdToFutureMap;
 
-    private final @NotNull AtomicBoolean closedAlready = new AtomicBoolean(false);
-    private final @NotNull Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
-
+    private void lazyInitialize() {
+        if (queue == null) {
+            assert closedAlready == null;
+            assert unacknowledgedMessages == null;
+            assert messageIdToFutureMap == null;
+            queue = new ArrayDeque<>();
+            closedAlready = new AtomicBoolean(false);
+            unacknowledgedMessages = new ShortHashSet();
+            messageIdToFutureMap = new ShortObjectHashMap<>();
+        }
+    }
 
     public void messageFlowComplete(final @NotNull ChannelHandlerContext ctx, final int packetId) {
-        final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
+        lazyInitialize();
+        Preconditions.checkNotNull(queue);
+        Preconditions.checkNotNull(unacknowledgedMessages);
+        Preconditions.checkNotNull(messageIdToFutureMap);
+
+        final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.remove(
+                ShortPacketIdEncodingUtils.encode(packetId));
 
         if (publishStatusFuture != null) {
-            messageIdToFutureMap.remove(packetId);
             publishStatusFuture.set(PublishStatus.DELIVERED);
         }
 
-        final boolean removed = unacknowledgedMessages.remove(packetId);
+        final boolean removed = unacknowledgedMessages.remove(ShortPacketIdEncodingUtils.encode(packetId));
         if (!removed) {
             return;
         }
@@ -86,16 +109,25 @@ public class OrderedTopicService {
             if (poll == null) {
                 return;
             }
-            unacknowledgedMessages.add(poll.publish.getPacketIdentifier());
+            unacknowledgedMessages.add(ShortPacketIdEncodingUtils.encode(poll.publish.getPacketIdentifier()));
             ctx.writeAndFlush(poll.getPublish(), poll.getPromise());
         } while (unacknowledgedMessages.size() < maxInflightWindow);
     }
 
-    public boolean handlePublish(final @NotNull Channel channel, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
+    public boolean handlePublish(
+            final @NotNull Channel channel,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) {
+        lazyInitialize();
+        Preconditions.checkNotNull(closedAlready);
+        Preconditions.checkNotNull(unacknowledgedMessages);
+        Preconditions.checkNotNull(messageIdToFutureMap);
 
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
-            messageIdToFutureMap.put(pubrelWithFuture.getPacketIdentifier(), pubrelWithFuture.getFuture());
+            messageIdToFutureMap.put(
+                    ShortPacketIdEncodingUtils.encode(pubrelWithFuture.getPacketIdentifier()),
+                    pubrelWithFuture.getFuture());
             return false;
         }
 
@@ -124,7 +156,7 @@ public class OrderedTopicService {
         }
 
         if (future != null) {
-            messageIdToFutureMap.put(publish.getPacketIdentifier(), future);
+            messageIdToFutureMap.put(ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()), future);
         }
 
         //do not store in OrderedTopicService if channelInactive has been called already
@@ -139,32 +171,34 @@ public class OrderedTopicService {
             queueMessage(promise, publish, clientId);
             return true;
         } else {
-            unacknowledgedMessages.add(publish.getPacketIdentifier());
+            unacknowledgedMessages.add(ShortPacketIdEncodingUtils.encode(publish.getPacketIdentifier()));
             return false;
         }
     }
 
     public void handleInactive() {
+        if (queue != null) {
+            Preconditions.checkNotNull(closedAlready);
+            Preconditions.checkNotNull(messageIdToFutureMap);
 
-        closedAlready.set(true);
+            closedAlready.set(true);
 
-        for (final QueuedMessage queuedMessage : queue) {
-            if (queuedMessage != null) {
-                if (!queuedMessage.getPromise().isDone()) {
-                    queuedMessage.getPromise().setFailure(CLOSED_CHANNEL_EXCEPTION);
+            for (final QueuedMessage queuedMessage : queue) {
+                if (queuedMessage != null) {
+                    if (!queuedMessage.getPromise().isDone()) {
+                        queuedMessage.getPromise().setFailure(CLOSED_CHANNEL_EXCEPTION);
+                    }
                 }
             }
-        }
 
-        // In case the client is disconnected, we return all the publish status futures
-        // This is particularly important for shared subscriptions, because the publish will not be resent otherwise
-        for (final Map.Entry<Integer, SettableFuture<PublishStatus>> entry : messageIdToFutureMap.entrySet()) {
-            final SettableFuture<PublishStatus> publishStatusFuture = entry.getValue();
-            publishStatusFuture.set(PublishStatus.NOT_CONNECTED);
+            // In case the client is disconnected, we return all the publish status futures
+            // This is particularly important for shared subscriptions, because the publish will not be resent otherwise
+            messageIdToFutureMap.forEachValue(publishStatusFuture -> publishStatusFuture.set(PublishStatus.NOT_CONNECTED));
         }
     }
 
     private void queueMessage(final @NotNull ChannelPromise promise, final @NotNull PUBLISH publish, final @NotNull String clientId) {
+        Preconditions.checkNotNull(queue);
 
         if (log.isTraceEnabled()) {
             final String topic = publish.getTopic();
@@ -176,8 +210,9 @@ public class OrderedTopicService {
         queue.add(new QueuedMessage(publish, promise));
     }
 
-    @NotNull
-    public Set<Integer> unacknowledgedMessages() {
+    @VisibleForTesting
+    public @NotNull ShortHashSet unacknowledgedMessages() {
+        Preconditions.checkNotNull(unacknowledgedMessages);
         return unacknowledgedMessages;
     }
 
