@@ -5,9 +5,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-/**
- * @author Henning Lohse
- */
 public class ShortPacketIdEncodingUtilsTest {
 
     @Test
