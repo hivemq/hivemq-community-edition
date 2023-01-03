@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -276,15 +277,20 @@ public class PublishPollServiceImpl implements PublishPollService {
     @Override
     public void pollSharedPublishes(final @NotNull String sharedSubscription) {
         final List<SubscriberWithQoS> subscribers = new ArrayList<>(sharedSubscriptionService.getSharedSubscriber(sharedSubscription));
-
-        // We should shuffle here because otherwise one client could consume all messages if it is fast enough
-        Collections.shuffle(subscribers);
-        for (final SubscriberWithQoS subscriber : subscribers) {
+        // Don't shuffle the whole Collection at once here, as this is CPU-intensive for many subscribers.
+        // Instead, use an approach similar to what Collections.shuffle does: Iterate backwards, randomly choose
+        // an element below the back index, and swap it with the element at the back index if it can't be used.
+        for (int backIndex = subscribers.size(); backIndex > 0; backIndex--) {
+            final int chosenIndex = ThreadLocalRandom.current().nextInt(backIndex);
+            final SubscriberWithQoS subscriber = subscribers.get(chosenIndex);
             final ClientConnection clientConnection = connectionPersistence.get(subscriber.getSubscriber());
             if (clientConnection == null || !clientConnection.getChannel().isActive()) {
-                continue; // client is disconnected
+                // The subscriber is disconnected.
+                // Swap it with the back index so that any other subscriber could be chosen next.
+                final SubscriberWithQoS backSubscriber = subscribers.get(backIndex - 1);
+                subscribers.set(chosenIndex, backSubscriber);
+                continue;
             }
-
             pollSharedPublishesForClient(subscriber.getSubscriber(), sharedSubscription, subscriber.getQos(), subscriber.isRetainAsPublished(), subscriber.getSubscriptionIdentifier(), clientConnection.getChannel());
         }
     }
