@@ -20,33 +20,26 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 import java.util.Objects;
 
-/**
- * @author Lukas Brandl
- */
 public class TopicFilter {
 
-    @NotNull
-    private final String topic;
-    @Nullable
-    private final String sharedName;
+    private final @NotNull String topic;
+    private final @Nullable String sharedName;
 
-    public TopicFilter(@NotNull final String topic, @Nullable final String sharedName) {
+    public TopicFilter(final @NotNull String topic, final @Nullable String sharedName) {
         this.topic = topic;
         this.sharedName = sharedName;
     }
 
-    @NotNull
-    public String getTopic() {
+    public @NotNull String getTopic() {
         return topic;
     }
 
-    @Nullable
-    public String getSharedName() {
+    public @Nullable String getSharedName() {
         return sharedName;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final TopicFilter that = (TopicFilter) o;

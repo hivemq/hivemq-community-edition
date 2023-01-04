@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.topic.tree;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
@@ -34,8 +33,8 @@ class TopicTreeNode {
      * The fields are NOT private to minimize the number of bypass methods.
      * The class is intended to be used only as a part of {@link TopicTreeImpl}.
      */
-    @NotNull MatchingNodeSubscriptions wildcardSubscriptions;
-    @NotNull MatchingNodeSubscriptions exactSubscriptions;
+    final @NotNull MatchingNodeSubscriptions wildcardSubscriptions;
+    final @NotNull MatchingNodeSubscriptions exactSubscriptions;
 
     /**
      * The child nodes of this node. The children get initialized lazily for memory saving purposes. If a threshold is
@@ -48,11 +47,10 @@ class TopicTreeNode {
      */
     @Nullable Map<String, TopicTreeNode> childrenMap;
 
-    public TopicTreeNode(final @NotNull String topicPart) {
+    TopicTreeNode(final @NotNull String topicPart) {
         this.topicPart = topicPart;
-
-        this.wildcardSubscriptions = new MatchingNodeSubscriptions();
-        this.exactSubscriptions = new MatchingNodeSubscriptions();
+        wildcardSubscriptions = new MatchingNodeSubscriptions();
+        exactSubscriptions = new MatchingNodeSubscriptions();
     }
 
     public @NotNull TopicTreeNode addChildNodeIfAbsent(final @NotNull TopicTreeNode node, final int indexMapCreationThreshold) {
@@ -157,11 +155,8 @@ class TopicTreeNode {
     public boolean equals(final @Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         final TopicTreeNode node = (TopicTreeNode) o;
-
         return topicPart.equals(node.topicPart);
-
     }
 
     @Override
@@ -173,5 +168,4 @@ class TopicTreeNode {
     public @NotNull String toString() {
         return topicPart;
     }
-
 }

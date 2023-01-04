@@ -55,8 +55,9 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
     private @Nullable Cache<String, ImmutableSet<Topic>> sharedSubscriptionCache;
 
     @Inject
-    public SharedSubscriptionServiceImpl(@NotNull final LocalTopicTree topicTree,
-                                         @NotNull final ClientSessionSubscriptionPersistence subscriptionPersistence) {
+    public SharedSubscriptionServiceImpl(
+            final @NotNull LocalTopicTree topicTree,
+            final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence) {
 
         this.topicTree = topicTree;
         this.subscriptionPersistence = subscriptionPersistence;
@@ -99,7 +100,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
      * @return a SharedSubscription or null if $share keyword not present
      */
     @Nullable
-    public SharedSubscription checkForSharedSubscription(@NotNull final String topic) {
+    public SharedSubscription checkForSharedSubscription(final @NotNull String topic) {
 
         final Matcher matcher = getSharedSubscriptionMatcher(topic);
         if (matcher.matches()) {
@@ -114,7 +115,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
     }
 
     @NotNull
-    public Subscription createSubscription(@NotNull final Topic topic) {
+    public Subscription createSubscription(final @NotNull Topic topic) {
 
         final SharedSubscription sharedSubscription = checkForSharedSubscription(topic.getTopic());
         if (sharedSubscription == null) {
@@ -132,7 +133,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
      * @return a set of subscribers
      */
     @NotNull
-    public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(@NotNull final String sharedSubscription) {
+    public ImmutableSet<SubscriberWithQoS> getSharedSubscriber(final @NotNull String sharedSubscription) {
         //calling this method before post construct will return an empty set
         if (sharedSubscriberCache == null) {
             return ImmutableSet.of();
@@ -154,7 +155,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
      * @return a set of subscriptions
      */
     @NotNull
-    public ImmutableSet<Topic> getSharedSubscriptions(@NotNull final String client) throws ExecutionException {
+    public ImmutableSet<Topic> getSharedSubscriptions(final @NotNull String client) throws ExecutionException {
         //calling this method before post construct will return an empty set
         if (sharedSubscriptionCache == null) {
             return ImmutableSet.of();
@@ -170,20 +171,20 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
      * @return a shared subscription object which shared name and topic filter
      */
     @NotNull
-    public static SharedSubscription splitTopicAndGroup(@NotNull final String sharedSubscription) {
+    public static SharedSubscription splitTopicAndGroup(final @NotNull String sharedSubscription) {
         final int slashIndex = sharedSubscription.indexOf("/");
         final String group = sharedSubscription.substring(0, slashIndex);
         final String topicFilter = sharedSubscription.substring(slashIndex + 1);
         return new SharedSubscription(topicFilter, group);
     }
 
-    public void invalidateSharedSubscriberCache(@NotNull final String sharedSubscription) {
+    public void invalidateSharedSubscriberCache(final @NotNull String sharedSubscription) {
         if (sharedSubscriberCache != null) {
             sharedSubscriberCache.invalidate(sharedSubscription);
         }
     }
 
-    public void invalidateSharedSubscriptionCache(@NotNull final String clientId) {
+    public void invalidateSharedSubscriptionCache(final @NotNull String clientId) {
         if (sharedSubscriptionCache != null) {
             sharedSubscriptionCache.invalidate(clientId);
         }
@@ -197,7 +198,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
      * @return the topic without the leading '$share/' or the original topic if it does't start with '$share/'
      */
     @NotNull
-    public String removePrefix(@NotNull final String topic) {
+    public String removePrefix(final @NotNull String topic) {
         if (topic.startsWith(SHARED_SUBSCRIPTION_PREFIX)) {
             return topic.substring(SHARED_SUBSCRIPTION_PREFIX.length());
         }
@@ -210,7 +211,7 @@ public class SharedSubscriptionServiceImpl implements SharedSubscriptionService 
         private final @NotNull String topicFilter;
         private final @NotNull String shareName;
 
-        public SharedSubscription(@NotNull final String topic, @NotNull final String shareName) {
+        public SharedSubscription(final @NotNull String topic, final @NotNull String shareName) {
             this.topicFilter = topic;
             this.shareName = shareName;
         }

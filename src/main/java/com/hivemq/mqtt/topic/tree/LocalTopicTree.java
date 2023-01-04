@@ -24,10 +24,6 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 import java.util.function.Predicate;
 
-/**
- * @author Lukas Brandl
- * @author Christoph Schäbel
- */
 public interface LocalTopicTree {
 
     boolean addTopic(@NotNull String subscriber, @NotNull Topic topic, byte flags, @Nullable String sharedGroup);
@@ -48,7 +44,9 @@ public interface LocalTopicTree {
      * @param topicFilter the topic filter (including wildcards)
      * @return the subscribers with a subscription with this topic filter
      */
-    @NotNull ImmutableSet<String> getSubscribersWithFilter(@NotNull String topicFilter, @NotNull Predicate<SubscriberWithQoS> itemFilter);
+    @NotNull ImmutableSet<String> getSubscribersWithFilter(
+            @NotNull String topicFilter,
+            @NotNull Predicate<SubscriberWithQoS> itemFilter);
 
     /**
      * All subscribers that have a subscription matching this topic
@@ -58,7 +56,10 @@ public interface LocalTopicTree {
      * @param excludeRootLevelWildcard
      * @return the subscribers with a subscription for this topic
      */
-    @NotNull ImmutableSet<String> getSubscribersForTopic(@NotNull String topic, @NotNull Predicate<SubscriberWithQoS> itemFilter, boolean excludeRootLevelWildcard);
+    @NotNull ImmutableSet<String> getSubscribersForTopic(
+            @NotNull String topic,
+            @NotNull Predicate<SubscriberWithQoS> itemFilter,
+            boolean excludeRootLevelWildcard);
 
     /**
      * Remove a subscription for a client

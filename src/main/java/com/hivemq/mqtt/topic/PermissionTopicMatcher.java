@@ -23,7 +23,10 @@ import static java.lang.Math.min;
 public class PermissionTopicMatcher implements TopicMatcher {
 
     @Override
-    public boolean matches(@NotNull final String permissionTopic, @NotNull final String actualTopic) throws InvalidTopicException {
+    public boolean matches(
+            final @NotNull String permissionTopic,
+            final @NotNull String actualTopic) throws InvalidTopicException {
+
         final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
         final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");
         final boolean nonWildCard = StringUtils.containsNone(stripedPermissionTopic, "#+");
@@ -35,19 +38,27 @@ public class PermissionTopicMatcher implements TopicMatcher {
         return matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard, endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
     }
 
-    public boolean matches(@NotNull final String permissionTopic, @NotNull final String[] splitPermissionTopic,
-                           final boolean nonWildCard, final boolean endsWithWildCard, final boolean rootWildCard,
-                           @NotNull final String actualTopic, @NotNull final String[] splitActualTopic) throws InvalidTopicException {
-        if (nonWildCard) {
+    public boolean matches(
+            final @NotNull String permissionTopic,
+            final @NotNull String[] splitPermissionTopic,
+            final boolean nonWildCard,
+            final boolean endsWithWildCard,
+            final boolean rootWildCard,
+            final @NotNull String actualTopic,
+            final @NotNull String[] splitActualTopic) throws InvalidTopicException {
 
+        if (nonWildCard) {
             return permissionTopic.equals(actualTopic);
         }
         return matchesWildcards(permissionTopic, splitPermissionTopic, endsWithWildCard, rootWildCard, splitActualTopic);
     }
 
-    private static boolean matchesWildcards(@NotNull final String permissionTopic, @NotNull final String[] splitPermissionTopic,
-                                            final boolean endsWithWildCard, final boolean rootWildCard,
-                                            @NotNull final String[] splitActualTopic) {
+    private static boolean matchesWildcards(
+            final @NotNull String permissionTopic,
+            final @NotNull String @NotNull [] splitPermissionTopic,
+            final boolean endsWithWildCard,
+            final boolean rootWildCard,
+            final @NotNull String @NotNull [] splitActualTopic) {
 
         if (rootWildCard) {
             if (!endsWithWildCard && permissionTopic.length() > 1) {

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 class MatchingNodeSubscriptions {
 
     /**
-     * This array gets lazy initialized for memory saving purposes. May contain <code>null</code>
+     * This array gets lazy initialized for memory saving purposes. May contain {@code null}
      * values. These null values are reassigned if possible before the array gets expanded.
      */
     @Nullable SubscriberWithQoS @Nullable [] nonSharedSubscribersArray;
@@ -63,12 +63,15 @@ class MatchingNodeSubscriptions {
      *                                       instead of nonSharedSubscribersArray.
      * @return whether the subscription information was replaced with {@param subscriberToAdd}.
      */
-    public boolean addSubscriber(final @NotNull SubscriberWithQoS subscriberToAdd,
-                                 final @NotNull String topicFilter,
-                                 final @NotNull SubscriptionCounters counters,
-                                 final int subscriberMapCreationThreshold) {
+    public boolean addSubscriber(
+            final @NotNull SubscriberWithQoS subscriberToAdd,
+             final @NotNull String topicFilter,
+            final @NotNull SubscriptionCounters counters,
+            final int subscriberMapCreationThreshold) {
 
-        final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus = storeSubscriberInStructures(subscriberToAdd, topicFilter, subscriberMapCreationThreshold);
+        final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus =
+                storeSubscriberInStructures(subscriberToAdd, topicFilter, subscriberMapCreationThreshold);
+
         if (subscriptionInfoPresenceStatus == null) {
             counters.getSubscriptionCounter().inc();
         }
@@ -85,39 +88,44 @@ class MatchingNodeSubscriptions {
      * @param topicFilter topic filter for the to-be-removed subscription represented as a string.
      * @param counters    container with subscription counters that are updated upon subscription removal.
      */
-    public void removeSubscriber(final @NotNull String subscriber,
-                                 final @Nullable String sharedName,
-                                 final @Nullable String topicFilter,
-                                 final @NotNull SubscriptionCounters counters) {
+    public void removeSubscriber(
+            final @NotNull String subscriber,
+            final @Nullable String sharedName,
+            final @Nullable String topicFilter,
+            final @NotNull SubscriptionCounters counters) {
 
-        final SubscriptionInfoRemovalStatus subscriptionInfoRemovalStatus = removeSubscriberFromStructures(subscriber, sharedName, topicFilter);
+        final SubscriptionInfoRemovalStatus subscriptionInfoRemovalStatus =
+                removeSubscriberFromStructures(subscriber, sharedName, topicFilter);
+
         if (subscriptionInfoRemovalStatus != null) {
             counters.getSubscriptionCounter().dec();
         }
     }
 
-    public void populateWithSubscriberNamesUsingFilter(final @NotNull Predicate<SubscriberWithQoS> itemFilter,
-                                                       final @NotNull ImmutableSet.Builder<String> subscribers) {
+    public void populateWithSubscriberNamesUsingFilter(
+            final @NotNull Predicate<SubscriberWithQoS> itemFilter,
+            final @NotNull ImmutableSet.Builder<String> subscribers) {
 
         populateUsingFilter(itemFilter, null, subscribers);
     }
 
-    public void populateWithSubscribersUsingFilter(final @NotNull Predicate<SubscriberWithQoS> itemFilter,
-                                                   final @NotNull ImmutableSet.Builder<SubscriberWithQoS> subscribers) {
+    public void populateWithSubscribersUsingFilter(
+            final @NotNull Predicate<SubscriberWithQoS> itemFilter,
+            final @NotNull ImmutableSet.Builder<SubscriberWithQoS> subscribers) {
 
         populateUsingFilter(itemFilter, subscribers, null);
     }
 
-    private void populateUsingFilter(final @NotNull Predicate<SubscriberWithQoS> itemFilter,
-                                     final @Nullable ImmutableSet.Builder<SubscriberWithQoS> subscribersBuilder,
-                                     final @Nullable ImmutableSet.Builder<String> subscriberNamesBuilder) {
+    private void populateUsingFilter(
+            final @NotNull Predicate<SubscriberWithQoS> itemFilter,
+            final @Nullable ImmutableSet.Builder<SubscriberWithQoS> subscribersBuilder,
+            final @Nullable ImmutableSet.Builder<String> subscriberNamesBuilder) {
 
         assert subscribersBuilder != null || subscriberNamesBuilder != null;
         final Stream<SubscriberWithQoS> subscriptions = getAllSubscriptions();
 
         if (subscriptions != null) {
-            subscriptions
-                    .filter(itemFilter)
+            subscriptions.filter(itemFilter)
                     .forEach(subscriber -> {
                         if (subscribersBuilder != null) {
                             subscribersBuilder.add(subscriber);
@@ -128,22 +136,28 @@ class MatchingNodeSubscriptions {
         }
     }
 
-    public void removeSubscriberByCondition(final @NotNull BiPredicate<SubscriberWithQoS, String> condition,
-                                            final @NotNull String topic,
-                                            final @NotNull SubscriptionCounters counters) {
+    public void removeSubscriberByCondition(
+            final @NotNull BiPredicate<SubscriberWithQoS, String> condition,
+            final @NotNull String topic,
+            final @NotNull SubscriptionCounters counters) {
+
         final Stream<SubscriberWithQoS> subscriptions = getAllSubscriptions();
         if (subscriptions != null) {
             subscriptions
                     .filter(subscriber -> condition.test(subscriber, topic))
                     .collect(Collectors.toSet())
-                    .forEach(subscriber -> removeSubscriber(subscriber.getSubscriber(), subscriber.getSharedName(), topic, counters));
+                    .forEach(subscriber -> removeSubscriber(subscriber.getSubscriber(),
+                            subscriber.getSharedName(), topic, counters));
         }
     }
 
     @ReadOnly
     public int getSubscriberCount() {
-        final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ? nonSharedSubscribersMap.size() : countArraySize(nonSharedSubscribersArray);
-        return sharedSubscribersMap == null ? nonSharedSubscribersCount : nonSharedSubscribersCount + sharedSubscribersMap.size();
+        final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ?
+                nonSharedSubscribersMap.size() : countArraySize(nonSharedSubscribersArray);
+
+        return sharedSubscribersMap == null ?
+                nonSharedSubscribersCount : nonSharedSubscribersCount + sharedSubscribersMap.size();
     }
 
     @ReadOnly
@@ -158,11 +172,8 @@ class MatchingNodeSubscriptions {
 
         if (nonSharedSubscribersMap != null) {
             subscribers.addAll(nonSharedSubscribersMap.values());
-        } else {
-            if (nonSharedSubscribersArray == null) {
-                return subscribers.build();
-            }
-            addEntriesToBuilder(subscribers, nonSharedSubscribersArray);
+        } else if (nonSharedSubscribersArray != null) {
+            subscribers.addAll(Arrays.asList(nonSharedSubscribersArray));
         }
 
         return subscribers.build();
@@ -170,16 +181,24 @@ class MatchingNodeSubscriptions {
 
     @ReadOnly
     public @Nullable Stream<SubscriberWithQoS> getSharedSubscriptions() {
-        return sharedSubscribersMap == null
-                ? null
-                : sharedSubscribersMap.values().stream().flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
+        if (sharedSubscribersMap == null) {
+            return null;
+        }
+        return sharedSubscribersMap.values()
+                .stream()
+                .flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
     }
 
     @ReadOnly
     public @Nullable Stream<SubscriberWithQoS> getNonSharedSubscriptions() {
-        return nonSharedSubscribersMap == null
-                ? (nonSharedSubscribersArray == null ? null : Stream.of(nonSharedSubscribersArray).filter(Objects::nonNull))
-                : nonSharedSubscribersMap.values().stream();
+        if (nonSharedSubscribersMap == null && nonSharedSubscribersArray == null) {
+            return null;
+        }
+        if (nonSharedSubscribersMap == null) {
+            return Stream.of(nonSharedSubscribersArray).filter(Objects::nonNull);
+        } else {
+            return nonSharedSubscribersMap.values().stream();
+        }
     }
 
     @ReadOnly
@@ -227,18 +246,18 @@ class MatchingNodeSubscriptions {
      */
     private static class SubscriptionGroup {
 
-        private final Map<String, SubscriberWithQoS> subscriptions = new HashMap<>();
+        private final @NotNull Map<String, SubscriberWithQoS> subscriptions = new HashMap<>();
 
         @Nullable SubscriberWithQoS put(final @NotNull SubscriberWithQoS subscription) {
             return subscriptions.put(subscription.getSubscriber(), subscription);
         }
 
-        @NotNull Collection<SubscriberWithQoS> getSubscriptionsInfos() {
-            return subscriptions.values();
-        }
-
         @Nullable SubscriberWithQoS remove(final @NotNull String subscriber) {
             return subscriptions.remove(subscriber);
+        }
+
+        @NotNull Collection<SubscriberWithQoS> getSubscriptionsInfos() {
+            return subscriptions.values();
         }
 
         int size() {
@@ -247,6 +266,7 @@ class MatchingNodeSubscriptions {
     }
 
     private static class SubscriptionInfoPresenceStatus {
+
         public final boolean subscriptionInfoSame;
 
         SubscriptionInfoPresenceStatus(final boolean subscriptionInfoSame) {
@@ -254,9 +274,10 @@ class MatchingNodeSubscriptions {
         }
     }
 
-    private @Nullable SubscriptionInfoPresenceStatus storeSubscriberInStructures(final @NotNull SubscriberWithQoS subscriberToAdd,
-                                                                                 final @NotNull String topicFilter,
-                                                                                 final int subscriberMapCreationThreshold) {
+    private @Nullable SubscriptionInfoPresenceStatus storeSubscriberInStructures(
+            final @NotNull SubscriberWithQoS subscriberToAdd,
+            final @NotNull String topicFilter,
+            final int subscriberMapCreationThreshold) {
 
         if (subscriberToAdd.isSharedSubscription() && subscriberToAdd.getSharedName() != null) {
             if (sharedSubscribersMap == null) {
@@ -272,7 +293,8 @@ class MatchingNodeSubscriptions {
         }
 
         // Possible initialization of map and moving the data
-        final int exactSubscribersCount = nonSharedSubscribersMap != null ? nonSharedSubscribersMap.values().size() : countArraySize(nonSharedSubscribersArray);
+        final int exactSubscribersCount = nonSharedSubscribersMap != null ?
+                nonSharedSubscribersMap.values().size() : countArraySize(nonSharedSubscribersArray);
 
         if (nonSharedSubscribersMap == null && exactSubscribersCount > subscriberMapCreationThreshold) {
             nonSharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold + 1);
@@ -298,30 +320,34 @@ class MatchingNodeSubscriptions {
         }
 
         //Let's try to find an existing subscription first
-        for (int i = 0; i < this.nonSharedSubscribersArray.length; i++) {
-            if (this.nonSharedSubscribersArray[i] != null && subscriberToAdd.getSubscriber().equals(this.nonSharedSubscribersArray[i].getSubscriber())) {
+        for (int i = 0; i < nonSharedSubscribersArray.length; i++) {
+            if (nonSharedSubscribersArray[i] != null &&
+                    subscriberToAdd.getSubscriber().equals(nonSharedSubscribersArray[i].getSubscriber())) {
                 //This entry is already present in the array, we can override and abort
-                final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus = new SubscriptionInfoPresenceStatus(this.nonSharedSubscribersArray[i].equals(subscriberToAdd));
+                final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus =
+                        new SubscriptionInfoPresenceStatus(this.nonSharedSubscribersArray[i].equals(subscriberToAdd));
+
                 this.nonSharedSubscribersArray[i] = subscriberToAdd;
                 return subscriptionInfoPresenceStatus;
             }
         }
 
         //Let's try to find an empty slot in the array
-        final int emptySlotIndex = Arrays.asList(this.nonSharedSubscribersArray).indexOf(null);
+        final int emptySlotIndex = Arrays.asList(nonSharedSubscribersArray).indexOf(null);
         if (emptySlotIndex >= 0) {
-            this.nonSharedSubscribersArray[emptySlotIndex] = subscriberToAdd;
+            nonSharedSubscribersArray[emptySlotIndex] = subscriberToAdd;
         } else { //or allocate a new array
-            final SubscriberWithQoS[] newArray = new SubscriberWithQoS[this.nonSharedSubscribersArray.length + 1];
-            System.arraycopy(this.nonSharedSubscribersArray, 0, newArray, 0, this.nonSharedSubscribersArray.length);
-            newArray[this.nonSharedSubscribersArray.length] = subscriberToAdd;
-            this.nonSharedSubscribersArray = newArray;
+            final SubscriberWithQoS[] newArray = new SubscriberWithQoS[nonSharedSubscribersArray.length + 1];
+            System.arraycopy(nonSharedSubscribersArray, 0, newArray, 0, nonSharedSubscribersArray.length);
+            newArray[nonSharedSubscribersArray.length] = subscriberToAdd;
+            nonSharedSubscribersArray = newArray;
         }
 
         return null;
     }
 
     private static class SubscriptionInfoRemovalStatus {
+
         public final boolean wasSharedSubscription;
 
         SubscriptionInfoRemovalStatus(final boolean wasSharedSubscription) {
@@ -329,9 +355,10 @@ class MatchingNodeSubscriptions {
         }
     }
 
-    private @Nullable SubscriptionInfoRemovalStatus removeSubscriberFromStructures(final @NotNull String subscriber,
-                                                                                   final @Nullable String sharedName,
-                                                                                   final @Nullable String topicFilter) {
+    private @Nullable SubscriptionInfoRemovalStatus removeSubscriberFromStructures(
+            final @NotNull String subscriber,
+            final @Nullable String sharedName,
+            final @Nullable String topicFilter) {
 
         SubscriberWithQoS remove = null;
         if (sharedName != null && topicFilter != null) { // shared subscription removal
@@ -366,11 +393,11 @@ class MatchingNodeSubscriptions {
         return remove == null ? null : new SubscriptionInfoRemovalStatus(remove.isSharedSubscription());
     }
 
-    private boolean isEmptyArray(final @Nullable SubscriberWithQoS @Nullable [] array) {
+    private static boolean isEmptyArray(final @Nullable Object @Nullable [] array) {
         if (array == null) {
             return true;
         }
-        for (final SubscriberWithQoS object : array) {
+        for (final Object object : array) {
             if (object != null) {
                 return false;
             }
@@ -379,11 +406,9 @@ class MatchingNodeSubscriptions {
     }
 
     private static int countArraySize(final @Nullable Object @Nullable [] array) {
-
         if (array == null) {
             return 0;
         }
-
         int count = 0;
         for (final Object object : array) {
             if (object != null) {
@@ -393,7 +418,10 @@ class MatchingNodeSubscriptions {
         return count;
     }
 
-    private static void addEntriesToBuilder(final @NotNull ImmutableSet.Builder<SubscriberWithQoS> builder, final @Nullable SubscriberWithQoS @NotNull [] subscribers) {
+    private static void addEntriesToBuilder(
+            final @NotNull ImmutableSet.Builder<SubscriberWithQoS> builder,
+            final @Nullable SubscriberWithQoS @NotNull [] subscribers) {
+
         for (final SubscriberWithQoS subscriber : subscribers) {
             if (subscriber != null) {
                 builder.add(subscriber);
