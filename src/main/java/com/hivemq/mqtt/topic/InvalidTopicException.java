@@ -15,6 +15,8 @@
  */
 package com.hivemq.mqtt.topic;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
 /**
  * Indicates that a provided topic is not compliant with the definition of a topic in the mqtt specification.
  * <p>
@@ -25,7 +27,7 @@ package com.hivemq.mqtt.topic;
  */
 public class InvalidTopicException extends RuntimeException {
 
-    public InvalidTopicException(final String message) {
+    public InvalidTopicException(final @NotNull String message) {
         super(message);
     }
 }
