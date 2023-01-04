@@ -61,7 +61,7 @@ class TopicTreeNode {
 
             //Check if we need to create an index for large nodes
             if (children.length > indexMapCreationThreshold && childrenMap == null) {
-                childrenMap = new HashMap<>(children.length);
+                childrenMap = new HashMap<>(children.length + 1);
 
                 TopicTreeNode existingNode = null;
                 //Add all entries to the map
@@ -79,6 +79,7 @@ class TopicTreeNode {
                 }
                 final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
                 childrenMap.put(childNode.getTopicPart(), childNode);
+                return childNode;
             } else {
 
                 //check if the node already exists
