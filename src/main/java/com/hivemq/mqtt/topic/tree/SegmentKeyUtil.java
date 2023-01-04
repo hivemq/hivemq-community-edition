@@ -18,13 +18,9 @@ package com.hivemq.mqtt.topic.tree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * @author Lukas Brandl
- */
-public class SegmentKeyUtil {
+public final class SegmentKeyUtil {
 
-    public static String segmentKey(final String topic) {
-        return segmentKey(topic, 1);
+    private SegmentKeyUtil() {
     }
 
     public static String segmentKey(final String topic, final int length) {

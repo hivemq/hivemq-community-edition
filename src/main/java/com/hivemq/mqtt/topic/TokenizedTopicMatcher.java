@@ -25,24 +25,22 @@ import static java.lang.Math.min;
  *
  * @author Dominik Obermaier
  */
-
 public class TokenizedTopicMatcher implements TopicMatcher {
 
     public boolean matches(@NotNull final String topicSubscription, @NotNull final String actualTopic) throws InvalidTopicException {
 
         if (StringUtils.containsAny(actualTopic, "#+")) {
-            throw new InvalidTopicException("The actual topic must not contain a wildard character (# or +)");
+            throw new InvalidTopicException("The actual topic must not contain a wildcard character (# or +)");
         }
         final String subscription = StringUtils.stripEnd(topicSubscription, "/");
 
         String topic = actualTopic;
 
-        if (actualTopic.length() > 1) {
-            topic = StringUtils.stripEnd(actualTopic, "/");
-
+        if (topic.length() > 1) {
+            topic = StringUtils.stripEnd(topic, "/");
         }
-        if (StringUtils.containsNone(topicSubscription, "#+")) {
 
+        if (StringUtils.containsNone(topicSubscription, "#+")) {
             return subscription.equals(topic);
         }
         if (actualTopic.startsWith("$") && !topicSubscription.startsWith("$")) {
