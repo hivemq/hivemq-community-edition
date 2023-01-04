@@ -104,15 +104,11 @@ class TopicTreeNode {
             }
         } else if (childrenMap != null) {
             return childrenMap.computeIfAbsent(childNodeTopicPart, TopicTreeNode::new);
-        } else {
-            final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
-            children = new TopicTreeNode[]{childNode};
-            return childNode;
         }
 
-        // This should never be called.
-        assert false;
-        return new TopicTreeNode(childNodeTopicPart);
+        final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
+        children = new TopicTreeNode[]{childNode};
+        return childNode;
     }
 
     /**
