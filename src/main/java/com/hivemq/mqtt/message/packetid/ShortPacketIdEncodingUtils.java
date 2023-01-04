@@ -16,13 +16,15 @@ public class ShortPacketIdEncodingUtils {
     @VisibleForTesting
     static final int MAX_PACKET_ID = 65535;
 
+    private static final int SHORT_BITMASK = 0xFFFF;
+
     public static short encode(final int packetId) {
         Preconditions.checkArgument(packetId >= MIN_PACKET_ID);
         Preconditions.checkArgument(packetId <= MAX_PACKET_ID);
-        return (short) (packetId + Short.MIN_VALUE);
+        return (short) packetId;
     }
 
     public static int decode(final short encodedPackedId) {
-        return ((int) encodedPackedId) - Short.MIN_VALUE;
+        return encodedPackedId & SHORT_BITMASK;
     }
 }
