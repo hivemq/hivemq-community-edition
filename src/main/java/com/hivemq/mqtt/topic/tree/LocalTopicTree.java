@@ -77,7 +77,7 @@ public class LocalTopicTree {
             final @NotNull String subscriber,
             final @NotNull Topic topic,
             final byte flags,
-            final @Nullable String sharedGroup) {
+            final @Nullable String sharedName) {
 
         checkNotNull(subscriber, "Subscriber must not be null");
         checkNotNull(topic, "Topic must not be null");
@@ -96,12 +96,12 @@ public class LocalTopicTree {
         }
 
         final SubscriberWithQoS entry = new SubscriberWithQoS(subscriber, topic.getQoS().getQosNumber(), flags,
-                sharedGroup, topic.getSubscriptionIdentifier(), null);
+                sharedName, topic.getSubscriptionIdentifier(), null);
 
         if (contents.length == 1 && "#".equals(contents[0])) {
             if (!rootWildcardSubscribers.contains(entry)) {
                 //Remove the same subscription with different QoS
-                final boolean removed = removeRootWildcardSubscriber(subscriber, sharedGroup);
+                final boolean removed = removeRootWildcardSubscriber(subscriber, sharedName);
                 rootWildcardSubscribers.add(entry);
                 counters.getSubscriptionCounter().inc();
 
