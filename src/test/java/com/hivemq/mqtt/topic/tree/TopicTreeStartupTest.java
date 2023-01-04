@@ -58,14 +58,14 @@ public class TopicTreeStartupTest {
     SharedSubscriptionService sharedSubscriptionService;
 
 
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
     private TopicTreeStartup topicTreeStartup;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTreeStartup =
                 new TopicTreeStartup(topicTree, clientSessionPersistence, clientSessionSubscriptionPersistence,

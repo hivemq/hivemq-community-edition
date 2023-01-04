@@ -32,14 +32,14 @@ public class NodeTest {
 
     @Test
     public void constructor_whenNodeCreated_thenItHasNoChildren() {
-        assertEquals(0, TopicTreeImpl.getChildrenCount(node));
+        assertEquals(0, LocalTopicTree.getChildrenCount(node));
     }
 
     @Test
     public void addChildNodeIfAbsent_whenTwoChildrenAreAddedToNode_thenTwoChildrenArePresentInTheNode() {
         node.addChildNodeIfAbsent(new TopicTreeNode("first"), 1);
         node.addChildNodeIfAbsent(new TopicTreeNode("second"), 1);
-        assertEquals(2, TopicTreeImpl.getChildrenCount(node));
+        assertEquals(2, LocalTopicTree.getChildrenCount(node));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class NodeTest {
         assertNotNull(node.getChildren());
         assertEquals(2, node.getChildren().length);
         node.getChildren()[0] = null;
-        assertEquals(1, TopicTreeImpl.getChildrenCount(node));
+        assertEquals(1, LocalTopicTree.getChildrenCount(node));
     }
 
     @Test

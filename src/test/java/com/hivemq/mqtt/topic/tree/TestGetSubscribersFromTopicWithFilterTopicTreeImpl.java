@@ -31,23 +31,22 @@ import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
 
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
 
     @Before
     public void setUp() {
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
     }
 
     @Test
     public void test_empty_topic_tree_get_subscribers() throws Exception {
 
         final Set<SubscriberWithIdentifiers> any = topicTree.findTopicSubscribers("any").getSubscribers();
-        assertEquals(true, any.isEmpty());
+        assertTrue(any.isEmpty());
     }
 
     @Test
@@ -56,7 +55,7 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersForTopic("anothertopic", getMatchAllFilter(), false);
-        assertEquals(true, subscribers.isEmpty());
+        assertTrue(subscribers.isEmpty());
     }
 
     @Test
@@ -235,7 +234,7 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
     @Test
     public void test_same_subscriber_for_same_topic_with_subscriber_map() throws Exception {
 
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
@@ -249,7 +248,7 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
     @Test
     public void test_root_level_wildcard_multiple_subscribers_with_wildcard_with_subscriber_map() throws Exception {
 
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);

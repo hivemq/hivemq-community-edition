@@ -25,7 +25,6 @@ import com.hivemq.bootstrap.netty.NettyConfiguration;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import io.netty.channel.EventLoopGroup;
@@ -57,7 +56,7 @@ public class MetricsModuleTest {
                 bind(NettyConfiguration.class).toInstance(nettyConfiguration);
                 bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
                 bind(ClientSessionLocalPersistence.class).toInstance(mock(ClientSessionLocalPersistence.class));
-                bind(LocalTopicTree.class).toInstance(mock(TopicTreeImpl.class));
+                bind(LocalTopicTree.class).toInstance(mock(LocalTopicTree.class));
                 bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));
                 bind(SystemInformation.class).toInstance(mock(SystemInformation.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
