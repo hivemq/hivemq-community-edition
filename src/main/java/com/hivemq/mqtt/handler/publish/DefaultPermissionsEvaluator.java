@@ -209,7 +209,7 @@ public class DefaultPermissionsEvaluator {
         try {
             if (topicPermission instanceof InternalTopicPermission) {
                 final InternalTopicPermission internalTopicPermission = (InternalTopicPermission) topicPermission;
-                return topicMatcher.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
+                return PermissionTopicMatcher.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
                         ((InternalTopicPermission) topicPermission).getSplitTopic(), !internalTopicPermission.containsWildcardCharacter(),
                         internalTopicPermission.endsWithWildcard(), internalTopicPermission.isRootWildcard(), topic, splitTopic);
             }
