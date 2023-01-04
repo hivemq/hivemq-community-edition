@@ -125,8 +125,7 @@ class MatchingNodeSubscriptions {
 
         assert subscribersBuilder != null || subscriberNamesBuilder != null;
 
-        getAllSubscriptions()
-                .filter(itemFilter)
+        getSharedSubscriptionStream().filter(itemFilter)
                 .forEach(subscriber -> {
                     if (subscribersBuilder != null) {
                         subscribersBuilder.add(subscriber);
@@ -134,6 +133,18 @@ class MatchingNodeSubscriptions {
                         subscriberNamesBuilder.add(subscriber.getSubscriber());
                     }
                 });
+
+        final Stream<SubscriberWithQoS> nonSharedSubscriptionStream = getNonSharedSubscriptionStream();
+        if (nonSharedSubscriptionStream != null) {
+            nonSharedSubscriptionStream.filter(itemFilter)
+                    .forEach(subscriber -> {
+                        if (subscribersBuilder != null) {
+                            subscribersBuilder.add(subscriber);
+                        } else {
+                            subscriberNamesBuilder.add(subscriber.getSubscriber());
+                        }
+                    });
+        }
     }
 
     @ReadOnly
@@ -145,14 +156,14 @@ class MatchingNodeSubscriptions {
     }
 
     @ReadOnly
-    public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptions() {
+    public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptionStream() {
         return sharedSubscribersMap.values()
                 .stream()
                 .flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
     }
 
     @ReadOnly
-    public @Nullable Stream<SubscriberWithQoS> getNonSharedSubscriptions() {
+    public @Nullable Stream<SubscriberWithQoS> getNonSharedSubscriptionStream() {
         if (nonSharedSubscribersMap == null && nonSharedSubscribersArray == null) {
             return null;
         }
@@ -161,18 +172,6 @@ class MatchingNodeSubscriptions {
         } else {
             return nonSharedSubscribersMap.values().stream();
         }
-    }
-
-    @ReadOnly
-    private @NotNull Stream<SubscriberWithQoS> getAllSubscriptions() {
-        final Stream<SubscriberWithQoS> sharedSubscriptions = getSharedSubscriptions();
-        final Stream<SubscriberWithQoS> nonSharedSubscriptions = getNonSharedSubscriptions();
-
-        if (nonSharedSubscriptions == null) {
-            return sharedSubscriptions;
-        }
-
-        return Stream.concat(sharedSubscriptions, nonSharedSubscriptions);
     }
 
     @ReadOnly

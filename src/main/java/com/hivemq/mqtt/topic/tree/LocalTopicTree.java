@@ -911,7 +911,7 @@ public class LocalTopicTree {
         @Override
         public void acceptNonRootState(final @NotNull MatchingNodeSubscriptions matchingNodeSubscriptions) {
 
-            final Stream<SubscriberWithQoS> nonSharedSubscriptions = matchingNodeSubscriptions.getNonSharedSubscriptions();
+            final Stream<SubscriberWithQoS> nonSharedSubscriptions = matchingNodeSubscriptions.getNonSharedSubscriptionStream();
             if (nonSharedSubscriptions != null) {
                 nonSharedSubscriptions
                         .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
@@ -926,7 +926,7 @@ public class LocalTopicTree {
             //
             // Note: if the non-shared subscriptions are found later on,
             // they will override the shared subscriptions (see getMatchingSubscriber method)!
-            matchingNodeSubscriptions.getSharedSubscriptions()
+            matchingNodeSubscriptions.getSharedSubscriptionStream()
                     .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
                     .forEach(subscriberWithQoS -> {
                         if (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos()) {
