@@ -199,7 +199,6 @@ public class LocalTopicTree {
             return;
         }
 
-
         final String[] topicPart = StringUtils.splitPreserveAllTokens(topic, '/');
         final String segmentKey = topicPart[0];
 
@@ -209,7 +208,7 @@ public class LocalTopicTree {
         try {
             final TopicTreeNode firstSegmentNode = segments.get(segmentKey);
             if (firstSegmentNode != null) {
-                traverseTree(firstSegmentNode, subscriberAndTopicConsumer, topicPart, 0, "");
+                traverseTree(firstSegmentNode, subscriberAndTopicConsumer, topicPart, 0);
             }
         } finally {
             lock.unlock();
@@ -224,7 +223,7 @@ public class LocalTopicTree {
             try {
                 final TopicTreeNode firstSegmentNode = segments.get("+");
                 if (firstSegmentNode != null) {
-                    traverseTree(firstSegmentNode, subscriberAndTopicConsumer, topicPart, 0, "");
+                    traverseTree(firstSegmentNode, subscriberAndTopicConsumer, topicPart, 0);
                 }
             } finally {
                 wildcardLock.unlock();
@@ -311,13 +310,11 @@ public class LocalTopicTree {
             final @NotNull TopicTreeNode node,
             final @NotNull SubscriptionsConsumer subscriberAndTopicConsumer,
             final String[] topicPart,
-            final int depth,
-            @NotNull String topic) {
+            final int depth) {
 
         if (!topicPart[depth].equals(node.getTopicPart()) && !"+".equals(node.getTopicPart())) {
             return;
         }
-        topic += node.getTopicPart();
 
         subscriberAndTopicConsumer.acceptNonRootState(node.wildcardSubscriptions);
 
@@ -337,7 +334,7 @@ public class LocalTopicTree {
                 //Get the exact node by the index
                 final TopicTreeNode matchingChildNode = getIndexForChildNode(topicPart[nextDepth], node);
                 if (matchingChildNode != null) {
-                    traverseTree(matchingChildNode, subscriberAndTopicConsumer, topicPart, depth + 1, topic + "/");
+                    traverseTree(matchingChildNode, subscriberAndTopicConsumer, topicPart, depth + 1);
                 }
 
                 //We also need to check if there is a wildcard node
