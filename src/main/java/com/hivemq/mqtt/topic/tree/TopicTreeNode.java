@@ -139,7 +139,7 @@ class TopicTreeNode {
         return topicPart;
     }
 
-    private boolean isEmptyArray(final @Nullable TopicTreeNode @Nullable [] array) {
+    private static boolean isEmptyArray(final @Nullable TopicTreeNode @Nullable [] array) {
         if (array == null) {
             return true;
         }

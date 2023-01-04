@@ -38,7 +38,7 @@ public class PermissionTopicMatcher implements TopicMatcher {
         return matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard, endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
     }
 
-    public boolean matches(
+    public static boolean matches(
             final @NotNull String permissionTopic,
             final @NotNull String[] splitPermissionTopic,
             final boolean nonWildCard,

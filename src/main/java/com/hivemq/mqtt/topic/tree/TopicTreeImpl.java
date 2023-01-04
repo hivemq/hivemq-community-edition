@@ -247,7 +247,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param subscribers a list of subscribers
      * @return a immutable Set of distinct Subscribers with the maximum QoS.
      */
-    private @NotNull ImmutableSet<SubscriberWithIdentifiers> createDistinctSubscribers(
+    private static @NotNull ImmutableSet<SubscriberWithIdentifiers> createDistinctSubscribers(
             final @NotNull ImmutableList<SubscriberWithQoS> subscribers) {
 
         final ImmutableSet.Builder<SubscriberWithIdentifiers> newSet = ImmutableSet.builder();
@@ -291,7 +291,7 @@ public class TopicTreeImpl implements LocalTopicTree {
         return newSet.build();
     }
 
-    private boolean equalSubscription(
+    private static boolean equalSubscription(
             final @NotNull SubscriberWithQoS first,
             final @NotNull SubscriberWithIdentifiers second) {
 
@@ -299,7 +299,7 @@ public class TopicTreeImpl implements LocalTopicTree {
                 second.getSharedName());
     }
 
-    private boolean equalSubscription(
+    private static boolean equalSubscription(
             final @NotNull SubscriberWithQoS first,
             final @NotNull String secondClient,
             final @Nullable String secondTopicFilter,
@@ -502,7 +502,7 @@ public class TopicTreeImpl implements LocalTopicTree {
         }
     }
 
-    private @Nullable TopicTreeNode getLastNode(final @NotNull TopicTreeNode[] nodes) {
+    private static @Nullable TopicTreeNode getLastNode(final @NotNull TopicTreeNode[] nodes) {
         //Search for the last node which is not null
         for (int i = nodes.length - 1; i >= 0; i--) {
             final TopicTreeNode node = nodes[i];
@@ -525,7 +525,7 @@ public class TopicTreeImpl implements LocalTopicTree {
      * @param results    the result array
      * @param depth      the current topic level depth
      */
-    private void iterateChildNodesForSubscriberRemoval(
+    private static void iterateChildNodesForSubscriberRemoval(
             final @NotNull TopicTreeNode node,
             final @NotNull String[] topicParts,
             final @NotNull TopicTreeNode[] results,
@@ -808,7 +808,7 @@ public class TopicTreeImpl implements LocalTopicTree {
 
         findSubscribers(topic, false, subscriberConsumer);
 
-        return subscriberConsumer.getMatchingSubscriber(this);
+        return subscriberConsumer.getMatchingSubscriber();
     }
 
     /* *************
@@ -968,13 +968,13 @@ public class TopicTreeImpl implements LocalTopicTree {
             }
         }
 
-        public @Nullable SubscriberWithIdentifiers getMatchingSubscriber(final @NotNull TopicTreeImpl topicTree) {
+        public @Nullable SubscriberWithIdentifiers getMatchingSubscriber() {
             final ImmutableList<SubscriberWithQoS> subscribers = this.subscribers.build();
-            if (!subscribers.isEmpty()) {
-                final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = topicTree.createDistinctSubscribers(subscribers);
-                return distinctSubscribers.asList().get(0);
-            } else {
+            if (subscribers.isEmpty()) {
                 return sharedSubscriber;
+            } else {
+                final ImmutableSet<SubscriberWithIdentifiers> distinctSubscribers = createDistinctSubscribers(subscribers);
+                return distinctSubscribers.asList().get(0);
             }
         }
     }

@@ -22,9 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class MatchingNodeSubscriptions {
@@ -136,21 +134,6 @@ class MatchingNodeSubscriptions {
         }
     }
 
-    public void removeSubscriberByCondition(
-            final @NotNull BiPredicate<SubscriberWithQoS, String> condition,
-            final @NotNull String topic,
-            final @NotNull SubscriptionCounters counters) {
-
-        final Stream<SubscriberWithQoS> subscriptions = getAllSubscriptions();
-        if (subscriptions != null) {
-            subscriptions
-                    .filter(subscriber -> condition.test(subscriber, topic))
-                    .collect(Collectors.toSet())
-                    .forEach(subscriber -> removeSubscriber(subscriber.getSubscriber(),
-                            subscriber.getSharedName(), topic, counters));
-        }
-    }
-
     @ReadOnly
     public int getSubscriberCount() {
         final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ?
@@ -234,8 +217,10 @@ class MatchingNodeSubscriptions {
     //                                                                   //
     ///////////////////////////////////////////////////////////////////////
 
-    private @NotNull String sharedSubscriptionKey(final @NotNull String sharedName,
-                                                  final @NotNull String topicFilter) {
+    private static @NotNull String sharedSubscriptionKey(
+            final @NotNull String sharedName,
+            final @NotNull String topicFilter) {
+
         return sharedName + "/" + topicFilter;
     }
 
